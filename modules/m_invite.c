@@ -130,13 +130,12 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 
   source_p->connection->invite.last_attempt = event_base->time.sec_monotonic;
   source_p->connection->invite.count++;
+  channel->last_invite_time = event_base->time.sec_monotonic;
 
   sendto_one_numeric(source_p, &me, RPL_INVITING, target_p->name, channel->name);
 
   if (target_p->away[0])
     sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name, target_p->away);
-
-  channel->last_invite_time = event_base->time.sec_monotonic;
 
   if (MyConnect(target_p))
   {

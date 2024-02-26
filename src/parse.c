@@ -238,7 +238,7 @@ parse_handle_command(struct Message *message, struct Client *source,
  * NOTE: parse() should not be called recusively by any other functions!
  */
 void
-parse(struct Client *client, char *pbuffer, char *bufend)
+parse(struct Client *client, char *buffer, char *buffer_end)
 {
   struct Client *from = client;
   struct Message *message = NULL;
@@ -253,9 +253,9 @@ parse(struct Client *client, char *pbuffer, char *bufend)
   assert(client->connection);
   assert(client->connection->fd);
   assert(client->connection->fd->flags.open);
-  assert((bufend - pbuffer) < IRCD_BUFSIZE);
+  assert((buffer_end - buffer) < IRCD_BUFSIZE);
 
-  for (ch = pbuffer; *ch == ' '; ++ch)  /* Skip spaces */
+  for (ch = buffer; *ch == ' '; ++ch)  /* Skip spaces */
     ;
 
   if (*ch == ':')
@@ -285,7 +285,7 @@ parse(struct Client *client, char *pbuffer, char *bufend)
       if (from == NULL)
       {
         ++ServerStats.is_unpf;
-        parse_remove_unknown(client, sender, pbuffer);
+        parse_remove_unknown(client, sender, buffer);
         return;
       }
 
@@ -344,7 +344,7 @@ parse(struct Client *client, char *pbuffer, char *bufend)
        * Hm, when is the buffer empty -- if a command
        * code has been found ?? -Armin
        */
-      if (*pbuffer)
+      if (*buffer)
         if (IsClient(from))
           sendto_one_numeric(from, &me, ERR_UNKNOWNCOMMAND, ch);
 
@@ -356,7 +356,7 @@ parse(struct Client *client, char *pbuffer, char *bufend)
 
     paramcount = message->handlers[from->from->handler].args_max;
 
-    size_t length = bufend - ((s) ? s : ch);
+    size_t length = buffer_end - ((s) ? s : ch);
     message->bytes += length;
   }
 

@@ -474,17 +474,15 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  target_p = hash_find_id(source_p->id);
+  target_p = hash_find_id(sid);
   if (target_p)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
-                         name, source_p->id,
-                         client_get_name(source_p, SHOW_IP));
+                         name, sid, client_get_name(source_p, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
-                         name, source_p->id,
-                         client_get_name(source_p, MASK_IP));
+                         name, sid, client_get_name(source_p, MASK_IP));
     exit_client(source_p, "Server ID already exists");
     return;
   }

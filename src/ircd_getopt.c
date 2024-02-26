@@ -77,7 +77,7 @@ ircd_getop_usage(const char *name, const struct lgetopt *opts)
  * @param opts An array of lgetopt structures representing valid command-line options.
  */
 void
-ircd_getop(int *argc, char ***argv, struct lgetopt *opts)
+ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
 {
   const char *progname = (*argv)[0];
 

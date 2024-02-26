@@ -131,9 +131,9 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
 	extban_nick.$(OBJEXT) extban_operclass.$(OBJEXT) \
 	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
-	extban_usermode.$(OBJEXT) fdlist.$(OBJEXT) getopt.$(OBJEXT) \
-	hash.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
-	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
+	extban_usermode.$(OBJEXT) fdlist.$(OBJEXT) hash.$(OBJEXT) \
+	hostmask.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) \
+	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_getopt.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) list.$(OBJEXT) \
 	listener.$(OBJEXT) log.$(OBJEXT) match.$(OBJEXT) \
 	memory.$(OBJEXT) misc.$(OBJEXT) modules.$(OBJEXT) \
@@ -185,12 +185,12 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/getopt.Po \
-	./$(DEPDIR)/hash.Po ./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
+	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/hash.Po \
+	./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
 	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/irc_string.Po \
-	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
-	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/list.Po \
-	./$(DEPDIR)/listener.Po ./$(DEPDIR)/log.Po \
+	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_getopt.Po \
+	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
+	./$(DEPDIR)/list.Po ./$(DEPDIR)/listener.Po ./$(DEPDIR)/log.Po \
 	./$(DEPDIR)/match.Po ./$(DEPDIR)/memory.Po ./$(DEPDIR)/misc.Po \
 	./$(DEPDIR)/modules.Po ./$(DEPDIR)/monitor.Po \
 	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
@@ -454,13 +454,13 @@ ircd_SOURCES = auth.c            \
                extban_tlsinfo.c  \
                extban_usermode.c \
                fdlist.c          \
-               getopt.c          \
                hash.c            \
                hostmask.c        \
                id.c              \
                ipcache.c         \
                irc_string.c      \
                ircd.c            \
+               ircd_getopt.c     \
                ircd_signal.c     \
                isupport.c        \
                list.c            \
@@ -623,13 +623,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_getopt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
@@ -867,13 +867,13 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
-	-rm -f ./$(DEPDIR)/getopt.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/hostmask.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/irc_string.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
+	-rm -f ./$(DEPDIR)/ircd_getopt.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/list.Po
@@ -984,13 +984,13 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
-	-rm -f ./$(DEPDIR)/getopt.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/hostmask.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/irc_string.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
+	-rm -f ./$(DEPDIR)/ircd_getopt.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/list.Po

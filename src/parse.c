@@ -243,7 +243,7 @@ parse(struct Client *client, char *buffer, char *buffer_end)
   struct Client *from = client;
   struct Message *message = NULL;
   char *para[MAXPARA + 2];  /* <command> + <parameters> + NULL */
-  char *ch = NULL;
+  char *ch = buffer;
   char *s = NULL;
   unsigned int numeric = 0;
   unsigned int parc = 0;
@@ -255,8 +255,9 @@ parse(struct Client *client, char *buffer, char *buffer_end)
   assert(client->connection->fd->flags.open);
   assert((buffer_end - buffer) < IRCD_BUFSIZE);
 
-  for (ch = buffer; *ch == ' '; ++ch)  /* Skip spaces */
-    ;
+  /* Skip leading spaces. */
+  while (*ch == ' ')
+    ++ch;
 
   if (*ch == ':')
   {

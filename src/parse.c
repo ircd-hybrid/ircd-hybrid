@@ -342,12 +342,9 @@ parse(struct Client *client, char *buffer, char *buffer_end)
        * If it has got to person state, it at least
        * seems to be well behaving. Perhaps this message
        * should never be generated, though...  --msa
-       * Hm, when is the buffer empty -- if a command
-       * code has been found ?? -Armin
        */
-      if (*buffer)
-        if (IsClient(from))
-          sendto_one_numeric(from, &me, ERR_UNKNOWNCOMMAND, ch);
+      if (IsClient(from))
+        sendto_one_numeric(from, &me, ERR_UNKNOWNCOMMAND, ch);
 
       ++ServerStats.is_unco;
       return;

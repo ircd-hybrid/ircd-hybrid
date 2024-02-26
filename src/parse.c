@@ -587,25 +587,6 @@ find_command(const char *cmd)
   return msg_tree_parse(cmd);
 }
 
-static void
-recurse_report_messages(struct Client *source, const struct MessageTree *mtree)
-{
-  if (mtree->msg)
-    sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
-                       mtree->msg->cmd,
-                       mtree->msg->count,
-                       mtree->msg->bytes,
-                       mtree->msg->rcount,
-                       mtree->msg->ecount);
-
-  for (unsigned int i = 0; i < MAXPTRLEN; ++i)
-  {
-    const struct MessageTree *ptr = mtree->pointers[i];
-    if (ptr)
-      recurse_report_messages(source, ptr);
-  }
-}
-
 /* report_messages()
  *
  * inputs	- pointer to client to report to
@@ -616,12 +597,32 @@ void
 report_messages(struct Client *source)
 {
   const struct MessageTree *const mtree = &msg_tree;
+  const struct MessageTree *stack[MAXPTRLEN * MAXPTRLEN];
+  unsigned int top = 0;
 
-  for (unsigned int i = 0; i < MAXPTRLEN; ++i)
+  /* Initialize stack with the root node. */
+  stack[top++] = mtree;
+
+  while (top > 0)
   {
-    const struct MessageTree *ptr = mtree->pointers[i];
-    if (ptr)
-      recurse_report_messages(source, ptr);
+    /* Pop the top of the stack. */
+    const struct MessageTree *current = stack[--top];
+
+    if (current->msg)
+      sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
+                         current->msg->cmd,
+                         current->msg->count,
+                         current->msg->bytes,
+                         current->msg->rcount,
+                         current->msg->ecount);
+
+    /* Push non-null pointers onto the stack in descending order. */
+    for (int i = MAXPTRLEN - 1; i >= 0; --i)
+    {
+      const struct MessageTree *ptr = current->pointers[i];
+      if (ptr)
+        stack[top++] = ptr;
+    }
   }
 }
 

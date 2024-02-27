@@ -182,7 +182,7 @@ modules_init(void)
   if (lt_dlinit())
   {
     ilog(LOG_TYPE_IRCD, "Couldn't initialize the libltdl run time dynamic"
-         " link library. Exiting.");
+         " link library: %s", lt_dlerror());
     exit(EXIT_FAILURE);
   }
 }

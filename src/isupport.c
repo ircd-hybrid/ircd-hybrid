@@ -271,13 +271,13 @@ void
 isupport_delete(const char *name)
 {
   struct Isupport *support = isupport_find(name);
-  if (support)
-  {
-    isupport_destroy(support);
+  if (support == NULL)
+    return;
 
-    /* Rebuild ISUPPORT lines after modification. */
-    isupport_build_lines();
-  }
+  isupport_destroy(support);
+
+  /* Rebuild ISUPPORT lines after modification. */
+  isupport_build_lines();
 }
 
 /**

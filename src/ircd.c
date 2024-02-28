@@ -450,7 +450,11 @@ make_daemon(void)
     exit(EXIT_SUCCESS);
   }
 
-  setsid();
+  if (setsid() == -1)
+  {
+    perror("setsid");
+    exit(EXIT_FAILURE);
+  }
 }
 
 /**

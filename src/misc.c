@@ -86,6 +86,37 @@ date_iso8601(uintmax_t lclock)
 }
 
 /**
+ * @brief Formats the current date and time in ISO 8601 format with microseconds.
+ *
+ * This function generates a string representing the current date and time
+ * in the ISO 8601 format (YYYY-MM-DDTHH:MM:SS.microsecondsZ). The result is
+ * stored in a static buffer, and the pointer to this buffer is returned.
+ *
+ * @param unused Unused parameter. This parameter is not used in the function.
+ * @return A pointer to the formatted date and time string.
+ */
+const char *
+date_iso8601_usec(uintmax_t unused)
+{
+  static char buf[MAX_DATE_STRING];
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+  uintmax_t current_time = tv.tv_sec;
+
+  const struct tm *time_info = localtime((time_t *)&current_time);
+  size_t len = strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", time_info);
+
+  /* Append microseconds. */
+  len += snprintf(buf + len, sizeof(buf) - len, ".%06ld", tv.tv_usec);
+    
+  /* Append UTC offset. */
+  strftime(buf + len, sizeof(buf) - len, "%z", time_info);
+
+  return buf;
+}
+
+/**
  * @brief Formats a given time value into a string using the ctime format.
  *
  * This function formats the provided time value into a string using the ctime format,

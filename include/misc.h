@@ -90,6 +90,7 @@
 
 extern const char *date(uintmax_t);
 extern const char *date_iso8601(uintmax_t);
+extern const char *date_iso8601_usec(uintmax_t);
 extern const char *date_ctime(uintmax_t);
 extern const char *time_dissect(uintmax_t);
 extern void binary_to_hex(const unsigned char *, char *, unsigned int);

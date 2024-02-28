@@ -33,7 +33,6 @@
 #include "send.h"
 #include "log.h"
 #include "client.h"
-#include "memory.h"
 #include "conf_db.h"
 
 /**

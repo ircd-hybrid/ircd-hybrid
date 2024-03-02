@@ -455,6 +455,21 @@ make_daemon(void)
     perror("setsid");
     exit(EXIT_FAILURE);
   }
+
+  /* Connect stdin, stdout, and stderr to /dev/null */
+  int fd = open("/dev/null", O_RDWR);
+  if (fd < 0)
+  {
+    perror("open");
+    exit(EXIT_FAILURE);
+  }
+
+  dup2(fd, STDIN_FILENO);
+  dup2(fd, STDOUT_FILENO);
+  dup2(fd, STDERR_FILENO);
+
+  if (fd > STDERR_FILENO)
+    close(fd);
 }
 
 /**
@@ -520,10 +535,7 @@ main(int argc, char *argv[])
   if (server_state.foreground)
     print_startup(getpid());
   else
-  {
     make_daemon();
-    close_standard_fds(); /* this needs to be before comm_select_init()! */
-  }
 
   setup_signals();
 

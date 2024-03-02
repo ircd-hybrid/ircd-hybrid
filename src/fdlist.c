@@ -158,21 +158,6 @@ fd_note(fde_t *F, const char *format, ...)
   }
 }
 
-/* Make sure stdio descriptors (0-2) and profiler descriptor (3)
- * always go somewhere harmless.  Use -foreground for profiling
- * or executing from gdb */
-void
-close_standard_fds(void)
-{
-  for (int i = 0; i < LOWEST_SAFE_FD; ++i)
-  {
-    close(i);
-
-    if (open("/dev/null", O_RDWR) < 0)
-      exit(EXIT_FAILURE); /* we're hosed if we can't even open /dev/null */
-  }
-}
-
 void
 close_fds(void)
 {

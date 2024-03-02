@@ -104,6 +104,5 @@ extern void fdlist_init(void);
 extern fde_t *fd_open(int, bool, const char *);
 extern fde_t *fd_close(fde_t *);
 extern void fd_note(fde_t *, const char *, ...);
-extern void close_standard_fds(void);
 extern void close_fds(void);
 #endif  /* INCLUDED_fdlist_h */

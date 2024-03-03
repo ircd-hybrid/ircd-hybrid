@@ -95,8 +95,9 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
   log->main = main;
   log->flush_immediately = true;
   log->time_provider = date_iso8601_usec;
-
   log->file = fopen(file_name, "a");
+  dlinkAdd(log, &log->node, &log_list);
+
   if (log->file == NULL)
   {
     if (log->main)
@@ -105,14 +106,12 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
       exit(EXIT_FAILURE);
     }
 
+    log_destroy(log);
     return NULL;
   }
 
   /* Set owner-only read and write permissions. */
   chmod(log->file_name, S_IRUSR | S_IWUSR);
-
-  dlinkAdd(log, &log->node, &log_list);
-
   return log;
 }
 
@@ -251,12 +250,13 @@ log_write(enum log_type type, const char *format, ...)
  *
  * @param log The Log structure to destroy.
  */
-static void
+void
 log_destroy(struct Log *log)
 {
   dlinkDelete(&log->node, &log_list);
 
-  fclose(log->file);
+  if (log->file)
+    fclose(log->file);
 
   xfree(log->file_name);
   xfree(log);

@@ -3454,7 +3454,7 @@ yyreduce:
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
   {
-    if (server_valid_name(yylval.string) == true)
+    if (server_valid_name(yylval.string))
       ConfigServerInfo.name = xstrdup(yylval.string);
     else
     {
@@ -3793,8 +3793,8 @@ yyreduce:
     break;
 
   if (block_state.type.value && block_state.file.buf[0])
-    log_set_file(block_state.type.value, block_state.size.value,
-                 block_state.file.buf);
+    log_add(block_state.type.value, false, block_state.size.value,
+            block_state.file.buf);
 }
 #line 3800 "conf_parser.c"
     break;
@@ -5168,7 +5168,7 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (server_valid_name(yylval.string) == true)
+  if (server_valid_name(yylval.string))
   {
     struct ServiceItem *service = service_make();
     service->name = xstrdup(yylval.string);

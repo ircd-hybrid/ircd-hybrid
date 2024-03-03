@@ -826,7 +826,7 @@ logging_file_entry:
     break;
 
   if (block_state.type.value && block_state.file.buf[0])
-    log_add(block_state.type.value, true, block_state.size.value,
+    log_add(block_state.type.value, false, block_state.size.value,
             block_state.file.buf);
 };
 

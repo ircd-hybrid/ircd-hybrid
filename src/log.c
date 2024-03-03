@@ -268,9 +268,12 @@ log_destroy(struct Log *log)
 void
 log_clear(void)
 {
-  while (log_list.head)
+  dlink_node *node, *node_next;
+
+  DLINK_FOREACH_SAFE(node, node_next, log_list.head)
   {
     struct Log *log = log_list.head->data;
+
     if (log->main == false)
       log_destroy(log);
   }

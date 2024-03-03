@@ -171,15 +171,17 @@ log_rotate(struct Log *log)
 }
 
 /**
- * @brief Checks if the log file size exceeds the maximum allowed size.
+ * @brief Checks whether log rotation is due based on specific conditions.
  *
- * This function checks whether the log file size exceeds the maximum allowed size.
+ * This function determines whether log rotation is necessary by evaluating
+ * certain conditions, such as exceeding a predefined maximum file size.
+ * If the log meets the conditions for rotation, it returns true; otherwise, it returns false.
  *
- * @param log The Log structure to check.
- * @return True if the log file exceeds the maximum size, false otherwise.
+ * @param log The Log structure for which to check if rotation is due.
+ * @return True if log rotation is due, false otherwise.
  */
 static bool
-log_exceed_size(struct Log *log)
+log_rotate_due(struct Log *log)
 {
   if (log->max_file_size == 0)
     return false;
@@ -227,7 +229,7 @@ log_write(enum log_type type, const char *format, ...)
         snprintf(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), sizeof(TRUNCATED_STRING), TRUNCATED_STRING);
 
       /* Check if log file exceeds the maximum size, rotate if needed. */
-      if (log->main == false && log_exceed_size(log))
+      if (log->main == false && log_rotate_due(log))
         log_rotate(log);
 
       /* Write log entry to the file. */

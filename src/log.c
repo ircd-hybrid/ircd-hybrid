@@ -83,7 +83,7 @@ static dlink_list log_list;
  * @param main Flag indicating if it's the primary log.
  * @param max_file_size Maximum size for the log file.
  * @param file_name Name of the log file.
- * @return A pointer to the initialized Log structure.
+ * @return A pointer to the initialized Log structure, or NULL on failure.
  */
 struct Log *
 log_add(enum log_type type, bool main, size_t max_file_size, const char *file_name)

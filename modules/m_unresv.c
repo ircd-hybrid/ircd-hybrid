@@ -66,7 +66,7 @@ resv_remove(struct Client *source_p, const struct aline_ctx *aline)
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s has removed the RESV for: [%s]",
                        get_oper_name(source_p), resv->mask);
-  ilog(LOG_TYPE_RESV, "%s removed RESV for [%s]",
+  log_write(LOG_TYPE_RESV, "%s removed RESV for [%s]",
        get_oper_name(source_p), resv->mask);
 
   resv_delete(resv, false);

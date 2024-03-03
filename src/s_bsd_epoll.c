@@ -60,7 +60,7 @@ comm_select_init(void)
   int fd = epoll_create1(EPOLL_CLOEXEC);
   if (fd < 0)
   {
-    ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open epoll fd: %s",
+    log_write(LOG_TYPE_IRCD, "comm_select_init: couldn't open epoll fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }
@@ -126,7 +126,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 
     if (epoll_ctl(epollop->fd, op, F->fd, &ep_event))
     {
-      ilog(LOG_TYPE_IRCD, "comm_setselect: epoll_ctl() failed: %s", strerror(errno));
+      log_write(LOG_TYPE_IRCD, "comm_setselect: epoll_ctl() failed: %s", strerror(errno));
       abort();
     }
   }

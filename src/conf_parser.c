@@ -5083,7 +5083,7 @@ yyreduce:
     block_state.flags.value |= CONF_FLAGS_SPOOF_IP;
   }
   else
-    ilog(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
+    log_write(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
 }
 #line 5089 "conf_parser.c"
     break;
@@ -5540,7 +5540,7 @@ yyreduce:
     hints.ai_flags    = AI_PASSIVE | AI_NUMERICHOST;
 
     if (getaddrinfo(block_state.bind.buf, NULL, &hints, &res))
-      ilog(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
+      log_write(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
     else
     {
       assert(res);

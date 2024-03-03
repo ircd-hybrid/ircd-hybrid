@@ -307,13 +307,13 @@ write_pidfile(const char *filename)
     snprintf(buf, sizeof(buf), "%u\n", pid);
 
     if (fputs(buf, fb) == -1)
-      ilog(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
+      log_write(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
            filename, strerror(errno));
 
     fclose(fb);
   }
   else
-    ilog(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
+    log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
          filename, strerror(errno));
 }
 
@@ -336,7 +336,7 @@ check_pidfile(const char *filename)
     char buf[IRCD_BUFSIZE]; 
 
     if (fgets(buf, 20, fb) == NULL)
-      ilog(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
+      log_write(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
            filename, strerror(errno));
     else
     {
@@ -353,7 +353,7 @@ check_pidfile(const char *filename)
     fclose(fb);
   }
   else if (errno != ENOENT)
-    ilog(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
+    log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
          filename, strerror(errno));
 }
 
@@ -566,7 +566,7 @@ main(int argc, char *argv[])
 
   if (EmptyString(ConfigServerInfo.name))
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
@@ -575,7 +575,7 @@ main(int argc, char *argv[])
   /* serverinfo {} description must exist.  If not, error out.*/
   if (EmptyString(ConfigServerInfo.description))
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
     exit(EXIT_FAILURE);
   }
 
@@ -583,7 +583,7 @@ main(int argc, char *argv[])
 
   if (EmptyString(ConfigServerInfo.sid))
   {
-    ilog(LOG_TYPE_IRCD, "Generating server ID");
+    log_write(LOG_TYPE_IRCD, "Generating server ID");
     generate_sid();
     ConfigServerInfo.sid = xstrdup(me.id);
   }
@@ -633,7 +633,7 @@ main(int argc, char *argv[])
     event_add(&event_write_links_file, NULL);
   }
 
-  ilog(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
+  log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();
 
   return 0;

@@ -76,7 +76,7 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
                   RPL_WHOISOPERATOR, conf->whois);
   }
 
-  ilog(LOG_TYPE_OPER, "OPER %s by %s",
+  log_write(LOG_TYPE_OPER, "OPER %s by %s",
        conf->name, client_get_name(source_p, HIDE_IP));
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
@@ -103,7 +103,7 @@ failed_oper_notice(struct Client *source_p, const char *name,
                          "Failed OPER attempt as %s by %s - %s",
                          name, client_get_name(source_p, HIDE_IP), reason);
 
-  ilog(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
+  log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
        name, client_get_name(source_p, HIDE_IP), reason);
 }
 

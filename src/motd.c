@@ -124,7 +124,7 @@ motd_cache(struct Motd *motd)
   /* Need the file's modification time */
   if (stat(motd->path, &sb) == -1)
   {
-    ilog(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path,
+    log_write(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path,
          strerror(errno));
     return 0;
   }
@@ -133,7 +133,7 @@ motd_cache(struct Motd *motd)
   FILE *file = fopen(motd->path, "r");
   if (file == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
          strerror(errno));
     return 0;
   }

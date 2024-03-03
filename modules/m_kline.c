@@ -154,7 +154,7 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
                          get_oper_name(source_p), aline->duration / 60,
                          conf->user, conf->host,
                          conf->reason);
-    ilog(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
+    log_write(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), aline->duration / 60,
          conf->user, conf->host, conf->reason);
   }
@@ -168,7 +168,7 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
                          "%s added K-Line for [%s@%s] [%s]",
                          get_oper_name(source_p),
                          conf->user, conf->host, conf->reason);
-    ilog(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
+    log_write(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
          get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
 

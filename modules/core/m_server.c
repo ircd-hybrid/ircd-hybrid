@@ -224,7 +224,7 @@ server_estab(struct Client *client_p)
                          "Link with %s established: [TLS: %s] (Capabilities: %s)",
                          client_get_name(client_p, MASK_IP), client_p->tls_cipher,
                          capab_get(client_p, true));
-    ilog(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
+    log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
          client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
          capab_get(client_p, true));
   }
@@ -238,7 +238,7 @@ server_estab(struct Client *client_p)
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link with %s established: (Capabilities: %s)",
                          client_get_name(client_p, MASK_IP), capab_get(client_p, true));
-    ilog(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
+    log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
          client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
   }
 

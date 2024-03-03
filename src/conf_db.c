@@ -51,14 +51,14 @@ get_file_version(struct dbFILE *f)
 
   if (read_uint32(&version, f) == false)
   {
-    ilog(LOG_TYPE_IRCD, "Error reading version number on %s: %s",
+    log_write(LOG_TYPE_IRCD, "Error reading version number on %s: %s",
          f->filename, strerror(errno));
     return 0;
   }
 
   if (version < 1)
   {
-    ilog(LOG_TYPE_IRCD, "Invalid version number (%u) on %s",
+    log_write(LOG_TYPE_IRCD, "Invalid version number (%u) on %s",
          version, f->filename);
     return 0;
   }
@@ -76,7 +76,7 @@ write_file_version(struct dbFILE *f, uint32_t version)
 {
   if (write_uint32(version, f) == false)
   {
-    ilog(LOG_TYPE_IRCD, "Error writing version number on %s",
+    log_write(LOG_TYPE_IRCD, "Error writing version number on %s",
          f->filename);
     return false;
   }
@@ -103,7 +103,7 @@ open_db_read(const char *filename)
     int errno_save = errno;
 
     if (errno != ENOENT)
-      ilog(LOG_TYPE_IRCD, "Cannot read database file %s", f->filename);
+      log_write(LOG_TYPE_IRCD, "Cannot read database file %s", f->filename);
 
     xfree(f);
     errno = errno_save;
@@ -132,7 +132,7 @@ open_db_write(const char *filename, uint32_t version)
 
   if (f->tempname[0] == '\0' || strcmp(f->tempname, filename) == 0)
   {
-    ilog(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
+    log_write(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
          filename);
     xfree(f);
     errno = ENAMETOOLONG;
@@ -163,7 +163,7 @@ open_db_write(const char *filename, uint32_t version)
     }
 
     errno = errno_save;
-    ilog(LOG_TYPE_IRCD, "Cannot create temporary database file %s",
+    log_write(LOG_TYPE_IRCD, "Cannot create temporary database file %s",
         f->tempname);
 
     if (f->fp)
@@ -262,7 +262,7 @@ close_db(struct dbFILE *f)
                            "data to database file %s; new data NOT saved.",
                            f->filename);
       errno = errno_save;
-      ilog(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new "
+      log_write(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new "
            "data NOT saved.", f->filename);
       remove(f->tempname);
     }
@@ -479,7 +479,7 @@ write_string(const char *s, struct dbFILE *f)
 #define SAFE_WRITE(x,db) do {                         \
     if ((x) == false) {                               \
         restore_db(f);                                \
-        ilog(LOG_TYPE_IRCD, "Write error on %s", db); \
+        log_write(LOG_TYPE_IRCD, "Write error on %s", db); \
         return;                                       \
     }                                                 \
 } while (false)

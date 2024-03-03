@@ -814,7 +814,7 @@ sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
   va_end(args);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s", buffer);
-  ilog(LOG_TYPE_IRCD, "%s", buffer);
+  log_write(LOG_TYPE_IRCD, "%s", buffer);
 }
 
 /* sendto_wallops_flags()

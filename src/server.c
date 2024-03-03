@@ -66,7 +66,7 @@ write_links_file(void *unused)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "w");
   if (file == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
          strerror(errno));
     return;
   }
@@ -119,7 +119,7 @@ read_links_file(void)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "r");
   if (file == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
          strerror(errno));
     return;
   }
@@ -405,7 +405,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-  ilog(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
+  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Create a socket for the server connection */
   int fd = comm_socket(conf->addr->ss.ss_family, SOCK_STREAM, 0);
@@ -536,7 +536,7 @@ server_tls_handshake(fde_t *F, void *data)
   comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->tls_certfp) == false)
-    ilog(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
+    log_write(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
          client_get_name(client, MASK_IP));
 
   server_finish_tls_handshake(client);

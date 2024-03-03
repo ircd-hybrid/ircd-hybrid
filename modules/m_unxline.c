@@ -72,7 +72,7 @@ xline_remove(struct Client *source_p, const struct aline_ctx *aline)
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s has removed the X-Line for: [%s]",
                        get_oper_name(source_p), gecos->mask);
-  ilog(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
+  log_write(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
        get_oper_name(source_p), gecos->mask);
 
   gecos_delete(gecos, false);

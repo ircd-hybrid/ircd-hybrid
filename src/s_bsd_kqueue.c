@@ -49,7 +49,7 @@ comm_select_init(void)
 {
   if ((kqueue_fd = kqueue()) < 0)
   {
-    ilog(LOG_TYPE_IRCD, "comm_select_init: couldn't open kqueue fd: %s",
+    log_write(LOG_TYPE_IRCD, "comm_select_init: couldn't open kqueue fd: %s",
          strerror(errno));
     exit(EXIT_FAILURE); /* Whee! */
   }

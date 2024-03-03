@@ -73,7 +73,7 @@ server_die(const char *message, bool restart)
 
   sendto_server(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);
 
-  ilog(LOG_TYPE_IRCD, "%s", buf);
+  log_write(LOG_TYPE_IRCD, "%s", buf);
 
   save_all_databases(NULL);
 

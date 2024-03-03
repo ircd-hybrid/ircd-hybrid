@@ -114,7 +114,7 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
                          "%s added temporary %ju min. X-Line for [%s] [%s]",
                          get_oper_name(source_p), aline->duration / 60,
                          gecos->mask, gecos->reason);
-    ilog(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
+    log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
          get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
   }
   else
@@ -127,7 +127,7 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
                          "%s added X-Line for [%s] [%s]",
                          get_oper_name(source_p), gecos->mask,
                          gecos->reason);
-    ilog(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
+    log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
          get_oper_name(source_p), gecos->mask, gecos->reason);
   }
 

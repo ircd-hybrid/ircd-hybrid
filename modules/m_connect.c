@@ -79,7 +79,7 @@ do_connect(struct Client *source_p, const char *name)
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
                 me.id, type_p, name, conf->port, get_oper_name(source_p));
 
-  ilog(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
+  log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
        type_p, name, conf->port, get_oper_name(source_p));
 
   /*

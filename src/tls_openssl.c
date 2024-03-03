@@ -48,7 +48,7 @@ report_crypto_errors(void)
   unsigned long e;
 
   while ((e = ERR_get_error()))
-    ilog(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
+    log_write(LOG_TYPE_IRCD, "SSL error: %s", ERR_error_string(e, 0));
 }
 
 static int
@@ -76,7 +76,7 @@ tls_init(void)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
@@ -91,7 +91,7 @@ tls_init(void)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
@@ -149,7 +149,7 @@ tls_new_credentials(void)
       }
     }
     else
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 #else
     EVP_PKEY *dhpkey = NULL;
     OSSL_STORE_CTX *ctx = OSSL_STORE_open(ConfigServerInfo.tls_dh_param_file, NULL, NULL, NULL, NULL);
@@ -182,7 +182,7 @@ tls_new_credentials(void)
     }
 
     if (dhpkey == NULL)
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 #endif
   }
 
@@ -191,7 +191,7 @@ tls_new_credentials(void)
   else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
   {
     SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
@@ -199,7 +199,7 @@ tls_new_credentials(void)
   else if ((ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
     ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   if (ConfigServerInfo.tls_cipher_list == NULL)
@@ -207,7 +207,7 @@ tls_new_credentials(void)
   else if (SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
   {
     SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
 #ifndef LIBRESSL_VERSION_NUMBER
@@ -216,7 +216,7 @@ tls_new_credentials(void)
   else if (SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
   {
     SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
   }
 #endif
 
@@ -350,7 +350,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 
   if (ssl == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
+    log_write(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
          ERR_error_string(ERR_get_error(), NULL));
     return false;
   }

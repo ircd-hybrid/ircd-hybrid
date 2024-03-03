@@ -86,7 +86,7 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
                          "%s added temporary %ju min. RESV for [%s] [%s]",
                          get_oper_name(source_p), aline->duration / 60,
                          resv->mask, resv->reason);
-    ilog(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
+    log_write(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
          get_oper_name(source_p), aline->duration / 60, resv->mask, resv->reason);
   }
   else
@@ -99,7 +99,7 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
                          "%s added RESV for [%s] [%s]",
                          get_oper_name(source_p), resv->mask,
                          resv->reason);
-    ilog(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
+    log_write(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
          get_oper_name(source_p), resv->mask, resv->reason);
   }
 }

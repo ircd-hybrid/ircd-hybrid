@@ -366,7 +366,7 @@ conf_check_client(struct Client *client)
       sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Rejecting client connection from %s: %s",
                            client_get_name(client, SHOW_IP), error);
 
-    ilog(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
+    log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
          client_get_name(client, SHOW_IP), error);
     exit_client(client, buf);
     return false;
@@ -681,7 +681,7 @@ conf_rehash(bool sig)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Got signal SIGHUP, reloading configuration file(s)");
-    ilog(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
+    log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
   }
 
   restart_resolver();
@@ -893,7 +893,7 @@ conf_handle_tls(bool cold)
   {
     if (cold)
     {
-      ilog(LOG_TYPE_IRCD, "Error while initializing TLS");
+      log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
       exit(EXIT_FAILURE);
     }
     else
@@ -923,7 +923,7 @@ conf_read_files(bool cold)
   {
     if (cold)
     {
-      ilog(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
+      log_write(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
            ConfigGeneral.configfile, strerror(errno));
       exit(EXIT_FAILURE);
     }
@@ -1010,7 +1010,7 @@ yyerror(const char *msg)
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno, msg, p);
-  ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
        conffilebuf, lineno, msg, p);
 }
 
@@ -1021,7 +1021,7 @@ conf_error_report(const char *msg)
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                        "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno, msg, p);
-  ilog(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
+  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
        conffilebuf, lineno, msg, p);
 }
 

@@ -112,7 +112,7 @@ void
 report_error(int level, const char *text, const char *who, int error)
 {
   who = (who) ? who : "";
-  ilog(LOG_TYPE_IRCD, text, who, strerror(error));
+  log_write(LOG_TYPE_IRCD, text, who, strerror(error));
 }
 
 /*
@@ -181,7 +181,7 @@ ssl_handshake(fde_t *F, void *data)
   comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
   if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->tls_certfp) == false)
-    ilog(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+    log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
          client_get_name(client, MASK_IP));
 
   auth_start(client);

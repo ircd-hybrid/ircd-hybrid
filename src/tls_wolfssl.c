@@ -48,7 +48,7 @@ report_crypto_errors(void)
   unsigned long e;
 
   while ((e = wolfSSL_ERR_get_error()))
-    ilog(LOG_TYPE_IRCD, "SSL error: %s", wolfSSL_ERR_error_string(e, 0));
+    log_write(LOG_TYPE_IRCD, "SSL error: %s", wolfSSL_ERR_error_string(e, 0));
 }
 
 static int
@@ -76,7 +76,7 @@ tls_init(void)
 
   if ((ConfigServerInfo.tls_ctx.server_ctx = wolfSSL_CTX_new(wolfTLS_server_method())) == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- wolfSSL_CTX_new failed");
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- wolfSSL_CTX_new failed");
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
@@ -88,7 +88,7 @@ tls_init(void)
 
   if ((ConfigServerInfo.tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- wolfSSL_CTX_new failed");
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- wolfSSL_CTX_new failed");
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
@@ -129,7 +129,7 @@ tls_new_credentials(void)
 
   if (ConfigServerInfo.tls_dh_param_file)
     if (wolfSSL_CTX_SetTmpDH_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
-       ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
+       log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 
 #ifdef SSL_CTX_set1_groups_list
   if (ConfigServerInfo.tls_supported_groups == NULL)
@@ -137,7 +137,7 @@ tls_new_credentials(void)
   else if (wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
   {
     wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 #else
   if (ConfigServerInfo.tls_supported_groups == NULL)
@@ -145,7 +145,7 @@ tls_new_credentials(void)
   else if (wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
   {
     wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 #endif
 
@@ -154,7 +154,7 @@ tls_new_credentials(void)
   else if ((ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
     ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_sha256();
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   if (ConfigServerInfo.tls_cipher_list == NULL)
@@ -162,7 +162,7 @@ tls_new_credentials(void)
   else if (wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) != SSL_SUCCESS)
   {
     wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
+    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
   TLS_initialized = true;
@@ -292,7 +292,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 
   if (ssl == NULL)
   {
-    ilog(LOG_TYPE_IRCD, "wolfSSL_new() ERROR! -- %s",
+    log_write(LOG_TYPE_IRCD, "wolfSSL_new() ERROR! -- %s",
          wolfSSL_ERR_error_string(wolfSSL_ERR_get_error(), NULL));
     return false;
   }

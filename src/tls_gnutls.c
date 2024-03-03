@@ -84,7 +84,7 @@ tls_new_credentials(void)
   int ret = gnutls_global_init();
   if (ret != GNUTLS_E_SUCCESS)
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
     xfree(context);
     return false;
   }
@@ -92,7 +92,7 @@ tls_new_credentials(void)
   ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
     xfree(context);
     return false;
   }
@@ -104,7 +104,7 @@ tls_new_credentials(void)
   ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    ilog(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
 
     gnutls_certificate_free_credentials(context->x509_cred);
     gnutls_priority_deinit(context->priorities);
@@ -115,7 +115,7 @@ tls_new_credentials(void)
   ret = gnutls_dh_params_init(&context->dh_params);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    ilog(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
+    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
     xfree(context);
     return false;
   }
@@ -126,12 +126,12 @@ tls_new_credentials(void)
 
     ret = gnutls_load_file(ConfigServerInfo.tls_dh_param_file, &data);
     if (ret != GNUTLS_E_SUCCESS)
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
+      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
     else
     {
       ret = gnutls_dh_params_import_pkcs3(context->dh_params, &data, GNUTLS_X509_FMT_PEM);
       if (ret != GNUTLS_E_SUCCESS)
-        ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
+        log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
       else
         /* TBR once 3.6 is our minimum supported version */
         gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
@@ -149,7 +149,7 @@ tls_new_credentials(void)
     if (ConfigServerInfo.message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
     {
       ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;
-      ilog(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
+      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
     }
   }
 
@@ -286,7 +286,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   if (ret != GNUTLS_E_SUCCESS)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    ilog(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
+    log_write(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
          cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
     gnutls_priority_init(&tls_data->context->priorities, tls_default_priority_string, NULL);
     return false;

@@ -202,7 +202,7 @@ log_exceed_size(struct Log *log)
  * @param ... Variable argument list for the log entry.
  */
 void
-ilog(enum log_type type, const char *format, ...)
+log_write(enum log_type type, const char *format, ...)
 {
   if (ConfigLog.use_logging == 0)
     return;

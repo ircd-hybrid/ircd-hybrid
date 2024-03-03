@@ -56,7 +56,7 @@ mr_error(struct Client *source_p, int parc, char *parv[])
   if (!EmptyString(parv[1]))
     message = parv[1];
 
-  ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
+  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        client_get_name(source_p, SHOW_IP), message);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
@@ -85,7 +85,7 @@ ms_error(struct Client *source_p, int parc, char *parv[])
   if (!EmptyString(parv[1]))
     message = parv[1];
 
-  ilog(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
+  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
        client_get_name(source_p, SHOW_IP), message);
 
   if (MyConnect(source_p))

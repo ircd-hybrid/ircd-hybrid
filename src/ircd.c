@@ -541,7 +541,7 @@ main(int argc, char *argv[])
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
-  log_set_file(LOG_TYPE_IRCD, 0, logFileName);
+  log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
   comm_select_init();  /* This needs to be setup early ! -- adrian */
   tls_init();

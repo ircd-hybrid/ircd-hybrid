@@ -557,8 +557,6 @@ conf_set_defaults(void)
   ConfigServerInfo.max_topic_length = 80;
   ConfigServerInfo.hub = 0;
 
-  log_iterate(log_free);
-
   ConfigLog.use_logging = 1;
 
   ConfigChannel.enable_extbans = 0;
@@ -846,6 +844,8 @@ conf_clear(void)
 
   pseudo_clear();  /* Clear pseudo {} items */
 
+  log_clear();
+
   /* Clean out ConfigServerInfo */
   xfree(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
@@ -952,7 +952,6 @@ conf_read_files(bool cold)
   conf_read(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
 
-  log_iterate(log_reopen);
   conf_handle_tls(cold);
 
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);

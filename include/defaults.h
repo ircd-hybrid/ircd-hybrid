@@ -101,8 +101,6 @@
 #define NETWORK_DESCRIPTION_DEFAULT "2600net IRC Network"  /* default for network_description */
 
 /* General defaults */
-#define LINKS_DELAY_DEFAULT  300
-
 #define MAX_TARGETS_DEFAULT 4           /* default for max_targets */
 
 #define CONNECTTIMEOUT  30      /* Recommended value: 30 */

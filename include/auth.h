@@ -68,7 +68,6 @@ struct AuthRequest
   fde_t *fd;  /**< File descriptor for identd queries. */
 };
 
-extern void auth_init(void);
 extern void auth_start(struct Client *);
 extern void auth_delete(struct AuthRequest *);
 #endif  /* INCLUDED_auth_h */

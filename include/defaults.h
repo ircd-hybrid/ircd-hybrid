@@ -101,8 +101,6 @@
 #define NETWORK_DESCRIPTION_DEFAULT "2600net IRC Network"  /* default for network_description */
 
 /* General defaults */
-#define MAX_TARGETS_DEFAULT 4           /* default for max_targets */
-
 #define CONNECTTIMEOUT  30      /* Recommended value: 30 */
 
 #define MIN_JOIN_LEAVE_TIME  60

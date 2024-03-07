@@ -61,11 +61,11 @@ server_die(const char *message, bool restart)
   }
 
   if (EmptyString(message))
-    snprintf(buf, sizeof(buf), "Server %s",
-             restart ? "Restarting" : "Terminating");
+    snprintf(buf, sizeof(buf), "Server is %s",
+             restart ? "restarting" : "terminating");
   else
-    snprintf(buf, sizeof(buf), "Server %s: %s",
-             restart ? "Restarting" : "Terminating", message);
+    snprintf(buf, sizeof(buf), "Server is %s: %s",
+             restart ? "restarting" : "terminating", message);
 
   dlink_node *node;
   DLINK_FOREACH(node, local_client_list.head)

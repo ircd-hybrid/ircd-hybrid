@@ -71,8 +71,6 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
-  struct Client *target_p = NULL;
-  struct Client *server_p = NULL;
   const char *msg = parv[parc - 1];
 
   if (parc < 3 || EmptyString(msg))
@@ -87,10 +85,15 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
     msg = buf;
   }
 
-  target_p = find_person(source_p, pseudo->nick);
-  server_p = hash_find_server(pseudo->server);
+  struct Client *target_p = find_person(source_p, pseudo->nick);
+  if (target_p)
+  {
+    const struct Client *server_p = hash_find_server(pseudo->server);
+    if (server_p == NULL || target_p->servptr != server_p || IsMe(server_p))
+      target_p = NULL;
+  }
 
-  if (target_p && server_p && (target_p->servptr == server_p) && !IsMe(server_p))
+  if (target_p)
     sendto_one(target_p, ":%s PRIVMSG %s :%s", source_p->id, target_p->id, msg);
   else
     sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);

@@ -47,7 +47,6 @@
 #include "hostmask.h"
 #include "parse.h"
 #include "res.h"
-#include "restart.h"
 #include "rng_mt.h"
 #include "s_bsd.h"
 #include "log.h"

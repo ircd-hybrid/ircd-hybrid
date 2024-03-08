@@ -274,7 +274,7 @@ log_clear(void)
 
   DLINK_FOREACH_SAFE(node, node_next, log_list.head)
   {
-    struct Log *log = log_list.head->data;
+    struct Log *log = node->data;
 
     if (log->main == false)
       log_destroy(log);

@@ -428,10 +428,12 @@ print_startup(int pid)
 }
 
 /**
- * @brief Detaches the server process to run as a daemon.
+ * @brief Transforms the current process into a daemon for background execution.
  *
- * This function forks the process to create a child, detaches it from
- * the terminal, and runs it as a daemon in the background.
+ * This function creates a child process using fork(), allowing the parent process
+ * to exit. The child becomes a daemon by detaching from the terminal and setting
+ * up a new session using setsid(). Standard input, output, and error are redirected
+ * to /dev/null to isolate the daemon from the terminal.
  */
 static void
 make_daemon(void)

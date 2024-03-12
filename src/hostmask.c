@@ -272,6 +272,51 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
 }
 
 /**
+ * @brief Masks the address based on the specified number of bits.
+ *
+ * This function masks the given IP address based on the specified number of bits,
+ * effectively setting to zero the bits beyond the specified prefix length.
+ *
+ * @param addr Pointer to the irc_ssaddr structure representing the IP address.
+ * @param bits The number of bits to preserve in the address (prefix length).
+ *
+ * @note The function handles both IPv4 and IPv6 addresses.
+ * For IPv4, the mask is applied to the network portion of the address.
+ * For IPv6, the mask is applied to the specified number of octets,
+ * and the remaining octets are set to zero.
+ */
+void
+address_mask(struct irc_ssaddr *addr, int bits)
+{
+  if (addr->ss.ss_family != AF_INET6)
+  {
+    /* Calculate the IPv4 mask based on the prefix length. */
+    const int mask = ~((1 << (32 - bits)) - 1);
+    struct sockaddr_in *const v4_base_ip = (struct sockaddr_in *)addr;
+
+    /* Apply the mask to the network portion of the IPv4 address. */
+    v4_base_ip->sin_addr.s_addr = htonl(ntohl(v4_base_ip->sin_addr.s_addr) & mask);
+  }
+  else
+  {
+    /* Calculate the number of full octets and remaining bits. */
+    const unsigned int n = bits / 8;
+    const unsigned int m = bits % 8;
+
+    /* Calculate the IPv6 mask based on the remaining bits. */
+    const int mask = ~((1 << (8 - m)) - 1);
+    struct sockaddr_in6 *const v6_base_ip = (struct sockaddr_in6 *)addr;
+
+    /* Apply the mask to the specified octet in the IPv6 address. */
+    v6_base_ip->sin6_addr.s6_addr[n] = v6_base_ip->sin6_addr.s6_addr[n] & mask;
+
+    /* Set the remaining octets to zero. */
+    for (unsigned int i = n + 1; i < 16; ++i)
+      v6_base_ip->sin6_addr.s6_addr[i] = 0;
+  }
+}
+
+/**
  * @brief Compare two network addresses for equality or matching.
  *
  * This function compares two network addresses for equality or matching based on

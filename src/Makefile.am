@@ -10,6 +10,7 @@ ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
 
 ircd_SOURCES = auth.c            \
+               base32.c          \
                channel.c         \
                channel_invite.c  \
                channel_mode.c    \
@@ -67,6 +68,7 @@ ircd_SOURCES = auth.c            \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
                s_bsd_kqueue.c    \
+               sha3.c            \
                tls_gnutls.c      \
                tls_none.c        \
                tls_openssl.c     \

@@ -118,7 +118,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
+am_ircd_OBJECTS = auth.$(OBJEXT) base32.$(OBJEXT) channel.$(OBJEXT) \
 	channel_invite.$(OBJEXT) channel_mode.$(OBJEXT) \
 	client.$(OBJEXT) client_svstag.$(OBJEXT) conf.$(OBJEXT) \
 	conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) \
@@ -140,11 +140,12 @@ am_ircd_OBJECTS = auth.$(OBJEXT) channel.$(OBJEXT) \
 	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
 	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
 	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
-	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) res.$(OBJEXT) \
-	reslib.$(OBJEXT) restart.$(OBJEXT) rng_mt.$(OBJEXT) \
-	s_bsd.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
+	s_bsd_kqueue.$(OBJEXT) sha3.$(OBJEXT) tls_gnutls.$(OBJEXT) \
+	tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) \
+	res.$(OBJEXT) reslib.$(OBJEXT) restart.$(OBJEXT) \
+	rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
+	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -169,16 +170,16 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
-	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
-	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
-	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
-	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_db.Po \
-	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
-	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
-	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
-	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/dbuf.Po \
-	./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
+am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/base32.Po \
+	./$(DEPDIR)/channel.Po ./$(DEPDIR)/channel_invite.Po \
+	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/client.Po \
+	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/conf.Po \
+	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
+	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
+	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
+	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
+	./$(DEPDIR)/dbuf.Po ./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
 	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
@@ -201,9 +202,10 @@ am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/s_bsd_epoll.Po ./$(DEPDIR)/s_bsd_kqueue.Po \
 	./$(DEPDIR)/s_bsd_poll.Po ./$(DEPDIR)/send.Po \
 	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/tls_gnutls.Po ./$(DEPDIR)/tls_none.Po \
-	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/tls_wolfssl.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/sha3.Po ./$(DEPDIR)/tls_gnutls.Po \
+	./$(DEPDIR)/tls_none.Po ./$(DEPDIR)/tls_openssl.Po \
+	./$(DEPDIR)/tls_wolfssl.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -422,6 +424,7 @@ ircd_LDFLAGS = -export-dynamic
 ircd_LDADD = $(LIBLTDL)
 ircd_DEPENDENCIES = $(LTDLDEPS)
 ircd_SOURCES = auth.c            \
+               base32.c          \
                channel.c         \
                channel_invite.c  \
                channel_mode.c    \
@@ -479,6 +482,7 @@ ircd_SOURCES = auth.c            \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
                s_bsd_kqueue.c    \
+               sha3.c            \
                tls_gnutls.c      \
                tls_none.c        \
                tls_openssl.c     \
@@ -591,6 +595,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
@@ -656,6 +661,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@ # am--include-marker
@@ -835,6 +841,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/auth.Po
+	-rm -f ./$(DEPDIR)/base32.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
@@ -900,6 +907,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
+	-rm -f ./$(DEPDIR)/sha3.Po
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
@@ -952,6 +960,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/auth.Po
+	-rm -f ./$(DEPDIR)/base32.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
@@ -1017,6 +1026,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
+	-rm -f ./$(DEPDIR)/sha3.Po
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po

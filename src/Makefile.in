@@ -120,12 +120,13 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_ircd_OBJECTS = auth.$(OBJEXT) base32.$(OBJEXT) channel.$(OBJEXT) \
 	channel_invite.$(OBJEXT) channel_mode.$(OBJEXT) \
-	client.$(OBJEXT) client_svstag.$(OBJEXT) conf.$(OBJEXT) \
-	conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) \
-	conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
-	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
-	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) \
-	event.$(OBJEXT) extban.$(OBJEXT) extban_account.$(OBJEXT) \
+	client.$(OBJEXT) client_svstag.$(OBJEXT) cloak.$(OBJEXT) \
+	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
+	conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) \
+	conf_resv.$(OBJEXT) conf_service.$(OBJEXT) \
+	conf_shared.$(OBJEXT) conf_parser.$(OBJEXT) \
+	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
+	extban.$(OBJEXT) extban_account.$(OBJEXT) \
 	extban_channel.$(OBJEXT) extban_fingerprint.$(OBJEXT) \
 	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
 	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
@@ -173,13 +174,14 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/auth.Po ./$(DEPDIR)/base32.Po \
 	./$(DEPDIR)/channel.Po ./$(DEPDIR)/channel_invite.Po \
 	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/client.Po \
-	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/conf.Po \
-	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
-	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
-	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
-	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
-	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
-	./$(DEPDIR)/dbuf.Po ./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
+	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
+	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
+	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_db.Po \
+	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
+	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
+	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
+	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/dbuf.Po \
+	./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
 	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
@@ -430,6 +432,7 @@ ircd_SOURCES = auth.c            \
                channel_mode.c    \
                client.c          \
                client_svstag.c   \
+               cloak.c           \
                conf.c            \
                conf_class.c      \
                conf_cluster.c    \
@@ -601,6 +604,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_svstag.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloak.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_class.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_cluster.Po@am__quote@ # am--include-marker
@@ -847,6 +851,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/channel_mode.Po
 	-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/client_svstag.Po
+	-rm -f ./$(DEPDIR)/cloak.Po
 	-rm -f ./$(DEPDIR)/conf.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po
@@ -966,6 +971,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/channel_mode.Po
 	-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/client_svstag.Po
+	-rm -f ./$(DEPDIR)/cloak.Po
 	-rm -f ./$(DEPDIR)/conf.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po

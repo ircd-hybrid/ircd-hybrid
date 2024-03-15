@@ -26,6 +26,7 @@
 #define __BASE32_H_
 
 #include <stddef.h>  /* size_t */
+#include <stdbool.h>
 
 /**
  * Returns the length of the output buffer required to encode len bytes of
@@ -42,6 +43,25 @@
  */
 #define UNBASE32_LEN(len)  (((len) / 8) * 5)
 
+/* Define constants for configuration flags. */
+#define BASE32_DISABLE_PADDING 0x01
+#define BASE32_USE_LOWERCASE 0x02
+
+typedef struct
+{
+  bool enable_padding;
+  bool use_lowercase;
+} base32_config;
+
+typedef struct
+{
+  base32_config config;
+  const unsigned char *base32_table;
+} base32_context;
+
+extern void base32_init(base32_context *);
+extern void base32_set_config(base32_context *, unsigned int);
+
 /**
  * Encode the data pointed to by plain into base32 and store the
  * result at the address pointed to by coded. The "coded" argument
@@ -50,7 +70,7 @@
  * contain characters from the [A-Z2-7=] set. The "len" arguments
  * define how many bytes will be read from the "plain" buffer.
  **/
-extern void base32_encode(const unsigned char *, size_t, unsigned char *);
+extern void base32_encode(base32_context *, const unsigned char *, size_t, unsigned char *);
 
 /**
  * Decode the null terminated string pointed to by coded and write
@@ -61,5 +81,5 @@ extern void base32_encode(const unsigned char *, size_t, unsigned char *);
  * expected due to padding. If an invalid base32 character is found
  * in the coded string, decoding will stop at that point.
  **/
-extern size_t base32_decode(const unsigned char *, unsigned char *);
+extern size_t base32_decode(base32_context *, const unsigned char *, unsigned char *);
 #endif

@@ -261,15 +261,19 @@ cloak_mac_and_compose(const struct irc_ssaddr *addr)
   memcpy(input + config->secret_len, addr_ptr, addr_len);
 
   /* Compute SHA3 hash. */
-  sha3_context ctx;
-  sha3_Init512(&ctx);
-  sha3_Update(&ctx, input, config->secret_len + addr_len);
-  const uint8_t *digest_sha3 = sha3_Finalize(&ctx);
+  sha3_context ctx_sha3;
+  sha3_Init512(&ctx_sha3);
+  sha3_Update(&ctx_sha3, input, config->secret_len + addr_len);
+  const uint8_t *digest_sha3 = sha3_Finalize(&ctx_sha3);
 
   /* Encode the hash in base32. */
   unsigned char digest_b32[BASE32_LEN(config->num_bytes) + 1];
   memset(digest_b32, 0, sizeof(digest_b32));
-  base32_encode(digest_sha3, config->num_bytes, digest_b32);
+
+  base32_context ctx_base32;
+  base32_init(&ctx_base32);
+  base32_set_config(&ctx_base32, BASE32_DISABLE_PADDING | BASE32_USE_LOWERCASE);
+  base32_encode(&ctx_base32, digest_sha3, config->num_bytes, digest_b32);
 
   /* Compose the cloaked hostname by combining the base32 hash and suffix. */
   static char cloak[HOSTLEN + 1];

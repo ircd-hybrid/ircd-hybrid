@@ -27,6 +27,33 @@
 
 #include "base32.h"
 
+/* base32 table definitions. */
+static const unsigned char base32_uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+static const unsigned char base32_lowercase[] = "abcdefghijklmnopqrstuvwxyz234567";
+
+/* Initialize base32 context with default configuration. */
+void
+base32_init(base32_context *ctx)
+{
+  ctx->config.enable_padding = true;
+  ctx->config.use_lowercase = false;
+  ctx->base32_table = base32_uppercase;
+}
+
+void
+base32_set_config(base32_context *ctx, unsigned int flags)
+{
+  if (flags & BASE32_DISABLE_PADDING)
+    ctx->config.enable_padding = false;
+  if (flags & BASE32_USE_LOWERCASE)
+  {
+    ctx->config.use_lowercase = true;
+    ctx->base32_table = base32_lowercase;
+  }
+  else
+    ctx->base32_table = base32_uppercase;
+}
+
 /**
  * Let this be a sequence of plain data before encoding:
  *
@@ -67,10 +94,9 @@ pad(unsigned char *buf, int len)
  * Only the 5 least significant bits are used.
  */
 static unsigned char
-encode_char(unsigned char c)
+encode_char(base32_context *ctx, unsigned char c)
 {
-  static unsigned char base32[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  return base32[c & 0x1F];  // 0001 1111
+  return ctx->base32_table[c & 0x1F];  // 0001 1111
 }
 
 /**
@@ -79,12 +105,20 @@ encode_char(unsigned char c)
  * or a padding character.
  */
 static int
-decode_char(unsigned char c)
+decode_char(base32_context *ctx, unsigned char c)
 {
   char retval = -1;
 
-  if (c >= 'A' && c <= 'Z')
-    retval = c - 'A';
+  if (ctx->config.use_lowercase)
+  {
+    if (c >= 'a' && c <= 'z')
+      retval = c - 'a';
+  }
+  else
+  {
+    if (c >= 'A' && c <= 'Z')
+      retval = c - 'A';
+  }
 
   if (c >= '2' && c <= '7')
     retval = c - '2' + 26;
@@ -161,7 +195,7 @@ shift_left(unsigned char byte, signed char offset)
  * output as per the specification.
  */
 static void
-encode_sequence(const unsigned char *plain, int len, unsigned char *coded)
+encode_sequence(base32_context *ctx, const unsigned char *plain, int len, unsigned char *coded)
 {
   assert(CHAR_BIT == 8);  // not sure this would work otherwise
   assert(len >= 0 && len <= 5);
@@ -174,7 +208,9 @@ encode_sequence(const unsigned char *plain, int len, unsigned char *coded)
     if (octet >= len)
     {
       // we hit the end of the buffer
-      pad(&coded[block], 8 - block);
+
+      if (ctx->config.enable_padding)
+        pad(&coded[block], 8 - block);
       return;
     }
 
@@ -186,21 +222,21 @@ encode_sequence(const unsigned char *plain, int len, unsigned char *coded)
       c |= shift_right(plain[octet + 1], 8 + junk);
     }
 
-    coded[block] = encode_char(c);
+    coded[block] = encode_char(ctx, c);
   }
 }
 
 void
-base32_encode(const unsigned char *plain, size_t len, unsigned char *coded)
+base32_encode(base32_context *ctx, const unsigned char *plain, size_t len, unsigned char *coded)
 {
   // All the hard work is done in encode_sequence(),
   // here we just need to feed it the data sequence by sequence.
   for (size_t i = 0, j = 0; i < len; i += 5, j += 8)
-    encode_sequence(&plain[i], min(len - i, 5), &coded[j]);
+    encode_sequence(ctx, &plain[i], min(len - i, 5), &coded[j]);
 }
 
 static int
-decode_sequence(const unsigned char *coded, unsigned char *plain)
+decode_sequence(base32_context *ctx, const unsigned char *coded, unsigned char *plain)
 {
   assert(CHAR_BIT == 8);
   assert(coded && plain);
@@ -212,7 +248,7 @@ decode_sequence(const unsigned char *coded, unsigned char *plain)
     int offset = get_offset(block);
     int octet = get_octet(block);
 
-    int c = decode_char(coded[block]);
+    int c = decode_char(ctx, coded[block]);
     if (c < 0)  // invalid char, stop here
       return octet;
 
@@ -229,13 +265,13 @@ decode_sequence(const unsigned char *coded, unsigned char *plain)
 }
 
 size_t
-base32_decode(const unsigned char *coded, unsigned char *plain)
+base32_decode(base32_context *ctx, const unsigned char *coded, unsigned char *plain)
 {
   size_t written = 0;
 
   for (size_t i = 0, j = 0; ; i += 8, j += 5)
   {
-    int n = decode_sequence(&coded[i], &plain[j]);
+    int n = decode_sequence(ctx, &coded[i], &plain[j]);
     written += n;
 
     if (n < 5)

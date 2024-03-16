@@ -1,80 +1,72 @@
-                        User and Channel Modes Guide
-                        ----------------------------
+*User and Channel Modes Guide for ircd-hybrid IRC Daemon*
 
-Upon connecting to the IRC server, you will see something like this:
+Upon connecting to the IRC server, the server information banner (RPL_MYINFO) provides essential
+details about the server software version and supported modes:
 
-irc.ircd-hybrid.org hybrid-8.2.40 BDFGHXRSWacdefgijklnopqrswy CIKLMNORSTbcehiklmnoprstv Ibehklov
+`irc.ircd-hybrid.org ircd-hybrid-8.2.44 BDFGHXRSWZacefgijklnopqrswxyz CIKLMNOQRSTVZabcehiklmnopqrstvz Iabehkloqv`
 
-These describe the user modes, channel modes, and channel modes that require
-arguments that are available to the user.
+This banner denotes the user modes, channel modes, and channel modes that necessitate arguments available for users.
 
-Here is a guide to the preceding modes:
+Here's a comprehensive guide to the aforementioned modes:
 
 User Modes:
 
-+a - admin        - Admin status. Can for example see IP addresses in "STATS c"
-+B - bot          - Marks the client as being a bot
-+c - cconn        - Client connection/quit notices
-+D - deaf         - Don't receive channel messages
-+e - external     - See remote server connection and split notices
-+f - flood        - See possible flood/spam warnings.
-+F - farconnect   - See remote client connection/quit notices
-+G - softcallerid - Server Side Ignore for users not on your channels
-+g - callerid     - Server Side Ignore (see modeg.txt)
-+H - hidden       - Hides IRC operator status to other users
-+i - invisible    - Not shown in NAMES or WHO unless you share a channel
-+j - rej          - See rejected client notices
-+k - skill        - See server generated KILL messages
-+l - locops       - See LOCOPS messages
-+n - nchange      - See client nick changes
-+o - oper         - IRC operator status
-+p - hidechans    - Hides channel list in WHOIS
-+q - hideidle     - Hides idle and signon time in WHOIS
-+r - registered   - User has been registered and identified for its nick.
-                    Can be set only by servers and services.
-+R - regonly      - Only registered clients may message you
-+s - servnotice   - See general server notices
-+S - secure       - Client is connected via TLS
-+w - wallop       - See server generated WALLOPS
-+W - webirc       - User is connected using a webirc gateway
-+X - expiration   - See *LINE expiration notices
-+y - spy          - See ADMIN, LINKS, MOTD, STATS, TRACE notices
-+Z - secureonly   - User may only receive private messages from secure connections
++a (admin): Grants IRC administrator status, enabling access to sensitive server information like IP addresses through commands like "STATS c".
++B (bot): Indicates the client as a bot.
++c (cconn): Allows viewing of local client connection and quit notices.
++D (deaf): Prevents receiving channel messages.
++e (external): Enables visibility of remote server connection and split notices.
++f (flood): Provides alerts for possible flood or spam activities.
++F (farconnect): Allows viewing of remote client connection and quit notices.
++G (softcallerid): Implements Server Side Ignore for users not on your channels.
++g (callerid): Implements Server Side Ignore (detailed in modeg.txt).
++H (hidden): Conceals IRC operator status from other users.
++i (invisible): Keeps the user hidden from NAMES or WHO unless they share a channel with the viewer.
++j (rej): Allows viewing of rejected client notices.
++k (skill): Grants visibility of server-generated KILL messages.
++l (locops): Allows viewing of LOCOPS messages.
++n (nchange): Enables viewing of client nick changes.
++o (oper): Grants IRC operator status.
++p (hidechans): Hides the channel list in WHOIS.
++q (hideidle): Conceals idle and sign-on time in WHOIS.
++r (registered): Indicates that the user has registered and identified with their nickname. This mode can only be set by servers and services.
++R (regonly): Restricts message reception to registered/identified users.
++s (servnotice): Allows viewing of general server notices.
++S (secure): Indicates a TLS (Transport Layer Security) connection.
++w (wallop): Grants visibility of WALLOPS messages.
++W (webirc): Indicates connection via a webirc gateway.
++x (cloak): Provides host cloaking functionality for enhanced security by obscuring IP addresses.
++X (expiration): Allows viewing of *LINE expiration notices.
++y (spy): Enables viewing of various request notices like ADMIN, INFO, LINKS, MAP, MOTD, STATS, TRACE, and ETRACE.
++Z (secureonly): Restricts private message (PRIVMSG) or notice (NOTICE) reception/sending to users with a secure connection (TLS).
 
 Channel Modes:
 
-+b - ban          - Channel ban on nick!user@host
-+c - noctrls      - Prevent users from sending messages containing control codes to the channel
-+C - noctcps      - Prevent users from sending CTCPs to the channel
-+e - exempt       - Exemption from bans
-+h - halfop       - Half-Op status
-+I - invex        - Invite exceptions, nick!user@host does not need to be explicitly INVITE'd
-                    into the channel before being able JOIN
-+i - invite       - Invite only
-+k - key          - Key/password for the channel
-+l - limit        - Limit the number of users in a channel
-+m - moderated    - Users without +v/h/o cannot send text to the channel
-+K - noknock      - KNOCK cannot be used on the channel
-+L - extlimit     - Channel can make use of the extended ban list limit. Can be set only by irc-operators,
-                    servers and services.
-+M - modreg       - Unregistered/unidentified clients cannot send text to the channel
-+N - nonickchange - This will prevent any user who isn't opped, half-opped or voiced (+o/+h/+v) from
-                    changing their nick while in the channel.
-+n - noexternal   - Users must be in the channel to send text to it
-+o - chanop       - Full operator status
-+O - operonly     - This mode will prevent anyone who hasn't obtained irc-operator status from joining the
-                    channel. Can be set only by irc-operators, servers and services.
-+p - private      - Private is obsolete, this now restricts KNOCK, and can be set at the same time as +s.
-+r - registered   - Channel has been registered. Can be set only by servers and services.
-+R - regonly      - Only registered clients may join a channel with that mode set
-+s - secret       - The channel does not show up on NAMES or LIST or in the
-                    WHOIS channel list unless you are a member of the channel
-+S - secureonly   - This mode will prevent anyone who isn't securely connected via TLS from joining
-                    the channel.
-+t - topic        - Only chanops and halfops can change the topic
-+T - nonotice     - Users without +v/h/o cannot send NOTICEs to the channel
-+v - voice        - Can speak in a moderated channel, and is exempt from flood restrictions
-+V - noinvite     - INVITE cannot be used on the channel
-
-The third part of the 004 numeric lists channel modes that require arguments.
-Currently these are Ibehklov.
++a (admin): Grants channel administrator status.
++b (ban): Implements a ban on nick!user@host in the channel.
++c (noctrls): Prevents users from sending messages containing control codes to the channel.
++C (noctcps): Prevents users from sending CTCPs (Client-to-client protocol) to the channel.
++e (exempt): Provides exemption from channel bans.
++h (halfop): Grants channel half-op status.
++I (invex): Specifies invite exceptions, allowing users to join without explicit invitation.
++i (invite): Makes the channel invite-only.
++k (key): Sets a key/password for the channel, restricting access to those with the correct key.
++l (limit): Limits the number of users in the channel.
++m (moderated): Restricts channel text sending to members with channel voice status or higher.
++K (noknock): Disables the KNOCK command on the channel.
++L (extlimit): Allows extended ban list limit usage, settable by IRC operators, servers, and services.
++M (modreg): Restricts text sending to unregistered/unidentified clients.
++N (nonickchange): Prevents users without channel voice status or higher from changing their nickname in the channel.
++n (noexternal): Requires users to be in the channel to send text to it.
++o (chanop): Grants channel operator status.
++O (operonly): Prevents non-IRC operators from joining the channel, settable by IRC operators, servers, and services.
++p (private): Obsolete; now restricts KNOCK and can be set simultaneously with +s.
++q (owner): Grants channel owner status.
++r (registered): Indicates a registered channel, settable only by servers and services.
++R (regonly): Allows only registered clients to join the channel.
++s (secret): Conceals the channel from NAMES, LIST, and WHOIS unless the viewer is a member.
++S (secureonly): Restricts channel access to securely connected clients via TLS.
++t (topic): Allows only channel members with channel half-op status or higher to change the topic.
++T (nonotice): Restricts sending of NOTICEs to the channel to members with channel voice status or higher.
++v (voice): Grants channel voice status, enabling speaking in moderated channels and exemption from flood restrictions.
++V (noinvite): Disables the INVITE command on the channel.

@@ -44,8 +44,11 @@
 #define UNBASE32_LEN(len)  (((len) / 8) * 5)
 
 /* Define constants for configuration flags. */
-#define BASE32_DISABLE_PADDING 0x01
-#define BASE32_USE_LOWERCASE 0x02
+enum BASE32_FLAGS
+{
+  BASE32_DISABLE_PADDING = 1 << 0,
+  BASE32_USE_LOWERCASE   = 1 << 1,
+};
 
 typedef struct
 {

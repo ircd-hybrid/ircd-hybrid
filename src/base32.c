@@ -41,7 +41,7 @@ base32_init(base32_context *ctx)
 }
 
 void
-base32_set_config(base32_context *ctx, unsigned int flags)
+base32_set_config(base32_context *ctx, enum BASE32_FLAGS flags)
 {
   if (flags & BASE32_DISABLE_PADDING)
     ctx->config.enable_padding = false;

@@ -35,19 +35,19 @@ static const unsigned char base32_lowercase[] = "abcdefghijklmnopqrstuvwxyz23456
 void
 base32_init(base32_context *ctx)
 {
-  ctx->config.enable_padding = true;
-  ctx->config.use_lowercase = false;
+  ctx->config.no_padding = false;
+  ctx->config.lower_case = false;
   ctx->base32_table = base32_uppercase;
 }
 
 void
 base32_set_config(base32_context *ctx, enum BASE32_FLAGS flags)
 {
-  if (flags & BASE32_DISABLE_PADDING)
-    ctx->config.enable_padding = false;
-  if (flags & BASE32_USE_LOWERCASE)
+  if (flags & BASE32_NO_PADDING)
+    ctx->config.no_padding = true;
+  if (flags & BASE32_LOWER_CASE)
   {
-    ctx->config.use_lowercase = true;
+    ctx->config.lower_case = true;
     ctx->base32_table = base32_lowercase;
   }
   else
@@ -109,7 +109,7 @@ decode_char(base32_context *ctx, unsigned char c)
 {
   char retval = -1;
 
-  if (ctx->config.use_lowercase)
+  if (ctx->config.lower_case)
   {
     if (c >= 'a' && c <= 'z')
       retval = c - 'a';
@@ -209,7 +209,7 @@ encode_sequence(base32_context *ctx, const unsigned char *plain, int len, unsign
     {
       // we hit the end of the buffer
 
-      if (ctx->config.enable_padding)
+      if (ctx->config.no_padding == false)
         pad(&coded[block], 8 - block);
       return;
     }

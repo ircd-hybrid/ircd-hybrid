@@ -43,23 +43,57 @@
  */
 #define UNBASE32_LEN(len)  (((len) / 8) * 5)
 
-/* Define constants for configuration flags. */
+/**
+ * @def BASE32_FLAGS
+ * @brief Enumerates configuration flags for Base32 encoding and decoding.
+ *
+ * This enumeration defines flags that can be used to configure the behavior of Base32 encoding and decoding.
+ * Flags can be combined using bitwise OR operations to enable multiple options simultaneously.
+ */
 enum BASE32_FLAGS
 {
-  BASE32_DISABLE_PADDING = 1 << 0,
-  BASE32_USE_LOWERCASE   = 1 << 1,
+  /**
+   * @def BASE32_NO_PADDING
+   * @brief Disables padding in Base32 encoding.
+   *
+   * When this flag is set, padding characters ('=') are not added to the end of encoded Base32 strings.
+   * By default, padding is enabled in Base32 encoding.
+   */
+  BASE32_NO_PADDING = 1 << 0,
+
+  /**
+   * @def BASE32_LOWER_CASE
+   * @brief Specifies the use of lower-case characters in Base32 encoding.
+   *
+   * When this flag is set, lower-case characters ('a' to 'z') are used in the Base32 encoding table.
+   * By default, upper-case characters ('A' to 'Z') are used.
+   */
+  BASE32_LOWER_CASE = 1 << 1,
 };
 
+/**
+ * @brief Configuration options for Base32 encoding and decoding.
+ *
+ * This structure defines configuration options for Base32 encoding and decoding.
+ * Users can specify options such as padding behavior and character case.
+ */
 typedef struct
 {
-  bool enable_padding;
-  bool use_lowercase;
+  bool no_padding;  /**< Specifies whether padding is disabled in Base32 encoding. Default is false. */
+  bool lower_case;  /**< Specifies whether lower-case characters are used in Base32 encoding. Default is false. */
 } base32_config;
 
-typedef struct
+/**
+ * @brief Context structure for Base32 encoding and decoding.
+ *
+ * This structure holds the context for Base32 encoding and decoding operations.
+ * It includes a base32_config structure for configuration options and a pointer
+ * to the Base32 encoding table.
+ */
+typedef struct base32_context
 {
-  base32_config config;
-  const unsigned char *base32_table;
+  base32_config config;  /**< Configuration options for Base32 encoding and decoding. */
+  const unsigned char *base32_table;  /**< Pointer to the Base32 encoding table. */
 } base32_context;
 
 extern void base32_init(base32_context *);

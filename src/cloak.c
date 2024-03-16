@@ -272,7 +272,7 @@ cloak_mac_and_compose(const struct irc_ssaddr *addr)
 
   base32_context ctx_base32;
   base32_init(&ctx_base32);
-  base32_set_config(&ctx_base32, BASE32_DISABLE_PADDING | BASE32_USE_LOWERCASE);
+  base32_set_config(&ctx_base32, BASE32_NO_PADDING | BASE32_LOWER_CASE);
   base32_encode(&ctx_base32, digest_sha3, config->num_bytes, digest_b32);
 
   /* Compose the cloaked hostname by combining the base32 hash and suffix. */

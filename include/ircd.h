@@ -110,7 +110,7 @@ struct Counter
   unsigned int invisi;  /**< Current invisible clients (users with user mode +i). */
   unsigned int max_loc;  /**< Peak local client count. */
   unsigned int max_tot;  /**< Peak global client count. */
-  unsigned int max_loc_con; /**< Peak local connections (clients + server). */
+  unsigned int max_loc_con;  /**< Peak local connections (clients + server). */
 };
 
 /**
@@ -122,7 +122,7 @@ struct Counter
  */
 struct ServerState_t
 {
-  bool foreground; /**< Flag indicating whether the server should run in the foreground. */
+  bool foreground;  /**< Flag indicating whether the server should run in the foreground. */
 };
 
 /**

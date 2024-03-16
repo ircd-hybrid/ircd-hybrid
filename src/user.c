@@ -29,6 +29,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "cloak.h"
 #include "hash.h"
 #include "id.h"
 #include "irc_string.h"
@@ -81,6 +82,7 @@ const struct user_modes  umode_tab[] =
   { 'r', UMODE_REGISTERED   },
   { 's', UMODE_SERVNOTICE   },
   { 'w', UMODE_WALLOP       },
+  { 'x', UMODE_CLOAK        },
   { 'y', UMODE_SPY          },
   { 'z', UMODE_SECURE       },
   { '\0', 0 }
@@ -386,6 +388,16 @@ register_local_user(struct Client *client)
   strlcpy(client->id, id, sizeof(client->id));
   hash_add_id(client);
 
+  if (!HasFlag(client, FLAGS_SPOOF))
+  {
+    const char *const cloak = cloak_compute(&client->ip);
+    if (cloak)
+    {
+      user_set_hostmask(client, cloak, false);
+      AddUMode(client, UMODE_CLOAK);
+    }
+  }
+
   sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        client->name, client->username, client->realhost,
@@ -667,7 +679,7 @@ user_get_mode_str(unsigned int modes)
 }
 
 void
-user_set_hostmask(struct Client *client, const char *hostname)
+user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 {
   if (strcmp(client->host, hostname) == 0)
     return;
@@ -681,6 +693,10 @@ user_set_hostmask(struct Client *client, const char *hostname)
                                client->host, client->username, hostname);
 
   strlcpy(client->host, hostname, sizeof(client->host));
+
+  if (svshost)
+    sendto_server(client, 0, 0, ":%s SVSHOST %s %ju %s",
+                  client->servptr->id, client->id, client->tsinfo, client->host);
 
   if (MyConnect(client))
   {

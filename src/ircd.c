@@ -35,6 +35,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "cloak.h"
 #include "event.h"
 #include "fdlist.h"
 #include "hash.h"
@@ -564,6 +565,7 @@ main(int argc, char *argv[])
   read_links_file();
   motd_init();
   user_modes_init();
+  cloak_initialize();
 
   if (EmptyString(ConfigServerInfo.name))
   {

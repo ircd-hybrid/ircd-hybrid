@@ -127,7 +127,8 @@ enum
   FLAGS_TLS           = 1 << 21,  /**< User is connected via TLS (Transport Layer Security) */
   FLAGS_SQUIT         = 1 << 22,
   FLAGS_EXEMPTXLINE   = 1 << 23,  /**< Client is exempt from x-lines */
-  FLAGS_CAP302        = 1 << 24  /**< Client supports the IRCv3 CAP 302 extension */
+  FLAGS_CAP302        = 1 << 24,  /**< Client supports the IRCv3 CAP 302 extension */
+  FLAGS_SPOOF         = 1 << 25,
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))
@@ -144,7 +145,7 @@ enum
   UMODE_SKILL        = 1 <<  3,  /**< Server Killed */
   UMODE_FLOOD        = 1 <<  4,  /**< Flooding/spambot notices */
   UMODE_SPY          = 1 <<  5,  /**< See STATS / LINKS */
-/*UMODE_             = 1 <<  6,*/  /**<  */
+  UMODE_CLOAK        = 1 <<  6,
   UMODE_NCHANGE      = 1 <<  7,  /**< Nick change notice */
   UMODE_WALLOP       = 1 <<  8,  /**< Send wallops to them */
   UMODE_INVISIBLE    = 1 <<  9,  /**< Makes user invisible */

@@ -314,7 +314,10 @@ verify_access(struct Client *client)
   strlcpy(client->realhost, client->host, sizeof(client->realhost));
 
   if (IsConfDoSpoofIp(conf))
+  {
     strlcpy(client->host, conf->name, sizeof(client->host));
+    AddFlag(client, FLAGS_SPOOF);
+  }
 
   return attach_iline(client, conf);
 }

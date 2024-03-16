@@ -29,6 +29,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "client_svstag.h"
+#include "cloak.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -52,6 +53,7 @@
 static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
+  const char *cloak = NULL;
   const struct user_modes *tab = NULL;
   const unsigned int setmodes = source_p->umodes;
   bool badmode = false;
@@ -121,6 +123,39 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
         }
 
         break;
+      case 'x':
+        if (what == MODE_ADD)
+        {
+          if (HasUMode(source_p, UMODE_CLOAK))
+            break;
+
+          if (MyConnect(source_p))
+          {
+            if (HasFlag(source_p, FLAGS_SPOOF))
+              break;
+
+            cloak = cloak_compute(&source_p->ip);
+            if (cloak == NULL)
+              break;
+          }
+
+          AddUMode(source_p, UMODE_CLOAK);
+
+          if (!MyConnect(source_p))
+            break;
+          user_set_hostmask(source_p, cloak, true);
+        }
+        else
+        {
+          if (!HasUMode(source_p, UMODE_CLOAK))
+            break;
+
+          DelUMode(source_p, UMODE_CLOAK);
+
+          if (!MyConnect(source_p))
+            break;
+          user_set_hostmask(source_p, source_p->realhost, true);
+        }
 
       case 'S':  /* Only servers may set +S in a burst */
       case 'W':  /* Only servers may set +W in a burst */

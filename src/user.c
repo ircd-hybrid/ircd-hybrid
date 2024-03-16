@@ -388,16 +388,6 @@ register_local_user(struct Client *client)
   strlcpy(client->id, id, sizeof(client->id));
   hash_add_id(client);
 
-  if (!HasFlag(client, FLAGS_SPOOF))
-  {
-    const char *const cloak = cloak_compute(&client->ip);
-    if (cloak)
-    {
-      user_set_hostmask(client, cloak, false);
-      AddUMode(client, UMODE_CLOAK);
-    }
-  }
-
   sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        client->name, client->username, client->realhost,
@@ -443,6 +433,16 @@ register_local_user(struct Client *client)
   ++Count.totalrestartcount;
 
   user_welcome(client);
+
+  if (!HasFlag(client, FLAGS_SPOOF))
+  {
+    const char *const cloak = cloak_compute(&client->ip);
+    if (cloak)
+    {
+      user_set_hostmask(client, cloak, false);
+      AddUMode(client, UMODE_CLOAK);
+    }
+  }
 
   introduce_client(client);
 }

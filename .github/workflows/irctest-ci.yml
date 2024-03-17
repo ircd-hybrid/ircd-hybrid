@@ -1,0 +1,47 @@
+name: irctest CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout irctest
+        uses: actions/checkout@v4
+        with:
+          path: irctest
+          ref: e6d54db9ce8d916b6629c61e970b1f3f1fc2db94
+          repository: progval/irctest
+
+      - name: configure
+        run: ./configure --prefix=$HOME/.local/
+      - name: make
+        run: make -j$(nproc)
+      - name: make install
+        run: make install
+
+      - name: Checkout Anope
+        uses: actions/checkout@v4
+        with:
+          path: anope
+          ref: 2.1.1
+          repository: anope/anope
+
+      - name: Build and install Anope
+        run: |
+          cd $GITHUB_WORKSPACE/anope/
+          sudo apt-get install ninja-build --no-install-recommends
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local/ -DPROGRAM_NAME=anope -GNinja ..
+          ninja install
+
+      - name: Install irctest dependencies
+        run: sudo apt-get install --assume-yes faketime python3-pytest
+
+      - name: Run irctest
+        run: PATH=$HOME/.local/bin:$PATH make -C irctest/ hybrid

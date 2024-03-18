@@ -54,14 +54,14 @@
 struct cloak_config
 {
   bool enabled;  /**< Flag indicating whether cloaking is enabled or not. */
-  int cidr_len_ipv4;  /**< CIDR length for IPv4 addresses. */
-  int cidr_len_ipv6;  /**< CIDR length for IPv6 addresses. */
-  int num_bits;  /**< Number of bits for the MAC computation. */
-  int num_bytes;  /**< Number of bytes derived from num_bits. */
+  size_t cidr_len_ipv4;  /**< CIDR length for IPv4 addresses. */
+  size_t cidr_len_ipv6;  /**< CIDR length for IPv6 addresses. */
+  size_t num_bits;  /**< Number of bits for the MAC computation. */
+  size_t num_bytes;  /**< Number of bytes derived from num_bits. */
   char *secret;  /**< Secret key used in the MAC computation. */
-  int secret_len;  /**< Length of the secret key. */
+  size_t secret_len;  /**< Length of the secret key. */
   char *suffix;  /**< Suffix appended to the cloaked hostname. */
-  int suffix_len;  /**< Length of the suffix. */
+  size_t suffix_len;  /**< Length of the suffix. */
 };
 
 /**

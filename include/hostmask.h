@@ -37,6 +37,8 @@ enum hostmask_type
 
 struct AddressRec
 {
+  dlink_node node;
+
   /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
   enum hostmask_type masktype;
   /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
@@ -61,8 +63,6 @@ struct AddressRec
   /* Only checked if !(type & 1)... */
   const char *username;
   struct MaskItem *conf;
-
-  dlink_node node;
 };
 
 extern dlink_list atable[ATABLE_SIZE];

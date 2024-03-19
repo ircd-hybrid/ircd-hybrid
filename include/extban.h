@@ -54,13 +54,13 @@ enum extban_match
 
 struct Extban
 {
+  dlink_node node;
   unsigned char character;
   enum extban_type type;
   int (*is_valid)(const char *);
   enum extban_match (*matches)(struct Client *, struct Channel *, struct Ban *);
   unsigned int types;  /* CHFL_BAN/EXCEPTION/INVEX */
   unsigned int flag;
-  dlink_node node;
 };
 
 extern void extban_init(void);

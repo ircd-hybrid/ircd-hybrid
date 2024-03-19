@@ -48,15 +48,14 @@ enum
 /** How long can comm_select() wait for network events [milliseconds] */
 enum { SELECT_DELAY = 500 };
 
-struct Client;
 struct Listener;
 
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
 extern void report_error(int, const char *, const char *, int);
+extern void remove_ipv6_mapping(struct irc_ssaddr *);
 
 extern int comm_get_sockerr(fde_t *);
 extern bool comm_ignore_errno(int);
-
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
@@ -69,5 +68,4 @@ extern int comm_accept(fde_t *, struct irc_ssaddr *);
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
-extern void remove_ipv6_mapping(struct irc_ssaddr *);
 #endif  /* INCLUDED_s_bsd_h */

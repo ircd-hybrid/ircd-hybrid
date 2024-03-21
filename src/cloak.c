@@ -213,7 +213,7 @@ cloak_initialize(void)
   cloak_set_enabled();
   cloak_set_num_bits(80);
   cloak_set_cidr_len_ipv4(32);
-  cloak_set_cidr_len_ipv4(64); 
+  cloak_set_cidr_len_ipv6(64);
   cloak_set_secret("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
   cloak_set_suffix("irc");
 }

@@ -210,19 +210,12 @@ cloak_initialize(void)
     return;
 
   config = xcalloc(sizeof(*config));
-  config->enabled = true;
-  config->num_bits = 80;
-  config->num_bytes = config->num_bits / 8;
-
-  if (config->num_bits % 8)
-    config->num_bytes += 1;
-
-  config->cidr_len_ipv4 = 32;
-  config->cidr_len_ipv6 = 64;
-  config->secret = xstrdup("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
-  config->secret_len = strlen(config->secret);
-  config->suffix = xstrdup("irc");
-  config->suffix_len = strlen(config->suffix);
+  cloak_set_enabled();
+  cloak_set_num_bits(80);
+  cloak_set_cidr_len_ipv4(32);
+  cloak_set_cidr_len_ipv4(64); 
+  cloak_set_secret("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
+  cloak_set_suffix("irc");
 }
 
 /**

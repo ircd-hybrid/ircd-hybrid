@@ -48,6 +48,19 @@
 static dlink_list hook_container_list;
 
 /**
+ * @brief Retrieves the list of hook containers.
+ *
+ * This function returns a pointer to the list of hook containers.
+ *
+ * @return Pointer to the list of hook containers.
+ */
+const dlink_list *
+hook_container_get_list(void)
+{
+  return &hook_container_list;
+}
+
+/**
  * @brief Registers a new callback with a hook container.
  *
  * @param name Name used to identify the callback (can be NULL for anonymous callbacks).

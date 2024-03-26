@@ -69,6 +69,7 @@ struct HookContainer
   uintmax_t last;  /**< Timestamp of the last time the hook was called. */
 };
 
+extern const dlink_list *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *, HCFUNC *);
 extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);

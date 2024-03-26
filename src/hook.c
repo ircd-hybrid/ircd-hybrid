@@ -195,7 +195,11 @@ hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert_pos
     case HOOK_INSERT_FIRST:
       dlinkAdd(hook, node, &container->chain);
       break;
+    case HOOK_INSERT_LAST:
+      dlinkAddTail(hook, node, &container->chain);
+      break;
     case HOOK_INSERT_MIDDLE:
+    default:
     {
       unsigned int length = dlink_list_length(&container->chain);
       if (length == 0)
@@ -210,15 +214,7 @@ hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert_pos
 
         dlinkAddAfter(hook, node, middle, &container->chain);
       }
-
-      break;
     }
-
-    case HOOK_INSERT_LAST:
-      dlinkAddTail(hook, node, &container->chain);
-      break;
-    default:
-      dlinkAdd(hook, node, &container->chain);
   }
 
   return node;

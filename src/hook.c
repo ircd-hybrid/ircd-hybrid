@@ -177,19 +177,50 @@ hook_container_find(const char *name)
  * @brief Installs a new hook into a hook container.
  *
  * This function installs a new hook into the specified hook container.
- * The new hook is added at the beginning of the chain, allowing it full
- * control over functions installed earlier.
+ * The new hook is added at the specified position in the chain, allowing
+ * for flexible control over the hook's placement.
  *
  * @param container Pointer to the HookContainer structure.
  * @param hook Address of the hook function.
+ * @param position Position to insert the hook in the chain.
  * @return dlink_node* Pointer to the dlink_node of the installed hook.
  */
 dlink_node *
-hook_install(struct HookContainer *container, HCFUNC *hook)
+hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert_position position)
 {
   dlink_node *node = xcalloc(sizeof(*node));
 
-  dlinkAdd(hook, node, &container->chain);
+  switch (position)
+  {
+    case HOOK_INSERT_FIRST:
+      dlinkAdd(hook, node, &container->chain);
+      break;
+    case HOOK_INSERT_MIDDLE:
+    {
+      unsigned int length = dlink_list_length(&container->chain);
+      if (length == 0)
+        /* If the chain is empty, insert at the beginning. */
+        dlinkAdd(hook, node, &container->chain);
+      else
+      {
+        /* Find the middle node. */
+        dlink_node *middle = container->chain.head;
+        for (unsigned int i = 0; i < length / 2; i++)
+          middle = middle->next;
+
+        dlinkAddAfter(hook, node, middle, &container->chain);
+      }
+
+      break;
+    }
+
+    case HOOK_INSERT_LAST:
+      dlinkAddTail(hook, node, &container->chain);
+      break;
+    default:
+      dlinkAdd(hook, node, &container->chain);
+  }
+
   return node;
 }
 

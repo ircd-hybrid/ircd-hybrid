@@ -32,6 +32,20 @@
 #define INCLUDED_hook_h
 
 /**
+ * @enum hook_insert_position
+ * @brief Enum for specifying the position for inserting hooks in a hook chain.
+ *
+ * This enum provides options for specifying where a new hook should be inserted
+ * in a hook chain relative to existing hooks.
+ */
+enum hook_insert_position
+{
+  HOOK_INSERT_FIRST,  /**< Insert the hook at the beginning of the chain. */
+  HOOK_INSERT_MIDDLE,  /**< Insert the hook after the middle hook in the chain (if applicable). */
+  HOOK_INSERT_LAST,  /**< Insert the hook at the end of the chain. */
+};
+
+/**
  * @typedef HCFUNC
  * @brief Typedef for function pointers used as hook callbacks.
  * @param va_list Argument list passed to the hook function.
@@ -58,7 +72,7 @@ struct HookContainer
 extern struct HookContainer *hook_container_register(const char *, HCFUNC *);
 extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);
-extern dlink_node *hook_install(struct HookContainer *, HCFUNC *);
+extern dlink_node *hook_install(struct HookContainer *, HCFUNC *, enum hook_insert_position);
 extern void hook_uninstall(struct HookContainer *, HCFUNC *);
 extern void *hook_advance_to_next(dlink_node *, ...);
 #endif  /* INCLUDED_hook_h */

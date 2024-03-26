@@ -45,6 +45,7 @@ ircd_SOURCES = auth.c            \
                extban_usermode.c \
                fdlist.c          \
                hash.c            \
+               hook.c            \
                hostmask.c        \
                id.c              \
                ipcache.c         \

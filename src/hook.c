@@ -199,7 +199,7 @@ hook_container_find(const char *name)
  * @return dlink_node* Pointer to the dlink_node of the installed hook.
  */
 dlink_node *
-hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert_position position)
+hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert position)
 {
   dlink_node *node = xcalloc(sizeof(*node));
 

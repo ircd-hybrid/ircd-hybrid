@@ -32,19 +32,19 @@
 #define INCLUDED_id_h
 
 /**
- * @enum IRC_MAXSID
+ * @var IRC_MAXSID
  * @brief Maximum length of SID (Server ID).
  */
 enum { IRC_MAXSID = 3 };
 
 /**
- * @enum IRC_MAXUID
+ * @var IRC_MAXUID
  * @brief Maximum length of UID (User ID).
  */
 enum { IRC_MAXUID = 6 };
 
 /**
- * @enum TOTALSIDUID
+ * @var TOTALSIDUID
  * @brief Total length of SID and UID combined.
  */
 enum { TOTALSIDUID = IRC_MAXSID + IRC_MAXUID };

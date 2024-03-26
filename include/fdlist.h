@@ -35,7 +35,7 @@
 #include "tls.h"
 
 /**
- * @enum FD_DESC_SIZE
+ * @var FD_DESC_SIZE
  * @brief Size of the file descriptor description buffer.
  */
 enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */

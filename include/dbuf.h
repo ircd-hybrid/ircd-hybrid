@@ -47,7 +47,7 @@
 #define dbuf_clear(x) dbuf_delete(x, dbuf_length(x))
 
 /**
- * @enum DBUF_BLOCK_SIZE
+ * @var DBUF_BLOCK_SIZE
  * @brief Size of each data block within the dynamic buffer.
  */
 enum { DBUF_BLOCK_SIZE = 1024 };

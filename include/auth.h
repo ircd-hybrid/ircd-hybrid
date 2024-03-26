@@ -31,7 +31,7 @@
 #define INCLUDED_auth_h
 
 /**
- * @enum RFC1413_BUFSIZE
+ * @var RFC1413_BUFSIZE
  * @brief Maximum buffer size for RFC 1413 ident replies.
  *
  * The RFC1413_BUFSIZE constant represents the maximum buffer size, in bytes, that is
@@ -42,7 +42,7 @@
 enum { RFC1413_BUFSIZE = 512 };
 
 /**
- * @enum RFC1413_PORTNUM
+ * @var RFC1413_PORTNUM
  * @brief Port number for the (Ident) server.
  *
  * The RFC1413_PORTNUM constant represents the TCP port number (113) on which the

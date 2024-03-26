@@ -90,6 +90,36 @@ dlinkAdd(void *data, dlink_node *m, dlink_list *list)
 }
 
 /**
+ * @brief Adds a node after a specified node in a double-linked list.
+ *
+ * This function adds a node containing the specified data after the specified
+ * node in the double-linked list.
+ *
+ * @param data Pointer to the data to be stored in the new node.
+ * @param m Pointer to the node to be added after.
+ * @param n Pointer to the node after which the new node will be added.
+ * @param list Pointer to the double-linked list.
+ */
+void
+dlinkAddAfter(void *data, dlink_node *m, dlink_node *n, dlink_list *list)
+{
+  m->data = data;
+  m->prev = n;
+  m->next = n->next;
+
+  if (n->next)
+    n->next->prev = m;
+  else
+  {
+    assert(list->tail == n);
+    list->tail = m;
+  }
+
+  n->next = m;
+  list->length++;
+}
+
+/**
  * @brief Adds a node before a specified node in a double-linked list.
  *
  * This function adds a node containing the specified data before the specified

@@ -101,6 +101,7 @@ typedef struct _dlink_list
 
 extern void free_dlink_node(dlink_node *);
 extern void dlinkAdd(void *, dlink_node *, dlink_list *);
+extern void dlinkAddAfter(void *, dlink_node *, dlink_node *, dlink_list *);
 extern void dlinkAddBefore(dlink_node *, void *, dlink_node *, dlink_list *);
 extern void dlinkAddTail(void *, dlink_node *, dlink_list *);
 extern void dlinkDelete(dlink_node *, dlink_list *);

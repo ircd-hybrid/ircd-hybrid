@@ -32,7 +32,6 @@
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
 
-#include "ircd_defs.h"
 #include "config.h"
 #include "event.h"
 

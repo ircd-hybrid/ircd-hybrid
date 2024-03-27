@@ -1040,6 +1040,7 @@ conf_error_report(const char *msg)
 static intmax_t
 valid_aline_time(const char *data)
 {
+  static const unsigned int max_aline_time = 24*60*360;
   const unsigned char *p = (const unsigned char *)data;
   unsigned char tmpch = '\0';
   intmax_t result = 0;
@@ -1053,8 +1054,8 @@ valid_aline_time(const char *data)
     result += (tmpch & 0xF);
   }
 
-  if (result > MAX_TDKLINE_TIME)
-    result = MAX_TDKLINE_TIME;
+  if (result > max_aline_time)
+    result = max_aline_time;
 
   result = result * 60;  /* Turn it into seconds */
 

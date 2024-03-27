@@ -75,7 +75,6 @@
  */
 
 #define HYBRID_SOMAXCONN 25
-#define MAX_TDKLINE_TIME  (24*60*360)
 
 /* tests show that about 7 fds are not registered by fdlist.c, these
  * include std* descriptors + some others (by OpenSSL etc.). Note this is

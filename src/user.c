@@ -419,7 +419,7 @@ register_local_user(struct Client *client)
 
     if (!(Count.max_loc % 10))
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "New maximum local client connections: %u",
+                           "New peak in local client connections: %u",
                            Count.max_loc);
   }
 

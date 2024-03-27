@@ -32,7 +32,7 @@
 
 #ifndef INCLUDED_cloak_h
 #define INCLUDED_cloak_h
-#include "stdinc.h"
+
 #include "ircd_defs.h"
 
 extern void cloak_set_enabled(void);

@@ -31,8 +31,6 @@
 #include "tls.h"
 
 
-enum { CLEANUP_TKLINES_TIME = 60 };
-
 enum maskitem_type
 {
   CONF_CLIENT = 1,

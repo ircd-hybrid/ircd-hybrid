@@ -194,7 +194,7 @@ static struct event event_cleanup_tklines =
 {
   .name = "cleanup_tklines",
   .handler = cleanup_tklines,
-  .when = CLEANUP_TKLINES_TIME
+  .when = 30
 };
 
 static struct event event_try_connections =
@@ -215,7 +215,7 @@ static struct event event_save_all_databases =
 {
   .name = "save_all_databases",
   .handler = save_all_databases,
-  .when = DATABASE_UPDATE_TIMEOUT
+  .when = 300
 };
 
 struct event event_write_links_file =

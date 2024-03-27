@@ -27,7 +27,6 @@
 #ifndef INCLUDED_conf_db_h
 #define INCLUDED_conf_db_h
 
-enum { DATABASE_UPDATE_TIMEOUT = 300 };
 enum { KLINE_DB_VERSION = 1 };
 
 struct dbFILE

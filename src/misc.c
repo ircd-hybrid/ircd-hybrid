@@ -42,7 +42,7 @@
 const char *
 date(uintmax_t lclock)
 {
-  static char buf[80];
+  static char buf[64];
   static uintmax_t lclock_last;
 
   if (lclock == 0)
@@ -70,7 +70,7 @@ date(uintmax_t lclock)
 const char *
 date_iso8601(uintmax_t lclock)
 {
-  static char buf[MAX_DATE_STRING];
+  static char buf[64];
   static uintmax_t lclock_last;
 
   if (lclock == 0)
@@ -98,7 +98,7 @@ date_iso8601(uintmax_t lclock)
 const char *
 date_iso8601_usec(uintmax_t unused)
 {
-  static char buf[MAX_DATE_STRING];
+  static char buf[64];
   struct timeval tv;
 
   gettimeofday(&tv, NULL);
@@ -129,7 +129,7 @@ date_iso8601_usec(uintmax_t unused)
 const char *
 date_ctime(uintmax_t lclock)
 {
-  static char buf[MAX_DATE_STRING];
+  static char buf[64];
   static uintmax_t lclock_last;
 
   if (lclock == 0)

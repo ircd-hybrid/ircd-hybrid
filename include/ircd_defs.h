@@ -57,8 +57,6 @@
 #define AWAYLEN         180  /**< Maximum size of an away message. */
 #define KEYLEN          23  /**< Maximum size of a channel key. */
 
-#define MAX_DATE_STRING 32  /**< Maximum string length for a date string. */
-
 /** @} */
 
 /**

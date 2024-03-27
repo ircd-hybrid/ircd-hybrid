@@ -33,14 +33,14 @@
 #include "memory.h"
 
 /**
- * @def OPTCHAR
+ * @var OPTCHAR
  * @brief Character used to denote command-line options.
  *
- * This macro defines the character used to denote command-line options. In this
+ * This variable defines the character used to denote command-line options. In this
  * context, options are command-line arguments preceded by a specific character,
  * typically a hyphen (-).
  */
-#define OPTCHAR '-'
+static const unsigned char OPTCHAR = '-';
 
 /**
  * @brief Display usage information for the program.

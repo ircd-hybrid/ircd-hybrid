@@ -47,7 +47,7 @@
 static void
 oper_up(struct Client *source_p, const struct MaskItem *conf)
 {
-  const unsigned int old = source_p->umodes;
+  const unsigned int oldmodes = source_p->umodes;
 
   ++Count.oper;
   SetOper(source_p);
@@ -57,7 +57,7 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
   else if (ConfigGeneral.oper_umodes)
     AddUMode(source_p, ConfigGeneral.oper_umodes);
 
-  if (!(old & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
 
   assert(dlinkFind(&oper_list, source_p) == NULL);
@@ -84,7 +84,7 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));
 
-  send_umode_out(source_p, old);
+  send_umode(source_p, true, true, oldmodes);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 

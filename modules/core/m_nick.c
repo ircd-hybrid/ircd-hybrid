@@ -227,11 +227,10 @@ change_local_nick(struct Client *source_p, const char *nick)
 
     if (HasUMode(source_p, UMODE_REGISTERED))
     {
-      unsigned int oldmodes = source_p->umodes;
-      char buf[UMODE_MAX_STR] = "";
-
+      const unsigned int oldmodes = source_p->umodes;
       DelUMode(source_p, UMODE_REGISTERED);
-      send_umode(source_p, true, oldmodes, buf);
+
+      send_umode(source_p, oldmodes, true, false);
     }
   }
 

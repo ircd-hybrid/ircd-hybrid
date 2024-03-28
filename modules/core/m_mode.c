@@ -55,7 +55,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
   const char *cloak = NULL;
   const struct user_modes *tab = NULL;
-  const unsigned int setmodes = source_p->umodes;
+  const unsigned int oldmodes = source_p->umodes;
   bool badmode = false;
   int what = MODE_ADD;
 
@@ -194,16 +194,16 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
     DelUMode(source_p, UMODE_ADMIN);
   }
 
-  if (!(setmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
     ++Count.invisi;
-  else if ((setmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+  else if ((oldmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
     --Count.invisi;
 
   /*
    * Compare new modes with old modes and send string which will cause
    * servers to update correctly.
    */
-  send_umode_out(source_p, setmodes);
+  send_umode(source_p, oldmodes, MyConnect(source_p), true);
 }
 
 /*! \brief MODE command handler

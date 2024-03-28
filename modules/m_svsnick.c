@@ -116,10 +116,9 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   if (HasUMode(target_p, UMODE_REGISTERED))
   {
     const unsigned int oldmodes = target_p->umodes;
-    char buf[UMODE_MAX_STR] = "";
-
     DelUMode(target_p, UMODE_REGISTERED);
-    send_umode(target_p, true, oldmodes, buf);
+
+    send_umode(target_p, oldmodes, true, false);
   }
 
   sendto_common_channels_local(target_p, true, 0, 0, ":%s!%s@%s NICK :%s",

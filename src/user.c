@@ -201,22 +201,14 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 static void
 introduce_client(struct Client *client)
 {
-  char buf[UMODE_MAX_STR] = "";
-
-  send_umode(client, MyConnect(client), 0, buf);
+  send_umode(client, MyConnect(client), false, 0);
   monitor_signon(client);
-
-  if (buf[0] == '\0')
-  {
-    buf[0] = '+';
-    buf[1] = '\0';
-  }
 
   sendto_server(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                 client->servptr->id, client->name, client->hopcount + 1,
-                client->tsinfo, buf, client->username, client->host,
-                client->realhost, client->sockhost, client->id,
-                client->account, client->info);
+                client->tsinfo, user_get_mode_str(client->umodes),
+                client->username, client->host, client->realhost,
+                client->sockhost, client->id, client->account, client->info);
 
   if (!EmptyString(client->tls_certfp))
     sendto_server(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
@@ -599,11 +591,14 @@ valid_nickname(const char *nickname, bool local)
  * \param client  Pointer to client
  * \param send    Whether to send a MODE message to client
  * \param old     Old user mode to compare against when building new mode buffer
- * \param buf     Pointer to buffer to build string in
  */
 void
-send_umode(struct Client *client, bool send, unsigned int old, char *buf)
+send_umode(struct Client *client, unsigned int old, bool send_client, bool send_server)
 {
+  if (client->umodes == old)
+    return;
+
+  char buf[UMODE_MAX_STR];
   char *m = buf;
   int what = MODE_QUERY;
 
@@ -638,27 +633,13 @@ send_umode(struct Client *client, bool send, unsigned int old, char *buf)
   }
 
   *m = '\0';
+  assert(*m != '\0');
 
-  if (send && *buf)
+  if (send_client)
     sendto_one(client, ":%s!%s@%s MODE %s :%s",
                client->name, client->username,
                client->host, client->name, buf);
-}
-
-/* send_umode_out()
- *
- * inputs	-
- * output	- NONE
- * side effects - Only send ubuf out to servers that know about this client
- */
-void
-send_umode_out(struct Client *client, unsigned int old)
-{
-  char buf[UMODE_MAX_STR] = "";
-
-  send_umode(client, MyConnect(client), old, buf);
-
-  if (buf[0])
+  if (send_server)
     sendto_server(client, 0, 0, ":%s MODE %s :%s",
                   client->id, client->id, buf);
 }

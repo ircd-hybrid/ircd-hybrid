@@ -44,8 +44,7 @@ extern const struct user_modes *umode_map[];
 extern const struct user_modes  umode_tab[];
 
 extern void user_modes_init(void);
-extern void send_umode(struct Client *, bool, unsigned int, char *);
-extern void send_umode_out(struct Client *, unsigned int);
+extern void send_umode(struct Client *, unsigned int, bool, bool);
 extern void show_lusers(struct Client *);
 
 extern void register_local_user(struct Client *);

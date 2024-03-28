@@ -70,7 +70,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   if (ts && (ts != target_p->tsinfo))
     return;
 
-  const unsigned int setmodes = target_p->umodes;
+  const unsigned int oldmodes = target_p->umodes;
 
   for (const char *m = modes; *m; ++m)
   {
@@ -141,12 +141,8 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
                 source_p->id,
                 target_p->id, target_p->tsinfo, modes);
 
-  if (MyConnect(target_p) && (setmodes != target_p->umodes))
-  {
-    char buf[UMODE_MAX_STR] = "";
-
-    send_umode(target_p, true, setmodes, buf);
-  }
+  if (MyConnect(target_p))
+    send_umode(target_p, oldmodes, true, false);
 }
 
 static struct Message svsmode_msgtab =

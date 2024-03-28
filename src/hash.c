@@ -545,14 +545,21 @@ list_one_channel(struct Client *client, struct Channel *channel)
       !(HasUMode(client, UMODE_ADMIN) || member_find_link(client, channel)))
     return;
 
+  /* Check the number of users in the channel */
   if (dlink_list_length(&channel->members) < lt->users_min ||
-      dlink_list_length(&channel->members) > lt->users_max ||
-      (channel->creation_time != 0 &&
-       ((unsigned int)channel->creation_time < lt->created_min ||
-        (unsigned int)channel->creation_time > lt->created_max)) ||
-      (unsigned int)channel->topic_time < lt->topicts_min ||
-      (channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX) >
-      lt->topicts_max)
+      dlink_list_length(&channel->members) > lt->users_max)
+    return;
+
+  /* Check the creation time of the channel */
+  if (channel->creation_time &&
+      ((unsigned int)channel->creation_time < lt->created_min ||
+       (unsigned int)channel->creation_time > lt->created_max))
+    return;
+
+  /* Check the topic time of the channel */
+  if ((unsigned int)channel->topic_time < lt->topicts_min ||
+    /* If channel->topic_time is zero, treat it as UINT_MAX to ensure it is considered greater than lt->topicts_max */
+      (channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX) > lt->topicts_max)
     return;
 
   if (lt->topic[0] && match(lt->topic, channel->topic))

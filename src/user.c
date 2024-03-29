@@ -201,7 +201,6 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 static void
 introduce_client(struct Client *client)
 {
-  send_umode(client, MyConnect(client), false, 0);
   monitor_signon(client);
 
   sendto_server(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
@@ -436,6 +435,7 @@ register_local_user(struct Client *client)
     }
   }
 
+  send_umode(client, true, false, 0);
   introduce_client(client);
 }
 

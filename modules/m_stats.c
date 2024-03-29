@@ -268,7 +268,7 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
     if (IsConfAllowAutoConn(conf))
       *p++ = 'A';
     if (IsConfTLS(conf))
-      *p++ = 'S';
+      *p++ = 'T';
     if (p == buf)
       *p++ = '*';
 

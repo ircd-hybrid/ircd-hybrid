@@ -69,13 +69,6 @@
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
 
-/*
- * This file is included to supply default values for things which
- * are now configurable at runtime.
- */
-
-#define HYBRID_SOMAXCONN 25
-
 /* tests show that about 7 fds are not registered by fdlist.c, these
  * include std* descriptors + some others (by OpenSSL etc.). Note this is
  * intentionally too high, we don't want to eat fds up to the last one */

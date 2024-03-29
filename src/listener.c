@@ -176,19 +176,16 @@ listener_accept_connection(fde_t *F, void *data)
                  listener, 0);
 }
 
-
-/*
- * inetport - create a listener socket in the AF_INET or AF_INET6 domain,
- * bind it to the port given in 'port' and listen to it
- * returns true (1) if successful false (0) on error.
+/**
+ * @var LISTEN_BACKLOG
+ * @brief Enumeration for the backlog argument in the listen() function.
  *
- * If the operating system has a define for SOMAXCONN, use it, otherwise
- * use HYBRID_SOMAXCONN
+ * This enum specifies the maximum length of the queue of pending connections
+ * that the listen() function can handle. When a connection request arrives
+ * and the queue is full, the request may be refused, depending on the system's
+ * behavior.
  */
-#ifdef SOMAXCONN
-#undef HYBRID_SOMAXCONN
-#define HYBRID_SOMAXCONN SOMAXCONN
-#endif
+enum { LISTEN_BACKLOG = 128 };
 
 static bool
 listener_finalize(struct Listener *listener)
@@ -252,7 +249,7 @@ listener_finalize(struct Listener *listener)
     return false;
   }
 
-  if (listen(fd, HYBRID_SOMAXCONN))
+  if (listen(fd, LISTEN_BACKLOG))
   {
     report_error(L_ALL, "listen failed for %s:%s",
                  listener_get_name(listener), errno);

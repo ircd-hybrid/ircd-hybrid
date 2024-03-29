@@ -239,6 +239,10 @@ user_welcome(struct Client *client)
     client->tls_cipher = xstrdup(tls_get_cipher(&client->connection->fd->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
+
+    if (!EmptyString(client->tls_certfp))
+      sendto_one_notice(client, &me, ":*** Your client certificate fingerprint is %s",
+                        client->tls_certfp);
   }
 
   sendto_one_numeric(client, &me, RPL_WELCOME, ConfigServerInfo.network_name,

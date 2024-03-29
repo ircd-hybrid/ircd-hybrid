@@ -350,8 +350,6 @@ parse(struct Client *client, char *buffer, char *buffer_end)
       return;
     }
 
-    assert(message->cmd);
-
     paramcount = message->handlers[from->from->handler].args_max;
 
     size_t length = buffer_end - ((s) ? s : ch);

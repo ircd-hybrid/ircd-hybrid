@@ -84,7 +84,7 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source_p));
 
-  send_umode(source_p, true, true, oldmodes);
+  send_umode(source_p, oldmodes, true, true);
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 

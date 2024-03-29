@@ -633,7 +633,7 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
   }
 
   *m = '\0';
-  assert(*m != '\0');
+  assert(buf[0] != '\0');
 
   if (send_client)
     sendto_one(client, ":%s!%s@%s MODE %s :%s",

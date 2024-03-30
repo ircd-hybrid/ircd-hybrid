@@ -599,6 +599,10 @@ valid_nickname(const char *nickname, bool local)
 void
 send_umode(struct Client *client, unsigned int old, bool send_client, bool send_server)
 {
+  /*
+   * If the client's current user modes match the old modes, indicating no change,
+   * simply return without further processing.
+   */
   if (client->umodes == old)
     return;
 
@@ -607,8 +611,8 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
   int what = MODE_QUERY;
 
   /*
-   * Build a string in umode_buf to represent the change in the user's
-   * mode between the new (client->umodes) and 'old'.
+   * Construct a string in the 'buf' array to represent the modifications in the user's mode
+   * between the current modes (client->umodes) and the provided 'old' modes.
    */
   for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
   {

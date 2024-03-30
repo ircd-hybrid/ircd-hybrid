@@ -72,14 +72,16 @@
  */
 enum { MAXPTRLEN = 32 };
 
-static struct CommandTree
+struct CommandTree
 {
   int links; /* Count of all pointers (including command) at this node
               * used as reference count for deletion of _this_ node.
               */
   struct Command *command;
   struct CommandTree *pointers[MAXPTRLEN];
-} command_tree;
+};
+
+static struct CommandTree command_tree;
 
 /* add_msg_element()
  *

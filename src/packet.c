@@ -57,7 +57,7 @@ static char readBuf[READBUF_SIZE];
  *      necessary fields (buffer etc..)
  */
 static void
-client_dopacket(struct Client *client, char *buffer, unsigned int length)
+client_dopacket(struct Client *client, char *buffer, size_t length)
 {
   /* Update messages received */
   ++me.connection->recv.messages;

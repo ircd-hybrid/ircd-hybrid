@@ -148,7 +148,7 @@ parse_client_queued(struct Client *client)
       if (i >= MAX_FLOOD)
         return;
 
-      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
+      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         return;
 
@@ -171,7 +171,7 @@ parse_client_queued(struct Client *client)
       if (IsDefunct(client))
         return;
 
-      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
+      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         return;
 
@@ -216,7 +216,7 @@ parse_client_queued(struct Client *client)
           (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
-      size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
+      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
       if (dolen == 0)
         return;
 

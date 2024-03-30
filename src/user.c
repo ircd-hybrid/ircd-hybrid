@@ -439,7 +439,7 @@ register_local_user(struct Client *client)
     }
   }
 
-  send_umode(client, true, false, 0);
+  send_umode(client, 0, true, false);
   introduce_client(client);
 }
 

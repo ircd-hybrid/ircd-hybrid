@@ -17,6 +17,7 @@ ircd_SOURCES = auth.c            \
                client.c          \
                client_svstag.c   \
                cloak.c           \
+               command.c         \
                conf.c            \
                conf_class.c      \
                conf_cluster.c    \

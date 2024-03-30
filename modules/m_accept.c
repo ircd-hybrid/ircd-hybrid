@@ -43,7 +43,7 @@
  * \param source_p The actual Client the list will be sent to.
  */
 static void
-list_accepts(struct Client *source_p)
+accept_list(struct Client *source_p)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
@@ -101,7 +101,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
   if (EmptyString(mask) || strcmp(mask, "*") == 0)
   {
-    list_accepts(source_p);
+    accept_list(source_p);
     return;
   }
 
@@ -159,7 +159,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
       }
 
       accept_add(nick, user, host, &source_p->connection->acceptlist);
-      list_accepts(source_p);
+      accept_list(source_p);
     }
   }
 }

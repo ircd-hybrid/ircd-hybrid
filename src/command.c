@@ -102,7 +102,7 @@ static struct CommandTree
  * in the parent.
  */
 static void
-command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *name)
+command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *const name)
 {
   if (*name == '\0')
   {
@@ -154,7 +154,7 @@ command_tree_add_element(struct CommandTree *tree, struct Command *command, cons
  * Thus, we continue to go back up removing all unused CommandTree(s)
  */
 static void
-command_tree_del_element(struct CommandTree *tree, const char *name)
+command_tree_del_element(struct CommandTree *tree, const char *const name)
 {
   /*
    * In case this is called for a nonexistent command

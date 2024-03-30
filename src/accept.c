@@ -39,6 +39,28 @@
  * Diane Bruce, "Dianora" db@db.net
  */
 
+/*! \brief Allocates and adds a struct AccepItem holding a nick!user\@host
+ *         mask to a Client's acceptlist.
+ *
+ * \param nick nick portion of the nick!user\@host mask.
+ * \param user user portion of the nick!user\@host mask.
+ * \param host host portion of the nick!user\@host mask.
+ * \param source_p The actual Client the new accept is added to.
+ */
+void
+accept_add(const char *nick,
+           const char *user,
+           const char *host, dlink_list *list)
+{
+  struct AcceptItem *accept = xcalloc(sizeof(*accept));
+
+  accept->nick = xstrdup(nick);
+  accept->user = xstrdup(user);
+  accept->host = xstrdup(host);
+
+  dlinkAdd(accept, &accept->node, list);
+}
+
 void
 accept_del(struct AcceptItem *accept, dlink_list *list)
 {

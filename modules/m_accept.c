@@ -78,30 +78,6 @@ list_accepts(struct Client *source_p)
   sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);
 }
 
-/*! \brief Allocates and adds a struct AccepItem holding a nick!user\@host
- *         mask to a Client's acceptlist.
- *
- * \param nick nick portion of the nick!user\@host mask.
- * \param user user portion of the nick!user\@host mask.
- * \param host host portion of the nick!user\@host mask.
- * \param source_p The actual Client the new accept is added to.
- */
-static void
-accept_add(const char *nick,
-           const char *user,
-           const char *host, struct Client *source_p)
-{
-  struct AcceptItem *accept = xcalloc(sizeof(*accept));
-
-  accept->nick = xstrdup(nick);
-  accept->user = xstrdup(user);
-  accept->host = xstrdup(host);
-
-  dlinkAdd(accept, &accept->node, &source_p->connection->acceptlist);
-
-  list_accepts(source_p);
-}
-
 /*! \brief ACCEPT command handler
  *
  * \param source_p Pointer to allocated Client struct from which the message
@@ -182,7 +158,8 @@ m_accept(struct Client *source_p, int parc, char *parv[])
         continue;
       }
 
-      accept_add(nick, user, host, source_p);
+      accept_add(nick, user, host, &source_p->connection->acceptlist);
+      list_accepts(source_p);
     }
   }
 }

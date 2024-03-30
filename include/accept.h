@@ -32,6 +32,7 @@ struct AcceptItem
 
 extern bool accept_message(struct Client *, struct Client *);
 extern struct AcceptItem *accept_find(const char *, const char *, const char *, dlink_list *, int (*)(const char *, const char *));
+extern void accept_add(const char *, const char *, const char *, dlink_list *);
 extern void accept_del(struct AcceptItem *, dlink_list *);
 extern void accept_clear_list(dlink_list *);
 #endif  /* INCLUDED_accept_h */

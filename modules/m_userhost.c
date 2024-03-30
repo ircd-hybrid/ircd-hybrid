@@ -98,9 +98,9 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_USERHOST, buf);
 }
 
-static struct Message userhost_msgtab =
+static struct Command userhost_msgtab =
 {
-  .cmd = "USERHOST",
+  .name = "USERHOST",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -111,13 +111,13 @@ static struct Message userhost_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&userhost_msgtab);
+  command_add(&userhost_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&userhost_msgtab);
+  command_del(&userhost_msgtab);
 }
 
 struct module module_entry =

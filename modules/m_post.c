@@ -50,9 +50,9 @@ mr_dumb_proxy(struct Client *source_p, int parc, char *parv[])
   exit_client(source_p, "Client Exit");
 }
 
-static struct Message post_msgtab =
+static struct Command post_msgtab =
 {
-  .cmd = "POST",
+  .name = "POST",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -60,9 +60,9 @@ static struct Message post_msgtab =
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
-static struct Message get_msgtab =
+static struct Command get_msgtab =
 {
-  .cmd = "GET",
+  .name = "GET",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -70,9 +70,9 @@ static struct Message get_msgtab =
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
-static struct Message put_msgtab =
+static struct Command put_msgtab =
 {
-  .cmd = "PUT",
+  .name = "PUT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -83,17 +83,17 @@ static struct Message put_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&post_msgtab);
-  mod_add_cmd(&get_msgtab);
-  mod_add_cmd(&put_msgtab);
+  command_add(&post_msgtab);
+  command_add(&get_msgtab);
+  command_add(&put_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&post_msgtab);
-  mod_del_cmd(&get_msgtab);
-  mod_del_cmd(&put_msgtab);
+  command_del(&post_msgtab);
+  command_del(&get_msgtab);
+  command_del(&put_msgtab);
 }
 
 struct module module_entry =

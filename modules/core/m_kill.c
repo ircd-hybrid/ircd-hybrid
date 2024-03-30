@@ -236,9 +236,9 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
 }
 
 
-static struct Message kill_msgtab =
+static struct Command kill_msgtab =
 {
-  .cmd = "KILL",
+  .name = "KILL",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_kill, .args_min = 3 },
@@ -249,13 +249,13 @@ static struct Message kill_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&kill_msgtab);
+  command_add(&kill_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&kill_msgtab);
+  command_del(&kill_msgtab);
 }
 
 struct module module_entry =

@@ -89,9 +89,9 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
              target_p->id, ts, comment);
 }
 
-static struct Message svskill_msgtab =
+static struct Command svskill_msgtab =
 {
-  .cmd = "SVSKILL",
+  .name = "SVSKILL",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svskill, .args_min = 3 },
@@ -102,13 +102,13 @@ static struct Message svskill_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svskill_msgtab);
+  command_add(&svskill_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svskill_msgtab);
+  command_del(&svskill_msgtab);
 }
 
 struct module module_entry =

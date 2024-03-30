@@ -102,9 +102,9 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
                 channel->name, source_p->id);
 }
 
-static struct Message opme_msgtab =
+static struct Command opme_msgtab =
 {
-  .cmd = "OPME",
+  .name = "OPME",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -115,13 +115,13 @@ static struct Message opme_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&opme_msgtab);
+  command_add(&opme_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&opme_msgtab);
+  command_del(&opme_msgtab);
 }
 
 struct module module_entry =

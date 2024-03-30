@@ -82,9 +82,9 @@ ms_globops(struct Client *source_p, int parc, char *parv[])
                        source_p->name, message);
 }
 
-static struct Message globops_msgtab =
+static struct Command globops_msgtab =
 {
-  .cmd = "GLOBOPS",
+  .name = "GLOBOPS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_globops, .args_min = 2 },
@@ -95,13 +95,13 @@ static struct Message globops_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&globops_msgtab);
+  command_add(&globops_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&globops_msgtab);
+  command_del(&globops_msgtab);
 }
 
 struct module module_entry =

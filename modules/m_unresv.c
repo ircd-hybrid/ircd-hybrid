@@ -149,9 +149,9 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
     resv_remove(source_p, &aline);
 }
 
-static struct Message unresv_msgtab =
+static struct Command unresv_msgtab =
 {
-  .cmd = "UNRESV",
+  .name = "UNRESV",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_unresv, .args_min = 3 },
@@ -162,13 +162,13 @@ static struct Message unresv_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&unresv_msgtab);
+  command_add(&unresv_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&unresv_msgtab);
+  command_del(&unresv_msgtab);
 }
 
 struct module module_entry =

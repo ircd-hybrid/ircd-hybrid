@@ -108,9 +108,9 @@ ms_admin(struct Client *source_p, int parc, char *parv[])
   do_admin(source_p);
 }
 
-static struct Message admin_msgtab =
+static struct Command admin_msgtab =
 {
-  .cmd = "ADMIN",
+  .name = "ADMIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_admin },
   .handlers[SERVER_HANDLER] = { .handler = ms_admin },
@@ -121,13 +121,13 @@ static struct Message admin_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&admin_msgtab);
+  command_add(&admin_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&admin_msgtab);
+  command_del(&admin_msgtab);
 }
 
 struct module module_entry =

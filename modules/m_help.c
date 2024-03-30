@@ -153,9 +153,9 @@ mo_help(struct Client *source_p, int parc, char *parv[])
   do_help(source_p, parv[1]);
 }
 
-static struct Message help_msgtab =
+static struct Command help_msgtab =
 {
-  .cmd = "HELP",
+  .name = "HELP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_help },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -166,13 +166,13 @@ static struct Message help_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&help_msgtab);
+  command_add(&help_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&help_msgtab);
+  command_del(&help_msgtab);
 }
 
 struct module module_entry =

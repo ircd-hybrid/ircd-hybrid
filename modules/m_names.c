@@ -64,9 +64,9 @@ m_names(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, RPL_ENDOFNAMES, "*");
 }
 
-static struct Message names_msgtab =
+static struct Command names_msgtab =
 {
-  .cmd = "NAMES",
+  .name = "NAMES",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_names },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -77,13 +77,13 @@ static struct Message names_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&names_msgtab);
+  command_add(&names_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&names_msgtab);
+  command_del(&names_msgtab);
 }
 
 struct module module_entry =

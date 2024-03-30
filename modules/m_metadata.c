@@ -85,9 +85,9 @@ ms_metadata(struct Client *source_p, int parc, char *parv[])
                   parv[1], parv[2], parv[3], parv[4]);
 }
 
-static struct Message metadata_msgtab =
+static struct Command metadata_msgtab =
 {
-  .cmd = "METADATA",
+  .name = "METADATA",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_metadata, .args_min = 4 },
@@ -98,13 +98,13 @@ static struct Message metadata_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&metadata_msgtab);
+  command_add(&metadata_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&metadata_msgtab);
+  command_del(&metadata_msgtab);
 }
 
 struct module module_entry =

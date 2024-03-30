@@ -182,9 +182,9 @@ mo_map(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_MAPEND);
 }
 
-static struct Message map_msgtab =
+static struct Command map_msgtab =
 {
-  .cmd = "MAP",
+  .name = "MAP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_map },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -195,13 +195,13 @@ static struct Message map_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&map_msgtab);
+  command_add(&map_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&map_msgtab);
+  command_del(&map_msgtab);
 }
 
 struct module module_entry =

@@ -216,9 +216,9 @@ mo_trace(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message trace_msgtab =
+static struct Command trace_msgtab =
 {
-  .cmd = "TRACE",
+  .name = "TRACE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_trace },
   .handlers[SERVER_HANDLER] = { .handler = mo_trace },
@@ -229,13 +229,13 @@ static struct Message trace_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&trace_msgtab);
+  command_add(&trace_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&trace_msgtab);
+  command_del(&trace_msgtab);
 }
 
 struct module module_entry =

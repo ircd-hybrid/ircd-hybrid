@@ -57,9 +57,9 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message capab_msgtab =
+static struct Command capab_msgtab =
 {
-  .cmd = "CAPAB",
+  .name = "CAPAB",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_capab, .args_min = 2 },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -70,13 +70,13 @@ static struct Message capab_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&capab_msgtab);
+  command_add(&capab_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&capab_msgtab);
+  command_del(&capab_msgtab);
 }
 
 struct module module_entry =

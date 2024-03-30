@@ -590,9 +590,9 @@ m_who(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, EmptyString(mask) ? "*" : mask);
 }
 
-static struct Message who_msgtab =
+static struct Command who_msgtab =
 {
-  .cmd = "WHO",
+  .name = "WHO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_who, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -603,14 +603,14 @@ static struct Message who_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&who_msgtab);
+  command_add(&who_msgtab);
   isupport_add("WHOX", NULL, -1);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&who_msgtab);
+  command_del(&who_msgtab);
   isupport_delete("WHOX");
 }
 

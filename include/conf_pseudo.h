@@ -41,7 +41,7 @@
 struct PseudoItem
 {
   dlink_node node;  /**< Node for linking into the pseudo command list. */
-  struct Message msg;  /**< Message structure for handling the pseudo command. */
+  struct Command msg;  /**< Message structure for handling the pseudo command. */
   char *name;  /**< Name of the pseudo command, used for error messages. */
   char *nick;  /**< Associated nick for the pseudo command. */
   char *server;  /**< Associated server for the pseudo command. */

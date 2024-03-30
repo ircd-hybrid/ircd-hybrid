@@ -70,13 +70,13 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   if (match(parv[1], me.name))
     return;
 
-  struct Message *message = find_command(parv[2]);
-  if (message == NULL)
+  struct Command *command = command_find(parv[2]);
+  if (command == NULL)
     return;
 
-  const struct MessageHandler *const handler = &message->handlers[ENCAP_HANDLER];
-  message->bytes += strlen(buf);
-  message->ecount++;
+  const struct CommandHandler *const handler = &command->handlers[ENCAP_HANDLER];
+  command->bytes += strlen(buf);
+  command->ecount++;
 
   parv += 2;
   parc -= 2;
@@ -89,9 +89,9 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   handler->handler(source_p, parc, parv);
 }
 
-static struct Message encap_msgtab =
+static struct Command encap_msgtab =
 {
-  .cmd = "ENCAP",
+  .name = "ENCAP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_encap, .args_min = 3 },
@@ -102,14 +102,14 @@ static struct Message encap_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&encap_msgtab);
+  command_add(&encap_msgtab);
   capab_add("ENCAP", CAPAB_ENCAP, true);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&encap_msgtab);
+  command_del(&encap_msgtab);
   capab_del("ENCAP");
 }
 

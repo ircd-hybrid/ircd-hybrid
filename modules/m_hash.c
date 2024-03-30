@@ -97,9 +97,9 @@ mo_hash(struct Client *source_p, int parc, char *parv[])
   do_hash(source_p, HASH_TYPE_CHANNEL);
 }
 
-static struct Message hash_msgtab =
+static struct Command hash_msgtab =
 {
-  .cmd = "HASH",
+  .name = "HASH",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -110,13 +110,13 @@ static struct Message hash_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&hash_msgtab);
+  command_add(&hash_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&hash_msgtab);
+  command_del(&hash_msgtab);
 }
 
 struct module module_entry =

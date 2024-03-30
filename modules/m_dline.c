@@ -237,9 +237,9 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
     dline_handle(source_p, &aline);
 }
 
-static struct Message dline_msgtab =
+static struct Command dline_msgtab =
 {
-  .cmd = "DLINE",
+  .name = "DLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_dline, .args_min = 5 },
@@ -250,14 +250,14 @@ static struct Message dline_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&dline_msgtab);
+  command_add(&dline_msgtab);
   capab_add("DLN", CAPAB_DLN, true);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&dline_msgtab);
+  command_del(&dline_msgtab);
   capab_del("DLN");
 }
 

@@ -161,9 +161,9 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
                          channel->name, channel->topic);
 }
 
-static struct Message topic_msgtab =
+static struct Command topic_msgtab =
 {
-  .cmd = "TOPIC",
+  .name = "TOPIC",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_topic, .args_min = 2, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_topic, .args_min = 3, .empty_last_arg = true },
@@ -174,13 +174,13 @@ static struct Message topic_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&topic_msgtab);
+  command_add(&topic_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&topic_msgtab);
+  command_del(&topic_msgtab);
 }
 
 struct module module_entry =

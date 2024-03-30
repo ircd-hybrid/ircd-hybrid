@@ -187,9 +187,9 @@ mo_oper(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
 }
 
-static struct Message oper_msgtab =
+static struct Command oper_msgtab =
 {
-  .cmd = "OPER",
+  .name = "OPER",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -200,13 +200,13 @@ static struct Message oper_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&oper_msgtab);
+  command_add(&oper_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&oper_msgtab);
+  command_del(&oper_msgtab);
 }
 
 struct module module_entry =

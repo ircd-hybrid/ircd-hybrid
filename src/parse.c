@@ -52,10 +52,10 @@
  *
  * so roughly you have this for matching 'trie' or 'tie'
  *
- * 't' points -> [MessageTree *] 'r' -> [MessageTree *] -> 'i'
- *   -> [MessageTree *] -> [MessageTree *] -> 'e' and matches
+ * 't' points -> [CommandTree *] 'r' -> [CommandTree *] -> 'i'
+ *   -> [CommandTree *] -> [CommandTree *] -> 'e' and matches
  *
- *                               'i' -> [MessageTree *] -> 'e' and matches
+ *                               'i' -> [CommandTree *] -> 'e' and matches
  *
  * BUGS (Limitations!)
  *
@@ -86,14 +86,14 @@
 enum { MAXPTRLEN = 32 };
 
 
-static struct MessageTree
+static struct CommandTree
 {
-  int links; /* Count of all pointers (including msg) at this node
+  int links; /* Count of all pointers (including command) at this node
               * used as reference count for deletion of _this_ node.
               */
-  struct Message *msg;
-  struct MessageTree *pointers[MAXPTRLEN];
-} msg_tree;
+  struct Command *command;
+  struct CommandTree *pointers[MAXPTRLEN];
+} command_tree;
 
 
 /* remove_unknown()
@@ -211,14 +211,14 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, int parc, char
  * side effects -
  */
 static void
-parse_handle_command(struct Message *message, struct Client *source,
+parse_handle_command(struct Command *command, struct Client *source,
                      unsigned int i, char *para[])
 {
-  const struct MessageHandler *const handler = &message->handlers[source->from->handler];
+  const struct CommandHandler *const handler = &command->handlers[source->from->handler];
 
   if (IsServer(source->from))
-    ++message->rcount;
-  ++message->count;
+    ++command->rcount;
+  ++command->count;
 
   if (handler->end_grace_period && MyClient(source))
     flood_endgrace(source);
@@ -227,7 +227,7 @@ parse_handle_command(struct Message *message, struct Client *source,
   if (handler->args_min &&
       ((i < handler->args_min) ||
        (handler->empty_last_arg != true && EmptyString(para[handler->args_min - 1]))))
-    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, message->cmd);
+    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
   else
     handler->handler(source, i, para);
 }
@@ -241,7 +241,7 @@ void
 parse(struct Client *client, char *buffer, char *buffer_end)
 {
   struct Client *from = client;
-  struct Message *message = NULL;
+  struct Command *command = NULL;
   char *para[MAXPARA + 2];  /* <command> + <parameters> + NULL */
   char *ch = buffer;
   char *s = NULL;
@@ -332,7 +332,7 @@ parse(struct Client *client, char *buffer, char *buffer_end)
     if ((s = strchr(ch, ' ')))
       *s++ = '\0';
 
-    if ((message = find_command(ch)) == NULL)
+    if ((command = command_find(ch)) == NULL)
     {
       /*
        * Note: Give error message *only* to recognized
@@ -350,21 +350,21 @@ parse(struct Client *client, char *buffer, char *buffer_end)
       return;
     }
 
-    paramcount = message->handlers[from->from->handler].args_max;
+    paramcount = command->handlers[from->from->handler].args_max;
 
     size_t length = buffer_end - ((s) ? s : ch);
-    message->bytes += length;
+    command->bytes += length;
   }
 
   memset(para, 0, sizeof(para));
   para[parc] = ch;
 
-  if (message && message->extra)
+  if (command && command->extra)
   {
     /*
      * XXX: This will have to go away after the command handler rewrite
      */
-    para[++parc] = message->extra;
+    para[++parc] = command->extra;
   }
 
   /*
@@ -407,15 +407,15 @@ parse(struct Client *client, char *buffer, char *buffer_end)
 
   para[++parc] = NULL;
 
-  if (message)
-    parse_handle_command(message, from, parc, para);
+  if (command)
+    parse_handle_command(command, from, parc, para);
   else
     parse_handle_numeric(numeric, from, parc, para);
 }
 
 /* add_msg_element()
  *
- * inputs	- pointer to MessageTree
+ * inputs	- pointer to CommandTree
  *		- pointer to Message to add for given command
  *		- pointer to current portion of command being added
  * output	- NONE
@@ -425,47 +425,46 @@ parse(struct Client *client, char *buffer, char *buffer_end)
  * How this works.
  *
  * The code first checks to see if its reached the end of the command
- * If so, that struct MessageTree has a msg pointer updated and the links
+ * If so, that struct CommandTree has a msg pointer updated and the links
  * count incremented, since a msg pointer is a reference.
  * Then the code descends recursively, building the trie.
- * If a pointer index inside the struct MessageTree is NULL a new
- * child struct MessageTree has to be allocated.
+ * If a pointer index inside the struct CommandTree is NULL a new
+ * child struct CommandTree has to be allocated.
  * The links (reference count) is incremented as they are created
  * in the parent.
  */
 static void
-add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
-                const char *cmd)
+command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *name)
 {
-  if (*cmd == '\0')
+  if (*name == '\0')
   {
-    mtree_p->msg = msg_p;
-    mtree_p->links++;  /* Have msg pointer, so up ref count */
+    tree->command = command;
+    tree->links++;  /* Have msg pointer, so up ref count */
   }
   else
   {
     /*
-     * *cmd & (MAXPTRLEN-1)
-     * convert the char pointed to at *cmd from ASCII to an integer
+     * *name & (MAXPTRLEN-1)
+     * convert the char pointed to at *name from ASCII to an integer
      * between 0 and MAXPTRLEN.
      * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
      */
-    struct MessageTree *ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)];
-    if (ntree_p == NULL)
+    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    if (current == NULL)
     {
-      ntree_p = xcalloc(sizeof(*ntree_p));
-      mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = ntree_p;
+      current = xcalloc(sizeof(*current));
+      tree->pointers[*name & (MAXPTRLEN - 1)] = current;
 
-      mtree_p->links++;  /* Have new pointer, so up ref count */
+      tree->links++;  /* Have new pointer, so up ref count */
     }
 
-    add_msg_element(ntree_p, msg_p, cmd + 1);
+    command_tree_add_element(current, command, name + 1);
   }
 }
 
 /* del_msg_element()
  *
- * inputs	- Pointer to MessageTree to delete from
+ * inputs	- Pointer to CommandTree to delete from
  *		- pointer to command name to delete
  * output	- NONE
  * side effects	- recursively deletes a token from the Message Tree ;-)
@@ -476,110 +475,110 @@ add_msg_element(struct MessageTree *mtree_p, struct Message *msg_p,
  * Well, first off, the code recursively descends into the trie
  * until it finds the terminating letter of the command being removed.
  * Once it has done that, it marks the msg pointer as NULL then
- * reduces the reference count on that allocated struct MessageTree
+ * reduces the reference count on that allocated struct CommandTree
  * since a command counts as a reference.
  *
  * Then it pops up the recurse stack. As it comes back up the recurse
  * The code checks to see if the child now has no pointers or msg
  * i.e. the links count has gone to zero. If it's no longer used, the
- * child struct MessageTree can be deleted. The parent reference
+ * child struct CommandTree can be deleted. The parent reference
  * to this child is then removed and the parents link count goes down.
- * Thus, we continue to go back up removing all unused MessageTree(s)
+ * Thus, we continue to go back up removing all unused CommandTree(s)
  */
 static void
-del_msg_element(struct MessageTree *mtree_p, const char *cmd)
+command_tree_del_element(struct CommandTree *tree, const char *name)
 {
   /*
    * In case this is called for a nonexistent command
-   * check that there is a msg pointer here, else links-- goes -ve
+   * check that there is a command pointer here, else links-- goes -ve
    * -db
    */
-  if (*cmd == '\0' && mtree_p->msg)
+  if (*name== '\0' && tree->command)
   {
-    mtree_p->msg = NULL;
-    mtree_p->links--;
+    tree->command = NULL;
+    tree->links--;
   }
   else
   {
-    struct MessageTree *ntree_p = mtree_p->pointers[*cmd & (MAXPTRLEN - 1)];
-    if (ntree_p)
+    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    if (current)
     {
-      del_msg_element(ntree_p, cmd + 1);
+      command_tree_del_element(current, name + 1);
 
-      if (ntree_p->links == 0)
+      if (current->links == 0)
       {
-        mtree_p->pointers[*cmd & (MAXPTRLEN - 1)] = NULL;
-        mtree_p->links--;
-        xfree(ntree_p);
+        tree->pointers[*name & (MAXPTRLEN - 1)] = NULL;
+        tree->links--;
+        xfree(current);
       }
     }
   }
 }
 
-/* msg_tree_parse()
+/* command_tree_parse()
  *
  * inputs	- Pointer to command to find
- *		- Pointer to MessageTree root
+ *		- Pointer to CommandTree root
  * output	- Find given command returning Message * if found NULL if not
  * side effects	- none
  */
-static struct Message *
-msg_tree_parse(const char *cmd)
+static struct Command *
+command_tree_parse(const char *name)
 {
-  struct MessageTree *mtree = &msg_tree;
+  struct CommandTree *tree = &command_tree;
 
-  assert(!EmptyString(cmd));
+  assert(!EmptyString(name));
 
-  while (IsAlpha(*cmd) && (mtree = mtree->pointers[*cmd & (MAXPTRLEN - 1)]))
-    if (*++cmd == '\0')
-      return mtree->msg;
+  while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
+    if (*++name == '\0')
+      return tree->command;
 
   return NULL;
 }
 
-/* mod_add_cmd()
+/* command_add()
  *
- * inputs	- pointer to struct Message
+ * inputs	- pointer to struct Command
  * output	- none
  * side effects - load this one command name
  */
 void
-mod_add_cmd(struct Message *msg)
+command_add(struct Command *command)
 {
-  assert(msg);
-  assert(msg->cmd);
+  assert(command);
+  assert(command->name);
 
   /* Command already added? */
-  if (msg_tree_parse(msg->cmd) == NULL)
-    add_msg_element(&msg_tree, msg, msg->cmd);
+  if (command_tree_parse(command->name) == NULL)
+    command_tree_add_element(&command_tree, command, command->name);
 }
 
-/* mod_del_cmd()
+/* command_del()
  *
- * inputs	- pointer to struct Message
+ * inputs	- pointer to struct Command
  * output	- none
  * side effects - unload this one command name
  */
 void
-mod_del_cmd(struct Message *msg)
+command_del(struct Command *command)
 {
-  assert(msg);
-  assert(msg->cmd);
+  assert(command);
+  assert(command->name);
 
-  if (msg_tree_parse(msg->cmd))
-    del_msg_element(&msg_tree, msg->cmd);
+  if (command_tree_parse(command->name))
+    command_tree_del_element(&command_tree, command->name);
 }
 
 /* find_command()
  *
  * inputs	- command name
- * output	- pointer to struct Message
+ * output	- pointer to struct Command
  * side effects - none
  */
-struct Message *
-find_command(const char *cmd)
+struct Command *
+command_find(const char *name)
 {
-  return msg_tree_parse(cmd);
+  return command_tree_parse(name);
 }
 
 /* report_messages()
@@ -589,32 +588,32 @@ find_command(const char *cmd)
  * side effects	- client is shown list of commands
  */
 void
-report_messages(struct Client *source)
+command_report(struct Client *source)
 {
-  const struct MessageTree *const mtree = &msg_tree;
-  const struct MessageTree *stack[MAXPTRLEN * MAXPTRLEN];
+  const struct CommandTree *const tree = &command_tree;
+  const struct CommandTree *stack[MAXPTRLEN * MAXPTRLEN];
   unsigned int top = 0;
 
   /* Initialize stack with the root node. */
-  stack[top++] = mtree;
+  stack[top++] = tree;
 
   while (top > 0)
   {
     /* Pop the top of the stack. */
-    const struct MessageTree *current = stack[--top];
+    const struct CommandTree *current = stack[--top];
 
-    if (current->msg)
+    if (current->command)
       sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
-                         current->msg->cmd,
-                         current->msg->count,
-                         current->msg->bytes,
-                         current->msg->rcount,
-                         current->msg->ecount);
+                         current->command->name,
+                         current->command->count,
+                         current->command->bytes,
+                         current->command->rcount,
+                         current->command->ecount);
 
     /* Push non-null pointers onto the stack in descending order. */
     for (int i = MAXPTRLEN - 1; i >= 0; --i)
     {
-      const struct MessageTree *ptr = current->pointers[i];
+      const struct CommandTree *ptr = current->pointers[i];
       if (ptr)
         stack[top++] = ptr;
     }

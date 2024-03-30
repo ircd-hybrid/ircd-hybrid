@@ -248,9 +248,9 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   channel_mode_set(source_p, channel, parc - 2, parv + 2);
 }
 
-static struct Message mode_msgtab =
+static struct Command mode_msgtab =
 {
-  .cmd = "MODE",
+  .name = "MODE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_mode, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = m_mode, .args_min = 2 },
@@ -261,13 +261,13 @@ static struct Message mode_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&mode_msgtab);
+  command_add(&mode_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&mode_msgtab);
+  command_del(&mode_msgtab);
 }
 
 struct module module_entry =

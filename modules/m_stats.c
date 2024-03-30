@@ -814,7 +814,7 @@ stats_messages(struct Client *source_p, int parc, char *parv[])
   if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
     sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
   else
-    report_messages(source_p);
+    command_report(source_p);
 }
 
 static void
@@ -1337,9 +1337,9 @@ stats_init(void)
     stats_map[tab->letter] = tab;
 }
 
-static struct Message stats_msgtab =
+static struct Command stats_msgtab =
 {
-  .cmd = "STATS",
+  .name = "STATS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_stats, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = ms_stats, .args_min = 3 },
@@ -1351,13 +1351,13 @@ static void
 module_init(void)
 {
   stats_init();
-  mod_add_cmd(&stats_msgtab);
+  command_add(&stats_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&stats_msgtab);
+  command_del(&stats_msgtab);
 }
 
 struct module module_entry =

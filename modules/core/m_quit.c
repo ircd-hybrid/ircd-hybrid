@@ -79,9 +79,9 @@ ms_quit(struct Client *source_p, int parc, char *parv[])
   exit_client(source_p, reason);
 }
 
-static struct Message quit_msgtab =
+static struct Command quit_msgtab =
 {
-  .cmd = "QUIT",
+  .name = "QUIT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_quit },
   .handlers[CLIENT_HANDLER] = { .handler = m_quit },
   .handlers[SERVER_HANDLER] = { .handler = ms_quit },
@@ -92,13 +92,13 @@ static struct Message quit_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&quit_msgtab);
+  command_add(&quit_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&quit_msgtab);
+  command_del(&quit_msgtab);
 }
 
 struct module module_entry =

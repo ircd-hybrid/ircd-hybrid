@@ -247,9 +247,9 @@ mo_module(struct Client *source_p, int parc, char *parv[])
                     subcmd);
 }
 
-static struct Message module_msgtab =
+static struct Command module_msgtab =
 {
-  .cmd = "MODULE",
+  .name = "MODULE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -260,13 +260,13 @@ static struct Message module_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&module_msgtab);
+  command_add(&module_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&module_msgtab);
+  command_del(&module_msgtab);
 }
 
 struct module module_entry =

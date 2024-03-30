@@ -102,9 +102,9 @@ ms_motd(struct Client *source_p, int parc, char *parv[])
   do_motd(source_p);
 }
 
-static struct Message motd_msgtab =
+static struct Command motd_msgtab =
 {
-  .cmd = "MOTD",
+  .name = "MOTD",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_motd },
   .handlers[SERVER_HANDLER] = { .handler = ms_motd },
@@ -115,13 +115,13 @@ static struct Message motd_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&motd_msgtab);
+  command_add(&motd_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&motd_msgtab);
+  command_del(&motd_msgtab);
 }
 
 struct module module_entry =

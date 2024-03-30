@@ -88,9 +88,9 @@ ms_lusers(struct Client *source_p, int parc, char *parv[])
   show_lusers(source_p);
 }
 
-static struct Message lusers_msgtab =
+static struct Command lusers_msgtab =
 {
-  .cmd = "LUSERS",
+  .name = "LUSERS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_lusers },
   .handlers[SERVER_HANDLER] = { .handler = ms_lusers },
@@ -101,13 +101,13 @@ static struct Message lusers_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&lusers_msgtab);
+  command_add(&lusers_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&lusers_msgtab);
+  command_del(&lusers_msgtab);
 }
 
 struct module module_entry =

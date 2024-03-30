@@ -110,9 +110,9 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message svinfo_msgtab =
+static struct Command svinfo_msgtab =
 {
-  .cmd = "SVINFO",
+  .name = "SVINFO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svinfo, .args_min = 5 },
@@ -123,13 +123,13 @@ static struct Message svinfo_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svinfo_msgtab);
+  command_add(&svinfo_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svinfo_msgtab);
+  command_del(&svinfo_msgtab);
 }
 
 struct module module_entry =

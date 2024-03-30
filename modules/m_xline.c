@@ -213,9 +213,9 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
     xline_handle(source_p, &aline);
 }
 
-static struct Message xline_msgtab =
+static struct Command xline_msgtab =
 {
-  .cmd = "XLINE",
+  .name = "XLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_xline, .args_min = 5 },
@@ -226,13 +226,13 @@ static struct Message xline_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&xline_msgtab);
+  command_add(&xline_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&xline_msgtab);
+  command_del(&xline_msgtab);
 }
 
 struct module module_entry =

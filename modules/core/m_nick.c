@@ -832,9 +832,9 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
     uid_from_server(source_p, parc, parv);
 }
 
-static struct Message nick_msgtab =
+static struct Command nick_msgtab =
 {
-  .cmd = "NICK",
+  .name = "NICK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
   .handlers[CLIENT_HANDLER] = { .handler = m_nick, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
@@ -842,9 +842,9 @@ static struct Message nick_msgtab =
   .handlers[OPER_HANDLER] = { .handler = m_nick }
 };
 
-static struct Message uid_msgtab =
+static struct Command uid_msgtab =
 {
-  .cmd = "UID",
+  .name = "UID",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 12 },
@@ -855,15 +855,15 @@ static struct Message uid_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&uid_msgtab);
-  mod_add_cmd(&nick_msgtab);
+  command_add(&uid_msgtab);
+  command_add(&nick_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&uid_msgtab);
-  mod_del_cmd(&nick_msgtab);
+  command_del(&uid_msgtab);
+  command_del(&nick_msgtab);
 }
 
 struct module module_entry =

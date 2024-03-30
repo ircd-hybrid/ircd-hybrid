@@ -264,9 +264,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
                 source_p->id, channel->creation_time, channel->name);
 }
 
-static struct Message join_msgtab =
+static struct Command join_msgtab =
 {
-  .cmd = "JOIN",
+  .name = "JOIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_join, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = ms_join, .args_min = 4 },
@@ -277,13 +277,13 @@ static struct Message join_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&join_msgtab);
+  command_add(&join_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&join_msgtab);
+  command_del(&join_msgtab);
 }
 
 struct module module_entry =

@@ -54,7 +54,7 @@ struct Client;
 /** Maximum parameters a command can have. See 2.3 Messages in RFC 1459. */
 enum { MAXPARA = 15 };
 
-/** Enumerated type for client message handlers. */
+/** Enumerated type for client command handlers. */
 typedef enum HandlerType
 {
   UNREGISTERED_HANDLER,  /**< Used for unregistered clients. */
@@ -65,7 +65,7 @@ typedef enum HandlerType
   LAST_HANDLER_TYPE,  /**< Number of handler types. */
 } HandlerType;
 
-struct MessageHandler
+struct CommandHandler
 {
   bool end_grace_period;  /**< Handler ends the flood grace period */
   bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
@@ -73,32 +73,32 @@ struct MessageHandler
                                be sent to the user before the m_func is even called */
   unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
                                of the message will be put into this last parameter */
-  void (*handler)(struct Client *, int, char *[]);  /**< Message/command handler function. */
+  void (*handler)(struct Client *, int, char *[]);  /**< Command handler function. */
 };
 
 /*
- * Message table structure
+ * Command table structure
  */
-struct Message
+struct Command
 {
-  const char *cmd;  /**< The actual command string */
+  const char *name;  /**< The actual command string */
   void *extra;  /**< Extra pointer to be passed in parv[1] */
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
-  uintmax_t bytes;  /**< Bytes received for this message */
+  uintmax_t bytes;  /**< Bytes received for this command */
 
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
-  struct MessageHandler handlers[LAST_HANDLER_TYPE];
+  struct CommandHandler handlers[LAST_HANDLER_TYPE];
 };
 
 extern void parse(struct Client *, char *, char *);
-extern void mod_add_cmd(struct Message *);
-extern void mod_del_cmd(struct Message *);
-extern struct Message *find_command(const char *);
-extern void report_messages(struct Client *);
+extern void command_add(struct Command *);
+extern void command_del(struct Command *);
+extern struct Command *command_find(const char *);
+extern void command_report(struct Client *);
 
 /* generic handlers */
 extern void m_ignore(struct Client *, int, char *[]);

@@ -349,9 +349,9 @@ ms_info(struct Client *source_p, int parc, char *parv[])
   send_info_text(source_p);
 }
 
-static struct Message info_msgtab =
+static struct Command info_msgtab =
 {
-  .cmd = "INFO",
+  .name = "INFO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_info },
   .handlers[SERVER_HANDLER] = { .handler = ms_info },
@@ -362,13 +362,13 @@ static struct Message info_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&info_msgtab);
+  command_add(&info_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&info_msgtab);
+  command_del(&info_msgtab);
 }
 
 struct module module_entry =

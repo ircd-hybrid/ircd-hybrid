@@ -339,9 +339,9 @@ mo_whois(struct Client *source_p, int parc, char *parv[])
   do_whois(source_p, parv[1]);
 }
 
-static struct Message whois_msgtab =
+static struct Command whois_msgtab =
 {
-  .cmd = "WHOIS",
+  .name = "WHOIS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_whois },
   .handlers[SERVER_HANDLER] = { .handler = mo_whois },
@@ -352,13 +352,13 @@ static struct Message whois_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&whois_msgtab);
+  command_add(&whois_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&whois_msgtab);
+  command_del(&whois_msgtab);
 }
 
 struct module module_entry =

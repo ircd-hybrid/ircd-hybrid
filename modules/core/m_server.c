@@ -682,9 +682,9 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
                        target_p->name, source_p->name);
 }
 
-static struct Message server_msgtab =
+static struct Command server_msgtab =
 {
-  .cmd = "SERVER",
+  .name = "SERVER",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 6 },
   .handlers[CLIENT_HANDLER] = { .handler = m_registered },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -692,9 +692,9 @@ static struct Message server_msgtab =
   .handlers[OPER_HANDLER] = { .handler = m_registered }
 };
 
-static struct Message sid_msgtab =
+static struct Command sid_msgtab =
 {
-  .cmd = "SID",
+  .name = "SID",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 6 },
@@ -705,15 +705,15 @@ static struct Message sid_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&sid_msgtab);
-  mod_add_cmd(&server_msgtab);
+  command_add(&sid_msgtab);
+  command_add(&server_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&sid_msgtab);
-  mod_del_cmd(&server_msgtab);
+  command_del(&sid_msgtab);
+  command_del(&server_msgtab);
 }
 
 struct module module_entry =

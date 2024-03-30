@@ -80,9 +80,9 @@ ms_wallops(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
 }
 
-static struct Message wallops_msgtab =
+static struct Command wallops_msgtab =
 {
-  .cmd = "WALLOPS",
+  .name = "WALLOPS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_wallops, .args_min = 2 },
@@ -93,13 +93,13 @@ static struct Message wallops_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&wallops_msgtab);
+  command_add(&wallops_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&wallops_msgtab);
+  command_del(&wallops_msgtab);
 }
 
 struct module module_entry =

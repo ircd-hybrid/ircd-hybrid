@@ -597,9 +597,9 @@ m_notice(struct Client *source_p, int parc, char *parv[])
   m_message(true, source_p, parc, parv);
 }
 
-static struct Message privmsg_msgtab =
+static struct Command privmsg_msgtab =
 {
-  .cmd = "PRIVMSG",
+  .name = "PRIVMSG",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
@@ -607,9 +607,9 @@ static struct Message privmsg_msgtab =
   .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
 };
 
-static struct Message notice_msgtab =
+static struct Command notice_msgtab =
 {
-  .cmd = "NOTICE",
+  .name = "NOTICE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_notice },
   .handlers[SERVER_HANDLER] = { .handler = m_notice },
@@ -620,15 +620,15 @@ static struct Message notice_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&privmsg_msgtab);
-  mod_add_cmd(&notice_msgtab);
+  command_add(&privmsg_msgtab);
+  command_add(&notice_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&privmsg_msgtab);
-  mod_del_cmd(&notice_msgtab);
+  command_del(&privmsg_msgtab);
+  command_del(&notice_msgtab);
 }
 
 struct module module_entry =

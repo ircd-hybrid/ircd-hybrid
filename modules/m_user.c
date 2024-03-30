@@ -79,9 +79,9 @@ mr_user(struct Client *source_p, int parc, char *parv[])
     register_local_user(source_p);
 }
 
-static struct Message user_msgtab =
+static struct Command user_msgtab =
 {
-  .cmd = "USER",
+  .name = "USER",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_user, .args_min = 5 },
   .handlers[CLIENT_HANDLER] = { .handler = m_registered },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -92,13 +92,13 @@ static struct Message user_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&user_msgtab);
+  command_add(&user_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&user_msgtab);
+  command_del(&user_msgtab);
 }
 
 struct module module_entry =

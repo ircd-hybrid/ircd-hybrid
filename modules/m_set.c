@@ -160,9 +160,9 @@ mo_set(struct Client *source_p, int parc, char *parv[])
   set_option_list(source_p);
 }
 
-static struct Message set_msgtab =
+static struct Command set_msgtab =
 {
-  .cmd = "SET",
+  .name = "SET",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -173,13 +173,13 @@ static struct Message set_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&set_msgtab);
+  command_add(&set_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&set_msgtab);
+  command_del(&set_msgtab);
 }
 
 struct module module_entry =

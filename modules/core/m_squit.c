@@ -183,9 +183,9 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
   exit_client(target_p, comment);
 }
 
-static struct Message squit_msgtab =
+static struct Command squit_msgtab =
 {
-  .cmd = "SQUIT",
+  .name = "SQUIT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_squit, .args_min = 2 },
@@ -196,13 +196,13 @@ static struct Message squit_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&squit_msgtab);
+  command_add(&squit_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&squit_msgtab);
+  command_del(&squit_msgtab);
 }
 
 struct module module_entry =

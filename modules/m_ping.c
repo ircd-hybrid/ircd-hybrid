@@ -115,9 +115,9 @@ ms_ping(struct Client *source_p, int parc, char *parv[])
     sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
 }
 
-static struct Message ping_msgtab =
+static struct Command ping_msgtab =
 {
-  .cmd = "PING",
+  .name = "PING",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ping },
   .handlers[SERVER_HANDLER] = { .handler = ms_ping },
@@ -128,13 +128,13 @@ static struct Message ping_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&ping_msgtab);
+  command_add(&ping_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&ping_msgtab);
+  command_del(&ping_msgtab);
 }
 
 struct module module_entry =

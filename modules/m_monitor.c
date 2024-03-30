@@ -262,9 +262,9 @@ m_monitor(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message monitor_msgtab =
+static struct Command monitor_msgtab =
 {
-  .cmd = "MONITOR",
+  .name = "MONITOR",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_monitor, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -275,14 +275,14 @@ static struct Message monitor_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&monitor_msgtab);
+  command_add(&monitor_msgtab);
   isupport_add("MONITOR", NULL, ConfigGeneral.max_monitor);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&monitor_msgtab);
+  command_del(&monitor_msgtab);
   isupport_delete("MONITOR");
 }
 

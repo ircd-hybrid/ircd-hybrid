@@ -82,9 +82,9 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
                target_p->id, parv[2], parv[3]);
 }
 
-static struct Message svsjoin_msgtab =
+static struct Command svsjoin_msgtab =
 {
-  .cmd = "SVSJOIN",
+  .name = "SVSJOIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svsjoin, .args_min = 3 },
@@ -95,13 +95,13 @@ static struct Message svsjoin_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svsjoin_msgtab);
+  command_add(&svsjoin_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svsjoin_msgtab);
+  command_del(&svsjoin_msgtab);
 }
 
 struct module module_entry =

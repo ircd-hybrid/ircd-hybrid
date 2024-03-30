@@ -166,9 +166,9 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
     kline_remove(source_p, &aline);
 }
 
-static struct Message unkline_msgtab =
+static struct Command unkline_msgtab =
 {
-  .cmd = "UNKLINE",
+  .name = "UNKLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_unkline, .args_min = 4 },
@@ -179,14 +179,14 @@ static struct Message unkline_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&unkline_msgtab);
+  command_add(&unkline_msgtab);
   capab_add("UNKLN", CAPAB_UNKLN, true);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&unkline_msgtab);
+  command_del(&unkline_msgtab);
   capab_del("UNKLN");
 }
 

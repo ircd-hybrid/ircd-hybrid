@@ -218,9 +218,9 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
 }
 
 
-static struct Message invite_msgtab =
+static struct Command invite_msgtab =
 {
-  .cmd = "INVITE",
+  .name = "INVITE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_invite, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_invite, .args_min = 4 },
@@ -231,13 +231,13 @@ static struct Message invite_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&invite_msgtab);
+  command_add(&invite_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&invite_msgtab);
+  command_del(&invite_msgtab);
 }
 
 struct module module_entry =

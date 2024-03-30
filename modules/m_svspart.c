@@ -82,9 +82,9 @@ ms_svspart(struct Client *source_p, int parc, char *parv[])
                target_p->id, parv[2], parv[3]);
 }
 
-static struct Message svspart_msgtab =
+static struct Command svspart_msgtab =
 {
-  .cmd = "SVSPART",
+  .name = "SVSPART",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svspart, .args_min = 3 },
@@ -95,13 +95,13 @@ static struct Message svspart_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svspart_msgtab);
+  command_add(&svspart_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svspart_msgtab);
+  command_del(&svspart_msgtab);
 }
 
 struct module module_entry =

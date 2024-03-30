@@ -186,9 +186,9 @@ m_accept(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message accept_msgtab =
+static struct Command accept_msgtab =
 {
-  .cmd = "ACCEPT",
+  .name = "ACCEPT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_accept },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -199,13 +199,13 @@ static struct Message accept_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&accept_msgtab);
+  command_add(&accept_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&accept_msgtab);
+  command_del(&accept_msgtab);
 }
 
 struct module module_entry =

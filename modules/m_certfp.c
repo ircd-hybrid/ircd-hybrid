@@ -56,9 +56,9 @@ ms_certfp(struct Client *source_p, int parc, char *parv[])
                 source_p->id, source_p->tls_certfp);
 }
 
-static struct Message certfp_msgtab =
+static struct Command certfp_msgtab =
 {
-  .cmd = "CERTFP",
+  .name = "CERTFP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_certfp, .args_min = 2 },
@@ -69,13 +69,13 @@ static struct Message certfp_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&certfp_msgtab);
+  command_add(&certfp_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&certfp_msgtab);
+  command_del(&certfp_msgtab);
 }
 
 struct module module_entry =

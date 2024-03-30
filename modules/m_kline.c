@@ -256,9 +256,9 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     kline_handle(source_p, &aline);
 }
 
-static struct Message kline_msgtab =
+static struct Command kline_msgtab =
 {
-  .cmd = "KLINE",
+  .name = "KLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_kline, .args_min = 6 },
@@ -269,14 +269,14 @@ static struct Message kline_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&kline_msgtab);
+  command_add(&kline_msgtab);
   capab_add("KLN", CAPAB_KLN, true);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&kline_msgtab);
+  command_del(&kline_msgtab);
   capab_del("KLN");
 }
 

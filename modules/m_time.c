@@ -78,9 +78,9 @@ ms_time(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
 }
 
-static struct Message time_msgtab =
+static struct Command time_msgtab =
 {
-  .cmd = "TIME",
+  .name = "TIME",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_time },
   .handlers[SERVER_HANDLER] = { .handler = ms_time },
@@ -91,13 +91,13 @@ static struct Message time_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&time_msgtab);
+  command_add(&time_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&time_msgtab);
+  command_del(&time_msgtab);
 }
 
 struct module module_entry =

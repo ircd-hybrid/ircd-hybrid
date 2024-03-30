@@ -111,9 +111,9 @@ m_away(struct Client *source_p, int parc, char *parv[])
   do_away(source_p, message);
 }
 
-static struct Message away_msgtab =
+static struct Command away_msgtab =
 {
-  .cmd = "AWAY",
+  .name = "AWAY",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_away },
   .handlers[SERVER_HANDLER] = { .handler = m_away },
@@ -124,14 +124,14 @@ static struct Message away_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&away_msgtab);
+  command_add(&away_msgtab);
   isupport_add("AWAYLEN", NULL, AWAYLEN);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&away_msgtab);
+  command_del(&away_msgtab);
   isupport_delete("AWAYLEN");
 }
 

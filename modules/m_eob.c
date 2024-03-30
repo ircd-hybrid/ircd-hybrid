@@ -56,9 +56,9 @@ ms_eob(struct Client *source_p, int parc, char *parv[])
   sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);
 }
 
-static struct Message eob_msgtab =
+static struct Command eob_msgtab =
 {
-  .cmd = "EOB",
+  .name = "EOB",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered  },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_eob },
@@ -69,13 +69,13 @@ static struct Message eob_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&eob_msgtab);
+  command_add(&eob_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&eob_msgtab);
+  command_del(&eob_msgtab);
 }
 
 struct module module_entry =

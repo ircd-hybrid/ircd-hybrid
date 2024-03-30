@@ -68,9 +68,9 @@ mo_restart(struct Client *source_p, int parc, char *parv[])
   server_die(buf, true);
 }
 
-static struct Message restart_msgtab =
+static struct Command restart_msgtab =
 {
-  .cmd = "RESTART",
+  .name = "RESTART",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -81,13 +81,13 @@ static struct Message restart_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&restart_msgtab);
+  command_add(&restart_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&restart_msgtab);
+  command_del(&restart_msgtab);
 }
 
 struct module module_entry =

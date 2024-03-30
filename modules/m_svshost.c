@@ -70,9 +70,9 @@ ms_svshost(struct Client *source_p, int parc, char *parv[])
                 target_p->id, target_p->tsinfo, parv[3]);
 }
 
-static struct Message svshost_msgtab =
+static struct Command svshost_msgtab =
 {
-  .cmd = "SVSHOST",
+  .name = "SVSHOST",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svshost, .args_min = 4 },
@@ -83,13 +83,13 @@ static struct Message svshost_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svshost_msgtab);
+  command_add(&svshost_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svshost_msgtab);
+  command_del(&svshost_msgtab);
 }
 
 struct module module_entry =

@@ -68,9 +68,9 @@ ms_svsaccount(struct Client *source_p, int parc, char *parv[])
                 target_p->id, target_p->tsinfo, target_p->account);
 }
 
-static struct Message svsaccount_msgtab =
+static struct Command svsaccount_msgtab =
 {
-  .cmd = "SVSACCOUNT",
+  .name = "SVSACCOUNT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_svsaccount, .args_min = 4 },
@@ -81,13 +81,13 @@ static struct Message svsaccount_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&svsaccount_msgtab);
+  command_add(&svsaccount_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&svsaccount_msgtab);
+  command_del(&svsaccount_msgtab);
 }
 
 struct module module_entry =

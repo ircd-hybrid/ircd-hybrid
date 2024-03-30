@@ -164,9 +164,9 @@ ms_connect(struct Client *source_p, int parc, char *parv[])
   do_connect(source_p, name);
 }
 
-static struct Message connect_msgtab =
+static struct Command connect_msgtab =
 {
-  .cmd = "CONNECT",
+  .name = "CONNECT",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_connect, .args_min = 4 },
@@ -177,13 +177,13 @@ static struct Message connect_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&connect_msgtab);
+  command_add(&connect_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&connect_msgtab);
+  command_del(&connect_msgtab);
 }
 
 struct module module_entry =

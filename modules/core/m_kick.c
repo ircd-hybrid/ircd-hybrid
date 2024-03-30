@@ -161,9 +161,9 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
   channel_remove_user(member_target);
 }
 
-static struct Message kick_msgtab =
+static struct Command kick_msgtab =
 {
-  .cmd = "KICK",
+  .name = "KICK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = ms_kick, .args_min = 3 },
@@ -174,13 +174,13 @@ static struct Message kick_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&kick_msgtab);
+  command_add(&kick_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&kick_msgtab);
+  command_del(&kick_msgtab);
 }
 
 struct module module_entry =

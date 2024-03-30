@@ -127,9 +127,9 @@ mo_etrace(struct Client *source_p, int parc, char *parv[])
   }
 }
 
-static struct Message etrace_msgtab =
+static struct Command etrace_msgtab =
 {
-  .cmd = "ETRACE",
+  .name = "ETRACE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = mo_etrace },
@@ -140,13 +140,13 @@ static struct Message etrace_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&etrace_msgtab);
+  command_add(&etrace_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&etrace_msgtab);
+  command_del(&etrace_msgtab);
 }
 
 struct module module_entry =

@@ -71,9 +71,9 @@ m_ison(struct Client *source_p, int parc, char *parv[])
   sendto_one_numeric(source_p, &me, RPL_ISON, buf);
 }
 
-static struct Message ison_msgtab =
+static struct Command ison_msgtab =
 {
-  .cmd = "ISON",
+  .name = "ISON",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ison, .args_min = 2, .args_max = 1 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -84,13 +84,13 @@ static struct Message ison_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&ison_msgtab);
+  command_add(&ison_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&ison_msgtab);
+  command_del(&ison_msgtab);
 }
 
 struct module module_entry =

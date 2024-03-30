@@ -163,9 +163,9 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
     dline_remove(source_p, &aline);
 }
 
-static struct Message undline_msgtab =
+static struct Command undline_msgtab =
 {
-  .cmd = "UNDLINE",
+  .name = "UNDLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = ms_undline, .args_min = 3 },
@@ -176,14 +176,14 @@ static struct Message undline_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&undline_msgtab);
+  command_add(&undline_msgtab);
   capab_add("UNDLN", CAPAB_UNDLN, true);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&undline_msgtab);
+  command_del(&undline_msgtab);
   capab_del("UNDLN");
 }
 

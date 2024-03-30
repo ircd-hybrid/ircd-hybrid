@@ -145,9 +145,9 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
                 parv[3], parv[4]);
 }
 
-static struct Message bmask_msgtab =
+static struct Command bmask_msgtab =
 {
-  .cmd = "BMASK",
+  .name = "BMASK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
   .handlers[SERVER_HANDLER] = { .handler = ms_bmask, .args_min = 5 },
@@ -158,13 +158,13 @@ static struct Message bmask_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&bmask_msgtab);
+  command_add(&bmask_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&bmask_msgtab);
+  command_del(&bmask_msgtab);
 }
 
 struct module module_entry =

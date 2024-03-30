@@ -115,7 +115,7 @@ pseudo_register(const char *name, const char *nick, const char *server,
                 const char *prepend,
                 const char *command)
 {
-  if (find_command(command))
+  if (command_find(command))
     return;
 
   struct PseudoItem *pseudo = xcalloc(sizeof(*pseudo));
@@ -126,8 +126,8 @@ pseudo_register(const char *name, const char *nick, const char *server,
   if (!EmptyString(prepend))
     pseudo->prepend = xstrdup(prepend);
 
-  pseudo->msg = (struct Message) {
-    .cmd = pseudo->command,
+  pseudo->msg = (struct Command) {
+    .name = pseudo->command,
     .extra = pseudo,
     .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
     .handlers[CLIENT_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 },
@@ -138,7 +138,7 @@ pseudo_register(const char *name, const char *nick, const char *server,
 
   dlinkAdd(pseudo, &pseudo->node, &pseudo_list);
 
-  mod_add_cmd(&pseudo->msg);
+  command_add(&pseudo->msg);
 }
 
 /**
@@ -153,9 +153,9 @@ pseudo_clear(void)
   while (pseudo_list.head)
   {
     struct PseudoItem *pseudo = pseudo_list.head->data;
-    assert(find_command(pseudo->msg.cmd));
+    assert(command_find(pseudo->msg.name));
 
-    mod_del_cmd(&pseudo->msg);
+    command_del(&pseudo->msg);
     dlinkDelete(&pseudo->node, &pseudo_list);
 
     xfree(pseudo->name);

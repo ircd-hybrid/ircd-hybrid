@@ -68,9 +68,9 @@ mo_die(struct Client *source_p, int parc, char *parv[])
   server_die(buf, false);
 }
 
-static struct Message die_msgtab =
+static struct Command die_msgtab =
 {
-  .cmd = "DIE",
+  .name = "DIE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -81,13 +81,13 @@ static struct Message die_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&die_msgtab);
+  command_add(&die_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&die_msgtab);
+  command_del(&die_msgtab);
 }
 
 struct module module_entry =

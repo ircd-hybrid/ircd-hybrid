@@ -56,9 +56,9 @@ m_part(struct Client *source_p, int parc, char *parv[])
   channel_do_part(source_p, parv[1], parv[2]);
 }
 
-static struct Message part_msgtab =
+static struct Command part_msgtab =
 {
-  .cmd = "PART",
+  .name = "PART",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_part, .args_min = 2, .end_grace_period = true },
   .handlers[SERVER_HANDLER] = { .handler = m_part, .args_min = 2 },
@@ -69,13 +69,13 @@ static struct Message part_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&part_msgtab);
+  command_add(&part_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&part_msgtab);
+  command_del(&part_msgtab);
 }
 
 struct module module_entry =

@@ -57,9 +57,9 @@ mr_pass(struct Client *source_p, int parc, char *parv[])
     source_p->connection->password = xstrndup(password, IRCD_MIN(strlen(password), PASSWDLEN));
 }
 
-static struct Message pass_msgtab =
+static struct Command pass_msgtab =
 {
-  .cmd = "PASS",
+  .name = "PASS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pass, .args_min = 2 },
   .handlers[CLIENT_HANDLER] = { .handler = m_registered },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -70,13 +70,13 @@ static struct Message pass_msgtab =
 static void
 module_init(void)
 {
-  mod_add_cmd(&pass_msgtab);
+  command_add(&pass_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&pass_msgtab);
+  command_del(&pass_msgtab);
 }
 
 struct module module_entry =

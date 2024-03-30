@@ -327,9 +327,9 @@ m_cap(struct Client *source_p, int parc, char *parv[])
   cmd->proc(source_p, caplist);
 }
 
-static struct Message cap_msgtab =
+static struct Command cap_msgtab =
 {
-  .cmd = "CAP",
+  .name = "CAP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_cap, .args_min = 2 },
   .handlers[CLIENT_HANDLER] = { .handler = m_cap, .args_min = 2 },
   .handlers[SERVER_HANDLER] = { .handler = m_ignore },
@@ -342,13 +342,13 @@ module_init(void)
 {
   /* First, let's sort the array */
   qsort(capab_list, CAPAB_LIST_LEN, sizeof(struct capabilities), (bqcmp)capab_sort);
-  mod_add_cmd(&cap_msgtab);
+  command_add(&cap_msgtab);
 }
 
 static void
 module_exit(void)
 {
-  mod_del_cmd(&cap_msgtab);
+  command_del(&cap_msgtab);
 }
 
 struct module module_entry =

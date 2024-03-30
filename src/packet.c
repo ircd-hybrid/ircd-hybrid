@@ -67,7 +67,7 @@ client_dopacket(struct Client *client, char *buffer, unsigned int length)
   client->connection->recv.bytes += length;
   me.connection->recv.bytes += length;
 
-  parse(client, buffer, buffer + length);
+  parse_message(client, buffer, buffer + length);
 }
 
 /* extract_one_line()

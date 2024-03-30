@@ -25,7 +25,6 @@
 
 #include "stdinc.h"
 #include "client.h"
-#include "parse.h"
 #include "channel.h"
 #include "hash.h"
 #include "id.h"
@@ -35,11 +34,8 @@
 #include "log.h"
 #include "send.h"
 #include "conf.h"
-#include "memory.h"
-#include "user.h"
-#include "server.h"
 #include "packet.h"
-
+#include "parse.h"
 
 /* remove_unknown()
  *

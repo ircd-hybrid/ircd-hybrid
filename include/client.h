@@ -407,16 +407,6 @@ struct Client
   char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
 };
 
-
-struct AcceptItem
-{
-  dlink_node node;
-  char *nick;
-  char *user;
-  char *host;
-};
-
-
 extern struct Client me;
 extern dlink_list listing_client_list;
 extern dlink_list global_client_list;
@@ -426,11 +416,7 @@ extern dlink_list local_server_list;  /* local servers to this server ONLY */
 extern dlink_list unknown_list;  /* unknown clients ON this server only */
 extern dlink_list oper_list;  /* our opers, duplicated in local_client_list */
 
-extern bool accept_message(struct Client *, struct Client *);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern struct AcceptItem *accept_find(const char *, const char *, const char *, dlink_list *, int (*)(const char *, const char *));
-extern void accept_del(struct AcceptItem *, dlink_list *);
-extern void accept_clear_list(dlink_list *);
 extern void exit_client(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);

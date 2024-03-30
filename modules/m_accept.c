@@ -34,6 +34,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "memory.h"
+#include "accept.h"
 
 
 /*! \brief Sends a list of nick!user\@host masks a Client

@@ -51,6 +51,7 @@
 #include "ipcache.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "accept.h"
 
 
 dlink_list listing_client_list;
@@ -989,90 +990,6 @@ exit_aborted_clients(void)
 
     exit_client(client, notice);
   }
-}
-
-/*
- * accept processing, this adds a form of "caller ID" to ircd
- *
- * If a client puts themselves into "caller ID only" mode,
- * only clients that match a client pointer they have put on
- * the accept list will be allowed to message them.
- *
- * Diane Bruce, "Dianora" db@db.net
- */
-
-void
-accept_del(struct AcceptItem *accept, dlink_list *list)
-{
-  dlinkDelete(&accept->node, list);
-
-  xfree(accept->nick);
-  xfree(accept->user);
-  xfree(accept->host);
-  xfree(accept);
-}
-
-struct AcceptItem *
-accept_find(const char *nick,
-            const char *user,
-            const char *host, dlink_list *list,
-            int (*compare)(const char *, const char *))
-{
-  dlink_node *node;
-
-  DLINK_FOREACH(node, list->head)
-  {
-    struct AcceptItem *accept = node->data;
-
-    if (compare(accept->nick, nick) == 0 &&
-        compare(accept->user, user) == 0 &&
-        compare(accept->host, host) == 0)
-      return accept;
-  }
-
-  return NULL;
-}
-
-/* accept_message()
- *
- * inputs       - pointer to source client
- *              - pointer to target client
- * output       - 1 if accept this message 0 if not
- * side effects - See if source is on target's allow list
- */
-bool
-accept_message(struct Client *source,
-               struct Client *target)
-{
-  dlink_node *node;
-
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
-    return true;
-
-  if (source == target || accept_find(source->name, source->username, source->host,
-                                      &target->connection->acceptlist, match))
-    return true;
-
-  if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
-    DLINK_FOREACH(node, target->channel.head)
-      if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
-        return true;
-
-  return false;
-}
-
-/* del_all_accepts()
- *
- * inputs       - pointer to exiting client
- * output       - NONE
- * side effects - Walk through given clients acceptlist and remove all entries
- */
-void
-accept_clear_list(dlink_list *list)
-{
-  while (list->head)
-    accept_del(list->head->data, list);
 }
 
 /**

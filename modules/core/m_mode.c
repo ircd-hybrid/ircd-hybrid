@@ -221,18 +221,20 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 static void
 m_mode(struct Client *source_p, int parc, char *parv[])
 {
+  const char *const name = parv[1];
+
   /* Now, try to find the channel in question */
-  if (!IsChanPrefix(*parv[1]))
+  if (!IsChanPrefix(*name))
   {
     /* If here, it has to be a non-channel name */
     set_user_mode(source_p, parc, parv);
     return;
   }
 
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 

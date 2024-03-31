@@ -95,9 +95,12 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
  * \param reason   The reason why they have failed
  */
 static void
-failed_oper_notice(struct Client *source_p, const char *name,
-                   const char *reason)
+failed_oper_notice(struct Client *source_p, enum irc_numerics numeric,
+                   const char *name, const char *reason)
 {
+  if (numeric)
+    sendto_one_numeric(source_p, &me, numeric);
+
   if (ConfigGeneral.failed_oper_notice)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Failed OPER attempt as %s by %s - %s",
@@ -128,17 +131,14 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   struct MaskItem *conf = operator_find(source_p, opername);
   if (conf == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-
     conf = operator_find(NULL, opername);
-    failed_oper_notice(source_p, opername, conf ? "host mismatch" : "no operator {} block");
+    failed_oper_notice(source_p, ERR_NOOPERHOST, opername, conf ? "host mismatch" : "no operator {} block");
     return;
   }
 
   if (IsConfTLS(conf) && !HasUMode(source_p, UMODE_SECURE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-    failed_oper_notice(source_p, opername, "requires TLS");
+    failed_oper_notice(source_p, ERR_NOOPERHOST, opername, "requires TLS");
     return;
   }
 
@@ -146,23 +146,21 @@ m_oper(struct Client *source_p, int parc, char *parv[])
   {
     if (EmptyString(source_p->tls_certfp) || strcasecmp(source_p->tls_certfp, conf->certfp))
     {
-      sendto_one_numeric(source_p, &me, ERR_NOOPERHOST);
-      failed_oper_notice(source_p, opername, "client certificate fingerprint mismatch");
+      failed_oper_notice(source_p, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
       return;
     }
   }
 
   if (match_conf_password(password, conf) == false)
   {
-    sendto_one_numeric(source_p, &me, ERR_PASSWDMISMATCH);
-    failed_oper_notice(source_p, opername, "password mismatch");
+    failed_oper_notice(source_p, ERR_PASSWDMISMATCH, opername, "password mismatch");
     return;
   }
 
   if (conf_attach(source_p, conf))
   {
     sendto_one_notice(source_p, &me, ":Can't attach conf!");
-    failed_oper_notice(source_p, opername, "can't attach conf!");
+    failed_oper_notice(source_p, 0, opername, "can't attach conf!");
     return;
   }
 

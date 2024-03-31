@@ -1127,7 +1127,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
  * \param reason Part reason to show
  */
 static void
-channel_part_one_client(struct Client *client, const char *name, const char *reason)
+channel_part_one(struct Client *client, const char *name, const char *reason)
 {
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
@@ -1190,5 +1190,5 @@ channel_part_list(struct Client *client, char *list, const char *reason)
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
-    channel_part_one_client(client, name, reason);
+    channel_part_one(client, name, reason);
 }

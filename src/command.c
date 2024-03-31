@@ -185,7 +185,7 @@ command_tree_del_element(struct CommandTree *tree, const char *const name)
   }
 }
 
-/* command_tree_parse()
+/* command_tree_find()
  *
  * inputs	- Pointer to command to find
  *		- Pointer to CommandTree root
@@ -193,7 +193,7 @@ command_tree_del_element(struct CommandTree *tree, const char *const name)
  * side effects	- none
  */
 static struct Command *
-command_tree_parse(const char *name)
+command_tree_find(const char *name)
 {
   struct CommandTree *tree = &command_tree;
 
@@ -219,7 +219,7 @@ command_add(struct Command *command)
   assert(command->name);
 
   /* Command already added? */
-  if (command_tree_parse(command->name) == NULL)
+  if (command_tree_find(command->name) == NULL)
     command_tree_add_element(&command_tree, command, command->name);
 }
 
@@ -235,7 +235,7 @@ command_del(struct Command *command)
   assert(command);
   assert(command->name);
 
-  if (command_tree_parse(command->name))
+  if (command_tree_find(command->name))
     command_tree_del_element(&command_tree, command->name);
 }
 
@@ -248,7 +248,7 @@ command_del(struct Command *command)
 struct Command *
 command_find(const char *name)
 {
-  return command_tree_parse(name);
+  return command_tree_find(name);
 }
 
 /* report_messages()

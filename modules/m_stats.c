@@ -974,10 +974,10 @@ stats_tstats(struct Client *source_p, int parc, char *parv[])
                      "t :connected %u %u",
                      sp.is_cl, sp.is_sv);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :bytes sent %ju %ju",
+                     "t :bytes sent %zu %zu",
                      sp.is_cbs, sp.is_sbs);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "t :bytes received %ju %ju",
+                     "t :bytes received %zu %zu",
                      sp.is_cbr, sp.is_sbr);
   sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %ju %ju",
@@ -1056,7 +1056,7 @@ static void
 stats_servlinks(struct Client *source_p, int parc, char *parv[])
 {
   dlink_node *node;
-  uintmax_t sendB = 0, recvB = 0;
+  size_t sendB = 0, recvB = 0;
 
   DLINK_FOREACH(node, local_server_list.head)
   {
@@ -1065,7 +1065,7 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
     sendB += target_p->connection->send.bytes;
     recvB += target_p->connection->recv.bytes;
 
-    /* ":%s 211 %s %s %u %u %ju %u %ju :%ju %ju %s" */
+    /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
     sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
                client_get_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                dbuf_length(&target_p->connection->buf_sendq),

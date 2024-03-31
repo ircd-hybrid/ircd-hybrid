@@ -74,10 +74,10 @@ struct SetOptions
  */
 struct ServerStatistics
 {
-  uintmax_t is_cbs;  /**< Bytes sent to clients. */
-  uintmax_t is_cbr;  /**< Bytes received from clients. */
-  uintmax_t is_sbs;  /**< Bytes sent to servers. */
-  uintmax_t is_sbr;  /**< Bytes received from servers. */
+  size_t is_cbs;  /**< Bytes sent to clients. */
+  size_t is_cbr;  /**< Bytes received from clients. */
+  size_t is_sbs;  /**< Bytes sent to servers. */
+  size_t is_sbr;  /**< Bytes received from servers. */
   uintmax_t is_cti;  /**< Time spent connected by clients. */
   uintmax_t is_sti;  /**< Time spent connected by servers. */
   unsigned int is_cl;  /**< Number of client connections. */

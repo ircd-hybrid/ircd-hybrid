@@ -126,7 +126,7 @@ pseudo_register(const char *name, const char *nick, const char *server,
   if (!EmptyString(prepend))
     pseudo->prepend = xstrdup(prepend);
 
-  pseudo->msg = (struct Command) {
+  pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
     .extra = pseudo,
     .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -138,7 +138,7 @@ pseudo_register(const char *name, const char *nick, const char *server,
 
   dlinkAdd(pseudo, &pseudo->node, &pseudo_list);
 
-  command_add(&pseudo->msg);
+  command_add(&pseudo->command_struct);
 }
 
 /**
@@ -153,9 +153,9 @@ pseudo_clear(void)
   while (pseudo_list.head)
   {
     struct PseudoItem *pseudo = pseudo_list.head->data;
-    assert(command_find(pseudo->msg.name));
+    assert(command_find(pseudo->command_struct.name));
 
-    command_del(&pseudo->msg);
+    command_del(&pseudo->command_struct);
     dlinkDelete(&pseudo->node, &pseudo_list);
 
     xfree(pseudo->name);

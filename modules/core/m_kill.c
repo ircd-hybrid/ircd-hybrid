@@ -54,16 +54,9 @@
 static void
 mo_kill(struct Client *source_p, int parc, char *parv[])
 {
-  char def_reason[] = CONF_NOREASON;
-
-  char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
-  if (!EmptyString(reason))
-  {
-    if (strlen(reason) > REASONLEN)
-      reason[REASONLEN] = '\0';
-  }
-  else
-    reason = def_reason;
+  const char *reason = parv[2];  /* Either defined or NULL (parc >= 2!!) */
+  if (EmptyString(reason))
+    reason = CONF_NOREASON;
 
   struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
@@ -103,22 +96,22 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   }
 
   if (MyConnect(target_p))
-    sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
+    sendto_one(target_p, ":%s!%s@%s KILL %s :%.*s",
                source_p->name, source_p->username, source_p->host,
-               target_p->name, reason);
+               target_p->name, REASONLEN, reason);
 
   /*
    * Do not change the format of this message. There's no point in changing messages
    * that have been around for ever, for no reason..
    */
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%s)",
+                       "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
                        target_p->name, target_p->username, target_p->host,
                        target_p->servptr->name,
-                       source_p->name, me.name, reason);
+                       source_p->name, me.name, REASONLEN, reason);
 
-  log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%s)",
-       source_p->name, target_p->name, me.name, reason);
+  log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
+       source_p->name, target_p->name, me.name, REASONLEN, reason);
 
   /*
    * And pass on the message to other servers. Note, that if KILL was changed,
@@ -126,9 +119,9 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
    */
   if (!MyConnect(target_p))
   {
-    sendto_server(source_p, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%s)",
+    sendto_server(source_p, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%.*s)",
                   source_p->id, target_p->id, me.name, source_p->host,
-                  source_p->username, source_p->name, reason);
+                  source_p->username, source_p->name, REASONLEN, reason);
 
     /*
      * Set FLAGS_KILLED. This prevents exit_client() from sending
@@ -139,7 +132,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
   }
 
   char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "Killed (%s (%s))", source_p->name, reason);
+  snprintf(buf, sizeof(buf), "Killed (%s (%.*s))", source_p->name, REASONLEN, reason);
 
   exit_client(target_p, buf);
 }

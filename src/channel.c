@@ -989,7 +989,7 @@ channel_set_mode_lock(struct Client *client, struct Channel *channel,
 }
 
 void
-channel_do_join(struct Client *client, char *chan_list, char *key_list)
+channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
   char *p = NULL;
   const struct ResvItem *resv = NULL;
@@ -1183,12 +1183,12 @@ channel_part_one_client(struct Client *client, const char *name, const char *rea
 }
 
 void
-channel_do_part(struct Client *client, char *channel, const char *reason)
+channel_part_list(struct Client *client, char *list, const char *reason)
 {
   char *p = NULL;
   assert(IsClient(client));
 
-  for (const char *name = strtok_r(channel, ",", &p); name;
-                   name = strtok_r(NULL,    ",", &p))
+  for (const char *name = strtok_r(list, ",", &p); name;
+                   name = strtok_r(NULL, ",", &p))
     channel_part_one_client(client, name, reason);
 }

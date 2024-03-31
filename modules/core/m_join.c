@@ -150,7 +150,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
 static void
 m_join(struct Client *source_p, int parc, char *parv[])
 {
-  channel_do_join(source_p, parv[1], parv[2]);
+  channel_join_list(source_p, parv[1], parv[2]);
 }
 
 /* ms_join()

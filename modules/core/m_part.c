@@ -53,7 +53,7 @@
 static void
 m_part(struct Client *source_p, int parc, char *parv[])
 {
-  channel_do_part(source_p, parv[1], parv[2]);
+  channel_part_list(source_p, parv[1], parv[2]);
 }
 
 static struct Command part_msgtab =

@@ -123,8 +123,8 @@ extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
 extern bool find_bmask(struct Client *, struct Channel*, const dlink_list *, struct Extban *);
 extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
 
-extern void channel_do_join(struct Client *, char *, char *);
-extern void channel_do_part(struct Client *, char *, const char *);
+extern void channel_join_list(struct Client *, char *, char *);
+extern void channel_part_list(struct Client *, char *, const char *);
 extern void remove_ban(struct Ban *, dlink_list *);
 extern void channel_add_user(struct Channel *, struct Client *, unsigned int, bool);
 extern void channel_remove_user(struct ChannelMember *);

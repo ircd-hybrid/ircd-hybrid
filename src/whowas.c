@@ -137,7 +137,7 @@ whowas_add_history(struct Client *client, bool online)
 
   assert(IsClient(client));
 
-  whowas->hash_value = strhash(client->name);
+  whowas->hash_value = hash_string(client->name);
   whowas->logoff = event_base->time.sec_real;
   whowas->server_hidden = IsHidden(client->servptr) != 0;
 
@@ -199,7 +199,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   timelimit = event_base->time.sec_real - timelimit;
 
   dlink_node *node;
-  DLINK_FOREACH(node, whowas_hash[strhash(name)].head)
+  DLINK_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
     struct Whowas *whowas = node->data;
 

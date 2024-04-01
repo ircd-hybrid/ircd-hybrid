@@ -65,21 +65,19 @@ enum
   HASH_TYPE_CHANNEL
 };
 
+extern unsigned int hash_string(const char *);
+extern void *hash_get_bucket(int, unsigned int);
 extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);
 extern void hash_del_channel(struct Channel *);
 extern void hash_add_id(struct Client *);
 extern void hash_del_id(struct Client *);
-
 extern struct Client *hash_find_id(const char *);
 extern struct Client *hash_find_client(const char *);
 extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
-extern void *hash_get_bucket(int, unsigned int);
 
 extern void free_list_task(struct Client *);
 extern void safe_list_channels(struct Client *, bool);
-
-extern unsigned int strhash(const char *);
 #endif  /* INCLUDED_hash_h */

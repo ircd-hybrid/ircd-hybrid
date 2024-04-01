@@ -55,7 +55,7 @@ do_whowas(struct Client *source_p, char *parv[])
   if (!MyConnect(source_p) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
     max = WHOWAS_MAX_REPLIES;
 
-  DLINK_FOREACH(node, whowas_get_hash(strhash(parv[1]))->head)
+  DLINK_FOREACH(node, whowas_get_hash(hash_string(parv[1]))->head)
   {
     const struct Whowas *whowas = node->data;
 

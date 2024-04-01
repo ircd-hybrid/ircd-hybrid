@@ -80,7 +80,7 @@ monitor_find_hash(const char *name)
 {
   dlink_node *node;
 
-  DLINK_FOREACH(node, monitor_hash[strhash(name)].head)
+  DLINK_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
     struct Monitor *monitor = node->data;
 
@@ -167,7 +167,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
   {
     monitor = xcalloc(sizeof(*monitor));
     monitor->name = xstrdup(name);
-    monitor->hash_value = strhash(monitor->name);
+    monitor->hash_value = hash_string(monitor->name);
 
     dlinkAdd(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
   }

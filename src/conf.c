@@ -425,7 +425,6 @@ conf_detach(struct Client *client, enum maskitem_type type)
 int
 conf_attach(struct Client *client, struct MaskItem *conf)
 {
-  assert(dlinkFind(&client->connection->confs, conf) == NULL);
   if (dlinkFind(&client->connection->confs, conf))
     return 1;
 

@@ -26,6 +26,7 @@
 #include "ltdl.h"
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "list.h"
 #include "modules.h"
 #include "log.h"

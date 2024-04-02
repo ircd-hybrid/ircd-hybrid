@@ -29,6 +29,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "user.h"
 #include "list.h"
 #include "ircd.h"

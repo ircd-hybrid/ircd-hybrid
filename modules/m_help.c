@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"

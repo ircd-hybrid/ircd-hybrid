@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "fdlist.h"
 #include "irc_string.h"
 #include "s_bsd.h"   /* comm_setselect */

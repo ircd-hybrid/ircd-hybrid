@@ -70,11 +70,11 @@
 #line 27 "conf_parser.y"
 
 
-#include "config.h"
 #include "stdinc.h"
+#include "defaults.h"
 #include "ircd.h"
 #include "list.h"
-#include "parse.h"
+#include "command.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"

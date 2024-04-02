@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "list.h"
 #include "user.h"
 #include "channel.h"

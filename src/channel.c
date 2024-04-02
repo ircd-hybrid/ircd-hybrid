@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "list.h"
 #include "channel.h"
 #include "channel_invite.h"

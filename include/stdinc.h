@@ -27,8 +27,6 @@
 
 #include "config.h"
 
-#include "defaults.h"
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>

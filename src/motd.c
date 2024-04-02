@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "defaults.h"
 #include "list.h"
 #include "ircd.h"
 #include "conf.h"

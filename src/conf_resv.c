@@ -24,12 +24,13 @@
  */
 
 #include "stdinc.h"
+#include "irc_string.h"
 #include "list.h"
 #include "send.h"
 #include "client.h"
 #include "memory.h"
 #include "ircd.h"
-#include "irc_string.h"
+#include "event.h"
 #include "ircd_defs.h"
 #include "misc.h"
 #include "conf.h"

@@ -25,9 +25,7 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "ircd.h"
 #include "conf.h"
-#include "hostmask.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "patricia.h"

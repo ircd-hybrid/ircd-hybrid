@@ -25,7 +25,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "ircd.h"
 #include "event.h"
 #include "rng_mt.h"
 #include "log.h"

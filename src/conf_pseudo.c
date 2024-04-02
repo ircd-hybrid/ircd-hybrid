@@ -33,12 +33,9 @@
 #include "parse.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "ircd.h"
 #include "numeric.h"
 #include "send.h"
 #include "memory.h"
-#include "user.h"
-#include "server.h"
 #include "conf_pseudo.h"
 
 static dlink_list pseudo_list;  /**< List to manage pseudo items. */

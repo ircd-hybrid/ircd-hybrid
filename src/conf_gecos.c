@@ -27,9 +27,8 @@
 #include "list.h"
 #include "send.h"
 #include "client.h"
-#include "ircd.h"
+#include "event.h"
 #include "memory.h"
-#include "conf.h"
 #include "conf_gecos.h"
 
 

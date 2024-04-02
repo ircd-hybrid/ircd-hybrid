@@ -31,8 +31,6 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "ircd.h"
-#include "conf.h"
 #include "send.h"
 #include "numeric.h"
 #include "client.h"

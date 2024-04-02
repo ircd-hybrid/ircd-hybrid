@@ -479,21 +479,22 @@ void
 free_list_task(struct Client *client)
 {
   struct ListTask *const lt = client->connection->list_task;
-  dlink_node *node, *node_next;
 
   dlinkDelete(&lt->node, &listing_client_list);
 
-  DLINK_FOREACH_SAFE(node, node_next, lt->show_mask.head)
+  while (lt->show_mask.head)
   {
-    xfree(node->data);
+    dlink_node *node = lt->show_mask.head;
     dlinkDelete(node, &lt->show_mask);
+    xfree(node->data);
     free_dlink_node(node);
   }
 
-  DLINK_FOREACH_SAFE(node, node_next, lt->hide_mask.head)
+  while (lt->hide_mask.head)
   {
-    xfree(node->data);
+    dlink_node *node = lt->hide_mask.head;
     dlinkDelete(node, &lt->hide_mask);
+    xfree(node->data);
     free_dlink_node(node);
   }
 

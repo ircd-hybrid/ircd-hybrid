@@ -258,7 +258,7 @@ command_find(const char *name)
  * side effects	- client is shown list of commands
  */
 void
-command_report(struct Client *source)
+command_report(struct Client *client)
 {
   const struct CommandTree *const tree = &command_tree;
   const struct CommandTree *stack[MAXPTRLEN * MAXPTRLEN];
@@ -273,7 +273,7 @@ command_report(struct Client *source)
     const struct CommandTree *current = stack[--top];
 
     if (current->command)
-      sendto_one_numeric(source, &me, RPL_STATSCOMMANDS,
+      sendto_one_numeric(client, &me, RPL_STATSCOMMANDS,
                          current->command->name,
                          current->command->count,
                          current->command->bytes,

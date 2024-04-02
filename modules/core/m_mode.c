@@ -53,7 +53,6 @@
 static void
 set_user_mode(struct Client *source_p, const int parc, char *parv[])
 {
-  const char *cloak = NULL;
   const struct user_modes *tab = NULL;
   const unsigned int oldmodes = source_p->umodes;
   bool badmode = false;
@@ -134,16 +133,13 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
             if (HasFlag(source_p, FLAGS_SPOOF))
               break;
 
-            cloak = cloak_compute(&source_p->ip);
+            const char *const cloak = cloak_compute(&source_p->ip);
             if (cloak == NULL)
               break;
+            user_set_hostmask(source_p, cloak, true);
           }
 
           AddUMode(source_p, UMODE_CLOAK);
-
-          if (!MyConnect(source_p))
-            break;
-          user_set_hostmask(source_p, cloak, true);
         }
         else
         {
@@ -152,9 +148,8 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
 
           DelUMode(source_p, UMODE_CLOAK);
 
-          if (!MyConnect(source_p))
-            break;
-          user_set_hostmask(source_p, source_p->realhost, true);
+          if (MyConnect(source_p))
+            user_set_hostmask(source_p, source_p->realhost, true);
         }
 
       case 'S':  /* Only servers may set +S in a burst */

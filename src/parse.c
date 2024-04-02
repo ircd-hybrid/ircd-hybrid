@@ -179,7 +179,7 @@ parse_handle_command(struct Command *command, struct Client *source,
  * NOTE: parse() should not be called recusively by any other functions!
  */
 void
-parse_message(struct Client *client, char *buffer, char *buffer_end)
+parse_message(struct Client *client, char *buffer, const char *buffer_end)
 {
   struct Client *from = client;
   struct Command *command = NULL;

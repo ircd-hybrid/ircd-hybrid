@@ -245,7 +245,7 @@ check_pings_list(dlink_list *list)
                                  "No response from %s, closing link",
                                  client_get_name(client, MASK_IP));
             log_write(LOG_TYPE_IRCD, "No response from %s, closing link",
-                 client_get_name(client, SHOW_IP));
+                      client_get_name(client, SHOW_IP));
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
@@ -289,7 +289,7 @@ check_unknowns_list(void)
                            "No response from %s during handshake, closing link",
                            client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
-           client_get_name(client, SHOW_IP));
+                client_get_name(client, SHOW_IP));
       exit = true;
     }
     else if (HasFlag(client, FLAGS_FINISHED_AUTH))
@@ -528,8 +528,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
   {
     case SHOW_IP:
       snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client->name,
-               client->username, client->sockhost);
+               client->name, client->username, client->sockhost);
       break;
     case MASK_IP:
       if (client->ip.ss.ss_family == AF_INET)
@@ -541,8 +540,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
       break;
     default:  /* HIDE_IP */
       snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client->name,
-               client->username, client->host);
+               client->name, client->username, client->host);
   }
 
   return buf;
@@ -592,13 +590,12 @@ client_close_connection(struct Client *client)
   }
   else if (IsServer(client))
   {
-    dlink_node *node;
-
     ++ServerStats.is_sv;
     ServerStats.is_sbs += client->connection->send.bytes;
     ServerStats.is_sbr += client->connection->recv.bytes;
     ServerStats.is_sti += event_base->time.sec_monotonic - client->connection->created_monotonic;
 
+    dlink_node *node;
     DLINK_FOREACH(node, connect_items.head)
     {
       struct MaskItem *conf = node->data;
@@ -641,8 +638,6 @@ client_close_connection(struct Client *client)
 static void
 exit_one_client(struct Client *client, const char *comment)
 {
-  dlink_node *node, *node_next;
-
   assert(!IsMe(client));
   assert(client != &me);
 
@@ -663,9 +658,9 @@ exit_one_client(struct Client *client, const char *comment)
      * (Note: The notice is to the local clients *only*)
      */
     sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
-                                 client->name, client->username,
-                                 client->host, comment);
+                                 client->name, client->username, client->host, comment);
 
+    dlink_node *node, *node_next;
     DLINK_FOREACH_SAFE(node, node_next, client->channel.head)
       channel_remove_user(node->data);
 
@@ -678,8 +673,7 @@ exit_one_client(struct Client *client, const char *comment)
   }
   else if (IsServer(client))
   {
-    sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
-                         "Server %s split from %s",
+    sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE, "Server %s split from %s",
                          client->name, client->servptr->name);
 
     dlinkDelete(&client->lnode, &client->servptr->serv->server_list);
@@ -789,18 +783,17 @@ exit_client(struct Client *client, const char *comment)
 
       monitor_clear_list(client);
 
-      sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
-                           "Client exiting: %s (%s@%s) [%s] [%s]",
+      sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE, "Client exiting: %s (%s@%s) [%s] [%s]",
                            client->name, client->username, client->realhost,
                            client->sockhost, comment);
 
       log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
-           date_ctime(client->connection->created_real),
-           event_base->time.sec_monotonic - client->connection->created_monotonic,
-           client->name, client->username, client->host,
-           client->sockhost, client->account,
-           client->connection->send.bytes >> 10,
-           client->connection->recv.bytes >> 10, client->info);
+                date_ctime(client->connection->created_real),
+                event_base->time.sec_monotonic - client->connection->created_monotonic,
+                client->name, client->username, client->host,
+                client->sockhost, client->account,
+                client->connection->send.bytes >> 10,
+                client->connection->recv.bytes >> 10, client->info);
     }
     else if (IsServer(client))
     {
@@ -859,9 +852,9 @@ exit_client(struct Client *client, const char *comment)
                            client->connection->send.bytes >> 10,
                            client->connection->recv.bytes >> 10);
       log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
-           client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic),
-           client->connection->send.bytes >> 10,
-           client->connection->recv.bytes >> 10);
+                client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic),
+                client->connection->send.bytes >> 10,
+                client->connection->recv.bytes >> 10);
     }
   }
   else if (IsClient(client) && !HasFlag(client, FLAGS_KILLED))
@@ -885,8 +878,6 @@ exit_client(struct Client *client, const char *comment)
 void
 dead_link_on_write(struct Client *client, int ierrno)
 {
-  dlink_node *node;
-
   if (IsDefunct(client))
     return;
 
@@ -894,7 +885,7 @@ dead_link_on_write(struct Client *client, int ierrno)
   dbuf_clear(&client->connection->buf_sendq);
 
   assert(dlinkFind(&abort_list, client) == NULL);
-  node = make_dlink_node();
+  dlink_node *node = make_dlink_node();
   /* don't let exit_aborted_clients() finish yet */
   dlinkAddTail(client, node, &abort_list);
 
@@ -933,7 +924,7 @@ dead_link_on_read(struct Client *client, int error)
                            "Server %s closed the connection",
                            client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "Server %s closed the connection",
-           client_get_name(client, SHOW_IP));
+                client_get_name(client, SHOW_IP));
     }
     else
     {
@@ -944,20 +935,17 @@ dead_link_on_read(struct Client *client, int error)
                            "Lost connection to %s: %s",
                            client_get_name(client, MASK_IP), strerror(current_error));
       log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
-           client_get_name(client, SHOW_IP), strerror(current_error));
+                client_get_name(client, SHOW_IP), strerror(current_error));
     }
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s was connected for %s",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s was connected for %s",
                          client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic));
   }
 
   if (error == 0)
-    strlcpy(errmsg, "Remote host closed the connection",
-            sizeof(errmsg));
+    strlcpy(errmsg, "Remote host closed the connection", sizeof(errmsg));
   else
-    snprintf(errmsg, sizeof(errmsg), "Read error: %s",
-             strerror(current_error));
+    snprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
 
   exit_client(client, errmsg);
 }

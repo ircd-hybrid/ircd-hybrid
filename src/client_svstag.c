@@ -57,8 +57,6 @@ void
 svstag_attach(dlink_list *list, unsigned int numeric,
               const char *umodes, const char *tag)
 {
-  const struct user_modes *tab = NULL;
-
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;
 
@@ -66,6 +64,7 @@ svstag_attach(dlink_list *list, unsigned int numeric,
   svstag->numeric = numeric;
   svstag->tag = xstrdup(tag);
 
+  const struct user_modes *tab;
   for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)
     if ((tab = umode_map[(unsigned char)*m]))
       svstag->umodes |= tab->flag;

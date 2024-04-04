@@ -309,13 +309,13 @@ write_pidfile(const char *filename)
 
     if (fputs(buf, fb) == -1)
       log_write(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
-           filename, strerror(errno));
+                filename, strerror(errno));
 
     fclose(fb);
   }
   else
     log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
-         filename, strerror(errno));
+              filename, strerror(errno));
 }
 
 /**
@@ -334,11 +334,11 @@ check_pidfile(const char *filename)
 
   if (fb)
   {
-    char buf[IRCD_BUFSIZE]; 
+    char buf[IRCD_BUFSIZE];
 
     if (fgets(buf, 20, fb) == NULL)
       log_write(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
-           filename, strerror(errno));
+                filename, strerror(errno));
     else
     {
       pid_t pid = atoi(buf);
@@ -355,7 +355,7 @@ check_pidfile(const char *filename)
   }
   else if (errno != ENOENT)
     log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
-         filename, strerror(errno));
+              filename, strerror(errno));
 }
 
 /**

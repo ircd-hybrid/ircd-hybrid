@@ -59,7 +59,7 @@ parse_remove_unknown(struct Client *client, const char *lsender, char *lbuffer)
   if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) || strchr(lsender, '.'))
   {
     log_write(LOG_TYPE_DEBUG, "Unknown prefix (%s) from %s, Squitting %s",
-         lbuffer, client_get_name(client, SHOW_IP), lsender);
+              lbuffer, client_get_name(client, SHOW_IP), lsender);
     sendto_one(client, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
                me.id, lsender, lbuffer, client->name);
   }
@@ -123,8 +123,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, int parc, char
     if (channel == NULL)
       return;
 
-    sendto_channel_butone(source, source, channel, 0, "%u %s %s",
-                          numeric, channel->name, parv[2]);
+    sendto_channel_butone(source, source, channel, 0, "%u %s %s", numeric, channel->name, parv[2]);
   }
   else
   {
@@ -235,7 +234,7 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
       {
         ++ServerStats.is_wrdi;
         log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-             from->name, from->from->name, client_get_name(client, SHOW_IP));
+                  from->name, from->from->name, client_get_name(client, SHOW_IP));
         return;
       }
     }

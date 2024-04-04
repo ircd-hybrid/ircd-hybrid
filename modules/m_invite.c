@@ -140,9 +140,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
   if (MyConnect(target_p))
   {
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
-               source_p->name, source_p->username,
-               source_p->host,
-               target_p->name, channel->name);
+               source_p->name, source_p->username, source_p->host, target_p->name, channel->name);
 
     if (HasCMode(channel, MODE_INVITEONLY))
       invite_add(channel, target_p);  /* Add the invite if channel is +i */
@@ -157,8 +155,7 @@ m_invite(struct Client *source_p, int parc, char *parv[])
                        ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
                        source_p->host, target_p->name, channel->name);
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
-                source_p->id, target_p->id,
-                channel->name, channel->creation_time);
+                source_p->id, target_p->id, channel->name, channel->creation_time);
 }
 
 /*! \brief INVITE command handler
@@ -196,9 +193,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
   if (MyConnect(target_p))
   {
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s",
-               source_p->name, source_p->username,
-               source_p->host,
-               target_p->name, channel->name);
+               source_p->name, source_p->username, source_p->host, target_p->name, channel->name);
 
     if (HasCMode(channel, MODE_INVITEONLY))
       invite_add(channel, target_p);  /* Add the invite if channel is +i */
@@ -213,8 +208,7 @@ ms_invite(struct Client *source_p, int parc, char *parv[])
                        ":%s!%s@%s INVITE %s %s", source_p->name, source_p->username,
                        source_p->host, target_p->name, channel->name);
   sendto_server(source_p, 0, 0, ":%s INVITE %s %s %ju",
-                source_p->id, target_p->id,
-                channel->name, channel->creation_time);
+                source_p->id, target_p->id, channel->name, channel->creation_time);
 }
 
 

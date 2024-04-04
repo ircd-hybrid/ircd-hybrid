@@ -143,10 +143,10 @@ capab_get(const void *ptr, bool active)
 {
   static char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  dlink_node *node;
 
   *bufptr = '\0';  /* buf is static */
 
+  dlink_node *node;
   DLINK_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;

@@ -58,7 +58,6 @@ void
 write_links_file(void *unused)
 {
   char buf[IRCD_BUFSIZE];
-  dlink_node *node, *node_next;
 
   if (EmptyString(ConfigServerHide.flatten_links_file))
     return;
@@ -66,11 +65,12 @@ write_links_file(void *unused)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "w");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
-         strerror(errno));
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s",
+              ConfigServerHide.flatten_links_file, strerror(errno));
     return;
   }
 
+  dlink_node *node, *node_next;
   DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
     dlinkDelete(node, &flatten_links);
@@ -119,8 +119,8 @@ read_links_file(void)
   FILE *file = fopen(ConfigServerHide.flatten_links_file, "r");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", ConfigServerHide.flatten_links_file,
-         strerror(errno));
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s",
+              ConfigServerHide.flatten_links_file, strerror(errno));
     return;
   }
 
@@ -379,9 +379,6 @@ server_make(struct Client *client)
 bool
 server_connect(struct MaskItem *conf, struct Client *by)
 {
-  char buf[HOSTIPLEN + 1];
-
-  /* Make sure conf is useful */
   assert(conf);
   assert(conf->type == CONF_SERVER);
   assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
@@ -403,6 +400,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
     return false;
   }
 
+  char buf[HOSTIPLEN + 1];
   getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
@@ -469,9 +467,11 @@ server_finish_tls_handshake(struct Client *client)
   if (conf == NULL)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
+                         "Lost connect{} block for %s",
+                         client_get_name(client, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client, MASK_IP));
+                         "Lost connect{} block for %s",
+                         client_get_name(client, MASK_IP));
 
     exit_client(client, "Lost connect{} block");
     return;
@@ -537,7 +537,7 @@ server_tls_handshake(fde_t *F, void *data)
 
   if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->tls_certfp) == false)
     log_write(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
-         client_get_name(client, MASK_IP));
+              client_get_name(client, MASK_IP));
 
   server_finish_tls_handshake(client);
 }

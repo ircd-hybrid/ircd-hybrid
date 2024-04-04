@@ -211,7 +211,7 @@ parse_client_queued(struct Client *client)
        */
       if (checkflood)
         if (client->connection->sent_parsed >=
-          (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
+            (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
       const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);

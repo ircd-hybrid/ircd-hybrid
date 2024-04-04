@@ -312,8 +312,7 @@ register_local_user(struct Client *client)
   {
     char buf[sizeof("Invalid username []") + sizeof(client->username)];
 
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                         "Invalid username: %s (%s@%s)",
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Invalid username: %s (%s@%s)",
                          client->name, client->username, client->host);
     ++ServerStats.is_ref;
     snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
@@ -646,8 +645,7 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
 
   if (send_client)
     sendto_one(client, ":%s!%s@%s MODE %s :%s",
-               client->name, client->username,
-               client->host, client->name, buf);
+               client->name, client->username, client->host, client->name, buf);
   if (send_server)
     sendto_server(client, 0, 0, ":%s MODE %s :%s",
                   client->id, client->id, buf);
@@ -729,8 +727,6 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   }
 
   if (client->away[0])
-    sendto_common_channels_local(client, false, CAP_AWAY_NOTIFY, CAP_CHGHOST,
-                                 ":%s!%s@%s AWAY :%s",
-                                 client->name, client->username,
-                                 client->host, client->away);
+    sendto_common_channels_local(client, false, CAP_AWAY_NOTIFY, CAP_CHGHOST, ":%s!%s@%s AWAY :%s",
+                                 client->name, client->username, client->host, client->away);
 }

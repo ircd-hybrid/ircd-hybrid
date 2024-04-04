@@ -166,8 +166,6 @@ sendq_unblocked(fde_t *F, void *data)
 void
 send_queued_write(struct Client *to)
 {
-  ssize_t retlen;
-
   /*
    * Once socket is marked dead, we cannot start writing to it,
    * even if the error is removed...
@@ -178,6 +176,7 @@ send_queued_write(struct Client *to)
   /* Next, lets try to write some data */
   while (dbuf_length(&to->connection->buf_sendq))
   {
+    ssize_t retlen;
     bool want_read = false;
     const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
@@ -224,16 +223,14 @@ send_queued_write(struct Client *to)
 void
 sendto_one(struct Client *to, const char *pattern, ...)
 {
-  va_list args;
-
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
-  va_start(args, pattern);
-
   struct dbuf_block *buffer = dbuf_alloc();
-  send_format(buffer, pattern, args);
 
+  va_list args;
+  va_start(args, pattern);
+  send_format(buffer, pattern, args);
   va_end(args);
 
   send_message(to->from, buffer);
@@ -244,7 +241,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-  va_list args;
 
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
@@ -256,6 +252,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   struct dbuf_block *buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
+  va_list args;
   va_start(args, numeric);
 
   const char *numstr;
@@ -275,8 +272,6 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *pattern, ...)
 {
-  va_list args;
-
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
@@ -287,6 +282,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
   struct dbuf_block *buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
@@ -388,14 +384,14 @@ sendto_server(const struct Client *one,
               const unsigned int nocapab,
               const char *format, ...)
 {
-  va_list args;
-  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
+  va_list args;
   va_start(args, format);
   send_format(buffer, format, args);
   va_end(args);
 
+  dlink_node *node;
   DLINK_FOREACH(node, local_server_list.head)
   {
     struct Client *client = node->data;
@@ -435,16 +431,16 @@ void
 sendto_common_channels_local(struct Client *user, bool touser, unsigned int poscap,
                              unsigned int negcap, const char *pattern, ...)
 {
-  va_list args;
-  dlink_node *node, *node2;
   struct dbuf_block *buffer = dbuf_alloc();
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
   ++send_marker;
 
+  dlink_node *node, *node2;
   DLINK_FOREACH(node, user->channel.head)
   {
     struct ChannelMember *member = node->data;
@@ -494,14 +490,14 @@ void
 sendto_channel_local(const struct Client *one, struct Channel *channel, int rank,
                      unsigned int poscap, unsigned int negcap, const char *pattern, ...)
 {
-  va_list args;
-  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
+  dlink_node *node;
   DLINK_FOREACH(node, channel->members_local.head)
   {
     struct ChannelMember *member = node->data;
@@ -647,18 +643,18 @@ void
 sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int capab,
                    const char *pattern, ...)
 {
-  va_list args;
-  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source_p->id);
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
   ++send_marker;
 
+  dlink_node *node;
   DLINK_FOREACH(node, global_server_list.head)
   {
     struct Client *target = node->data;
@@ -704,8 +700,6 @@ sendto_anywhere(struct Client *to, const struct Client *from,
                 const char *command,
                 const char *pattern, ...)
 {
-  va_list args;
-
   if (IsDead(to->from))
     return;
 
@@ -717,6 +711,7 @@ sendto_anywhere(struct Client *to, const struct Client *from,
     dbuf_put_fmt(buffer, ":%s %s %s ", ID_or_name(from, to),
                  command, ID_or_name(to, to));
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
@@ -740,8 +735,6 @@ sendto_anywhere(struct Client *to, const struct Client *from,
 void
 sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
 {
-  va_list args;
-  dlink_node *node;
   const char *ntype = "???";
 
   switch (type)
@@ -762,10 +755,12 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
   struct dbuf_block *buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
+  dlink_node *node;
   DLINK_FOREACH(node, oper_list.head)
   {
     struct Client *client = node->data;
@@ -801,7 +796,6 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
 void
 sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
 {
-  va_list args;
   char buffer[IRCD_BUFSIZE];
 
   if ((event_base->time.sec_monotonic - *rate) < 20)
@@ -809,6 +803,7 @@ sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
 
   *rate = event_base->time.sec_monotonic;
 
+  va_list args;
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);
   va_end(args);
@@ -829,8 +824,6 @@ void
 sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
                      const char *pattern, ...)
 {
-  va_list args;
-  dlink_node *node;
   struct dbuf_block *buffer = dbuf_alloc();
 
   if (IsClient(source_p))
@@ -838,10 +831,12 @@ sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
   else
     dbuf_put_fmt(buffer, ":%s WALLOPS :", source_p->name);
 
+  va_list args;
   va_start(args, pattern);
   send_format(buffer, pattern, args);
   va_end(args);
 
+  dlink_node *node;
   DLINK_FOREACH(node, oper_list.head)
   {
     struct Client *client = node->data;

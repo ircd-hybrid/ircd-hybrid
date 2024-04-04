@@ -125,8 +125,7 @@ motd_cache(struct Motd *motd)
   /* Need the file's modification time */
   if (stat(motd->path, &sb) == -1)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path,
-         strerror(errno));
+    log_write(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path, strerror(errno));
     return 0;
   }
 
@@ -134,8 +133,7 @@ motd_cache(struct Motd *motd)
   FILE *file = fopen(motd->path, "r");
   if (file == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path,
-         strerror(errno));
+    log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path, strerror(errno));
     return 0;
   }
 
@@ -399,8 +397,7 @@ motd_report(struct Client *client, int parc, char *parv[])
   DLINK_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
-    sendto_one_numeric(client, &me, RPL_STATSTLINE,
-                       motd->mask, motd->path);
+    sendto_one_numeric(client, &me, RPL_STATSTLINE, motd->mask, motd->path);
   }
 }
 
@@ -433,7 +430,6 @@ motd_memory_count(struct Client *client)
   DLINK_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
-
     ++mt;
     mtm += sizeof(struct Motd);
     mtm += motd->path ? (strlen(motd->path) + 1) : 0;
@@ -443,13 +439,11 @@ motd_memory_count(struct Client *client)
   DLINK_FOREACH(node, MotdList.cachelist.head)
   {
     const struct MotdCache *cache = node->data;
-
     ++mtc;
     mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
     mtcm += cache->path ? (strlen(cache->path) + 1) : 0;
   }
 
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Motds %u(%zu) Cache %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Motds %u(%zu) Cache %u(%zu)",
                      mt, mtm, mtc, mtcm);
 }

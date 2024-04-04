@@ -98,19 +98,17 @@ monitor_find_hash(const char *name)
 void
 monitor_signon(const struct Client *client)
 {
-  char buf[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  dlink_node *node;
-
   assert(IsClient(client));
 
   struct Monitor *monitor = monitor_find_hash(client->name);
   if (monitor == NULL)
     return;  /* This name isn't on monitor */
 
-  snprintf(buf, sizeof(buf), "%s!%s@%s", client->name,
-           client->username, client->host);
+  char buf[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
+  snprintf(buf, sizeof(buf), "%s!%s@%s", client->name, client->username, client->host);
 
   /* Send notifies out to everybody on the list in header */
+  dlink_node *node;
   DLINK_FOREACH(node, monitor->monitored_by.head)
     sendto_one_numeric(node->data, &me, RPL_MONONLINE, buf);
 }
@@ -122,8 +120,6 @@ monitor_signon(const struct Client *client)
 void
 monitor_signoff(const struct Client *client)
 {
-  dlink_node *node;
-
   assert(IsClient(client));
 
   struct Monitor *monitor = monitor_find_hash(client->name);
@@ -131,6 +127,7 @@ monitor_signoff(const struct Client *client)
     return;  /* This name isn't on monitor */
 
   /* Send notifies out to everybody on the list in header */
+  dlink_node *node;
   DLINK_FOREACH(node, monitor->monitored_by.head)
     sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
 }

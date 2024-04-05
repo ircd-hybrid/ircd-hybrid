@@ -48,8 +48,7 @@
  * \param source_p The actual Client the new accept is added to.
  */
 void
-accept_add(const char *nick,
-           const char *user,
+accept_add(const char *nick, const char *user,
            const char *host, dlink_list *list)
 {
   struct AcceptItem *accept = xcalloc(sizeof(*accept));
@@ -86,8 +85,7 @@ accept_clear_list(dlink_list *list)
 }
 
 struct AcceptItem *
-accept_find(const char *nick,
-            const char *user,
+accept_find(const char *nick, const char *user,
             const char *host, dlink_list *list,
             int (*compare)(const char *, const char *))
 {
@@ -114,8 +112,7 @@ accept_find(const char *nick,
  * side effects - See if source is on target's allow list
  */
 bool
-accept_message(struct Client *source,
-               struct Client *target)
+accept_message(struct Client *source, struct Client *target)
 {
   dlink_node *node;
 

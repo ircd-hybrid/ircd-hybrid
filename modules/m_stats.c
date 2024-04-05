@@ -96,22 +96,22 @@ oper_privs_as_string(const unsigned int flags)
   };
 
   static char buf[sizeof(flag_table) / sizeof(flag_table[0])];
-  char *p = buf;
+  char *bufptr = buf;
 
   for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
     if (flags & tab->flag)
-      *p++ = tab->letter;
+      *bufptr++ = tab->letter;
 
-  if (p == buf)
-    *p++ = '0';
+  if (bufptr == buf)
+    *bufptr++ = '0';
 
-  *p = '\0';
+  *bufptr = '\0';
 
   return buf;
 }
 
 static void
-report_shared(struct Client *source_p)
+report_shared(struct Client *client)
 {
   static const struct shared_types
   {
@@ -136,25 +136,25 @@ report_shared(struct Client *source_p)
   DLINK_FOREACH(node, shared_get_list()->head)
   {
     const struct SharedItem *shared = node->data;
-    char *p = buf;
+    char *bufptr = buf;
 
-    *p++ = 'c';
+    *bufptr++ = 'c';
 
     for (const struct shared_types *tab = flag_table; tab->type; ++tab)
       if (tab->type & shared->type)
-        *p++ = tab->letter;
+        *bufptr++ = tab->letter;
       else
-        *p++ = ToLower(tab->letter);
+        *bufptr++ = ToLower(tab->letter);
 
-    *p = '\0';
+    *bufptr = '\0';
 
-    sendto_one_numeric(source_p, &me, RPL_STATSULINE,
+    sendto_one_numeric(client, &me, RPL_STATSULINE,
                        shared->server, shared->user, shared->host, buf);
   }
 }
 
 static void
-report_cluster(struct Client *source_p)
+report_cluster(struct Client *client)
 {
   static const struct cluster_types
   {
@@ -179,43 +179,43 @@ report_cluster(struct Client *source_p)
   DLINK_FOREACH(node, cluster_get_list()->head)
   {
     const struct ClusterItem *cluster = node->data;
-    char *p = buf;
+    char *bufptr = buf;
 
-    *p++ = 'C';
+    *bufptr++ = 'C';
 
     for (const struct cluster_types *tab = flag_table; tab->type; ++tab)
       if (tab->type & cluster->type)
-        *p++ = tab->letter;
+        *bufptr++ = tab->letter;
       else
-        *p++ = ToLower(tab->letter);
+        *bufptr++ = ToLower(tab->letter);
 
-    *p = '\0';
+    *bufptr = '\0';
 
-    sendto_one_numeric(source_p, &me, RPL_STATSULINE, cluster->server, "*", "*", buf);
+    sendto_one_numeric(client, &me, RPL_STATSULINE, cluster->server, "*", "*", buf);
   }
 }
 
 static void
-stats_service(struct Client *source_p, int parc, char *parv[])
+stats_service(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, service_get_list()->head)
   {
     const struct ServiceItem *service = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSSERVICE, "*", service->name, 0, 0);
+    sendto_one_numeric(client, &me, RPL_STATSSERVICE, "*", service->name, 0, 0);
   }
 }
 
 static void
-stats_gecos(struct Client *source_p, int parc, char *parv[])
+stats_gecos(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, gecos_get_list()->head)
   {
     const struct GecosItem *gecos = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSXLINE,
+    sendto_one_numeric(client, &me, RPL_STATSXLINE,
                        gecos->expire ? 'x' : 'X', gecos->mask, gecos->reason);
   }
 }
@@ -227,11 +227,11 @@ stats_gecos(struct Client *source_p, int parc, char *parv[])
  * side effects	-
  */
 static void
-stats_operator(struct Client *source_p, int parc, char *parv[])
+stats_operator(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
+  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -241,44 +241,44 @@ stats_operator(struct Client *source_p, int parc, char *parv[])
     const struct MaskItem *conf = node->data;
 
     /* Don't allow non opers to see oper privs */
-    if (HasUMode(source_p, UMODE_OPER))
-      sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+    if (HasUMode(client, UMODE_OPER))
+      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                          conf->name, oper_privs_as_string(conf->port),
                          conf->class->name);
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
+      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                          conf->name, "0", conf->class->name);
   }
 }
 
 static void
-stats_connect(struct Client *source_p, int parc, char *parv[])
+stats_connect(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, connect_items.head)
   {
     char buf[8];
-    char *p = buf;
+    char *bufptr = buf;
     const struct MaskItem *conf = node->data;
 
     if (IsConfAllowAutoConn(conf))
-      *p++ = 'A';
+      *bufptr++ = 'A';
     if (IsConfTLS(conf))
-      *p++ = 'T';
-    if (p == buf)
-      *p++ = '*';
+      *bufptr++ = 'T';
+    if (bufptr == buf)
+      *bufptr++ = '*';
 
-    *p = '\0';
+    *bufptr = '\0';
 
     /*
      * Allow admins to see actual ips unless 'hide_server_ips' is enabled
      */
-    if (ConfigServerHide.hide_server_ips == 0 && HasUMode(source_p, UMODE_ADMIN))
-      sendto_one_numeric(source_p, &me, RPL_STATSCLINE,
+    if (ConfigServerHide.hide_server_ips == 0 && HasUMode(client, UMODE_ADMIN))
+      sendto_one_numeric(client, &me, RPL_STATSCLINE,
                          'C', conf->host, buf, conf->name, conf->port, conf->class->name);
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSCLINE,
+      sendto_one_numeric(client, &me, RPL_STATSCLINE,
                          'C', "*@127.0.0.1", buf, conf->name, conf->port, conf->class->name);
   }
 }
@@ -290,27 +290,27 @@ stats_connect(struct Client *source_p, int parc, char *parv[])
  * side effects - report all resvs to client.
  */
 static void
-stats_resv(struct Client *source_p, int parc, char *parv[])
+stats_resv(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, resv_chan_get_list()->head)
   {
     const struct ResvItem *resv = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
+    sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expire ? 'q' : 'Q', resv->mask, resv->reason);
   }
 
   DLINK_FOREACH(node, resv_nick_get_list()->head)
   {
     const struct ResvItem *resv = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSQLINE,
+    sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expire ? 'q' : 'Q', resv->mask, resv->reason);
   }
 }
 
 static void
-stats_memory(struct Client *source_p, int parc, char *parv[])
+stats_memory(struct Client *client, int parc, char *parv[])
 {
   unsigned int local_client_conf_count = 0;      /* local client conf links */
   unsigned int channel_members = 0;
@@ -341,15 +341,15 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   dlink_node *node, *node2;
   DLINK_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target_p = node->data;
-    local_client_conf_count += dlink_list_length(&target_p->connection->confs);
+    const struct Client *target = node->data;
+    local_client_conf_count += dlink_list_length(&target->connection->confs);
   }
 
   DLINK_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target_p = node->data;
-    local_client_conf_count += dlink_list_length(&target_p->connection->confs);
-    monitor_list_entries += dlink_list_length(&target_p->connection->monitors);
+    const struct Client *target = node->data;
+    local_client_conf_count += dlink_list_length(&target->connection->confs);
+    monitor_list_entries += dlink_list_length(&target->connection->monitors);
   }
 
   local_client_count = dlink_list_length(&local_server_list) +
@@ -392,27 +392,27 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
   }
 
   monitor_count_memory(&monitor_list_headers, &monitor_list_memory);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :MONITOR headers %u(%zu) entries %u(%zu)",
                      monitor_list_headers,
                      monitor_list_memory,
                      monitor_list_entries,
                      monitor_list_entries * sizeof(dlink_node) * 2);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Clients %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Clients %u(%zu)",
                      dlink_list_length(&global_client_list),
                      dlink_list_length(&global_client_list) * sizeof(struct Client));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Servers %u(%zu, %zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Servers %u(%zu, %zu)",
                      dlink_list_length(&global_server_list),
                      dlink_list_length(&global_server_list) * sizeof(struct Client),
                      dlink_list_length(&global_server_list) * sizeof(struct Server));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached confs %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached confs %u(%zu)",
                      local_client_conf_count,
                      local_client_conf_count * sizeof(dlink_node));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Resv channels %u(%zu) nicks %u(%zu)",
                      dlink_list_length(resv_chan_get_list()),
                      dlink_list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
@@ -420,59 +420,59 @@ stats_memory(struct Client *source_p, int parc, char *parv[])
                      dlink_list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
 
   listener_count_memory(&listener_count, &listener_memory);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Listeners %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Listeners %u(%zu)",
                      listener_count, listener_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Classes %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Classes %u(%zu)",
                      dlink_list_length(class_get_list()),
                      dlink_list_length(class_get_list()) * sizeof(struct ClassItem));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channels %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channels %u(%zu)",
                      dlink_list_length(channel_get_list()),
                      dlink_list_length(channel_get_list()) * sizeof(struct Channel));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Bans %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Bans %u(%zu)",
                      channel_bans, channel_ban_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Exceptions %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Exceptions %u(%zu)",
                      channel_except, channel_except_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Invex %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Invex %u(%zu)",
                      channel_invex, channel_invex_memory);
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Channel members %u(%zu) invites %u(%zu)",
                      channel_members,
                      channel_members * sizeof(struct ChannelMember),
                      channel_invites,
                      channel_invites * sizeof(struct Invite));
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Safelist %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Safelist %u(%zu)",
                      safelist_count, safelist_memory);
 
   whowas_count_memory(&wwu, &wwm);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas users %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas users %u(%zu)",
                      wwu, wwm);
 
-  motd_memory_count(source_p);
+  motd_memory_count(client);
 
   ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :iphash %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :iphash %u(%zu)",
                      number_ips_stored, mem_ips_stored);
 
   local_client_memory_used = local_client_count * (sizeof(struct Client) + sizeof(struct Connection));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Local client Memory in use: %u(%zu)",
                      local_client_count, local_client_memory_used);
 
   remote_client_memory_used = remote_client_count * sizeof(struct Client);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Remote client Memory in use: %u(%zu)",
                      remote_client_count, remote_client_memory_used);
 }
 
 static void
-stats_dns_servers(struct Client *source_p, int parc, char *parv[])
+stats_dns_servers(struct Client *client, int parc, char *parv[])
 {
   char ipaddr[HOSTIPLEN + 1];
 
@@ -480,7 +480,7 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
   {
     getnameinfo((const struct sockaddr *)&reslib_nsaddr_list[i], reslib_nsaddr_list[i].ss_len,
                 ipaddr, sizeof(ipaddr), NULL, 0, NI_NUMERICHOST);
-    sendto_one_numeric(source_p, &me, RPL_STATSALINE, ipaddr);
+    sendto_one_numeric(client, &me, RPL_STATSALINE, ipaddr);
   }
 }
 
@@ -491,7 +491,7 @@ stats_dns_servers(struct Client *source_p, int parc, char *parv[])
  * side effects - client is given dline list.
  */
 static void
-stats_deny(struct Client *source_p, int parc, char *parv[])
+stats_deny(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
@@ -509,7 +509,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
       if (conf->until)
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSDLINE, 'D', conf->host, conf->reason);
+      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'D', conf->host, conf->reason);
     }
   }
 }
@@ -521,7 +521,7 @@ stats_deny(struct Client *source_p, int parc, char *parv[])
  * side effects - client is given dline list.
  */
 static void
-stats_tdeny(struct Client *source_p, int parc, char *parv[])
+stats_tdeny(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
@@ -539,7 +539,7 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
       if (conf->until == 0)
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSDLINE, 'd', conf->host, conf->reason);
+      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'd', conf->host, conf->reason);
     }
   }
 }
@@ -551,11 +551,11 @@ stats_tdeny(struct Client *source_p, int parc, char *parv[])
  * side effects - client is given list of exempt blocks
  */
 static void
-stats_exempt(struct Client *source_p, int parc, char *parv[])
+stats_exempt(struct Client *client, int parc, char *parv[])
 {
   if (ConfigGeneral.stats_e_disabled)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -570,45 +570,44 @@ stats_exempt(struct Client *source_p, int parc, char *parv[])
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      sendto_one_numeric(source_p, &me, RPL_STATSDLINE, 'e', conf->host, "");
+      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'e', conf->host, "");
     }
   }
 }
 
 static void
-stats_events(struct Client *source_p, int parc, char *parv[])
+stats_events(struct Client *client, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :Operation                      Next Execution");
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :---------------------------------------------");
 
   dlink_node *node;
   DLINK_FOREACH(node, event_get_list()->head)
   {
     const struct event *ev = node->data;
-
-    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                        "E :%-30s %-4ju seconds",
                        ev->name, ev->next - event_base->time.sec_monotonic);
   }
 }
 
 static void
-stats_fdlist(struct Client *source_p, int parc, char *parv[])
+stats_fdlist(struct Client *client, int parc, char *parv[])
 {
   for (int fd = 0; fd <= highest_fd; ++fd)
   {
     const fde_t *F = &fd_table[fd];
 
     if (F->flags.open)
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "F :fd %-5d desc '%s'", F->fd, F->desc);
   }
 }
 
 static void
-stats_hubleaf(struct Client *source_p, int parc, char *parv[])
+stats_hubleaf(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node, *node2;
 
@@ -617,7 +616,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
     const struct MaskItem *conf = node->data;
 
     DLINK_FOREACH(node2, conf->hub_list.head)
-      sendto_one_numeric(source_p, &me, RPL_STATSHLINE, 'H', node2->data, conf->name, 0, "*");
+      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', node2->data, conf->name, 0, "*");
   }
 
   DLINK_FOREACH(node, connect_items.head)
@@ -625,7 +624,7 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
     const struct MaskItem *conf = node->data;
 
     DLINK_FOREACH(node2, conf->leaf_list.head)
-      sendto_one_numeric(source_p, &me, RPL_STATSLLINE, 'L', node2->data, conf->name, 0, "*");
+      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', node2->data, conf->name, 0, "*");
   }
 }
 
@@ -639,46 +638,46 @@ stats_hubleaf(struct Client *source_p, int parc, char *parv[])
  * side effects - NONE
  */
 static const char *
-show_iline_prefix(const struct Client *source_p, const struct MaskItem *conf)
+show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
 {
   static char buf[USERLEN + 16];
-  char *p = buf;
+  char *bufptr = buf;
 
   if (IsConfWebIRC(conf))
-    *p++ = '<';
+    *bufptr++ = '<';
   if (IsNoTilde(conf))
-    *p++ = '-';
+    *bufptr++ = '-';
   if (IsNeedIdentd(conf))
-    *p++ = '+';
+    *bufptr++ = '+';
   if (!IsNeedPassword(conf))
-    *p++ = '&';
+    *bufptr++ = '&';
   if (IsConfExemptResv(conf))
-    *p++ = '$';
+    *bufptr++ = '$';
   if (IsConfDoSpoofIp(conf))
-    *p++ = '=';
+    *bufptr++ = '=';
   if (IsConfCanFlood(conf))
-    *p++ = '|';
-  if (HasUMode(source_p, UMODE_OPER))
+    *bufptr++ = '|';
+  if (HasUMode(client, UMODE_OPER))
   {
     if (IsConfExemptKline(conf))
-      *p++ = '^';
+      *bufptr++ = '^';
     if (IsConfExemptXline(conf))
-      *p++ = '!';
+      *bufptr++ = '!';
     if (IsConfExemptLimits(conf))
-      *p++ = '>';
+      *bufptr++ = '>';
   }
 
-  strlcpy(p, conf->user, USERLEN + 1);
+  strlcpy(bufptr, conf->user, USERLEN + 1);
   return buf;
 }
 
 static void
-stats_auth(struct Client *source_p, int parc, char *parv[])
+stats_auth(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_i_oper_only && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_i_oper_only && !HasUMode(client, UMODE_OPER))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -693,12 +692,12 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      if (IsConfDoSpoofIp(conf) && !HasUMode(source_p, UMODE_OPER))
+      if (IsConfDoSpoofIp(conf) && !HasUMode(client, UMODE_OPER))
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSILINE, 'I',
+      sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
                          conf->name == NULL ? "*" : conf->name,
-                         show_iline_prefix(source_p, conf),
+                         show_iline_prefix(client, conf),
                          conf->host, conf->port,
                          conf->class->name);
     }
@@ -710,15 +709,15 @@ stats_auth(struct Client *source_p, int parc, char *parv[])
  *         type(==0 for perm, !=0 for temporary)
  *         mask
  * Output: None
- * Side effects: Reports configured K(or k)-lines to source_p.
+ * Side effects: Reports configured K(or k)-lines to client.
  */
 static void
-stats_kill(struct Client *source_p, int parc, char *parv[])
+stats_kill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !HasUMode(client, UMODE_OPER))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -737,19 +736,19 @@ stats_kill(struct Client *source_p, int parc, char *parv[])
       if (conf->until)
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSKLINE,
+      sendto_one_numeric(client, &me, RPL_STATSKLINE,
                          'K', conf->host, conf->user, conf->reason);
     }
   }
 }
 
 static void
-stats_tkill(struct Client *source_p, int parc, char *parv[])
+stats_tkill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !HasUMode(client, UMODE_OPER))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -768,29 +767,29 @@ stats_tkill(struct Client *source_p, int parc, char *parv[])
       if (conf->until == 0)
         continue;
 
-      sendto_one_numeric(source_p, &me, RPL_STATSKLINE, 'k', conf->host, conf->user, conf->reason);
+      sendto_one_numeric(client, &me, RPL_STATSKLINE, 'k', conf->host, conf->user, conf->reason);
     }
   }
 }
 
 static void
-stats_messages(struct Client *source_p, int parc, char *parv[])
+stats_messages(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
-    command_report(source_p);
+    command_report(client);
 }
 
 static void
-stats_pseudo(struct Client *source_p, int parc, char *parv[])
+stats_pseudo(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, pseudo_get_list()->head)
   {
     const struct PseudoItem *pseudo = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSPSEUDO,
+    sendto_one_numeric(client, &me, RPL_STATSPSEUDO,
                        pseudo->command, pseudo->name, pseudo->nick, pseudo->server,
                        pseudo->prepend ? pseudo->prepend : "*");
   }
@@ -803,37 +802,37 @@ stats_pseudo(struct Client *source_p, int parc, char *parv[])
  * side effects - client is shown a list of active opers
  */
 static void
-stats_operedup(struct Client *source_p, int parc, char *parv[])
+stats_operedup(struct Client *client, int parc, char *parv[])
 {
   unsigned int opercount = 0;
 
   dlink_node *node;
   DLINK_FOREACH(node, oper_list.head)
   {
-    const struct Client *target_p = node->data;
+    const struct Client *target = node->data;
 
-    if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
+    if (HasUMode(target, UMODE_HIDDEN) && !HasUMode(client, UMODE_OPER))
       continue;
 
     const char *duration = "n/a";
-    if (HasUMode(source_p, UMODE_OPER) || !HasUMode(target_p, UMODE_HIDEIDLE))
-      duration = time_dissect(client_get_idle_time(source_p, target_p));
+    if (HasUMode(client, UMODE_OPER) || !HasUMode(target, UMODE_HIDEIDLE))
+      duration = time_dissect(client_get_idle_time(client, target));
 
-    if (MyConnect(source_p) && HasUMode(source_p, UMODE_OPER))
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+    if (MyConnect(client) && HasUMode(client, UMODE_OPER))
+      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c][%s] %s (%s@%s) Idle: %s",
-                         HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
-                         oper_privs_as_string(target_p->connection->operflags),
-                         target_p->name, target_p->username, target_p->host, duration);
+                         HasUMode(target, UMODE_ADMIN) ? 'A' : 'O',
+                         oper_privs_as_string(target->connection->operflags),
+                         target->name, target->username, target->host, duration);
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                          "p :[%c] %s (%s@%s) Idle: %s",
-                         HasUMode(target_p, UMODE_ADMIN) ? 'A' : 'O',
-                         target_p->name, target_p->username, target_p->host, duration);
+                         HasUMode(target, UMODE_ADMIN) ? 'A' : 'O',
+                         target->name, target->username, target->host, duration);
     ++opercount;
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :%u OPER(s)", opercount);
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :%u OPER(s)", opercount);
 }
 
 /* show_ports()
@@ -843,11 +842,11 @@ stats_operedup(struct Client *source_p, int parc, char *parv[])
  * side effects - send port listing to a client
  */
 static void
-stats_ports(struct Client *source_p, int parc, char *parv[])
+stats_ports(struct Client *client, int parc, char *parv[])
 {
-  if (ConfigGeneral.stats_P_oper_only && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigGeneral.stats_P_oper_only && !HasUMode(client, UMODE_OPER))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
   }
 
@@ -855,115 +854,115 @@ stats_ports(struct Client *source_p, int parc, char *parv[])
   DLINK_FOREACH(node, listener_get_list()->head)
   {
     char buf[8];
-    char *p = buf;
+    char *bufptr = buf;
     const struct Listener *listener = node->data;
 
     if (listener_has_flag(listener, LISTENER_HIDDEN))
     {
-      if (!HasUMode(source_p, UMODE_ADMIN))
+      if (!HasUMode(client, UMODE_ADMIN))
         continue;
-      *p++ = 'H';
+      *bufptr++ = 'H';
     }
 
     if (listener_has_flag(listener, LISTENER_SERVER))
-      *p++ = 'S';
+      *bufptr++ = 'S';
     if (listener_has_flag(listener, LISTENER_CLIENT))
-      *p++ = 'C';
+      *bufptr++ = 'C';
     if (listener_has_flag(listener, LISTENER_TLS))
-      *p++ = 'T';
+      *bufptr++ = 'T';
     if (listener_has_flag(listener, LISTENER_DEFER))
-      *p++ = 'D';
-    *p = '\0';
+      *bufptr++ = 'D';
+    *bufptr = '\0';
 
-    if (HasUMode(source_p, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
-      sendto_one_numeric(source_p, &me, RPL_STATSPLINE,
+    if (HasUMode(client, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
+      sendto_one_numeric(client, &me, RPL_STATSPLINE,
                          'P', listener->port, listener->name, listener->ref_count, buf,
                          listener->active == true ? "active" : "disabled");
     else
-      sendto_one_numeric(source_p, &me, RPL_STATSPLINE,
+      sendto_one_numeric(client, &me, RPL_STATSPLINE,
                          'P', listener->port, me.name, listener->ref_count, buf,
                          listener->active == true ? "active" : "disabled");
   }
 }
 
 static void
-stats_tstats(struct Client *source_p, int parc, char *parv[])
+stats_tstats(struct Client *client, int parc, char *parv[])
 {
   struct ServerStatistics sp = ServerStats;
 
   dlink_node *node;
   DLINK_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target_p = node->data;
-    sp.is_sbs += target_p->connection->send.bytes;
-    sp.is_sbr += target_p->connection->recv.bytes;
-    sp.is_sti += event_base->time.sec_monotonic - target_p->connection->created_monotonic;
+    const struct Client *target = node->data;
+    sp.is_sbs += target->connection->send.bytes;
+    sp.is_sbr += target->connection->recv.bytes;
+    sp.is_sti += event_base->time.sec_monotonic - target->connection->created_monotonic;
     sp.is_sv++;
   }
 
   DLINK_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target_p = node->data;
-    sp.is_cbs += target_p->connection->send.bytes;
-    sp.is_cbr += target_p->connection->recv.bytes;
-    sp.is_cti += event_base->time.sec_monotonic - target_p->connection->created_monotonic;
+    const struct Client *target = node->data;
+    sp.is_cbs += target->connection->send.bytes;
+    sp.is_cbr += target->connection->recv.bytes;
+    sp.is_cti += event_base->time.sec_monotonic - target->connection->created_monotonic;
     sp.is_cl++;
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :accepts %u refused %u",
                      sp.is_ac, sp.is_ref);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :unknown commands %u prefixes %u",
                      sp.is_unco, sp.is_unpf);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :nick collisions %u unknown closes %u",
                      sp.is_kill, sp.is_ni);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :wrong direction %u empty %u",
                      sp.is_wrdi, sp.is_empt);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :numerics seen %u",
                      sp.is_num);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :auth successes %u fails %u",
                      sp.is_asuc, sp.is_abad);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :Client Server");
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :connected %u %u",
                      sp.is_cl, sp.is_sv);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes sent %zu %zu",
                      sp.is_cbs, sp.is_sbs);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :bytes received %zu %zu",
                      sp.is_cbr, sp.is_sbr);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "t :time connected %ju %ju",
                      sp.is_cti, sp.is_sti);
 }
 
 static void
-stats_uptime(struct Client *source_p, int parc, char *parv[])
+stats_uptime(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(source_p, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
   {
-    sendto_one_numeric(source_p, &me, RPL_STATSUPTIME,
+    sendto_one_numeric(client, &me, RPL_STATSUPTIME,
                        time_dissect(event_base->time.sec_monotonic - me.connection->created_monotonic));
-    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(source_p, UMODE_OPER))
-       sendto_one_numeric(source_p, &me, RPL_STATSCONN, Count.max_loc_con,
+    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(client, UMODE_OPER))
+       sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
   }
 }
 
 static void
-stats_shared(struct Client *source_p, int parc, char *parv[])
+stats_shared(struct Client *client, int parc, char *parv[])
 {
-  report_shared(source_p);
-  report_cluster(source_p);
+  report_shared(client);
+  report_cluster(client);
 }
 
 /* stats_servers()
@@ -973,31 +972,31 @@ stats_shared(struct Client *source_p, int parc, char *parv[])
  * side effects - client is shown lists of who connected servers
  */
 static void
-stats_servers(struct Client *source_p, int parc, char *parv[])
+stats_servers(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target_p = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
-                       target_p->name, (target_p->serv->by[0] ? target_p->serv->by : "Remote."),
-                       "*", "*", time_dissect(event_base->time.sec_monotonic - target_p->connection->last_data));
+    const struct Client *target = node->data;
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
+                       target->name, (target->serv->by[0] ? target->serv->by : "Remote."),
+                       "*", "*", time_dissect(event_base->time.sec_monotonic - target->connection->last_data));
   }
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",
                      dlink_list_length(&local_server_list));
 }
 
 static void
-stats_class(struct Client *source_p, int parc, char *parv[])
+stats_class(struct Client *client, int parc, char *parv[])
 {
   dlink_node *node;
 
   DLINK_FOREACH(node, class_get_list()->head)
   {
     const struct ClassItem *class = node->data;
-    sendto_one_numeric(source_p, &me, RPL_STATSYLINE, 'Y',
+    sendto_one_numeric(client, &me, RPL_STATSYLINE, 'Y',
                        class->name, class->ping_freq,
                        class->con_freq,
                        class->max_total, class->max_sendq,
@@ -1010,49 +1009,49 @@ stats_class(struct Client *source_p, int parc, char *parv[])
 }
 
 static void
-stats_servlinks(struct Client *source_p, int parc, char *parv[])
+stats_servlinks(struct Client *client, int parc, char *parv[])
 {
   size_t sendB = 0, recvB = 0;
 
   dlink_node *node;
   DLINK_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target_p = node->data;
+    const struct Client *target = node->data;
 
-    sendB += target_p->connection->send.bytes;
-    recvB += target_p->connection->recv.bytes;
+    sendB += target->connection->send.bytes;
+    recvB += target->connection->recv.bytes;
 
     /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
-    sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                       client_get_name(target_p, HasUMode(source_p, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
-                       dbuf_length(&target_p->connection->buf_sendq),
-                       target_p->connection->send.messages,
-                       target_p->connection->send.bytes >> 10,
-                       target_p->connection->recv.messages,
-                       target_p->connection->recv.bytes >> 10,
-                       (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
-                       (event_base->time.sec_monotonic - target_p->connection->last_data),
-                       capab_get(target_p, true));
+    sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
+                       client_get_name(target, HasUMode(client, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
+                       dbuf_length(&target->connection->buf_sendq),
+                       target->connection->send.messages,
+                       target->connection->send.bytes >> 10,
+                       target->connection->recv.messages,
+                       target->connection->recv.bytes >> 10,
+                       (event_base->time.sec_monotonic - target->connection->created_monotonic),
+                       (event_base->time.sec_monotonic - target->connection->last_data),
+                       capab_get(target, true));
   }
 
   sendB >>= 10;
   recvB >>= 10;
 
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :%u total server(s)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :%u total server(s)",
                      dlink_list_length(&local_server_list));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Sent total: %7.2f %s",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Sent total: %7.2f %s",
                      _GMKv(sendB), _GMKs(sendB));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recvB), _GMKs(recvB));
 
   const uintmax_t uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
                      _GMKs((me.connection->send.bytes >> 10)),
                      (float)((float)((me.connection->send.bytes) >> 10) /
                      (float)uptime));
-  sendto_one_numeric(source_p, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "? :Server recv: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->recv.bytes >> 10)),
                      _GMKs((me.connection->recv.bytes >> 10)),
@@ -1072,16 +1071,16 @@ stats_servlinks(struct Client *source_p, int parc, char *parv[])
  *
  */
 static const char *
-parse_stats_args(struct Client *source_p, int parc, char *parv[], bool *doall, bool *wilds)
+parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, bool *wilds)
 {
   const char *const name = parv[2];
 
   if (EmptyString(name))
     return NULL;
 
-  if (irccmp(name, ID_or_name(&me, source_p)) == 0)
+  if (irccmp(name, ID_or_name(&me, client)) == 0)
     *doall = true;
-  else if (match(name, ID_or_name(&me, source_p)) == 0)
+  else if (match(name, ID_or_name(&me, client)) == 0)
     *doall = true;
 
   *wilds = has_wildcards(name);
@@ -1089,7 +1088,7 @@ parse_stats_args(struct Client *source_p, int parc, char *parv[], bool *doall, b
 }
 
 static void
-stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
+stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
              dlink_list *list, const char statchar)
 {
   dlink_node *node;
@@ -1100,13 +1099,13 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
    */
   DLINK_FOREACH(node, list->head)
   {
-    const struct Client *target_p = node->data;
+    const struct Client *target = node->data;
     enum addr_mask_type type;
 
-    if (!doall && wilds && match(name, target_p->name))
+    if (!doall && wilds && match(name, target->name))
       continue;
 
-    if (!(doall || wilds) && irccmp(name, target_p->name))
+    if (!(doall || wilds) && irccmp(name, target->name))
       continue;
 
     if (IsUpper(statchar))
@@ -1114,20 +1113,20 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
     else
       type = HIDE_IP;
 
-    if (IsServer(target_p) || IsConnecting(target_p) || IsHandshake(target_p))
-      if (!HasUMode(source_p, UMODE_ADMIN))
+    if (IsServer(target) || IsConnecting(target) || IsHandshake(target))
+      if (!HasUMode(client, UMODE_ADMIN))
         type = MASK_IP;
 
-    sendto_one_numeric(source_p, &me, RPL_STATSLINKINFO,
-                       client_get_name(target_p, type),
-                       dbuf_length(&target_p->connection->buf_sendq),
-                       target_p->connection->send.messages,
-                       target_p->connection->send.bytes >> 10,
-                       target_p->connection->recv.messages,
-                       target_p->connection->recv.bytes >> 10,
-                       (event_base->time.sec_monotonic - target_p->connection->created_monotonic),
-                       (event_base->time.sec_monotonic - target_p->connection->last_data),
-                       IsServer(target_p) ? capab_get(target_p, true) : "-");
+    sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
+                       client_get_name(target, type),
+                       dbuf_length(&target->connection->buf_sendq),
+                       target->connection->send.messages,
+                       target->connection->send.bytes >> 10,
+                       target->connection->recv.messages,
+                       target->connection->recv.bytes >> 10,
+                       (event_base->time.sec_monotonic - target->connection->created_monotonic),
+                       (event_base->time.sec_monotonic - target->connection->last_data),
+                       IsServer(target) ? capab_get(target, true) : "-");
   }
 }
 
@@ -1141,28 +1140,28 @@ stats_L_list(struct Client *source_p, const char *name, bool doall, bool wilds,
  * side effects -
  */
 static void
-stats_L(struct Client *source_p, const char *name, bool doall,
+stats_L(struct Client *client, const char *name, bool doall,
         bool wilds, const char statchar)
 {
-  stats_L_list(source_p, name, doall, wilds, &unknown_list, statchar);
-  stats_L_list(source_p, name, doall, wilds, &local_client_list, statchar);
-  stats_L_list(source_p, name, doall, wilds, &local_server_list, statchar);
+  stats_L_list(client, name, doall, wilds, &unknown_list, statchar);
+  stats_L_list(client, name, doall, wilds, &local_client_list, statchar);
+  stats_L_list(client, name, doall, wilds, &local_server_list, statchar);
 }
 
 static void
-stats_ltrace(struct Client *source_p, int parc, char *parv[])
+stats_ltrace(struct Client *client, int parc, char *parv[])
 {
   bool doall = false;
   bool wilds = false;
   const char *name;
 
-  if ((name = parse_stats_args(source_p, parc, parv, &doall, &wilds)))
+  if ((name = parse_stats_args(client, parc, parv, &doall, &wilds)))
   {
     const char statchar = *parv[1];
-    stats_L(source_p, name, doall, wilds, statchar);
+    stats_L(client, name, doall, wilds, statchar);
   }
   else
-    sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "STATS");
+    sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, "STATS");
 }
 
 struct StatsStruct
@@ -1218,29 +1217,29 @@ static const struct StatsStruct  stats_tab[] =
 };
 
 static void
-do_stats(struct Client *source_p, int parc, char *parv[])
+do_stats(struct Client *client, int parc, char *parv[])
 {
   const unsigned char statchar = *parv[1];
   if (statchar == '\0')
   {
-    sendto_one_numeric(source_p, &me, RPL_ENDOFSTATS, '*');
+    sendto_one_numeric(client, &me, RPL_ENDOFSTATS, '*');
     return;
   }
 
   const struct StatsStruct *const tab = stats_map[statchar];
   if (tab)
   {
-    if (tab->required_modes == 0 || HasUMode(source_p, tab->required_modes))
-      tab->handler(source_p, parc, parv);
+    if (tab->required_modes == 0 || HasUMode(client, tab->required_modes))
+      tab->handler(client, parc, parv);
     else
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVILEGES);
+      sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
     sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "STATS %c requested by %s (%s@%s) [%s]",
-                         statchar, source_p->name, source_p->username,
-                         source_p->host, source_p->servptr->name);
+                         statchar, client->name, client->username,
+                         client->host, client->servptr->name);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFSTATS, statchar);
+  sendto_one_numeric(client, &me, RPL_ENDOFSTATS, statchar);
 }
 
 /*
@@ -1250,14 +1249,14 @@ do_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[2] = (if present) server/mask in stats L
  */
 static void
-m_stats(struct Client *source_p, int parc, char *parv[])
+m_stats(struct Client *client, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isn't flooding */
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "STATS");
+    sendto_one_numeric(client, &me, RPL_LOAD2HI, "STATS");
     return;
   }
 
@@ -1265,10 +1264,10 @@ m_stats(struct Client *source_p, int parc, char *parv[])
 
   /* Is the stats meant for us? */
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_hunt(client, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
-  do_stats(source_p, parc, parv);
+  do_stats(client, parc, parv);
 }
 
 /*
@@ -1278,12 +1277,12 @@ m_stats(struct Client *source_p, int parc, char *parv[])
  *      parv[2] = (if present) server/mask in stats L, or target
  */
 static void
-ms_stats(struct Client *source_p, int parc, char *parv[])
+ms_stats(struct Client *client, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
+  if (server_hunt(client, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
     return;
 
-  do_stats(source_p, parc, parv);
+  do_stats(client, parc, parv);
 }
 
 static void

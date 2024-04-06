@@ -102,7 +102,7 @@ mr_pong(struct Client *source_p, int parc, char *parv[])
         AddFlag(source_p, FLAGS_PING_COOKIE);
 
         if (source_p->connection->registration == 0)
-          register_local_user(source_p);
+          user_register_local(source_p);
       }
       else
         sendto_one_numeric(source_p, &me, ERR_WRONGPONG,

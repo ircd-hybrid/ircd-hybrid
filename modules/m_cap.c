@@ -269,7 +269,7 @@ cap_end(struct Client *source_p, const char *arg)
 
   /* If client is now done... */
   if (source_p->connection->registration == 0)
-    register_local_user(source_p);
+    user_register_local(source_p);
 }
 
 static void

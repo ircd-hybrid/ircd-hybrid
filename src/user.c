@@ -200,7 +200,7 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
  *                from a remote connect.
  */
 static void
-introduce_client(struct Client *client)
+user_introduce(struct Client *client)
 {
   monitor_signon(client);
 
@@ -265,7 +265,7 @@ user_welcome(struct Client *client)
  * \param client Pointer to given client to introduce
  */
 void
-register_local_user(struct Client *client)
+user_register_local(struct Client *client)
 {
   const struct MaskItem *conf = NULL;
 
@@ -440,7 +440,7 @@ register_local_user(struct Client *client)
   }
 
   send_umode(client, 0, true, false);
-  introduce_client(client);
+  user_introduce(client);
 }
 
 /* register_remote_user()
@@ -454,7 +454,7 @@ register_local_user(struct Client *client)
  *		  is introduced by a server.
  */
 void
-register_remote_user(struct Client *client)
+user_register_remote(struct Client *client)
 {
   assert(client->servptr->from == client->from);
 
@@ -479,7 +479,7 @@ register_remote_user(struct Client *client)
                          client->name, client->username, client->realhost,
                          client->sockhost, client->info, client->id);
 
-  introduce_client(client);
+  user_introduce(client);
 }
 
 /* valid_hostname()

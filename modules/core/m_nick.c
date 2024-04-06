@@ -187,7 +187,7 @@ set_initial_nick(struct Client *source_p, const char *nick)
   fd_note(source_p->connection->fd, "Nick: %s", source_p->name);
 
   if (source_p->connection->registration == 0)
-    register_local_user(source_p);
+    user_register_local(source_p);
 }
 
 /* change_local_nick()
@@ -383,7 +383,7 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
     AddUMode(client_p, tab->flag);
   }
 
-  register_remote_user(client_p);
+  user_register_remote(client_p);
 }
 
 /*!

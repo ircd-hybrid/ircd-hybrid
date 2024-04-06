@@ -76,7 +76,7 @@ mr_user(struct Client *source_p, int parc, char *parv[])
   source_p->connection->registration &= ~REG_NEED_USER;
 
   if (source_p->connection->registration == 0)
-    register_local_user(source_p);
+    user_register_local(source_p);
 }
 
 static struct Command user_msgtab =

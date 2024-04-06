@@ -106,10 +106,10 @@ module_reload(struct Client *source_p, const char *arg)
   if (strcmp(arg, "*") == 0)
   {
     unsigned int modnum = dlink_list_length(modules_get_list());
-    dlink_node *node, *node_next;
 
     sendto_one_notice(source_p, &me, ":Reloading all modules");
 
+    dlink_node *node, *node_next;
     DLINK_FOREACH_SAFE(node, node_next, modules_get_list()->head)
     {
       modp = node->data;
@@ -126,7 +126,7 @@ module_reload(struct Client *source_p, const char *arg)
                          "Module Restart: %u modules unloaded, %u modules loaded",
                          modnum, dlink_list_length(modules_get_list()));
     log_write(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
-         modnum, dlink_list_length(modules_get_list()));
+              modnum, dlink_list_length(modules_get_list()));
     return;
   }
 
@@ -155,8 +155,7 @@ module_reload(struct Client *source_p, const char *arg)
   if (load_one_module(arg) == false && is_core)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Error reloading core "
-                         "module: %s: terminating ircd", arg);
+                         "Error reloading core module: %s: terminating ircd", arg);
     log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
     exit(EXIT_FAILURE);
   }
@@ -180,8 +179,7 @@ module_list(struct Client *source_p, const char *arg)
       continue;
 
     sendto_one_numeric(source_p, &me, RPL_MODLIST,
-                       modp->name, modp->handle,
-                       "*", modp->is_core == true ? "(core)" : "");
+                       modp->name, modp->handle, "*", modp->is_core == true ? "(core)" : "");
   }
 
   sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);

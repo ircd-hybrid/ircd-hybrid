@@ -45,11 +45,9 @@ do_links(struct Client *source_p, char *parv[])
 {
   dlink_node *node;
 
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "LINKS requested by %s (%s@%s) [%s]",
-                       source_p->name,
-                       source_p->username, source_p->host,
-                       source_p->servptr->name);
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
+                       source_p->name, source_p->username,
+                       source_p->host, source_p->servptr->name);
 
   if (HasUMode(source_p, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
   {

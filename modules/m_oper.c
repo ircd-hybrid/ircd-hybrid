@@ -72,12 +72,11 @@ oper_up(struct Client *source_p, const struct MaskItem *conf)
   {
     svstag_attach(&source_p->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
     sendto_server(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                  me.id, source_p->id, source_p->tsinfo,
-                  RPL_WHOISOPERATOR, conf->whois);
+                  me.id, source_p->id, source_p->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-       conf->name, client_get_name(source_p, HIDE_IP));
+            conf->name, client_get_name(source_p, HIDE_IP));
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
                        get_oper_name(source_p));
@@ -107,7 +106,7 @@ failed_oper_notice(struct Client *source_p, enum irc_numerics numeric,
                          name, client_get_name(source_p, HIDE_IP), reason);
 
   log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
-       name, client_get_name(source_p, HIDE_IP), reason);
+            name, client_get_name(source_p, HIDE_IP), reason);
 }
 
 /*! \brief OPER command handler

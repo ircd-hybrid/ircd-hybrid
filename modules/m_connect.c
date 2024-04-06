@@ -80,7 +80,7 @@ do_connect(struct Client *source_p, const char *name)
                 me.id, type_p, name, conf->port, get_oper_name(source_p));
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-       type_p, name, conf->port, get_oper_name(source_p));
+            type_p, name, conf->port, get_oper_name(source_p));
 
   /*
    * At this point we should be calling connect_server with a valid

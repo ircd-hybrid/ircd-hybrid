@@ -221,8 +221,7 @@ static const char *infotext[] =
 static void
 send_birthdate_online_time(struct Client *source_p)
 {
-  sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT,
-                     ":On-line since %s",
+  sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT, ":On-line since %s",
                      date(me.connection->created_real));
 }
 
@@ -270,8 +269,7 @@ send_conf_options(struct Client *source_p)
 static void
 send_info_text(struct Client *source_p)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "INFO requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 

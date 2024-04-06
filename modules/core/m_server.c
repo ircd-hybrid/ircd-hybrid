@@ -177,8 +177,8 @@ server_estab(struct Client *client_p)
                me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
   }
 
-  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju", me.id, TS_CURRENT, TS_MINIMUM,
-             event_base->time.sec_real);
+  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju",
+             me.id, TS_CURRENT, TS_MINIMUM, event_base->time.sec_real);
 
   SetServer(client_p);
   client_p->servptr = &me;
@@ -225,8 +225,8 @@ server_estab(struct Client *client_p)
                          client_get_name(client_p, MASK_IP), client_p->tls_cipher,
                          capab_get(client_p, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-         capab_get(client_p, true));
+              client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
+              capab_get(client_p, true));
   }
   else
   {
@@ -239,14 +239,13 @@ server_estab(struct Client *client_p)
                          "Link with %s established: (Capabilities: %s)",
                          client_get_name(client_p, MASK_IP), capab_get(client_p, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
-         client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
+              client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
   }
 
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
   sendto_server(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
-                me.id, client_p->name, client_p->id,
-                IsHidden(client_p) ? "h" : "", client_p->info);
+                me.id, client_p->name, client_p->id, IsHidden(client_p) ? "h" : "", client_p->info);
 
   /*
    * Pass on my client information to the new server
@@ -272,9 +271,8 @@ server_estab(struct Client *client_p)
       continue;
 
     sendto_one(client_p, ":%s SID %s %u %s +%s :%s",
-               target_p->servptr->id, target_p->name, target_p->hopcount+1,
-               target_p->id, IsHidden(target_p) ? "h" : "",
-               target_p->info);
+               target_p->servptr->id, target_p->name, target_p->hopcount + 1,
+               target_p->id, IsHidden(target_p) ? "h" : "", target_p->info);
   }
 
   server_burst(client_p);
@@ -423,11 +421,11 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     if (warn)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-         "Unauthorized server connection attempt from %s: %s for server %s",
-         client_get_name(source_p, SHOW_IP), error, name);
+                           "Unauthorized server connection attempt from %s: %s for server %s",
+                           client_get_name(source_p, SHOW_IP), error, name);
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-         "Unauthorized server connection attempt from %s: %s for server %s",
-         client_get_name(source_p, MASK_IP), error, name);
+                           "Unauthorized server connection attempt from %s: %s for server %s",
+                           client_get_name(source_p, MASK_IP), error, name);
     }
 
     exit_client(source_p, error);

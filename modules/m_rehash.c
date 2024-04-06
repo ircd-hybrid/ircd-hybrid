@@ -51,7 +51,7 @@ rehash_conf(struct Client *source_p)
                        "%s is rehashing configuration file(s)",
                        get_oper_name(source_p));
   log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
-       get_oper_name(source_p));
+            get_oper_name(source_p));
   conf_rehash(false);
 }
 
@@ -67,7 +67,7 @@ rehash_motd(struct Client *source_p)
                        "%s is forcing re-reading of MOTD files",
                        get_oper_name(source_p));
   log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
-       get_oper_name(source_p));
+            get_oper_name(source_p));
   motd_recache();
 }
 
@@ -83,7 +83,7 @@ rehash_dns(struct Client *source_p)
                        "%s is rehashing DNS",
                        get_oper_name(source_p));
   log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
-       get_oper_name(source_p));
+            get_oper_name(source_p));
   restart_resolver();
 }
 

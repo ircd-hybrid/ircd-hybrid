@@ -70,29 +70,29 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
   switch (target_p->status)
   {
     case STAT_CONNECTING:
-      sendto_one_numeric(source_p, &me, RPL_TRACECONNECTING, class_name,
-                         HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
+      sendto_one_numeric(source_p, &me, RPL_TRACECONNECTING,
+                         class_name, HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
       break;
     case STAT_HANDSHAKE:
-      sendto_one_numeric(source_p, &me, RPL_TRACEHANDSHAKE, class_name,
-                         HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
+      sendto_one_numeric(source_p, &me, RPL_TRACEHANDSHAKE,
+                         class_name, HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
       break;
     case STAT_ME:
       break;
     case STAT_UNKNOWN:
-      sendto_one_numeric(source_p, &me, RPL_TRACEUNKNOWN, class_name,
-                         name, target_p->sockhost,
+      sendto_one_numeric(source_p, &me, RPL_TRACEUNKNOWN,
+                         class_name, name, target_p->sockhost,
                          event_base->time.sec_monotonic - target_p->connection->created_monotonic);
       break;
     case STAT_CLIENT:
       if (HasUMode(target_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR, class_name, name,
-                           target_p->sockhost,
+        sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR,
+                           class_name, name, target_p->sockhost,
                            event_base->time.sec_monotonic - target_p->connection->last_data,
                            client_get_idle_time(source_p, target_p));
       else
-        sendto_one_numeric(source_p, &me, RPL_TRACEUSER, class_name, name,
-                           target_p->sockhost,
+        sendto_one_numeric(source_p, &me, RPL_TRACEUSER,
+                           class_name, name, target_p->sockhost,
                            event_base->time.sec_monotonic - target_p->connection->last_data,
                            client_get_idle_time(source_p, target_p));
       break;
@@ -106,9 +106,9 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
       if (!HasUMode(source_p, UMODE_ADMIN))
         name = client_get_name(target_p, MASK_IP);
 
-      sendto_one_numeric(source_p, &me, RPL_TRACESERVER, class_name, servers,
-                         clients, name, *(target_p->serv->by) ?
-                         target_p->serv->by : "*", "*",
+      sendto_one_numeric(source_p, &me, RPL_TRACESERVER,
+                         class_name, servers, clients, name,
+                         *(target_p->serv->by) ? target_p->serv->by : "*", "*",
                          me.name, event_base->time.sec_monotonic - target_p->connection->last_data);
       break;
     }
@@ -129,8 +129,7 @@ do_trace(struct Client *source_p, const char *name)
 
   assert(HasUMode(source_p, UMODE_OPER));
 
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "TRACE requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "TRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 

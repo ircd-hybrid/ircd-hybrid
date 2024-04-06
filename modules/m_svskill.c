@@ -78,15 +78,14 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   if (target_p->from == source_p->from)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Received wrong-direction SVSKILL "
-                         "for %s (behind %s) from %s",
+                         "Received wrong-direction SVSKILL for %s (behind %s) from %s",
                          target_p->name, source_p->from->name,
                          client_get_name(source_p, HIDE_IP));
     return;
   }
 
-  sendto_one(target_p, ":%s SVSKILL %s %ju :%s", source_p->id,
-             target_p->id, ts, comment);
+  sendto_one(target_p, ":%s SVSKILL %s %ju :%s",
+             source_p->id, target_p->id, ts, comment);
 }
 
 static struct Command svskill_msgtab =

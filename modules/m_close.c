@@ -58,8 +58,7 @@ mo_close(struct Client *source_p, int parc, char *parv[])
     struct Client *target_p = unknown_list.head->data;
 
     sendto_one_numeric(source_p, &me, RPL_CLOSING,
-                       client_get_name(target_p, SHOW_IP),
-                       target_p->status);
+                       client_get_name(target_p, SHOW_IP), target_p->status);
 
     /*
      * Exit here is safe, because it is guaranteed not to be source_p

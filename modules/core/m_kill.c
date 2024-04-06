@@ -111,7 +111,7 @@ mo_kill(struct Client *source_p, int parc, char *parv[])
                        source_p->name, me.name, REASONLEN, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
-       source_p->name, target_p->name, me.name, REASONLEN, reason);
+            source_p->name, target_p->name, me.name, REASONLEN, reason);
 
   /*
    * And pass on the message to other servers. Note, that if KILL was changed,
@@ -184,8 +184,7 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     }
     else
       sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
-                 source_p->name, source_p->username, source_p->host,
-                 target_p->name, reason);
+                 source_p->name, source_p->username, source_p->host, target_p->name, reason);
   }
 
   /*
@@ -200,19 +199,17 @@ ms_kill(struct Client *source_p, int parc, char *parv[])
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
                          target_p->name, target_p->username, target_p->host,
-                         target_p->servptr->name,
-                         source_p->name,
+                         target_p->servptr->name, source_p->name,
                          source_p->servptr->name, source_p->host, source_p->username,
                          source_p->name, reason);
   else
     sendto_realops_flags(UMODE_SKILL, L_ALL, SEND_NOTICE,
                          "Received KILL message for %s!%s@%s[%s]. From %s %s",
                          target_p->name, target_p->username, target_p->host,
-                         target_p->servptr->name,
-                         source_p->name, reason);
+                         target_p->servptr->name, source_p->name, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
-       source_p->name, target_p->name, source_p->name, reason);
+            source_p->name, target_p->name, source_p->name, reason);
 
   sendto_server(source_p, 0, 0, ":%s KILL %s :%s %s",
                 source_p->id, target_p->id, parv[2], reason);

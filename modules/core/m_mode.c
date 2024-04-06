@@ -236,9 +236,10 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   /* Now known the channel exists */
   if (parc < 3)
   {
-    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS, channel->name,
-                       channel_modes(channel, source_p, true));
-    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME, channel->name, channel->creation_time);
+    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS,
+                       channel->name, channel_modes(channel, source_p, true));
+    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME,
+                       channel->name, channel->creation_time);
     return;
   }
 

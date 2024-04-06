@@ -138,8 +138,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_server(source_p, 0, 0, ":%s SVSMODE %s %ju %s",
-                source_p->id,
-                target_p->id, target_p->tsinfo, modes);
+                source_p->id, target_p->id, target_p->tsinfo, modes);
 
   if (MyConnect(target_p))
     send_umode(target_p, oldmodes, true, false);

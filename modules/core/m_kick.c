@@ -104,12 +104,10 @@ m_kick(struct Client *source_p, int parc, char *parv[])
     reason = parv[3];
 
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                       source_p->name, source_p->username,
-                       source_p->host, channel->name,
+                       source_p->name, source_p->username, source_p->host, channel->name,
                        target_p->name, KICKLEN, reason);
   sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
-                source_p->id, channel->name,
-                target_p->id, KICKLEN, reason);
+                source_p->id, channel->name, target_p->id, KICKLEN, reason);
   channel_remove_user(member_target);
 }
 
@@ -147,8 +145,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
 
   if (IsClient(source_p))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                         source_p->name, source_p->username,
-                         source_p->host, channel->name,
+                         source_p->name, source_p->username, source_p->host, channel->name,
                          target_p->name, KICKLEN, reason);
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
@@ -156,8 +153,7 @@ ms_kick(struct Client *source_p, int parc, char *parv[])
                          channel->name, target_p->name, KICKLEN, reason);
 
   sendto_server(source_p, 0, 0, ":%s KICK %s %s :%.*s",
-                source_p->id, channel->name,
-                target_p->id, KICKLEN, reason);
+                source_p->id, channel->name, target_p->id, KICKLEN, reason);
   channel_remove_user(member_target);
 }
 

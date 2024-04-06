@@ -382,16 +382,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       channel_add_user(channel, target_p, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           target_p->name, target_p->username,
-                           target_p->host, channel->name, target_p->account, target_p->info);
+                           target_p->name, target_p->username, target_p->host, channel->name,
+                           target_p->account, target_p->info);
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           target_p->name, target_p->username,
-                           target_p->host, channel->name);
+                           target_p->name, target_p->username, target_p->host, channel->name);
 
       if (target_p->away[0])
         sendto_channel_local(target_p, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                             target_p->name, target_p->username,
-                             target_p->host, target_p->away);
+                             target_p->name, target_p->username, target_p->host, target_p->away);
     }
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)

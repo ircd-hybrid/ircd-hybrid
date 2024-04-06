@@ -37,7 +37,6 @@ static void dump_map(struct Client *client,
                      struct Client *server,
                      unsigned int prompt_length)
 {
-  dlink_node *node;
   static char prompt[64];
   char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
@@ -81,6 +80,7 @@ static void dump_map(struct Client *client,
     return;
   strcpy(p, "|-");
 
+  dlink_node *node;
   DLINK_FOREACH(node, server->serv->server_list.head)
   {
     struct Client *target_p = node->data;
@@ -125,8 +125,7 @@ static void dump_map(struct Client *client,
 static void
 do_map(struct Client *source_p)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "MAP requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
   dump_map(source_p, &me, 0);

@@ -234,8 +234,7 @@ msg_channel(bool notice, struct Client *source_p, struct Channel *channel,
  * side effects	- message given channel either chanop or voice
  */
 static void
-msg_client(bool notice, struct Client *source_p, struct Client *target_p,
-           const char *text)
+msg_client(bool notice, struct Client *source_p, struct Client *target_p, const char *text)
 {
   if (MyClient(source_p))
   {
@@ -325,8 +324,7 @@ msg_client(bool notice, struct Client *source_p, struct Client *target_p,
  *		  This disambiguates the syntax.
  */
 static void
-handle_special(bool notice, struct Client *source_p,
-               const char *nick, const char *text)
+handle_special(bool notice, struct Client *source_p, const char *nick, const char *text)
 {
   /*
    * nick@server addressed?

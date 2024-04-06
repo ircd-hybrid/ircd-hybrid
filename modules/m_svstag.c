@@ -67,8 +67,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   {
     svstag_clear_list(&target_p->svstags);
     sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju -",
-                  source_p->id,
-                  target_p->id, target_p->tsinfo);
+                  source_p->id, target_p->id, target_p->tsinfo);
     return;
   }
 
@@ -78,9 +77,7 @@ ms_svstag(struct Client *source_p, int parc, char *parv[])
   svstag_attach(&target_p->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
   sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
-                source_p->id,
-                target_p->id, target_p->tsinfo,
-                parv[3], parv[4], parv[5]);
+                source_p->id, target_p->id, target_p->tsinfo, parv[3], parv[4], parv[5]);
 }
 
 static struct Command svstag_msgtab =

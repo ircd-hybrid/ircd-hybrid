@@ -57,13 +57,11 @@ mr_error(struct Client *source_p, int parc, char *parv[])
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-       client_get_name(source_p, SHOW_IP), message);
+            client_get_name(source_p, SHOW_IP), message);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                       "ERROR :from %s -- %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "ERROR :from %s -- %s",
                        client_get_name(source_p, HIDE_IP), message);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-                       "ERROR :from %s -- %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE, "ERROR :from %s -- %s",
                        client_get_name(source_p, MASK_IP), message);
 }
 
@@ -86,17 +84,14 @@ ms_error(struct Client *source_p, int parc, char *parv[])
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-       client_get_name(source_p, SHOW_IP), message);
+            client_get_name(source_p, SHOW_IP), message);
 
   if (MyConnect(source_p))
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "ERROR :from %s -- %s",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "ERROR :from %s -- %s",
                          client_get_name(source_p->from, MASK_IP), message);
   else
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "ERROR :from %s via %s -- %s",
-                         source_p->name,
-                         client_get_name(source_p->from, MASK_IP), message);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "ERROR :from %s via %s -- %s",
+                         source_p->name, client_get_name(source_p->from, MASK_IP), message);
 }
 
 static struct Command error_msgtab =

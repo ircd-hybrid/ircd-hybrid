@@ -80,15 +80,14 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
     if (target_p->from == source_p->from)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Received wrong-direction SVSNICK "
-                           "for %s (behind %s) from %s",
+                           "Received wrong-direction SVSNICK for %s (behind %s) from %s",
                            target_p->name, source_p->from->name,
                            client_get_name(source_p, HIDE_IP));
       return;
     }
 
-    sendto_one(target_p, ":%s SVSNICK %s %ju %s %ju", source_p->id,
-               target_p->id, ts, new_nick, new_ts);
+    sendto_one(target_p, ":%s SVSNICK %s %ju %s %ju",
+               source_p->id, target_p->id, ts, new_nick, new_ts);
     return;
   }
 
@@ -122,8 +121,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
   }
 
   sendto_common_channels_local(target_p, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               target_p->name, target_p->username,
-                               target_p->host, new_nick);
+                               target_p->name, target_p->username, target_p->host, new_nick);
 
   whowas_add_history(target_p, true);
 

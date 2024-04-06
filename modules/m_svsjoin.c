@@ -67,19 +67,18 @@ ms_svsjoin(struct Client *source_p, int parc, char *parv[])
   if (target_p->from == source_p->from)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Received wrong-direction SVSJOIN "
-                         "for %s (behind %s) from %s",
+                         "Received wrong-direction SVSJOIN for %s (behind %s) from %s",
                          target_p->name, source_p->from->name,
                          client_get_name(source_p, HIDE_IP));
     return;
   }
 
   if (EmptyString(parv[3]))
-    sendto_one(target_p, ":%s SVSJOIN %s %s", source_p->id,
-               target_p->id, parv[2]);
+    sendto_one(target_p, ":%s SVSJOIN %s %s",
+               source_p->id, target_p->id, parv[2]);
   else
-    sendto_one(target_p, ":%s SVSJOIN %s %s %s", source_p->id,
-               target_p->id, parv[2], parv[3]);
+    sendto_one(target_p, ":%s SVSJOIN %s %s %s",
+               source_p->id, target_p->id, parv[2], parv[3]);
 }
 
 static struct Command svsjoin_msgtab =

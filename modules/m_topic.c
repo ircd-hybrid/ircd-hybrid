@@ -77,17 +77,14 @@ m_topic(struct Client *source_p, int parc, char *parv[])
     {
       char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
-      snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
-               source_p->username, source_p->host);
+      snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
+               source_p->name, source_p->username, source_p->host);
       channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, true);
 
       sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
-                    source_p->id, channel->name,
-                    channel->topic);
+                    source_p->id, channel->name, channel->topic);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                           source_p->name,
-                           source_p->username,
-                           source_p->host,
+                           source_p->name, source_p->username, source_p->host,
                            channel->name, channel->topic);
     }
   }
@@ -101,9 +98,8 @@ m_topic(struct Client *source_p, int parc, char *parv[])
       {
         sendto_one_numeric(source_p, &me, RPL_TOPIC,
                            channel->name, channel->topic);
-        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME, channel->name,
-                           channel->topic_info,
-                           channel->topic_time);
+        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME,
+                           channel->name, channel->topic_info, channel->topic_time);
       }
     }
     else
@@ -136,8 +132,8 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
 
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
   if (IsClient(source_p))
-    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s", source_p->name,
-             source_p->username, source_p->host);
+    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
+             source_p->name, source_p->username, source_p->host);
   else if (IsHidden(source_p) || ConfigServerHide.hide_servers)
     strlcpy(topic_info, me.name, sizeof(topic_info));
   else
@@ -146,14 +142,11 @@ ms_topic(struct Client *source_p, int parc, char *parv[])
   channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, false);
 
   sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
-                source_p->id, channel->name,
-                channel->topic);
+                source_p->id, channel->name, channel->topic);
 
   if (IsClient(source_p))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source_p->name,
-                         source_p->username,
-                         source_p->host,
+                         source_p->name, source_p->username, source_p->host,
                          channel->name, channel->topic);
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",

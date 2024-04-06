@@ -64,8 +64,7 @@ ms_svsaccount(struct Client *source_p, int parc, char *parv[])
                                target_p->name, target_p->username,
                                target_p->host, target_p->account);
   sendto_server(source_p, 0, 0, ":%s SVSACCOUNT %s %ju %s",
-                source_p->id,
-                target_p->id, target_p->tsinfo, target_p->account);
+                source_p->id, target_p->id, target_p->tsinfo, target_p->account);
 }
 
 static struct Command svsaccount_msgtab =

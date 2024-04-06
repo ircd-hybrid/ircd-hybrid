@@ -210,8 +210,8 @@ change_local_nick(struct Client *source_p, const char *nick)
   if (ConfigGeneral.anti_nick_flood && !HasUMode(source_p, UMODE_OPER) &&
       (source_p->connection->nick.count > ConfigGeneral.max_nick_changes))
   {
-    sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST, nick,
-                       ConfigGeneral.max_nick_time);
+    sendto_one_numeric(source_p, &me, ERR_NICKTOOFAST,
+                       nick, ConfigGeneral.max_nick_time);
     return;
   }
 
@@ -243,8 +243,7 @@ change_local_nick(struct Client *source_p, const char *nick)
                        "Nick change: From %s to %s [%s@%s]",
                        source_p->name, nick, source_p->username, source_p->host);
   sendto_common_channels_local(source_p, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source_p->name, source_p->username,
-                               source_p->host, nick);
+                               source_p->name, source_p->username, source_p->host, nick);
   whowas_add_history(source_p, true);
 
   sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
@@ -295,8 +294,7 @@ change_remote_nick(struct Client *source_p, char *parv[])
                        "Nick change: From %s to %s [%s@%s]",
                        source_p->name, parv[1], source_p->username, source_p->host);
   sendto_common_channels_local(source_p, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source_p->name, source_p->username,
-                               source_p->host, parv[1]);
+                               source_p->name, source_p->username, source_p->host, parv[1]);
 
   whowas_add_history(source_p, true);
   sendto_server(source_p, 0, 0, ":%s NICK %s :%ju",
@@ -427,8 +425,7 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(both killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
 
     sendto_one(source_p, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -462,13 +459,11 @@ perform_uid_introduction_collides(struct Client *source_p, struct Client *target
   if (sameuser)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(older killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
   else
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(newer killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
 
   ++ServerStats.is_kill;
   sendto_one_numeric(target_p, &me, ERR_NICKCOLLISION, target_p->name);
@@ -536,14 +531,14 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   {
     if (sameuser)
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-           "Nick change collision from %s to %s(%s <- %s)(older killed)",
-           source_p->name, target_p->name, target_p->from->name,
-           source_p->from->name);
+                           "Nick change collision from %s to %s(%s <- %s)(older killed)",
+                           source_p->name, target_p->name, target_p->from->name,
+                           source_p->from->name);
     else
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-           "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-           source_p->name, target_p->name, target_p->from->name,
-           source_p->from->name);
+                           "Nick change collision from %s to %s(%s <- %s)(newer killed)",
+                           source_p->name, target_p->name, target_p->from->name,
+                           source_p->from->name);
 
     ++ServerStats.is_kill;
 
@@ -561,13 +556,11 @@ perform_nick_change_collides(struct Client *source_p, struct Client *target_p,
   if (sameuser)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(older killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
   else
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Nick collision on %s(%s <- %s)(newer killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
 
   sendto_server(NULL, 0, 0, ":%s KILL %s :%s (Nick collision)",
                 me.id, target_p->id, me.name);
@@ -808,8 +801,7 @@ ms_uid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "ID collision on %s(%s <- %s)(both killed)",
-                         target_p->name, target_p->from->name,
-                         source_p->from->name);
+                         target_p->name, target_p->from->name, source_p->from->name);
 
     sendto_server(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
                   me.id, target_p->id, me.name);

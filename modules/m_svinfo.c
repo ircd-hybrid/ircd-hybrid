@@ -62,14 +62,14 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
      * we drop the link  -orabidoo
      */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-         "Link %s dropped, wrong TS protocol version (%s,%s)",
-         client_get_name(source_p, SHOW_IP), parv[1], parv[2]);
+              "Link %s dropped, wrong TS protocol version (%s,%s)",
+              client_get_name(source_p, SHOW_IP), parv[1], parv[2]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-         "Link %s dropped, wrong TS protocol version (%s,%s)",
-         client_get_name(source_p, MASK_IP), parv[1], parv[2]);
+              "Link %s dropped, wrong TS protocol version (%s,%s)",
+              client_get_name(source_p, MASK_IP), parv[1], parv[2]);
     log_write(LOG_TYPE_IRCD,
-         "Link %s dropped, wrong TS protocol version (%s,%s)",
-         client_get_name(source_p, SHOW_IP), parv[1], parv[2]);
+              "Link %s dropped, wrong TS protocol version (%s,%s)",
+              client_get_name(source_p, SHOW_IP), parv[1], parv[2]);
 
     exit_client(source_p, "Incompatible TS version");
     return;
@@ -86,14 +86,14 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   if (deltat > ConfigGeneral.ts_max_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-         "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-         client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+              client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-         "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-         client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+              client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
     log_write(LOG_TYPE_IRCD,
-         "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-         client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+              client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
 
     exit_client(source_p, "Excessive TS delta");
     return;
@@ -102,11 +102,11 @@ ms_svinfo(struct Client *source_p, int parc, char *parv[])
   if (deltat > ConfigGeneral.ts_warn_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-          "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-          client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+              client_get_name(source_p, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
-          "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-          client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
+              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
+              client_get_name(source_p, MASK_IP), event_base->time.sec_real, theirtime, deltat);
   }
 }
 

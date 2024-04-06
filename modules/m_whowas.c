@@ -61,17 +61,16 @@ do_whowas(struct Client *source_p, char *parv[])
 
     if (irccmp(parv[1], whowas->name) == 0)
     {
-      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER, whowas->name,
-                         whowas->username, whowas->hostname,
-                         whowas->realname);
+      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER,
+                         whowas->name, whowas->username, whowas->hostname, whowas->realname);
 
       if (HasUMode(source_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, whowas->name,
-                           whowas->username, whowas->realhost,
-                           whowas->sockhost);
+        sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY,
+                           whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
       if (strcmp(whowas->account, "*"))
-        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, whowas->name, whowas->account, "was");
+        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT,
+                           whowas->name, whowas->account, "was");
 
       bool server_hidden = false;
       if (!HasUMode(source_p, UMODE_OPER))

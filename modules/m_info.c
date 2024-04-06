@@ -219,9 +219,9 @@ static const char *infotext[] =
  * side effects	- birthdate and online time are sent
  */
 static void
-send_birthdate_online_time(struct Client *source_p)
+send_birthdate_online_time(struct Client *client)
 {
-  sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT, ":On-line since %s",
+  sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":On-line since %s",
                      date(me.connection->created_real));
 }
 
@@ -232,7 +232,7 @@ send_birthdate_online_time(struct Client *source_p)
  * side effects	- send config options to client
  */
 static void
-send_conf_options(struct Client *source_p)
+send_conf_options(struct Client *client)
 {
   for (const struct InfoStruct *iptr = info_table; iptr->name; ++iptr)
   {
@@ -253,11 +253,11 @@ send_conf_options(struct Client *source_p)
         break;
     }
 
-    sendto_one_numeric(source_p, &me, RPL_INFO | SND_EXPLICIT, ":%-30s %-5s [%s]",
+    sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":%-30s %-5s [%s]",
                        iptr->name, value, iptr->desc);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_INFO, "");
+  sendto_one_numeric(client, &me, RPL_INFO, "");
 }
 
 /* send_info_text()
@@ -267,11 +267,11 @@ send_conf_options(struct Client *source_p)
  * side effects - info text is sent to client
  */
 static void
-send_info_text(struct Client *source_p)
+send_info_text(struct Client *client)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "INFO requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
+                       client->name, client->username,
+                       client->host, client->servptr->name);
 
   for (const char **text = infotext; *text; ++text)
   {
@@ -280,20 +280,20 @@ send_info_text(struct Client *source_p)
     if (*line == '\0')
       line = " ";
 
-    sendto_one_numeric(source_p, &me, RPL_INFO, line);
+    sendto_one_numeric(client, &me, RPL_INFO, line);
   }
 
-  if (HasUMode(source_p, UMODE_OPER))
+  if (HasUMode(client, UMODE_OPER))
   {
-    send_conf_options(source_p);
+    send_conf_options(client);
 
     if (tls_is_initialized())
-      sendto_one_numeric(source_p, &me, RPL_INFO, tls_get_version());
+      sendto_one_numeric(client, &me, RPL_INFO, tls_get_version());
   }
 
-  send_birthdate_online_time(source_p);
+  send_birthdate_online_time(client);
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFINFO);
+  sendto_one_numeric(client, &me, RPL_ENDOFINFO);
 }
 
 /*! \brief INFO command handler

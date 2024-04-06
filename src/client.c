@@ -458,20 +458,20 @@ conf_try_ban(struct Client *client, int type, const char *reason)
  * side effects - find person by (nick)name
  */
 struct Client *
-find_person(const struct Client *source_p, const char *name)
+find_person(const struct Client *client, const char *name)
 {
-  struct Client *target_p = NULL;
+  struct Client *target = NULL;
 
   if (IsDigit(*name))
   {
-    if (IsServer(source_p->from))
-      target_p = hash_find_id(name);
+    if (IsServer(client->from))
+      target = hash_find_id(name);
   }
   else
-    target_p = hash_find_client(name);
+    target = hash_find_client(name);
 
-  if (target_p && IsClient(target_p))
-    return target_p;
+  if (target && IsClient(target))
+    return target;
 
   return NULL;
 }
@@ -482,21 +482,21 @@ find_person(const struct Client *source_p, const char *name)
  *      an error message (NO SUCH NICK) is generated.
  */
 struct Client *
-find_chasing(struct Client *source_p, const char *name)
+find_chasing(struct Client *client, const char *name)
 {
-  struct Client *target_p = find_person(source_p, name);
+  struct Client *target = find_person(client, name);
 
-  if (target_p)
-    return target_p;
+  if (target)
+    return target;
 
   if (IsDigit(*name))
     return NULL;
 
-  target_p = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
-  if (target_p == NULL)
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
+  target = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
+  if (target == NULL)
+    sendto_one_numeric(client, &me, ERR_NOSUCHNICK, name);
 
-  return target_p;
+  return target;
 }
 
 /*
@@ -990,23 +990,23 @@ exit_aborted_clients(void)
  * actual idle time is also returned. Otherwise, the (fake) idle time is calculated
  * based on the class configuration.
  *
- * @param source_p Pointer to the source client.
- * @param target_p Pointer to the target client.
+ * @param source Pointer to the source client.
+ * @param target Pointer to the target client.
  * @return The calculated (fake) idle time for the target client.
  */
 unsigned int
-client_get_idle_time(const struct Client *source_p,
-                     const struct Client *target_p)
+client_get_idle_time(const struct Client *source,
+                     const struct Client *target)
 {
   unsigned int idle = 0;
-  const struct ClassItem *const class = class_get_ptr(&target_p->connection->confs);
+  const struct ClassItem *const class = class_get_ptr(&target->connection->confs);
 
-  if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target_p == source_p)
-    return event_base->time.sec_monotonic - target_p->connection->last_privmsg;
+  if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
+    return event_base->time.sec_monotonic - target->connection->last_privmsg;
 
-  if (HasUMode(source_p, UMODE_OPER) &&
+  if (HasUMode(source, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return event_base->time.sec_monotonic - target_p->connection->last_privmsg;
+    return event_base->time.sec_monotonic - target->connection->last_privmsg;
 
   const unsigned int min_idle = class->min_idle;
   const unsigned int max_idle = class->max_idle;
@@ -1017,7 +1017,7 @@ client_get_idle_time(const struct Client *source_p,
   if (class->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else
-    idle = event_base->time.sec_monotonic - target_p->connection->last_privmsg;
+    idle = event_base->time.sec_monotonic - target->connection->last_privmsg;
 
   if (max_idle)
     idle %= max_idle;

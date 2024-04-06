@@ -49,7 +49,7 @@ enum server_hunt_ret
 struct server_hunt
 {
   enum server_hunt_ret ret;
-  struct Client *target_p;
+  struct Client *target;
 };
 
 extern bool server_valid_name(const char *);

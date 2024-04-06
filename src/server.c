@@ -156,7 +156,7 @@ read_links_file(void)
  *      returns: (see #defines)
  */
 const struct server_hunt *
-server_hunt(struct Client *source_p, const char *command, const int server, char *parv[])
+server_hunt(struct Client *client, const char *command, const int server, char *parv[])
 {
   static struct server_hunt hunt;
   struct server_hunt *const h = &hunt;
@@ -165,25 +165,25 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
   /* Assume it's me, if no server */
   if (EmptyString(mask))
   {
-    h->target_p = &me;
+    h->target = &me;
     h->ret = HUNTED_ISME;
     return h;
   }
 
-  h->target_p = find_person(source_p, mask);
-  if (h->target_p == NULL)
-    h->target_p = hash_find_server(mask);
+  h->target = find_person(client, mask);
+  if (h->target == NULL)
+    h->target = hash_find_server(mask);
 
   /*
    * These are to pickup matches that would cause the following
    * message to go in the wrong direction while doing quick fast
    * non-matching lookups.
    */
-  if (h->target_p)
-    if (h->target_p->from == source_p->from && !MyConnect(h->target_p))
-      h->target_p = NULL;
+  if (h->target)
+    if (h->target->from == client->from && !MyConnect(h->target))
+      h->target = NULL;
 
-  if (h->target_p == NULL && has_wildcards(mask))
+  if (h->target == NULL && has_wildcards(mask))
   {
     dlink_node *node;
     DLINK_FOREACH(node, global_server_list.head)
@@ -193,15 +193,15 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
       assert(IsMe(tmp) || IsServer(tmp));
       if (match(mask, tmp->name) == 0)
       {
-        if (tmp->from == source_p->from && !MyConnect(tmp))
+        if (tmp->from == client->from && !MyConnect(tmp))
           continue;
 
-        h->target_p = tmp;
+        h->target = tmp;
         break;
       }
     }
 
-    if (h->target_p == NULL)
+    if (h->target == NULL)
     {
       DLINK_FOREACH(node, global_client_list.head)
       {
@@ -210,34 +210,34 @@ server_hunt(struct Client *source_p, const char *command, const int server, char
         assert(IsClient(tmp));
         if (match(mask, tmp->name) == 0)
         {
-          if (tmp->from == source_p->from && !MyConnect(tmp))
+          if (tmp->from == client->from && !MyConnect(tmp))
             continue;
 
-          h->target_p = tmp;
+          h->target = tmp;
           break;
         }
       }
     }
   }
 
-  if (h->target_p)
+  if (h->target)
   {
-    assert(IsMe(h->target_p) || IsServer(h->target_p) || IsClient(h->target_p));
-    if (IsMe(h->target_p) || MyClient(h->target_p))
+    assert(IsMe(h->target) || IsServer(h->target) || IsClient(h->target));
+    if (IsMe(h->target) || MyClient(h->target))
     {
       h->ret = HUNTED_ISME;
       return h;
     }
 
-    parv[server] = h->target_p->id;
-    sendto_one(h->target_p, command, source_p->id,
+    parv[server] = h->target->id;
+    sendto_one(h->target, command, client->id,
                parv[1], parv[2], parv[3], parv[4],
                parv[5], parv[6], parv[7], parv[8]);
     h->ret = HUNTED_PASS;
     return h;
   }
 
-  sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, mask);
+  sendto_one_numeric(client, &me, ERR_NOSUCHSERVER, mask);
   h->ret = HUNTED_NOSUCH;
   return h;
 }

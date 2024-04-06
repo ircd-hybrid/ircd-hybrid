@@ -117,7 +117,7 @@ mo_etrace(struct Client *source_p, int parc, char *parv[])
   {
     case HUNTED_PASS:
       sendto_one_numeric(source_p, &me, RPL_TRACELINK,
-                         IRCD_VERSION, hunt->target_p->name, hunt->target_p->from->name);
+                         IRCD_VERSION, hunt->target->name, hunt->target->from->name);
       break;
     case HUNTED_ISME:
       do_etrace(source_p, parv[1]);

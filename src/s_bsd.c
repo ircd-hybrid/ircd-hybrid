@@ -517,7 +517,7 @@ comm_socket(int family, int sock_type, int proto)
 int
 comm_accept(fde_t *F, struct irc_ssaddr *addr)
 {
-  socklen_t addrlen = sizeof(struct irc_ssaddr);
+  socklen_t addrlen = sizeof(*addr);
 
   if (number_fd >= hard_fdlimit)
   {

@@ -263,7 +263,7 @@ who_matches(struct Client *source_p, const struct Client *target_p,
     const int ret = parse_netmask(mask, &addr, &bits);
 
     if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_compare(&target_p->ip, &addr, false, false, bits))
+      if (address_compare(&target_p->addr, &addr, false, false, bits))
         return true;
 
     if (match(mask, target_p->sockhost) == 0)

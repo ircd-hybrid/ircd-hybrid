@@ -364,7 +364,7 @@ struct Client
   dlink_list channel;  /**< Chain of channel pointer blocks */
   dlink_list svstags;  /**< List of ServicesTag items */
 
-  struct irc_ssaddr ip;  /**< Real IP address */
+  struct irc_ssaddr addr;  /**< Real IP address */
 
   char *tls_certfp;  /**< TLS certificate fingerprint */
   char *tls_cipher;  /**< Exact copy of tls_get_cipher() */

@@ -182,7 +182,7 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
           break;
         case HM_IPV6:
         case HM_IPV4:
-          if (address_compare(&client->ip, &exempt->addr, false, false, exempt->bits))
+          if (address_compare(&client->addr, &exempt->addr, false, false, exempt->bits))
             return true;
           break;
         default:

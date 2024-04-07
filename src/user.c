@@ -431,7 +431,7 @@ user_register_local(struct Client *client)
 
   if (!HasFlag(client, FLAGS_SPOOF))
   {
-    const char *const cloak = cloak_compute(&client->ip);
+    const char *const cloak = cloak_compute(&client->addr);
     if (cloak)
     {
       user_set_hostmask(client, cloak, false);

@@ -67,7 +67,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   const struct MaskItem *conf =
     find_address_conf(source_p->host, HasFlag(source_p, FLAGS_GOTID) ?
-                      source_p->username : "webirc", &source_p->ip, pass);
+                      source_p->username : "webirc", &source_p->addr, pass);
   if (conf == NULL)
     return;
 
@@ -107,8 +107,8 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   assert(res);
 
-  memcpy(&source_p->ip, res->ai_addr, res->ai_addrlen);
-  source_p->ip.ss_len = res->ai_addrlen;
+  memcpy(&source_p->addr, res->ai_addr, res->ai_addrlen);
+  source_p->addr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);
 
   strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));
@@ -123,7 +123,7 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
   strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  conf = find_dline_conf(&source_p->ip);
+  conf = find_dline_conf(&source_p->addr);
   if (conf)
   {
     if (conf->type == CONF_DLINE)

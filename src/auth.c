@@ -237,7 +237,7 @@ auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, s
     report_type = REPORT_FAIL_DNS;
   else if (namelength > HOSTLEN)
     report_type = REPORT_HOST_TOOLONG;
-  else if (address_compare(addr, &auth->client->ip, true, false, 0) == false)
+  else if (address_compare(addr, &auth->client->addr, true, false, 0) == false)
     report_type = REPORT_IP_MISMATCH;
   else if (auth_verify_hostname(name) == false)
     report_type = REPORT_HOST_INVALID;
@@ -537,7 +537,7 @@ auth_start_query(struct AuthRequest *auth)
   assert(auth->client->connection);
 
   /* Open a socket of the same type as the client socket */
-  int fd = comm_socket(auth->client->ip.ss.ss_family, SOCK_STREAM, 0);
+  int fd = comm_socket(auth->client->addr.ss.ss_family, SOCK_STREAM, 0);
   if (fd == -1)
   {
     report_error(L_ALL, "creating auth stream socket %s:%s",
@@ -562,7 +562,7 @@ auth_start_query(struct AuthRequest *auth)
   v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
 
-  comm_connect_tcp(auth->fd, &auth->client->ip, RFC1413_PORTNUM, &localaddr,
+  comm_connect_tcp(auth->fd, &auth->client->addr, RFC1413_PORTNUM, &localaddr,
                    auth_connect_callback, auth, 4);
 }
 
@@ -596,7 +596,7 @@ auth_start(struct Client *client)
   if (ConfigGeneral.disable_auth == 0)
     auth_start_query(auth);
 
-  gethost_byaddr(auth_dns_callback, auth, &client->ip);
+  gethost_byaddr(auth_dns_callback, auth, &client->addr);
 }
 
 /**

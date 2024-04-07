@@ -195,7 +195,7 @@ ssl_handshake(fde_t *F, void *data)
  * any client list yet.
  */
 void
-add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
+add_connection(struct Listener *listener, struct irc_ssaddr *addr, int fd)
 {
   struct Client *client = client_make(NULL);
 
@@ -206,10 +206,10 @@ add_connection(struct Listener *listener, struct irc_ssaddr *irn, int fd)
    * copy address to 'sockhost' as a string, copy it to host too
    * so we have something valid to put into error messages...
    */
-  client->ip = *irn;
+  client->addr = *addr;
 
-  getnameinfo((const struct sockaddr *)&client->ip,
-              client->ip.ss_len, client->sockhost,
+  getnameinfo((const struct sockaddr *)&client->addr,
+              client->addr.ss_len, client->sockhost,
               sizeof(client->sockhost), NULL, 0, NI_NUMERICHOST);
 
   if (client->sockhost[0] == ':' &&

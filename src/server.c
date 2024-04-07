@@ -424,7 +424,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client->sockhost, buf, sizeof(client->sockhost));
 
-  client->ip = *conf->addr;
+  client->addr = *conf->addr;
   client->connection->fd = fd_open(fd, true, NULL);
 
   /* Server names are always guaranteed under HOSTLEN chars */

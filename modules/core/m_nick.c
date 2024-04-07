@@ -354,10 +354,10 @@ uid_from_server(struct Client *source_p, int parc, char *parv[])
 
   if (getaddrinfo(client_p->sockhost, NULL, &hints, &res) == 0)
   {
-    memcpy(&client_p->ip, res->ai_addr, res->ai_addrlen);
-    client_p->ip.ss_len = res->ai_addrlen;
+    memcpy(&client_p->addr, res->ai_addr, res->ai_addrlen);
+    client_p->addr.ss_len = res->ai_addrlen;
 
-    struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->ip);
+    struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->addr);
     ++ipcache->count_remote;
     AddFlag(client_p, FLAGS_IPHASH);
   }

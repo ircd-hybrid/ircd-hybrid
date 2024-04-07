@@ -644,7 +644,7 @@ ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
         break;
       case HM_IPV6:
       case HM_IPV4:
-        if (address_compare(&client->ip, &ban->addr, false, false, ban->bits))
+        if (address_compare(&client->addr, &ban->addr, false, false, ban->bits))
           return true;
         break;
       default:

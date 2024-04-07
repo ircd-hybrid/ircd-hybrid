@@ -354,14 +354,14 @@ check_conf_klines(void)
     if (IsDead(client))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client->ip, CONF_DLINE, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client, CLIENT_BAN_DLINE, conf->reason);
       continue;  /* and go examine next Client */
     }
 
-    if ((ptr = find_conf_by_address(client->host, &client->ip, CONF_KLINE,
+    if ((ptr = find_conf_by_address(client->host, &client->addr, CONF_KLINE,
                                     client->username, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
@@ -386,7 +386,7 @@ check_conf_klines(void)
     if (IsDead(client))
       continue;
 
-    if ((ptr = find_conf_by_address(NULL, &client->ip, CONF_DLINE, NULL, NULL, 1)))
+    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
     {
       const struct MaskItem *conf = ptr;
       conf_try_ban(client, CLIENT_BAN_DLINE, conf->reason);
@@ -422,7 +422,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
       ban_type = 'K';
       break;
     case CLIENT_BAN_DLINE:
-      if (find_conf_by_address(NULL, &client->ip, CONF_EXEMPT, NULL, NULL, 1))
+      if (find_conf_by_address(NULL, &client->addr, CONF_EXEMPT, NULL, NULL, 1))
         return;
       ban_type = 'D';
       break;
@@ -531,7 +531,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
                client->name, client->username, client->sockhost);
       break;
     case MASK_IP:
-      if (client->ip.ss.ss_family == AF_INET)
+      if (client->addr.ss.ss_family == AF_INET)
         snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
                  client->name, client->username);
       else
@@ -689,7 +689,7 @@ exit_one_client(struct Client *client, const char *comment)
   if (HasFlag(client, FLAGS_IPHASH))
   {
     DelFlag(client, FLAGS_IPHASH);
-    ipcache_record_remove(&client->ip, MyConnect(client));
+    ipcache_record_remove(&client->addr, MyConnect(client));
   }
 
   /* Check to see if the client isn't already on the dead list */

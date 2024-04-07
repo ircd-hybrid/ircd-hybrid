@@ -133,7 +133,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
             if (HasFlag(source_p, FLAGS_SPOOF))
               break;
 
-            const char *const cloak = cloak_compute(&source_p->ip);
+            const char *const cloak = cloak_compute(&source_p->addr);
             if (cloak == NULL)
               break;
             user_set_hostmask(source_p, cloak, true);

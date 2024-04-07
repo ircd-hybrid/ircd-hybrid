@@ -62,7 +62,7 @@ dline_check(const struct AddressRec *arec)
       {
         case HM_IPV6:
         case HM_IPV4:
-          if (address_compare(&client->ip, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
+          if (address_compare(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
             conf_try_ban(client, CLIENT_BAN_DLINE, arec->conf->reason);
           break;
         default:

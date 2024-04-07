@@ -250,7 +250,7 @@ attach_iline(struct Client *client, struct MaskItem *conf)
   const struct ClassItem *const class = conf->class;
   bool a_limit_reached = false;
 
-  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->ip);
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
   ++ipcache->count_local;
   AddFlag(client, FLAGS_IPHASH);
 
@@ -261,7 +261,7 @@ attach_iline(struct Client *client, struct MaskItem *conf)
   else if (class->max_perip_global &&
            (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
     a_limit_reached = true;
-  else if (class_ip_limit_add(conf->class, &client->ip, IsConfExemptLimits(conf)))
+  else if (class_ip_limit_add(conf->class, &client->addr, IsConfExemptLimits(conf)))
     a_limit_reached = true;
 
   if (a_limit_reached)
@@ -287,7 +287,7 @@ verify_access(struct Client *client)
   else
     strlcpy(username + 1, client->username, sizeof(username) - 1);
 
-  struct MaskItem *conf = find_address_conf(client->host, username, &client->ip,
+  struct MaskItem *conf = find_address_conf(client->host, username, &client->addr,
                                             client->connection->password);
   if (conf == NULL)
     return NOT_AUTHORIZED;
@@ -404,7 +404,7 @@ conf_detach(struct Client *client, enum maskitem_type type)
     free_dlink_node(node);
 
     if (conf->type == CONF_CLIENT)
-      class_ip_limit_remove(conf->class, &client->ip);
+      class_ip_limit_remove(conf->class, &client->addr);
 
     if (--conf->class->ref_count == 0 && conf->class->active == false)
     {
@@ -523,7 +523,7 @@ operator_find(const struct Client *client, const char *name)
             break;
           case HM_IPV6:
           case HM_IPV4:
-            if (address_compare(&client->ip, conf->addr, false, false, conf->bits))
+            if (address_compare(&client->addr, conf->addr, false, false, conf->bits))
               return conf;
             break;
           default:

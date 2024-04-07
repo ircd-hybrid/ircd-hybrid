@@ -266,6 +266,6 @@ class_ip_limit_rebuild(struct ClassItem *class)
 
     if (conf->type == CONF_CLIENT)
       if (conf->class == class)
-        class_ip_limit_add(class, &client->ip, true);
+        class_ip_limit_add(class, &client->addr, true);
   }
 }

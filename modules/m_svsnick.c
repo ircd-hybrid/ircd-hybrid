@@ -59,7 +59,7 @@ ms_svsnick(struct Client *source_p, int parc, char *parv[])
 {
   const char *new_nick = parv[3];
 
-  if (!HasFlag(source_p, FLAGS_SERVICE))
+  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return;
 
   if (valid_nickname(new_nick, true) == false)

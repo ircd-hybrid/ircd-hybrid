@@ -59,7 +59,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
   const struct user_modes *tab = NULL;
   int what = MODE_ADD;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE))
+  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return;
 
   struct Client *target_p = find_person(source_p, parv[1]);

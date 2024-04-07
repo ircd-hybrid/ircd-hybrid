@@ -50,7 +50,7 @@
 static void
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE))
+  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
     return;
 
   struct Client *target_p = find_person(source_p, parv[1]);

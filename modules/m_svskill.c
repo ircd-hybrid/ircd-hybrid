@@ -50,13 +50,8 @@
 static void
 ms_svskill(struct Client *source_p, int parc, char *parv[])
 {
-  const char *comment = parv[3];  /* Either defined or NULL */
-
   if (!HasFlag(source_p, FLAGS_SERVICE))
     return;
-
-  if (EmptyString(comment))
-    comment = CONF_NOREASON;
 
   struct Client *target_p = find_person(source_p, parv[1]);
   if (target_p == NULL)
@@ -66,6 +61,7 @@ ms_svskill(struct Client *source_p, int parc, char *parv[])
   if (ts && (ts != target_p->tsinfo))
     return;
 
+  const char *const comment = parv[3];
   if (MyConnect(target_p))
   {
     char reason[REASONLEN + 1] = "SVSKilled: ";
@@ -93,7 +89,7 @@ static struct Command svskill_msgtab =
   .name = "SVSKILL",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svskill, .args_min = 3 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_svskill, .args_min = 4 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

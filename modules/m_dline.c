@@ -138,21 +138,19 @@ dline_handle(struct Client *source_p, const struct aline_ctx *aline)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. D-Line for [%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60,
-                         conf->host, conf->reason);
+                         get_oper_name(source_p), aline->duration / 60, conf->host, conf->reason);
     log_write(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
-         get_oper_name(source_p), aline->duration / 60, conf->host, conf->reason);
+              get_oper_name(source_p), aline->duration / 60, conf->host, conf->reason);
   }
   else
   {
     if (IsClient(source_p))
       sendto_one_notice(source_p, &me, ":Added D-Line [%s]", conf->host);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added D-Line for [%s] [%s]",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added D-Line for [%s] [%s]",
                          get_oper_name(source_p), conf->host, conf->reason);
     log_write(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
-         get_oper_name(source_p), conf->host, conf->reason);
+              get_oper_name(source_p), conf->host, conf->reason);
   }
 
   dline_check(add_conf_by_address(CONF_DLINE, conf));
@@ -232,8 +230,7 @@ ms_dline(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_DLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_DLINE, source_p->servptr->name, source_p->username, source_p->host))
     dline_handle(source_p, &aline);
 }
 

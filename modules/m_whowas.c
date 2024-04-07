@@ -82,11 +82,11 @@ do_whowas(struct Client *source_p, char *parv[])
       }
 
       if (server_hidden)
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
-                           ConfigServerInfo.network_name, date_ctime(whowas->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER,
+                           whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
       else
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, whowas->name,
-                           whowas->servername, date_ctime(whowas->logoff));
+        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER,
+                           whowas->name, whowas->servername, date_ctime(whowas->logoff));
       ++count;
     }
 

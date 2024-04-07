@@ -69,11 +69,10 @@ xline_remove(struct Client *source_p, const struct aline_ctx *aline)
   if (IsClient(source_p))
     sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos->mask);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has removed the X-Line for: [%s]",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the X-Line for: [%s]",
                        get_oper_name(source_p), gecos->mask);
   log_write(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-       get_oper_name(source_p), gecos->mask);
+            get_oper_name(source_p), gecos->mask);
 
   gecos_delete(gecos, false);
 }
@@ -115,7 +114,8 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s", aline.host);
+    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
+                       aline.host);
 
   xline_remove(source_p, &aline);
 }
@@ -150,8 +150,7 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNXLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_UNXLINE, source_p->servptr->name, source_p->username, source_p->host))
     xline_remove(source_p, &aline);
 }
 

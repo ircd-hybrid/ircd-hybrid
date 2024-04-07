@@ -112,10 +112,9 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. X-Line for [%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60,
-                         gecos->mask, gecos->reason);
+                         get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-         get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
+              get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
   }
   else
   {
@@ -123,12 +122,10 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
       sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
                         gecos->mask, gecos->reason);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added X-Line for [%s] [%s]",
-                         get_oper_name(source_p), gecos->mask,
-                         gecos->reason);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added X-Line for [%s] [%s]",
+                         get_oper_name(source_p), gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-         get_oper_name(source_p), gecos->mask, gecos->reason);
+              get_oper_name(source_p), gecos->mask, gecos->reason);
   }
 
   xline_check(gecos);
@@ -208,8 +205,7 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_XLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_XLINE, source_p->servptr->name, source_p->username, source_p->host))
     xline_handle(source_p, &aline);
 }
 

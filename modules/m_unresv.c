@@ -63,11 +63,10 @@ resv_remove(struct Client *source_p, const struct aline_ctx *aline)
   if (IsClient(source_p))
     sendto_one_notice(source_p, &me, ":RESV for [%s] is removed", resv->mask);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has removed the RESV for: [%s]",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the RESV for: [%s]",
                        get_oper_name(source_p), resv->mask);
   log_write(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-       get_oper_name(source_p), resv->mask);
+            get_oper_name(source_p), resv->mask);
 
   resv_delete(resv, false);
 }
@@ -144,8 +143,7 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNRESV, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_UNRESV, source_p->servptr->name, source_p->username, source_p->host))
     resv_remove(source_p, &aline);
 }
 

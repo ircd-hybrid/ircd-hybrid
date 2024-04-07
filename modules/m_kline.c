@@ -151,12 +151,9 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60,
-                         conf->user, conf->host,
-                         conf->reason);
+                         get_oper_name(source_p), aline->duration / 60, conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-         get_oper_name(source_p), aline->duration / 60,
-         conf->user, conf->host, conf->reason);
+              get_oper_name(source_p), aline->duration / 60, conf->user, conf->host, conf->reason);
   }
   else
   {
@@ -164,12 +161,10 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
       sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p),
-                         conf->user, conf->host, conf->reason);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added K-Line for [%s@%s] [%s]",
+                         get_oper_name(source_p), conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
-         get_oper_name(source_p), conf->user, conf->host, conf->reason);
+              get_oper_name(source_p), conf->user, conf->host, conf->reason);
   }
 
   kline_check(add_conf_by_address(CONF_KLINE, conf));
@@ -201,8 +196,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
   if (aline.server)
   {
     sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
-                       aline.server, aline.duration,
-                       aline.user, aline.host, aline.reason);
+                       aline.server, aline.duration, aline.user, aline.host, aline.reason);
 
     /* Allow ON to apply local kline as well if it matches */
     if (match(aline.server, me.name))
@@ -244,15 +238,14 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[2], NULL, 10)
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s", aline.server,
-                     aline.duration, aline.user, aline.host, aline.reason);
+  sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
+                     aline.server, aline.duration, aline.user, aline.host, aline.reason);
 
   if (match(aline.server, me.name))
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_KLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_KLINE, source_p->servptr->name, source_p->username, source_p->host))
     kline_handle(source_p, &aline);
 }
 

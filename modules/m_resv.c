@@ -84,10 +84,9 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. RESV for [%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60,
-                         resv->mask, resv->reason);
+                         get_oper_name(source_p), aline->duration / 60, resv->mask, resv->reason);
     log_write(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-         get_oper_name(source_p), aline->duration / 60, resv->mask, resv->reason);
+              get_oper_name(source_p), aline->duration / 60, resv->mask, resv->reason);
   }
   else
   {
@@ -95,12 +94,10 @@ resv_handle(struct Client *source_p, const struct aline_ctx *aline)
       sendto_one_notice(source_p, &me, ":Added RESV [%s] [%s]",
                         resv->mask, resv->reason);
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "%s added RESV for [%s] [%s]",
-                         get_oper_name(source_p), resv->mask,
-                         resv->reason);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added RESV for [%s] [%s]",
+                         get_oper_name(source_p), resv->mask, resv->reason);
     log_write(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
-         get_oper_name(source_p), resv->mask, resv->reason);
+              get_oper_name(source_p), resv->mask, resv->reason);
   }
 }
 
@@ -172,8 +169,7 @@ ms_resv(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_RESV, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_RESV, source_p->servptr->name, source_p->username, source_p->host))
     resv_handle(source_p, &aline);
 }
 

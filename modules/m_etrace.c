@@ -67,14 +67,11 @@ report_this_status(struct Client *source_p, const struct Client *target_p)
 static void
 do_etrace(struct Client *source_p, const char *name)
 {
-  bool doall = false;
-  dlink_node *node;
-
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE,
-                       "ETRACE requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username,
                        source_p->host, source_p->servptr->name);
 
+  bool doall = false;
   if (EmptyString(name))
     doall = true;
   else if (match(name, me.name) == 0)
@@ -82,6 +79,7 @@ do_etrace(struct Client *source_p, const char *name)
   else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
     doall = true;
 
+  dlink_node *node;
   DLINK_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;

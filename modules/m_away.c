@@ -86,8 +86,7 @@ do_away(struct Client *source_p, const char *message)
 
   strlcpy(source_p->away, message, sizeof(source_p->away));
   sendto_common_channels_local(source_p, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source_p->name, source_p->username,
-                               source_p->host, source_p->away);
+                               source_p->name, source_p->username, source_p->host, source_p->away);
   sendto_server(source_p, 0, 0, ":%s AWAY :%s",
                 source_p->id, source_p->away);
 }

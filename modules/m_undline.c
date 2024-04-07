@@ -77,11 +77,10 @@ dline_remove(struct Client *source_p, const struct aline_ctx *aline)
     sendto_one_notice(source_p, &me, ":D-Line for [%s] is removed",
                       conf->host);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has removed the D-Line for: [%s]",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the D-Line for: [%s]",
                        get_oper_name(source_p), conf->host);
   log_write(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-       get_oper_name(source_p), conf->host);
+            get_oper_name(source_p), conf->host);
 
   delete_one_address_conf(aline->host, conf);
 }
@@ -123,7 +122,8 @@ mo_undline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s", aline.host);
+    cluster_distribute(source_p, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s",
+                       aline.host);
 
   dline_remove(source_p, &aline);
 }
@@ -158,8 +158,7 @@ ms_undline(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNDLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_UNDLINE, source_p->servptr->name, source_p->username, source_p->host))
     dline_remove(source_p, &aline);
 }
 

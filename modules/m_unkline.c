@@ -77,11 +77,10 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
     sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
                       conf->user, conf->host);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "%s has removed the K-Line for: [%s@%s]",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the K-Line for: [%s@%s]",
                        get_oper_name(source_p), conf->user, conf->host);
   log_write(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-       get_oper_name(source_p), conf->user, conf->host);
+            get_oper_name(source_p), conf->user, conf->host);
 
   delete_one_address_conf(aline->host, conf);
 }
@@ -123,8 +122,8 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE,
-                       "%s %s", aline.user, aline.host);
+    cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE, "%s %s",
+                       aline.user, aline.host);
 
   kline_remove(source_p, &aline);
 }
@@ -161,8 +160,7 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
     return;
 
   if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNKLINE, source_p->servptr->name,
-                  source_p->username, source_p->host))
+      shared_find(SHARED_UNKLINE, source_p->servptr->name, source_p->username, source_p->host))
     kline_remove(source_p, &aline);
 }
 

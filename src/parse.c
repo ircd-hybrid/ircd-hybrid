@@ -44,7 +44,7 @@
  * side effects -
  */
 static void
-parse_remove_unknown(struct Client *client, const char *lsender, char *lbuffer)
+parse_remove_unknown(struct Client *client, const char *sender, char *buffer)
 {
   /*
    * Do kill if it came from a server because it means there is a ghost
@@ -56,16 +56,16 @@ parse_remove_unknown(struct Client *client, const char *lsender, char *lbuffer)
    * 'nodots'          is a nickname (KILL)
    * 'no.dot.at.start' is a server   (SQUIT)
    */
-  if ((IsDigit(*lsender) && strlen(lsender) <= IRC_MAXSID) || strchr(lsender, '.'))
+  if ((IsDigit(*sender) && strlen(sender) <= IRC_MAXSID) || strchr(sender, '.'))
   {
     log_write(LOG_TYPE_DEBUG, "Unknown prefix (%s) from %s, Squitting %s",
-              lbuffer, client_get_name(client, SHOW_IP), lsender);
+              buffer, client_get_name(client, SHOW_IP), sender);
     sendto_one(client, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-               me.id, lsender, lbuffer, client->name);
+               me.id, sender, buffer, client->name);
   }
   else
     sendto_one(client, ":%s KILL %s :%s (Unknown Client)",
-               me.id, lsender, me.name);
+               me.id, sender, me.name);
 }
 
 /*

@@ -345,6 +345,55 @@ list_move_node(list_node_t *m, list_t *list_del, list_t *list_add)
 }
 
 /**
+ * @brief Iterates over each node in the list and calls a callback function for each node.
+ *
+ * This function iterates over each node in the provided list and calls the specified
+ * callback function for each node, passing the data of the current node and the user-defined
+ * data pointer to the callback function.
+ *
+ * @param list Pointer to the double-linked list to iterate over.
+ * @param callback Pointer to the callback function to be called for each node.
+ * @param user_ptr Pointer to user-defined data that can be passed to the callback function.
+ */
+void
+list_iterate(list_t *list, list_iterate_callback callback, void *user_ptr)
+{
+  list_node_t *node = list->head;
+
+  while (node)
+  {
+    callback(node->data, user_ptr);
+    node = node->next;
+  }
+}
+
+/**
+ * @brief Iterates over each node in the list and calls a callback function for each node safely.
+ *
+ * This function iterates over each node in the provided list and calls the specified
+ * callback function for each node, passing the data of the current node and the user-defined
+ * data pointer to the callback function. It allows the callback function to safely remove
+ * entries from the list without causing issues with the iteration.
+ *
+ * @param list Pointer to the double-linked list to iterate over.
+ * @param callback Pointer to the callback function to be called for each node.
+ * @param user_ptr Pointer to user-defined data that can be passed to the callback function.
+ */
+void
+list_iterate_safe(list_t *list, list_iterate_callback callback, void *user_ptr)
+{
+  list_node_t *node = list->head;
+
+  while (node)
+  {
+    list_node_t *node_next = node->next;
+    callback(node->data, user_ptr);
+
+    node = node_next;
+  }
+}
+
+/**
  * @brief Finds and deletes a node with a specific data value in a double-linked list.
  *
  * This function searches for a node with the specified data value in the

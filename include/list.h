@@ -99,6 +99,8 @@ typedef struct _list
   unsigned int length;  /**< Number of nodes in the list. */
 } list_t;
 
+typedef void (*list_iterate_callback)(void *, void *);
+
 extern void list_free_node(list_node_t *);
 extern void list_add(void *, list_node_t *, list_t *);
 extern void list_add_after(void *, list_node_t *, list_node_t *, list_t *);
@@ -107,6 +109,8 @@ extern void list_add_tail(void *, list_node_t *, list_t *);
 extern void list_delete(list_node_t *, list_t *);
 extern void list_move_list(list_t *, list_t *);
 extern void list_move_node(list_node_t *, list_t *, list_t *);
+extern void list_iterate(list_t *, list_iterate_callback, void *);
+extern void list_iterate_safe(list_t *, list_iterate_callback, void *);
 extern list_node_t *list_find(list_t *, const void *);
 extern list_node_t *list_find_cmp(const list_t *, const void *, int (*)(const char *, const char *));
 extern list_node_t *list_find_delete(list_t *, void *);

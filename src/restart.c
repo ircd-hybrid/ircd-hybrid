@@ -68,8 +68,8 @@ server_die(const char *message, bool restart)
     snprintf(buf, sizeof(buf), "Server is %s: %s",
              restart ? "restarting" : "terminating", message);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_client_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_client_list.head)
     sendto_one_notice(node->data, &me, ":%s", buf);
 
   sendto_server(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);

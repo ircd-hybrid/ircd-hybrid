@@ -59,7 +59,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   char banbuf[IRCD_BUFSIZE];
   const char *mask;
   char *s, *t, *mbuf, *pbuf;
-  dlink_list *list = NULL;
+  list_t *list = NULL;
   size_t mlen = 0, tlen = 0;
   int modecount = 0;
   unsigned int type = 0;

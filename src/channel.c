@@ -47,13 +47,13 @@
 
 
 /** Doubly linked list containing a list of all channels. */
-static dlink_list channel_list;
+static list_t channel_list;
 
 
 /*! \brief Returns the channel_list as constant
  * \return channel_list
  */
-const dlink_list *
+const list_t *
 channel_get_list(void)
 {
   return &channel_list;
@@ -108,12 +108,12 @@ channel_add_user(struct Channel *channel, struct Client *client,
   member->channel = channel;
   member->flags = flags;
 
-  dlinkAdd(member, &member->channode, &channel->members);
+  list_add(member, &member->channode, &channel->members);
 
   if (MyConnect(client))
-    dlinkAdd(member, &member->locchannode, &channel->members_local);
+    list_add(member, &member->locchannode, &channel->members_local);
 
-  dlinkAdd(member, &member->usernode, &client->channel);
+  list_add(member, &member->usernode, &client->channel);
 }
 
 /*! \brief Deletes an user from a channel by removing a link in the
@@ -126,12 +126,12 @@ channel_remove_user(struct ChannelMember *member)
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
 
-  dlinkDelete(&member->channode, &channel->members);
+  list_delete(&member->channode, &channel->members);
 
   if (MyConnect(client))
-    dlinkDelete(&member->locchannode, &channel->members_local);
+    list_delete(&member->locchannode, &channel->members_local);
 
-  dlinkDelete(&member->usernode, &client->channel);
+  list_delete(&member->usernode, &client->channel);
 
   xfree(member);
 
@@ -148,14 +148,14 @@ channel_remove_user(struct ChannelMember *member)
 void
 channel_demote_members(struct Channel *channel, const struct Client *client)
 {
-  dlink_node *node;
+  list_node_t *node;
   char modebuf[MAXMODEPARAMS + 1];
   char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
   char *mbuf = modebuf;
   char *pbuf = parabuf;
   unsigned int pargs = 0;
 
-  DLINK_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
 
@@ -198,7 +198,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
 static void
 channel_send_members(struct Client *client, const struct Channel *channel)
 {
-  dlink_node *node;
+  list_node_t *node;
   size_t len;
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
@@ -206,7 +206,7 @@ channel_send_members(struct Client *client, const struct Channel *channel)
                                 channel->name, channel_modes(channel, client, true));
   char *const bufptr_start = bufptr;
 
-  DLINK_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->members.head)
   {
     const struct ChannelMember *member = node->data;
 
@@ -233,20 +233,20 @@ channel_send_members(struct Client *client, const struct Channel *channel)
  */
 static void
 channel_send_mask_list(struct Client *client, const struct Channel *channel,
-                       const dlink_list *list, const char flag)
+                       const list_t *list, const char flag)
 {
-  dlink_node *node;
+  list_node_t *node;
   size_t len;
   char buf[IRCD_BUFSIZE];
 
-  if (dlink_list_length(list) == 0)
+  if (list_length(list) == 0)
     return;
 
   char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :", me.id,
                                 channel->creation_time, channel->name, flag);
   char *const bufptr_start = bufptr;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     const struct Ban *ban = node->data;
 
@@ -337,20 +337,20 @@ channel_check_name(const char *name, bool local)
 }
 
 void
-remove_ban(struct Ban *ban, dlink_list *list)
+remove_ban(struct Ban *ban, list_t *list)
 {
-  dlinkDelete(&ban->node, list);
+  list_delete(&ban->node, list);
   xfree(ban);
 }
 
 /* channel_free_mask_list()
  *
- * inputs       - pointer to dlink_list
+ * inputs       - pointer to list_t
  * output       - NONE
  * side effects -
  */
 static void
-channel_free_mask_list(dlink_list *list)
+channel_free_mask_list(list_t *list)
 {
   while (list->head)
   {
@@ -380,7 +380,7 @@ channel_make(const char *name)
   if (channel->name_len >= sizeof(channel->name))
     channel->name_len = sizeof(channel->name) - 1;
 
-  dlinkAdd(channel, &channel->node, &channel_list);
+  list_add(channel, &channel->node, &channel_list);
   hash_add_channel(channel);
 
   return channel;
@@ -399,7 +399,7 @@ channel_free(struct Channel *channel)
   channel_free_mask_list(&channel->exceptlist);
   channel_free_mask_list(&channel->invexlist);
 
-  dlinkDelete(&channel->node, &channel_list);
+  list_delete(&channel->node, &channel_list);
   hash_del_channel(channel);
 
   assert(channel->hnextch == channel);
@@ -407,27 +407,27 @@ channel_free(struct Channel *channel)
   assert(channel->node.prev == NULL);
   assert(channel->node.next == NULL);
 
-  assert(dlink_list_length(&channel->members_local) == 0);
+  assert(list_length(&channel->members_local) == 0);
   assert(channel->members_local.head == NULL);
   assert(channel->members_local.tail == NULL);
 
-  assert(dlink_list_length(&channel->members) == 0);
+  assert(list_length(&channel->members) == 0);
   assert(channel->members.head == NULL);
   assert(channel->members.tail == NULL);
 
-  assert(dlink_list_length(&channel->invites) == 0);
+  assert(list_length(&channel->invites) == 0);
   assert(channel->invites.head == NULL);
   assert(channel->invites.tail == NULL);
 
-  assert(dlink_list_length(&channel->banlist) == 0);
+  assert(list_length(&channel->banlist) == 0);
   assert(channel->banlist.head == NULL);
   assert(channel->banlist.tail == NULL);
 
-  assert(dlink_list_length(&channel->exceptlist) == 0);
+  assert(list_length(&channel->exceptlist) == 0);
   assert(channel->exceptlist.head == NULL);
   assert(channel->exceptlist.tail == NULL);
 
-  assert(dlink_list_length(&channel->invexlist) == 0);
+  assert(list_length(&channel->invexlist) == 0);
   assert(channel->invexlist.head == NULL);
   assert(channel->invexlist.tail == NULL);
 
@@ -471,8 +471,8 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     /* 1       23456            789             01                        2 3  */
     size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
-    dlink_node *node;
-    DLINK_FOREACH(node, channel->members.head)
+    list_node_t *node;
+    LIST_FOREACH(node, channel->members.head)
     {
       const struct ChannelMember *member = node->data;
 
@@ -656,11 +656,11 @@ ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 }
 
 bool
-find_bmask(struct Client *client, struct Channel *channel, const dlink_list *list, struct Extban *extban)
+find_bmask(struct Client *client, struct Channel *channel, const list_t *list, struct Extban *extban)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     struct Ban *ban = node->data;
 
@@ -730,7 +730,7 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel->mode.key[0] && (key == NULL || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
-  if (channel->mode.limit && dlink_list_length(&channel->members) >=
+  if (channel->mode.limit && list_length(&channel->members) >=
       channel->mode.limit)
     return ERR_CHANNELISFULL;
 
@@ -751,21 +751,21 @@ member_has_flags(const struct ChannelMember *member, const unsigned int flags)
 struct ChannelMember *
 member_find_link(const struct Client *client, const struct Channel *channel)
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (!IsClient(client))
     return NULL;
 
   /* Take the shortest of the two lists */
-  if (dlink_list_length(&channel->members) < dlink_list_length(&client->channel))
+  if (list_length(&channel->members) < list_length(&client->channel))
   {
-    DLINK_FOREACH(node, channel->members.head)
+    LIST_FOREACH(node, channel->members.head)
       if (((struct ChannelMember *)node->data)->client == client)
         return node->data;
   }
   else
   {
-    DLINK_FOREACH(node, client->channel.head)
+    LIST_FOREACH(node, client->channel.head)
       if (((struct ChannelMember *)node->data)->channel == channel)
         return node->data;
   }
@@ -1029,7 +1029,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       continue;
     }
 
-    if (dlink_list_length(&client->channel) >=
+    if (list_length(&client->channel) >=
         ((class->max_channels) ? class->max_channels : ConfigChannel.max_channels))
     {
       sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);

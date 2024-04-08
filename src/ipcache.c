@@ -33,7 +33,7 @@
 #include "patricia.h"
 
 
-static dlink_list ipcache_list;
+static list_t ipcache_list;
 static patricia_tree_t *ipcache_trie_v6;
 static patricia_tree_t *ipcache_trie_v4;
 
@@ -67,7 +67,7 @@ ipcache_record_find_or_add(void *addr)
 
   struct ip_entry *iptr = xcalloc(sizeof(*iptr));
   iptr->trie_pointer = ptrie;
-  dlinkAdd(pnode, &iptr->node, &ipcache_list);
+  list_add(pnode, &iptr->node, &ipcache_list);
 
   PATRICIA_DATA_SET(pnode, iptr);
 
@@ -84,7 +84,7 @@ ipcache_record_delete(patricia_node_t *pnode)
   {
     patricia_remove(iptr->trie_pointer, pnode);
 
-    dlinkDelete(&iptr->node, &ipcache_list);
+    list_delete(&iptr->node, &ipcache_list);
     xfree(iptr);
   }
 }
@@ -126,9 +126,9 @@ ipcache_record_remove(void *addr, bool local)
 static void
 ipcache_remove_expired_records(void *unused)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, ipcache_list.head)
+  LIST_FOREACH_SAFE(node, node_next, ipcache_list.head)
     ipcache_record_delete(node->data);
 }
 
@@ -146,8 +146,8 @@ void
 ipcache_get_stats(unsigned int *const number_ips_stored, size_t *const mem_ips_stored)
 {
   /* TBD: inaccurate for now as it does only count the amount of memory for struct ip_entry items */
-  (*number_ips_stored) = dlink_list_length(&ipcache_list);
-  (*mem_ips_stored) = dlink_list_length(&ipcache_list) * sizeof(struct ip_entry);
+  (*number_ips_stored) = list_length(&ipcache_list);
+  (*mem_ips_stored) = list_length(&ipcache_list) * sizeof(struct ip_entry);
 }
 
 void

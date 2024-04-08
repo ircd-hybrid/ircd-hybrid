@@ -49,7 +49,7 @@ void
 dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
 {
   block->refs++;
-  dlinkAddTail(block, make_dlink_node(), &queue->blocks);
+  list_add_tail(block, list_make_node(), &queue->blocks);
   queue->total_size += block->size;
 }
 
@@ -58,7 +58,7 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 {
   while (count > 0 && dbuf_length(queue) > 0)
   {
-    dlink_node *node = queue->blocks.head;
+    list_node_t *node = queue->blocks.head;
     struct dbuf_block *block = node->data;
     size_t avail = block->size - queue->pos;
 
@@ -69,8 +69,8 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 
       dbuf_ref_free(block);
 
-      dlinkDelete(node, &queue->blocks);
-      free_dlink_node(node);
+      list_delete(node, &queue->blocks);
+      list_free_node(node);
 
       queue->pos = 0;
     }
@@ -118,7 +118,7 @@ dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
     if (block == NULL || sizeof(block->data) - block->size == 0)
     {
       block = dbuf_alloc();
-      dlinkAddTail(block, make_dlink_node(), &queue->blocks);
+      list_add_tail(block, list_make_node(), &queue->blocks);
     }
 
     size_t avail = sizeof(block->data) - block->size;

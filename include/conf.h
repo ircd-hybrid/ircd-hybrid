@@ -97,7 +97,7 @@ enum
 
 struct split_nuh_item
 {
-  dlink_node node;
+  list_node_t node;
 
   char *nuhmask;
   char *nickptr;
@@ -111,9 +111,9 @@ struct split_nuh_item
 
 struct MaskItem
 {
-  dlink_node         node;
-  dlink_list         leaf_list;
-  dlink_list         hub_list;
+  list_node_t         node;
+  list_t         leaf_list;
+  list_t         hub_list;
   enum maskitem_type type;
   bool       active;
   bool       dns_failed;
@@ -287,9 +287,9 @@ struct aline_ctx
   uintmax_t duration;
 };
 
-extern dlink_list flatten_links;
-extern dlink_list connect_items;
-extern dlink_list operator_items;
+extern list_t flatten_links;
+extern list_t connect_items;
+extern list_t operator_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;
@@ -308,7 +308,7 @@ extern bool conf_check_client(struct Client *);
 
 
 extern void conf_detach(struct Client *, enum maskitem_type);
-extern struct MaskItem *find_conf_name(dlink_list *, const char *, enum maskitem_type);
+extern struct MaskItem *find_conf_name(list_t *, const char *, enum maskitem_type);
 extern int conf_connect_allowed(struct irc_ssaddr *);
 extern void split_nuh(struct split_nuh_item *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);

@@ -49,7 +49,7 @@
  */
 void
 accept_add(const char *nick, const char *user,
-           const char *host, dlink_list *list)
+           const char *host, list_t *list)
 {
   struct AcceptItem *accept = xcalloc(sizeof(*accept));
 
@@ -57,13 +57,13 @@ accept_add(const char *nick, const char *user,
   accept->user = xstrdup(user);
   accept->host = xstrdup(host);
 
-  dlinkAdd(accept, &accept->node, list);
+  list_add(accept, &accept->node, list);
 }
 
 void
-accept_del(struct AcceptItem *accept, dlink_list *list)
+accept_del(struct AcceptItem *accept, list_t *list)
 {
-  dlinkDelete(&accept->node, list);
+  list_delete(&accept->node, list);
 
   xfree(accept->nick);
   xfree(accept->user);
@@ -78,7 +78,7 @@ accept_del(struct AcceptItem *accept, dlink_list *list)
  * side effects - Walk through given clients acceptlist and remove all entries
  */
 void
-accept_clear_list(dlink_list *list)
+accept_clear_list(list_t *list)
 {
   while (list->head)
     accept_del(list->head->data, list);
@@ -86,12 +86,12 @@ accept_clear_list(dlink_list *list)
 
 struct AcceptItem *
 accept_find(const char *nick, const char *user,
-            const char *host, dlink_list *list,
+            const char *host, list_t *list,
             int (*compare)(const char *, const char *))
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     struct AcceptItem *accept = node->data;
 
@@ -114,7 +114,7 @@ accept_find(const char *nick, const char *user,
 bool
 accept_message(struct Client *source, struct Client *target)
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
       (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
@@ -125,7 +125,7 @@ accept_message(struct Client *source, struct Client *target)
     return true;
 
   if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
-    DLINK_FOREACH(node, target->channel.head)
+    LIST_FOREACH(node, target->channel.head)
       if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
         return true;
 

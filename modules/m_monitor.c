@@ -56,7 +56,7 @@ monitor_add(struct Client *source_p, char *list)
     if (EmptyString(name) || valid_nickname(name, true) == false)
       continue;
 
-    if (dlink_list_length(&source_p->connection->monitors) >=
+    if (list_length(&source_p->connection->monitors) >=
         ConfigGeneral.max_monitor)
     {
       char buf[IRCD_BUFSIZE];
@@ -119,7 +119,7 @@ monitor_del(struct Client *source_p, char *list)
 {
   char *p = NULL;
 
-  if (dlink_list_length(&source_p->connection->monitors) == 0)
+  if (list_length(&source_p->connection->monitors) == 0)
     return;
 
   for (const char *name = strtok_r(list, ",", &p); name;
@@ -133,13 +133,13 @@ monitor_list(struct Client *source_p)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  dlink_node *node;
+  list_node_t *node;
 
   /* :me.name 732 source_p->name :name1,name2,...\r\n */
   /* 1       23456              78               9 10 */
   size_t len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  DLINK_FOREACH(node, source_p->connection->monitors.head)
+  LIST_FOREACH(node, source_p->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;
 
@@ -164,13 +164,13 @@ monitor_status(struct Client *source_p)
   char ofbuf[IRCD_BUFSIZE];
   char *onbufptr = onbuf;
   char *ofbufptr = ofbuf;
-  dlink_node *node;
+  list_node_t *node;
 
   /* :me.name 730 source_p->name :nick!user@host,...\r\n */
   /* 1       23456              78                  9 10 */
   size_t len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  DLINK_FOREACH(node, source_p->connection->monitors.head)
+  LIST_FOREACH(node, source_p->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;
 

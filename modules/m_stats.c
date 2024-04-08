@@ -132,8 +132,8 @@ report_shared(struct Client *client)
 
   char buf[sizeof(flag_table) / sizeof(flag_table[0]) + 1];  /* +1 for 'c' */
 
-  dlink_node *node;
-  DLINK_FOREACH(node, shared_get_list()->head)
+  list_node_t *node;
+  LIST_FOREACH(node, shared_get_list()->head)
   {
     const struct SharedItem *shared = node->data;
     char *bufptr = buf;
@@ -175,8 +175,8 @@ report_cluster(struct Client *client)
 
   char buf[sizeof(flag_table) / sizeof(flag_table[0]) + 1];  /* +1 for 'C' */
 
-  dlink_node *node;
-  DLINK_FOREACH(node, cluster_get_list()->head)
+  list_node_t *node;
+  LIST_FOREACH(node, cluster_get_list()->head)
   {
     const struct ClusterItem *cluster = node->data;
     char *bufptr = buf;
@@ -198,9 +198,9 @@ report_cluster(struct Client *client)
 static void
 stats_service(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, service_get_list()->head)
+  LIST_FOREACH(node, service_get_list()->head)
   {
     const struct ServiceItem *service = node->data;
     sendto_one_numeric(client, &me, RPL_STATSSERVICE, "*", service->name, 0, 0);
@@ -210,9 +210,9 @@ stats_service(struct Client *client, int parc, char *parv[])
 static void
 stats_gecos(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, gecos_get_list()->head)
+  LIST_FOREACH(node, gecos_get_list()->head)
   {
     const struct GecosItem *gecos = node->data;
     sendto_one_numeric(client, &me, RPL_STATSXLINE,
@@ -235,8 +235,8 @@ stats_operator(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
-  DLINK_FOREACH(node, operator_items.head)
+  list_node_t *node;
+  LIST_FOREACH(node, operator_items.head)
   {
     const struct MaskItem *conf = node->data;
 
@@ -254,9 +254,9 @@ stats_operator(struct Client *client, int parc, char *parv[])
 static void
 stats_connect(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_items.head)
   {
     char buf[8];
     char *bufptr = buf;
@@ -292,16 +292,16 @@ stats_connect(struct Client *client, int parc, char *parv[])
 static void
 stats_resv(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, resv_chan_get_list()->head)
+  LIST_FOREACH(node, resv_chan_get_list()->head)
   {
     const struct ResvItem *resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expire ? 'q' : 'Q', resv->mask, resv->reason);
   }
 
-  DLINK_FOREACH(node, resv_nick_get_list()->head)
+  LIST_FOREACH(node, resv_nick_get_list()->head)
   {
     const struct ResvItem *resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
@@ -338,55 +338,55 @@ stats_memory(struct Client *client, int parc, char *parv[])
   size_t listener_memory = 0;
 
 
-  dlink_node *node, *node2;
-  DLINK_FOREACH(node, local_server_list.head)
+  list_node_t *node, *node2;
+  LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *target = node->data;
-    local_client_conf_count += dlink_list_length(&target->connection->confs);
+    local_client_conf_count += list_length(&target->connection->confs);
   }
 
-  DLINK_FOREACH(node, local_client_list.head)
+  LIST_FOREACH(node, local_client_list.head)
   {
     const struct Client *target = node->data;
-    local_client_conf_count += dlink_list_length(&target->connection->confs);
-    monitor_list_entries += dlink_list_length(&target->connection->monitors);
+    local_client_conf_count += list_length(&target->connection->confs);
+    monitor_list_entries += list_length(&target->connection->monitors);
   }
 
-  local_client_count = dlink_list_length(&local_server_list) +
-                       dlink_list_length(&local_client_list);
-  remote_client_count = dlink_list_length(&global_server_list) +
-                        dlink_list_length(&global_client_list) - local_client_count;
+  local_client_count = list_length(&local_server_list) +
+                       list_length(&local_client_list);
+  remote_client_count = list_length(&global_server_list) +
+                        list_length(&global_client_list) - local_client_count;
 
   /* Count up all members, invites, ban lists, except lists, Invex lists */
-  DLINK_FOREACH(node, channel_get_list()->head)
+  LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *channel = node->data;
-    channel_members += dlink_list_length(&channel->members);
-    channel_invites += dlink_list_length(&channel->invites);
+    channel_members += list_length(&channel->members);
+    channel_invites += list_length(&channel->invites);
 
-    channel_bans += dlink_list_length(&channel->banlist);
-    channel_ban_memory += dlink_list_length(&channel->banlist) * sizeof(struct Ban);
+    channel_bans += list_length(&channel->banlist);
+    channel_ban_memory += list_length(&channel->banlist) * sizeof(struct Ban);
 
-    channel_except += dlink_list_length(&channel->exceptlist);
-    channel_except_memory += dlink_list_length(&channel->exceptlist) * sizeof(struct Ban);
+    channel_except += list_length(&channel->exceptlist);
+    channel_except_memory += list_length(&channel->exceptlist) * sizeof(struct Ban);
 
-    channel_invex += dlink_list_length(&channel->invexlist);
-    channel_invex_memory += dlink_list_length(&channel->invexlist) * sizeof(struct Ban);
+    channel_invex += list_length(&channel->invexlist);
+    channel_invex_memory += list_length(&channel->invexlist) * sizeof(struct Ban);
   }
 
-  safelist_count = dlink_list_length(&listing_client_list);
+  safelist_count = list_length(&listing_client_list);
   if (safelist_count)
   {
     safelist_memory = safelist_count * sizeof(struct ListTask);
 
-    DLINK_FOREACH(node, listing_client_list.head)
+    LIST_FOREACH(node, listing_client_list.head)
     {
       const struct Client *acptr = node->data;
 
-      DLINK_FOREACH(node2, acptr->connection->list_task->show_mask.head)
+      LIST_FOREACH(node2, acptr->connection->list_task->show_mask.head)
         safelist_memory += strlen(node2->data);
 
-      DLINK_FOREACH(node2, acptr->connection->list_task->hide_mask.head)
+      LIST_FOREACH(node2, acptr->connection->list_task->hide_mask.head)
         safelist_memory += strlen(node2->data);
     }
   }
@@ -397,39 +397,39 @@ stats_memory(struct Client *client, int parc, char *parv[])
                      monitor_list_headers,
                      monitor_list_memory,
                      monitor_list_entries,
-                     monitor_list_entries * sizeof(dlink_node) * 2);
+                     monitor_list_entries * sizeof(list_node_t) * 2);
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Clients %u(%zu)",
-                     dlink_list_length(&global_client_list),
-                     dlink_list_length(&global_client_list) * sizeof(struct Client));
+                     list_length(&global_client_list),
+                     list_length(&global_client_list) * sizeof(struct Client));
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Servers %u(%zu, %zu)",
-                     dlink_list_length(&global_server_list),
-                     dlink_list_length(&global_server_list) * sizeof(struct Client),
-                     dlink_list_length(&global_server_list) * sizeof(struct Server));
+                     list_length(&global_server_list),
+                     list_length(&global_server_list) * sizeof(struct Client),
+                     list_length(&global_server_list) * sizeof(struct Server));
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached confs %u(%zu)",
                      local_client_conf_count,
-                     local_client_conf_count * sizeof(dlink_node));
+                     local_client_conf_count * sizeof(list_node_t));
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Resv channels %u(%zu) nicks %u(%zu)",
-                     dlink_list_length(resv_chan_get_list()),
-                     dlink_list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
-                     dlink_list_length(resv_nick_get_list()),
-                     dlink_list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
+                     list_length(resv_chan_get_list()),
+                     list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
+                     list_length(resv_nick_get_list()),
+                     list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
 
   listener_count_memory(&listener_count, &listener_memory);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Listeners %u(%zu)",
                      listener_count, listener_memory);
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Classes %u(%zu)",
-                     dlink_list_length(class_get_list()),
-                     dlink_list_length(class_get_list()) * sizeof(struct ClassItem));
+                     list_length(class_get_list()),
+                     list_length(class_get_list()) * sizeof(struct ClassItem));
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channels %u(%zu)",
-                     dlink_list_length(channel_get_list()),
-                     dlink_list_length(channel_get_list()) * sizeof(struct Channel));
+                     list_length(channel_get_list()),
+                     list_length(channel_get_list()) * sizeof(struct Channel));
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Bans %u(%zu)",
                      channel_bans, channel_ban_memory);
@@ -493,11 +493,11 @@ stats_dns_servers(struct Client *client, int parc, char *parv[])
 static void
 stats_deny(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -523,11 +523,11 @@ stats_deny(struct Client *client, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -559,10 +559,10 @@ stats_exempt(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
+  list_node_t *node;
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -583,8 +583,8 @@ stats_events(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :---------------------------------------------");
 
-  dlink_node *node;
-  DLINK_FOREACH(node, event_get_list()->head)
+  list_node_t *node;
+  LIST_FOREACH(node, event_get_list()->head)
   {
     const struct event *ev = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
@@ -609,21 +609,21 @@ stats_fdlist(struct Client *client, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node, *node2;
+  list_node_t *node, *node2;
 
-  DLINK_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 
-    DLINK_FOREACH(node2, conf->hub_list.head)
+    LIST_FOREACH(node2, conf->hub_list.head)
       sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', node2->data, conf->name, 0, "*");
   }
 
-  DLINK_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_items.head)
   {
     const struct MaskItem *conf = node->data;
 
-    DLINK_FOREACH(node2, conf->leaf_list.head)
+    LIST_FOREACH(node2, conf->leaf_list.head)
       sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', node2->data, conf->name, 0, "*");
   }
 }
@@ -681,10 +681,10 @@ stats_auth(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
+  list_node_t *node;
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -721,10 +721,10 @@ stats_kill(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
+  list_node_t *node;
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -752,10 +752,10 @@ stats_tkill(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
+  list_node_t *node;
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(node, atable[i].head)
+    LIST_FOREACH(node, atable[i].head)
     {
       const struct AddressRec *arec = node->data;
 
@@ -784,9 +784,9 @@ stats_messages(struct Client *client, int parc, char *parv[])
 static void
 stats_pseudo(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, pseudo_get_list()->head)
+  LIST_FOREACH(node, pseudo_get_list()->head)
   {
     const struct PseudoItem *pseudo = node->data;
     sendto_one_numeric(client, &me, RPL_STATSPSEUDO,
@@ -806,8 +806,8 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 {
   unsigned int opercount = 0;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, oper_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, oper_list.head)
   {
     const struct Client *target = node->data;
 
@@ -850,8 +850,8 @@ stats_ports(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
-  DLINK_FOREACH(node, listener_get_list()->head)
+  list_node_t *node;
+  LIST_FOREACH(node, listener_get_list()->head)
   {
     char buf[8];
     char *bufptr = buf;
@@ -890,8 +890,8 @@ stats_tstats(struct Client *client, int parc, char *parv[])
 {
   struct ServerStatistics sp = ServerStats;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *target = node->data;
     sp.is_sbs += target->connection->send.bytes;
@@ -900,7 +900,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     sp.is_sv++;
   }
 
-  DLINK_FOREACH(node, local_client_list.head)
+  LIST_FOREACH(node, local_client_list.head)
   {
     const struct Client *target = node->data;
     sp.is_cbs += target->connection->send.bytes;
@@ -974,9 +974,9 @@ stats_shared(struct Client *client, int parc, char *parv[])
 static void
 stats_servers(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, local_server_list.head)
+  LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
@@ -985,15 +985,15 @@ stats_servers(struct Client *client, int parc, char *parv[])
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",
-                     dlink_list_length(&local_server_list));
+                     list_length(&local_server_list));
 }
 
 static void
 stats_class(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, class_get_list()->head)
+  LIST_FOREACH(node, class_get_list()->head)
   {
     const struct ClassItem *class = node->data;
     sendto_one_numeric(client, &me, RPL_STATSYLINE, 'Y',
@@ -1013,8 +1013,8 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
 {
   size_t sendB = 0, recvB = 0;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *target = node->data;
 
@@ -1038,7 +1038,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
   recvB >>= 10;
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :%u total server(s)",
-                     dlink_list_length(&local_server_list));
+                     list_length(&local_server_list));
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Sent total: %7.2f %s",
                      _GMKv(sendB), _GMKs(sendB));
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
@@ -1089,15 +1089,15 @@ parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, boo
 
 static void
 stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
-             dlink_list *list, const char statchar)
+             list_t *list, const char statchar)
 {
-  dlink_node *node;
+  list_node_t *node;
 
   /*
    * Send info about connections which match, or all if the
    * mask matches from.
    */
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     const struct Client *target = node->data;
     enum addr_mask_type type;

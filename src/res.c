@@ -78,7 +78,7 @@ static void res_readreply(fde_t *, void *);
 
 struct reslist
 {
-  dlink_node node;                           /**< Doubly linked list node. */
+  list_node_t node;                           /**< Doubly linked list node. */
   unsigned int id;                           /**< Request ID (from request header). */
   char type;                                 /**< Current request type. */
   char retries;                              /**< Retry counter */
@@ -93,7 +93,7 @@ struct reslist
 };
 
 static fde_t *ResolverFileDescriptor;
-static dlink_list request_list;
+static list_t request_list;
 
 
 /*
@@ -104,7 +104,7 @@ static dlink_list request_list;
 static void
 rem_request(struct reslist *request)
 {
-  dlinkDelete(&request->node, &request_list);
+  list_delete(&request->node, &request_list);
   xfree(request);
 }
 
@@ -122,7 +122,7 @@ make_request(dns_callback_fnc callback, void *ctx)
   request->callback = callback;
   request->callback_ctx = ctx;
 
-  dlinkAdd(request, &request->node, &request_list);
+  list_add(request, &request->node, &request_list);
   return request;
 }
 
@@ -191,9 +191,9 @@ restart_resolver(void)
 void
 delete_resolver_queries(const void *vptr)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, request_list.head)
+  LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
     struct reslist *request = node->data;
 
@@ -231,9 +231,9 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 static struct reslist *
 find_id(unsigned int id)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, request_list.head)
+  LIST_FOREACH(node, request_list.head)
   {
     struct reslist *request = node->data;
 
@@ -606,9 +606,9 @@ res_readreply(fde_t *F, void *data)
 static void
 resolver_timeout(void *unused)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, request_list.head)
+  LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
     struct reslist *request = node->data;
     uintmax_t timeout = request->sentat + request->timeout;

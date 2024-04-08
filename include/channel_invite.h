@@ -29,8 +29,8 @@
 /** Invite structure */
 struct Invite
 {
-  dlink_node user_node;  /**< link to client->connection->invited */
-  dlink_node chan_node;  /**< link to channel->invites */
+  list_node_t user_node;  /**< link to client->connection->invited */
+  list_node_t chan_node;  /**< link to channel->invites */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
   uintmax_t when;  /**< Time the invite has been created; monotonic time */
@@ -39,5 +39,5 @@ struct Invite
 extern struct Invite *invite_find(struct Channel *, struct Client *);
 extern void invite_add(struct Channel *, struct Client *);
 extern void invite_del(struct Invite *);
-extern void invite_clear_list(dlink_list *);
+extern void invite_clear_list(list_t *);
 #endif  /* INCLUDED_channel_invite_h */

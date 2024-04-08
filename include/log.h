@@ -60,7 +60,7 @@ enum log_type
  */
 struct Log
 {
-  dlink_node node;  /**< Doubly linked list node for log management. */
+  list_node_t node;  /**< Doubly linked list node for log management. */
   enum log_type type;  /**< Type categorizing the log entries. */
   char *file_name;  /**< File name associated with the log. */
   FILE *file;  /**< File pointer for the log file. */

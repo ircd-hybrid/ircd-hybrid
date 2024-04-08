@@ -45,8 +45,8 @@ static struct
 {
   struct Motd *local;    /**< Local MOTD. */
   struct Motd *remote;   /**< Remote MOTD. */
-  dlink_list other;      /**< MOTDs specified in configuration file. */
-  dlink_list cachelist;  /**< List of MotdCache entries. */
+  list_t other;      /**< MOTDs specified in configuration file. */
+  list_t cachelist;  /**< List of MotdCache entries. */
 } MotdList;
 
 
@@ -109,8 +109,8 @@ motd_cache(struct Motd *motd)
     return motd->cache;
 
   /* Try to find it in the list of cached files */
-  dlink_node *node;
-  DLINK_FOREACH(node, MotdList.cachelist.head)
+  list_node_t *node;
+  LIST_FOREACH(node, MotdList.cachelist.head)
   {
     struct MotdCache *cache = node->data;
 
@@ -162,7 +162,7 @@ motd_cache(struct Motd *motd)
   xfree(cache);
 
   /* Now link it in */
-  dlinkAdd(motd->cache, &motd->cache->node, &MotdList.cachelist);
+  list_add(motd->cache, &motd->cache->node, &MotdList.cachelist);
 
   return motd->cache;
 }
@@ -184,7 +184,7 @@ motd_decache(struct Motd *motd)
 
   if (--cache->ref == 0)  /* Reduce reference count */
   {
-    dlinkDelete(&cache->node, &MotdList.cachelist);
+    list_delete(&cache->node, &MotdList.cachelist);
     xfree(cache->path);  /* Free path info */
     xfree(cache);  /* Very simple for a reason */
   }
@@ -224,8 +224,8 @@ motd_lookup(const struct Client *client)
     return MotdList.remote;
 
   /* Check the motd blocks first */
-  dlink_node *node;
-  DLINK_FOREACH(node, MotdList.other.head)
+  list_node_t *node;
+  LIST_FOREACH(node, MotdList.other.head)
   {
     struct Motd *motd = node->data;
 
@@ -323,8 +323,8 @@ motd_recache(void)
   motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
   motd_decache(MotdList.remote);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, MotdList.other.head)  /* Now all the others */
+  list_node_t *node;
+  LIST_FOREACH(node, MotdList.other.head)  /* Now all the others */
     motd_decache(node->data);
 
   /* Now recache local and remote MOTDs */
@@ -360,7 +360,7 @@ motd_add(const char *mask, const char *path)
 {
   struct Motd *motd = motd_create(mask, path);  /* Create the motd */
 
-  dlinkAdd(motd, &motd->node, &MotdList.other);
+  list_add(motd, &motd->node, &MotdList.other);
 }
 
 /*! \brief Clear out all MOTDs.
@@ -377,7 +377,7 @@ motd_clear(void)
   while (MotdList.other.head)  /* Destroy other MOTDs */
   {
     struct Motd *motd = MotdList.other.head->data;
-    dlinkDelete(&motd->node, &MotdList.other);
+    list_delete(&motd->node, &MotdList.other);
     motd_destroy(motd);
   }
 
@@ -392,9 +392,9 @@ motd_clear(void)
 void
 motd_report(struct Client *client, int parc, char *parv[])
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, MotdList.other.head)
+  LIST_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
     sendto_one_numeric(client, &me, RPL_STATSTLINE, motd->mask, motd->path);
@@ -426,8 +426,8 @@ motd_memory_count(struct Client *client)
     mtm += MotdList.remote->path ? (strlen(MotdList.remote->path) + 1) : 0;
   }
 
-  dlink_node *node;
-  DLINK_FOREACH(node, MotdList.other.head)
+  list_node_t *node;
+  LIST_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
     ++mt;
@@ -436,7 +436,7 @@ motd_memory_count(struct Client *client)
     mtm += motd->mask ? (strlen(motd->mask) + 1) : 0;
   }
 
-  DLINK_FOREACH(node, MotdList.cachelist.head)
+  LIST_FOREACH(node, MotdList.cachelist.head)
   {
     const struct MotdCache *cache = node->data;
     ++mtc;

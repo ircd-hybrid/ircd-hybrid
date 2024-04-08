@@ -57,8 +57,8 @@ m_invite(struct Client *source_p, int parc, char *parv[])
 {
   if (parc < 2)
   {
-    dlink_node *node;
-    DLINK_FOREACH(node, source_p->connection->invited.head)
+    list_node_t *node;
+    LIST_FOREACH(node, source_p->connection->invited.head)
     {
       const struct Invite *const invite = node->data;
       sendto_one_numeric(source_p, &me, RPL_INVITELIST, invite->channel->name);

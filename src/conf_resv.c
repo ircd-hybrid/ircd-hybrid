@@ -38,17 +38,17 @@
 #include "hostmask.h"
 
 
-static dlink_list resv_chan_list;
-static dlink_list resv_nick_list;
+static list_t resv_chan_list;
+static list_t resv_nick_list;
 
 
-const dlink_list *
+const list_t *
 resv_chan_get_list(void)
 {
   return &resv_chan_list;
 }
 
-const dlink_list *
+const list_t *
 resv_nick_get_list(void)
 {
   return &resv_nick_list;
@@ -65,14 +65,14 @@ resv_delete(struct ResvItem *resv, bool expired)
   {
     struct ResvExemptItem *exempt = resv->exempt_list.head->data;
 
-    dlinkDelete(&exempt->node, &resv->exempt_list);
+    list_delete(&exempt->node, &resv->exempt_list);
     xfree(exempt->name);
     xfree(exempt->user);
     xfree(exempt->host);
     xfree(exempt);
   }
 
-  dlinkDelete(&resv->node, resv->list);
+  list_delete(&resv->node, resv->list);
   xfree(resv->mask);
   xfree(resv->reason);
   xfree(resv);
@@ -87,9 +87,9 @@ resv_delete(struct ResvItem *resv, bool expired)
  * side effects	-
  */
 struct ResvItem *
-resv_make(const char *mask, const char *reason, const dlink_list *elist)
+resv_make(const char *mask, const char *reason, const list_t *elist)
 {
-  dlink_list *list;
+  list_t *list;
 
   if (IsChanPrefix(*mask))
     list = &resv_chan_list;
@@ -100,13 +100,13 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
   resv->list = list;
   resv->mask = xstrdup(mask);
   resv->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
-  dlinkAdd(resv, &resv->node, resv->list);
+  list_add(resv, &resv->node, resv->list);
 
   if (elist)
   {
-    dlink_node *node;
+    list_node_t *node;
 
-    DLINK_FOREACH(node, elist->head)
+    LIST_FOREACH(node, elist->head)
     {
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
@@ -130,7 +130,7 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
       exempt->user = xstrdup(user);
       exempt->host = xstrdup(host);
       exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
-      dlinkAdd(exempt, &exempt->node, &resv->exempt_list);
+      list_add(exempt, &exempt->node, &resv->exempt_list);
     }
   }
 
@@ -140,15 +140,15 @@ resv_make(const char *mask, const char *reason, const dlink_list *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_list *list;
+  list_t *list;
 
   if (IsChanPrefix(*name))
     list = &resv_chan_list;
   else
     list = &resv_nick_list;
 
-  dlink_node *node, *node_next;
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct ResvItem *resv = node->data;
 
@@ -165,9 +165,9 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
 bool
 resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, resv->exempt_list.head)
+  LIST_FOREACH(node, resv->exempt_list.head)
   {
     const struct ResvExemptItem *exempt = node->data;
 
@@ -197,13 +197,13 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 void
 resv_clear(void)
 {
-  dlink_list *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
+  list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (list_t **list = tab; *list; ++list)
   {
-    dlink_node *node, *node_next;
+    list_node_t *node, *node_next;
 
-    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct ResvItem *resv = node->data;
 
@@ -216,13 +216,13 @@ resv_clear(void)
 void
 resv_expire(void)
 {
-  dlink_list *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
+  list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (list_t **list = tab; *list; ++list)
   {
-    dlink_node *node, *node_next;
+    list_node_t *node, *node_next;
 
-    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct ResvItem *resv = node->data;
 

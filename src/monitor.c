@@ -36,7 +36,7 @@
 #include "monitor.h"
 
 
-static dlink_list monitor_hash[HASHSIZE];
+static list_t monitor_hash[HASHSIZE];
 
 
 /*
@@ -59,10 +59,10 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
 {
   for (unsigned int i = 0; i < HASHSIZE; ++i)
   {
-    dlink_node *node;
-    (*count) += dlink_list_length(&monitor_hash[i]);
+    list_node_t *node;
+    (*count) += list_length(&monitor_hash[i]);
 
-    DLINK_FOREACH(node, monitor_hash[i].head)
+    LIST_FOREACH(node, monitor_hash[i].head)
     {
       const struct Monitor *const monitor = node->data;
       (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
@@ -78,9 +78,9 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
 static struct Monitor *
 monitor_find_hash(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, monitor_hash[hash_string(name)].head)
+  LIST_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
     struct Monitor *monitor = node->data;
 
@@ -108,8 +108,8 @@ monitor_signon(const struct Client *client)
   snprintf(buf, sizeof(buf), "%s!%s@%s", client->name, client->username, client->host);
 
   /* Send notifies out to everybody on the list in header */
-  dlink_node *node;
-  DLINK_FOREACH(node, monitor->monitored_by.head)
+  list_node_t *node;
+  LIST_FOREACH(node, monitor->monitored_by.head)
     sendto_one_numeric(node->data, &me, RPL_MONONLINE, buf);
 }
 
@@ -127,8 +127,8 @@ monitor_signoff(const struct Client *client)
     return;  /* This name isn't on monitor */
 
   /* Send notifies out to everybody on the list in header */
-  dlink_node *node;
-  DLINK_FOREACH(node, monitor->monitored_by.head)
+  list_node_t *node;
+  LIST_FOREACH(node, monitor->monitored_by.head)
     sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
 }
 
@@ -140,9 +140,9 @@ static void
 monitor_free(struct Monitor *monitor)
 {
   assert(monitor->monitored_by.head == NULL);
-  assert(dlinkFind(&monitor_hash[monitor->hash_value], monitor));
+  assert(list_find(&monitor_hash[monitor->hash_value], monitor));
 
-  dlinkDelete(&monitor->node, &monitor_hash[monitor->hash_value]);
+  list_delete(&monitor->node, &monitor_hash[monitor->hash_value]);
 
   xfree(monitor->name);
   xfree(monitor);
@@ -156,7 +156,7 @@ monitor_free(struct Monitor *monitor)
 bool
 monitor_add_to_hash_table(const char *name, struct Client *client)
 {
-  dlink_node *node = NULL;
+  list_node_t *node = NULL;
 
   /* If found NULL (no header for this name), make one... */
   struct Monitor *monitor = monitor_find_hash(name);
@@ -166,19 +166,19 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
     monitor->name = xstrdup(name);
     monitor->hash_value = hash_string(monitor->name);
 
-    dlinkAdd(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
+    list_add(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
   }
   else
   {
     /* Is this client already on the monitor-list? */
-    node = dlinkFind(&monitor->monitored_by, client);
+    node = list_find(&monitor->monitored_by, client);
   }
 
   if (node == NULL)
   {
     /* No it isn't, so add it in the bucket and client adding it */
-    dlinkAdd(client, make_dlink_node(), &monitor->monitored_by);
-    dlinkAdd(monitor, make_dlink_node(), &client->connection->monitors);
+    list_add(client, list_make_node(), &monitor->monitored_by);
+    list_add(monitor, list_make_node(), &client->connection->monitors);
     return true;
   }
 
@@ -196,15 +196,15 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
   if (monitor == NULL)
     return;  /* No header found for that name. i.e. it's not being monitored */
 
-  dlink_node *node = dlinkFindDelete(&monitor->monitored_by, client);
+  list_node_t *node = list_find_delete(&monitor->monitored_by, client);
   if (node == NULL)
     return;  /* This name isn't being monitored by client */
 
-  free_dlink_node(node);
+  list_free_node(node);
 
-  node = dlinkFindDelete(&client->connection->monitors, monitor);
+  node = list_find_delete(&client->connection->monitors, monitor);
   if (node)
-    free_dlink_node(node);
+    list_free_node(node);
 
   /* In case this header is now empty of notices, remove it */
   if (monitor->monitored_by.head == NULL)
@@ -218,24 +218,24 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 void
 monitor_clear_list(struct Client *client)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, client->connection->monitors.head)
+  LIST_FOREACH_SAFE(node, node_next, client->connection->monitors.head)
   {
     struct Monitor *monitor = node->data;
 
-    assert(dlinkFind(&monitor->monitored_by, client));
+    assert(list_find(&monitor->monitored_by, client));
 
-    dlink_node *temp = dlinkFindDelete(&monitor->monitored_by, client);
+    list_node_t *temp = list_find_delete(&monitor->monitored_by, client);
     if (temp)
-      free_dlink_node(temp);
+      list_free_node(temp);
 
     /* If this leaves a header without notifies, remove it. */
     if (monitor->monitored_by.head == NULL)
       monitor_free(monitor);
 
-    dlinkDelete(node, &client->connection->monitors);
-    free_dlink_node(node);
+    list_delete(node, &client->connection->monitors);
+    list_free_node(node);
   }
 
   assert(client->connection->monitors.head == NULL);

@@ -71,7 +71,7 @@ enum { LOG_ROTATION_ATTEMPTS = 1000 };
  * Each element in the list is a Log structure representing a specific
  * type of log (e.g., ircd log, kill log, etc.).
  */
-static dlink_list log_list;
+static list_t log_list;
 
 /**
  * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
@@ -96,7 +96,7 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
   log->flush_immediately = true;
   log->time_provider = date_iso8601_usec;
   log->file = fopen(file_name, "a");
-  dlinkAdd(log, &log->node, &log_list);
+  list_add(log, &log->node, &log_list);
 
   if (log->file == NULL)
   {
@@ -208,8 +208,8 @@ log_write(enum log_type type, const char *format, ...)
   if (ConfigLog.use_logging == 0)
     return;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, log_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, log_list.head)
   {
     struct Log *log = node->data;
 
@@ -253,7 +253,7 @@ log_write(enum log_type type, const char *format, ...)
 void
 log_destroy(struct Log *log)
 {
-  dlinkDelete(&log->node, &log_list);
+  list_delete(&log->node, &log_list);
 
   if (log->file)
     fclose(log->file);
@@ -270,9 +270,9 @@ log_destroy(struct Log *log)
 void
 log_clear(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, log_list.head)
+  LIST_FOREACH_SAFE(node, node_next, log_list.head)
   {
     struct Log *log = node->data;
 

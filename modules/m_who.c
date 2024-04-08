@@ -104,8 +104,8 @@ who_send(struct Client *source_p, const struct Client *target_p,
   {
     if (who->fields == 0 || (who->fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
     {
-      dlink_node *node;
-      DLINK_FOREACH(node, target_p->channel.head)
+      list_node_t *node;
+      LIST_FOREACH(node, target_p->channel.head)
       {
         member = node->data;
 
@@ -289,9 +289,9 @@ static void
 who_on_common_channel(struct Client *source_p, struct Channel *channel, const char *mask,
                       struct WhoQuery *who)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
     struct Client *target_p = member->client;
@@ -320,7 +320,7 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 static void
 who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
 {
-  dlink_node *node;
+  list_node_t *node;
   static uintmax_t last_used = 0;
 
   if (!HasUMode(source_p, UMODE_OPER))
@@ -335,14 +335,14 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
   }
 
   /* First, list all matching invisible clients on common channels */
-  DLINK_FOREACH(node, source_p->channel.head)
+  LIST_FOREACH(node, source_p->channel.head)
   {
     struct ChannelMember *member = node->data;
     who_on_common_channel(source_p, member->channel, mask, who);
   }
 
   /* Second, list all matching visible clients */
-  DLINK_FOREACH(node, global_client_list.head)
+  LIST_FOREACH(node, global_client_list.head)
   {
     struct Client *target_p = node->data;
 
@@ -380,8 +380,8 @@ who_on_channel(struct Client *source_p, struct Channel *channel, const struct Wh
   else if (HasCMode(channel, MODE_SECRET))
     return;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, channel->members.head)
+  list_node_t *node;
+  LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
     struct Client *target_p = member->client;

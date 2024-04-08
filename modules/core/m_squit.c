@@ -57,8 +57,8 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   struct Client *target_p = NULL;
 
   /* The following allows wild cards in SQUIT. */
-  dlink_node *node;
-  DLINK_FOREACH(node, global_server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, global_server_list.head)
   {
     struct Client *tmp = node->data;
 
@@ -160,8 +160,8 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
 
     /* Send to everything but target and source */
-    dlink_node *node;
-    DLINK_FOREACH(node, local_server_list.head)
+    list_node_t *node;
+    LIST_FOREACH(node, local_server_list.head)
     {
       struct Client *client_p = node->data;
 

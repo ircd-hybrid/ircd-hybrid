@@ -31,8 +31,8 @@
 /** Monitor structure */
 struct Monitor
 {
-  dlink_node node;  /**< List node; linked into monitor_hash */
-  dlink_list monitored_by;  /**< List of clients that have this entry on their monitor list */
+  list_node_t node;  /**< List node; linked into monitor_hash */
+  list_t monitored_by;  /**< List of clients that have this entry on their monitor list */
   char *name;  /**< Name of the client to monitor */
   unsigned int hash_value;  /**< Cached hash value derived from Monitor::name */
 };

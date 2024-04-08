@@ -45,7 +45,7 @@ enum { MOTD_MAXLINES = 100 };
 /** Entry for a single Message Of The Day (MOTD). */
 struct Motd
 {
-  dlink_node node;  /**< Next MOTD in the linked list. */
+  list_node_t node;  /**< Next MOTD in the linked list. */
   enum MotdType type;  /**< Type of MOTD. */
   char *path;  /**< Pathname of MOTD file. */
   char *mask;  /**< Hostmask if type==MOTD_HOSTMASK,
@@ -60,7 +60,7 @@ struct Motd
 /** Cache entry for the contents of a MOTD file. */
 struct MotdCache
 {
-  dlink_node node;  /**< Next MotdCache in list. */
+  list_node_t node;  /**< Next MotdCache in list. */
   char *path;  /**< Pathname of file. */
   unsigned int ref;  /**< Number of references to this entry. */
   unsigned int maxcount;  /**< Number of lines allocated for message. */

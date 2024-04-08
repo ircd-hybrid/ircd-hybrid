@@ -113,33 +113,33 @@ void
 show_lusers(struct Client *client)
 {
   if (ConfigServerHide.hide_servers == 0 || HasUMode(client, UMODE_OPER))
-    sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (dlink_list_length(&global_client_list) - Count.invisi),
-                       Count.invisi, dlink_list_length(&global_server_list));
+    sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (list_length(&global_client_list) - Count.invisi),
+                       Count.invisi, list_length(&global_server_list));
   else
-    sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (dlink_list_length(&global_client_list) - Count.invisi),
+    sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (list_length(&global_client_list) - Count.invisi),
                        Count.invisi, 1);
 
   if (Count.oper)
     sendto_one_numeric(client, &me, RPL_LUSEROP, Count.oper);
 
-  if (dlink_list_length(&unknown_list))
-    sendto_one_numeric(client, &me, RPL_LUSERUNKNOWN, dlink_list_length(&unknown_list));
+  if (list_length(&unknown_list))
+    sendto_one_numeric(client, &me, RPL_LUSERUNKNOWN, list_length(&unknown_list));
 
-  if (dlink_list_length(channel_get_list()))
-    sendto_one_numeric(client, &me, RPL_LUSERCHANNELS, dlink_list_length(channel_get_list()));
+  if (list_length(channel_get_list()))
+    sendto_one_numeric(client, &me, RPL_LUSERCHANNELS, list_length(channel_get_list()));
 
   if (ConfigServerHide.hide_servers == 0 || HasUMode(client, UMODE_OPER))
   {
-    sendto_one_numeric(client, &me, RPL_LUSERME, dlink_list_length(&local_client_list), dlink_list_length(&local_server_list));
-    sendto_one_numeric(client, &me, RPL_LOCALUSERS, dlink_list_length(&local_client_list), Count.max_loc);
-    sendto_one_numeric(client, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
+    sendto_one_numeric(client, &me, RPL_LUSERME, list_length(&local_client_list), list_length(&local_server_list));
+    sendto_one_numeric(client, &me, RPL_LOCALUSERS, list_length(&local_client_list), Count.max_loc);
+    sendto_one_numeric(client, &me, RPL_GLOBALUSERS, list_length(&global_client_list), Count.max_tot);
     sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con, Count.max_loc, Count.totalrestartcount);
   }
   else
   {
-    sendto_one_numeric(client, &me, RPL_LUSERME, dlink_list_length(&global_client_list), 0);
-    sendto_one_numeric(client, &me, RPL_LOCALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
-    sendto_one_numeric(client, &me, RPL_GLOBALUSERS, dlink_list_length(&global_client_list), Count.max_tot);
+    sendto_one_numeric(client, &me, RPL_LUSERME, list_length(&global_client_list), 0);
+    sendto_one_numeric(client, &me, RPL_LOCALUSERS, list_length(&global_client_list), Count.max_tot);
+    sendto_one_numeric(client, &me, RPL_GLOBALUSERS, list_length(&global_client_list), Count.max_tot);
   }
 }
 
@@ -349,8 +349,8 @@ user_register_local(struct Client *client)
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  if ((dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
-      (dlink_list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client, FLAGS_NOLIMIT)))
+  if ((list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
+      (list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client, FLAGS_NOLIMIT)))
   {
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
                          "Too many clients, rejecting %s[%s].",
@@ -401,16 +401,16 @@ user_register_local(struct Client *client)
   client->servptr = &me;
   client->connection->last_privmsg = event_base->time.sec_monotonic;
 
-  dlinkAdd(client, &client->lnode, &client->servptr->serv->client_list);
-  dlinkAdd(client, &client->node, &global_client_list);
+  list_add(client, &client->lnode, &client->servptr->serv->client_list);
+  list_add(client, &client->node, &global_client_list);
 
-  assert(dlinkFind(&unknown_list, client));
+  assert(list_find(&unknown_list, client));
 
-  dlink_move_node(&client->connection->node, &unknown_list, &local_client_list);
+  list_move_node(&client->connection->node, &unknown_list, &local_client_list);
 
-  if (dlink_list_length(&local_client_list) > Count.max_loc)
+  if (list_length(&local_client_list) > Count.max_loc)
   {
-    Count.max_loc = dlink_list_length(&local_client_list);
+    Count.max_loc = list_length(&local_client_list);
 
     if (!(Count.max_loc % 10))
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
@@ -418,13 +418,13 @@ user_register_local(struct Client *client)
                            Count.max_loc);
   }
 
-  if ((dlink_list_length(&local_client_list) +
-       dlink_list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = dlink_list_length(&local_client_list) +
-                        dlink_list_length(&local_server_list);
+  if ((list_length(&local_client_list) +
+       list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = list_length(&local_client_list) +
+                        list_length(&local_server_list);
 
-  if (dlink_list_length(&global_client_list) > Count.max_tot)
-    Count.max_tot = dlink_list_length(&global_client_list);
+  if (list_length(&global_client_list) > Count.max_tot)
+    Count.max_tot = list_length(&global_client_list);
   ++Count.totalrestartcount;
 
   user_welcome(client);
@@ -466,11 +466,11 @@ user_register_remote(struct Client *client)
     AddFlag(client, FLAGS_SERVICE);
 
   SetClient(client);
-  dlinkAdd(client, &client->lnode, &client->servptr->serv->client_list);
-  dlinkAdd(client, &client->node, &global_client_list);
+  list_add(client, &client->lnode, &client->servptr->serv->client_list);
+  list_add(client, &client->node, &global_client_list);
 
-  if (dlink_list_length(&global_client_list) > Count.max_tot)
-    Count.max_tot = dlink_list_length(&global_client_list);
+  if (list_length(&global_client_list) > Count.max_tot)
+    Count.max_tot = list_length(&global_client_list);
 
   if (HasFlag(client->servptr, FLAGS_EOB))
     sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
@@ -695,8 +695,8 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   if (ConfigGeneral.cycle_on_host_change == 0)
     return;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, client->channel.head)
+  list_node_t *node;
+  LIST_FOREACH(node, client->channel.head)
   {
     char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
     char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";

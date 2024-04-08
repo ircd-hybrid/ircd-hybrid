@@ -142,7 +142,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  * side effects	- given ban list is removed, modes are sent to local clients
  */
 static void
-remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list *list, char c)
+remove_ban_list(struct Channel *channel, const struct Client *client, list_t *list, char c)
 {
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];
@@ -151,7 +151,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, dlink_list
   int count = 0;
   size_t cur_len, mlen;
 
-  if (dlink_list_length(list) == 0)
+  if (list_length(list) == 0)
     return;
 
   cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
@@ -422,7 +422,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   sendto_server(source_p, 0, 0, "%s", uid_buf);
 
-  if (dlink_list_length(&channel->members) == 0 && isnew)
+  if (list_length(&channel->members) == 0 && isnew)
     channel_free(channel);
 }
 

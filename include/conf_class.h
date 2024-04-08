@@ -51,7 +51,7 @@ enum
 struct ClassItem
 {
   char *name;  /**< Name of the class. */
-  dlink_node node;  /**< List node for linking into class_list. */
+  list_node_t node;  /**< List node for linking into class_list. */
   bool active;  /**< Indicates if the class is active. */
   void *ip_tree_v6;  /**< Pointer to IPv6 patricia_tree_t item. */
   void *ip_tree_v4;  /**< Pointer to IPv4 patricia_tree_t item. */
@@ -78,14 +78,14 @@ struct ClassItem
 extern struct ClassItem *class_default;
 
 extern struct ClassItem *class_make(void);
-extern const struct ClassItem *class_get_ptr(const dlink_list *const);
-extern const dlink_list *class_get_list(void);
+extern const struct ClassItem *class_get_ptr(const list_t *const);
+extern const list_t *class_get_list(void);
 extern void class_free(struct ClassItem *const);
 extern void class_init(void);
-extern const char *class_get_name(const dlink_list *const);
-extern unsigned int class_get_ping_freq(const dlink_list *const);
-extern unsigned int class_get_sendq(const dlink_list *const);
-extern unsigned int class_get_recvq(const dlink_list *const);
+extern const char *class_get_name(const list_t *const);
+extern unsigned int class_get_ping_freq(const list_t *const);
+extern unsigned int class_get_sendq(const list_t *const);
+extern unsigned int class_get_recvq(const list_t *const);
 extern struct ClassItem *class_find(const char *, bool);
 extern void class_mark_for_deletion(void);
 extern void class_delete_marked(void);

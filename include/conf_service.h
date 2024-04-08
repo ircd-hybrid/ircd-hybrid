@@ -39,11 +39,11 @@
  */
 struct ServiceItem
 {
-  dlink_node node;  /**< Node for linking in the service list. */
+  list_node_t node;  /**< Node for linking in the service list. */
   char *name;  /**< Name of the service. */
 };
 
-extern const dlink_list *service_get_list(void);
+extern const list_t *service_get_list(void);
 extern void service_clear(void);
 extern struct ServiceItem *service_make(void);
 extern const struct ServiceItem *service_find(const char *, int (*)(const char *, const char *));

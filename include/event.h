@@ -50,10 +50,10 @@ struct event
   uintmax_t next;
   void *data;
   bool active;
-  dlink_node node;
+  list_node_t node;
 };
 
-extern const dlink_list *event_get_list(void);
+extern const list_t *event_get_list(void);
 extern void event_add(struct event *, void *);
 extern void event_addish(struct event *, void *);
 extern void event_delete(struct event *);

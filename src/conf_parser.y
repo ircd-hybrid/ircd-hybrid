@@ -57,7 +57,7 @@ static struct
 {
   struct
   {
-    dlink_list list;
+    list_t list;
   } mask,
     leaf,
     hub;
@@ -110,17 +110,17 @@ static struct
 static void
 reset_block_state(void)
 {
-  dlink_node *node, *node_next;
-  dlink_list *tab[] = { &block_state.mask.list,
+  list_node_t *node, *node_next;
+  list_t *tab[] = { &block_state.mask.list,
                         &block_state.leaf.list, &block_state.hub.list, NULL };
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (list_t **list = tab; *list; ++list)
   {
-    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       xfree(node->data);
-      dlinkDelete(node, *list);
-      free_dlink_node(node);
+      list_delete(node, *list);
+      list_free_node(node);
     }
   }
 
@@ -711,7 +711,7 @@ motd_entry: MOTD
     reset_block_state();
 } '{' motd_items '}' ';'
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -719,7 +719,7 @@ motd_entry: MOTD
   if (!block_state.file.buf[0])
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
     motd_add(node->data, block_state.file.buf);
 };
 
@@ -729,7 +729,7 @@ motd_item:  motd_mask | motd_file | error ';' ;
 motd_mask: MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 motd_file: T_FILE '=' QSTRING ';'
@@ -905,7 +905,7 @@ oper_entry: OPERATOR
   block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
 } '{' oper_items '}' ';'
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -916,7 +916,7 @@ oper_entry: OPERATOR
   if (!block_state.rpass.buf[0])
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
   {
     struct split_nuh_item nuh;
     char *s = node->data;
@@ -981,7 +981,7 @@ oper_name: NAME '=' QSTRING ';'
 oper_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 oper_password: PASSWORD '=' QSTRING ';'
@@ -1535,12 +1535,12 @@ auth_entry: IRCD_AUTH
     reset_block_state();
 } '{' auth_items '}' ';'
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
   {
     struct split_nuh_item nuh;
     char *s = node->data;
@@ -1590,7 +1590,7 @@ auth_item:      auth_user |
 auth_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 auth_passwd: PASSWORD '=' QSTRING ';'
@@ -1730,7 +1730,7 @@ resv_reason: REASON '=' QSTRING ';'
 resv_exempt: EXEMPT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 
@@ -1992,8 +1992,8 @@ connect_entry: CONNECT
   if (block_state.ciph.buf[0])
     conf->cipher_list = xstrdup(block_state.ciph.buf);
 
-  dlinkMoveList(&block_state.leaf.list, &conf->leaf_list);
-  dlinkMoveList(&block_state.hub.list, &conf->hub_list);
+  list_move_list(&block_state.leaf.list, &conf->leaf_list);
+  list_move_list(&block_state.hub.list, &conf->hub_list);
 
   if (block_state.bind.buf[0])
   {
@@ -2141,13 +2141,13 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
 connect_hub_mask: HUB_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.hub.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.hub.list);
 };
 
 connect_leaf_mask: LEAF_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.leaf.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.leaf.list);
 };
 
 connect_class: CLASS '=' QSTRING ';'

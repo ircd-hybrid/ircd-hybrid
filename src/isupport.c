@@ -50,7 +50,7 @@
  */
 struct Isupport
 {
-  dlink_node node;  /**< Node for linking Isupport structures in a list. */
+  list_node_t node;  /**< Node for linking Isupport structures in a list. */
   char *name;  /**< Name of the ISUPPORT option. */
   char *options;  /**< Options associated with the ISUPPORT option. */
   int number;  /**< Numerical value associated with the ISUPPORT option. */
@@ -66,7 +66,7 @@ struct Isupport
  * addition, deletion, and retrieval, are performed on this list to maintain and update
  * ISUPPORT options dynamically.
  */
-static dlink_list isupport_list;
+static list_t isupport_list;
 
 /**
  * @var isupport_list_lines
@@ -78,7 +78,7 @@ static dlink_list isupport_list;
  * updated and rebuilt as needed to reflect the current set of supported features and
  * configurations.
  */
-static dlink_list isupport_list_lines;
+static list_t isupport_list_lines;
 
 /**
  * @brief Clears the list of lines used for RPL_ISUPPORT messages.
@@ -92,10 +92,10 @@ isupport_clear_lines(void)
 {
   while (isupport_list_lines.head)
   {
-    dlink_node *node = isupport_list_lines.head;
-    dlinkDelete(node, &isupport_list_lines);
+    list_node_t *node = isupport_list_lines.head;
+    list_delete(node, &isupport_list_lines);
     xfree(node->data);
-    free_dlink_node(node);
+    list_free_node(node);
   }
 }
 
@@ -117,8 +117,8 @@ isupport_build_lines(void)
 
   isupport_clear_lines();
 
-  dlink_node *node;
-  DLINK_FOREACH(node, isupport_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *support = node->data;
 
@@ -136,7 +136,7 @@ isupport_build_lines(void)
       if (bufptr[len - 1] == ' ')
         bufptr[--len] = '\0';
 
-      dlinkAddTail(xstrdup(buf), make_dlink_node(), &isupport_list_lines);
+      list_add_tail(xstrdup(buf), list_make_node(), &isupport_list_lines);
       bufptr = buf;
       len = 0;
       tokens = 0;
@@ -148,7 +148,7 @@ isupport_build_lines(void)
     if (bufptr[len - 1] == ' ')
       bufptr[--len] = '\0';
 
-    dlinkAddTail(xstrdup(buf), make_dlink_node(), &isupport_list_lines);
+    list_add_tail(xstrdup(buf), list_make_node(), &isupport_list_lines);
   }
 }
 
@@ -163,9 +163,9 @@ isupport_build_lines(void)
 static struct Isupport *
 isupport_find(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, isupport_list.head)
+  LIST_FOREACH(node, isupport_list.head)
   {
     struct Isupport *support = node->data;
     if (irccmp(support->name, name) == 0)
@@ -212,7 +212,7 @@ isupport_create(const char *name, const char *options, int number)
   support->name = xstrdup(name);
   support->options = (options) ? xstrdup(options) : NULL;
   support->number = number;
-  dlinkAddTail(support, &support->node, &isupport_list);
+  list_add_tail(support, &support->node, &isupport_list);
 
   return support;
 }
@@ -227,7 +227,7 @@ isupport_create(const char *name, const char *options, int number)
 static void
 isupport_destroy(struct Isupport *support)
 {
-  dlinkDelete(&support->node, &isupport_list);
+  list_delete(&support->node, &isupport_list);
   xfree(support->name);
   xfree(support->options);
   xfree(support);
@@ -289,9 +289,9 @@ isupport_delete(const char *name)
 void
 isupport_show(struct Client *client)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, isupport_list_lines.head)
+  LIST_FOREACH(node, isupport_list_lines.head)
   {
     const char *const string = node->data;
     sendto_one_numeric(client, &me, RPL_ISUPPORT, string);

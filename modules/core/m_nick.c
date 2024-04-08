@@ -669,8 +669,8 @@ m_nick(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  dlink_node *node;
-  DLINK_FOREACH(node, source_p->channel.head)
+  list_node_t *node;
+  LIST_FOREACH(node, source_p->channel.head)
   {
     struct ChannelMember *member = node->data;
 

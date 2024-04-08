@@ -54,16 +54,16 @@
 #include "accept.h"
 
 
-dlink_list listing_client_list;
-dlink_list unknown_list;
-dlink_list local_client_list;
-dlink_list local_server_list;
-dlink_list global_client_list;
-dlink_list global_server_list;
-dlink_list oper_list;
+list_t listing_client_list;
+list_t unknown_list;
+list_t local_client_list;
+list_t local_server_list;
+list_t global_client_list;
+list_t global_server_list;
+list_t oper_list;
 
-static dlink_list dead_list, abort_list;
-static dlink_node *eac_next;  /* next aborted client to exit */
+static list_t dead_list, abort_list;
+static list_node_t *eac_next;  /* next aborted client to exit */
 
 /**
  * @brief Create a new Client struct and set it to the initial state.
@@ -96,7 +96,7 @@ client_make(struct Client *from)
     client->connection->registration = REG_INIT;
 
     /* as good a place as any... */
-    dlinkAdd(client, &client->connection->node, &unknown_list);
+    list_add(client, &client->connection->node, &unknown_list);
   }
 
   client->idhnext = client;
@@ -129,15 +129,15 @@ client_free(struct Client *client)
   assert(client->lnode.prev == NULL);
   assert(client->lnode.next == NULL);
 
-  assert(dlink_list_length(&client->whowas_list) == 0);
+  assert(list_length(&client->whowas_list) == 0);
   assert(client->whowas_list.head == NULL);
   assert(client->whowas_list.tail == NULL);
 
-  assert(dlink_list_length(&client->channel) == 0);
+  assert(list_length(&client->channel) == 0);
   assert(client->channel.head == NULL);
   assert(client->channel.tail == NULL);
 
-  assert(dlink_list_length(&client->svstags) == 0);
+  assert(list_length(&client->svstags) == 0);
   assert(client->svstags.head == NULL);
   assert(client->svstags.tail == NULL);
 
@@ -154,20 +154,20 @@ client_free(struct Client *client)
     assert(client->connection->list_task == NULL);
     assert(client->connection->auth == NULL);
 
-    assert(dlink_list_length(&client->connection->acceptlist) == 0);
+    assert(list_length(&client->connection->acceptlist) == 0);
     assert(client->connection->acceptlist.head == NULL);
     assert(client->connection->acceptlist.tail == NULL);
 
 
-    assert(dlink_list_length(&client->connection->monitors) == 0);
+    assert(list_length(&client->connection->monitors) == 0);
     assert(client->connection->monitors.head == NULL);
     assert(client->connection->monitors.tail == NULL);
 
-    assert(dlink_list_length(&client->connection->confs) == 0);
+    assert(list_length(&client->connection->confs) == 0);
     assert(client->connection->confs.head == NULL);
     assert(client->connection->confs.tail == NULL);
 
-    assert(dlink_list_length(&client->connection->invited) == 0);
+    assert(list_length(&client->connection->invited) == 0);
     assert(client->connection->invited.head == NULL);
     assert(client->connection->invited.tail == NULL);
 
@@ -201,12 +201,12 @@ client_free(struct Client *client)
  * side effects	-
  */
 static void
-check_pings_list(dlink_list *list)
+check_pings_list(list_t *list)
 {
   char buf[32];  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Client *client = node->data;
     assert(IsClient(client) || IsServer(client));
@@ -266,9 +266,9 @@ check_pings_list(dlink_list *list)
 static void
 check_unknowns_list(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
+  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client = node->data;
     bool exit = false;
@@ -343,10 +343,10 @@ check_pings(void *unused)
 void
 check_conf_klines(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
   const void *ptr;
 
-  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
     struct Client *client = node->data;
 
@@ -378,7 +378,7 @@ check_conf_klines(void)
   }
 
   /* Also check the unknowns list for new dlines */
-  DLINK_FOREACH_SAFE(node, node_next, unknown_list.head)
+  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client = node->data;
 
@@ -549,13 +549,13 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
 void
 free_exited_clients(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, dead_list.head)
+  LIST_FOREACH_SAFE(node, node_next, dead_list.head)
   {
     client_free(node->data);
-    dlinkDelete(node, &dead_list);
-    free_dlink_node(node);
+    list_delete(node, &dead_list);
+    list_free_node(node);
   }
 }
 
@@ -595,8 +595,8 @@ client_close_connection(struct Client *client)
     ServerStats.is_sbr += client->connection->recv.bytes;
     ServerStats.is_sti += event_base->time.sec_monotonic - client->connection->created_monotonic;
 
-    dlink_node *node;
-    DLINK_FOREACH(node, connect_items.head)
+    list_node_t *node;
+    LIST_FOREACH(node, connect_items.head)
     {
       struct MaskItem *conf = node->data;
 
@@ -648,8 +648,8 @@ exit_one_client(struct Client *client, const char *comment)
     if (HasUMode(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    dlinkDelete(&client->lnode, &client->servptr->serv->client_list);
-    dlinkDelete(&client->node, &global_client_list);
+    list_delete(&client->lnode, &client->servptr->serv->client_list);
+    list_delete(&client->node, &global_client_list);
 
     /*
      * If a person is on a channel, send a QUIT notice
@@ -660,8 +660,8 @@ exit_one_client(struct Client *client, const char *comment)
     sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
                                  client->name, client->username, client->host, comment);
 
-    dlink_node *node, *node_next;
-    DLINK_FOREACH_SAFE(node, node_next, client->channel.head)
+    list_node_t *node, *node_next;
+    LIST_FOREACH_SAFE(node, node_next, client->channel.head)
       channel_remove_user(node->data);
 
     svstag_clear_list(&client->svstags);
@@ -676,8 +676,8 @@ exit_one_client(struct Client *client, const char *comment)
     sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE, "Server %s split from %s",
                          client->name, client->servptr->name);
 
-    dlinkDelete(&client->lnode, &client->servptr->serv->server_list);
-    dlinkDelete(&client->node, &global_server_list);
+    list_delete(&client->lnode, &client->servptr->serv->server_list);
+    list_delete(&client->node, &global_server_list);
   }
 
   if (client->id[0])
@@ -693,11 +693,11 @@ exit_one_client(struct Client *client, const char *comment)
   }
 
   /* Check to see if the client isn't already on the dead list */
-  assert(dlinkFind(&dead_list, client) == NULL);
+  assert(list_find(&dead_list, client) == NULL);
 
   /* Add to dead client dlist */
   SetDead(client);
-  dlinkAdd(client, make_dlink_node(), &dead_list);
+  list_add(client, list_make_node(), &dead_list);
 }
 
 /*
@@ -709,12 +709,12 @@ exit_one_client(struct Client *client, const char *comment)
 static void
 recurse_remove_clients(struct Client *client, const char *comment)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, client->serv->client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, client->serv->client_list.head)
     exit_one_client(node->data, comment);
 
-  DLINK_FOREACH_SAFE(node, node_next, client->serv->server_list.head)
+  LIST_FOREACH_SAFE(node, node_next, client->serv->server_list.head)
   {
     recurse_remove_clients(node->data, comment);
     exit_one_client(node->data, comment);
@@ -766,13 +766,13 @@ exit_client(struct Client *client, const char *comment)
     {
       if (HasUMode(client, UMODE_OPER))
       {
-        dlink_node *node = dlinkFindDelete(&oper_list, client);
+        list_node_t *node = list_find_delete(&oper_list, client);
         if (node)
-          free_dlink_node(node);
+          list_free_node(node);
       }
 
-      assert(dlinkFind(&local_client_list, client));
-      dlinkDelete(&client->connection->node, &local_client_list);
+      assert(list_find(&local_client_list, client));
+      list_delete(&client->connection->node, &local_client_list);
 
       if (client->connection->list_task)
         free_list_task(client);
@@ -797,8 +797,8 @@ exit_client(struct Client *client, const char *comment)
     }
     else if (IsServer(client))
     {
-      assert(dlinkFind(&local_server_list, client));
-      dlinkDelete(&client->connection->node, &local_server_list);
+      assert(list_find(&local_server_list, client));
+      list_delete(&client->connection->node, &local_server_list);
 
       if (!HasFlag(client, FLAGS_SQUIT))
         /* For them, we are exiting the network */
@@ -806,8 +806,8 @@ exit_client(struct Client *client, const char *comment)
     }
     else
     {
-      assert(dlinkFind(&unknown_list, client));
-      dlinkDelete(&client->connection->node, &unknown_list);
+      assert(list_find(&unknown_list, client));
+      list_delete(&client->connection->node, &unknown_list);
     }
 
     sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, comment);
@@ -861,12 +861,12 @@ exit_client(struct Client *client, const char *comment)
     sendto_server(client->from, 0, 0, ":%s QUIT :%s", client->id, comment);
 
   /* The client *better* be off all of the lists */
-  assert(dlinkFind(&unknown_list, client) == NULL);
-  assert(dlinkFind(&local_client_list, client) == NULL);
-  assert(dlinkFind(&local_server_list, client) == NULL);
-  assert(dlinkFind(&oper_list, client) == NULL);
-  assert(dlinkFind(&listing_client_list, client) == NULL);
-  assert(dlinkFind(&abort_list, client) == NULL);
+  assert(list_find(&unknown_list, client) == NULL);
+  assert(list_find(&local_client_list, client) == NULL);
+  assert(list_find(&local_server_list, client) == NULL);
+  assert(list_find(&oper_list, client) == NULL);
+  assert(list_find(&listing_client_list, client) == NULL);
+  assert(list_find(&abort_list, client) == NULL);
 
   exit_one_client(client, comment);
 }
@@ -884,10 +884,10 @@ dead_link_on_write(struct Client *client, int ierrno)
   dbuf_clear(&client->connection->buf_recvq);
   dbuf_clear(&client->connection->buf_sendq);
 
-  assert(dlinkFind(&abort_list, client) == NULL);
-  dlink_node *node = make_dlink_node();
+  assert(list_find(&abort_list, client) == NULL);
+  list_node_t *node = list_make_node();
   /* don't let exit_aborted_clients() finish yet */
-  dlinkAddTail(client, node, &abort_list);
+  list_add_tail(client, node, &abort_list);
 
   if (eac_next == NULL)
     eac_next = node;
@@ -953,16 +953,16 @@ dead_link_on_read(struct Client *client, int error)
 void
 exit_aborted_clients(void)
 {
-  dlink_node *ptr;
+  list_node_t *ptr;
   const char *notice;
 
-  DLINK_FOREACH_SAFE(ptr, eac_next, abort_list.head)
+  LIST_FOREACH_SAFE(ptr, eac_next, abort_list.head)
   {
     struct Client *client = ptr->data;
     eac_next = ptr->next;
 
-    dlinkDelete(ptr, &abort_list);
-    free_dlink_node(ptr);
+    list_delete(ptr, &abort_list);
+    list_free_node(ptr);
 
     if (client == NULL)
     {

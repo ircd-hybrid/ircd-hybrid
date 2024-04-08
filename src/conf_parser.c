@@ -101,7 +101,7 @@ static struct
 {
   struct
   {
-    dlink_list list;
+    list_t list;
   } mask,
     leaf,
     hub;
@@ -154,17 +154,17 @@ static struct
 static void
 reset_block_state(void)
 {
-  dlink_node *node, *node_next;
-  dlink_list *tab[] = { &block_state.mask.list,
+  list_node_t *node, *node_next;
+  list_t *tab[] = { &block_state.mask.list,
                         &block_state.leaf.list, &block_state.hub.list, NULL };
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (list_t **list = tab; *list; ++list)
   {
-    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       xfree(node->data);
-      dlinkDelete(node, *list);
-      free_dlink_node(node);
+      list_delete(node, *list);
+      list_free_node(node);
     }
   }
 
@@ -3661,7 +3661,7 @@ yyreduce:
   case 99: /* motd_entry: MOTD $@1 '{' motd_items '}' ';'  */
 #line 713 "conf_parser.y"
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3669,7 +3669,7 @@ yyreduce:
   if (!block_state.file.buf[0])
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
     motd_add(node->data, block_state.file.buf);
 }
 #line 3676 "conf_parser.c"
@@ -3679,7 +3679,7 @@ yyreduce:
 #line 730 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
 #line 3685 "conf_parser.c"
     break;
@@ -3922,7 +3922,7 @@ yyreduce:
   case 149: /* oper_entry: OPERATOR $@5 '{' oper_items '}' ';'  */
 #line 907 "conf_parser.y"
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3933,7 +3933,7 @@ yyreduce:
   if (!block_state.rpass.buf[0])
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
   {
     struct split_nuh_item nuh;
     char *s = node->data;
@@ -3991,7 +3991,7 @@ yyreduce:
 #line 982 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
 #line 3997 "conf_parser.c"
     break;
@@ -4897,12 +4897,12 @@ yyreduce:
   case 297: /* auth_entry: IRCD_AUTH $@13 '{' auth_items '}' ';'  */
 #line 1537 "conf_parser.y"
 {
-  dlink_node *node;
+  list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
     break;
 
-  DLINK_FOREACH(node, block_state.mask.list.head)
+  LIST_FOREACH(node, block_state.mask.list.head)
   {
     struct split_nuh_item nuh;
     char *s = node->data;
@@ -4944,7 +4944,7 @@ yyreduce:
 #line 1591 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
 #line 4950 "conf_parser.c"
     break;
@@ -5157,7 +5157,7 @@ yyreduce:
 #line 1731 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.mask.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
 #line 5163 "conf_parser.c"
     break;
@@ -5528,8 +5528,8 @@ yyreduce:
   if (block_state.ciph.buf[0])
     conf->cipher_list = xstrdup(block_state.ciph.buf);
 
-  dlinkMoveList(&block_state.leaf.list, &conf->leaf_list);
-  dlinkMoveList(&block_state.hub.list, &conf->hub_list);
+  list_move_list(&block_state.leaf.list, &conf->leaf_list);
+  list_move_list(&block_state.hub.list, &conf->hub_list);
 
   if (block_state.bind.buf[0])
   {
@@ -5707,7 +5707,7 @@ yyreduce:
 #line 2142 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.hub.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.hub.list);
 }
 #line 5713 "conf_parser.c"
     break;
@@ -5716,7 +5716,7 @@ yyreduce:
 #line 2148 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    dlinkAdd(xstrdup(yylval.string), make_dlink_node(), &block_state.leaf.list);
+    list_add(xstrdup(yylval.string), list_make_node(), &block_state.leaf.list);
 }
 #line 5722 "conf_parser.c"
     break;

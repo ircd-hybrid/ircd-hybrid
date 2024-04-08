@@ -41,9 +41,9 @@
  */
 struct Whowas
 {
-  dlink_node hash_node;  /**< List node; linked into whowas_hash. */
-  dlink_node list_node;  /**< List node; linked into whowas_list. */
-  dlink_node client_list_node;  /**< List node; linked into client->whowas_list. */
+  list_node_t hash_node;  /**< List node; linked into whowas_hash. */
+  list_node_t list_node;  /**< List node; linked into whowas_list. */
+  list_node_t client_list_node;  /**< List node; linked into client->whowas_list. */
   unsigned int hash_value;  /**< Hash value derived from Whowas::name. */
   uintmax_t logoff;  /**< Time when the client logged off; real time. */
   bool server_hidden;  /**< Indicates if the client's server is hidden. */
@@ -58,7 +58,7 @@ struct Whowas
   struct Client *client;  /**< Pointer to the current client or NULL if offline. */
 };
 
-extern const dlink_list *whowas_get_hash(unsigned int);
+extern const list_t *whowas_get_hash(unsigned int);
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, bool);
 extern void whowas_off_history(struct Client *);

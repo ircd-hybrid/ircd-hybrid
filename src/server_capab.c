@@ -37,7 +37,7 @@
 #include "memory.h"
 
 /** @brief List of server capabilities supported by this IRC server. */
-static dlink_list capab_list;
+static list_t capab_list;
 
 /**
  * @brief Initialize the server capabilities.
@@ -73,7 +73,7 @@ capab_add(const char *name, unsigned int flag, bool active)
   cap->name = xstrdup(name);
   cap->cap = flag;
   cap->active = active;
-  dlinkAdd(cap, &cap->node, &capab_list);
+  list_add(cap, &cap->node, &capab_list);
 }
 
 /**
@@ -87,15 +87,15 @@ capab_add(const char *name, unsigned int flag, bool active)
 void
 capab_del(const char *name)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, capab_list.head)
+  LIST_FOREACH_SAFE(node, node_next, capab_list.head)
   {
     struct Capability *cap = node->data;
 
     if (irccmp(cap->name, name) == 0)
     {
-      dlinkDelete(node, &capab_list);
+      list_delete(node, &capab_list);
       xfree(cap->name);
       xfree(cap);
     }
@@ -114,9 +114,9 @@ capab_del(const char *name)
 unsigned int
 capab_find(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, capab_list.head)
+  LIST_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;
 
@@ -146,8 +146,8 @@ capab_get(const void *ptr, bool active)
 
   *bufptr = '\0';  /* buf is static */
 
-  dlink_node *node;
-  DLINK_FOREACH(node, capab_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;
 

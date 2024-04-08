@@ -38,7 +38,7 @@
 #include "memory.h"
 #include "conf_pseudo.h"
 
-static dlink_list pseudo_list;  /**< List to manage pseudo items. */
+static list_t pseudo_list;  /**< List to manage pseudo items. */
 
 /**
  * @brief Retrieves the list of pseudo items.
@@ -47,7 +47,7 @@ static dlink_list pseudo_list;  /**< List to manage pseudo items. */
  *
  * @return Pointer to the list of pseudo items.
  */
-const dlink_list *
+const list_t *
 pseudo_get_list(void)
 {
   return &pseudo_list;
@@ -133,7 +133,7 @@ pseudo_register(const char *name, const char *nick, const char *server,
     .handlers[OPER_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 }
   };
 
-  dlinkAdd(pseudo, &pseudo->node, &pseudo_list);
+  list_add(pseudo, &pseudo->node, &pseudo_list);
 
   command_add(&pseudo->command_struct);
 }
@@ -153,7 +153,7 @@ pseudo_clear(void)
     assert(command_find(pseudo->command_struct.name));
 
     command_del(&pseudo->command_struct);
-    dlinkDelete(&pseudo->node, &pseudo_list);
+    list_delete(&pseudo->node, &pseudo_list);
 
     xfree(pseudo->name);
     xfree(pseudo->nick);

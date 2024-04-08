@@ -28,9 +28,9 @@
 
 struct ResvItem
 {
-  dlink_node node;
-  dlink_list *list;
-  dlink_list exempt_list;
+  list_node_t node;
+  list_t *list;
+  list_t exempt_list;
   char *mask;
   char *reason;
   uintmax_t expire;
@@ -40,7 +40,7 @@ struct ResvItem
 
 struct ResvExemptItem
 {
-  dlink_node node;
+  list_node_t node;
   char *name;
   char *user;
   char *host;
@@ -49,10 +49,10 @@ struct ResvExemptItem
   int type;
 };
 
-extern const dlink_list *resv_chan_get_list(void);
-extern const dlink_list *resv_nick_get_list(void);
+extern const list_t *resv_chan_get_list(void);
+extern const list_t *resv_nick_get_list(void);
 extern void resv_delete(struct ResvItem *, bool);
-extern struct ResvItem *resv_make(const char *, const char *, const dlink_list *);
+extern struct ResvItem *resv_make(const char *, const char *, const list_t *);
 extern bool resv_exempt_find(const struct Client *, const struct ResvItem *);
 extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));
 extern void resv_clear(void);

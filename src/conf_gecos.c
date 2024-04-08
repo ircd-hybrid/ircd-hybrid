@@ -32,10 +32,10 @@
 #include "conf_gecos.h"
 
 
-static dlink_list gecos_list;
+static list_t gecos_list;
 
 
-const dlink_list *
+const list_t *
 gecos_get_list(void)
 {
   return &gecos_list;
@@ -44,9 +44,9 @@ gecos_get_list(void)
 void
 gecos_clear(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, gecos_list.head)
+  LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
 
@@ -62,7 +62,7 @@ gecos_delete(struct GecosItem *gecos, bool expired)
     sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
                          gecos->mask);
 
-  dlinkDelete(&gecos->node, &gecos_list);
+  list_delete(&gecos->node, &gecos_list);
   xfree(gecos->mask);
   xfree(gecos->reason);
   xfree(gecos);
@@ -72,7 +72,7 @@ struct GecosItem *
 gecos_make(void)
 {
   struct GecosItem *gecos = xcalloc(sizeof(*gecos));
-  dlinkAdd(gecos, &gecos->node, &gecos_list);
+  list_add(gecos, &gecos->node, &gecos_list);
 
   return gecos;
 }
@@ -80,9 +80,9 @@ gecos_make(void)
 struct GecosItem *
 gecos_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, gecos_list.head)
+  LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
 
@@ -99,9 +99,9 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
 void
 gecos_expire(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, gecos_list.head)
+  LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
 

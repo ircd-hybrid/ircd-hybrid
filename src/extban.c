@@ -33,18 +33,18 @@
 #include "extban.h"
 
 
-static dlink_list extban_list;
+static list_t extban_list;
 static unsigned int matching_mask, acting_mask;
 
 
 static unsigned int
 extban_find_mask(void)
 {
-  dlink_node *node;
+  list_node_t *node;
   unsigned int used = 0;
   unsigned int i;
 
-  DLINK_FOREACH(node, extban_list.head)
+  LIST_FOREACH(node, extban_list.head)
   {
     const struct Extban *extban = node->data;
     used |= extban->flag;
@@ -86,7 +86,7 @@ extban_add(struct Extban *extban)
     return;
 
   extban->flag = mask;
-  dlinkAdd(extban, &extban->node, &extban_list);
+  list_add(extban, &extban->node, &extban_list);
 
   if (extban->type & EXTBAN_MATCHING)
     matching_mask |= mask;
@@ -100,7 +100,7 @@ extban_del(struct Extban *extban)
   if (extban->flag == 0)
     return;
 
-  dlinkDelete(&extban->node, &extban_list);
+  list_delete(&extban->node, &extban_list);
 
   matching_mask &= ~extban->flag;
   acting_mask &= ~extban->flag;
@@ -109,9 +109,9 @@ extban_del(struct Extban *extban)
 struct Extban *
 extban_find(unsigned char c)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, extban_list.head)
+  LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
 
@@ -125,9 +125,9 @@ extban_find(unsigned char c)
 struct Extban *
 extban_find_flag(unsigned int flag)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, extban_list.head)
+  LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
 
@@ -188,10 +188,10 @@ extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset
 size_t
 extban_format(unsigned int e, char *buf)
 {
-  dlink_node *node;
+  list_node_t *node;
   size_t written = 0;
 
-  DLINK_FOREACH(node, extban_list.head)
+  LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
 
@@ -214,7 +214,7 @@ extban_format(unsigned int e, char *buf)
     }
   }
 
-  DLINK_FOREACH(node, extban_list.head)
+  LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
 
@@ -258,11 +258,11 @@ extban_get_isupport(void)
   char extban_chars[256] = { 0 };
   static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
 
-  if (dlink_list_length(&extban_list) == 0)
+  if (list_length(&extban_list) == 0)
     return NULL;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, extban_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
     extban_chars[extban->character] = extban->character;

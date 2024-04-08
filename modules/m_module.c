@@ -105,12 +105,12 @@ module_reload(struct Client *source_p, const char *arg)
 
   if (strcmp(arg, "*") == 0)
   {
-    unsigned int modnum = dlink_list_length(modules_get_list());
+    unsigned int modnum = list_length(modules_get_list());
 
     sendto_one_notice(source_p, &me, ":Reloading all modules");
 
-    dlink_node *node, *node_next;
-    DLINK_FOREACH_SAFE(node, node_next, modules_get_list()->head)
+    list_node_t *node, *node_next;
+    LIST_FOREACH_SAFE(node, node_next, modules_get_list()->head)
     {
       modp = node->data;
 
@@ -124,9 +124,9 @@ module_reload(struct Client *source_p, const char *arg)
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Module Restart: %u modules unloaded, %u modules loaded",
-                         modnum, dlink_list_length(modules_get_list()));
+                         modnum, list_length(modules_get_list()));
     log_write(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
-              modnum, dlink_list_length(modules_get_list()));
+              modnum, list_length(modules_get_list()));
     return;
   }
 
@@ -169,9 +169,9 @@ module_reload(struct Client *source_p, const char *arg)
 static void
 module_list(struct Client *source_p, const char *arg)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, modules_get_list()->head)
+  LIST_FOREACH(node, modules_get_list()->head)
   {
     const struct module *modp = node->data;
 

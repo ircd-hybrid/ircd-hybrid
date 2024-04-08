@@ -72,8 +72,8 @@ struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
 /* general conf items link list root, other than k lines etc. */
-dlink_list connect_items;
-dlink_list operator_items;
+list_t connect_items;
+list_t operator_items;
 
 extern unsigned int lineno;
 extern char linebuf[];
@@ -155,10 +155,10 @@ conf_dns_lookup(struct MaskItem *conf)
 /* map_to_list()
  *
  * inputs       - ConfType conf
- * output       - pointer to dlink_list to use
+ * output       - pointer to list_t to use
  * side effects - none
  */
-static dlink_list *
+static list_t *
 map_to_list(enum maskitem_type type)
 {
   switch (type)
@@ -178,25 +178,25 @@ struct MaskItem *
 conf_make(enum maskitem_type type)
 {
   struct MaskItem *const conf = xcalloc(sizeof(*conf));
-  dlink_list *list = NULL;
+  list_t *list = NULL;
 
   conf->type   = type;
   conf->active = true;
   conf->aftype = AF_INET;
 
   if ((list = map_to_list(type)))
-    dlinkAdd(conf, &conf->node, list);
+    list_add(conf, &conf->node, list);
   return conf;
 }
 
 void
 conf_free(struct MaskItem *conf)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-  dlink_list *list = NULL;
+  list_node_t *node = NULL, *node_next = NULL;
+  list_t *list = NULL;
 
   if ((list = map_to_list(conf->type)))
-    dlinkFindDelete(list, conf);
+    list_find_delete(list, conf);
 
   xfree(conf->name);
 
@@ -220,18 +220,18 @@ conf_free(struct MaskItem *conf)
   xfree(conf->bind);
   xfree(conf->cipher_list);
 
-  DLINK_FOREACH_SAFE(node, node_next, conf->hub_list.head)
+  LIST_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
     xfree(node->data);
-    dlinkDelete(node, &conf->hub_list);
-    free_dlink_node(node);
+    list_delete(node, &conf->hub_list);
+    list_free_node(node);
   }
 
-  DLINK_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
+  LIST_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
   {
     xfree(node->data);
-    dlinkDelete(node, &conf->leaf_list);
-    free_dlink_node(node);
+    list_delete(node, &conf->leaf_list);
+    list_free_node(node);
   }
 
   xfree(conf);
@@ -387,9 +387,9 @@ conf_check_client(struct Client *client)
 void
 conf_detach(struct Client *client, enum maskitem_type type)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, client->connection->confs.head)
+  LIST_FOREACH_SAFE(node, node_next, client->connection->confs.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -400,8 +400,8 @@ conf_detach(struct Client *client, enum maskitem_type type)
     if (!(conf->type & type))
       continue;
 
-    dlinkDelete(node, &client->connection->confs);
-    free_dlink_node(node);
+    list_delete(node, &client->connection->confs);
+    list_free_node(node);
 
     if (conf->type == CONF_CLIENT)
       class_ip_limit_remove(conf->class, &client->addr);
@@ -426,13 +426,13 @@ conf_detach(struct Client *client, enum maskitem_type type)
 int
 conf_attach(struct Client *client, struct MaskItem *conf)
 {
-  if (dlinkFind(&client->connection->confs, conf))
+  if (list_find(&client->connection->confs, conf))
     return 1;
 
   conf->class->ref_count++;
   conf->ref_count++;
 
-  dlinkAdd(conf, make_dlink_node(), &client->connection->confs);
+  list_add(conf, list_make_node(), &client->connection->confs);
 
   return 0;
 }
@@ -447,11 +447,11 @@ conf_attach(struct Client *client, struct MaskItem *conf)
  *		  and has the given mask.
  */
 struct MaskItem *
-find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
+find_conf_name(list_t *list, const char *name, enum maskitem_type type)
 {
-  dlink_node *node = NULL;
+  list_node_t *node = NULL;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     struct MaskItem *conf = node->data;
 
@@ -472,9 +472,9 @@ find_conf_name(dlink_list *list, const char *name, enum maskitem_type type)
 struct MaskItem *
 connect_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -497,9 +497,9 @@ connect_find(const char *name, int (*compare)(const char *, const char *))
 struct MaskItem *
 operator_find(const struct Client *client, const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, operator_items.head)
+  LIST_FOREACH(node, operator_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -764,7 +764,7 @@ get_oper_name(const struct Client *client)
 
   if (MyConnect(client))
   {
-    const dlink_node *const node = client->connection->confs.head;
+    const list_node_t *const node = client->connection->confs.head;
 
     if (node)
     {
@@ -799,12 +799,12 @@ get_oper_name(const struct Client *client)
 static void
 conf_clear(void)
 {
-  dlink_node *node = NULL, *node_next = NULL;
-  dlink_list *free_items [] = {
+  list_node_t *node = NULL, *node_next = NULL;
+  list_t *free_items [] = {
     &connect_items, &operator_items, NULL
   };
 
-  dlink_list ** iterator = free_items; /* C is dumb */
+  list_t ** iterator = free_items; /* C is dumb */
 
   /* We only need to free anything allocated by yyparse() here.
    * Resetting structs, etc, is taken care of by conf_set_defaults().
@@ -812,12 +812,12 @@ conf_clear(void)
 
   for (; *iterator; iterator++)
   {
-    DLINK_FOREACH_SAFE(node, node_next, (*iterator)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*iterator)->head)
     {
       struct MaskItem *conf = node->data;
 
       conf->active = false;
-      dlinkDelete(&conf->node, *iterator);
+      list_delete(&conf->node, *iterator);
 
       if (!conf->ref_count)
         conf_free(conf);

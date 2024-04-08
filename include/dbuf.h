@@ -69,7 +69,7 @@ struct dbuf_block
  */
 struct dbuf_queue
 {
-  dlink_list blocks;  /**< List of data blocks. */
+  list_t blocks;  /**< List of data blocks. */
   size_t total_size;  /**< Total size of the dynamic buffer. */
   size_t pos;  /**< Current position within the dynamic buffer. */
 };

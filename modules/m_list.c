@@ -55,11 +55,11 @@ do_list(struct Client *source_p, char *arg)
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
   source_p->connection->list_task = lt;
-  dlinkAdd(source_p, &lt->node, &listing_client_list);
+  list_add(source_p, &lt->node, &listing_client_list);
 
   if (!EmptyString(arg))
   {
-    dlink_list *list;
+    list_t *list;
     char *opt, *save = NULL;
     bool error = false;
     int i;
@@ -147,7 +147,7 @@ do_list(struct Client *source_p, char *arg)
             error = true;
 
           if (error == false)
-            dlinkAdd(xstrdup(opt), make_dlink_node(), list);
+            list_add(xstrdup(opt), list_make_node(), list);
       }
     }
 

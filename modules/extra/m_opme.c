@@ -54,7 +54,7 @@ static void
 mo_opme(struct Client *source_p, int parc, char *parv[])
 {
   const char *const name = parv[1];
-  dlink_node *node;
+  list_node_t *node;
 
   if (!HasOFlag(source_p, OPER_FLAG_OPME))
   {
@@ -76,7 +76,7 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  DLINK_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->members.head)
   {
     const struct ChannelMember *tmp = node->data;
 

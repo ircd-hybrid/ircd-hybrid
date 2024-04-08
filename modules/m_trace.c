@@ -42,12 +42,12 @@ static void
 trace_get_dependent(unsigned int *const server,
                     unsigned int *const client, const struct Client *target_p)
 {
-  dlink_node *node;
+  list_node_t *node;
 
   (*server)++;
-  (*client) += dlink_list_length(&target_p->serv->client_list);
+  (*client) += list_length(&target_p->serv->client_list);
 
-  DLINK_FOREACH(node, target_p->serv->server_list.head)
+  LIST_FOREACH(node, target_p->serv->server_list.head)
     trace_get_dependent(server, client, node->data);
 }
 
@@ -123,8 +123,8 @@ static void
 do_trace(struct Client *source_p, const char *name)
 {
   bool doall = false;
-  const dlink_node *node;
-  const dlink_list *tab[] = { &local_client_list,
+  const list_node_t *node;
+  const list_t *tab[] = { &local_client_list,
                               &local_server_list, &unknown_list, NULL };
 
   assert(HasUMode(source_p, UMODE_OPER));
@@ -140,9 +140,9 @@ do_trace(struct Client *source_p, const char *name)
   else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
     doall = true;
 
-  for (const dlink_list **list = tab; *list; ++list)
+  for (const list_t **list = tab; *list; ++list)
   {
-    DLINK_FOREACH(node, (*list)->head)
+    LIST_FOREACH(node, (*list)->head)
     {
       const struct Client *target_p = node->data;
 
@@ -153,7 +153,7 @@ do_trace(struct Client *source_p, const char *name)
 
   if (doall)
   {
-    DLINK_FOREACH(node, class_get_list()->head)
+    LIST_FOREACH(node, class_get_list()->head)
     {
       const struct ClassItem *class = node->data;
 

@@ -38,9 +38,9 @@
 #include "memory.h"
 
 
-static dlink_list modules_list;
-static dlink_list modules_path;
-static dlink_list modules_conf;
+static list_t modules_list;
+static list_t modules_path;
+static list_t modules_conf;
 
 static const char *const core_module_table[] =
 {
@@ -64,7 +64,7 @@ static const char *const core_module_table[] =
 };
 
 
-dlink_list *
+list_t *
 modules_get_list(void)
 {
   return &modules_list;
@@ -94,7 +94,7 @@ unload_one_module(const char *name, bool warn)
   if (modp->modexit)
     modp->modexit();
 
-  dlinkDelete(&modp->node, &modules_list);
+  list_delete(&modp->node, &modules_list);
   xfree(modp->name);
 
   lt_dlclose(modp->handle);
@@ -150,7 +150,7 @@ load_a_module(const char *path, bool warn)
 
   modp->handle = tmpptr;
   modp->name = xstrdup(mod_basename);
-  dlinkAdd(modp, &modp->node, &modules_list);
+  list_add(modp, &modp->node, &modules_list);
 
   if (modp->modinit)
     modp->modinit();
@@ -194,9 +194,9 @@ modules_init(void)
 static struct module_path *
 mod_find_path(const char *path)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, modules_path.head)
+  LIST_FOREACH(node, modules_path.head)
   {
     struct module_path *mpath = node->data;
 
@@ -223,7 +223,7 @@ mod_add_path(const char *path)
 
   pathst = xcalloc(sizeof(*pathst));
   pathst->path = xstrdup(path);
-  dlinkAdd(pathst, &pathst->node, &modules_path);
+  list_add(pathst, &pathst->node, &modules_path);
 }
 
 /* add_conf_module
@@ -239,7 +239,7 @@ add_conf_module(const char *name)
 
   pathst = xcalloc(sizeof(*pathst));
   pathst->path = xstrdup(name);
-  dlinkAdd(pathst, &pathst->node, &modules_conf);
+  list_add(pathst, &pathst->node, &modules_conf);
 }
 
 /* mod_clear_paths()
@@ -255,7 +255,7 @@ modules_conf_clear(void)
   {
     struct module_path *path = modules_path.head->data;
 
-    dlinkDelete(&path->node, &modules_path);
+    list_delete(&path->node, &modules_path);
     xfree(path->path);
     xfree(path);
   }
@@ -264,7 +264,7 @@ modules_conf_clear(void)
   {
     struct module_path *path = modules_conf.head->data;
 
-    dlinkDelete(&path->node, &modules_conf);
+    list_delete(&path->node, &modules_conf);
     xfree(path->path);
     xfree(path);
   }
@@ -279,9 +279,9 @@ modules_conf_clear(void)
 struct module *
 findmodule_byname(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, modules_list.head)
+  LIST_FOREACH(node, modules_list.head)
   {
     struct module *modp = node->data;
 
@@ -334,9 +334,9 @@ load_all_modules(bool warn)
 void
 load_conf_modules(void)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, modules_conf.head)
+  LIST_FOREACH(node, modules_conf.head)
   {
     struct module_path *mpath = node->data;
 
@@ -380,11 +380,11 @@ load_core_modules(bool warn)
 bool
 load_one_module(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
   char path[HYB_PATH_MAX + 1];
   struct stat statbuf;
 
-  DLINK_FOREACH(node, modules_path.head)
+  LIST_FOREACH(node, modules_path.head)
   {
     const struct module_path *mpath = node->data;
 

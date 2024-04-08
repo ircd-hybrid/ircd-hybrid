@@ -45,13 +45,13 @@
 static void
 dline_check(const struct AddressRec *arec)
 {
-  dlink_list *tab[] = { &local_client_list, &unknown_list, NULL };
+  list_t *tab[] = { &local_client_list, &unknown_list, NULL };
 
-  for (dlink_list **list = tab; *list; ++list)
+  for (list_t **list = tab; *list; ++list)
   {
-    dlink_node *node, *node_next;
+    list_node_t *node, *node_next;
 
-    DLINK_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct Client *client = node->data;
 

@@ -43,9 +43,9 @@
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 #define ALLINUSE_WARNING "ERROR :All connections in use\r\n"
 
-static dlink_list listener_list;
+static list_t listener_list;
 
-const dlink_list *
+const list_t *
 listener_get_list(void)
 {
   return &listener_list;
@@ -58,7 +58,7 @@ listener_make(const int port, const struct irc_ssaddr *addr)
 
   listener->port = port;
   listener->addr = *addr;
-  dlinkAdd(listener, &listener->node, &listener_list);
+  list_add(listener, &listener->node, &listener_list);
 
   return listener;
 }
@@ -66,7 +66,7 @@ listener_make(const int port, const struct irc_ssaddr *addr)
 static void
 listener_free(struct Listener *listener)
 {
-  dlinkDelete(&listener->node, &listener_list);
+  list_delete(&listener->node, &listener_list);
   xfree(listener->name);
   xfree(listener);
 }
@@ -96,7 +96,7 @@ listener_has_flag(const struct Listener *listener, unsigned int flags)
 void
 listener_count_memory(unsigned int *count, size_t *bytes)
 {
-  (*count) = dlink_list_length(&listener_list);
+  (*count) = list_length(&listener_list);
   (*bytes) = *count * sizeof(struct Listener);
 }
 
@@ -287,11 +287,11 @@ listener_finalize(struct Listener *listener)
 static struct Listener *
 listener_find(int port, struct irc_ssaddr *addr)
 {
-  dlink_node *node;
+  list_node_t *node;
   struct Listener *listener    = NULL;
   struct Listener *last_closed = NULL;
 
-  DLINK_FOREACH(node, listener_list.head)
+  LIST_FOREACH(node, listener_list.head)
   {
     listener = node->data;
 
@@ -340,10 +340,10 @@ listener_close(struct Listener *listener)
 void
 listener_close_marked(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
   /* close all 'extra' listening ports we have */
-  DLINK_FOREACH_SAFE(node, node_next, listener_list.head)
+  LIST_FOREACH_SAFE(node, node_next, listener_list.head)
     listener_close(node->data);
 }
 

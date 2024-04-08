@@ -79,8 +79,8 @@ do_etrace(struct Client *source_p, const char *name)
   else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
     doall = true;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_client_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_client_list.head)
   {
     const struct Client *target_p = node->data;
 

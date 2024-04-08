@@ -37,16 +37,16 @@
 #include "ircd.h"
 #include "conf.h"
 
-static dlink_list whowas_list;  /*!< Linked list of struct Whowas pointers. */
-static dlink_list whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entry retrieval based on hash values. */
+static list_t whowas_list;  /*!< Linked list of struct Whowas pointers. */
+static list_t whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entry retrieval based on hash values. */
 
 /**
  * @brief Retrieves a slot of the whowas_hash based on the provided hash value.
  *
  * @param hash_value The hash value used to locate the slot.
- * @return A pointer to the dlink_list associated with the specified hash value.
+ * @return A pointer to the list_t associated with the specified hash value.
  */
-const dlink_list *
+const list_t *
 whowas_get_hash(unsigned int hash_value)
 {
   if (hash_value >= HASHSIZE)
@@ -64,10 +64,10 @@ static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
 {
   if (whowas->client)
-    dlinkDelete(&whowas->client_list_node, &whowas->client->whowas_list);
+    list_delete(&whowas->client_list_node, &whowas->client->whowas_list);
 
-  dlinkDelete(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
-  dlinkDelete(&whowas->list_node, &whowas_list);
+  list_delete(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
+  list_delete(&whowas->list_node, &whowas_list);
 
   return whowas;
 }
@@ -96,8 +96,8 @@ whowas_make(void)
 {
   struct Whowas *whowas;
 
-  if (dlink_list_length(&whowas_list) &&
-      dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+  if (list_length(&whowas_list) &&
+      list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
   else
     whowas = xcalloc(sizeof(*whowas));
@@ -116,8 +116,8 @@ whowas_make(void)
 void
 whowas_trim(void)
 {
-  while (dlink_list_length(&whowas_list) &&
-         dlink_list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+  while (list_length(&whowas_list) &&
+         list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas_free(whowas_list.tail->data);
 }
 
@@ -153,13 +153,13 @@ whowas_add_history(struct Client *client, bool online)
   if (online)
   {
     whowas->client = client;
-    dlinkAdd(whowas, &whowas->client_list_node, &client->whowas_list);
+    list_add(whowas, &whowas->client_list_node, &client->whowas_list);
   }
   else
     whowas->client = NULL;
 
-  dlinkAdd(whowas, &whowas->hash_node, &whowas_hash[whowas->hash_value]);
-  dlinkAdd(whowas, &whowas->list_node, &whowas_list);
+  list_add(whowas, &whowas->hash_node, &whowas_hash[whowas->hash_value]);
+  list_add(whowas, &whowas->list_node, &whowas_list);
 }
 
 /**
@@ -179,7 +179,7 @@ whowas_off_history(struct Client *client)
     struct Whowas *whowas = client->whowas_list.head->data;
 
     whowas->client = NULL;
-    dlinkDelete(&whowas->client_list_node, &client->whowas_list);
+    list_delete(&whowas->client_list_node, &client->whowas_list);
   }
 }
 
@@ -198,8 +198,8 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 {
   timelimit = event_base->time.sec_real - timelimit;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, whowas_hash[hash_string(name)].head)
+  list_node_t *node;
+  LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
     struct Whowas *whowas = node->data;
 
@@ -222,6 +222,6 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 void
 whowas_count_memory(unsigned int *const count, size_t *const bytes)
 {
-  (*count) = dlink_list_length(&whowas_list);
-  (*bytes) = dlink_list_length(&whowas_list) * sizeof(struct Whowas);
+  (*count) = list_length(&whowas_list);
+  (*bytes) = list_length(&whowas_list) * sizeof(struct Whowas);
 }

@@ -33,7 +33,7 @@
 #define INCLUDED_list_h
 
 /**
- * @def DLINK_FOREACH
+ * @def LIST_FOREACH
  * @brief Iterates forward through the double-linked list.
  *
  * This macro is used to iterate through a double-linked list in the forward direction.
@@ -41,10 +41,10 @@
  * @param pos Node variable for iteration.
  * @param head List head.
  */
-#define DLINK_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
+#define LIST_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
 
 /**
- * @def DLINK_FOREACH_SAFE
+ * @def LIST_FOREACH_SAFE
  * @brief Iterates forward through the double-linked list safely while removing nodes.
  *
  * This macro is used to iterate through a double-linked list in the forward direction
@@ -54,10 +54,10 @@
  * @param n Temporary list head for safe removal.
  * @param head List head.
  */
-#define DLINK_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
+#define LIST_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
 
 /**
- * @def DLINK_FOREACH_PREV
+ * @def LIST_FOREACH_PREV
  * @brief Iterates backward through a double-linked list.
  *
  * This macro is used to iterate through a double-linked list in the backward direction.
@@ -65,50 +65,50 @@
  * @param pos Node variable for iteration.
  * @param head List head.
  */
-#define DLINK_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
+#define LIST_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
 
 /**
- * @def dlink_list_length
+ * @def list_length
  * @brief Macro to retrieve the length of the double-linked list.
  *
  * This macro returns the number of nodes in the specified double-linked list.
  *
  * @param list Pointer to the double-linked list.
  */
-#define dlink_list_length(list) (list)->length
+#define list_length(list) (list)->length
 
 /**
- * @struct dlink_node
+ * @struct list_node_t
  * @brief Structure representing a node in a double-linked list.
  */
-typedef struct _dlink_node
+typedef struct _list_node
 {
   void *data;  /**< Pointer to the data stored in the node. */
-  struct _dlink_node *prev;  /**< Pointer to the previous node in the list. */
-  struct _dlink_node *next;  /**< Pointer to the next node in the list. */
-} dlink_node;
+  struct _list_node *prev;  /**< Pointer to the previous node in the list. */
+  struct _list_node *next;  /**< Pointer to the next node in the list. */
+} list_node_t;
 
 /**
- * @struct dlink_list
+ * @struct list_t
  * @brief Structure representing a double-linked list.
  */
-typedef struct _dlink_list
+typedef struct _list
 {
-  dlink_node *head;  /**< Pointer to the head (first node) of the list. */
-  dlink_node *tail;  /**< Pointer to the tail (last node) of the list. */
+  list_node_t *head;  /**< Pointer to the head (first node) of the list. */
+  list_node_t *tail;  /**< Pointer to the tail (last node) of the list. */
   unsigned int length;  /**< Number of nodes in the list. */
-} dlink_list;
+} list_t;
 
-extern void free_dlink_node(dlink_node *);
-extern void dlinkAdd(void *, dlink_node *, dlink_list *);
-extern void dlinkAddAfter(void *, dlink_node *, dlink_node *, dlink_list *);
-extern void dlinkAddBefore(dlink_node *, void *, dlink_node *, dlink_list *);
-extern void dlinkAddTail(void *, dlink_node *, dlink_list *);
-extern void dlinkDelete(dlink_node *, dlink_list *);
-extern void dlinkMoveList(dlink_list *, dlink_list *);
-extern void dlink_move_node(dlink_node *, dlink_list *, dlink_list *);
-extern dlink_node *dlinkFind(dlink_list *, const void *);
-extern dlink_node *dlinkFindCmp(const dlink_list *, const void *, int (*)(const char *, const char *));
-extern dlink_node *dlinkFindDelete(dlink_list *, void *);
-extern dlink_node *make_dlink_node(void);
+extern void list_free_node(list_node_t *);
+extern void list_add(void *, list_node_t *, list_t *);
+extern void list_add_after(void *, list_node_t *, list_node_t *, list_t *);
+extern void list_add_before(list_node_t *, void *, list_node_t *, list_t *);
+extern void list_add_tail(void *, list_node_t *, list_t *);
+extern void list_delete(list_node_t *, list_t *);
+extern void list_move_list(list_t *, list_t *);
+extern void list_move_node(list_node_t *, list_t *, list_t *);
+extern list_node_t *list_find(list_t *, const void *);
+extern list_node_t *list_find_cmp(const list_t *, const void *, int (*)(const char *, const char *));
+extern list_node_t *list_find_delete(list_t *, void *);
+extern list_node_t *list_make_node(void);
 #endif  /* INCLUDED_list_h */

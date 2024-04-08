@@ -58,12 +58,12 @@ enum
  */
 struct ClusterItem
 {
-  dlink_node node;  /**< Linked list node for management. */
+  list_node_t node;  /**< Linked list node for management. */
   char *server;  /**< Name of the server to share with; may include wildcards. */
   unsigned int type;  /**< Type of IRC command to share (using CLUSTER_* constants). */
 };
 
-extern const dlink_list *cluster_get_list(void);
+extern const list_t *cluster_get_list(void);
 extern void cluster_clear(void);
 extern struct ClusterItem *cluster_make(void);
 extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...);

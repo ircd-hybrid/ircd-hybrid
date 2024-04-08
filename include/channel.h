@@ -52,7 +52,7 @@ struct Mode
 /** Channel structure */
 struct Channel
 {
-  dlink_node node;  /**< List node; linked into channel_list */
+  list_node_t node;  /**< List node; linked into channel_list */
 
   struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
   struct Mode mode;
@@ -72,12 +72,12 @@ struct Channel
   bool sent_join_flood_notice;  /**< Indicates whether a server notice about a join flood event has been sent to IRC operators. */
   bool sent_message_flood_notice;  /**< Indicates whether a server notice about a message flood event has been sent to IRC operators. */
 
-  dlink_list members_local;  /**< List of local members on this channel */
-  dlink_list members;  /**< List of members on this channel */
-  dlink_list invites;  /**< List of invites on this channel */
-  dlink_list banlist;  /**< List of bans on this channel */
-  dlink_list exceptlist;  /**< List of ban exceptions on this channel */
-  dlink_list invexlist;  /**< List of invite exceptions on this channel */
+  list_t members_local;  /**< List of local members on this channel */
+  list_t members;  /**< List of members on this channel */
+  list_t invites;  /**< List of invites on this channel */
+  list_t banlist;  /**< List of bans on this channel */
+  list_t exceptlist;  /**< List of ban exceptions on this channel */
+  list_t invexlist;  /**< List of invite exceptions on this channel */
 
   float number_joined;
 
@@ -89,9 +89,9 @@ struct Channel
 /** ChannelMember structure */
 struct ChannelMember
 {
-  dlink_node locchannode;  /**< link to channel->members_local */
-  dlink_node channode;  /**< link to channel->members */
-  dlink_node usernode;  /**< link to client->channel */
+  list_node_t locchannode;  /**< link to channel->members_local */
+  list_node_t channode;  /**< link to channel->members */
+  list_node_t usernode;  /**< link to client->channel */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
   unsigned int flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
@@ -102,7 +102,7 @@ enum { BANSTRLEN = 200 }; /* XXX */
 /** Ban structure. Used for b/e/I n!u\@h masks */
 struct Ban
 {
-  dlink_node node;
+  list_node_t node;
   unsigned int extban;
   char banstr[BANSTRLEN];
   char name[NICKLEN + 1];
@@ -116,16 +116,16 @@ struct Ban
   int type;
 };
 
-extern const dlink_list *channel_get_list(void);
+extern const list_t *channel_get_list(void);
 extern bool channel_check_name(const char *, bool);
 extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool, const char **);
 extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
-extern bool find_bmask(struct Client *, struct Channel*, const dlink_list *, struct Extban *);
+extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct Extban *);
 extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
 
 extern void channel_join_list(struct Client *, char *, char *);
 extern void channel_part_list(struct Client *, char *, const char *);
-extern void remove_ban(struct Ban *, dlink_list *);
+extern void remove_ban(struct Ban *, list_t *);
 extern void channel_add_user(struct Channel *, struct Client *, unsigned int, bool);
 extern void channel_remove_user(struct ChannelMember *);
 extern void channel_demote_members(struct Channel *, const struct Client *);

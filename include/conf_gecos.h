@@ -28,7 +28,7 @@
 
 struct GecosItem
 {
-  dlink_node node;
+  list_node_t node;
   char *mask;
   char *reason;
   uintmax_t expire;
@@ -36,7 +36,7 @@ struct GecosItem
   bool in_database;
 };
 
-extern const dlink_list *gecos_get_list(void);
+extern const list_t *gecos_get_list(void);
 extern void gecos_delete(struct GecosItem *, bool);
 extern struct GecosItem *gecos_make(void);
 extern struct GecosItem *gecos_find(const char *, int (*)(const char *, const char *));

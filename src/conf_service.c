@@ -36,7 +36,7 @@
  * configurations for service {} blocks in the ircd-hybrid daemon. Each
  * node in the list corresponds to a specific service configuration.
  */
-static dlink_list service_list;
+static list_t service_list;
 
 /**
  * @brief Get the list of service configurations.
@@ -47,7 +47,7 @@ static dlink_list service_list;
  *
  * @return A pointer to the list of service configurations.
  */
-const dlink_list *
+const list_t *
 service_get_list(void)
 {
   return &service_list;
@@ -67,7 +67,7 @@ service_clear(void)
   {
     struct ServiceItem *service = service_list.head->data;
 
-    dlinkDelete(&service->node, &service_list);
+    list_delete(&service->node, &service_list);
     xfree(service->name);
     xfree(service);
   }
@@ -85,7 +85,7 @@ struct ServiceItem *
 service_make(void)
 {
   struct ServiceItem *service = xcalloc(sizeof(*service));
-  dlinkAdd(service, &service->node, &service_list);
+  list_add(service, &service->node, &service_list);
 
   return service;
 }
@@ -105,9 +105,9 @@ service_make(void)
 const struct ServiceItem *
 service_find(const char *name, int (*compare)(const char *, const char *))
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, service_list.head)
+  LIST_FOREACH(node, service_list.head)
   {
     const struct ServiceItem *service = node->data;
 

@@ -62,9 +62,9 @@ static void dump_map(struct Client *client,
     buf[bufpos++] = '|';
 
     bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
-                       dlink_list_length(&server->serv->client_list), 100 *
-                       (float)dlink_list_length(&server->serv->client_list) /
-                       (float)dlink_list_length(&global_client_list));
+                       list_length(&server->serv->client_list), 100 *
+                       (float)list_length(&server->serv->client_list) /
+                       (float)list_length(&global_client_list));
     sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
 
@@ -80,8 +80,8 @@ static void dump_map(struct Client *client,
     return;
   strcpy(p, "|-");
 
-  dlink_node *node;
-  DLINK_FOREACH(node, server->serv->server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, server->serv->server_list.head)
   {
     struct Client *target_p = node->data;
 
@@ -96,7 +96,7 @@ static void dump_map(struct Client *client,
     ++cnt;
   }
 
-  DLINK_FOREACH(node, server->serv->server_list.head)
+  LIST_FOREACH(node, server->serv->server_list.head)
   {
     struct Client *target_p = node->data;
 

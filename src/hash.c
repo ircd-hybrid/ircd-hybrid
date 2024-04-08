@@ -480,22 +480,22 @@ free_list_task(struct Client *client)
 {
   struct ListTask *const lt = client->connection->list_task;
 
-  dlinkDelete(&lt->node, &listing_client_list);
+  list_delete(&lt->node, &listing_client_list);
 
   while (lt->show_mask.head)
   {
-    dlink_node *node = lt->show_mask.head;
-    dlinkDelete(node, &lt->show_mask);
+    list_node_t *node = lt->show_mask.head;
+    list_delete(node, &lt->show_mask);
     xfree(node->data);
-    free_dlink_node(node);
+    list_free_node(node);
   }
 
   while (lt->hide_mask.head)
   {
-    dlink_node *node = lt->hide_mask.head;
-    dlinkDelete(node, &lt->hide_mask);
+    list_node_t *node = lt->hide_mask.head;
+    list_delete(node, &lt->hide_mask);
     xfree(node->data);
-    free_dlink_node(node);
+    list_free_node(node);
   }
 
   xfree(lt);
@@ -514,12 +514,12 @@ free_list_task(struct Client *client)
 static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
-  if (dlink_list_length(&lt->show_mask))
-    if (dlinkFindCmp(&lt->show_mask, name, match) == NULL)
+  if (list_length(&lt->show_mask))
+    if (list_find_cmp(&lt->show_mask, name, match) == NULL)
       return false;
 
-  if (dlink_list_length(&lt->hide_mask))
-    if (dlinkFindCmp(&lt->hide_mask, name, match))
+  if (list_length(&lt->hide_mask))
+    if (list_find_cmp(&lt->hide_mask, name, match))
       return false;
 
   return true;
@@ -547,8 +547,8 @@ list_one_channel(struct Client *client, struct Channel *channel)
     return;
 
   /* Check the number of users in the channel */
-  if (dlink_list_length(&channel->members) < lt->users_min ||
-      dlink_list_length(&channel->members) > lt->users_max)
+  if (list_length(&channel->members) < lt->users_min ||
+      list_length(&channel->members) > lt->users_max)
     return;
 
   /* Check the creation time of the channel */
@@ -577,7 +577,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
              channel_modes(channel, client, false));
 
   sendto_one_numeric(client, &me, RPL_LIST, channel->name,
-                     dlink_list_length(&channel->members),
+                     list_length(&channel->members),
                      buf, channel->topic);
 }
 
@@ -621,9 +621,9 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
   }
   else
   {
-    dlink_node *node;
+    list_node_t *node;
 
-    DLINK_FOREACH(node, lt->show_mask.head)
+    LIST_FOREACH(node, lt->show_mask.head)
       if ((channel = hash_find_channel(node->data)))
         list_one_channel(client, channel);
   }

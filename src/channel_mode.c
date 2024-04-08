@@ -107,7 +107,7 @@ get_mask(const struct Ban *ban)
  */
 
 const char *
-add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_list *list, unsigned int type)
+add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
 {
   char mask[MODEBUFLEN];
   char *maskptr = mask;
@@ -117,9 +117,9 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
 
   if (MyClient(client))
   {
-    unsigned int num_mask = dlink_list_length(&channel->banlist) +
-                            dlink_list_length(&channel->exceptlist) +
-                            dlink_list_length(&channel->invexlist);
+    unsigned int num_mask = list_length(&channel->banlist) +
+                            list_length(&channel->exceptlist) +
+                            list_length(&channel->invexlist);
 
     /* Don't let local clients overflow the b/e/I lists */
     if (num_mask >= ((HasCMode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large :
@@ -208,8 +208,8 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
   else
     ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
 
-  dlink_node *node;
-  DLINK_FOREACH(node, list->head)
+  list_node_t *node;
+  LIST_FOREACH(node, list->head)
   {
     const struct Ban *tmp = node->data;
 
@@ -230,7 +230,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
   else
     strlcpy(ban->who, client->name, sizeof(ban->who));
 
-  dlinkAdd(ban, &ban->node, list);
+  list_add(ban, &ban->node, list);
 
   return ban->banstr;
 }
@@ -243,16 +243,16 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, dlink_
  * side effects	-
  */
 static const char *
-del_id(struct Client *client, struct Channel *channel, const char *banid, dlink_list *list, unsigned int type)
+del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
 {
   static char mask[MODEBUFLEN];
-  dlink_node *node;
+  list_node_t *node;
 
   assert(banid);
 
   /* TBD: n!u@h formatting fo local clients */
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     struct Ban *ban = node->data;
 
@@ -354,11 +354,11 @@ fix_key(char *arg)
  * side effects - clear ban cache
  */
 void
-clear_ban_cache_list(dlink_list *list)
+clear_ban_cache_list(list_t *list)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
   {
     struct ChannelMember *member = node->data;
     member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
@@ -508,7 +508,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   const char *ret = NULL;
-  dlink_list *list;
+  list_t *list;
   enum irc_numerics rpl_list = 0, rpl_endlist = 0;
   int errtype = 0;
 
@@ -543,8 +543,8 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
     *errors |= errtype;
 
-    dlink_node *node;
-    DLINK_FOREACH(node, list->head)
+    list_node_t *node;
+    LIST_FOREACH(node, list->head)
     {
       const struct Ban *ban = node->data;
       sendto_one_numeric(client, &me, rpl_list, channel->name,

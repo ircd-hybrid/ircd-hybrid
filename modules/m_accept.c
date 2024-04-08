@@ -47,13 +47,13 @@ accept_list(struct Client *source_p)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  dlink_node *node;
+  list_node_t *node;
 
   /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
   /* 1       23456              78                     9 10 */
   size_t len = strlen(me.name) + strlen(source_p->name) + 10;
 
-  DLINK_FOREACH(node, source_p->connection->acceptlist.head)
+  LIST_FOREACH(node, source_p->connection->acceptlist.head)
   {
     const struct AcceptItem *const accept = node->data;
     size_t masklen = strlen(accept->nick) +
@@ -133,7 +133,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
     }
     else if (*mask)
     {
-      if (dlink_list_length(&source_p->connection->acceptlist) >= ConfigGeneral.max_accept)
+      if (list_length(&source_p->connection->acceptlist) >= ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);
         return;

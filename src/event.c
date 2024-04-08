@@ -33,9 +33,9 @@
 struct event_base ebase;
 struct event_base *event_base = &ebase;
 
-static dlink_list event_list;
+static list_t event_list;
 
-const dlink_list *
+const list_t *
 event_get_list(void)
 {
   return &event_list;
@@ -50,19 +50,19 @@ event_add(struct event *ev, void *data)
   ev->next = event_base->time.sec_monotonic + ev->when;
   ev->active = true;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, event_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, event_list.head)
   {
     struct event *e = node->data;
 
     if (e->next > ev->next)
     {
-      dlinkAddBefore(node, ev, &ev->node, &event_list);
+      list_add_before(node, ev, &ev->node, &event_list);
       return;
     }
   }
 
-  dlinkAddTail(ev, &ev->node, &event_list);
+  list_add_tail(ev, &ev->node, &event_list);
 }
 
 void
@@ -84,7 +84,7 @@ event_delete(struct event *ev)
   if (ev->active == false)
     return;
 
-  dlinkDelete(&ev->node, &event_list);
+  list_delete(&ev->node, &event_list);
   ev->active = false;
 }
 
@@ -97,8 +97,8 @@ event_run(void)
     return;
   last = event_base->time.sec_monotonic;
 
-  unsigned int len = dlink_list_length(&event_list);
-  while (len-- && dlink_list_length(&event_list))
+  unsigned int len = list_length(&event_list);
+  while (len-- && list_length(&event_list))
   {
     struct event *ev = event_list.head->data;
 

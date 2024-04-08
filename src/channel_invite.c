@@ -41,16 +41,16 @@
 struct Invite *
 invite_find(struct Channel *channel, struct Client *client)
 {
-  dlink_node *node, *node_next;
-  dlink_list *list;
+  list_node_t *node, *node_next;
+  list_t *list;
 
   /* Take the shortest of the two lists */
-  if (dlink_list_length(&client->connection->invited) < dlink_list_length(&channel->invites))
+  if (list_length(&client->connection->invited) < list_length(&channel->invites))
     list = &client->connection->invited;
   else
     list = &channel->invites;
 
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Invite *invite = node->data;
 
@@ -81,15 +81,15 @@ invite_add(struct Channel *channel, struct Client *client)
   invite->when = event_base->time.sec_monotonic;
 
   /* Delete last link in chain if the list is max length */
-  while (dlink_list_length(&client->connection->invited) &&
-         dlink_list_length(&client->connection->invited) >= ConfigChannel.max_invites)
+  while (list_length(&client->connection->invited) &&
+         list_length(&client->connection->invited) >= ConfigChannel.max_invites)
     invite_del(client->connection->invited.tail->data);
 
   /* Add client to channel invite list */
-  dlinkAdd(invite, &invite->chan_node, &channel->invites);
+  list_add(invite, &invite->chan_node, &channel->invites);
 
   /* Add channel to the end of the client invite list */
-  dlinkAdd(invite, &invite->user_node, &client->connection->invited);
+  list_add(invite, &invite->user_node, &client->connection->invited);
 }
 
 /*! \brief Delete Invite block from channel invite list
@@ -99,18 +99,18 @@ invite_add(struct Channel *channel, struct Client *client)
 void
 invite_del(struct Invite *invite)
 {
-  dlinkDelete(&invite->user_node, &invite->client->connection->invited);
-  dlinkDelete(&invite->chan_node, &invite->channel->invites);
+  list_delete(&invite->user_node, &invite->client->connection->invited);
+  list_delete(&invite->chan_node, &invite->channel->invites);
 
   /* Release memory pointed to by 'invite' */
   xfree(invite);
 }
 
 /*! \brief Removes and frees all Invite blocks from a list
- * \param list Pointer to a dlink_list
+ * \param list Pointer to a list_t
  */
 void
-invite_clear_list(dlink_list *list)
+invite_clear_list(list_t *list)
 {
   while (list->head)
     invite_del(list->head->data);

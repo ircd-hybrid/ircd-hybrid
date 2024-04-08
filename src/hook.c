@@ -45,7 +45,7 @@
  * hook container. Hook containers are used to store callbacks (hook functions)
  * and manage their execution when triggered by events.
  */
-static dlink_list hook_container_list;
+static list_t hook_container_list;
 
 /**
  * @brief Retrieves the list of hook containers.
@@ -54,7 +54,7 @@ static dlink_list hook_container_list;
  *
  * @return Pointer to the list of hook containers.
  */
-const dlink_list *
+const list_t *
 hook_container_get_list(void)
 {
   return &hook_container_list;
@@ -89,19 +89,19 @@ hook_container_register(const char *name, HCFUNC *func)
     if (container)
     {
       if (func)
-        dlinkAddTail(func, xcalloc(sizeof(dlink_node)), &container->chain);
+        list_add_tail(func, xcalloc(sizeof(list_node_t)), &container->chain);
       return container;
     }
   }
 
   container = xcalloc(sizeof(*container));
   if (func)
-    dlinkAdd(func, xcalloc(sizeof(dlink_node)), &container->chain);
+    list_add(func, xcalloc(sizeof(list_node_t)), &container->chain);
 
   if (name)
   {
     container->name = xstrdup(name);
-    dlinkAdd(container, &container->node, &hook_container_list);
+    list_add(container, &container->node, &hook_container_list);
   }
 
   return container;
@@ -125,7 +125,7 @@ hook_run_chain(struct HookContainer *container, ...)
   container->last = event_base->time.sec_monotonic;
 
   /* Check if the hook chain is empty. */
-  if (dlink_list_length(&container->chain) == 0)
+  if (list_length(&container->chain) == 0)
     return NULL;  /* No hooks to execute. */
 
   va_list args;
@@ -143,12 +143,12 @@ hook_run_chain(struct HookContainer *container, ...)
  * the hook chain. It finds the next hook in the chain after the current one
  * and calls it with the provided arguments.
  *
- * @param this_hook Pointer to the dlink_node of the current hook function.
+ * @param this_hook Pointer to the list_node_t of the current hook function.
  * @param ... Original or modified arguments to be passed to the next hook.
  * @return void* Return value of the next hook function.
  */
 void *
-hook_advance_to_next(dlink_node *this_hook, ...)
+hook_advance_to_next(list_node_t *this_hook, ...)
 {
   /* Check if the next hook exists. */
   if (this_hook->next == NULL)
@@ -174,9 +174,9 @@ hook_advance_to_next(dlink_node *this_hook, ...)
 struct HookContainer *
 hook_container_find(const char *name)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, hook_container_list.head)
+  LIST_FOREACH(node, hook_container_list.head)
   {
     struct HookContainer *container = node->data;
     if (irccmp(container->name, name) == 0)
@@ -196,36 +196,36 @@ hook_container_find(const char *name)
  * @param container Pointer to the HookContainer structure.
  * @param hook Address of the hook function.
  * @param position Position to insert the hook in the chain.
- * @return dlink_node* Pointer to the dlink_node of the installed hook.
+ * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
-dlink_node *
+list_node_t *
 hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert position)
 {
-  dlink_node *node = xcalloc(sizeof(*node));
+  list_node_t *node = xcalloc(sizeof(*node));
 
   switch (position)
   {
     case HOOK_INSERT_FIRST:
-      dlinkAdd(hook, node, &container->chain);
+      list_add(hook, node, &container->chain);
       break;
     case HOOK_INSERT_LAST:
-      dlinkAddTail(hook, node, &container->chain);
+      list_add_tail(hook, node, &container->chain);
       break;
     case HOOK_INSERT_MIDDLE:
     default:
     {
-      unsigned int length = dlink_list_length(&container->chain);
+      unsigned int length = list_length(&container->chain);
       if (length == 0)
         /* If the chain is empty, insert at the beginning. */
-        dlinkAdd(hook, node, &container->chain);
+        list_add(hook, node, &container->chain);
       else
       {
         /* Find the middle node. */
-        dlink_node *middle = container->chain.head;
+        list_node_t *middle = container->chain.head;
         for (unsigned int i = 0; i < length / 2; i++)
           middle = middle->next;
 
-        dlinkAddAfter(hook, node, middle, &container->chain);
+        list_add_after(hook, node, middle, &container->chain);
       }
     }
   }
@@ -246,8 +246,8 @@ void
 hook_uninstall(struct HookContainer *container, HCFUNC *hook)
 {
   /* Let it core if not found. */
-  dlink_node *node = dlinkFind(&container->chain, hook);
+  list_node_t *node = list_find(&container->chain, hook);
 
-  dlinkDelete(node, &container->chain);
+  list_delete(node, &container->chain);
   xfree(node);
 }

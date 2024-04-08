@@ -309,7 +309,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
                       const char *pattern, ...)
 {
   va_list args_l, args_r;
-  dlink_node *node;
+  list_node_t *node;
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
 
@@ -329,7 +329,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
   ++send_marker;
 
-  DLINK_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
     struct Client *target = member->client;
@@ -391,8 +391,8 @@ sendto_server(const struct Client *one,
   send_format(buffer, format, args);
   va_end(args);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_server_list.head)
   {
     struct Client *client = node->data;
 
@@ -440,13 +440,13 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
 
   ++send_marker;
 
-  dlink_node *node, *node2;
-  DLINK_FOREACH(node, user->channel.head)
+  list_node_t *node, *node2;
+  LIST_FOREACH(node, user->channel.head)
   {
     struct ChannelMember *member = node->data;
     struct Channel *channel = member->channel;
 
-    DLINK_FOREACH(node2, channel->members_local.head)
+    LIST_FOREACH(node2, channel->members_local.head)
     {
       struct ChannelMember *member2 = node2->data;
       struct Client *target = member2->client;
@@ -497,8 +497,8 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
   send_format(buffer, pattern, args);
   va_end(args);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, channel->members_local.head)
+  list_node_t *node;
+  LIST_FOREACH(node, channel->members_local.head)
   {
     struct ChannelMember *member = node->data;
     struct Client *target = member->client;
@@ -562,7 +562,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
                     const char *mask, bool host, const char *pattern, ...)
 {
   va_list args_l, args_r;
-  dlink_node *node;
+  list_node_t *node;
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
 
@@ -577,7 +577,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   va_end(args_r);
 
   /* Scan the local clients */
-  DLINK_FOREACH(node, local_client_list.head)
+  LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
 
@@ -594,7 +594,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   }
 
   /* Now scan servers */
-  DLINK_FOREACH(node, local_server_list.head)
+  LIST_FOREACH(node, local_server_list.head)
   {
     struct Client *client = node->data;
 
@@ -654,8 +654,8 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
 
   ++send_marker;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, global_server_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, global_server_list.head)
   {
     struct Client *target = node->data;
 
@@ -760,8 +760,8 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
   send_format(buffer, pattern, args);
   va_end(args);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, oper_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, oper_list.head)
   {
     struct Client *client = node->data;
     assert(HasUMode(client, UMODE_OPER));
@@ -836,8 +836,8 @@ sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
   send_format(buffer, pattern, args);
   va_end(args);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, oper_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, oper_list.head)
   {
     struct Client *client = node->data;
     assert(client->umodes & UMODE_OPER);

@@ -83,14 +83,14 @@ static void
 whois_person(struct Client *source_p, struct Client *target_p)
 {
   char buf[IRCD_BUFSIZE];
-  dlink_node *node;
+  list_node_t *node;
   const struct ServicesTag *svstag = NULL;
 
   sendto_one_numeric(source_p, &me, RPL_WHOISUSER, target_p->name,
                      target_p->username, target_p->host,
                      target_p->info);
 
-  if (dlink_list_length(&target_p->channel))
+  if (list_length(&target_p->channel))
   {
     char *bufptr = buf;
 
@@ -103,7 +103,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     else
       len += IRCD_MAX(strlen(me.name), strlen(me.id)) + IRCD_MAX(strlen(source_p->name), strlen(source_p->id));
 
-    DLINK_FOREACH(node, target_p->channel.head)
+    LIST_FOREACH(node, target_p->channel.head)
     {
       const struct ChannelMember *member = node->data;
       enum whois_show_type show = whois_show_channel(member->channel, source_p, target_p);
@@ -182,7 +182,7 @@ whois_person(struct Client *source_p, struct Client *target_p)
     }
   }
 
-  DLINK_FOREACH(node, target_p->svstags.head)
+  LIST_FOREACH(node, target_p->svstags.head)
   {
     svstag = node->data;
 

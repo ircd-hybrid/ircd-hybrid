@@ -104,8 +104,8 @@ server_send_client(struct Client *client_p, struct Client *target_p)
   if (target_p->away[0])
     sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
 
-  dlink_node *node;
-  DLINK_FOREACH_PREV(node, target_p->svstags.tail)
+  list_node_t *node;
+  LIST_FOREACH_PREV(node, target_p->svstags.tail)
   {
     const struct ServicesTag *svstag = node->data;
     sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
@@ -123,9 +123,9 @@ server_send_client(struct Client *client_p, struct Client *target_p)
 static void
 server_burst(struct Client *client_p)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, global_client_list.head)
+  LIST_FOREACH(node, global_client_list.head)
   {
     struct Client *target_p = node->data;
 
@@ -133,12 +133,12 @@ server_burst(struct Client *client_p)
       server_send_client(client_p, target_p);
   }
 
-  DLINK_FOREACH(node, channel_get_list()->head)
+  LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *channel = node->data;
 
-    assert(dlink_list_length(&channel->members) != 0);
-    if (dlink_list_length(&channel->members))
+    assert(list_length(&channel->members) != 0);
+    if (list_length(&channel->members))
       channel_send_modes(client_p, channel);
   }
 
@@ -158,7 +158,7 @@ server_estab(struct Client *client_p)
   xfree(client_p->connection->password);
   client_p->connection->password = NULL;
 
-  if (ConfigServerInfo.hub == 0 && dlink_list_length(&local_server_list))
+  if (ConfigServerInfo.hub == 0 && list_length(&local_server_list))
   {
     ++ServerStats.is_ref;
     exit_client(client_p, "I'm a leaf not a hub");
@@ -183,17 +183,17 @@ server_estab(struct Client *client_p)
   SetServer(client_p);
   client_p->servptr = &me;
 
-  dlinkAdd(client_p, &client_p->lnode, &me.serv->server_list);
+  list_add(client_p, &client_p->lnode, &me.serv->server_list);
 
-  assert(dlinkFind(&unknown_list, client_p));
-  dlink_move_node(&client_p->connection->node, &unknown_list, &local_server_list);
+  assert(list_find(&unknown_list, client_p));
+  list_move_node(&client_p->connection->node, &unknown_list, &local_server_list);
 
-  dlinkAdd(client_p, &client_p->node, &global_server_list);
+  list_add(client_p, &client_p->node, &global_server_list);
 
-  if ((dlink_list_length(&local_client_list) +
-       dlink_list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = dlink_list_length(&local_client_list) +
-                        dlink_list_length(&local_server_list);
+  if ((list_length(&local_client_list) +
+       list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = list_length(&local_client_list) +
+                        list_length(&local_server_list);
 
   hash_add_client(client_p);
   hash_add_id(client_p);
@@ -261,8 +261,8 @@ server_estab(struct Client *client_p)
    * up connection this other fragment at the same time, it's
    * a race condition, not the normal way of operation...
    */
-  dlink_node *node;
-  DLINK_FOREACH_PREV(node, global_server_list.tail)
+  list_node_t *node;
+  LIST_FOREACH_PREV(node, global_server_list.tail)
   {
     struct Client *target_p = node->data;
 
@@ -279,7 +279,7 @@ server_estab(struct Client *client_p)
 
   if (IsCapable(client_p, CAPAB_EOB))
   {
-    DLINK_FOREACH_PREV(node, global_server_list.tail)
+    LIST_FOREACH_PREV(node, global_server_list.tail)
     {
       struct Client *target_p = node->data;
 
@@ -304,13 +304,13 @@ enum
 static int
 server_check(const char *name, struct Client *client_p)
 {
-  dlink_node *node;
+  list_node_t *node;
   int error = SERVER_CHECK_CONNECT_NOT_FOUND;
 
   assert(client_p);
 
   /* Loop through looking for all possible connect items that might work */
-  DLINK_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -594,8 +594,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * leaf. If so, close the link.
    */
   const struct MaskItem *conf = source_p->from->connection->confs.head->data;
-  bool hlined = dlinkFindCmp(&conf->hub_list , parv[1], match) != NULL;
-  bool llined = dlinkFindCmp(&conf->leaf_list, parv[1], match) != NULL;
+  bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
+  bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
 
 
   /*
@@ -666,8 +666,8 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   if (service_find(target_p->name, irccmp))
     AddFlag(target_p, FLAGS_SERVICE);
 
-  dlinkAdd(target_p, &target_p->node, &global_server_list);
-  dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->server_list);
+  list_add(target_p, &target_p->node, &global_server_list);
+  list_add(target_p, &target_p->lnode, &target_p->servptr->serv->server_list);
 
   hash_add_client(target_p);
   hash_add_id(target_p);

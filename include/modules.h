@@ -28,7 +28,7 @@
 
 struct module
 {
-  dlink_node node;
+  list_node_t node;
   char *name;
   void *handle;
   void (*modinit)(void);
@@ -39,11 +39,11 @@ struct module
 
 struct module_path
 {
-  dlink_node node;
+  list_node_t node;
   char *path;
 };
 
-extern dlink_list *modules_get_list(void);
+extern list_t *modules_get_list(void);
 /* add a path */
 extern void mod_add_path(const char *);
 extern void modules_conf_clear(void);

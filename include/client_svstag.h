@@ -28,13 +28,13 @@
 
 struct ServicesTag
 {
-  dlink_node node;
+  list_node_t node;
   char *tag;
   unsigned int numeric;
   unsigned int umodes;
 };
 
-extern void svstag_detach(dlink_list *, unsigned int);
-extern void svstag_attach(dlink_list *, unsigned int, const char *, const char *);
-extern void svstag_clear_list(dlink_list *);
+extern void svstag_detach(list_t *, unsigned int);
+extern void svstag_attach(list_t *, unsigned int, const char *, const char *);
+extern void svstag_clear_list(list_t *);
 #endif  /* INCLUDED_client_svstag_h */

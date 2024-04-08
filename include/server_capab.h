@@ -90,7 +90,7 @@ enum
  */
 struct Capability
 {
-  dlink_node node;  /**< List node; linked into capab_list. */
+  list_node_t node;  /**< List node; linked into capab_list. */
   char *name;  /**< Name of the capability. */
   unsigned int cap;  /**< Bitmask value representing the capability. */
   bool active;  /**< Indicates whether the capability is currently active on this server and advertised to others. */

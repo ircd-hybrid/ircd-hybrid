@@ -52,7 +52,7 @@ mo_close(struct Client *source_p, int parc, char *parv[])
     return;
   }
 
-  const unsigned int closed = dlink_list_length(&unknown_list);
+  const unsigned int closed = list_length(&unknown_list);
   while (unknown_list.head)
   {
     struct Client *target_p = unknown_list.head->data;

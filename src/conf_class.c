@@ -34,10 +34,10 @@
 
 struct ClassItem *class_default;
 
-static dlink_list class_list;
+static list_t class_list;
 
 
-const dlink_list *
+const list_t *
 class_get_list(void)
 {
   return &class_list;
@@ -56,7 +56,7 @@ class_make(void)
   class->ip_tree_v6 = patricia_new(128);
   class->ip_tree_v4 = patricia_new( 32);
 
-  dlinkAdd(class, &class->node, &class_list);
+  list_add(class, &class->node, &class_list);
 
   return class;
 }
@@ -73,7 +73,7 @@ class_free(struct ClassItem *const class)
   if (class->ip_tree_v4)
     patricia_destroy(class->ip_tree_v4, NULL);
 
-  dlinkDelete(&class->node, &class_list);
+  list_delete(&class->node, &class_list);
   xfree(class->name);
   xfree(class);
 }
@@ -86,9 +86,9 @@ class_init(void)
 }
 
 const struct ClassItem *
-class_get_ptr(const dlink_list *const list)
+class_get_ptr(const list_t *const list)
 {
-  const dlink_node *const node = list->head;
+  const list_node_t *const node = list->head;
 
   if (node)
   {
@@ -104,25 +104,25 @@ class_get_ptr(const dlink_list *const list)
 }
 
 const char *
-class_get_name(const dlink_list *const list)
+class_get_name(const list_t *const list)
 {
   return class_get_ptr(list)->name;
 }
 
 unsigned int
-class_get_ping_freq(const dlink_list *const list)
+class_get_ping_freq(const list_t *const list)
 {
   return class_get_ptr(list)->ping_freq;
 }
 
 unsigned int
-class_get_sendq(const dlink_list *const list)
+class_get_sendq(const list_t *const list)
 {
   return class_get_ptr(list)->max_sendq;
 }
 
 unsigned int
-class_get_recvq(const dlink_list *const list)
+class_get_recvq(const list_t *const list)
 {
   return class_get_ptr(list)->max_recvq;
 }
@@ -135,9 +135,9 @@ class_get_recvq(const dlink_list *const list)
 struct ClassItem *
 class_find(const char *name, bool active)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, class_list.head)
+  LIST_FOREACH(node, class_list.head)
   {
     struct ClassItem *class = node->data;
 
@@ -160,9 +160,9 @@ class_find(const char *name, bool active)
 void
 class_mark_for_deletion(void)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH_PREV(node, class_list.tail->prev)
+  LIST_FOREACH_PREV(node, class_list.tail->prev)
   {
     struct ClassItem *class = node->data;
     class->active = false;
@@ -172,9 +172,9 @@ class_mark_for_deletion(void)
 void
 class_delete_marked(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, class_list.head)
+  LIST_FOREACH_SAFE(node, node_next, class_list.head)
   {
     struct ClassItem *class = node->data;
 
@@ -258,8 +258,8 @@ class_ip_limit_rebuild(struct ClassItem *class)
   patricia_clear(class->ip_tree_v6, NULL);
   patricia_clear(class->ip_tree_v4, NULL);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, local_client_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
     struct MaskItem *conf = client->connection->confs.tail->data;

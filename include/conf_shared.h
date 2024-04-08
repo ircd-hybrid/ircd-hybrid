@@ -43,14 +43,14 @@ enum
 
 struct SharedItem
 {
-  dlink_node node;
+  list_node_t node;
   char *server;
   char *user;
   char *host;
   unsigned int type;
 };
 
-extern const dlink_list *shared_get_list(void);
+extern const list_t *shared_get_list(void);
 extern void shared_clear(void);
 extern struct SharedItem *shared_make(void);
 extern const struct SharedItem *shared_find(unsigned int, const char *, const char *, const char *);

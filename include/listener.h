@@ -41,7 +41,7 @@ enum
 /** Entry for a single listener/port */
 struct Listener
 {
-  dlink_node node;  /**< List node; linked into listener_list */
+  list_node_t node;  /**< List node; linked into listener_list */
   bool active;  /**< Current state of listener */
   fde_t *fd;  /**< File descriptor */
   int port;  /**< Listener IP port */
@@ -51,7 +51,7 @@ struct Listener
   unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
 };
 
-extern const dlink_list *listener_get_list(void);
+extern const list_t *listener_get_list(void);
 extern void listener_add(int, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);

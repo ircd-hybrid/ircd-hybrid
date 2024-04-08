@@ -250,17 +250,17 @@ enum addr_mask_type
 /** Server structure */
 struct Server
 {
-  dlink_list server_list;  /**< Servers on this server */
-  dlink_list client_list;  /**< Clients on this server */
+  list_t server_list;  /**< Servers on this server */
+  list_t client_list;  /**< Clients on this server */
   char by[NICKLEN + 1];  /**< Who activated this connection */
 };
 
 /** ListTask structure */
 struct ListTask
 {
-  dlink_node node;  /**< Embedded list node used to link into listing_client_list */
-  dlink_list show_mask;  /**< Channels to show */
-  dlink_list hide_mask;  /**< Channels to hide */
+  list_node_t node;  /**< Embedded list node used to link into listing_client_list */
+  list_t show_mask;  /**< Channels to show */
+  list_t hide_mask;  /**< Channels to hide */
 
   unsigned int hash_index;  /**< The hash bucket we are currently in */
   unsigned int users_min;
@@ -278,7 +278,7 @@ struct ListTask
  */
 struct Connection
 {
-  dlink_node node;
+  list_node_t node;
 
   unsigned int registration;
   unsigned int cap;  /**< Client CAP bit-field */
@@ -322,10 +322,10 @@ struct Connection
 
   struct AuthRequest *auth;
   struct Listener *listener;  /**< Listener accepted from */
-  dlink_list acceptlist;  /**< Clients I'll allow to talk to me */
-  dlink_list monitors;  /**< Chain of Monitor pointer blocks */
-  dlink_list confs;  /**< Configuration record associated */
-  dlink_list invited;  /**< Chain of invite pointer blocks */
+  list_t acceptlist;  /**< Clients I'll allow to talk to me */
+  list_t monitors;  /**< Chain of Monitor pointer blocks */
+  list_t confs;  /**< Configuration record associated */
+  list_t invited;  /**< Chain of invite pointer blocks */
 
   fde_t *fd;  /**< Pointer to fdlist.c:fd_table[] */
 
@@ -342,8 +342,8 @@ struct Connection
 /** Client structure */
 struct Client
 {
-  dlink_node node;
-  dlink_node lnode;  /**< Used for Server->servers/users */
+  list_node_t node;
+  list_node_t lnode;  /**< Used for Server->servers/users */
 
   struct Connection *connection;  /**< Connection structure associated with this client */
   struct Client *hnext;  /**< For client hash table lookups by name */
@@ -360,9 +360,9 @@ struct Client
   unsigned int status;  /**< Client type */
   unsigned int handler;  /**< Handler index */
 
-  dlink_list whowas_list;
-  dlink_list channel;  /**< Chain of channel pointer blocks */
-  dlink_list svstags;  /**< List of ServicesTag items */
+  list_t whowas_list;
+  list_t channel;  /**< Chain of channel pointer blocks */
+  list_t svstags;  /**< List of ServicesTag items */
 
   struct irc_ssaddr addr;  /**< Real IP address */
 
@@ -408,13 +408,13 @@ struct Client
 };
 
 extern struct Client me;
-extern dlink_list listing_client_list;
-extern dlink_list global_client_list;
-extern dlink_list global_server_list;  /* global servers on the network */
-extern dlink_list local_client_list;  /* local clients only ON this server */
-extern dlink_list local_server_list;  /* local servers to this server ONLY */
-extern dlink_list unknown_list;  /* unknown clients ON this server only */
-extern dlink_list oper_list;  /* our opers, duplicated in local_client_list */
+extern list_t listing_client_list;
+extern list_t global_client_list;
+extern list_t global_server_list;  /* global servers on the network */
+extern list_t local_client_list;  /* local clients only ON this server */
+extern list_t local_server_list;  /* local servers to this server ONLY */
+extern list_t unknown_list;  /* unknown clients ON this server only */
+extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern void exit_client(struct Client *, const char *);

@@ -45,9 +45,9 @@
 static void
 xline_check(const struct GecosItem *gecos)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, local_client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
     struct Client *client = node->data;
 

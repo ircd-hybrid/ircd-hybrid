@@ -24,15 +24,15 @@
 
 struct AcceptItem
 {
-  dlink_node node;
+  list_node_t node;
   char *nick;
   char *user;
   char *host;
 };
 
 extern bool accept_message(struct Client *, struct Client *);
-extern struct AcceptItem *accept_find(const char *, const char *, const char *, dlink_list *, int (*)(const char *, const char *));
-extern void accept_add(const char *, const char *, const char *, dlink_list *);
-extern void accept_del(struct AcceptItem *, dlink_list *);
-extern void accept_clear_list(dlink_list *);
+extern struct AcceptItem *accept_find(const char *, const char *, const char *, list_t *, int (*)(const char *, const char *));
+extern void accept_add(const char *, const char *, const char *, list_t *);
+extern void accept_del(struct AcceptItem *, list_t *);
+extern void accept_clear_list(list_t *);
 #endif  /* INCLUDED_accept_h */

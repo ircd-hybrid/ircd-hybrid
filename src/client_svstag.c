@@ -32,19 +32,19 @@
 
 
 static void
-svstag_free(struct ServicesTag *svstag, dlink_list *list)
+svstag_free(struct ServicesTag *svstag, list_t *list)
 {
-  dlinkDelete(&svstag->node, list);
+  list_delete(&svstag->node, list);
   xfree(svstag->tag);
   xfree(svstag);
 }
 
 void
-svstag_detach(dlink_list *list, unsigned int numeric)
+svstag_detach(list_t *list, unsigned int numeric)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
-  DLINK_FOREACH_SAFE(node, node_next, list->head)
+  LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct ServicesTag *svstag = node->data;
 
@@ -54,7 +54,7 @@ svstag_detach(dlink_list *list, unsigned int numeric)
 }
 
 void
-svstag_attach(dlink_list *list, unsigned int numeric,
+svstag_attach(list_t *list, unsigned int numeric,
               const char *umodes, const char *tag)
 {
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
@@ -70,13 +70,13 @@ svstag_attach(dlink_list *list, unsigned int numeric,
       svstag->umodes |= tab->flag;
 
   if (numeric != RPL_WHOISOPERATOR)
-    dlinkAddTail(svstag, &svstag->node, list);
+    list_add_tail(svstag, &svstag->node, list);
   else
-    dlinkAdd(svstag, &svstag->node, list);
+    list_add(svstag, &svstag->node, list);
 }
 
 void
-svstag_clear_list(dlink_list *list)
+svstag_clear_list(list_t *list)
 {
   while (list->head)
     svstag_free(list->head->data, list);

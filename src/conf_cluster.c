@@ -32,7 +32,7 @@
 #include "server_capab.h"
 #include "send.h"
 
-static dlink_list cluster_list;  /**< List to manage cluster items. */
+static list_t cluster_list;  /**< List to manage cluster items. */
 
 
 /**
@@ -42,7 +42,7 @@ static dlink_list cluster_list;  /**< List to manage cluster items. */
  *
  * @return Pointer to the list of cluster items.
  */
-const dlink_list *
+const list_t *
 cluster_get_list(void)
 {
   return &cluster_list;
@@ -60,7 +60,7 @@ cluster_clear(void)
   {
     struct ClusterItem *cluster = cluster_list.head->data;
 
-    dlinkDelete(&cluster->node, &cluster_list);
+    list_delete(&cluster->node, &cluster_list);
     xfree(cluster->server);
     xfree(cluster);
   }
@@ -78,7 +78,7 @@ struct ClusterItem *
 cluster_make(void)
 {
   struct ClusterItem *cluster = xcalloc(sizeof(*cluster));
-  dlinkAdd(cluster, &cluster->node, &cluster_list);
+  list_add(cluster, &cluster->node, &cluster_list);
 
   return cluster;
 }
@@ -107,8 +107,8 @@ cluster_distribute(const void *client, const char *command, unsigned int capab,
   vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
 
-  dlink_node *node;
-  DLINK_FOREACH(node, cluster_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, cluster_list.head)
   {
     const struct ClusterItem *cluster = node->data;
 

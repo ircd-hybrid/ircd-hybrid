@@ -490,14 +490,14 @@ save_kline_database(const char *filename)
   uint32_t i = 0;
   uint32_t records = 0;
   struct dbFILE *f = NULL;
-  dlink_node *ptr = NULL;
+  list_node_t *ptr = NULL;
 
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(ptr, atable[i].head)
+    LIST_FOREACH(ptr, atable[i].head)
     {
       struct AddressRec *arec = ptr->data;
 
@@ -510,7 +510,7 @@ save_kline_database(const char *filename)
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(ptr, atable[i].head)
+    LIST_FOREACH(ptr, atable[i].head)
     {
       struct AddressRec *arec = ptr->data;
 
@@ -580,14 +580,14 @@ save_dline_database(const char *filename)
   uint32_t i = 0;
   uint32_t records = 0;
   struct dbFILE *f = NULL;
-  dlink_node *ptr = NULL;
+  list_node_t *ptr = NULL;
 
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(ptr, atable[i].head)
+    LIST_FOREACH(ptr, atable[i].head)
     {
       struct AddressRec *arec = ptr->data;
 
@@ -600,7 +600,7 @@ save_dline_database(const char *filename)
 
   for (i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH(ptr, atable[i].head)
+    LIST_FOREACH(ptr, atable[i].head)
     {
       struct AddressRec *arec = ptr->data;
 
@@ -665,13 +665,13 @@ save_resv_database(const char *filename)
 {
   uint32_t records = 0;
   struct dbFILE *f = NULL;
-  dlink_node *node = NULL;
+  list_node_t *node = NULL;
   const struct ResvItem *resv = NULL;
 
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
-  DLINK_FOREACH(node, resv_chan_get_list()->head)
+  LIST_FOREACH(node, resv_chan_get_list()->head)
   {
     resv = node->data;
 
@@ -679,7 +679,7 @@ save_resv_database(const char *filename)
       ++records;
   }
 
-  DLINK_FOREACH(node, resv_nick_get_list()->head)
+  LIST_FOREACH(node, resv_nick_get_list()->head)
   {
     resv = node->data;
 
@@ -689,7 +689,7 @@ save_resv_database(const char *filename)
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  DLINK_FOREACH(node, resv_chan_get_list()->head)
+  LIST_FOREACH(node, resv_chan_get_list()->head)
   {
     resv = node->data;
 
@@ -702,7 +702,7 @@ save_resv_database(const char *filename)
     SAFE_WRITE(write_uint64(resv->expire, f), filename);
   }
 
-  DLINK_FOREACH(node, resv_nick_get_list()->head)
+  LIST_FOREACH(node, resv_nick_get_list()->head)
   {
     resv = node->data;
 
@@ -764,13 +764,13 @@ save_xline_database(const char *filename)
 {
   uint32_t records = 0;
   struct dbFILE *f = NULL;
-  dlink_node *ptr = NULL;
+  list_node_t *ptr = NULL;
   struct GecosItem *gecos = NULL;
 
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
-  DLINK_FOREACH(ptr, gecos_get_list()->head)
+  LIST_FOREACH(ptr, gecos_get_list()->head)
   {
     gecos = ptr->data;
 
@@ -780,7 +780,7 @@ save_xline_database(const char *filename)
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  DLINK_FOREACH(ptr, gecos_get_list()->head)
+  LIST_FOREACH(ptr, gecos_get_list()->head)
   {
     gecos = ptr->data;
 

@@ -54,7 +54,7 @@ enum extban_match
 
 struct Extban
 {
-  dlink_node node;
+  list_node_t node;
   unsigned char character;
   enum extban_type type;
   int (*is_valid)(const char *);

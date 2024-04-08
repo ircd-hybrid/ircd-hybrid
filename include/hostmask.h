@@ -37,7 +37,7 @@ enum hostmask_type
 
 struct AddressRec
 {
-  dlink_node node;
+  list_node_t node;
 
   /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
   enum hostmask_type masktype;
@@ -65,7 +65,7 @@ struct AddressRec
   struct MaskItem *conf;
 };
 
-extern dlink_list atable[ATABLE_SIZE];
+extern list_t atable[ATABLE_SIZE];
 extern int parse_netmask(const char *, struct irc_ssaddr *, int *);
 extern void address_mask(struct irc_ssaddr *, int);
 extern bool address_compare(const void *, const void *, bool, bool, int);

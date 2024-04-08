@@ -62,18 +62,18 @@ typedef void *HCFUNC(va_list);
  */
 struct HookContainer
 {
-  dlink_node node;  /**< Doubly-linked list node for container management. */
+  list_node_t node;  /**< Doubly-linked list node for container management. */
   char *name;  /**< Name used to identify the callback. */
-  dlink_list chain;  /**< Doubly-linked list to store hook functions. */
+  list_t chain;  /**< Doubly-linked list to store hook functions. */
   unsigned int called;  /**< Number of times the hook has been called. */
   uintmax_t last;  /**< Timestamp of the last time the hook was called. */
 };
 
-extern const dlink_list *hook_container_get_list(void);
+extern const list_t *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *, HCFUNC *);
 extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);
-extern dlink_node *hook_install(struct HookContainer *, HCFUNC *, enum hook_insert);
+extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, enum hook_insert);
 extern void hook_uninstall(struct HookContainer *, HCFUNC *);
-extern void *hook_advance_to_next(dlink_node *, ...);
+extern void *hook_advance_to_next(list_node_t *, ...);
 #endif  /* INCLUDED_hook_h */

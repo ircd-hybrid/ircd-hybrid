@@ -30,10 +30,10 @@
 #include "conf_shared.h"
 
 
-static dlink_list shared_list;
+static list_t shared_list;
 
 
-const dlink_list *
+const list_t *
 shared_get_list(void)
 {
   return &shared_list;
@@ -46,7 +46,7 @@ shared_clear(void)
   {
     struct SharedItem *shared = shared_list.head->data;
 
-    dlinkDelete(&shared->node, &shared_list);
+    list_delete(&shared->node, &shared_list);
     xfree(shared->server);
     xfree(shared->user);
     xfree(shared->host);
@@ -58,7 +58,7 @@ struct SharedItem *
 shared_make(void)
 {
   struct SharedItem *shared = xcalloc(sizeof(*shared));
-  dlinkAdd(shared, &shared->node, &shared_list);
+  list_add(shared, &shared->node, &shared_list);
 
   return shared;
 }
@@ -67,9 +67,9 @@ const struct SharedItem *
 shared_find(unsigned int type, const char *server,
             const char *user, const char *host)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, shared_list.head)
+  LIST_FOREACH(node, shared_list.head)
   {
     const struct SharedItem *shared = node->data;
 

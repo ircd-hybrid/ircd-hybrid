@@ -40,7 +40,7 @@
  */
 struct PseudoItem
 {
-  dlink_node node;  /**< Node for linking into the pseudo command list. */
+  list_node_t node;  /**< Node for linking into the pseudo command list. */
   struct Command command_struct;  /**< Command structure for handling the pseudo command. */
   char *name;  /**< Name of the pseudo command, used for error messages. */
   char *nick;  /**< Associated nick for the pseudo command. */
@@ -49,7 +49,7 @@ struct PseudoItem
   char *command;  /**< Actual command/alias to be executed. */
 };
 
-extern const dlink_list *pseudo_get_list(void);
+extern const list_t *pseudo_get_list(void);
 extern void pseudo_register(const char *, const char *, const char *, const char *, const char *);
 extern void pseudo_clear(void);
 #endif  /* INCLUDED_conf_pseudo_h */

@@ -41,10 +41,10 @@
  *
  * @return Pointer to the new double-linked list node.
  */
-dlink_node *
-make_dlink_node(void)
+list_node_t *
+list_make_node(void)
 {
-  dlink_node *node = xcalloc(sizeof(*node));
+  list_node_t *node = xcalloc(sizeof(*node));
 
   return node;
 }
@@ -57,7 +57,7 @@ make_dlink_node(void)
  * @param node Pointer to the double-linked list node to be freed.
  */
 void
-free_dlink_node(dlink_node *node)
+list_free_node(list_node_t *node)
 {
   xfree(node);
 }
@@ -73,7 +73,7 @@ free_dlink_node(dlink_node *node)
  * @param list Pointer to the double-linked list.
  */
 void
-dlinkAdd(void *data, dlink_node *m, dlink_list *list)
+list_add(void *data, list_node_t *m, list_t *list)
 {
   m->data = data;
   m->prev = NULL;
@@ -101,7 +101,7 @@ dlinkAdd(void *data, dlink_node *m, dlink_list *list)
  * @param list Pointer to the double-linked list.
  */
 void
-dlinkAddAfter(void *data, dlink_node *m, dlink_node *n, dlink_list *list)
+list_add_after(void *data, list_node_t *m, list_node_t *n, list_t *list)
 {
   m->data = data;
   m->prev = n;
@@ -131,11 +131,11 @@ dlinkAddAfter(void *data, dlink_node *m, dlink_node *n, dlink_list *list)
  * @param list Pointer to the double-linked list.
  */
 void
-dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
+list_add_before(list_node_t *b, void *data, list_node_t *m, list_t *list)
 {
-  /* Shortcut - if it's the first one, call dlinkAdd only */
+  /* Shortcut - if it's the first one, call list_add only */
   if (b == list->head)
-    dlinkAdd(data, m, list);
+    list_add(data, m, list);
   else
   {
     m->data = data;
@@ -158,7 +158,7 @@ dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
  * @param list Pointer to the double-linked list.
  */
 void
-dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
+list_add_tail(void *data, list_node_t *m, list_t *list)
 {
   m->data = data;
   m->next = NULL;
@@ -183,7 +183,7 @@ dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
  * @param list Pointer to the double-linked list.
  */
 void
-dlinkDelete(dlink_node *m, dlink_list *list)
+list_delete(list_node_t *m, list_t *list)
 {
   assert(list->length > 0);
 
@@ -223,12 +223,12 @@ dlinkDelete(dlink_node *m, dlink_list *list)
  * @param data Pointer to the data value to search for.
  * @return Pointer to the node with the specified data value, or NULL if not found.
  */
-dlink_node *
-dlinkFind(dlink_list *list, const void *data)
+list_node_t *
+list_find(list_t *list, const void *data)
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
     if (node->data == data)
       return node;
 
@@ -246,12 +246,12 @@ dlinkFind(dlink_list *list, const void *data)
  * @param cmp Function pointer to the comparison function.
  * @return Pointer to the node with the specified data value, or NULL if not found.
  */
-dlink_node *
-dlinkFindCmp(const dlink_list *list, const void *data, int (*cmp)(const char *, const char *))
+list_node_t *
+list_find_cmp(const list_t *list, const void *data, int (*cmp)(const char *, const char *))
 {
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, list->head)
+  LIST_FOREACH(node, list->head)
     if (cmp(node->data, data) == 0)
       return node;
 
@@ -268,7 +268,7 @@ dlinkFindCmp(const dlink_list *list, const void *data, int (*cmp)(const char *, 
  * @param to Pointer to the destination double-linked list.
  */
 void
-dlinkMoveList(dlink_list *from, dlink_list *to)
+list_move_list(list_t *from, list_t *to)
 {
   /* There are three cases */
   /* case one, nothing in from list */
@@ -308,7 +308,7 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
  * @param list_add Pointer to the destination double-linked list.
  */
 void
-dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
+list_move_node(list_node_t *m, list_t *list_del, list_t *list_add)
 {
   /* Assumption: If m->next == NULL, then list_del->tail == m
    *      and:   If m->prev == NULL, then list_del->head == m
@@ -354,16 +354,16 @@ dlink_move_node(dlink_node *m, dlink_list *list_del, dlink_list *list_add)
  * @param data Pointer to the data value to search for and delete.
  * @return Pointer to the deleted node, or NULL if not found.
  */
-dlink_node *
-dlinkFindDelete(dlink_list *list, void *data)
+list_node_t *
+list_find_delete(list_t *list, void *data)
 {
-  dlink_node *m;
+  list_node_t *m;
 
-  DLINK_FOREACH(m, list->head)
+  LIST_FOREACH(m, list->head)
   {
     if (m->data == data)
     {
-      dlinkDelete(m, list);
+      list_delete(m, list);
       return m;
     }
   }

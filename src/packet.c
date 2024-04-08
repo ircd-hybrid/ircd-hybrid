@@ -79,9 +79,9 @@ static size_t
 extract_one_line(struct dbuf_queue *qptr, char *buffer)
 {
   size_t line_bytes = 0, eol_bytes = 0;
-  dlink_node *node;
+  list_node_t *node;
 
-  DLINK_FOREACH(node, qptr->blocks.head)
+  LIST_FOREACH(node, qptr->blocks.head)
   {
     const struct dbuf_block *block = node->data;
     unsigned int idx;

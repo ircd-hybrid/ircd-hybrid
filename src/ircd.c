@@ -238,8 +238,8 @@ io_loop(void)
   {
     if (listing_client_list.head)
     {
-      dlink_node *node, *node_next;
-      DLINK_FOREACH_SAFE(node, node_next, listing_client_list.head)
+      list_node_t *node, *node_next;
+      LIST_FOREACH_SAFE(node, node_next, listing_client_list.head)
         safe_list_channels(node->data, false);
     }
 
@@ -607,7 +607,7 @@ main(int argc, char *argv[])
   hash_add_id(&me);
   hash_add_client(&me);
 
-  dlinkAdd(&me, &me.node, &global_server_list);
+  list_add(&me, &me.node, &global_server_list);
 
   load_kline_database(ConfigGeneral.klinefile);
   load_dline_database(ConfigGeneral.dlinefile);

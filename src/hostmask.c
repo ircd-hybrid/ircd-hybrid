@@ -44,7 +44,7 @@
                        } while (false);
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
-dlink_list atable[ATABLE_SIZE];
+list_t atable[ATABLE_SIZE];
 
 /* The mask parser/type determination code... */
 
@@ -510,7 +510,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
                      const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;
-  dlink_node *node;
+  list_node_t *node;
   struct MaskItem *hprec = NULL;
   struct AddressRec *arec = NULL;
   int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
@@ -522,7 +522,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
     {
       for (int b = 128; b >= 0; b -= 16)
       {
-        DLINK_FOREACH(node, atable[hash_ipv6(addr, b)].head)
+        LIST_FOREACH(node, atable[hash_ipv6(addr, b)].head)
         {
           arec = node->data;
 
@@ -545,7 +545,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
     {
       for (int b = 32; b >= 0; b -= 8)
       {
-        DLINK_FOREACH(node, atable[hash_ipv4(addr, b)].head)
+        LIST_FOREACH(node, atable[hash_ipv4(addr, b)].head)
         {
           arec = node->data;
 
@@ -572,7 +572,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
 
     while (true)
     {
-        DLINK_FOREACH(node, atable[hash_text(p)].head)
+        LIST_FOREACH(node, atable[hash_text(p)].head)
         {
           arec = node->data;
           if ((arec->type == type) &&
@@ -593,7 +593,7 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
       ++p;
     }
 
-    DLINK_FOREACH(node, atable[0].head)
+    LIST_FOREACH(node, atable[0].head)
     {
       arec = node->data;
 
@@ -692,16 +692,16 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
     case HM_IPV4:
       /* We have to do this, since we do not re-hash for every bit -A1kmm. */
       bits -= bits % 8;
-      dlinkAdd(arec, &arec->node, &atable[hash_ipv4(&arec->Mask.ipa.addr, bits)]);
+      list_add(arec, &arec->node, &atable[hash_ipv4(&arec->Mask.ipa.addr, bits)]);
       break;
     case HM_IPV6:
       /* We have to do this, since we do not re-hash for every bit -A1kmm. */
       bits -= bits % 16;
-      dlinkAdd(arec, &arec->node, &atable[hash_ipv6(&arec->Mask.ipa.addr, bits)]);
+      list_add(arec, &arec->node, &atable[hash_ipv6(&arec->Mask.ipa.addr, bits)]);
       break;
     default: /* HM_HOST */
       arec->Mask.hostname = hostname;
-      dlinkAdd(arec, &arec->node, &atable[get_mask_hash(hostname)]);
+      list_add(arec, &arec->node, &atable[get_mask_hash(hostname)]);
       break;
   }
 
@@ -719,7 +719,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 {
   int bits = 0;
   uint32_t hv = 0;
-  dlink_node *node;
+  list_node_t *node;
   struct irc_ssaddr addr;
 
   switch (parse_netmask(address, &addr, &bits))
@@ -739,13 +739,13 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       break;
   }
 
-  DLINK_FOREACH(node, atable[hv].head)
+  LIST_FOREACH(node, atable[hv].head)
   {
     struct AddressRec *arec = node->data;
 
     if (arec->conf == conf)
     {
-      dlinkDelete(&arec->node, &atable[hv]);
+      list_delete(&arec->node, &atable[hv]);
 
       if (conf->ref_count == 0)
         conf_free(conf);
@@ -766,11 +766,11 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 void
 clear_out_address_conf(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH_SAFE(node, node_next, atable[i].head)
+    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
     {
       struct AddressRec *arec = node->data;
 
@@ -780,7 +780,7 @@ clear_out_address_conf(void)
       if (IsConfDatabase(arec->conf))
         continue;
 
-      dlinkDelete(&arec->node, &atable[i]);
+      list_delete(&arec->node, &atable[i]);
       arec->conf->active = false;
 
       if (arec->conf->ref_count == 0)
@@ -815,11 +815,11 @@ hostmask_send_expiration(const struct AddressRec *const arec)
 void
 hostmask_expire_temporary(void)
 {
-  dlink_node *node, *node_next;
+  list_node_t *node, *node_next;
 
   for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
   {
-    DLINK_FOREACH_SAFE(node, node_next, atable[i].head)
+    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
     {
       struct AddressRec *arec = node->data;
 
@@ -832,7 +832,7 @@ hostmask_expire_temporary(void)
         case CONF_DLINE:
           hostmask_send_expiration(arec);
 
-          dlinkDelete(&arec->node, &atable[i]);
+          list_delete(&arec->node, &atable[i]);
           conf_free(arec->conf);
           xfree(arec);
           break;

@@ -42,7 +42,7 @@
 #include "parse.h"
 
 
-dlink_list flatten_links;
+list_t flatten_links;
 static void server_connect_callback(fde_t *, int, void *);
 
 
@@ -70,15 +70,15 @@ write_links_file(void *unused)
     return;
   }
 
-  dlink_node *node, *node_next;
-  DLINK_FOREACH_SAFE(node, node_next, flatten_links.head)
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
-    dlinkDelete(node, &flatten_links);
+    list_delete(node, &flatten_links);
     xfree(node->data);
-    free_dlink_node(node);
+    list_free_node(node);
   }
 
-  DLINK_FOREACH(node, global_server_list.head)
+  LIST_FOREACH(node, global_server_list.head)
   {
     const struct Client *client = node->data;
 
@@ -99,7 +99,7 @@ write_links_file(void *unused)
      * - madmax
      */
     snprintf(buf, sizeof(buf), "%s %s :1 %s", client->name, me.name, client->info);
-    dlinkAddTail(xstrdup(buf), make_dlink_node(), &flatten_links);
+    list_add_tail(xstrdup(buf), list_make_node(), &flatten_links);
 
     strlcat(buf, "\n", sizeof(buf));
     fputs(buf, file);
@@ -130,7 +130,7 @@ read_links_file(void)
     if (p)
       *p = '\0';
 
-    dlinkAddTail(xstrdup(buf), make_dlink_node(), &flatten_links);
+    list_add_tail(xstrdup(buf), list_make_node(), &flatten_links);
   }
 
   fclose(file);
@@ -185,8 +185,8 @@ server_hunt(struct Client *client, const char *command, const int server, char *
 
   if (h->target == NULL && has_wildcards(mask))
   {
-    dlink_node *node;
-    DLINK_FOREACH(node, global_server_list.head)
+    list_node_t *node;
+    LIST_FOREACH(node, global_server_list.head)
     {
       struct Client *tmp = node->data;
 
@@ -203,7 +203,7 @@ server_hunt(struct Client *client, const char *command, const int server, char *
 
     if (h->target == NULL)
     {
-      DLINK_FOREACH(node, global_client_list.head)
+      LIST_FOREACH(node, global_client_list.head)
       {
         struct Client *tmp = node->data;
 
@@ -258,8 +258,8 @@ try_connections(void *unused)
   if (GlobalSetOptions.autoconnect == false)
     return;
 
-  dlink_node *node;
-  DLINK_FOREACH(node, connect_items.head)
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
   {
     struct MaskItem *conf = node->data;
 
@@ -294,8 +294,8 @@ try_connections(void *unused)
       /* Move this entry to the end of the list, if not already last */
       if (node->next)
       {
-        dlinkDelete(node, &connect_items);
-        dlinkAddTail(conf, &conf->node, &connect_items);
+        list_delete(node, &connect_items);
+        list_add_tail(conf, &conf->node, &connect_items);
       }
 
       if (find_servconn_in_progress(conf->name))
@@ -639,9 +639,9 @@ server_connect_callback(fde_t *F, int status, void *data)
 struct Client *
 find_servconn_in_progress(const char *name)
 {
-  dlink_node *ptr;
+  list_node_t *ptr;
 
-  DLINK_FOREACH(ptr, unknown_list.head)
+  LIST_FOREACH(ptr, unknown_list.head)
   {
     struct Client *cptr = ptr->data;
 

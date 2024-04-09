@@ -1,6 +1,8 @@
 #### Noteworthy changes in version 8.2.44 (2024-??-??)
-* Fixed FTCBFS issue caused by ./configure using macros that have no special handling
-  for cross-compilation
+* Fixed FTCBFS issue caused by ./configure using macros that lacked special handling
+  for cross-compilation scenarios
+* Fixed the issue where XLINE and UNXLINE were not working properly on servers within
+  a cluster
 
 
 #### Noteworthy changes in version 8.2.43 (2022-09-26)

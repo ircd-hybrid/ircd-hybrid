@@ -245,9 +245,7 @@ hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert pos
 void
 hook_uninstall(struct HookContainer *container, HCFUNC *hook)
 {
-  /* Let it core if not found. */
-  list_node_t *node = list_find(&container->chain, hook);
-
-  list_delete(node, &container->chain);
-  xfree(node);
+  list_node_t *node = list_find_delete(&container->chain, hook);
+  if (node)
+    list_free_node(node);
 }

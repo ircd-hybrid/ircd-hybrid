@@ -115,7 +115,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
-                       aline.host);
+                       aline.mask);
 
   xline_remove(source_p, &aline);
 }

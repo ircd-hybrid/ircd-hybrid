@@ -59,9 +59,9 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
 {
   for (unsigned int i = 0; i < HASHSIZE; ++i)
   {
-    list_node_t *node;
     (*count) += list_length(&monitor_hash[i]);
 
+    list_node_t *node;
     LIST_FOREACH(node, monitor_hash[i].head)
     {
       const struct Monitor *const monitor = node->data;

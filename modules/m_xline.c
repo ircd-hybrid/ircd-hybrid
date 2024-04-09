@@ -166,7 +166,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
   }
   else
     cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
-                       aline.mask, aline.mask, aline.reason);
+                       aline.mask, aline.duration, aline.reason);
 
   xline_handle(source_p, &aline);
 }

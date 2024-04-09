@@ -66,5 +66,5 @@ struct ClusterItem
 extern const list_t *cluster_get_list(void);
 extern void cluster_clear(void);
 extern struct ClusterItem *cluster_make(void);
-extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...);
+extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...) AFP(5,6);
 #endif  /* INCLUDED_conf_cluster_h */

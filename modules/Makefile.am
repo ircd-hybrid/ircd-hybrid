@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
 SUBDIRS = core extra
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/libio/src
+AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 modulesdir = $(pkglibdir)/modules/autoload
 
 modules_LTLIBRARIES = m_accept.la     \

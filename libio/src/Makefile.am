@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libio.la
 
 libio_la_SOURCES =  base32.c      \

@@ -308,8 +308,6 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
                       struct Channel *channel, int rank,
                       const char *pattern, ...)
 {
-  va_list args_l, args_r;
-  list_node_t *node;
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
 
@@ -320,6 +318,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
   dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
+  va_list args_l, args_r;
   va_start(args_l, pattern);
   va_start(args_r, pattern);
   send_format(buffer_l, pattern, args_l);
@@ -329,6 +328,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
 
   ++send_marker;
 
+  list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
@@ -561,14 +561,13 @@ void
 sendto_match_butone(const struct Client *one, const struct Client *from,
                     const char *mask, bool host, const char *pattern, ...)
 {
-  va_list args_l, args_r;
-  list_node_t *node;
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
 
   dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
   dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
+  va_list args_l, args_r;
   va_start(args_l, pattern);
   va_start(args_r, pattern);
   send_format(buffer_l, pattern, args_l);
@@ -577,6 +576,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
   va_end(args_r);
 
   /* Scan the local clients */
+  list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
@@ -705,11 +705,11 @@ sendto_anywhere(struct Client *to, const struct Client *from,
 
   struct dbuf_block *buffer = dbuf_alloc();
   if (MyClient(to) && IsClient(from))
-    dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ", from->name, from->username,
-                 from->host, command, to->name);
+    dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
+                 from->name, from->username, from->host, command, to->name);
   else
-    dbuf_put_fmt(buffer, ":%s %s %s ", ID_or_name(from, to),
-                 command, ID_or_name(to, to));
+    dbuf_put_fmt(buffer, ":%s %s %s ",
+                 ID_or_name(from, to), command, ID_or_name(to, to));
 
   va_list args;
   va_start(args, pattern);

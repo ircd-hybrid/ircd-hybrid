@@ -301,8 +301,7 @@ user_register_local(struct Client *client)
     if (IsNeedIdentd(conf))
     {
       ++ServerStats.is_ref;
-      sendto_one_notice(client, &me, ":*** Notice -- You need to install "
-                        "identd to use this server");
+      sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
       exit_client(client, "Install identd");
       return;
     }
@@ -352,8 +351,7 @@ user_register_local(struct Client *client)
   if ((list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
       (list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client, FLAGS_NOLIMIT)))
   {
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                         "Too many clients, rejecting %s[%s].",
+    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Too many clients, rejecting %s[%s].",
                          client->name, client->host);
     ++ServerStats.is_ref;
     exit_client(client, "Sorry, server is full - try later");

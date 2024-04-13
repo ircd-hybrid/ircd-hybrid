@@ -32,8 +32,6 @@
 #include "log.h"
 #include "send.h"
 #include "conf.h"
-#include "numeric.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
 
@@ -63,7 +61,6 @@ static const char *const core_module_table[] =
   NULL
 };
 
-
 list_t *
 modules_get_list(void)
 {
@@ -86,9 +83,8 @@ modules_valid_suffix(const char *name)
 bool
 unload_one_module(const char *name, bool warn)
 {
-  struct module *modp = NULL;
-
-  if ((modp = findmodule_byname(name)) == NULL)
+  struct module *modp = findmodule_byname(name);
+  if (modp == NULL)
     return false;
 
   if (modp->modexit)
@@ -102,8 +98,7 @@ unload_one_module(const char *name, bool warn)
   if (warn)
   {
     log_write(LOG_TYPE_IRCD, "Module %s unloaded", name);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Module %s unloaded", name);
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s unloaded", name);
   }
 
   return true;
@@ -118,32 +113,31 @@ unload_one_module(const char *name, bool warn)
 bool
 load_a_module(const char *path, bool warn)
 {
-  lt_dlhandle tmpptr = NULL;
-  const char *mod_basename = NULL;
-  struct module *modp = NULL;
+  const char *mod_basename;
 
   if (findmodule_byname((mod_basename = libio_basename(path))))
     return false;
 
-  if ((tmpptr = lt_dlopen(path)) == NULL)
+  lt_dlhandle tmpptr = lt_dlopen(path);
+  if (tmpptr == NULL)
   {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Error loading module %s: %s",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Error loading module %s: %s",
                          mod_basename, err);
     log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
     return false;
   }
 
-  if ((modp = lt_dlsym(tmpptr, "module_entry")) == NULL)
+  struct module *modp = lt_dlsym(tmpptr, "module_entry");
+  if (modp == NULL)
   {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Error loading module %s: %s",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Error loading module %s: %s",
                          mod_basename, err);
     log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
+
     lt_dlclose(tmpptr);
     return false;
   }
@@ -157,11 +151,9 @@ load_a_module(const char *path, bool warn)
 
   if (warn)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Module %s [handle: %p] loaded.",
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] loaded.",
                          modp->name, tmpptr);
-    log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded.",
-         modp->name, tmpptr);
+    log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded.", modp->name, tmpptr);
   }
 
   return true;
@@ -179,8 +171,8 @@ modules_init(void)
 {
   if (lt_dlinit())
   {
-    log_write(LOG_TYPE_IRCD, "Couldn't initialize the libltdl run time dynamic"
-         " link library: %s", lt_dlerror());
+    log_write(LOG_TYPE_IRCD, "Couldn't initialize the libltdl run time dynamic link library: %s",
+              lt_dlerror());
     exit(EXIT_FAILURE);
   }
 }
@@ -308,7 +300,7 @@ load_all_modules(bool warn)
   if ((system_module_dir = opendir(AUTOMODPATH)) == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Could not load modules from %s: %s",
-         AUTOMODPATH, strerror(errno));
+              AUTOMODPATH, strerror(errno));
     return;
   }
 
@@ -358,13 +350,12 @@ load_core_modules(bool warn)
 
   for (unsigned int i = 0; core_module_table[i]; ++i)
   {
-    snprintf(module_name, sizeof(module_name), "%s%s",
-             MODPATH, core_module_table[i]);
+    snprintf(module_name, sizeof(module_name), "%s%s", MODPATH, core_module_table[i]);
 
     if (load_a_module(module_name, warn) == false)
     {
       log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd",
-           core_module_table[i]);
+                core_module_table[i]);
       exit(EXIT_FAILURE);
     }
   }
@@ -400,8 +391,7 @@ load_one_module(const char *name)
           return load_a_module(path, true);
   }
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "Cannot locate module %s", name);
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Cannot locate module %s", name);
   log_write(LOG_TYPE_IRCD, "Cannot locate module %s", name);
   return false;
 }

@@ -309,7 +309,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
   if (addr->ss.ss_family == AF_INET)
   {
     const struct sockaddr_in *v4 = (const struct sockaddr_in *)addr;
-    const unsigned char *cp = (const unsigned char *)&v4->sin_addr.s_addr;
+    const uint8_t *cp = (const uint8_t *)&v4->sin_addr.s_addr;
 
     snprintf(ipbuf, sizeof(ipbuf), "%u.%u.%u.%u.in-addr.arpa.",
              (unsigned int)(cp[3]), (unsigned int)(cp[2]),
@@ -318,7 +318,7 @@ do_query_number(dns_callback_fnc callback, void *ctx,
   else if (addr->ss.ss_family == AF_INET6)
   {
     const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)addr;
-    const unsigned char *cp = (const unsigned char *)&v6->sin6_addr.s6_addr;
+    const uint8_t *cp = (const uint8_t *)&v6->sin6_addr.s6_addr;
 
     snprintf(ipbuf, sizeof(ipbuf),
              "%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x."

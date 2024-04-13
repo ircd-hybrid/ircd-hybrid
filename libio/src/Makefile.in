@@ -88,7 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = modules/core
+subdir = libio/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_append_flag.m4 \
@@ -115,135 +115,16 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-am__installdirs = "$(DESTDIR)$(modulesdir)"
-LTLIBRARIES = $(modules_LTLIBRARIES)
-m_bmask_la_LIBADD =
-am_m_bmask_la_OBJECTS = m_bmask.lo
-m_bmask_la_OBJECTS = $(am_m_bmask_la_OBJECTS)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libio_la_DEPENDENCIES = @LTLIBOBJS@
+am_libio_la_OBJECTS = base32.lo dbuf.lo event.lo hook.lo irc_string.lo \
+	ircd_getopt.lo list.lo log.lo match.lo misc.lo memory.lo \
+	patricia.lo rng_mt.lo sha3.lo
+libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-m_bmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_bmask_la_LDFLAGS) $(LDFLAGS) -o $@
-m_die_la_LIBADD =
-am_m_die_la_OBJECTS = m_die.lo
-m_die_la_OBJECTS = $(am_m_die_la_OBJECTS)
-m_die_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_die_la_LDFLAGS) $(LDFLAGS) -o $@
-m_error_la_LIBADD =
-am_m_error_la_OBJECTS = m_error.lo
-m_error_la_OBJECTS = $(am_m_error_la_OBJECTS)
-m_error_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_error_la_LDFLAGS) $(LDFLAGS) -o $@
-m_join_la_LIBADD =
-am_m_join_la_OBJECTS = m_join.lo
-m_join_la_OBJECTS = $(am_m_join_la_OBJECTS)
-m_join_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_join_la_LDFLAGS) $(LDFLAGS) -o $@
-m_kick_la_LIBADD =
-am_m_kick_la_OBJECTS = m_kick.lo
-m_kick_la_OBJECTS = $(am_m_kick_la_OBJECTS)
-m_kick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_kick_la_LDFLAGS) $(LDFLAGS) -o $@
-m_kill_la_LIBADD =
-am_m_kill_la_OBJECTS = m_kill.lo
-m_kill_la_OBJECTS = $(am_m_kill_la_OBJECTS)
-m_kill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_kill_la_LDFLAGS) $(LDFLAGS) -o $@
-m_message_la_LIBADD =
-am_m_message_la_OBJECTS = m_message.lo
-m_message_la_OBJECTS = $(am_m_message_la_OBJECTS)
-m_message_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_message_la_LDFLAGS) $(LDFLAGS) -o $@
-m_mlock_la_LIBADD =
-am_m_mlock_la_OBJECTS = m_mlock.lo
-m_mlock_la_OBJECTS = $(am_m_mlock_la_OBJECTS)
-m_mlock_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_mlock_la_LDFLAGS) $(LDFLAGS) -o $@
-m_mode_la_LIBADD =
-am_m_mode_la_OBJECTS = m_mode.lo
-m_mode_la_OBJECTS = $(am_m_mode_la_OBJECTS)
-m_mode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_mode_la_LDFLAGS) $(LDFLAGS) -o $@
-m_nick_la_LIBADD =
-am_m_nick_la_OBJECTS = m_nick.lo
-m_nick_la_OBJECTS = $(am_m_nick_la_OBJECTS)
-m_nick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_nick_la_LDFLAGS) $(LDFLAGS) -o $@
-m_part_la_LIBADD =
-am_m_part_la_OBJECTS = m_part.lo
-m_part_la_OBJECTS = $(am_m_part_la_OBJECTS)
-m_part_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_part_la_LDFLAGS) $(LDFLAGS) -o $@
-m_quit_la_LIBADD =
-am_m_quit_la_OBJECTS = m_quit.lo
-m_quit_la_OBJECTS = $(am_m_quit_la_OBJECTS)
-m_quit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_quit_la_LDFLAGS) $(LDFLAGS) -o $@
-m_server_la_LIBADD =
-am_m_server_la_OBJECTS = m_server.lo
-m_server_la_OBJECTS = $(am_m_server_la_OBJECTS)
-m_server_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_server_la_LDFLAGS) $(LDFLAGS) -o $@
-m_sjoin_la_LIBADD =
-am_m_sjoin_la_OBJECTS = m_sjoin.lo
-m_sjoin_la_OBJECTS = $(am_m_sjoin_la_OBJECTS)
-m_sjoin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_sjoin_la_LDFLAGS) $(LDFLAGS) -o $@
-m_squit_la_LIBADD =
-am_m_squit_la_OBJECTS = m_squit.lo
-m_squit_la_OBJECTS = $(am_m_squit_la_OBJECTS)
-m_squit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_squit_la_LDFLAGS) $(LDFLAGS) -o $@
-m_tmode_la_LIBADD =
-am_m_tmode_la_OBJECTS = m_tmode.lo
-m_tmode_la_OBJECTS = $(am_m_tmode_la_OBJECTS)
-m_tmode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_tmode_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -259,14 +140,13 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_die.Plo \
-	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_join.Plo \
-	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
-	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_mlock.Plo \
-	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_nick.Plo \
-	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_quit.Plo \
-	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_sjoin.Plo \
-	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_tmode.Plo
+am__depfiles_remade = ./$(DEPDIR)/base32.Plo ./$(DEPDIR)/dbuf.Plo \
+	./$(DEPDIR)/event.Plo ./$(DEPDIR)/hook.Plo \
+	./$(DEPDIR)/irc_string.Plo ./$(DEPDIR)/ircd_getopt.Plo \
+	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
+	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
+	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/rng_mt.Plo \
+	./$(DEPDIR)/sha3.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -286,22 +166,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
-	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
-	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_mlock_la_SOURCES) \
-	$(m_mode_la_SOURCES) $(m_nick_la_SOURCES) $(m_part_la_SOURCES) \
-	$(m_quit_la_SOURCES) $(m_server_la_SOURCES) \
-	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
-	$(m_tmode_la_SOURCES)
-DIST_SOURCES = $(m_bmask_la_SOURCES) $(m_die_la_SOURCES) \
-	$(m_error_la_SOURCES) $(m_join_la_SOURCES) \
-	$(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_mlock_la_SOURCES) \
-	$(m_mode_la_SOURCES) $(m_nick_la_SOURCES) $(m_part_la_SOURCES) \
-	$(m_quit_la_SOURCES) $(m_server_la_SOURCES) \
-	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
-	$(m_tmode_la_SOURCES)
+SOURCES = $(libio_la_SOURCES)
+DIST_SOURCES = $(libio_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -472,59 +338,37 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = foreign
-MODULE_FLAGS = -module -avoid-version
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/libio/src
-modulesdir = $(pkglibdir)/modules
-m_bmask_la_LDFLAGS = $(MODULE_FLAGS)
-m_die_la_LDFLAGS = $(MODULE_FLAGS)
-m_error_la_LDFLAGS = $(MODULE_FLAGS)
-m_join_la_LDFLAGS = $(MODULE_FLAGS)
-m_kick_la_LDFLAGS = $(MODULE_FLAGS)
-m_kill_la_LDFLAGS = $(MODULE_FLAGS)
-m_message_la_LDFLAGS = $(MODULE_FLAGS)
-m_mlock_la_LDFLAGS = $(MODULE_FLAGS)
-m_mode_la_LDFLAGS = $(MODULE_FLAGS)
-m_nick_la_LDFLAGS = $(MODULE_FLAGS)
-m_part_la_LDFLAGS = $(MODULE_FLAGS)
-m_quit_la_LDFLAGS = $(MODULE_FLAGS)
-m_server_la_LDFLAGS = $(MODULE_FLAGS)
-m_sjoin_la_LDFLAGS = $(MODULE_FLAGS)
-m_squit_la_LDFLAGS = $(MODULE_FLAGS)
-m_tmode_la_LDFLAGS = $(MODULE_FLAGS)
-m_bmask_la_SOURCES = m_bmask.c
-m_die_la_SOURCES = m_die.c
-m_error_la_SOURCES = m_error.c
-m_join_la_SOURCES = m_join.c
-m_kick_la_SOURCES = m_kick.c
-m_kill_la_SOURCES = m_kill.c
-m_message_la_SOURCES = m_message.c
-m_mlock_la_SOURCES = m_mlock.c
-m_mode_la_SOURCES = m_mode.c
-m_nick_la_SOURCES = m_nick.c
-m_part_la_SOURCES = m_part.c
-m_quit_la_SOURCES = m_quit.c
-m_server_la_SOURCES = m_server.c
-m_sjoin_la_SOURCES = m_sjoin.c
-m_squit_la_SOURCES = m_squit.c
-m_tmode_la_SOURCES = m_tmode.c
-modules_LTLIBRARIES = m_bmask.la   \
-                      m_die.la     \
-                      m_error.la   \
-                      m_join.la    \
-                      m_kick.la    \
-                      m_kill.la    \
-                      m_message.la \
-                      m_mlock.la   \
-                      m_mode.la    \
-                      m_nick.la    \
-                      m_part.la    \
-                      m_quit.la    \
-                      m_server.la  \
-                      m_sjoin.la   \
-                      m_squit.la   \
-                      m_tmode.la
+AM_CPPFLAGS = -I$(top_srcdir)/include
+noinst_LTLIBRARIES = libio.la
+libio_la_SOURCES = base32.c      \
+                    base32.h.h    \
+                    dbuf.c        \
+                    dbuf.h        \
+                    event.c       \
+                    event.h       \
+                    hook.c        \
+                    hook.h        \
+                    irc_string.c  \
+                    irc_string.h  \
+                    ircd_getopt.c \
+                    ircd_getopt.h \
+                    list.c        \
+                    list.h        \
+                    log.c         \
+                    log.h         \
+                    match.c       \
+                    misc.c        \
+                    misc.h        \
+                    memory.c      \
+                    memory.h      \
+                    patricia.c    \
+                    patricia.h    \
+                    rng_mt.c      \
+                    rng_mt.h      \
+                    sha3.c        \
+                    sha3.h
 
+libio_la_LIBADD = @LTLIBOBJS@
 all: all-am
 
 .SUFFIXES:
@@ -538,9 +382,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign modules/core/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu libio/src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign modules/core/Makefile
+	  $(AUTOMAKE) --gnu libio/src/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -559,33 +403,9 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-install-modulesLTLIBRARIES: $(modules_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	@list='$(modules_LTLIBRARIES)'; test -n "$(modulesdir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(modulesdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(modulesdir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(modulesdir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(modulesdir)"; \
-	}
-
-uninstall-modulesLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(modules_LTLIBRARIES)'; test -n "$(modulesdir)" || list=; \
-	for p in $$list; do \
-	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(modulesdir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(modulesdir)/$$f"; \
-	done
-
-clean-modulesLTLIBRARIES:
-	-test -z "$(modules_LTLIBRARIES)" || rm -f $(modules_LTLIBRARIES)
-	@list='$(modules_LTLIBRARIES)'; \
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
 	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
 	      sort -u`; \
@@ -594,53 +414,8 @@ clean-modulesLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-m_bmask.la: $(m_bmask_la_OBJECTS) $(m_bmask_la_DEPENDENCIES) $(EXTRA_m_bmask_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_bmask_la_LINK) -rpath $(modulesdir) $(m_bmask_la_OBJECTS) $(m_bmask_la_LIBADD) $(LIBS)
-
-m_die.la: $(m_die_la_OBJECTS) $(m_die_la_DEPENDENCIES) $(EXTRA_m_die_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_die_la_LINK) -rpath $(modulesdir) $(m_die_la_OBJECTS) $(m_die_la_LIBADD) $(LIBS)
-
-m_error.la: $(m_error_la_OBJECTS) $(m_error_la_DEPENDENCIES) $(EXTRA_m_error_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_error_la_LINK) -rpath $(modulesdir) $(m_error_la_OBJECTS) $(m_error_la_LIBADD) $(LIBS)
-
-m_join.la: $(m_join_la_OBJECTS) $(m_join_la_DEPENDENCIES) $(EXTRA_m_join_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_join_la_LINK) -rpath $(modulesdir) $(m_join_la_OBJECTS) $(m_join_la_LIBADD) $(LIBS)
-
-m_kick.la: $(m_kick_la_OBJECTS) $(m_kick_la_DEPENDENCIES) $(EXTRA_m_kick_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_kick_la_LINK) -rpath $(modulesdir) $(m_kick_la_OBJECTS) $(m_kick_la_LIBADD) $(LIBS)
-
-m_kill.la: $(m_kill_la_OBJECTS) $(m_kill_la_DEPENDENCIES) $(EXTRA_m_kill_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_kill_la_LINK) -rpath $(modulesdir) $(m_kill_la_OBJECTS) $(m_kill_la_LIBADD) $(LIBS)
-
-m_message.la: $(m_message_la_OBJECTS) $(m_message_la_DEPENDENCIES) $(EXTRA_m_message_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_message_la_LINK) -rpath $(modulesdir) $(m_message_la_OBJECTS) $(m_message_la_LIBADD) $(LIBS)
-
-m_mlock.la: $(m_mlock_la_OBJECTS) $(m_mlock_la_DEPENDENCIES) $(EXTRA_m_mlock_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_mlock_la_LINK) -rpath $(modulesdir) $(m_mlock_la_OBJECTS) $(m_mlock_la_LIBADD) $(LIBS)
-
-m_mode.la: $(m_mode_la_OBJECTS) $(m_mode_la_DEPENDENCIES) $(EXTRA_m_mode_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_mode_la_LINK) -rpath $(modulesdir) $(m_mode_la_OBJECTS) $(m_mode_la_LIBADD) $(LIBS)
-
-m_nick.la: $(m_nick_la_OBJECTS) $(m_nick_la_DEPENDENCIES) $(EXTRA_m_nick_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_nick_la_LINK) -rpath $(modulesdir) $(m_nick_la_OBJECTS) $(m_nick_la_LIBADD) $(LIBS)
-
-m_part.la: $(m_part_la_OBJECTS) $(m_part_la_DEPENDENCIES) $(EXTRA_m_part_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_part_la_LINK) -rpath $(modulesdir) $(m_part_la_OBJECTS) $(m_part_la_LIBADD) $(LIBS)
-
-m_quit.la: $(m_quit_la_OBJECTS) $(m_quit_la_DEPENDENCIES) $(EXTRA_m_quit_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_quit_la_LINK) -rpath $(modulesdir) $(m_quit_la_OBJECTS) $(m_quit_la_LIBADD) $(LIBS)
-
-m_server.la: $(m_server_la_OBJECTS) $(m_server_la_DEPENDENCIES) $(EXTRA_m_server_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_server_la_LINK) -rpath $(modulesdir) $(m_server_la_OBJECTS) $(m_server_la_LIBADD) $(LIBS)
-
-m_sjoin.la: $(m_sjoin_la_OBJECTS) $(m_sjoin_la_DEPENDENCIES) $(EXTRA_m_sjoin_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_sjoin_la_LINK) -rpath $(modulesdir) $(m_sjoin_la_OBJECTS) $(m_sjoin_la_LIBADD) $(LIBS)
-
-m_squit.la: $(m_squit_la_OBJECTS) $(m_squit_la_DEPENDENCIES) $(EXTRA_m_squit_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_squit_la_LINK) -rpath $(modulesdir) $(m_squit_la_OBJECTS) $(m_squit_la_LIBADD) $(LIBS)
-
-m_tmode.la: $(m_tmode_la_OBJECTS) $(m_tmode_la_DEPENDENCIES) $(EXTRA_m_tmode_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_tmode_la_LINK) -rpath $(modulesdir) $(m_tmode_la_OBJECTS) $(m_tmode_la_LIBADD) $(LIBS)
+libio.la: $(libio_la_OBJECTS) $(libio_la_DEPENDENCIES) $(EXTRA_libio_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libio_la_OBJECTS) $(libio_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -648,22 +423,20 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_bmask.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_die.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_error.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_join.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kick.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kill.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_message.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mlock.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mode.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_nick.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_part.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_quit.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_server.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_sjoin.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_squit.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tmode.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_getopt.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -789,9 +562,6 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(modulesdir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -824,26 +594,24 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-modulesLTLIBRARIES \
+clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/m_bmask.Plo
-	-rm -f ./$(DEPDIR)/m_die.Plo
-	-rm -f ./$(DEPDIR)/m_error.Plo
-	-rm -f ./$(DEPDIR)/m_join.Plo
-	-rm -f ./$(DEPDIR)/m_kick.Plo
-	-rm -f ./$(DEPDIR)/m_kill.Plo
-	-rm -f ./$(DEPDIR)/m_message.Plo
-	-rm -f ./$(DEPDIR)/m_mlock.Plo
-	-rm -f ./$(DEPDIR)/m_mode.Plo
-	-rm -f ./$(DEPDIR)/m_nick.Plo
-	-rm -f ./$(DEPDIR)/m_part.Plo
-	-rm -f ./$(DEPDIR)/m_quit.Plo
-	-rm -f ./$(DEPDIR)/m_server.Plo
-	-rm -f ./$(DEPDIR)/m_sjoin.Plo
-	-rm -f ./$(DEPDIR)/m_squit.Plo
-	-rm -f ./$(DEPDIR)/m_tmode.Plo
+		-rm -f ./$(DEPDIR)/base32.Plo
+	-rm -f ./$(DEPDIR)/dbuf.Plo
+	-rm -f ./$(DEPDIR)/event.Plo
+	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/irc_string.Plo
+	-rm -f ./$(DEPDIR)/ircd_getopt.Plo
+	-rm -f ./$(DEPDIR)/list.Plo
+	-rm -f ./$(DEPDIR)/log.Plo
+	-rm -f ./$(DEPDIR)/match.Plo
+	-rm -f ./$(DEPDIR)/memory.Plo
+	-rm -f ./$(DEPDIR)/misc.Plo
+	-rm -f ./$(DEPDIR)/patricia.Plo
+	-rm -f ./$(DEPDIR)/rng_mt.Plo
+	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -860,7 +628,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-modulesLTLIBRARIES
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -889,22 +657,20 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/m_bmask.Plo
-	-rm -f ./$(DEPDIR)/m_die.Plo
-	-rm -f ./$(DEPDIR)/m_error.Plo
-	-rm -f ./$(DEPDIR)/m_join.Plo
-	-rm -f ./$(DEPDIR)/m_kick.Plo
-	-rm -f ./$(DEPDIR)/m_kill.Plo
-	-rm -f ./$(DEPDIR)/m_message.Plo
-	-rm -f ./$(DEPDIR)/m_mlock.Plo
-	-rm -f ./$(DEPDIR)/m_mode.Plo
-	-rm -f ./$(DEPDIR)/m_nick.Plo
-	-rm -f ./$(DEPDIR)/m_part.Plo
-	-rm -f ./$(DEPDIR)/m_quit.Plo
-	-rm -f ./$(DEPDIR)/m_server.Plo
-	-rm -f ./$(DEPDIR)/m_sjoin.Plo
-	-rm -f ./$(DEPDIR)/m_squit.Plo
-	-rm -f ./$(DEPDIR)/m_tmode.Plo
+		-rm -f ./$(DEPDIR)/base32.Plo
+	-rm -f ./$(DEPDIR)/dbuf.Plo
+	-rm -f ./$(DEPDIR)/event.Plo
+	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/irc_string.Plo
+	-rm -f ./$(DEPDIR)/ircd_getopt.Plo
+	-rm -f ./$(DEPDIR)/list.Plo
+	-rm -f ./$(DEPDIR)/log.Plo
+	-rm -f ./$(DEPDIR)/match.Plo
+	-rm -f ./$(DEPDIR)/memory.Plo
+	-rm -f ./$(DEPDIR)/misc.Plo
+	-rm -f ./$(DEPDIR)/patricia.Plo
+	-rm -f ./$(DEPDIR)/rng_mt.Plo
+	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -921,30 +687,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-modulesLTLIBRARIES
+uninstall-am:
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-generic clean-libtool clean-modulesLTLIBRARIES \
+	clean-generic clean-libtool clean-noinstLTLIBRARIES \
 	cscopelist-am ctags ctags-am distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
-	install-modulesLTLIBRARIES install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am \
-	uninstall-modulesLTLIBRARIES
+	tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
-
-modules: $(modules_LTLIBRARIES)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -67,6 +67,8 @@ AX_DEFINE_BUILD_DATE
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
+  libio/Makefile
+  libio/src/Makefile
   libltdl/Makefile
   modules/Makefile
   modules/core/Makefile

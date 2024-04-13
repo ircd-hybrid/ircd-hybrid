@@ -29,7 +29,11 @@
  * nodes by data value.
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <assert.h>
+
 #include "list.h"
 #include "memory.h"
 

@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = tools libltdl doc help modules src
+SUBDIRS = tools libio libltdl doc help modules src
 
 install-data-local:
 	$(INSTALL) -d $(DESTDIR)${localstatedir}/lib

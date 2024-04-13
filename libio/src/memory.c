@@ -27,10 +27,16 @@
  * reallocation, and deallocation, as well as string duplication functions.
  */
 
-#include "stdinc.h"
-#include "irc_string.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include "memory.h"
-#include "restart.h"
+#include "irc_string.h"
+
+static void (*outofmemory)(void) = abort;
 
 /**
  * @brief Allocates memory using calloc.
@@ -130,23 +136,4 @@ xstrndup(const char *s, size_t len)
   strlcpy(ret, s, len + 1);
 
   return ret;
-}
-
-/**
- * @brief Handles out-of-memory conditions.
- *
- * This function reports an out-of-memory condition and restarts the program.
- * If it is called more than once, it aborts the program execution.
- */
-void
-outofmemory(void)
-{
-  static bool was_here = false;
-
-  if (was_here == false)
-    was_here = true;
-  else
-    abort();
-
-  server_die("out of memory", true);
 }

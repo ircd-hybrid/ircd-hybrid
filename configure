@@ -18673,7 +18673,7 @@ printf "%s\n" "#define AX_BUILD_DATE \"$BUILD_DATE\"" >>confdefs.h
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile libltdl/Makefile modules/Makefile modules/core/Makefile modules/extra/Makefile doc/Makefile help/Makefile tools/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile libio/Makefile libio/src/Makefile libltdl/Makefile modules/Makefile modules/core/Makefile modules/extra/Makefile doc/Makefile help/Makefile tools/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -19719,6 +19719,8 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "libio/Makefile") CONFIG_FILES="$CONFIG_FILES libio/Makefile" ;;
+    "libio/src/Makefile") CONFIG_FILES="$CONFIG_FILES libio/src/Makefile" ;;
     "libltdl/Makefile") CONFIG_FILES="$CONFIG_FILES libltdl/Makefile" ;;
     "modules/Makefile") CONFIG_FILES="$CONFIG_FILES modules/Makefile" ;;
     "modules/core/Makefile") CONFIG_FILES="$CONFIG_FILES modules/core/Makefile" ;;

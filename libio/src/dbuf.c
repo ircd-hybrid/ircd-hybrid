@@ -23,7 +23,13 @@
  * \brief Supports dynamic data buffers.
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <assert.h>
+
 #include "list.h"
 #include "dbuf.h"
 #include "memory.h"

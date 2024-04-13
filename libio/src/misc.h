@@ -27,6 +27,8 @@
 #ifndef INCLUDED_misc_h
 #define INCLUDED_misc_h
 
+#include <stdint.h>
+
 /**
  * @def IRCD_MAX
  * @brief Macro for maximum of two values.

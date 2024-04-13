@@ -24,9 +24,12 @@
  * @brief Miscellaneous functions for IRCd.
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+
 #include "misc.h"
-#include "ircd.h"
+#include "event.h"
 
 /**
  * @brief Formats a given time value into a human-readable string using the strftime format.

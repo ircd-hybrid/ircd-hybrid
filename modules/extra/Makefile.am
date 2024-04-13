@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
 
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/libio/src
 modulesdir = $(pkglibdir)/modules/extra
 
 modules_LTLIBRARIES = m_opme.la

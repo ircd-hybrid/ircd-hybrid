@@ -366,7 +366,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = tools libltdl doc help modules src
+SUBDIRS = tools libio libltdl doc help modules src
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

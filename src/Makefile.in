@@ -118,36 +118,31 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) base32.$(OBJEXT) \
-	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
-	channel_mode.$(OBJEXT) client.$(OBJEXT) \
-	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
-	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
-	conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) \
-	conf_resv.$(OBJEXT) conf_service.$(OBJEXT) \
-	conf_shared.$(OBJEXT) conf_parser.$(OBJEXT) \
-	conf_lexer.$(OBJEXT) dbuf.$(OBJEXT) event.$(OBJEXT) \
-	extban.$(OBJEXT) extban_account.$(OBJEXT) \
-	extban_channel.$(OBJEXT) extban_fingerprint.$(OBJEXT) \
-	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
-	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
-	extban_nick.$(OBJEXT) extban_operclass.$(OBJEXT) \
-	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
-	extban_usermode.$(OBJEXT) fdlist.$(OBJEXT) hash.$(OBJEXT) \
-	hook.$(OBJEXT) hostmask.$(OBJEXT) id.$(OBJEXT) \
-	ipcache.$(OBJEXT) irc_string.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_getopt.$(OBJEXT) ircd_signal.$(OBJEXT) isupport.$(OBJEXT) \
-	list.$(OBJEXT) listener.$(OBJEXT) log.$(OBJEXT) \
-	match.$(OBJEXT) memory.$(OBJEXT) misc.$(OBJEXT) \
+am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) channel.$(OBJEXT) \
+	channel_invite.$(OBJEXT) channel_mode.$(OBJEXT) \
+	client.$(OBJEXT) client_svstag.$(OBJEXT) cloak.$(OBJEXT) \
+	command.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
+	conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
+	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
+	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
+	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
+	extban_fingerprint.$(OBJEXT) extban_gecos.$(OBJEXT) \
+	extban_join.$(OBJEXT) extban_knock.$(OBJEXT) \
+	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
+	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
+	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
+	fdlist.$(OBJEXT) hash.$(OBJEXT) hostmask.$(OBJEXT) \
+	id.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
 	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	patricia.$(OBJEXT) s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) sha3.$(OBJEXT) tls_gnutls.$(OBJEXT) \
-	tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) \
-	res.$(OBJEXT) reslib.$(OBJEXT) restart.$(OBJEXT) \
-	rng_mt.$(OBJEXT) s_bsd.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
+	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
+	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) res.$(OBJEXT) \
+	reslib.$(OBJEXT) restart.$(OBJEXT) s_bsd.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -173,43 +168,37 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/auth.Po \
-	./$(DEPDIR)/base32.Po ./$(DEPDIR)/channel.Po \
-	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
-	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
-	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
-	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
-	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_db.Po \
-	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
-	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
-	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
-	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/dbuf.Po \
-	./$(DEPDIR)/event.Po ./$(DEPDIR)/extban.Po \
-	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
+	./$(DEPDIR)/channel.Po ./$(DEPDIR)/channel_invite.Po \
+	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/client.Po \
+	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
+	./$(DEPDIR)/command.Po ./$(DEPDIR)/conf.Po \
+	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
+	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
+	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
+	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
+	./$(DEPDIR)/extban.Po ./$(DEPDIR)/extban_account.Po \
+	./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/hash.Po ./$(DEPDIR)/hook.Po \
+	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/hash.Po \
 	./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/id.Po \
-	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/irc_string.Po \
-	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_getopt.Po \
+	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
 	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/list.Po ./$(DEPDIR)/listener.Po ./$(DEPDIR)/log.Po \
-	./$(DEPDIR)/match.Po ./$(DEPDIR)/memory.Po ./$(DEPDIR)/misc.Po \
-	./$(DEPDIR)/modules.Po ./$(DEPDIR)/monitor.Po \
-	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
-	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
-	./$(DEPDIR)/patricia.Po ./$(DEPDIR)/res.Po \
-	./$(DEPDIR)/reslib.Po ./$(DEPDIR)/restart.Po \
-	./$(DEPDIR)/rng_mt.Po ./$(DEPDIR)/s_bsd.Po \
+	./$(DEPDIR)/listener.Po ./$(DEPDIR)/modules.Po \
+	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
+	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
+	./$(DEPDIR)/parse.Po ./$(DEPDIR)/res.Po ./$(DEPDIR)/reslib.Po \
+	./$(DEPDIR)/restart.Po ./$(DEPDIR)/s_bsd.Po \
 	./$(DEPDIR)/s_bsd_epoll.Po ./$(DEPDIR)/s_bsd_kqueue.Po \
 	./$(DEPDIR)/s_bsd_poll.Po ./$(DEPDIR)/send.Po \
 	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/sha3.Po ./$(DEPDIR)/tls_gnutls.Po \
-	./$(DEPDIR)/tls_none.Po ./$(DEPDIR)/tls_openssl.Po \
-	./$(DEPDIR)/tls_wolfssl.Po ./$(DEPDIR)/user.Po \
-	./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/tls_gnutls.Po ./$(DEPDIR)/tls_none.Po \
+	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/tls_wolfssl.Po \
+	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -423,13 +412,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_YFLAGS = -d
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/include -I$(top_srcdir)/libio/src
 ircd_LDFLAGS = -export-dynamic
-ircd_LDADD = $(LIBLTDL)
+ircd_LDADD = $(LIBLTDL) ../libio/src/.libs/libio.a
 ircd_DEPENDENCIES = $(LTDLDEPS)
 ircd_SOURCES = accept.c          \
                auth.c            \
-               base32.c          \
                channel.c         \
                channel_invite.c  \
                channel_mode.c    \
@@ -448,8 +436,6 @@ ircd_SOURCES = accept.c          \
                conf_shared.c     \
                conf_parser.y     \
                conf_lexer.l      \
-               dbuf.c            \
-               event.c           \
                extban.c          \
                extban_account.c  \
                extban_channel.c  \
@@ -465,32 +451,22 @@ ircd_SOURCES = accept.c          \
                extban_usermode.c \
                fdlist.c          \
                hash.c            \
-               hook.c            \
                hostmask.c        \
                id.c              \
                ipcache.c         \
-               irc_string.c      \
                ircd.c            \
-               ircd_getopt.c     \
                ircd_signal.c     \
                isupport.c        \
-               list.c            \
                listener.c        \
-               log.c             \
-               match.c           \
-               memory.c          \
-               misc.c            \
                modules.c         \
                monitor.c         \
                motd.c            \
                numeric.c         \
                packet.c          \
                parse.c           \
-               patricia.c        \
                s_bsd_epoll.c     \
                s_bsd_poll.c      \
                s_bsd_kqueue.c    \
-               sha3.c            \
                tls_gnutls.c      \
                tls_none.c        \
                tls_openssl.c     \
@@ -498,7 +474,6 @@ ircd_SOURCES = accept.c          \
                res.c             \
                reslib.c          \
                restart.c         \
-               rng_mt.c          \
                s_bsd.c           \
                send.c            \
                server.c          \
@@ -604,7 +579,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accept.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
@@ -623,8 +597,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_resv.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_service.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_shared.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_account.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_channel.Po@am__quote@ # am--include-marker
@@ -640,32 +612,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_getopt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_epoll.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@ # am--include-marker
@@ -673,7 +635,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@ # am--include-marker
@@ -854,7 +815,6 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/auth.Po
-	-rm -f ./$(DEPDIR)/base32.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
@@ -873,8 +833,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/conf_resv.Po
 	-rm -f ./$(DEPDIR)/conf_service.Po
 	-rm -f ./$(DEPDIR)/conf_shared.Po
-	-rm -f ./$(DEPDIR)/dbuf.Po
-	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/extban.Po
 	-rm -f ./$(DEPDIR)/extban_account.Po
 	-rm -f ./$(DEPDIR)/extban_channel.Po
@@ -890,32 +848,22 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/hook.Po
 	-rm -f ./$(DEPDIR)/hostmask.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
-	-rm -f ./$(DEPDIR)/irc_string.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
-	-rm -f ./$(DEPDIR)/ircd_getopt.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
-	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/listener.Po
-	-rm -f ./$(DEPDIR)/log.Po
-	-rm -f ./$(DEPDIR)/match.Po
-	-rm -f ./$(DEPDIR)/memory.Po
-	-rm -f ./$(DEPDIR)/misc.Po
 	-rm -f ./$(DEPDIR)/modules.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
-	-rm -f ./$(DEPDIR)/patricia.Po
 	-rm -f ./$(DEPDIR)/res.Po
 	-rm -f ./$(DEPDIR)/reslib.Po
 	-rm -f ./$(DEPDIR)/restart.Po
-	-rm -f ./$(DEPDIR)/rng_mt.Po
 	-rm -f ./$(DEPDIR)/s_bsd.Po
 	-rm -f ./$(DEPDIR)/s_bsd_epoll.Po
 	-rm -f ./$(DEPDIR)/s_bsd_kqueue.Po
@@ -923,7 +871,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
-	-rm -f ./$(DEPDIR)/sha3.Po
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po
@@ -977,7 +924,6 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/auth.Po
-	-rm -f ./$(DEPDIR)/base32.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
@@ -996,8 +942,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/conf_resv.Po
 	-rm -f ./$(DEPDIR)/conf_service.Po
 	-rm -f ./$(DEPDIR)/conf_shared.Po
-	-rm -f ./$(DEPDIR)/dbuf.Po
-	-rm -f ./$(DEPDIR)/event.Po
 	-rm -f ./$(DEPDIR)/extban.Po
 	-rm -f ./$(DEPDIR)/extban_account.Po
 	-rm -f ./$(DEPDIR)/extban_channel.Po
@@ -1013,32 +957,22 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/hook.Po
 	-rm -f ./$(DEPDIR)/hostmask.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
-	-rm -f ./$(DEPDIR)/irc_string.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
-	-rm -f ./$(DEPDIR)/ircd_getopt.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
-	-rm -f ./$(DEPDIR)/list.Po
 	-rm -f ./$(DEPDIR)/listener.Po
-	-rm -f ./$(DEPDIR)/log.Po
-	-rm -f ./$(DEPDIR)/match.Po
-	-rm -f ./$(DEPDIR)/memory.Po
-	-rm -f ./$(DEPDIR)/misc.Po
 	-rm -f ./$(DEPDIR)/modules.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
-	-rm -f ./$(DEPDIR)/patricia.Po
 	-rm -f ./$(DEPDIR)/res.Po
 	-rm -f ./$(DEPDIR)/reslib.Po
 	-rm -f ./$(DEPDIR)/restart.Po
-	-rm -f ./$(DEPDIR)/rng_mt.Po
 	-rm -f ./$(DEPDIR)/s_bsd.Po
 	-rm -f ./$(DEPDIR)/s_bsd_epoll.Po
 	-rm -f ./$(DEPDIR)/s_bsd_kqueue.Po
@@ -1046,7 +980,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
-	-rm -f ./$(DEPDIR)/sha3.Po
 	-rm -f ./$(DEPDIR)/tls_gnutls.Po
 	-rm -f ./$(DEPDIR)/tls_none.Po
 	-rm -f ./$(DEPDIR)/tls_openssl.Po

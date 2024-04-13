@@ -29,11 +29,14 @@
  * when the events occur.
  */
 
-#include "stdinc.h"
-#include "irc_string.h"
-#include "memory.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdarg.h>
+
 #include "list.h"
-#include "event.h"
+#include "memory.h"
+//#include "event.h"
 #include "hook.h"
 
 /**
@@ -122,7 +125,7 @@ void *
 hook_run_chain(struct HookContainer *container, ...)
 {
   container->called++;
-  container->last = event_base->time.sec_monotonic;
+//  container->last = event_base->time.sec_monotonic;
 
   /* Check if the hook chain is empty. */
   if (list_length(&container->chain) == 0)
@@ -179,7 +182,7 @@ hook_container_find(const char *name)
   LIST_FOREACH(node, hook_container_list.head)
   {
     struct HookContainer *container = node->data;
-    if (irccmp(container->name, name) == 0)
+    if (strcasecmp(container->name, name) == 0)
       return container;
   }
 

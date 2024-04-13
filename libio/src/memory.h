@@ -32,7 +32,6 @@
 #ifndef INCLUDED_memory_h
 #define INCLUDED_memory_h
 
-extern void outofmemory(void);
 extern void *xcalloc(size_t);
 extern void *xrealloc(void *, size_t);
 extern void xfree(void *);

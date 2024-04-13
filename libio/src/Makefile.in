@@ -117,8 +117,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_DEPENDENCIES = @LTLIBOBJS@
-am_libio_la_OBJECTS = base32.lo dbuf.lo event.lo hook.lo irc_string.lo \
-	ircd_getopt.lo list.lo log.lo match.lo misc.lo memory.lo \
+am_libio_la_OBJECTS = base32.lo dbuf.lo event.lo hook.lo io_getopt.lo \
+	irc_string.lo list.lo log.lo match.lo misc.lo memory.lo \
 	patricia.lo rng_mt.lo sha3.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -142,7 +142,7 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/base32.Plo ./$(DEPDIR)/dbuf.Plo \
 	./$(DEPDIR)/event.Plo ./$(DEPDIR)/hook.Plo \
-	./$(DEPDIR)/irc_string.Plo ./$(DEPDIR)/ircd_getopt.Plo \
+	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/irc_string.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/rng_mt.Plo \
@@ -348,10 +348,10 @@ libio_la_SOURCES = base32.c      \
                     event.h       \
                     hook.c        \
                     hook.h        \
+                    io_getopt.c   \
+                    io_getopt.h   \
                     irc_string.c  \
                     irc_string.h  \
-                    ircd_getopt.c \
-                    ircd_getopt.h \
                     list.c        \
                     list.h        \
                     log.c         \
@@ -427,8 +427,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_getopt.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc_string.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_getopt.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Plo@am__quote@ # am--include-marker
@@ -602,8 +602,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/io_getopt.Plo
 	-rm -f ./$(DEPDIR)/irc_string.Plo
-	-rm -f ./$(DEPDIR)/ircd_getopt.Plo
 	-rm -f ./$(DEPDIR)/list.Plo
 	-rm -f ./$(DEPDIR)/log.Plo
 	-rm -f ./$(DEPDIR)/match.Plo
@@ -661,8 +661,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/io_getopt.Plo
 	-rm -f ./$(DEPDIR)/irc_string.Plo
-	-rm -f ./$(DEPDIR)/ircd_getopt.Plo
 	-rm -f ./$(DEPDIR)/list.Plo
 	-rm -f ./$(DEPDIR)/log.Plo
 	-rm -f ./$(DEPDIR)/match.Plo

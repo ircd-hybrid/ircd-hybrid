@@ -20,7 +20,7 @@
  */
 
 /**
- * @file ircd_getopt.c
+ * @file io_getopt.c
  * @brief Command-line option parsing utility, avoiding getopt_long().
  *
  * This file provides functionality for parsing command-line options using a custom
@@ -29,7 +29,7 @@
  */
 
 #include "stdinc.h"
-#include "ircd_getopt.h"
+#include "io_getopt.h"
 #include "memory.h"
 
 /**
@@ -46,13 +46,13 @@ static const unsigned char OPTCHAR = '-';
  * @brief Display usage information for the program.
  *
  * Displays the program's usage information, including valid options and their descriptions,
- * based on the provided lgetopt structure.
+ * based on the provided io_getopt structure.
  *
  * @param name The name of the program.
- * @param opts An array of lgetopt structures representing valid command-line options.
+ * @param opts An array of io_getopt structures representing valid command-line options.
  */
 static void
-ircd_getop_usage(const char *name, const struct lgetopt *opts)
+io_getopt_usage(const char *name, const struct io_getopt *opts)
 {
   fprintf(stderr, "Usage: %s [options]\n", name);
   fprintf(stderr, "Where valid options are:\n");
@@ -74,10 +74,10 @@ ircd_getop_usage(const char *name, const struct lgetopt *opts)
  *
  * @param argc Pointer to the argument count.
  * @param argv Pointer to the argument vector.
- * @param opts An array of lgetopt structures representing valid command-line options.
+ * @param opts An array of io_getopt structures representing valid command-line options.
  */
 void
-ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
+io_getopt(int *argc, char ***argv, struct io_getopt *opts)
 {
   const char *progname = (*argv)[0];
 
@@ -114,7 +114,7 @@ ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
             {
               fprintf(stderr, "Error: option '%c%s' requires an argument\n",
                       OPTCHAR, opts[i].opt);
-              ircd_getop_usage((*argv)[0], opts);
+              io_getopt_usage((*argv)[0], opts);
             }
 
             *((int *)opts[i].argloc) = atoi((*argv)[1]);
@@ -127,7 +127,7 @@ ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
             {
               fprintf(stderr, "Error: option '%c%s' requires an argument\n",
                       OPTCHAR, opts[i].opt);
-              ircd_getop_usage(progname, opts);
+              io_getopt_usage(progname, opts);
             }
 
             *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
@@ -136,11 +136,11 @@ ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
             break;
 
           case USAGE:
-            ircd_getop_usage(progname, opts);
+            io_getopt_usage(progname, opts);
             /* NOTREACHED */
 
           default:
-            fprintf(stderr, "Error: internal error in ircd_getop() at %s:%d\n",
+            fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n",
                     __FILE__, __LINE__);
             exit(EXIT_FAILURE);
         }
@@ -151,7 +151,7 @@ ircd_getopt(int *argc, char ***argv, struct lgetopt *opts)
     {
       fprintf(stderr, "Error: unknown argument '%c%s'\n",
               OPTCHAR, opt);
-      ircd_getop_usage(progname, opts);
+      io_getopt_usage(progname, opts);
     }
   }
 }

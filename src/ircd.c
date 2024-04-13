@@ -56,7 +56,7 @@
 #include "server_capab.h"
 #include "send.h"
 #include "modules.h"
-#include "ircd_getopt.h"
+#include "io_getopt.h"
 #include "conf_db.h"
 #include "conf_class.h"
 #include "ipcache.h"
@@ -164,10 +164,10 @@ bool doremotd;
 static bool printVersion;
 
 /**
- * @var struct lgetopt myopts[]
+ * @var struct io_getopt myopts[]
  * @brief Array of command-line options and their descriptions.
  */
-static struct lgetopt myopts[] =
+static struct io_getopt myopts[] =
 {
   { "configfile", &ConfigGeneral.configfile,
    STRING, "File to use for ircd.conf" },
@@ -521,7 +521,7 @@ main(int argc, char *argv[])
   myargv = argv;
   umask(077);  /* umask 077: u=rwx,g=,o= */
 
-  ircd_getopt(&argc, &argv, myopts);
+  io_getopt(&argc, &argv, myopts);
 
   if (printVersion)
   {

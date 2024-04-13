@@ -20,7 +20,7 @@
  */
 
 /**
- * @file ircd_getopt.h
+ * @file io_getopt.h
  * @brief Header for the lightweight command-line option parser avoiding getopt_long().
  *
  * This header provides structures and functions for parsing command-line options in a simple way,
@@ -31,14 +31,14 @@
 #define INCLUDED_ircd_getopt_h
 
 /**
- * @struct lgetopt
+ * @struct io_getopt
  * @brief Structure representing a command-line option.
  *
  * This structure contains information about a command-line option, including its
  * name, the location to store the argument (if any), the type of the argument,
  * and a description for usage and help printing.
  */
-struct lgetopt
+struct io_getopt
 {
   const char *opt;  /**< Name of the argument. */
   void *argloc;  /**< Location to store the argument to it (-option argument). */
@@ -46,5 +46,5 @@ struct lgetopt
   const char *desc;  /**< Description of the argument, usage for printing help. */
 };
 
-extern void ircd_getopt(int *, char ***, struct lgetopt *);
+extern void io_getopt(int *, char ***, struct io_getopt *);
 #endif /* INCLUDED_ircd_getopt_h */

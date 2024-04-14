@@ -34,6 +34,13 @@
 #include "memory.h"
 #include "irc_string.h"
 
+/**
+ * @brief Custom handler for out-of-memory conditions.
+ *
+ * This function pointer allows users to specify a custom handler to be called in case
+ * of memory allocation failure within the memory utility functions. By default, it
+ * is set to abort(), terminating the program.
+ */
 static void (*outofmemory)(void) = abort;
 
 /**

@@ -98,52 +98,52 @@ io_getopt(int *argc, char ***argv, struct io_getopt *opts)
     /* Search through our argument list, and see if it matches */
     for (unsigned int i = 0; opts[i].opt; ++i)
     {
-      if (strcmp(opts[i].opt, opt) == 0)
+      if (strcmp(opts[i].opt, opt))
+        continue;
+
+      /* Found our argument */
+      found = true;
+
+      switch (opts[i].argtype)
       {
-        /* Found our argument */
-        found = true;
+        case BOOLEAN:
+          *((bool *)opts[i].argloc) = true;
+          break;
 
-        switch (opts[i].argtype)
-        {
-          case BOOLEAN:
-            *((bool *)opts[i].argloc) = true;
-            break;
+        case INTEGER:
+          if (*argc < 2)
+          {
+            fprintf(stderr, "Error: option '%c%s' requires an argument\n",
+                    OPTCHAR, opts[i].opt);
+            io_getopt_usage((*argv)[0], opts);
+          }
 
-          case INTEGER:
-            if (*argc < 2)
-            {
-              fprintf(stderr, "Error: option '%c%s' requires an argument\n",
-                      OPTCHAR, opts[i].opt);
-              io_getopt_usage((*argv)[0], opts);
-            }
+          *((int *)opts[i].argloc) = atoi((*argv)[1]);
+          (*argc)--;
+          (*argv)++;
+          break;
 
-            *((int *)opts[i].argloc) = atoi((*argv)[1]);
-            (*argc)--;
-            (*argv)++;
-            break;
-
-          case STRING:
-            if (*argc < 2)
-            {
-              fprintf(stderr, "Error: option '%c%s' requires an argument\n",
-                      OPTCHAR, opts[i].opt);
-              io_getopt_usage(progname, opts);
-            }
-
-            *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
-            (*argc)--;
-            (*argv)++;
-            break;
-
-          case USAGE:
+        case STRING:
+          if (*argc < 2)
+          {
+            fprintf(stderr, "Error: option '%c%s' requires an argument\n",
+                    OPTCHAR, opts[i].opt);
             io_getopt_usage(progname, opts);
-            /* NOTREACHED */
+          }
 
-          default:
-            fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n",
-                    __FILE__, __LINE__);
-            exit(EXIT_FAILURE);
-        }
+          *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
+          (*argc)--;
+          (*argv)++;
+          break;
+
+        case USAGE:
+          io_getopt_usage(progname, opts);
+          /* NOTREACHED */
+
+        default:
+          fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n",
+                  __FILE__, __LINE__);
+          exit(EXIT_FAILURE);
       }
     }
 

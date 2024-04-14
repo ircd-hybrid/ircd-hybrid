@@ -22,6 +22,8 @@
 #ifndef INCLUDED_io_h
 #define INCLUDED_io_h
 
+#include <limits.h>
+
 #if defined PATH_MAX
 # define IO_PATH_MAX PATH_MAX
 #elif defined MAXPATHLEN

@@ -31,6 +31,7 @@
 #ifndef INCLUDED_fdlist_h
 #define INCLUDED_fdlist_h
 
+#include "io.h"
 #include "ircd_defs.h"
 #include "tls.h"
 
@@ -103,6 +104,6 @@ extern fde_t *fd_table;  /**< File descriptor table. */
 extern void fdlist_init(void);
 extern fde_t *fd_open(int, bool, const char *);
 extern fde_t *fd_close(fde_t *);
-extern void fd_note(fde_t *, const char *, ...);
+extern void fd_note(fde_t *, const char *, ...) IO_AFP(2,3);
 extern void close_fds(void);
 #endif  /* INCLUDED_fdlist_h */

@@ -127,7 +127,7 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
 static bool
 log_rotate(struct Log *log)
 {
-  char new_file_name[PATH_MAX];
+  char new_file_name[IO_PATH_MAX];
   unsigned int attempt = 0;
 
   /* Attempt to find an available filename for rotation. */

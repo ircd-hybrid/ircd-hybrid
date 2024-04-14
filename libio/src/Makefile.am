@@ -9,6 +9,7 @@ libio_la_SOURCES =  base32.c      \
                     event.h       \
                     hook.c        \
                     hook.h        \
+                    io.h          \
                     io_getopt.c   \
                     io_getopt.h   \
                     irc_string.c  \

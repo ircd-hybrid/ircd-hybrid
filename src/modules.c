@@ -295,7 +295,7 @@ load_all_modules(bool warn)
 {
   DIR *system_module_dir = NULL;
   struct dirent *ldirent = NULL;
-  char module_fq_name[HYB_PATH_MAX + 1];
+  char module_fq_name[IO_PATH_MAX + 1];
 
   if ((system_module_dir = opendir(AUTOMODPATH)) == NULL)
   {
@@ -346,7 +346,7 @@ load_conf_modules(void)
 void
 load_core_modules(bool warn)
 {
-  char module_name[HYB_PATH_MAX + 1];
+  char module_name[IO_PATH_MAX + 1];
 
   for (unsigned int i = 0; core_module_table[i]; ++i)
   {
@@ -372,7 +372,7 @@ bool
 load_one_module(const char *name)
 {
   list_node_t *node;
-  char path[HYB_PATH_MAX + 1];
+  char path[IO_PATH_MAX + 1];
   struct stat statbuf;
 
   LIST_FOREACH(node, modules_path.head)

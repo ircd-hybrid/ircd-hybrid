@@ -32,6 +32,8 @@
 #ifndef INCLUDED_log_h
 #define INCLUDED_log_h
 
+#include "io.h"
+
 /**
  * @enum log_type
  * @brief Enumerates different log types for classifying log entries.
@@ -73,5 +75,5 @@ struct Log
 extern struct Log *log_add(enum log_type, bool, size_t, const char *);
 extern void log_destroy(struct Log *);
 extern void log_clear(void);
-extern void log_write(enum log_type, const char *, ...) AFP(2,3);
+extern void log_write(enum log_type, const char *, ...) IO_AFP(2,3);
 #endif  /* INCLUDED_log_h */

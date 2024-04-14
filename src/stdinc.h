@@ -73,17 +73,4 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-
-#ifdef PATH_MAX
-#define HYB_PATH_MAX PATH_MAX
-#else
-#define HYB_PATH_MAX 4096
-#endif
-
-#if 0 && __GNUC__
-#define AFP(a,b) __attribute__((format (printf, a, b)))
-#else
-#define AFP(a,b)
-#endif
-
 #endif  /* INCLUDED_stdinc_h */

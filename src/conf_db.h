@@ -27,14 +27,16 @@
 #ifndef INCLUDED_conf_db_h
 #define INCLUDED_conf_db_h
 
+#include "io.h"
+
 enum { KLINE_DB_VERSION = 1 };
 
 struct dbFILE
 {
   char mode;  /**< 'r' for reading, 'w' for writing */
   FILE *fp;  /**< The file pointer itself */
-  char filename[HYB_PATH_MAX + 1];  /**< Name of the database file */
-  char tempname[HYB_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
+  char filename[IO_PATH_MAX + 1];  /**< Name of the database file */
+  char tempname[IO_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
 };
 
 extern bool read_uint16(uint16_t *, struct dbFILE *);

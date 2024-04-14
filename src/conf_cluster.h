@@ -27,6 +27,8 @@
 #ifndef INCLUDED_conf_cluster_h
 #define INCLUDED_conf_cluster_h
 
+#include "io.h"
+
 /**
  * @brief Configuration options for clustering.
  *
@@ -66,5 +68,5 @@ struct ClusterItem
 extern const list_t *cluster_get_list(void);
 extern void cluster_clear(void);
 extern struct ClusterItem *cluster_make(void);
-extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...) AFP(5,6);
+extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
 #endif  /* INCLUDED_conf_cluster_h */

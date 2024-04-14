@@ -30,7 +30,10 @@
  * for specific character properties relevant to IRC standards.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdbool.h>
+
 #include "irc_string.h"
 
 /**

@@ -27,8 +27,6 @@
  * reallocation, and deallocation, as well as string duplication functions.
  */
 
-#include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>

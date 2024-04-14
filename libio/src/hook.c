@@ -36,7 +36,7 @@
 
 #include "list.h"
 #include "memory.h"
-//#include "event.h"
+#include "event.h"
 #include "hook.h"
 
 /**
@@ -125,7 +125,7 @@ void *
 hook_run_chain(struct HookContainer *container, ...)
 {
   container->called++;
-//  container->last = event_base->time.sec_monotonic;
+  container->last = event_base->time.sec_monotonic;
 
   /* Check if the hook chain is empty. */
   if (list_length(&container->chain) == 0)

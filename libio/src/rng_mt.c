@@ -42,7 +42,7 @@
 
 */
 
-#include "stdinc.h"
+#include <stdint.h>
 #include "rng_mt.h"
 
 /* Period parameters */

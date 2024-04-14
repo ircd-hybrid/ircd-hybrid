@@ -31,24 +31,24 @@
 #define INCLUDED_auth_h
 
 /**
- * @var RFC1413_BUFSIZE
+ * @var AUTH_BUFSIZE
  * @brief Maximum buffer size for RFC 1413 ident replies.
  *
- * The RFC1413_BUFSIZE constant represents the maximum buffer size, in bytes, that is
+ * The AUTH_BUFSIZE constant represents the maximum buffer size, in bytes, that is
  * allowed for RFC 1413 ident replies. According to the RFC 1413 standard, a server
  * should not send more than 512 octets of user ID and a client must accept at least
  * 512 octets of user ID.
  */
-enum { RFC1413_BUFSIZE = 512 };
+enum { AUTH_BUFSIZE = 512 };
 
 /**
- * @var RFC1413_PORTNUM
+ * @var AUTH_PORTNUM
  * @brief Port number for the (Ident) server.
  *
- * The RFC1413_PORTNUM constant represents the TCP port number (113) on which the
+ * The AUTH_PORTNUM constant represents the TCP port number (113) on which the
  * Ident server listens, adhering to the guidelines outlined in RFC 1413.
  */
-enum { RFC1413_PORTNUM = 113 };
+enum { AUTH_PORTNUM = 113 };
 
 struct Client;
 

@@ -848,11 +848,11 @@ exit_client(struct Client *client, const char *comment)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s was connected for %s. %ju/%ju sendK/recvK.",
-                           client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic),
+                           client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic),
                            client->connection->send.bytes >> 10,
                            client->connection->recv.bytes >> 10);
       log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
-                client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic),
+                client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic),
                 client->connection->send.bytes >> 10,
                 client->connection->recv.bytes >> 10);
     }
@@ -939,7 +939,7 @@ dead_link_on_read(struct Client *client, int error)
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s was connected for %s",
-                         client->name, time_dissect(event_base->time.sec_monotonic - client->connection->created_monotonic));
+                         client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic));
   }
 
   if (error == 0)

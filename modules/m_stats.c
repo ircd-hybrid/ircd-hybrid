@@ -816,7 +816,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 
     const char *duration = "n/a";
     if (HasUMode(client, UMODE_OPER) || !HasUMode(target, UMODE_HIDEIDLE))
-      duration = time_dissect(client_get_idle_time(client, target));
+      duration = time_format_duration(client_get_idle_time(client, target));
 
     if (MyConnect(client) && HasUMode(client, UMODE_OPER))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
@@ -951,7 +951,7 @@ stats_uptime(struct Client *client, int parc, char *parv[])
   else
   {
     sendto_one_numeric(client, &me, RPL_STATSUPTIME,
-                       time_dissect(event_base->time.sec_monotonic - me.connection->created_monotonic));
+                       time_format_duration(event_base->time.sec_monotonic - me.connection->created_monotonic));
     if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(client, UMODE_OPER))
        sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
@@ -981,7 +981,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
                        target->name, (target->serv->by[0] ? target->serv->by : "Remote."),
-                       "*", "*", time_dissect(event_base->time.sec_monotonic - target->connection->last_data));
+                       "*", "*", time_format_duration(event_base->time.sec_monotonic - target->connection->last_data));
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",

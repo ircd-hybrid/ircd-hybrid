@@ -156,7 +156,7 @@ date_ctime(uintmax_t lclock)
  * @return Formatted duration string.
  */
 const char *
-time_dissect(uintmax_t duration)
+time_format_duration(uintmax_t duration)
 {
   static char buf[32];  /* 32 = sizeof("9999999999999999 days, 23:59:59") */
   unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;

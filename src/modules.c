@@ -293,24 +293,22 @@ findmodule_byname(const char *name)
 void
 load_all_modules(bool warn)
 {
-  DIR *system_module_dir = NULL;
-  struct dirent *ldirent = NULL;
-  char module_fq_name[IO_PATH_MAX + 1];
-
-  if ((system_module_dir = opendir(AUTOMODPATH)) == NULL)
+  DIR *system_module_dir = opendir(AUTOMODPATH);
+  if (system_module_dir == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Could not load modules from %s: %s",
               AUTOMODPATH, strerror(errno));
     return;
   }
 
+  struct dirent *ldirent;
   while ((ldirent = readdir(system_module_dir)))
   {
     if (modules_valid_suffix(ldirent->d_name))
     {
-       snprintf(module_fq_name, sizeof(module_fq_name), "%s/%s",
-                AUTOMODPATH, ldirent->d_name);
-       load_a_module(module_fq_name, warn);
+       char path[IO_PATH_MAX + 1];
+       snprintf(path, sizeof(path), "%s/%s", AUTOMODPATH, ldirent->d_name);
+       load_a_module(path, warn);
     }
   }
 
@@ -346,13 +344,12 @@ load_conf_modules(void)
 void
 load_core_modules(bool warn)
 {
-  char module_name[IO_PATH_MAX + 1];
-
   for (unsigned int i = 0; core_module_table[i]; ++i)
   {
-    snprintf(module_name, sizeof(module_name), "%s%s", MODPATH, core_module_table[i]);
+    char path[IO_PATH_MAX + 1];
+    snprintf(path, sizeof(path), "%s%s", MODPATH, core_module_table[i]);
 
-    if (load_a_module(module_name, warn) == false)
+    if (load_a_module(path, warn) == false)
     {
       log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd",
                 core_module_table[i]);
@@ -372,18 +369,18 @@ bool
 load_one_module(const char *name)
 {
   list_node_t *node;
-  char path[IO_PATH_MAX + 1];
-  struct stat statbuf;
 
   LIST_FOREACH(node, modules_path.head)
   {
     const struct module_path *mpath = node->data;
 
-    snprintf(path, sizeof(path), "%s/%s", mpath->path, name);
-
     if (modules_valid_suffix(name) == false)
       continue;
 
+    char path[IO_PATH_MAX + 1];
+    snprintf(path, sizeof(path), "%s/%s", mpath->path, name);
+
+    struct stat statbuf;
     if (strstr(path, "../") == NULL &&
         strstr(path, "/..") == NULL)
       if (stat(path, &statbuf) == 0)

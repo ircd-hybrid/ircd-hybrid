@@ -509,10 +509,10 @@ res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
   ssize_t rc;
-  socklen_t len = sizeof(struct irc_ssaddr);
-  struct irc_ssaddr lsin;
+  struct irc_ssaddr addr;
+  socklen_t len = sizeof(addr);
 
-  while ((rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&lsin, &len)) != -1)
+  while ((rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len)) != -1)
   {
     if (rc <= (ssize_t)sizeof(HEADER))
       continue;
@@ -520,7 +520,7 @@ res_readreply(fde_t *F, void *data)
     /*
      * Check against possibly fake replies
      */
-    if (res_ourserver(&lsin) == false)
+    if (res_ourserver(&addr) == false)
       continue;
 
     /*

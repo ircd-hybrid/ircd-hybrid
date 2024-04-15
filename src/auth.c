@@ -317,7 +317,6 @@ enum IdentReplyFields
 static const char *
 auth_check_ident_reply(char *const reply)
 {
-  char *token = NULL, *end = NULL;
   char *vector[USERID_TOKEN_COUNT];
   const unsigned int count = token_vector(reply, ':', vector, USERID_TOKEN_COUNT);
 
@@ -327,7 +326,7 @@ auth_check_ident_reply(char *const reply)
   /*
    * Second token is the reply type
    */
-  token = vector[IDENT_REPLY_TYPE];
+  char *token = vector[IDENT_REPLY_TYPE];
 
   if (EmptyString(token))
     return NULL;
@@ -382,6 +381,7 @@ auth_check_ident_reply(char *const reply)
   /*
    * Look for the end of the username, terminators are '\0, @, <SPACE>, :'
    */
+  char *end;
   for (end = token; *end; ++end)
     if (IsSpace(*end) || '@' == *end || ':' == *end)
       break;
@@ -435,9 +435,9 @@ auth_read_reply(fde_t *F, void *data)
   else
   {
     strlcpy(auth->client->username, username, sizeof(auth->client->username));
+    AddFlag(auth->client, FLAGS_GOTID);
     auth_sendheader(auth->client, REPORT_FIN_ID);
     ++ServerStats.is_asuc;
-    AddFlag(auth->client, FLAGS_GOTID);
   }
 
   auth_release_client(auth);
@@ -467,14 +467,6 @@ static void
 auth_connect_callback(fde_t *F, int error, void *data)
 {
   struct AuthRequest *const auth = data;
-  struct irc_ssaddr us;
-  struct irc_ssaddr them;
-  char authbuf[16];
-  ssize_t len = 0;
-  socklen_t ulen = sizeof(struct irc_ssaddr);
-  socklen_t tlen = sizeof(struct irc_ssaddr);
-  uint16_t uport, tport;
-  struct sockaddr_in6 *v6;
 
   assert(auth->fd == F);
   assert(auth->client);
@@ -486,6 +478,10 @@ auth_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
+  struct irc_ssaddr us;
+  struct irc_ssaddr them;
+  socklen_t ulen = sizeof(struct irc_ssaddr);
+  socklen_t tlen = sizeof(struct irc_ssaddr);
   if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
   {
@@ -495,12 +491,14 @@ auth_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  v6 = (struct sockaddr_in6 *)&us;
-  uport = ntohs(v6->sin6_port);
-  v6 = (struct sockaddr_in6 *)&them;
-  tport = ntohs(v6->sin6_port);
+  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&us;
+  uint16_t uport = ntohs(v6->sin6_port);
 
-  len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
+  v6 = (struct sockaddr_in6 *)&them;
+  uint16_t tport = ntohs(v6->sin6_port);
+
+  char authbuf[16];
+  ssize_t len = snprintf(authbuf, sizeof(authbuf), "%u, %u\r\n", tport, uport);
 
   if (send(F->fd, authbuf, len, 0) != len)
   {
@@ -530,8 +528,7 @@ static void
 auth_start_query(struct AuthRequest *auth)
 {
   struct irc_ssaddr localaddr;
-  socklen_t locallen = sizeof(struct irc_ssaddr);
-  struct sockaddr_in6 *v6;
+  socklen_t locallen = sizeof(localaddr);
 
   assert(auth->client);
   assert(auth->client->connection);
@@ -559,7 +556,8 @@ auth_start_query(struct AuthRequest *auth)
   getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&localaddr, &locallen);
 
   remove_ipv6_mapping(&localaddr);
-  v6 = (struct sockaddr_in6 *)&localaddr;
+
+  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);
 
   comm_connect_tcp(auth->fd, &auth->client->addr, AUTH_PORTNUM, &localaddr,

@@ -430,13 +430,10 @@ hash_get_bucket(int type, unsigned int hashv)
   {
     case HASH_TYPE_ID:
       return idTable[hashv];
-      break;
     case HASH_TYPE_CHANNEL:
       return channelTable[hashv];
-      break;
     case HASH_TYPE_CLIENT:
       return clientTable[hashv];
-      break;
     default:
       assert(0);
   }

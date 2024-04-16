@@ -4452,5 +4452,11 @@ conf_eof(void)
 
   strlcpy(conffilebuf, file->conffile, sizeof(conffilebuf));
   return false;
+
+  /*
+   * The following call to yy_fatal_error(NULL) is intentionally placed after the return statement
+   * to silence the warning about yy_fatal_error being defined but not used.
+   */
+  yy_fatal_error(NULL);
 }
 

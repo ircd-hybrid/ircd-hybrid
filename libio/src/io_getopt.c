@@ -28,6 +28,7 @@
  * simple interface for specifying valid options along with their types and descriptions.
  */
 
+#include <stdnoreturn.h>
 #include "stdinc.h"
 #include "io_getopt.h"
 #include "memory.h"
@@ -51,7 +52,7 @@ static const unsigned char OPTCHAR = '-';
  * @param name The name of the program.
  * @param opts An array of io_getopt structures representing valid command-line options.
  */
-static void
+static noreturn void
 io_getopt_usage(const char *name, const struct io_getopt *opts)
 {
   fprintf(stderr, "Usage: %s [options]\n", name);

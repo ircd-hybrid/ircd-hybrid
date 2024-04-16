@@ -69,6 +69,6 @@
 struct irc_ssaddr
 {
   struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
-  unsigned char ss_len;  /**< Length of the sockaddr_storage. */
+  socklen_t ss_len;  /**< Length of the sockaddr_storage. */
 };
 #endif /* INCLUDED_ircd_defs_h */

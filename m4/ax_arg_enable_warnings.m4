@@ -29,6 +29,7 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wtype-limits])
     AX_APPEND_COMPILE_FLAGS([-Wundef])
     AX_APPEND_COMPILE_FLAGS([-Wuninitialized])
+    AX_APPEND_COMPILE_FLAGS([-Wunreachable-code-break])
     AX_APPEND_COMPILE_FLAGS([-Wwrite-strings])
   ])
 ])

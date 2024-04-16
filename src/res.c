@@ -460,7 +460,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         v4->sin_family = AF_INET;
         memcpy(&v4->sin_addr, current, sizeof(struct in_addr));
         return true;
-        break;
 
       case T_AAAA:
         if (request->type != T_AAAA)
@@ -474,7 +473,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         v6->sin6_family = AF_INET6;
         memcpy(&v6->sin6_addr, current, sizeof(struct in6_addr));
         return true;
-        break;
 
       case T_PTR:
         if (request->type != T_PTR)
@@ -486,7 +484,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
 
         request->name_len = strlcpy(request->name, hostbuf, sizeof(request->name));
         return true;
-        break;
 
       case T_CNAME:
         current += rd_length;
@@ -494,7 +491,6 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
 
       default:
         return false;
-        break;
     }
   }
 

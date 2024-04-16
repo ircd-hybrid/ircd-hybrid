@@ -165,10 +165,8 @@ map_to_list(enum maskitem_type type)
   {
     case CONF_OPER:
       return &operator_items;
-      break;
     case CONF_SERVER:
       return &connect_items;
-      break;
     default:
       return NULL;
   }

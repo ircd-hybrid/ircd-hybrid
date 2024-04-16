@@ -199,10 +199,8 @@ open_db(const char *filename, const char *mode, uint32_t version)
   {
     case 'r':
       return open_db_read(filename);
-      break;
     case 'w':
       return open_db_write(filename, version);
-      break;
     default:
       errno = EINVAL;
       return NULL;

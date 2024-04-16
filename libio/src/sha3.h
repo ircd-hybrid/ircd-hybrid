@@ -1,5 +1,5 @@
-#ifndef SHA3_H
-#define SHA3_H
+#ifndef INCLUDED_sha3_h
+#define INCLUDED_sha3_h
 
 #include <stdint.h>
 
@@ -62,4 +62,4 @@ extern void sha3_Init512(void *);
 extern enum SHA3_FLAGS sha3_SetFlags(void *, enum SHA3_FLAGS);
 extern void sha3_Update(void *, void const *, size_t);
 extern void const *sha3_Finalize(void *);
-#endif
+#endif  /* INCLUDED_sha3_h */

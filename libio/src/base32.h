@@ -22,8 +22,8 @@
  * THE SOFTWARE.
  **/
 
-#ifndef __BASE32_H_
-#define __BASE32_H_
+#ifndef INCLUDED_base32_h
+#define INCLUDED_base32_h
 
 #include <stddef.h>  /* size_t */
 #include <stdbool.h>
@@ -119,4 +119,4 @@ extern void base32_encode(base32_context *, const unsigned char *, size_t, unsig
  * in the coded string, decoding will stop at that point.
  **/
 extern size_t base32_decode(base32_context *, const unsigned char *, unsigned char *);
-#endif
+#endif  /* INCLUDED_base32_h */

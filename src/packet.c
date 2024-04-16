@@ -84,7 +84,7 @@ extract_one_line(struct dbuf_queue *qptr, char *buffer)
   LIST_FOREACH(node, qptr->blocks.head)
   {
     const struct dbuf_block *block = node->data;
-    unsigned int idx;
+    size_t idx;
 
     if (node == qptr->blocks.head)
       idx = qptr->pos;

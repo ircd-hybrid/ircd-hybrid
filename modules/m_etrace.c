@@ -46,54 +46,50 @@
  * side effects - NONE
  */
 static void
-report_this_status(struct Client *source_p, const struct Client *target_p)
+trace_send_status(struct Client *source, const struct Client *target)
 {
-  if (target_p->status != STAT_CLIENT)
+  if (target->status != STAT_CLIENT)
     return;
 
-  sendto_one_numeric(source_p, &me, RPL_ETRACE,
-                     HasUMode(target_p, UMODE_OPER) ? "Oper" : "User",
-                     class_get_name(&target_p->connection->confs),
-                     target_p->name,
-                     target_p->username,
-                     target_p->host,
-                     target_p->sockhost,
-                     target_p->info);
+  sendto_one_numeric(source, &me, RPL_ETRACE,
+                     HasUMode(target, UMODE_OPER) ? "Oper" : "User",
+                     class_get_name(&target->connection->confs),
+                     target->name, target->username, target->host, target->sockhost, target->info);
 }
 
 /*
  * do_etrace()
  */
 static void
-do_etrace(struct Client *source_p, const char *name)
+do_etrace(struct Client *source, const char *name)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
 
   bool doall = false;
   if (EmptyString(name))
     doall = true;
   else if (match(name, me.name) == 0)
     doall = true;
-  else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
+  else if (!MyClient(source) && strcmp(name, me.id) == 0)
     doall = true;
 
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target_p = node->data;
+    const struct Client *target = node->data;
 
-    if (doall || match(name, target_p->name) == 0)
-      report_this_status(source_p, target_p);
+    if (doall || match(name, target->name) == 0)
+      trace_send_status(source, target);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ETRACEEND, me.name);
+  sendto_one_numeric(source, &me, RPL_ETRACEEND, me.name);
 }
 
 /*! \brief ETRACE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -104,21 +100,21 @@ do_etrace(struct Client *source_p, const char *name)
  *      - parv[2] = nick or server name to forward the etrace to
  */
 static void
-mo_etrace(struct Client *source_p, int parc, char *parv[])
+mo_etrace(struct Client *source, int parc, char *parv[])
 {
   if (parc > 2)
-    if (server_hunt(source_p, ":%s ETRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s ETRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
-  const struct server_hunt *hunt = server_hunt(source_p, ":%s ETRACE :%s", 1, parv);
+  const struct server_hunt *hunt = server_hunt(source, ":%s ETRACE :%s", 1, parv);
   switch (hunt->ret)
   {
     case HUNTED_PASS:
-      sendto_one_numeric(source_p, &me, RPL_TRACELINK,
+      sendto_one_numeric(source, &me, RPL_TRACELINK,
                          IRCD_VERSION, hunt->target->name, hunt->target->from->name);
       break;
     case HUNTED_ISME:
-      do_etrace(source_p, parv[1]);
+      do_etrace(source, parv[1]);
       break;
     default:
       break;

@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "misc.h"
 #include "memory.h"
+#include "irc_string.h"
 
 /**
  * @def TRUNCATED_STRING
@@ -225,7 +226,7 @@ log_write(enum log_type type, const char *format, ...)
 
       /* Check if log message was truncated. */
       if (length >= sizeof(buffer))
-        snprintf(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), sizeof(TRUNCATED_STRING), TRUNCATED_STRING);
+        strlcpy(buffer + LOG_MAX_LENGTH - sizeof(TRUNCATED_STRING), TRUNCATED_STRING, sizeof(TRUNCATED_STRING));
 
       /* Check if log file exceeds the maximum size, rotate if needed. */
       if (log->main == false && log_rotate_due(log))

@@ -81,13 +81,13 @@ struct WhoQuery
 
 
 /*! \brief Send a WHO reply to a client who asked.
- * \param source_p Pointer to client requesting who.
- * \param target_p Client who is shown to \a source_p.
+ * \param source Pointer to client requesting who.
+ * \param target Client who is shown to \a source.
  * \param member ChannelMember pointer of a shared channel that provides visibility.
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_send(struct Client *source_p, const struct Client *target_p,
+who_send(struct Client *source, const struct Client *target,
          const struct ChannelMember *member, const struct WhoQuery *who)
 {
   char buf[IRCD_BUFSIZE];
@@ -105,11 +105,11 @@ who_send(struct Client *source_p, const struct Client *target_p,
     if (who->fields == 0 || (who->fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
     {
       list_node_t *node;
-      LIST_FOREACH(node, target_p->channel.head)
+      LIST_FOREACH(node, target->channel.head)
       {
         member = node->data;
 
-        if (PubChannel(member->channel) || source_p == target_p || member_find_link(source_p, member->channel))
+        if (PubChannel(member->channel) || source == target || member_find_link(source, member->channel))
           break;
         member = NULL;
       }
@@ -133,76 +133,76 @@ who_send(struct Client *source_p, const struct Client *target_p,
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", member ? member->channel->name : "*");
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_UID))
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->username);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->username);
 
   if ((who->fields & WHO_FIELD_NIP))
   {
-    if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->sockhost);
+    if (HasUMode(source, UMODE_OPER) || source == target)
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->sockhost);
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", "255.255.255.255");
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_HOS))
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->host);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->host);
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_SER))
   {
-    if (!HasUMode(source_p, UMODE_OPER) &&
-        (ConfigServerHide.hide_servers || IsHidden(target_p->servptr)))
+    if (!HasUMode(source, UMODE_OPER) &&
+        (ConfigServerHide.hide_servers || IsHidden(target->servptr)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", ConfigServerHide.hidden_name);
     else
-      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->servptr->name);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->servptr->name);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_NIC))
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->name);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->name);
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_FLA))
   {
     char status[16];
 
-    if (HasUMode(source_p, UMODE_OPER))
-      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target_p->away[0] ? 'G' : 'H',
-               HasUMode(target_p, UMODE_BOT) ? "B" : "",
-               HasUMode(target_p, UMODE_SECURE) ? "z" : "",
-               HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
-               HasUMode(target_p, UMODE_OPER) ? "*" : "",
-               member ? member_get_prefix(member, who->fields || !!HasCap(source_p, CAP_MULTI_PREFIX)) : "");
+    if (HasUMode(source, UMODE_OPER))
+      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target->away[0] ? 'G' : 'H',
+               HasUMode(target, UMODE_BOT) ? "B" : "",
+               HasUMode(target, UMODE_SECURE) ? "z" : "",
+               HasUMode(target, UMODE_REGISTERED) ? "r" : "",
+               HasUMode(target, UMODE_OPER) ? "*" : "",
+               member ? member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX)) : "");
 
     else
-      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target_p->away[0] ? 'G' : 'H',
-               HasUMode(target_p, UMODE_BOT) ? "B" : "",
-               HasUMode(target_p, UMODE_SECURE) ? "z" : "",
-               HasUMode(target_p, UMODE_REGISTERED) ? "r" : "",
-               HasUMode(target_p, UMODE_OPER) &&
-               !HasUMode(target_p, UMODE_HIDDEN) ? "*" : "",
-               member ? member_get_prefix(member, who->fields || !!HasCap(source_p, CAP_MULTI_PREFIX)) : "");
+      snprintf(status, sizeof(status), "%c%s%s%s%s%s", target->away[0] ? 'G' : 'H',
+               HasUMode(target, UMODE_BOT) ? "B" : "",
+               HasUMode(target, UMODE_SECURE) ? "z" : "",
+               HasUMode(target, UMODE_REGISTERED) ? "r" : "",
+               HasUMode(target, UMODE_OPER) &&
+               !HasUMode(target, UMODE_HIDDEN) ? "*" : "",
+               member ? member_get_prefix(member, who->fields || !!HasCap(source, CAP_MULTI_PREFIX)) : "");
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", status);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_DIS))
   {
-    if (!HasUMode(source_p, UMODE_OPER) &&
-        (ConfigServerHide.hide_servers || IsHidden(target_p->servptr)))
+    if (!HasUMode(source, UMODE_OPER) &&
+        (ConfigServerHide.hide_servers || IsHidden(target->servptr)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", 0);
     else
-      p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", target_p->hopcount);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", target->hopcount);
   }
 
   if ((who->fields & WHO_FIELD_IDL))
   {
-    if (MyClient(target_p) &&
-        (HasUMode(source_p, UMODE_OPER) || target_p == source_p))
-      p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source_p, target_p));
+    if (MyClient(target) &&
+        (HasUMode(source, UMODE_OPER) || target == source))
+      p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source, target));
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", 0);
   }
 
   if ((who->fields & WHO_FIELD_ACC))
   {
-    if (strcmp(target_p->account, "*"))
-      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target_p->account);
+    if (strcmp(target->account, "*"))
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->account);
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", "0");
   }
@@ -211,101 +211,101 @@ who_send(struct Client *source_p, const struct Client *target_p,
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", "n/a");
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_REN))
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s%s", who->fields ? ":" : "", target_p->info);
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s%s", who->fields ? ":" : "", target->info);
                                 /* Place colon here for special reply ^ */
 
-  sendto_one_numeric(source_p, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, buf + 1);
+  sendto_one_numeric(source, &me, who->fields ? RPL_WHOSPCRPL : RPL_WHOREPLY, buf + 1);
 }
 
 /*!
- * \param source_p Pointer to client requesting who.
- * \param target_p Pointer to client to do who on.
+ * \param source Pointer to client requesting who.
+ * \param target Pointer to client to do who on.
  * \param mask Mask to match.
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  * \return true if mask matches, false otherwise.
  */
 static bool
-who_matches(struct Client *source_p, const struct Client *target_p,
+who_matches(struct Client *source, const struct Client *target,
             const char *mask, const struct WhoQuery *who)
 {
   if ((who->bitsel & WHOSELECT_OPER))
-    if (!HasUMode(target_p, UMODE_OPER) ||
-        (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
+    if (!HasUMode(target, UMODE_OPER) ||
+        (HasUMode(target, UMODE_HIDDEN) && !HasUMode(source, UMODE_OPER)))
       return false;
 
   if (mask == NULL)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_NIC) && match(mask, target_p->name) == 0)
+  if ((who->matchsel & WHO_FIELD_NIC) && match(mask, target->name) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_UID) && match(mask, target_p->username) == 0)
+  if ((who->matchsel & WHO_FIELD_UID) && match(mask, target->username) == 0)
     return true;
 
   if ((who->matchsel & WHO_FIELD_HOS))
   {
-    if (match(mask, target_p->host) == 0)
+    if (match(mask, target->host) == 0)
       return true;
-    else if (HasUMode(source_p, UMODE_OPER) && match(mask, target_p->realhost) == 0)
+    if (HasUMode(source, UMODE_OPER) && match(mask, target->realhost) == 0)
       return true;
   }
 
-  if ((who->matchsel & WHO_FIELD_REN) && match(mask, target_p->info) == 0)
+  if ((who->matchsel & WHO_FIELD_REN) && match(mask, target->info) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_ACC) && match(mask, target_p->account) == 0)
+  if ((who->matchsel & WHO_FIELD_ACC) && match(mask, target->account) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_NIP) && HasUMode(source_p, UMODE_OPER))
+  if ((who->matchsel & WHO_FIELD_NIP) && HasUMode(source, UMODE_OPER))
   {
     struct irc_ssaddr addr;
     int bits = 0;
     const int ret = parse_netmask(mask, &addr, &bits);
 
     if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_compare(&target_p->addr, &addr, false, false, bits))
+      if (address_compare(&target->addr, &addr, false, false, bits))
         return true;
 
-    if (match(mask, target_p->sockhost) == 0)
+    if (match(mask, target->sockhost) == 0)
       return true;
   }
 
   if ((who->matchsel & WHO_FIELD_SER))
-    if (HasUMode(source_p, UMODE_OPER) ||
-        (ConfigServerHide.hide_servers == 0 && !IsHidden(target_p->servptr)))
-      if (match(mask, target_p->servptr->name) == 0)
+    if (HasUMode(source, UMODE_OPER) ||
+        (ConfigServerHide.hide_servers == 0 && !IsHidden(target->servptr)))
+      if (match(mask, target->servptr->name) == 0)
         return true;
 
   return false;
 }
 
 /*! \brief Lists matching clients on specified channel. Marks matched clients.
- * \param source_p Pointer to client requesting who.
+ * \param source Pointer to client requesting who.
  * \param channel Pointer to channel member chain.
  * \param mask Mask to match.
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_on_common_channel(struct Client *source_p, struct Channel *channel, const char *mask,
-                      struct WhoQuery *who)
+who_on_common_channel(struct Client *source, struct Channel *channel,
+                      const char *mask, struct WhoQuery *who)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
-    struct Client *target_p = member->client;
+    struct Client *target = member->client;
 
-    if (!HasUMode(target_p, UMODE_INVISIBLE) || HasFlag(target_p, FLAGS_MARK))
+    if (!HasUMode(target, UMODE_INVISIBLE) || HasFlag(target, FLAGS_MARK))
       continue;
 
-    AddFlag(target_p, FLAGS_MARK);
+    AddFlag(target, FLAGS_MARK);
 
     if (who->maxmatches)
     {
-      if (who_matches(source_p, target_p, mask, who))
+      if (who_matches(source, target, mask, who))
       {
-        who_send(source_p, target_p, member, who);
+        who_send(source, target, member, who);
         --who->maxmatches;
       }
     }
@@ -313,21 +313,20 @@ who_on_common_channel(struct Client *source_p, struct Channel *channel, const ch
 }
 
 /*! \brief Does a global scan of all clients looking for match.
- * \param source_p Pointer to client requesting who.
+ * \param source Pointer to client requesting who.
  * \param mask Mask to match.
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
+who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 {
-  list_node_t *node;
   static uintmax_t last_used = 0;
 
-  if (!HasUMode(source_p, UMODE_OPER))
+  if (!HasUMode(source, UMODE_OPER))
   {
     if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
     {
-      sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHO");
+      sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHO");
       return;
     }
 
@@ -335,30 +334,31 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
   }
 
   /* First, list all matching invisible clients on common channels */
-  LIST_FOREACH(node, source_p->channel.head)
+  list_node_t *node;
+  LIST_FOREACH(node, source->channel.head)
   {
     struct ChannelMember *member = node->data;
-    who_on_common_channel(source_p, member->channel, mask, who);
+    who_on_common_channel(source, member->channel, mask, who);
   }
 
   /* Second, list all matching visible clients */
   LIST_FOREACH(node, global_client_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    assert(IsClient(target_p));
+    assert(IsClient(target));
 
-    if (HasUMode(target_p, UMODE_INVISIBLE))
+    if (HasUMode(target, UMODE_INVISIBLE))
     {
-      DelFlag(target_p, FLAGS_MARK);
+      DelFlag(target, FLAGS_MARK);
       continue;
     }
 
     if (who->maxmatches)
     {
-      if (who_matches(source_p, target_p, mask, who))
+      if (who_matches(source, target, mask, who))
       {
-        who_send(source_p, target_p, NULL, who);
+        who_send(source, target, NULL, who);
         --who->maxmatches;
       }
     }
@@ -366,16 +366,16 @@ who_global(struct Client *source_p, const char *mask, struct WhoQuery *who)
 }
 
 /*! \brief Does a WHO on given channel.
- * \param source_p Pointer to client requesting who.
+ * \param source Pointer to client requesting who.
  * \param channel Pointer to channel to do who on.
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_on_channel(struct Client *source_p, struct Channel *channel, const struct WhoQuery *who)
+who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQuery *who)
 {
   bool is_member = false;
 
-  if (HasUMode(source_p, UMODE_ADMIN) || member_find_link(source_p, channel))
+  if (HasUMode(source, UMODE_ADMIN) || member_find_link(source, channel))
     is_member = true;
   else if (HasCMode(channel, MODE_SECRET))
     return;
@@ -384,23 +384,23 @@ who_on_channel(struct Client *source_p, struct Channel *channel, const struct Wh
   LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
-    struct Client *target_p = member->client;
+    struct Client *target = member->client;
 
-    if (is_member || !HasUMode(target_p, UMODE_INVISIBLE))
+    if (is_member || !HasUMode(target, UMODE_INVISIBLE))
     {
       if ((who->bitsel & WHOSELECT_OPER))
-        if (!HasUMode(target_p, UMODE_OPER) ||
-            (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER)))
+        if (!HasUMode(target, UMODE_OPER) ||
+            (HasUMode(target, UMODE_HIDDEN) && !HasUMode(source, UMODE_OPER)))
           continue;
 
-      who_send(source_p, target_p, member, who);
+      who_send(source, target, member, who);
     }
   }
 }
 
 /*! \brief WHO command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -414,7 +414,7 @@ who_on_channel(struct Client *source_p, struct Channel *channel, const struct Wh
  *                  so the final thing will be like o%tnchu,777
  */
 static void
-m_who(struct Client *source_p, int parc, char *parv[])
+m_who(struct Client *source, int parc, char *parv[])
 {
   char *mask = parv[1];
   char *options = parv[2];
@@ -553,24 +553,24 @@ m_who(struct Client *source_p, int parc, char *parv[])
     /* List all users on a given channel */
     struct Channel *channel = hash_find_channel(mask);
     if (channel)
-      who_on_channel(source_p, channel, who);
+      who_on_channel(source, channel, who);
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
+    sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
     return;
   }
 
   /* '/who nick' */
   if (who->matchsel == 0 || (who->matchsel & WHO_FIELD_NIC))
   {
-    const struct Client *target_p = find_person(source_p, mask);
-    if (target_p)
+    const struct Client *target = find_person(source, mask);
+    if (target)
     {
       if (!(who->bitsel & WHOSELECT_OPER) ||
-        (HasUMode(target_p, UMODE_OPER) &&
-          (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))))
-        who_send(source_p, target_p, NULL, who);
+          (HasUMode(target, UMODE_OPER) &&
+           (!HasUMode(target, UMODE_HIDDEN) || HasUMode(source, UMODE_OPER))))
+        who_send(source, target, NULL, who);
 
-      sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, mask);
+      sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
       return;
     }
   }
@@ -583,11 +583,11 @@ m_who(struct Client *source_p, int parc, char *parv[])
   if (who->matchsel == 0)
     who->matchsel = WHO_FIELD_DEF;
 
-  who_global(source_p, mask, who);
+  who_global(source, mask, who);
 
   if (who->maxmatches == 0)
-    sendto_one_numeric(source_p, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
-  sendto_one_numeric(source_p, &me, RPL_ENDOFWHO, EmptyString(mask) ? "*" : mask);
+    sendto_one_numeric(source, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
+  sendto_one_numeric(source, &me, RPL_ENDOFWHO, EmptyString(mask) ? "*" : mask);
 }
 
 static struct Command who_msgtab =

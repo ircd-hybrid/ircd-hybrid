@@ -39,16 +39,16 @@
 
 
 static void
-trace_get_dependent(unsigned int *const server,
-                    unsigned int *const client, const struct Client *target_p)
+trace_get_dependent(unsigned int *const servers,
+                    unsigned int *const clients, const struct Client *target)
 {
   list_node_t *node;
 
-  (*server)++;
-  (*client) += list_length(&target_p->serv->client_list);
+  (*servers)++;
+  (*clients) += list_length(&target->serv->client_list);
 
-  LIST_FOREACH(node, target_p->serv->server_list.head)
-    trace_get_dependent(server, client, node->data);
+  LIST_FOREACH(node, target->serv->server_list.head)
+    trace_get_dependent(servers, clients, node->data);
 }
 
 /* report_this_status()
@@ -59,95 +59,91 @@ trace_get_dependent(unsigned int *const server,
  * side effects - NONE
  */
 static void
-report_this_status(struct Client *source_p, const struct Client *target_p)
+trace_send_status(struct Client *source, const struct Client *target)
 {
-  const char *name;
-  const char *class_name;
+  const char *name = client_get_name(target, HIDE_IP);
+  const char *class_name = class_get_name(&target->connection->confs);
 
-  name = client_get_name(target_p, HIDE_IP);
-  class_name = class_get_name(&target_p->connection->confs);
-
-  switch (target_p->status)
+  switch (target->status)
   {
     case STAT_CONNECTING:
-      sendto_one_numeric(source_p, &me, RPL_TRACECONNECTING,
-                         class_name, HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
+      sendto_one_numeric(source, &me, RPL_TRACECONNECTING,
+                         class_name, HasUMode(source, UMODE_ADMIN) ? name : target->name);
       break;
     case STAT_HANDSHAKE:
-      sendto_one_numeric(source_p, &me, RPL_TRACEHANDSHAKE,
-                         class_name, HasUMode(source_p, UMODE_ADMIN) ? name : target_p->name);
+      sendto_one_numeric(source, &me, RPL_TRACEHANDSHAKE,
+                         class_name, HasUMode(source, UMODE_ADMIN) ? name : target->name);
       break;
     case STAT_ME:
       break;
     case STAT_UNKNOWN:
-      sendto_one_numeric(source_p, &me, RPL_TRACEUNKNOWN,
-                         class_name, name, target_p->sockhost,
-                         event_base->time.sec_monotonic - target_p->connection->created_monotonic);
+      sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
+                         class_name, name, target->sockhost,
+                         event_base->time.sec_monotonic - target->connection->created_monotonic);
       break;
     case STAT_CLIENT:
-      if (HasUMode(target_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_TRACEOPERATOR,
-                           class_name, name, target_p->sockhost,
-                           event_base->time.sec_monotonic - target_p->connection->last_data,
-                           client_get_idle_time(source_p, target_p));
+      if (HasUMode(target, UMODE_OPER))
+        sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
+                           class_name, name, target->sockhost,
+                           event_base->time.sec_monotonic - target->connection->last_data,
+                           client_get_idle_time(source, target));
       else
-        sendto_one_numeric(source_p, &me, RPL_TRACEUSER,
-                           class_name, name, target_p->sockhost,
-                           event_base->time.sec_monotonic - target_p->connection->last_data,
-                           client_get_idle_time(source_p, target_p));
+        sendto_one_numeric(source, &me, RPL_TRACEUSER,
+                           class_name, name, target->sockhost,
+                           event_base->time.sec_monotonic - target->connection->last_data,
+                           client_get_idle_time(source, target));
       break;
     case STAT_SERVER:
     {
       unsigned int clients = 0;
       unsigned int servers = 0;
 
-      trace_get_dependent(&servers, &clients, target_p);
+      trace_get_dependent(&servers, &clients, target);
 
-      if (!HasUMode(source_p, UMODE_ADMIN))
-        name = client_get_name(target_p, MASK_IP);
+      if (!HasUMode(source, UMODE_ADMIN))
+        name = client_get_name(target, MASK_IP);
 
-      sendto_one_numeric(source_p, &me, RPL_TRACESERVER,
+      sendto_one_numeric(source, &me, RPL_TRACESERVER,
                          class_name, servers, clients, name,
-                         *(target_p->serv->by) ? target_p->serv->by : "*", "*",
-                         me.name, event_base->time.sec_monotonic - target_p->connection->last_data);
+                         *(target->serv->by) ? target->serv->by : "*", "*",
+                         me.name, event_base->time.sec_monotonic - target->connection->last_data);
       break;
     }
 
     default: /* ...we actually shouldn't come here... --msa */
-      sendto_one_numeric(source_p, &me, RPL_TRACENEWTYPE, name);
+      sendto_one_numeric(source, &me, RPL_TRACENEWTYPE, name);
       break;
   }
 }
 
 static void
-do_trace(struct Client *source_p, const char *name)
+do_trace(struct Client *source, const char *name)
 {
-  bool doall = false;
-  const list_node_t *node;
-  const list_t *tab[] = { &local_client_list,
-                              &local_server_list, &unknown_list, NULL };
-
-  assert(HasUMode(source_p, UMODE_OPER));
+  assert(HasUMode(source, UMODE_OPER));
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "TRACE requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
 
+  bool doall = false;
   if (EmptyString(name))
     doall = true;
   else if (match(name, me.name) == 0)
     doall = true;
-  else if (!MyClient(source_p) && strcmp(name, me.id) == 0)
+  else if (!MyClient(source) && strcmp(name, me.id) == 0)
     doall = true;
 
+  const list_node_t *node;
+  const list_t *tab[] = { &local_client_list,
+                          &local_server_list, &unknown_list, NULL };
   for (const list_t **list = tab; *list; ++list)
   {
     LIST_FOREACH(node, (*list)->head)
     {
-      const struct Client *target_p = node->data;
+      const struct Client *target = node->data;
 
-      if (doall || match(name, target_p->name) == 0)
-        report_this_status(source_p, target_p);
+      if (doall || match(name, target->name) == 0)
+        trace_send_status(source, target);
     }
   }
 
@@ -158,16 +154,16 @@ do_trace(struct Client *source_p, const char *name)
       const struct ClassItem *class = node->data;
 
       if (class->ref_count)
-        sendto_one_numeric(source_p, &me, RPL_TRACECLASS, class->name, class->ref_count);
+        sendto_one_numeric(source, &me, RPL_TRACECLASS, class->name, class->ref_count);
     }
   }
 
-  sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
+  sendto_one_numeric(source, &me, RPL_TRACEEND, me.name);
 }
 
 /*! \brief TRACE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -176,14 +172,14 @@ do_trace(struct Client *source_p, const char *name)
  *      - parv[0] = command
  */
 static void
-m_trace(struct Client *source_p, int parc, char *parv[])
+m_trace(struct Client *source, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, RPL_TRACEEND, me.name);
+  sendto_one_numeric(source, &me, RPL_TRACEEND, me.name);
 }
 
 /*! \brief TRACE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -194,21 +190,21 @@ m_trace(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = nick or server name to forward the trace to
  */
 static void
-mo_trace(struct Client *source_p, int parc, char *parv[])
+mo_trace(struct Client *source, int parc, char *parv[])
 {
   if (parc > 2)
-    if (server_hunt(source_p, ":%s TRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s TRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
-  const struct server_hunt *hunt = server_hunt(source_p, ":%s TRACE :%s", 1, parv);
+  const struct server_hunt *hunt = server_hunt(source, ":%s TRACE :%s", 1, parv);
   switch (hunt->ret)
   {
     case HUNTED_PASS:
-      sendto_one_numeric(source_p, &me, RPL_TRACELINK,
+      sendto_one_numeric(source, &me, RPL_TRACELINK,
                          IRCD_VERSION, hunt->target->name, hunt->target->from->name);
       break;
     case HUNTED_ISME:
-      do_trace(source_p, parv[1]);
+      do_trace(source, parv[1]);
       break;
     default:
       break;

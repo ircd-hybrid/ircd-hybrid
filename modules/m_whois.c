@@ -51,21 +51,19 @@ enum whois_show_type
 };
 
 static enum whois_show_type
-whois_show_channel(struct Channel *channel,
-                   struct Client *source_p,
-                   struct Client *target_p)
+whois_show_channel(struct Channel *channel, struct Client *source, struct Client *target)
 {
-  if (PubChannel(channel) && !HasUMode(target_p, UMODE_HIDECHANS))
+  if (PubChannel(channel) && !HasUMode(target, UMODE_HIDECHANS))
     return WHOIS_SHOW_NORMAL;
 
-  if (source_p == target_p || member_find_link(source_p, channel))
+  if (source == target || member_find_link(source, channel))
     return WHOIS_SHOW_NORMAL;
 
-  if (HasUMode(source_p, UMODE_OPER))
+  if (HasUMode(source, UMODE_OPER))
   {
     if (!PubChannel(channel))
       return WHOIS_SHOW_NONPUB;
-    /* HasUMode(target_p, UMODE_HIDECHANS) == true */
+    /* HasUMode(target, UMODE_HIDECHANS) == true */
     return WHOIS_SHOW_HIDDEN;
   }
 
@@ -74,45 +72,44 @@ whois_show_channel(struct Channel *channel,
 
 /* whois_person()
  *
- * inputs	- source_p client to report to
- *		- target_p client to report on
+ * inputs	- source client to report to
+ *		- target client to report on
  * output	- NONE
  * side effects	- 
  */
 static void
-whois_person(struct Client *source_p, struct Client *target_p)
+whois_person(struct Client *source, struct Client *target)
 {
   char buf[IRCD_BUFSIZE];
   list_node_t *node;
   const struct ServicesTag *svstag = NULL;
 
-  sendto_one_numeric(source_p, &me, RPL_WHOISUSER, target_p->name,
-                     target_p->username, target_p->host,
-                     target_p->info);
+  sendto_one_numeric(source, &me, RPL_WHOISUSER,
+                     target->name, target->username, target->host, target->info);
 
-  if (list_length(&target_p->channel))
+  if (list_length(&target->channel))
   {
     char *bufptr = buf;
 
-    /* :me.name 319 source_p->name target_p->name :~@#chan1 +#chan2 #chan3 ...\r\n */
+    /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
     /* 1       23456              7              89                           0 1  */
-    size_t len = strlen(target_p->name) + 11;
+    size_t len = strlen(target->name) + 11;
 
-    if (MyConnect(source_p))
-      len += strlen(me.name) + strlen(source_p->name);
+    if (MyConnect(source))
+      len += strlen(me.name) + strlen(source->name);
     else
-      len += IRCD_MAX(strlen(me.name), strlen(me.id)) + IRCD_MAX(strlen(source_p->name), strlen(source_p->id));
+      len += IRCD_MAX(strlen(me.name), strlen(me.id)) + IRCD_MAX(strlen(source->name), strlen(source->id));
 
-    LIST_FOREACH(node, target_p->channel.head)
+    LIST_FOREACH(node, target->channel.head)
     {
       const struct ChannelMember *member = node->data;
-      enum whois_show_type show = whois_show_channel(member->channel, source_p, target_p);
+      enum whois_show_type show = whois_show_channel(member->channel, source, target);
 
       if (show != WHOIS_SHOW_NO)
       {
         if ((bufptr - buf) + member->channel->name_len + 1 + (show != WHOIS_SHOW_NORMAL) + member_get_prefix_len(member, true) + len > sizeof(buf))
         {
-          sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
+          sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
           bufptr = buf;
         }
 
@@ -128,111 +125,106 @@ whois_person(struct Client *source_p, struct Client *target_p)
     }
 
     if (bufptr != buf)
-      sendto_one_numeric(source_p, &me, RPL_WHOISCHANNELS, target_p->name, buf);
+      sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
   }
 
-  if ((ConfigServerHide.hide_servers || IsHidden(target_p->servptr)) &&
-      !(HasUMode(source_p, UMODE_OPER) || source_p == target_p))
-    sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
+  if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
+      !(HasUMode(source, UMODE_OPER) || source == target))
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER, target->name,
                        ConfigServerHide.hidden_name,
                        ConfigServerInfo.network_description);
   else
-    sendto_one_numeric(source_p, &me, RPL_WHOISSERVER, target_p->name,
-                       target_p->servptr->name, target_p->servptr->info);
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER, target->name,
+                       target->servptr->name, target->servptr->info);
 
-  if (HasUMode(target_p, UMODE_REGISTERED))
-    sendto_one_numeric(source_p, &me, RPL_WHOISREGNICK, target_p->name);
+  if (HasUMode(target, UMODE_REGISTERED))
+    sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);
 
-  if (strcmp(target_p->account, "*"))
-    sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT, target_p->name,
-                       target_p->account, "is");
+  if (strcmp(target->account, "*"))
+    sendto_one_numeric(source, &me, RPL_WHOISACCOUNT, target->name, target->account, "is");
 
-  if (target_p->away[0])
-    sendto_one_numeric(source_p, &me, RPL_AWAY, target_p->name,
-                       target_p->away);
+  if (target->away[0])
+    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
-  if (HasUMode(target_p, UMODE_CALLERID | UMODE_SOFTCALLERID))
+  if (HasUMode(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
   {
-    bool callerid = HasUMode(target_p, UMODE_CALLERID) != 0;
+    bool callerid = HasUMode(target, UMODE_CALLERID) != 0;
 
-    sendto_one_numeric(source_p, &me, RPL_TARGUMODEG, target_p->name,
+    sendto_one_numeric(source, &me, RPL_TARGUMODEG, target->name,
                        callerid ? "+g" : "+G",
                        callerid ? "server side ignore" :
                                   "server side ignore with the exception of common channels");
   }
 
-  if (HasUMode(target_p, UMODE_OPER) || HasFlag(target_p, FLAGS_SERVICE))
+  if (HasUMode(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
   {
-    if (!HasUMode(target_p, UMODE_HIDDEN) || HasUMode(source_p, UMODE_OPER))
+    if (!HasUMode(target, UMODE_HIDDEN) || HasUMode(source, UMODE_OPER))
     {
-      if (target_p->svstags.head)
-        svstag = target_p->svstags.head->data;
+      if (target->svstags.head)
+        svstag = target->svstags.head->data;
 
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
       {
         const char *text;
-        if (HasFlag(target_p, FLAGS_SERVICE))
+        if (HasFlag(target, FLAGS_SERVICE))
           text = "is a Network Service";
-        else if (HasUMode(target_p, UMODE_ADMIN))
+        else if (HasUMode(target, UMODE_ADMIN))
           text = "is a Server Administrator";
-        else  /* HasUMode(target_p, UMODE_OPER) == true */
+        else  /* HasUMode(target, UMODE_OPER) == true */
           text = "is an IRC Operator";
-        sendto_one_numeric(source_p, &me, RPL_WHOISOPERATOR, target_p->name, text);
+        sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
       }
     }
   }
 
-  LIST_FOREACH(node, target_p->svstags.head)
+  LIST_FOREACH(node, target->svstags.head)
   {
     svstag = node->data;
 
     if (svstag->numeric == RPL_WHOISOPERATOR)
-      if (HasUMode(target_p, UMODE_HIDDEN) && !HasUMode(source_p, UMODE_OPER))
+      if (HasUMode(target, UMODE_HIDDEN) && !HasUMode(source, UMODE_OPER))
         continue;
 
-    if (svstag->umodes == 0 || HasUMode(source_p, svstag->umodes))
-      sendto_one_numeric(source_p, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
-                         target_p->name, svstag->tag);
+    if (svstag->umodes == 0 || HasUMode(source, svstag->umodes))
+      sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
+                         target->name, svstag->tag);
   }
 
-  if (HasUMode(target_p, UMODE_BOT))
-    sendto_one_numeric(source_p, &me, RPL_WHOISBOT, target_p->name);
+  if (HasUMode(target, UMODE_BOT))
+    sendto_one_numeric(source, &me, RPL_WHOISBOT, target->name);
 
-  if (HasUMode(target_p, UMODE_WEBIRC))
-    sendto_one_numeric(source_p, &me, RPL_WHOISTEXT, target_p->name,
+  if (HasUMode(target, UMODE_WEBIRC))
+    sendto_one_numeric(source, &me, RPL_WHOISTEXT, target->name,
                        "User connected using a webirc gateway");
 
-  if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-    sendto_one_numeric(source_p, &me, RPL_WHOISMODES, target_p->name,
-                       user_get_mode_str(target_p->umodes));
+  if (HasUMode(source, UMODE_OPER) || source == target)
+    sendto_one_numeric(source, &me, RPL_WHOISMODES,
+                       target->name, user_get_mode_str(target->umodes));
 
-  if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-    sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY, target_p->name,
-                       target_p->username, target_p->realhost,
-                       target_p->sockhost);
+  if (HasUMode(source, UMODE_OPER) || source == target)
+    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
+                       target->name, target->username, target->realhost, target->sockhost);
 
-  if (HasUMode(target_p, UMODE_SECURE))
+  if (HasUMode(target, UMODE_SECURE))
   {
-    snprintf(buf, sizeof(buf), target_p->tls_cipher ?
+    snprintf(buf, sizeof(buf), target->tls_cipher ?
              "is using a secure connection [%s]" :
-             "is using a secure connection", target_p->tls_cipher);
-    sendto_one_numeric(source_p, &me, RPL_WHOISSECURE, target_p->name, buf);
+             "is using a secure connection", target->tls_cipher);
+    sendto_one_numeric(source, &me, RPL_WHOISSECURE, target->name, buf);
   }
 
-  if (!EmptyString(target_p->tls_certfp))
-    if (HasUMode(source_p, UMODE_OPER) || source_p == target_p)
-      sendto_one_numeric(source_p, &me, RPL_WHOISCERTFP, target_p->name, target_p->tls_certfp);
+  if (!EmptyString(target->tls_certfp))
+    if (HasUMode(source, UMODE_OPER) || source == target)
+      sendto_one_numeric(source, &me, RPL_WHOISCERTFP, target->name, target->tls_certfp);
 
-  if (MyConnect(target_p))
-    if (!HasUMode(target_p, UMODE_HIDEIDLE) || HasUMode(source_p, UMODE_OPER) ||
-        source_p == target_p)
-      sendto_one_numeric(source_p, &me, RPL_WHOISIDLE, target_p->name,
-                         client_get_idle_time(source_p, target_p),
-                         target_p->connection->created_real);
+  if (MyConnect(target))
+    if (!HasUMode(target, UMODE_HIDEIDLE) || HasUMode(source, UMODE_OPER) || source == target)
+      sendto_one_numeric(source, &me, RPL_WHOISIDLE,
+                         target->name, client_get_idle_time(source, target), target->connection->created_real);
 
-  if (HasUMode(target_p, UMODE_SPY) && source_p != target_p)
-    sendto_one_notice(target_p, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
-                      source_p->name, source_p->username, source_p->host, source_p->servptr->name);
+  if (HasUMode(target, UMODE_SPY) && source != target)
+    sendto_one_notice(target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
+                      source->name, source->username, source->host, source->servptr->name);
 }
 
 /* do_whois()
@@ -244,21 +236,21 @@ whois_person(struct Client *source_p, struct Client *target_p)
  * side effects - Does whois
  */
 static void
-do_whois(struct Client *source_p, const char *name)
+do_whois(struct Client *source, const char *name)
 {
-  struct Client *target_p;
+  struct Client *target = hash_find_client(name);
 
-  if ((target_p = hash_find_client(name)) && IsClient(target_p))
-    whois_person(source_p, target_p);
+  if (target && IsClient(target))
+    whois_person(source, target);
   else
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHNICK, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFWHOIS, name);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOIS, name);
 }
 
 /*! \brief WHOIS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -269,13 +261,13 @@ do_whois(struct Client *source_p, const char *name)
  *      - parv[2] = nickname
  */
 static void
-m_whois(struct Client *source_p, int parc, char *parv[])
+m_whois(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
@@ -284,7 +276,7 @@ m_whois(struct Client *source_p, int parc, char *parv[])
     /* seeing as this is going across servers, we should limit it */
     if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
     {
-      sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHOIS");
+      sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
       return;
     }
 
@@ -298,18 +290,18 @@ m_whois(struct Client *source_p, int parc, char *parv[])
     if (ConfigServerHide.disable_remote_commands)
       parv[1] = parv[2];
 
-    if (server_hunt(source_p, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
     parv[1] = parv[2];
   }
 
-  do_whois(source_p, parv[1]);
+  do_whois(source, parv[1]);
 }
 
 /*! \brief WHOIS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -320,23 +312,23 @@ m_whois(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = nickname
  */
 static void
-mo_whois(struct Client *source_p, int parc, char *parv[])
+mo_whois(struct Client *source, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
   if (!EmptyString(parv[2]))
   {
-    if (server_hunt(source_p, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
     parv[1] = parv[2];
   }
 
-  do_whois(source_p, parv[1]);
+  do_whois(source, parv[1]);
 }
 
 static struct Command whois_msgtab =

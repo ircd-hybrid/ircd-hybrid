@@ -267,8 +267,6 @@ user_welcome(struct Client *client)
 void
 user_register_local(struct Client *client)
 {
-  const struct MaskItem *conf = NULL;
-
   assert(client == client->from);
   assert(client->connection->registration == 0);
   assert(MyConnect(client));
@@ -294,51 +292,29 @@ user_register_local(struct Client *client)
   if (conf_check_client(client) == false)
     return;
 
-  conf = client->connection->confs.head->data;
-
+  const struct MaskItem *const conf = client->connection->confs.head->data;
   if (!HasFlag(client, FLAGS_GOTID))
   {
     if (IsNeedIdentd(conf))
     {
-      ++ServerStats.is_ref;
       sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
       exit_client(client, "Install identd");
+      ++ServerStats.is_ref;
       return;
     }
   }
 
   if (valid_username(client->username, true) == false)
   {
-    char buf[sizeof("Invalid username []") + sizeof(client->username)];
-
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Invalid username: %s (%s@%s)",
                          client->name, client->username, client->host);
-    ++ServerStats.is_ref;
+
+    char buf[sizeof("Invalid username []") + sizeof(client->username)];
     snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
     exit_client(client, buf);
+    ++ServerStats.is_ref;
     return;
   }
-
-  /* Password check */
-  if (!EmptyString(conf->passwd))
-  {
-    if (match_conf_password(client->connection->password, conf) == false)
-    {
-      ++ServerStats.is_ref;
-
-      sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
-      exit_client(client, "Bad Password");
-      return;
-    }
-  }
-
-  xfree(client->connection->password);
-  client->connection->password = NULL;
-
-  /*
-   * Report if user has &^>= etc. and set flags as needed in client
-   */
-  report_and_set_user_flags(client, conf);
 
   /*
    * Limit clients -
@@ -348,17 +324,19 @@ user_register_local(struct Client *client)
    * probably be just a percentage of the MAXCLIENTS...
    *   -Taner
    */
-  if ((list_length(&local_client_list) >= GlobalSetOptions.maxclients + MAX_BUFFER) ||
-      (list_length(&local_client_list) >= GlobalSetOptions.maxclients && !HasFlag(client, FLAGS_NOLIMIT)))
+  unsigned int max_clients = GlobalSetOptions.maxclients;
+  if (IsConfExemptLimits(conf))
+    max_clients += MAX_BUFFER;
+  if (list_length(&local_client_list) >= max_clients)
   {
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Too many clients, rejecting %s[%s].",
                          client->name, client->host);
-    ++ServerStats.is_ref;
     exit_client(client, "Sorry, server is full - try later");
+    ++ServerStats.is_ref;
     return;
   }
 
-  if (!HasFlag(client, FLAGS_EXEMPTXLINE))
+  if (!IsConfExemptXline(conf))
   {
     const struct GecosItem *gecos = gecos_find(client->info, match);
     if (gecos)
@@ -368,11 +346,26 @@ user_register_local(struct Client *client)
                            client->info, gecos->reason,
                            client_get_name(client, HIDE_IP),
                            client->sockhost);
-      ++ServerStats.is_ref;
       exit_client(client, "Bad user info");
+      ++ServerStats.is_ref;
       return;
     }
   }
+
+  /* Password check */
+  if (!EmptyString(conf->passwd))
+  {
+    if (match_conf_password(client->connection->password, conf) == false)
+    {
+      sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
+      exit_client(client, "Bad Password");
+      ++ServerStats.is_ref;
+      return;
+    }
+  }
+
+  xfree(client->connection->password);
+  client->connection->password = NULL;
 
   const char *id;
   while (hash_find_id((id = uid_get())))
@@ -424,6 +417,11 @@ user_register_local(struct Client *client)
   if (list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = list_length(&global_client_list);
   ++Count.totalrestartcount;
+
+  /*
+   * Report if user has &^>= etc. and set flags as needed in client
+   */
+  report_and_set_user_flags(client, conf);
 
   user_welcome(client);
 

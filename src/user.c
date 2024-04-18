@@ -271,6 +271,7 @@ user_register_local(struct Client *client)
   assert(client->connection->registration == 0);
   assert(MyConnect(client));
   assert(IsUnknown(client));
+  assert(list_find(&unknown_list, client));
 
   if (ConfigGeneral.ping_cookie)
   {
@@ -394,9 +395,6 @@ user_register_local(struct Client *client)
 
   list_add(client, &client->lnode, &client->servptr->serv->client_list);
   list_add(client, &client->node, &global_client_list);
-
-  assert(list_find(&unknown_list, client));
-
   list_move_node(&client->connection->node, &unknown_list, &local_client_list);
 
   if (list_length(&local_client_list) > Count.max_loc)

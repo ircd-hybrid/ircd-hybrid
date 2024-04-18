@@ -40,7 +40,7 @@
 
 /*! \brief SQUIT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,10 +51,10 @@
  *      - parv[2] = comment
  */
 static void
-mo_squit(struct Client *source_p, int parc, char *parv[])
+mo_squit(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
-  struct Client *target_p = NULL;
+  struct Client *target = NULL;
 
   /* The following allows wild cards in SQUIT. */
   list_node_t *node;
@@ -66,27 +66,27 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
     {
       if (match(name, tmp->name) == 0)
       {
-        target_p = tmp;
+        target = tmp;
         break;
       }
     }
   }
 
-  if (target_p == NULL || IsMe(target_p))
+  if (target == NULL || IsMe(target))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, name);
     return;
   }
 
-  if (!MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT_REMOTE))
+  if (!MyConnect(target) && !HasOFlag(source, OPER_FLAG_SQUIT_REMOTE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit:remote");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "squit:remote");
     return;
   }
 
-  if (MyConnect(target_p) && !HasOFlag(source_p, OPER_FLAG_SQUIT))
+  if (MyConnect(target) && !HasOFlag(source, OPER_FLAG_SQUIT))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "squit");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "squit");
     return;
   }
 
@@ -94,33 +94,33 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
   if (!EmptyString(parv[2]))
     strlcpy(comment, parv[2], sizeof(comment));
 
-  if (MyConnect(target_p))
+  if (MyConnect(target))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Received SQUIT %s from %s (%s)",
-                         target_p->name, get_oper_name(source_p), comment);
+                         target->name, get_oper_name(source), comment);
     log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%s)",
-              target_p->name, get_oper_name(source_p), comment);
+              target->name, get_oper_name(source), comment);
 
     /* To them, we are exiting */
-    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
+    sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, comment);
 
     /* Send to everything but target */
-    sendto_server(target_p, 0, 0, ":%s SQUIT %s :%s",
-                  source_p->id, target_p->id, comment);
+    sendto_server(target, 0, 0, ":%s SQUIT %s :%s",
+                  source->id, target->id, comment);
   }
   else
     /* Send to everything */
     sendto_server(NULL, 0, 0, ":%s SQUIT %s :%s",
-                  source_p->id, target_p->id, comment);
+                  source->id, target->id, comment);
 
-  AddFlag(target_p, FLAGS_SQUIT);
+  AddFlag(target, FLAGS_SQUIT);
 
-  exit_client(target_p, comment);
+  exit_client(target, comment);
 }
 
 /*! \brief SQUIT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -131,33 +131,33 @@ mo_squit(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = comment
  */
 static void
-ms_squit(struct Client *source_p, int parc, char *parv[])
+ms_squit(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target_p = hash_find_server(parv[1]);
-  if (target_p == NULL)
+  struct Client *target = hash_find_server(parv[1]);
+  if (target == NULL)
     return;
 
-  if (!IsServer(target_p) && !IsMe(target_p))
+  if (!IsServer(target) && !IsMe(target))
     return;
 
-  if (IsMe(target_p))
-    target_p = source_p->from;
+  if (IsMe(target))
+    target = source->from;
 
-  const char *comment = source_p->name;
+  const char *comment = source->name;
   if (parc > 2 && parv[parc - 1])
     comment = parv[parc - 1];
 
-  if (MyConnect(target_p))
+  if (MyConnect(target))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
-                         me.name, target_p->name, get_oper_name(source_p), comment);
-    sendto_server(source_p, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
-                  me.id, target_p->name, get_oper_name(source_p), comment);
+                         me.name, target->name, get_oper_name(source), comment);
+    sendto_server(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
+                  me.id, target->name, get_oper_name(source), comment);
     log_write(LOG_TYPE_IRCD, "Remote SQUIT %s from %s (%s)",
-              target_p->name, get_oper_name(source_p), comment);
+              target->name, get_oper_name(source), comment);
 
     /* To them, we are exiting */
-    sendto_one(target_p, ":%s SQUIT %s :%s", source_p->id, me.id, comment);
+    sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, comment);
 
     /* Send to everything but target and source */
     list_node_t *node;
@@ -165,21 +165,21 @@ ms_squit(struct Client *source_p, int parc, char *parv[])
     {
       struct Client *client_p = node->data;
 
-      if (client_p == target_p || client_p == source_p->from)
+      if (client_p == target || client_p == source->from)
         continue;
 
       sendto_one(client_p, ":%s SQUIT %s :%s",
-                 source_p->id, target_p->id, comment);
+                 source->id, target->id, comment);
     }
   }
   else
     /* Send to everything but source */
-    sendto_server(source_p, 0, 0, ":%s SQUIT %s :%s",
-                  source_p->id, target_p->id, comment);
+    sendto_server(source, 0, 0, ":%s SQUIT %s :%s",
+                  source->id, target->id, comment);
 
-  AddFlag(target_p, FLAGS_SQUIT);
+  AddFlag(target, FLAGS_SQUIT);
 
-  exit_client(target_p, comment);
+  exit_client(target, comment);
 }
 
 static struct Command squit_msgtab =

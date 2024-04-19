@@ -35,6 +35,8 @@
 #include "server_capab.h"
 #include "conf_class.h"
 #include "log.h"
+#include "conf.h"
+#include "hostmask.h"
 
 
 static uintmax_t send_marker;
@@ -545,7 +547,16 @@ static bool
 match_it(const struct Client *one, const char *mask, bool host)
 {
   if (host)
+  {
+    struct irc_ssaddr addr;
+    int bits = 0;
+    const int ret = parse_netmask(mask, &addr, &bits);
+
+    if (ret == HM_IPV4 || ret == HM_IPV6)
+      if (address_compare(&one->addr, &addr, false, false, bits))
+        return true;
     return match(mask, one->realhost) == 0;
+  }
 
   return match(mask, one->servptr->name) == 0;
 }

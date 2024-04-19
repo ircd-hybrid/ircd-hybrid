@@ -205,7 +205,8 @@ enum
   OPER_FLAG_UNRESV         = 1 << 25,  /**< Oper can use UNRESV command */
   OPER_FLAG_UNXLINE        = 1 << 26,  /**< Oper can use UNXLINE command */
   OPER_FLAG_WALLOPS        = 1 << 27,  /**< Oper can use WALLOPS command */
-  OPER_FLAG_XLINE          = 1 << 28   /**< Oper can use XLINE command */
+  OPER_FLAG_XLINE          = 1 << 28,  /**< Oper can use XLINE command */
+  OPER_FLAG_MESSAGE_MASS   = 1 << 29,  /**< Oper can send mass messages */
 };
 
 #define HasOFlag(x, y) ((x)->connection->operflags &   (y))

@@ -240,6 +240,7 @@ listen                      { return LISTEN; }
 locops                      { return T_LOCOPS; }
 log                         { return T_LOG; }
 mask                        { return MASK; }
+mass                        { return MASS; }
 max_accept                  { return MAX_ACCEPT; }
 max_bans                    { return MAX_BANS; }
 max_bans_large              { return MAX_BANS_LARGE; }
@@ -253,6 +254,7 @@ max_nick_time               { return MAX_NICK_TIME; }
 max_number                  { return MAX_NUMBER; }
 max_targets                 { return MAX_TARGETS; }
 max_topic_length            { return MAX_TOPIC_LENGTH; }
+message                     { return MESSAGE; }
 min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }

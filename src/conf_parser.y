@@ -216,6 +216,7 @@ reset_block_state(void)
 %token  LEAF_MASK
 %token  LISTEN
 %token  MASK
+%token  MASS
 %token  MAX_ACCEPT
 %token  MAX_BANS
 %token  MAX_BANS_LARGE
@@ -229,6 +230,7 @@ reset_block_state(void)
 %token  MAX_NUMBER
 %token  MAX_TARGETS
 %token  MAX_TOPIC_LENGTH
+%token  MESSAGE
 %token  MIN_IDLE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
@@ -1250,6 +1252,10 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CLOSE;
+} | MESSAGE ':' MASS
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_MESSAGE_MASS;
 };
 
 

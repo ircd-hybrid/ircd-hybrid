@@ -359,6 +359,12 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
       return;
     }
 
+    if (MyClient(source) && !HasOFlag(source, OPER_FLAG_MESSAGE_MASS))
+    {
+      sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
+      return;
+    }
+
     if (*(nick + 1) == '$' || *(nick + 1) == '#')
       ++nick;
     else if (MyClient(source))

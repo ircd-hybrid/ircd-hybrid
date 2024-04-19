@@ -345,12 +345,6 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
     return;
   }
 
-  if (!HasUMode(source, UMODE_OPER))
-  {
-    sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   /*
    * The following two cases allow masks in NOTICEs
    * (for OPERs only)
@@ -359,29 +353,18 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
    */
   if (*nick == '$')
   {
+    if (!HasUMode(source, UMODE_OPER))
+    {
+      sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
+      return;
+    }
+
     if (*(nick + 1) == '$' || *(nick + 1) == '#')
       ++nick;
     else if (MyClient(source))
     {
       sendto_one_notice(source, &me, ":The command %s %s is no longer supported, please use $%s",
                         command[notice], nick, nick);
-      return;
-    }
-
-    const char *s = strrchr(nick, '.');
-    if (s == NULL)
-    {
-      sendto_one_numeric(source, &me, ERR_NOTOPLEVEL, nick);
-      return;
-    }
-
-    while (*++s)
-      if (*s == '.' || *s == '*' || *s == '?')
-        break;
-
-    if (*s == '*' || *s == '?')
-    {
-      sendto_one_numeric(source, &me, ERR_WILDTOPLEVEL, nick);
       return;
     }
 

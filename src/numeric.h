@@ -195,8 +195,6 @@ enum irc_numerics
   ERR_INVALIDCAPCMD        = 410,
   ERR_NORECIPIENT          = 411,
   ERR_NOTEXTTOSEND         = 412,
-  ERR_NOTOPLEVEL           = 413,
-  ERR_WILDTOPLEVEL         = 414,
   ERR_UNKNOWNCOMMAND       = 421,
   ERR_NOMOTD               = 422,
   ERR_TOOMANYAWAY          = 429,

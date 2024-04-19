@@ -545,7 +545,7 @@ static bool
 match_it(const struct Client *one, const char *mask, bool host)
 {
   if (host)
-    return match(mask, one->host) == 0;
+    return match(mask, one->realhost) == 0;
 
   return match(mask, one->servptr->name) == 0;
 }

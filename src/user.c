@@ -294,15 +294,12 @@ user_register_local(struct Client *client)
     return;
 
   const struct MaskItem *const conf = client->connection->confs.head->data;
-  if (!HasFlag(client, FLAGS_GOTID))
+  if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
   {
-    if (IsNeedIdentd(conf))
-    {
-      sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
-      exit_client(client, "Install identd");
-      ++ServerStats.is_ref;
-      return;
-    }
+    sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
+    exit_client(client, "Install identd");
+    ++ServerStats.is_ref;
+    return;
   }
 
   if (valid_username(client->username, true) == false)

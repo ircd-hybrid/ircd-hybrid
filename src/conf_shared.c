@@ -46,7 +46,7 @@ shared_clear(void)
   {
     struct SharedItem *shared = shared_list.head->data;
 
-    list_delete(&shared->node, &shared_list);
+    list_remove(&shared->node, &shared_list);
     xfree(shared->server);
     xfree(shared->user);
     xfree(shared->host);

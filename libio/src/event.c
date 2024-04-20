@@ -84,7 +84,7 @@ event_delete(struct event *ev)
   if (ev->active == false)
     return;
 
-  list_delete(&ev->node, &event_list);
+  list_remove(&ev->node, &event_list);
   ev->active = false;
 }
 

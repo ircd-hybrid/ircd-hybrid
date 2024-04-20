@@ -99,8 +99,8 @@ invite_add(struct Channel *channel, struct Client *client)
 void
 invite_del(struct Invite *invite)
 {
-  list_delete(&invite->user_node, &invite->client->connection->invited);
-  list_delete(&invite->chan_node, &invite->channel->invites);
+  list_remove(&invite->user_node, &invite->client->connection->invited);
+  list_remove(&invite->chan_node, &invite->channel->invites);
 
   /* Release memory pointed to by 'invite' */
   xfree(invite);

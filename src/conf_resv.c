@@ -65,14 +65,14 @@ resv_delete(struct ResvItem *resv, bool expired)
   {
     struct ResvExemptItem *exempt = resv->exempt_list.head->data;
 
-    list_delete(&exempt->node, &resv->exempt_list);
+    list_remove(&exempt->node, &resv->exempt_list);
     xfree(exempt->name);
     xfree(exempt->user);
     xfree(exempt->host);
     xfree(exempt);
   }
 
-  list_delete(&resv->node, resv->list);
+  list_remove(&resv->node, resv->list);
   xfree(resv->mask);
   xfree(resv->reason);
   xfree(resv);

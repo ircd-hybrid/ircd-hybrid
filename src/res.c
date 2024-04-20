@@ -104,7 +104,7 @@ static list_t request_list;
 static void
 rem_request(struct reslist *request)
 {
-  list_delete(&request->node, &request_list);
+  list_remove(&request->node, &request_list);
   xfree(request);
 }
 

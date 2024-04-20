@@ -75,7 +75,7 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 
       dbuf_ref_free(block);
 
-      list_delete(node, &queue->blocks);
+      list_remove(node, &queue->blocks);
       list_free_node(node);
 
       queue->pos = 0;

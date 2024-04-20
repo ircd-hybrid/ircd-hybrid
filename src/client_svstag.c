@@ -34,7 +34,7 @@
 static void
 svstag_free(struct ServicesTag *svstag, list_t *list)
 {
-  list_delete(&svstag->node, list);
+  list_remove(&svstag->node, list);
   xfree(svstag->tag);
   xfree(svstag);
 }

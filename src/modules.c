@@ -90,7 +90,7 @@ unload_one_module(const char *name, bool warn)
   if (modp->modexit)
     modp->modexit();
 
-  list_delete(&modp->node, &modules_list);
+  list_remove(&modp->node, &modules_list);
   xfree(modp->name);
 
   lt_dlclose(modp->handle);
@@ -247,7 +247,7 @@ modules_conf_clear(void)
   {
     struct module_path *path = modules_path.head->data;
 
-    list_delete(&path->node, &modules_path);
+    list_remove(&path->node, &modules_path);
     xfree(path->path);
     xfree(path);
   }
@@ -256,7 +256,7 @@ modules_conf_clear(void)
   {
     struct module_path *path = modules_conf.head->data;
 
-    list_delete(&path->node, &modules_conf);
+    list_remove(&path->node, &modules_conf);
     xfree(path->path);
     xfree(path);
   }

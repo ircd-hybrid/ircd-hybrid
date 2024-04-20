@@ -84,7 +84,7 @@ ipcache_record_delete(patricia_node_t *pnode)
   {
     patricia_remove(iptr->trie_pointer, pnode);
 
-    list_delete(&iptr->node, &ipcache_list);
+    list_remove(&iptr->node, &ipcache_list);
     xfree(iptr);
   }
 }

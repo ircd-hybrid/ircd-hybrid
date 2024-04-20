@@ -67,7 +67,7 @@ service_clear(void)
   {
     struct ServiceItem *service = service_list.head->data;
 
-    list_delete(&service->node, &service_list);
+    list_remove(&service->node, &service_list);
     xfree(service->name);
     xfree(service);
   }

@@ -62,7 +62,7 @@ gecos_delete(struct GecosItem *gecos, bool expired)
     sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
                          gecos->mask);
 
-  list_delete(&gecos->node, &gecos_list);
+  list_remove(&gecos->node, &gecos_list);
   xfree(gecos->mask);
   xfree(gecos->reason);
   xfree(gecos);

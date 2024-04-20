@@ -477,12 +477,12 @@ free_list_task(struct Client *client)
 {
   struct ListTask *const lt = client->connection->list_task;
 
-  list_delete(&lt->node, &listing_client_list);
+  list_remove(&lt->node, &listing_client_list);
 
   while (lt->show_mask.head)
   {
     list_node_t *node = lt->show_mask.head;
-    list_delete(node, &lt->show_mask);
+    list_remove(node, &lt->show_mask);
     xfree(node->data);
     list_free_node(node);
   }
@@ -490,7 +490,7 @@ free_list_task(struct Client *client)
   while (lt->hide_mask.head)
   {
     list_node_t *node = lt->hide_mask.head;
-    list_delete(node, &lt->hide_mask);
+    list_remove(node, &lt->hide_mask);
     xfree(node->data);
     list_free_node(node);
   }

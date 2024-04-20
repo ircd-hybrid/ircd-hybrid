@@ -184,7 +184,7 @@ motd_decache(struct Motd *motd)
 
   if (--cache->ref == 0)  /* Reduce reference count */
   {
-    list_delete(&cache->node, &MotdList.cachelist);
+    list_remove(&cache->node, &MotdList.cachelist);
     xfree(cache->path);  /* Free path info */
     xfree(cache);  /* Very simple for a reason */
   }
@@ -377,7 +377,7 @@ motd_clear(void)
   while (MotdList.other.head)  /* Destroy other MOTDs */
   {
     struct Motd *motd = MotdList.other.head->data;
-    list_delete(&motd->node, &MotdList.other);
+    list_remove(&motd->node, &MotdList.other);
     motd_destroy(motd);
   }
 

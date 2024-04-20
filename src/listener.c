@@ -66,7 +66,7 @@ listener_make(const int port, const struct irc_ssaddr *addr)
 static void
 listener_free(struct Listener *listener)
 {
-  list_delete(&listener->node, &listener_list);
+  list_remove(&listener->node, &listener_list);
   xfree(listener->name);
   xfree(listener);
 }

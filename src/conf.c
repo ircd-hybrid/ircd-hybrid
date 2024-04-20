@@ -194,7 +194,7 @@ conf_free(struct MaskItem *conf)
   list_t *list = NULL;
 
   if ((list = map_to_list(conf->type)))
-    list_find_delete(list, conf);
+    list_find_remove(list, conf);
 
   xfree(conf->name);
 
@@ -221,14 +221,14 @@ conf_free(struct MaskItem *conf)
   LIST_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
     xfree(node->data);
-    list_delete(node, &conf->hub_list);
+    list_remove(node, &conf->hub_list);
     list_free_node(node);
   }
 
   LIST_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
   {
     xfree(node->data);
-    list_delete(node, &conf->leaf_list);
+    list_remove(node, &conf->leaf_list);
     list_free_node(node);
   }
 
@@ -398,7 +398,7 @@ conf_detach(struct Client *client, enum maskitem_type type)
     if (!(conf->type & type))
       continue;
 
-    list_delete(node, &client->connection->confs);
+    list_remove(node, &client->connection->confs);
     list_free_node(node);
 
     if (conf->type == CONF_CLIENT)
@@ -815,7 +815,7 @@ conf_clear(void)
       struct MaskItem *conf = node->data;
 
       conf->active = false;
-      list_delete(&conf->node, *iterator);
+      list_remove(&conf->node, *iterator);
 
       if (!conf->ref_count)
         conf_free(conf);

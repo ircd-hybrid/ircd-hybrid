@@ -745,7 +745,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
 
     if (arec->conf == conf)
     {
-      list_delete(&arec->node, &atable[hv]);
+      list_remove(&arec->node, &atable[hv]);
 
       if (conf->ref_count == 0)
         conf_free(conf);
@@ -780,7 +780,7 @@ clear_out_address_conf(void)
       if (IsConfDatabase(arec->conf))
         continue;
 
-      list_delete(&arec->node, &atable[i]);
+      list_remove(&arec->node, &atable[i]);
       arec->conf->active = false;
 
       if (arec->conf->ref_count == 0)
@@ -832,7 +832,7 @@ hostmask_expire_temporary(void)
         case CONF_DLINE:
           hostmask_send_expiration(arec);
 
-          list_delete(&arec->node, &atable[i]);
+          list_remove(&arec->node, &atable[i]);
           conf_free(arec->conf);
           xfree(arec);
           break;

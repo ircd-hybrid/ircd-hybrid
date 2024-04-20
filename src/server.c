@@ -73,7 +73,7 @@ write_links_file(void *unused)
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
-    list_delete(node, &flatten_links);
+    list_remove(node, &flatten_links);
     xfree(node->data);
     list_free_node(node);
   }
@@ -294,7 +294,7 @@ try_connections(void *unused)
       /* Move this entry to the end of the list, if not already last */
       if (node->next)
       {
-        list_delete(node, &connect_items);
+        list_remove(node, &connect_items);
         list_add_tail(conf, &conf->node, &connect_items);
       }
 

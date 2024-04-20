@@ -95,7 +95,7 @@ capab_del(const char *name)
 
     if (irccmp(cap->name, name) == 0)
     {
-      list_delete(node, &capab_list);
+      list_remove(node, &capab_list);
       xfree(cap->name);
       xfree(cap);
     }

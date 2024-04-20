@@ -186,7 +186,7 @@ list_add_tail(void *data, list_node_t *m, list_t *list)
  * @param list Pointer to the double-linked list.
  */
 void
-list_delete(list_node_t *m, list_t *list)
+list_remove(list_node_t *m, list_t *list)
 {
   assert(list->length > 0);
 
@@ -407,7 +407,7 @@ list_iterate_safe(list_t *list, list_iterate_callback callback, void *user_ptr)
  * @return Pointer to the deleted node, or NULL if not found.
  */
 list_node_t *
-list_find_delete(list_t *list, void *data)
+list_find_remove(list_t *list, void *data)
 {
   list_node_t *m;
 
@@ -415,7 +415,7 @@ list_find_delete(list_t *list, void *data)
   {
     if (m->data == data)
     {
-      list_delete(m, list);
+      list_remove(m, list);
       return m;
     }
   }

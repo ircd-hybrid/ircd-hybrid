@@ -93,7 +93,7 @@ isupport_clear_lines(void)
   while (isupport_list_lines.head)
   {
     list_node_t *node = isupport_list_lines.head;
-    list_delete(node, &isupport_list_lines);
+    list_remove(node, &isupport_list_lines);
     xfree(node->data);
     list_free_node(node);
   }
@@ -227,7 +227,7 @@ isupport_create(const char *name, const char *options, int number)
 static void
 isupport_destroy(struct Isupport *support)
 {
-  list_delete(&support->node, &isupport_list);
+  list_remove(&support->node, &isupport_list);
   xfree(support->name);
   xfree(support->options);
   xfree(support);

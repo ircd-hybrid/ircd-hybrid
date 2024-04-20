@@ -60,7 +60,7 @@ cluster_clear(void)
   {
     struct ClusterItem *cluster = cluster_list.head->data;
 
-    list_delete(&cluster->node, &cluster_list);
+    list_remove(&cluster->node, &cluster_list);
     xfree(cluster->server);
     xfree(cluster);
   }

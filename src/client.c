@@ -554,7 +554,7 @@ free_exited_clients(void)
   LIST_FOREACH_SAFE(node, node_next, dead_list.head)
   {
     client_free(node->data);
-    list_delete(node, &dead_list);
+    list_remove(node, &dead_list);
     list_free_node(node);
   }
 }
@@ -648,8 +648,8 @@ exit_one_client(struct Client *client, const char *comment)
     if (HasUMode(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    list_delete(&client->lnode, &client->servptr->serv->client_list);
-    list_delete(&client->node, &global_client_list);
+    list_remove(&client->lnode, &client->servptr->serv->client_list);
+    list_remove(&client->node, &global_client_list);
 
     /*
      * If a person is on a channel, send a QUIT notice
@@ -676,8 +676,8 @@ exit_one_client(struct Client *client, const char *comment)
     sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE, "Server %s split from %s",
                          client->name, client->servptr->name);
 
-    list_delete(&client->lnode, &client->servptr->serv->server_list);
-    list_delete(&client->node, &global_server_list);
+    list_remove(&client->lnode, &client->servptr->serv->server_list);
+    list_remove(&client->node, &global_server_list);
   }
 
   if (client->id[0])
@@ -766,13 +766,13 @@ exit_client(struct Client *client, const char *comment)
     {
       if (HasUMode(client, UMODE_OPER))
       {
-        list_node_t *node = list_find_delete(&oper_list, client);
+        list_node_t *node = list_find_remove(&oper_list, client);
         if (node)
           list_free_node(node);
       }
 
       assert(list_find(&local_client_list, client));
-      list_delete(&client->connection->node, &local_client_list);
+      list_remove(&client->connection->node, &local_client_list);
 
       if (client->connection->list_task)
         free_list_task(client);
@@ -798,7 +798,7 @@ exit_client(struct Client *client, const char *comment)
     else if (IsServer(client))
     {
       assert(list_find(&local_server_list, client));
-      list_delete(&client->connection->node, &local_server_list);
+      list_remove(&client->connection->node, &local_server_list);
 
       if (!HasFlag(client, FLAGS_SQUIT))
         /* For them, we are exiting the network */
@@ -807,7 +807,7 @@ exit_client(struct Client *client, const char *comment)
     else
     {
       assert(list_find(&unknown_list, client));
-      list_delete(&client->connection->node, &unknown_list);
+      list_remove(&client->connection->node, &unknown_list);
     }
 
     sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, comment);
@@ -961,7 +961,7 @@ exit_aborted_clients(void)
     struct Client *client = ptr->data;
     eac_next = ptr->next;
 
-    list_delete(ptr, &abort_list);
+    list_remove(ptr, &abort_list);
     list_free_node(ptr);
 
     if (client == NULL)

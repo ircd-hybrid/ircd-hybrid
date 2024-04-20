@@ -163,7 +163,7 @@ reset_block_state(void)
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       xfree(node->data);
-      list_delete(node, *list);
+      list_remove(node, *list);
       list_free_node(node);
     }
   }

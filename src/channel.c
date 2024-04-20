@@ -126,12 +126,12 @@ channel_remove_user(struct ChannelMember *member)
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
 
-  list_delete(&member->channode, &channel->members);
+  list_remove(&member->channode, &channel->members);
 
   if (MyConnect(client))
-    list_delete(&member->locchannode, &channel->members_local);
+    list_remove(&member->locchannode, &channel->members_local);
 
-  list_delete(&member->usernode, &client->channel);
+  list_remove(&member->usernode, &client->channel);
 
   xfree(member);
 
@@ -339,7 +339,7 @@ channel_check_name(const char *name, bool local)
 void
 remove_ban(struct Ban *ban, list_t *list)
 {
-  list_delete(&ban->node, list);
+  list_remove(&ban->node, list);
   xfree(ban);
 }
 
@@ -399,7 +399,7 @@ channel_free(struct Channel *channel)
   channel_free_mask_list(&channel->exceptlist);
   channel_free_mask_list(&channel->invexlist);
 
-  list_delete(&channel->node, &channel_list);
+  list_remove(&channel->node, &channel_list);
   hash_del_channel(channel);
 
   assert(channel->hnextch == channel);

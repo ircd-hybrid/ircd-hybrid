@@ -63,7 +63,7 @@ accept_add(const char *nick, const char *user,
 void
 accept_del(struct AcceptItem *accept, list_t *list)
 {
-  list_delete(&accept->node, list);
+  list_remove(&accept->node, list);
 
   xfree(accept->nick);
   xfree(accept->user);

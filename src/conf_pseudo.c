@@ -153,7 +153,7 @@ pseudo_clear(void)
     assert(command_find(pseudo->command_struct.name));
 
     command_del(&pseudo->command_struct);
-    list_delete(&pseudo->node, &pseudo_list);
+    list_remove(&pseudo->node, &pseudo_list);
 
     xfree(pseudo->name);
     xfree(pseudo->nick);

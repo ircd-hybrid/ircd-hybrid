@@ -97,7 +97,7 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
             ClrOFlag(target_p);
             DelUMode(target_p, ConfigGeneral.oper_only_umodes);
 
-            list_node_t *node = list_find_delete(&oper_list, target_p);
+            list_node_t *node = list_find_remove(&oper_list, target_p);
             if (node)
               list_free_node(node);
           }

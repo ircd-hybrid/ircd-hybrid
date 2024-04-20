@@ -142,7 +142,7 @@ monitor_free(struct Monitor *monitor)
   assert(monitor->monitored_by.head == NULL);
   assert(list_find(&monitor_hash[monitor->hash_value], monitor));
 
-  list_delete(&monitor->node, &monitor_hash[monitor->hash_value]);
+  list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
 
   xfree(monitor->name);
   xfree(monitor);
@@ -196,13 +196,13 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
   if (monitor == NULL)
     return;  /* No header found for that name. i.e. it's not being monitored */
 
-  list_node_t *node = list_find_delete(&monitor->monitored_by, client);
+  list_node_t *node = list_find_remove(&monitor->monitored_by, client);
   if (node == NULL)
     return;  /* This name isn't being monitored by client */
 
   list_free_node(node);
 
-  node = list_find_delete(&client->connection->monitors, monitor);
+  node = list_find_remove(&client->connection->monitors, monitor);
   if (node)
     list_free_node(node);
 
@@ -226,7 +226,7 @@ monitor_clear_list(struct Client *client)
 
     assert(list_find(&monitor->monitored_by, client));
 
-    list_node_t *temp = list_find_delete(&monitor->monitored_by, client);
+    list_node_t *temp = list_find_remove(&monitor->monitored_by, client);
     if (temp)
       list_free_node(temp);
 
@@ -234,7 +234,7 @@ monitor_clear_list(struct Client *client)
     if (monitor->monitored_by.head == NULL)
       monitor_free(monitor);
 
-    list_delete(node, &client->connection->monitors);
+    list_remove(node, &client->connection->monitors);
     list_free_node(node);
   }
 

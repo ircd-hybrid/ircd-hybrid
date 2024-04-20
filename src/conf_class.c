@@ -73,7 +73,7 @@ class_free(struct ClassItem *const class)
   if (class->ip_tree_v4)
     patricia_destroy(class->ip_tree_v4, NULL);
 
-  list_delete(&class->node, &class_list);
+  list_remove(&class->node, &class_list);
   xfree(class->name);
   xfree(class);
 }

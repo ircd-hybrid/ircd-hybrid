@@ -115,7 +115,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
             ClrOFlag(source_p);
             DelUMode(source_p, ConfigGeneral.oper_only_umodes);
 
-            list_node_t *node = list_find_delete(&oper_list, source_p);
+            list_node_t *node = list_find_remove(&oper_list, source_p);
             if (node)
               list_free_node(node);
           }

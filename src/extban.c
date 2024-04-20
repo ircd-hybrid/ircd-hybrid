@@ -100,7 +100,7 @@ extban_del(struct Extban *extban)
   if (extban->flag == 0)
     return;
 
-  list_delete(&extban->node, &extban_list);
+  list_remove(&extban->node, &extban_list);
 
   matching_mask &= ~extban->flag;
   acting_mask &= ~extban->flag;

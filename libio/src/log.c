@@ -254,7 +254,7 @@ log_write(enum log_type type, const char *format, ...)
 void
 log_destroy(struct Log *log)
 {
-  list_delete(&log->node, &log_list);
+  list_remove(&log->node, &log_list);
 
   if (log->file)
     fclose(log->file);

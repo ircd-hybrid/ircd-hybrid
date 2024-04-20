@@ -64,10 +64,10 @@ static struct Whowas *
 whowas_unlink(struct Whowas *whowas)
 {
   if (whowas->client)
-    list_delete(&whowas->client_list_node, &whowas->client->whowas_list);
+    list_remove(&whowas->client_list_node, &whowas->client->whowas_list);
 
-  list_delete(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
-  list_delete(&whowas->list_node, &whowas_list);
+  list_remove(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
+  list_remove(&whowas->list_node, &whowas_list);
 
   return whowas;
 }
@@ -179,7 +179,7 @@ whowas_off_history(struct Client *client)
     struct Whowas *whowas = client->whowas_list.head->data;
 
     whowas->client = NULL;
-    list_delete(&whowas->client_list_node, &client->whowas_list);
+    list_remove(&whowas->client_list_node, &client->whowas_list);
   }
 }
 

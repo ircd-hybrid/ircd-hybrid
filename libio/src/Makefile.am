@@ -25,6 +25,10 @@ libio_la_SOURCES =  base32.c      \
                     memory.h      \
                     patricia.c    \
                     patricia.h    \
+                    res.c         \
+                    res.h         \
+                    reslib.c      \
+                    reslib.h      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \

@@ -119,7 +119,7 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_DEPENDENCIES = @LTLIBOBJS@
 am_libio_la_OBJECTS = base32.lo dbuf.lo event.lo hook.lo io_getopt.lo \
 	irc_string.lo list.lo log.lo match.lo misc.lo memory.lo \
-	patricia.lo rng_mt.lo sha3.lo
+	patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -145,7 +145,8 @@ am__depfiles_remade = ./$(DEPDIR)/base32.Plo ./$(DEPDIR)/dbuf.Plo \
 	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/irc_string.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
-	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/rng_mt.Plo \
+	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/res.Plo \
+	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/rng_mt.Plo \
 	./$(DEPDIR)/sha3.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -364,6 +365,10 @@ libio_la_SOURCES = base32.c      \
                     memory.h      \
                     patricia.c    \
                     patricia.h    \
+                    res.c         \
+                    res.h         \
+                    reslib.c      \
+                    reslib.h      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \
@@ -436,6 +441,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Plo@am__quote@ # am--include-marker
 
@@ -611,6 +618,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
+	-rm -f ./$(DEPDIR)/res.Plo
+	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f Makefile
@@ -670,6 +679,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
+	-rm -f ./$(DEPDIR)/res.Plo
+	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f Makefile

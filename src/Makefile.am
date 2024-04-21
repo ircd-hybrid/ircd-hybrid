@@ -106,10 +106,6 @@ ircd_SOURCES = accept.c          \
                tls_openssl.h     \
                tls_wolfssl.c     \
                tls_wolfssl.h     \
-               res.c             \
-               res.h             \
-               reslib.c          \
-               reslib.h          \
                restart.c         \
                restart.h         \
                s_bsd.c           \

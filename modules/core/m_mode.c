@@ -51,31 +51,31 @@
  * parv[2] - modes to change
  */
 static void
-set_user_mode(struct Client *source_p, const int parc, char *parv[])
+set_user_mode(struct Client *source, const int parc, char *parv[])
 {
   const struct user_modes *tab = NULL;
-  const unsigned int oldmodes = source_p->umodes;
+  const unsigned int oldmodes = source->umodes;
   bool badmode = false;
   int what = MODE_ADD;
 
-  const struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  const struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
   {
-    if (MyConnect(source_p))
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    if (MyConnect(source))
+      sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
-  if (source_p != target_p)
+  if (source != target)
   {
-     sendto_one_numeric(source_p, &me, ERR_USERSDONTMATCH);
+     sendto_one_numeric(source, &me, ERR_USERSDONTMATCH);
      return;
   }
 
   if (parc < 3)
   {
-    sendto_one_numeric(source_p, &me, RPL_UMODEIS,
-                       user_get_mode_str(source_p->umodes));
+    sendto_one_numeric(source, &me, RPL_UMODEIS,
+                       user_get_mode_str(source->umodes));
     return;
   }
 
@@ -93,29 +93,29 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
       case 'o':
         if (what == MODE_ADD)
         {
-          if (!MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER))
+          if (!MyConnect(source) && !HasUMode(source, UMODE_OPER))
           {
             ++Count.oper;
-            SetOper(source_p);
+            SetOper(source);
           }
         }
         else
         {
-          if (!HasUMode(source_p, UMODE_OPER))
+          if (!HasUMode(source, UMODE_OPER))
             break;
 
-          ClearOper(source_p);
+          ClearOper(source);
           --Count.oper;
 
-          if (MyConnect(source_p))
+          if (MyConnect(source))
           {
-            svstag_detach(&source_p->svstags, RPL_WHOISOPERATOR);
-            conf_detach(source_p, CONF_OPER);
+            svstag_detach(&source->svstags, RPL_WHOISOPERATOR);
+            conf_detach(source, CONF_OPER);
 
-            ClrOFlag(source_p);
-            DelUMode(source_p, ConfigGeneral.oper_only_umodes);
+            ClrOFlag(source);
+            DelUMode(source, ConfigGeneral.oper_only_umodes);
 
-            list_node_t *node = list_find_remove(&oper_list, source_p);
+            list_node_t *node = list_find_remove(&oper_list, source);
             if (node)
               list_free_node(node);
           }
@@ -125,31 +125,31 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
       case 'x':
         if (what == MODE_ADD)
         {
-          if (HasUMode(source_p, UMODE_CLOAK))
+          if (HasUMode(source, UMODE_CLOAK))
             break;
 
-          if (MyConnect(source_p))
+          if (MyConnect(source))
           {
-            if (HasFlag(source_p, FLAGS_SPOOF))
+            if (HasFlag(source, FLAGS_SPOOF))
               break;
 
-            const char *const cloak = cloak_compute(&source_p->addr);
+            const char *const cloak = cloak_compute(&source->addr);
             if (cloak == NULL)
               break;
-            user_set_hostmask(source_p, cloak, true);
+            user_set_hostmask(source, cloak, true);
           }
 
-          AddUMode(source_p, UMODE_CLOAK);
+          AddUMode(source, UMODE_CLOAK);
         }
         else
         {
-          if (!HasUMode(source_p, UMODE_CLOAK))
+          if (!HasUMode(source, UMODE_CLOAK))
             break;
 
-          DelUMode(source_p, UMODE_CLOAK);
+          DelUMode(source, UMODE_CLOAK);
 
-          if (MyConnect(source_p))
-            user_set_hostmask(source_p, source_p->realhost, true);
+          if (MyConnect(source))
+            user_set_hostmask(source, source->realhost, true);
         }
 
       case 'S':  /* Only servers may set +S in a burst */
@@ -161,18 +161,18 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
       default:
         if ((tab = umode_map[(unsigned char)*m]))
         {
-          if (MyConnect(source_p) && !HasUMode(source_p, UMODE_OPER) &&
+          if (MyConnect(source) && !HasUMode(source, UMODE_OPER) &&
               (ConfigGeneral.oper_only_umodes & tab->flag))
             badmode = true;
           else
           {
             if (what == MODE_ADD)
-              AddUMode(source_p, tab->flag);
+              AddUMode(source, tab->flag);
             else
-              DelUMode(source_p, tab->flag);
+              DelUMode(source, tab->flag);
           }
         }
-        else if (MyConnect(source_p))
+        else if (MyConnect(source))
           badmode = true;
 
         break;
@@ -180,30 +180,30 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
   }
 
   if (badmode)
-    sendto_one_numeric(source_p, &me, ERR_UMODEUNKNOWNFLAG);
+    sendto_one_numeric(source, &me, ERR_UMODEUNKNOWNFLAG);
 
-  if (MyConnect(source_p) && HasUMode(source_p, UMODE_ADMIN) &&
-      !HasOFlag(source_p, OPER_FLAG_ADMIN))
+  if (MyConnect(source) && HasUMode(source, UMODE_ADMIN) &&
+      !HasOFlag(source, OPER_FLAG_ADMIN))
   {
-    sendto_one_notice(source_p, &me, ":*** You have no admin flag;");
-    DelUMode(source_p, UMODE_ADMIN);
+    sendto_one_notice(source, &me, ":*** You have no admin flag;");
+    DelUMode(source, UMODE_ADMIN);
   }
 
-  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source, UMODE_INVISIBLE))
     ++Count.invisi;
-  else if ((oldmodes & UMODE_INVISIBLE) && !HasUMode(source_p, UMODE_INVISIBLE))
+  else if ((oldmodes & UMODE_INVISIBLE) && !HasUMode(source, UMODE_INVISIBLE))
     --Count.invisi;
 
   /*
    * Compare new modes with old modes and send string which will cause
    * servers to update correctly.
    */
-  send_umode(source_p, oldmodes, MyConnect(source_p), true);
+  send_umode(source, oldmodes, MyConnect(source), true);
 }
 
 /*! \brief MODE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -214,7 +214,7 @@ set_user_mode(struct Client *source_p, const int parc, char *parv[])
  *      - parv[2] = modes to be added or removed
  */
 static void
-m_mode(struct Client *source_p, int parc, char *parv[])
+m_mode(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
@@ -222,28 +222,28 @@ m_mode(struct Client *source_p, int parc, char *parv[])
   if (!IsChanPrefix(*name))
   {
     /* If here, it has to be a non-channel name */
-    set_user_mode(source_p, parc, parv);
+    set_user_mode(source, parc, parv);
     return;
   }
 
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
   /* Now known the channel exists */
   if (parc < 3)
   {
-    sendto_one_numeric(source_p, &me, RPL_CHANNELMODEIS,
-                       channel->name, channel_modes(channel, source_p, true));
-    sendto_one_numeric(source_p, &me, RPL_CREATIONTIME,
+    sendto_one_numeric(source, &me, RPL_CHANNELMODEIS,
+                       channel->name, channel_modes(channel, source, true));
+    sendto_one_numeric(source, &me, RPL_CREATIONTIME,
                        channel->name, channel->creation_time);
     return;
   }
 
-  channel_mode_set(source_p, channel, parc - 2, parv + 2);
+  channel_mode_set(source, channel, parc - 2, parv + 2);
 }
 
 static struct Command mode_msgtab =

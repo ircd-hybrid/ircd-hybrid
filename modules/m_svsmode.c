@@ -41,7 +41,7 @@
 
 /*! \brief SVSMODE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -53,24 +53,24 @@
  *      - parv[3] = modes to be added or removed
  */
 static void
-ms_svsmode(struct Client *source_p, int parc, char *parv[])
+ms_svsmode(struct Client *source, int parc, char *parv[])
 {
   const char *const modes = parv[3];
   const struct user_modes *tab = NULL;
   int what = MODE_ADD;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
-  struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target_p->tsinfo))
+  if (ts && (ts != target->tsinfo))
     return;
 
-  const unsigned int oldmodes = target_p->umodes;
+  const unsigned int oldmodes = target->umodes;
 
   for (const char *m = modes; *m; ++m)
   {
@@ -84,20 +84,20 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         break;
 
       case 'o':
-        if (what == MODE_DEL && HasUMode(target_p, UMODE_OPER))
+        if (what == MODE_DEL && HasUMode(target, UMODE_OPER))
         {
-          ClearOper(target_p);
+          ClearOper(target);
           --Count.oper;
 
-          if (MyConnect(target_p))
+          if (MyConnect(target))
           {
-            svstag_detach(&target_p->svstags, RPL_WHOISOPERATOR);
-            conf_detach(target_p, CONF_OPER);
+            svstag_detach(&target->svstags, RPL_WHOISOPERATOR);
+            conf_detach(target, CONF_OPER);
 
-            ClrOFlag(target_p);
-            DelUMode(target_p, ConfigGeneral.oper_only_umodes);
+            ClrOFlag(target);
+            DelUMode(target, ConfigGeneral.oper_only_umodes);
 
-            list_node_t *node = list_find_remove(&oper_list, target_p);
+            list_node_t *node = list_find_remove(&oper_list, target);
             if (node)
               list_free_node(node);
           }
@@ -106,14 +106,14 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         break;
 
       case 'i':
-        if (what == MODE_ADD && !HasUMode(target_p, UMODE_INVISIBLE))
+        if (what == MODE_ADD && !HasUMode(target, UMODE_INVISIBLE))
         {
-          AddUMode(target_p, UMODE_INVISIBLE);
+          AddUMode(target, UMODE_INVISIBLE);
           ++Count.invisi;
         }
-        else if (what == MODE_DEL && HasUMode(target_p, UMODE_INVISIBLE))
+        else if (what == MODE_DEL && HasUMode(target, UMODE_INVISIBLE))
         {
-          DelUMode(target_p, UMODE_INVISIBLE);
+          DelUMode(target, UMODE_INVISIBLE);
           --Count.invisi;
         }
 
@@ -128,20 +128,20 @@ ms_svsmode(struct Client *source_p, int parc, char *parv[])
         if ((tab = umode_map[(unsigned char)*m]))
         {
           if (what == MODE_ADD)
-            AddUMode(target_p, tab->flag);
+            AddUMode(target, tab->flag);
           else
-            DelUMode(target_p, tab->flag);
+            DelUMode(target, tab->flag);
         }
 
         break;
     }
   }
 
-  sendto_server(source_p, 0, 0, ":%s SVSMODE %s %ju %s",
-                source_p->id, target_p->id, target_p->tsinfo, modes);
+  sendto_server(source, 0, 0, ":%s SVSMODE %s %ju %s",
+                source->id, target->id, target->tsinfo, modes);
 
-  if (MyConnect(target_p))
-    send_umode(target_p, oldmodes, true, false);
+  if (MyConnect(target))
+    send_umode(target, oldmodes, true, false);
 }
 
 static struct Command svsmode_msgtab =

@@ -59,12 +59,12 @@ pseudo_get_list(void)
  * This function processes incoming pseudo messages and forwards them to the
  * appropriate target based on the pseudo configuration.
  *
- * @param source_p Source client sending the pseudo message.
+ * @param source Source client sending the pseudo message.
  * @param parc Number of parameters in the message.
  * @param parv Array of parameters in the message.
  */
 static void
-pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
+pseudo_message_handler(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
@@ -72,7 +72,7 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
 
   if (parc < 3 || EmptyString(msg))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTEXTTOSEND);
+    sendto_one_numeric(source, &me, ERR_NOTEXTTOSEND);
     return;
   }
 
@@ -82,18 +82,18 @@ pseudo_message_handler(struct Client *source_p, int parc, char *parv[])
     msg = buf;
   }
 
-  struct Client *target_p = find_person(source_p, pseudo->nick);
-  if (target_p)
+  struct Client *target = find_person(source, pseudo->nick);
+  if (target)
   {
-    const struct Client *server_p = hash_find_server(pseudo->server);
-    if (server_p == NULL || target_p->servptr != server_p || IsMe(server_p))
-      target_p = NULL;
+    const struct Client *server = hash_find_server(pseudo->server);
+    if (server == NULL || target->servptr != server || IsMe(server))
+      target = NULL;
   }
 
-  if (target_p)
-    sendto_one(target_p, ":%s PRIVMSG %s :%s", source_p->id, target_p->id, msg);
+  if (target)
+    sendto_one(target, ":%s PRIVMSG %s :%s", source->id, target->id, msg);
   else
-    sendto_one_numeric(source_p, &me, ERR_SERVICESDOWN, pseudo->name);
+    sendto_one_numeric(source, &me, ERR_SERVICESDOWN, pseudo->name);
 }
 
 /**

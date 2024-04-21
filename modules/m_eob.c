@@ -34,7 +34,7 @@
 
 /*! \brief EOB command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -43,17 +43,17 @@
  *      - parv[0] = command
  */
 static void
-ms_eob(struct Client *source_p, int parc, char *parv[])
+ms_eob(struct Client *source, int parc, char *parv[])
 {
-  assert(IsServer(source_p));
+  assert(IsServer(source));
 
-  if (MyConnect(source_p))
+  if (MyConnect(source))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "End of burst from %s (%ju seconds)", source_p->name,
-                         (event_base->time.sec_monotonic - source_p->connection->created_monotonic));
+                         "End of burst from %s (%ju seconds)", source->name,
+                         (event_base->time.sec_monotonic - source->connection->created_monotonic));
 
-  AddFlag(source_p, FLAGS_EOB);
-  sendto_server(source_p, 0, 0, ":%s EOB", source_p->id);
+  AddFlag(source, FLAGS_EOB);
+  sendto_server(source, 0, 0, ":%s EOB", source->id);
 }
 
 static struct Command eob_msgtab =

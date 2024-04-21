@@ -82,34 +82,34 @@ server_set_flags(struct Client *client_p, const char *flags)
  * side effects - NICK message is sent towards given client_p
  */
 static void
-server_send_client(struct Client *client_p, struct Client *target_p)
+server_send_client(struct Client *client_p, struct Client *target)
 {
-  assert(IsClient(target_p));
+  assert(IsClient(target));
 
   sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-             target_p->servptr->id,
-             target_p->name, target_p->hopcount + 1,
-             target_p->tsinfo, user_get_mode_str(target_p->umodes),
-             target_p->username, target_p->host, target_p->realhost,
-             target_p->sockhost, target_p->id,
-             target_p->account, target_p->info);
+             target->servptr->id,
+             target->name, target->hopcount + 1,
+             target->tsinfo, user_get_mode_str(target->umodes),
+             target->username, target->host, target->realhost,
+             target->sockhost, target->id,
+             target->account, target->info);
 
-  if (!EmptyString(target_p->tls_certfp))
-    sendto_one(client_p, ":%s CERTFP %s", target_p->id, target_p->tls_certfp);
+  if (!EmptyString(target->tls_certfp))
+    sendto_one(client_p, ":%s CERTFP %s", target->id, target->tls_certfp);
 
-  if (!EmptyString(target_p->tls_cipher))
+  if (!EmptyString(target->tls_cipher))
     sendto_one(client_p, ":%s METADATA client %s cipher :%s",
-               target_p->servptr->id, target_p->id, target_p->tls_cipher);
+               target->servptr->id, target->id, target->tls_cipher);
 
-  if (target_p->away[0])
-    sendto_one(client_p, ":%s AWAY :%s", target_p->id, target_p->away);
+  if (target->away[0])
+    sendto_one(client_p, ":%s AWAY :%s", target->id, target->away);
 
   list_node_t *node;
-  LIST_FOREACH_PREV(node, target_p->svstags.tail)
+  LIST_FOREACH_PREV(node, target->svstags.tail)
   {
     const struct ServicesTag *svstag = node->data;
     sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
-               target_p->id, target_p->tsinfo, svstag->numeric,
+               target->id, target->tsinfo, svstag->numeric,
                user_get_mode_str(svstag->umodes), svstag->tag);
   }
 }
@@ -127,10 +127,10 @@ server_burst(struct Client *client_p)
 
   LIST_FOREACH(node, global_client_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    if (target_p->from != client_p)
-      server_send_client(client_p, target_p);
+    if (target->from != client_p)
+      server_send_client(client_p, target);
   }
 
   LIST_FOREACH(node, channel_get_list()->head)
@@ -264,15 +264,15 @@ server_estab(struct Client *client_p)
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    /* target_p->from == target_p for target_p == client_p */
-    if (IsMe(target_p) || target_p->from == client_p)
+    /* target->from == target for target == client_p */
+    if (IsMe(target) || target->from == client_p)
       continue;
 
     sendto_one(client_p, ":%s SID %s %u %s +%s :%s",
-               target_p->servptr->id, target_p->name, target_p->hopcount + 1,
-               target_p->id, IsHidden(target_p) ? "h" : "", target_p->info);
+               target->servptr->id, target->name, target->hopcount + 1,
+               target->id, IsHidden(target) ? "h" : "", target->info);
   }
 
   server_burst(client_p);
@@ -281,13 +281,13 @@ server_estab(struct Client *client_p)
   {
     LIST_FOREACH_PREV(node, global_server_list.tail)
     {
-      struct Client *target_p = node->data;
+      struct Client *target = node->data;
 
-      if (target_p->from == client_p)
+      if (target->from == client_p)
         continue;
 
-      if (IsMe(target_p) || HasFlag(target_p, FLAGS_EOB))
-        sendto_one(client_p, ":%s EOB", target_p->id);
+      if (IsMe(target) || HasFlag(target, FLAGS_EOB))
+        sendto_one(client_p, ":%s EOB", target->id);
     }
   }
 }
@@ -346,16 +346,16 @@ server_check(const char *name, struct Client *client_p)
  *  parv[5] = serverinfo
  */
 static void
-mr_server(struct Client *source_p, int parc, char *parv[])
+mr_server(struct Client *source, int parc, char *parv[])
 {
   const char *name = parv[1];
   const char *sid = parv[3];
   const char *error = NULL;
   bool warn = true;
 
-  if (listener_has_flag(source_p->connection->listener, LISTENER_CLIENT))
+  if (listener_has_flag(source->connection->listener, LISTENER_CLIENT))
   {
-    exit_client(source_p, "Use a different port");
+    exit_client(source, "Use a different port");
     return;
   }
 
@@ -363,11 +363,11 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
-          "for server %s", client_get_name(source_p, SHOW_IP), name);
+          "for server %s", client_get_name(source, SHOW_IP), name);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
           "Unauthorized server connection attempt from %s: Bogus server name "
-          "for server %s", client_get_name(source_p, MASK_IP), name);
-    exit_client(source_p, "Bogus server name");
+          "for server %s", client_get_name(source, MASK_IP), name);
+    exit_client(source, "Bogus server name");
     return;
   }
 
@@ -375,23 +375,23 @@ mr_server(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source_p, SHOW_IP), sid);
+                         client_get_name(source, SHOW_IP), sid);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source_p, MASK_IP), sid);
-    exit_client(source_p, "Bogus server ID introduced");
+                         client_get_name(source, MASK_IP), sid);
+    exit_client(source, "Bogus server ID introduced");
     return;
   }
 
-  if (IsHandshake(source_p) && irccmp(source_p->name, name))
+  if (IsHandshake(source) && irccmp(source->name, name))
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with mismatching server name %s",
-                         client_get_name(source_p, SHOW_IP), name);
+                         client_get_name(source, SHOW_IP), name);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with mismatching server name %s",
-                         client_get_name(source_p, MASK_IP), name);
-    exit_client(source_p, "Mismatching server name introduced");
+                         client_get_name(source, MASK_IP), name);
+    exit_client(source, "Mismatching server name introduced");
     return;
   }
 
@@ -399,7 +399,7 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * Now we just have to call server_check() and everything should
    * be checked for us... -A1kmm.
    */
-  switch (server_check(name, source_p))
+  switch (server_check(name, source))
   {
     case SERVER_CHECK_CONNECT_NOT_FOUND:
       error = "No connect {} block";
@@ -422,34 +422,34 @@ mr_server(struct Client *source_p, int parc, char *parv[])
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Unauthorized server connection attempt from %s: %s for server %s",
-                           client_get_name(source_p, SHOW_IP), error, name);
+                           client_get_name(source, SHOW_IP), error, name);
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Unauthorized server connection attempt from %s: %s for server %s",
-                           client_get_name(source_p, MASK_IP), error, name);
+                           client_get_name(source, MASK_IP), error, name);
     }
 
-    exit_client(source_p, error);
+    exit_client(source, error);
     return;
   }
 
   if (service_find(name, irccmp) == NULL)
   {
-    if ((ConfigChannel.enable_owner == 0) != !IsCapable(source_p, CAPAB_QOP) ||
-        (ConfigChannel.enable_admin == 0) != !IsCapable(source_p, CAPAB_AOP))
+    if ((ConfigChannel.enable_owner == 0) != !IsCapable(source, CAPAB_QOP) ||
+        (ConfigChannel.enable_admin == 0) != !IsCapable(source, CAPAB_AOP))
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                            "Link %s introduced server with mismatching AOP/QOP capabilities",
-                           client_get_name(source_p, SHOW_IP));
+                           client_get_name(source, SHOW_IP));
       sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                            "Link %s introduced server with mismatching AOP/QOP capabilities",
-                           client_get_name(source_p, MASK_IP));
-      exit_client(source_p, "Mismatching AOP/QOP capabilities");
+                           client_get_name(source, MASK_IP));
+      exit_client(source, "Mismatching AOP/QOP capabilities");
       return;
     }
   }
 
-  struct Client *target_p = hash_find_server(name);
-  if (target_p)
+  struct Client *target = hash_find_server(name);
+  if (target)
   {
     /*
      * This link is trying feed me a server that I already have
@@ -464,24 +464,24 @@ mr_server(struct Client *source_p, int parc, char *parv[])
      */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
-                         name, client_get_name(source_p, SHOW_IP));
+                         name, client_get_name(source, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s from %s",
-                         name, client_get_name(source_p, MASK_IP));
-    exit_client(source_p, "Server already exists");
+                         name, client_get_name(source, MASK_IP));
+    exit_client(source, "Server already exists");
     return;
   }
 
-  target_p = hash_find_id(sid);
-  if (target_p)
+  target = hash_find_id(sid);
+  if (target)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
-                         name, sid, client_get_name(source_p, SHOW_IP));
+                         name, sid, client_get_name(source, SHOW_IP));
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Attempt to re-introduce server %s SID %s from %s",
-                         name, sid, client_get_name(source_p, MASK_IP));
-    exit_client(source_p, "Server ID already exists");
+                         name, sid, client_get_name(source, MASK_IP));
+    exit_client(source, "Server ID already exists");
     return;
   }
 
@@ -489,22 +489,22 @@ mr_server(struct Client *source_p, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  target_p = find_servconn_in_progress(name);
-  if (target_p && (target_p != source_p))
-    exit_client(target_p, "Overridden");
+  target = find_servconn_in_progress(name);
+  if (target && (target != source))
+    exit_client(target, "Overridden");
 
   /*
    * If we are connecting (Handshake), we already have the name from the
-   * connect{} block in source_p->name.
+   * connect{} block in source->name.
    */
-  strlcpy(source_p->name, name, sizeof(source_p->name));
-  strlcpy(source_p->id, sid, sizeof(source_p->id));
-  strlcpy(source_p->info, parv[parc - 1], sizeof(source_p->info));
+  strlcpy(source->name, name, sizeof(source->name));
+  strlcpy(source->id, sid, sizeof(source->id));
+  strlcpy(source->info, parv[parc - 1], sizeof(source->info));
 
-  server_set_flags(source_p, parv[4]);
+  server_set_flags(source, parv[4]);
 
-  source_p->hopcount = atoi(parv[2]);
-  server_estab(source_p);
+  source->hopcount = atoi(parv[2]);
+  server_estab(source);
 }
 
 /* ms_sid()
@@ -523,21 +523,21 @@ mr_server(struct Client *source_p, int parc, char *parv[])
  *  parv[5] = serverinfo
  */
 static void
-ms_sid(struct Client *source_p, int parc, char *parv[])
+ms_sid(struct Client *source, int parc, char *parv[])
 {
   /* Just to be sure -A1kmm. */
-  if (!IsServer(source_p))
+  if (!IsServer(source))
     return;
 
   if (server_valid_name(parv[1]) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
-                         client_get_name(source_p->from, SHOW_IP), parv[1]);
+                         client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server name %s",
-                         client_get_name(source_p->from, MASK_IP), parv[1]);
-    exit_client(source_p->from, "Bogus server name introduced");
+                         client_get_name(source->from, MASK_IP), parv[1]);
+    exit_client(source->from, "Bogus server name introduced");
     return;
   }
 
@@ -545,39 +545,39 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source_p->from, SHOW_IP), parv[3]);
+                         client_get_name(source->from, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source_p->from, MASK_IP), parv[3]);
-    exit_client(source_p->from, "Bogus server ID introduced");
+                         client_get_name(source->from, MASK_IP), parv[3]);
+    exit_client(source->from, "Bogus server ID introduced");
     return;
   }
 
   /* Collision on SID? */
-  struct Client *target_p = hash_find_id(parv[3]);
-  if (target_p)
+  struct Client *target = hash_find_id(parv[3]);
+  if (target)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
-                         client_get_name(source_p->from, SHOW_IP), parv[3]);
+                         client_get_name(source->from, SHOW_IP), parv[3]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server ID %s already exists",
-                         client_get_name(source_p->from, MASK_IP), parv[3]);
-    exit_client(source_p->from, "Link cancelled, server ID already exists");
+                         client_get_name(source->from, MASK_IP), parv[3]);
+    exit_client(source->from, "Link cancelled, server ID already exists");
     return;
   }
 
   /* Collision on name? */
-  target_p = hash_find_server(parv[1]);
-  if (target_p)
+  target = hash_find_server(parv[1]);
+  if (target)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
-                         client_get_name(source_p->from, SHOW_IP), parv[1]);
+                         client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s cancelled, server %s already exists",
-                         client_get_name(source_p->from, MASK_IP), parv[1]);
-    exit_client(source_p->from, "Server exists");
+                         client_get_name(source->from, MASK_IP), parv[1]);
+    exit_client(source->from, "Server exists");
     return;
   }
 
@@ -585,15 +585,15 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  target_p = find_servconn_in_progress(parv[1]);
-  if (target_p && (target_p != source_p->from))
-    exit_client(target_p, "Overridden");
+  target = find_servconn_in_progress(parv[1]);
+  if (target && (target != source->from))
+    exit_client(target, "Overridden");
 
   /*
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct MaskItem *conf = source_p->from->connection->confs.head->data;
+  const struct MaskItem *conf = source->from->connection->confs.head->data;
   bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
   bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
 
@@ -622,17 +622,17 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
    * Would allow this server in finland to hub anything but .edu's
    */
 
-  /* Ok, check source_p->from can hub the new server */
+  /* Ok, check source->from can hub the new server */
   if (hlined == false)
   {
     /* OOOPs nope can't HUB */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
-                         client_get_name(source_p->from, SHOW_IP), parv[1]);
+                         client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Non-Hub link %s introduced %s.",
-                         client_get_name(source_p->from, MASK_IP), parv[1]);
-    exit_client(source_p, "No matching hub_mask.");
+                         client_get_name(source->from, MASK_IP), parv[1]);
+    exit_client(source, "No matching hub_mask.");
     return;
   }
 
@@ -642,42 +642,41 @@ ms_sid(struct Client *source_p, int parc, char *parv[])
     /* OOOPs nope can't HUB this leaf */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
-                         client_get_name(source_p->from, SHOW_IP), parv[1]);
+                         client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Link %s introduced leafed server %s.",
-                         client_get_name(source_p->from, MASK_IP), parv[1]);
-    exit_client(source_p->from, "Leafed server.");
+                         client_get_name(source->from, MASK_IP), parv[1]);
+    exit_client(source->from, "Leafed server.");
     return;
   }
 
-  target_p = client_make(source_p->from);
-  server_make(target_p);
-  target_p->hopcount = atoi(parv[2]);
-  target_p->servptr = source_p;
+  target = client_make(source->from);
+  server_make(target);
+  target->hopcount = atoi(parv[2]);
+  target->servptr = source;
 
-  strlcpy(target_p->name, parv[1], sizeof(target_p->name));
-  strlcpy(target_p->id, parv[3], sizeof(target_p->id));
-  strlcpy(target_p->info, parv[parc - 1], sizeof(target_p->info));
+  strlcpy(target->name, parv[1], sizeof(target->name));
+  strlcpy(target->id, parv[3], sizeof(target->id));
+  strlcpy(target->info, parv[parc - 1], sizeof(target->info));
 
-  server_set_flags(target_p, parv[4]);
+  server_set_flags(target, parv[4]);
 
-  SetServer(target_p);
+  SetServer(target);
 
-  if (service_find(target_p->name, irccmp))
-    AddFlag(target_p, FLAGS_SERVICE);
+  if (service_find(target->name, irccmp))
+    AddFlag(target, FLAGS_SERVICE);
 
-  list_add(target_p, &target_p->node, &global_server_list);
-  list_add(target_p, &target_p->lnode, &target_p->servptr->serv->server_list);
+  list_add(target, &target->node, &global_server_list);
+  list_add(target, &target->lnode, &target->servptr->serv->server_list);
 
-  hash_add_client(target_p);
-  hash_add_id(target_p);
+  hash_add_client(target);
+  hash_add_id(target);
 
-  sendto_server(source_p->from, 0, 0, ":%s SID %s %u %s +%s :%s",
-                source_p->id, target_p->name, target_p->hopcount + 1,
-                target_p->id, IsHidden(target_p) ? "h" : "", target_p->info);
-  sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE,
-                       "Server %s being introduced by %s",
-                       target_p->name, source_p->name);
+  sendto_server(source->from, 0, 0, ":%s SID %s %u %s +%s :%s",
+                source->id, target->name, target->hopcount + 1,
+                target->id, IsHidden(target) ? "h" : "", target->info);
+  sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE, "Server %s being introduced by %s",
+                       target->name, source->name);
 }
 
 static struct Command server_msgtab =

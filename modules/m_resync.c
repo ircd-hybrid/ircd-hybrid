@@ -37,7 +37,7 @@
 
 /*! \brief RESYNC command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -47,19 +47,19 @@
  *      - parv[1] = channel name
  */
 static void
-ms_resync(struct Client *source_p, int parc, char *parv[])
+ms_resync(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source_p));
-  assert(IsServer(source_p));
+  assert(MyConnect(source));
+  assert(IsServer(source));
 
-  if (!MyConnect(source_p) || !IsServer(source_p))
+  if (!MyConnect(source) || !IsServer(source))
     return;
 
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
     return;
 
-  channel_send_modes(source_p, channel);
+  channel_send_modes(source, channel);
 }
 
 static struct Command resync_msgtab =

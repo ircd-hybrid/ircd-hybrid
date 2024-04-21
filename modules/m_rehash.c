@@ -41,49 +41,49 @@
 
 /*! \brief REHASH CONF handler
  *         Attempts to reload server's configuration file(s)
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  */
 static void
-rehash_conf(struct Client *source_p)
+rehash_conf(struct Client *source)
 {
-  sendto_one_numeric(source_p, &me, RPL_REHASHING, "CONF");
+  sendto_one_numeric(source, &me, RPL_REHASHING, "CONF");
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s is rehashing configuration file(s)",
-                       get_oper_name(source_p));
+                       get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
-            get_oper_name(source_p));
+            get_oper_name(source));
   conf_rehash(false);
 }
 
 /*! \brief REHASH MOTD handler
  *         Attempts to recache server's MOTD file(s)
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  */
 static void
-rehash_motd(struct Client *source_p)
+rehash_motd(struct Client *source)
 {
-  sendto_one_numeric(source_p, &me, RPL_REHASHING, "MOTD");
+  sendto_one_numeric(source, &me, RPL_REHASHING, "MOTD");
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s is forcing re-reading of MOTD files",
-                       get_oper_name(source_p));
+                       get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
-            get_oper_name(source_p));
+            get_oper_name(source));
   motd_recache();
 }
 
 /*! \brief REHASH DNS handler
  *         Attempts to restart server's resolver
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  */
 static void
-rehash_dns(struct Client *source_p)
+rehash_dns(struct Client *source)
 {
-  sendto_one_numeric(source_p, &me, RPL_REHASHING, "DNS");
+  sendto_one_numeric(source, &me, RPL_REHASHING, "DNS");
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "%s is rehashing DNS",
-                       get_oper_name(source_p));
+                       get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
-            get_oper_name(source_p));
+            get_oper_name(source));
   restart_resolver();
 }
 
@@ -103,7 +103,7 @@ static const struct RehashStruct rehash_cmd_table[] =
 
 /*! \brief REHASH command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -117,16 +117,16 @@ static const struct RehashStruct rehash_cmd_table[] =
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-mo_rehash(struct Client *source_p, int parc, char *parv[])
+mo_rehash(struct Client *source, int parc, char *parv[])
 {
   const char *option = NULL;
   const char *server = NULL;
 
   if (!EmptyString(parv[2]))
   {
-    if (!HasOFlag(source_p, OPER_FLAG_REHASH_REMOTE))
+    if (!HasOFlag(source, OPER_FLAG_REHASH_REMOTE))
     {
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash:remote");
+      sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash:remote");
       return;
     }
 
@@ -135,9 +135,9 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
   }
   else
   {
-    if (!HasOFlag(source_p, OPER_FLAG_REHASH))
+    if (!HasOFlag(source, OPER_FLAG_REHASH))
     {
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "rehash");
+      sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash");
       return;
     }
 
@@ -150,22 +150,22 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
       continue;
 
     if (!EmptyString(server))
-      sendto_match_servs(source_p, server, 0, "REHASH %s %s", server, option);
+      sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
 
     if (EmptyString(server) || match(server, me.name) == 0)
-      tab->handler(source_p);
+      tab->handler(source);
 
     return;
   }
 
-  sendto_one_notice(source_p, &me, ":%s is not a valid option. "
+  sendto_one_notice(source, &me, ":%s is not a valid option. "
                     "Choose from CONF, DNS, MOTD",
                     option);
 }
 
 /*! \brief REHASH command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -176,18 +176,18 @@ mo_rehash(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-ms_rehash(struct Client *source_p, int parc, char *parv[])
+ms_rehash(struct Client *source, int parc, char *parv[])
 {
   const char *const option = parv[2];
   const char *const server = parv[1];
 
-  sendto_match_servs(source_p, server, 0, "REHASH %s %s", server, option);
+  sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
 
   if (match(server, me.name))
     return;
 
-  if (!shared_find(SHARED_REHASH, source_p->servptr->name,
-                   source_p->username, source_p->host))
+  if (!shared_find(SHARED_REHASH, source->servptr->name,
+                   source->username, source->host))
     return;
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
@@ -195,7 +195,7 @@ ms_rehash(struct Client *source_p, int parc, char *parv[])
     if (irccmp(tab->option, option))
       continue;
 
-    tab->handler(source_p);
+    tab->handler(source);
     return;
   }
 }

@@ -66,16 +66,16 @@ xline_check(const struct GecosItem *gecos)
  * side effects - when successful, adds an xline to the conf
  */
 static void
-xline_handle(struct Client *source_p, const struct aline_ctx *aline)
+xline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
 
-  if (!HasFlag(source_p, FLAGS_SERVICE))
+  if (!HasFlag(source, FLAGS_SERVICE))
   {
     if (valid_wild_card_simple(aline->mask) == false)
     {
-      if (IsClient(source_p))
-        sendto_one_notice(source_p, &me, ":Please include at least %u non-wildcard characters with the xline",
+      if (IsClient(source))
+        sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the xline",
                           ConfigGeneral.min_nonwildcard_simple);
       return;
     }
@@ -84,8 +84,8 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
   struct GecosItem *gecos = gecos_find(aline->mask, match);
   if (gecos)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":[%s] already X-Lined by [%s] - %s",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":[%s] already X-Lined by [%s] - %s",
                         aline->mask, gecos->mask, gecos->reason);
     return;
   }
@@ -106,26 +106,26 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
   {
     gecos->expire = event_base->time.sec_real + aline->duration;
 
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added temporary %ju min. X-Line [%s]",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":Added temporary %ju min. X-Line [%s]",
                         aline->duration / 60, gecos->mask);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. X-Line for [%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
+                         get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-              get_oper_name(source_p), aline->duration / 60, gecos->mask, gecos->reason);
+              get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
   }
   else
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added X-Line [%s] [%s]",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":Added X-Line [%s] [%s]",
                         gecos->mask, gecos->reason);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added X-Line for [%s] [%s]",
-                         get_oper_name(source_p), gecos->mask, gecos->reason);
+                         get_oper_name(source), gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-              get_oper_name(source_p), gecos->mask, gecos->reason);
+              get_oper_name(source), gecos->mask, gecos->reason);
   }
 
   xline_check(gecos);
@@ -142,22 +142,22 @@ xline_handle(struct Client *source_p, const struct aline_ctx *aline)
  *
  */
 static void
-mo_xline(struct Client *source_p, int parc, char *parv[])
+mo_xline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = true };
 
-  if (!HasOFlag(source_p, OPER_FLAG_XLINE))
+  if (!HasOFlag(source, OPER_FLAG_XLINE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "xline");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "xline");
     return;
   }
 
-  if (parse_aline("XLINE", source_p, parc, parv, &aline) == false)
+  if (parse_aline("XLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)
   {
-    sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
+    sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
                        aline.server, aline.mask, aline.duration, aline.reason);
 
     /* Allow ON to apply local xline as well if it matches */
@@ -165,15 +165,15 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
+    cluster_distribute(source, "XLINE", CAPAB_CLUSTER, CLUSTER_XLINE, "%s %ju :%s",
                        aline.mask, aline.duration, aline.reason);
 
-  xline_handle(source_p, &aline);
+  xline_handle(source, &aline);
 }
 
 /*! \brief XLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -186,7 +186,7 @@ mo_xline(struct Client *source_p, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_xline(struct Client *source_p, int parc, char *parv[])
+ms_xline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -198,15 +198,15 @@ ms_xline(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[3], NULL, 10)
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
+  sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
                      aline.server, aline.mask, aline.duration, aline.reason);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_XLINE, source_p->servptr->name, source_p->username, source_p->host))
-    xline_handle(source_p, &aline);
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      shared_find(SHARED_XLINE, source->servptr->name, source->username, source->host))
+    xline_handle(source, &aline);
 }
 
 static struct Command xline_msgtab =

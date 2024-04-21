@@ -38,7 +38,7 @@
 
 
 static void
-monitor_add(struct Client *source_p, char *list)
+monitor_add(struct Client *source, char *list)
 {
   char onbuf[IRCD_BUFSIZE];
   char ofbuf[IRCD_BUFSIZE];
@@ -46,9 +46,9 @@ monitor_add(struct Client *source_p, char *list)
   char *ofbufptr = ofbuf;
   char *p = NULL;
 
-  /* :me.name 730 source_p->name :nick!user@host,...\r\n */
+  /* :me.name 730 source->name :nick!user@host,...\r\n */
   /* 1       23456              78                  9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
@@ -56,37 +56,37 @@ monitor_add(struct Client *source_p, char *list)
     if (EmptyString(name) || valid_nickname(name, true) == false)
       continue;
 
-    if (list_length(&source_p->connection->monitors) >=
+    if (list_length(&source->connection->monitors) >=
         ConfigGeneral.max_monitor)
     {
       char buf[IRCD_BUFSIZE];
 
       if (onbufptr != onbuf)
-        sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
+        sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
       if (ofbufptr != ofbuf)
-        sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
+        sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 
       if (EmptyString(p))
         snprintf(buf, sizeof(buf), "%s", name);
       else
         snprintf(buf, sizeof(buf), "%s,%s", name, p);
 
-      sendto_one_numeric(source_p, &me, ERR_MONLISTFULL,
+      sendto_one_numeric(source, &me, ERR_MONLISTFULL,
                          ConfigGeneral.max_monitor, buf);
       return;
     }
 
-    if (monitor_add_to_hash_table(name, source_p) == false)
+    if (monitor_add_to_hash_table(name, source) == false)
       continue;  /* Name is already being monitored */
 
-    const struct Client *target_p = find_person(source_p, name);
-    if (target_p == NULL)
+    const struct Client *target = find_person(source, name);
+    if (target == NULL)
     {
       size_t masklen = strlen(name) + 1;  /* +1 for comma */
 
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
-        sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
+        sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
         ofbufptr = ofbuf;
       }
 
@@ -94,58 +94,58 @@ monitor_add(struct Client *source_p, char *list)
     }
     else
     {
-      size_t masklen = strlen(target_p->name) + strlen(target_p->username) +
-                       strlen(target_p->host) + 3;  /* +3 for ! + @ + comma */
+      size_t masklen = strlen(target->name) + strlen(target->username) +
+                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
 
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
-        sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
+        sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
         onbufptr = onbuf;
       }
 
       onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), onbufptr != onbuf ? ",%s!%s@%s" : "%s!%s@%s",
-                           target_p->name, target_p->username, target_p->host);
+                           target->name, target->username, target->host);
     }
   }
 
   if (onbufptr != onbuf)
-    sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
+    sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
   if (ofbufptr != ofbuf)
-    sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
+    sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 }
 
 static void
-monitor_del(struct Client *source_p, char *list)
+monitor_del(struct Client *source, char *list)
 {
   char *p = NULL;
 
-  if (list_length(&source_p->connection->monitors) == 0)
+  if (list_length(&source->connection->monitors) == 0)
     return;
 
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
     if (!EmptyString(name))
-      monitor_del_from_hash_table(name, source_p);
+      monitor_del_from_hash_table(name, source);
 }
 
 static void
-monitor_list(struct Client *source_p)
+monitor_list(struct Client *source)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   list_node_t *node;
 
-  /* :me.name 732 source_p->name :name1,name2,...\r\n */
+  /* :me.name 732 source->name :name1,name2,...\r\n */
   /* 1       23456              78               9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  LIST_FOREACH(node, source_p->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;
 
     if ((bufptr - buf) + strlen(monitor->name) + 1 /* +1 for comma */ + len > sizeof(buf))
     {
-      sendto_one_numeric(source_p, &me, RPL_MONLIST, buf);
+      sendto_one_numeric(source, &me, RPL_MONLIST, buf);
       bufptr = buf;
     }
 
@@ -153,12 +153,12 @@ monitor_list(struct Client *source_p)
   }
 
   if (bufptr != buf)
-    sendto_one_numeric(source_p, &me, RPL_MONLIST, buf);
-  sendto_one_numeric(source_p, &me, RPL_ENDOFMONLIST);
+    sendto_one_numeric(source, &me, RPL_MONLIST, buf);
+  sendto_one_numeric(source, &me, RPL_ENDOFMONLIST);
 }
 
 static void
-monitor_status(struct Client *source_p)
+monitor_status(struct Client *source)
 {
   char onbuf[IRCD_BUFSIZE];
   char ofbuf[IRCD_BUFSIZE];
@@ -166,22 +166,22 @@ monitor_status(struct Client *source_p)
   char *ofbufptr = ofbuf;
   list_node_t *node;
 
-  /* :me.name 730 source_p->name :nick!user@host,...\r\n */
+  /* :me.name 730 source->name :nick!user@host,...\r\n */
   /* 1       23456              78                  9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  LIST_FOREACH(node, source_p->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;
 
-    const struct Client *target_p = find_person(source_p, monitor->name);
-    if (target_p == NULL)
+    const struct Client *target = find_person(source, monitor->name);
+    if (target == NULL)
     {
       size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */
 
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
-        sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
+        sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
         ofbufptr = ofbuf;
       }
 
@@ -189,29 +189,29 @@ monitor_status(struct Client *source_p)
     }
     else
     {
-      size_t masklen = strlen(target_p->name) + strlen(target_p->username) +
-                       strlen(target_p->host) + 3;  /* +3 for ! + @ + comma */
+      size_t masklen = strlen(target->name) + strlen(target->username) +
+                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
 
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
-        sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
+        sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
         onbufptr = onbuf;
       }
 
       onbufptr += snprintf(onbufptr, sizeof(onbuf) - (onbufptr - onbuf), onbufptr != onbuf ? ",%s!%s@%s" : "%s!%s@%s",
-                           target_p->name, target_p->username, target_p->host);
+                           target->name, target->username, target->host);
     }
   }
 
   if (onbufptr != onbuf)
-    sendto_one_numeric(source_p, &me, RPL_MONONLINE, onbuf);
+    sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
   if (ofbufptr != ofbuf)
-    sendto_one_numeric(source_p, &me, RPL_MONOFFLINE, ofbuf);
+    sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 }
 
 /*! \brief MONITOR command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -222,42 +222,39 @@ monitor_status(struct Client *source_p)
  *      - parv[2] = comma-separated list of nicknames 
  */
 static void
-m_monitor(struct Client *source_p, int parc, char *parv[])
+m_monitor(struct Client *source, int parc, char *parv[])
 {
   switch (*parv[1])
   {
     case '+':
       if (EmptyString(parv[2]))
       {
-        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MONITOR");
+        sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MONITOR");
         return;
       }
 
-      monitor_add(source_p, parv[2]);
+      monitor_add(source, parv[2]);
       break;
     case '-':
       if (EmptyString(parv[2]))
       {
-        sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MONITOR");
+        sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MONITOR");
         return;
       }
 
-      monitor_del(source_p, parv[2]);
+      monitor_del(source, parv[2]);
       break;
-
     case 'C':
     case 'c':
-      monitor_clear_list(source_p);
+      monitor_clear_list(source);
       break;
-
     case 'L':
     case 'l':
-      monitor_list(source_p);
+      monitor_list(source);
       break;
-
     case 'S':
     case 's':
-      monitor_status(source_p);
+      monitor_status(source);
       break;
   }
 }

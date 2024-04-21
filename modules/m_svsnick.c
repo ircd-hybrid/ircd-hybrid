@@ -42,7 +42,7 @@
 
 /*! \brief SVSNICK command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -55,86 +55,86 @@
  *      - parv[4] = new timestamp
  */
 static void
-ms_svsnick(struct Client *source_p, int parc, char *parv[])
+ms_svsnick(struct Client *source, int parc, char *parv[])
 {
   const char *new_nick = parv[3];
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
   if (valid_nickname(new_nick, true) == false)
     return;
 
-  struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target_p->tsinfo))
+  if (ts && (ts != target->tsinfo))
     return;
 
   uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
 
-  if (!MyConnect(target_p))
+  if (!MyConnect(target))
   {
-    if (target_p->from == source_p->from)
+    if (target->from == source->from)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Received wrong-direction SVSNICK for %s (behind %s) from %s",
-                           target_p->name, source_p->from->name,
-                           client_get_name(source_p, HIDE_IP));
+                           target->name, source->from->name,
+                           client_get_name(source, HIDE_IP));
       return;
     }
 
-    sendto_one(target_p, ":%s SVSNICK %s %ju %s %ju",
-               source_p->id, target_p->id, ts, new_nick, new_ts);
+    sendto_one(target, ":%s SVSNICK %s %ju %s %ju",
+               source->id, target->id, ts, new_nick, new_ts);
     return;
   }
 
   struct Client *exists_p = hash_find_client(new_nick);
   if (exists_p)
   {
-    if (target_p == exists_p)
+    if (target == exists_p)
     {
-      if (strcmp(target_p->name, new_nick) == 0)
+      if (strcmp(target->name, new_nick) == 0)
         return;
     }
     else if (IsUnknown(exists_p))
       exit_client(exists_p, "SVSNICK Override");
     else
     {
-      exit_client(target_p, "SVSNICK Collide");
+      exit_client(target, "SVSNICK Collide");
       return;
     }
   }
 
-  target_p->tsinfo = new_ts;
-  clear_ban_cache_list(&target_p->channel);
-  monitor_signoff(target_p);
+  target->tsinfo = new_ts;
+  clear_ban_cache_list(&target->channel);
+  monitor_signoff(target);
 
-  if (HasUMode(target_p, UMODE_REGISTERED))
+  if (HasUMode(target, UMODE_REGISTERED))
   {
-    const unsigned int oldmodes = target_p->umodes;
-    DelUMode(target_p, UMODE_REGISTERED);
+    const unsigned int oldmodes = target->umodes;
+    DelUMode(target, UMODE_REGISTERED);
 
-    send_umode(target_p, oldmodes, true, false);
+    send_umode(target, oldmodes, true, false);
   }
 
-  sendto_common_channels_local(target_p, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               target_p->name, target_p->username, target_p->host, new_nick);
+  sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               target->name, target->username, target->host, new_nick);
 
-  whowas_add_history(target_p, true);
+  whowas_add_history(target, true);
 
   sendto_server(NULL, 0, 0, ":%s NICK %s :%ju",
-                target_p->id, new_nick, target_p->tsinfo);
+                target->id, new_nick, target->tsinfo);
 
-  hash_del_client(target_p);
-  strlcpy(target_p->name, new_nick, sizeof(target_p->name));
-  hash_add_client(target_p);
+  hash_del_client(target);
+  strlcpy(target->name, new_nick, sizeof(target->name));
+  hash_add_client(target);
 
-  monitor_signon(target_p);
+  monitor_signon(target);
 
-  fd_note(target_p->connection->fd, "Nick: %s", target_p->name);
+  fd_note(target->connection->fd, "Nick: %s", target->name);
 }
 
 static struct Command svsnick_msgtab =

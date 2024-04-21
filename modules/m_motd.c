@@ -39,20 +39,20 @@
 /*! \brief Sends the "message of the day" and notifies irc-operators
  *         about the MOTD request
  *
- * \param source_p Pointer to client to report to
+ * \param source Pointer to client to report to
  */
 static void
-do_motd(struct Client *source_p)
+do_motd(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MOTD requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
-  motd_send(source_p);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
+  motd_send(source);
 }
 
 /*! \brief MOTD command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -62,28 +62,28 @@ do_motd(struct Client *source_p)
  *      - parv[1] = nickname/servername
  */
 static void
-m_motd(struct Client *source_p, int parc, char *parv[])
+m_motd(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "MOTD");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "MOTD");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s MOTD :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s MOTD :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
-  do_motd(source_p);
+  do_motd(source);
 }
 
 /*! \brief MOTD command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -93,12 +93,12 @@ m_motd(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_motd(struct Client *source_p, int parc, char *parv[])
+ms_motd(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s MOTD :%s", 1, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s MOTD :%s", 1, parv)->ret != HUNTED_ISME)
     return;
 
-  do_motd(source_p);
+  do_motd(source);
 }
 
 static struct Command motd_msgtab =

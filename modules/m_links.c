@@ -38,18 +38,18 @@
 /*! \brief Shows a list of linked servers and notifies irc-operators
  *         about the LINKS request
  *
- * \param source_p Pointer to client to report to
+ * \param source Pointer to client to report to
  */
 static void
-do_links(struct Client *source_p, char *parv[])
+do_links(struct Client *source, char *parv[])
 {
   list_node_t *node;
 
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
 
-  if (HasUMode(source_p, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
+  if (HasUMode(source, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
   {
     const char *mask = parv[2];
     if (EmptyString(mask))
@@ -57,30 +57,30 @@ do_links(struct Client *source_p, char *parv[])
 
     LIST_FOREACH(node, global_server_list.head)
     {
-      const struct Client *target_p = node->data;
+      const struct Client *target = node->data;
 
       /* Skip hidden servers */
-      if (IsHidden(target_p))
-        if (!HasUMode(source_p, UMODE_OPER))
+      if (IsHidden(target))
+        if (!HasUMode(source, UMODE_OPER))
           continue;
 
-      if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-        if (!HasUMode(source_p, UMODE_OPER))
+      if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+        if (!HasUMode(source, UMODE_OPER))
           continue;
 
-      if (!EmptyString(mask) && match(mask, target_p->name))
+      if (!EmptyString(mask) && match(mask, target->name))
         continue;
 
       /*
        * We just send the reply, as if they are here there's either no SHIDE,
        * or they're an oper.
        */
-      sendto_one_numeric(source_p, &me, RPL_LINKS,
-                         target_p->name, target_p->servptr->name,
-                         target_p->hopcount, target_p->info);
+      sendto_one_numeric(source, &me, RPL_LINKS,
+                         target->name, target->servptr->name,
+                         target->hopcount, target->info);
     }
 
-    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS,
+    sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
                        EmptyString(mask) ? "*" : mask);
   }
   else
@@ -89,23 +89,23 @@ do_links(struct Client *source_p, char *parv[])
      * Print our own info so at least it looks like a normal links, then
      * print out the file (which may or may not be empty).
      */
-    sendto_one_numeric(source_p, &me, RPL_LINKS, me.name, me.name, 0, me.info);
+    sendto_one_numeric(source, &me, RPL_LINKS, me.name, me.name, 0, me.info);
 
     LIST_FOREACH(node, flatten_links.head)
-      sendto_one_numeric(source_p, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
-    sendto_one_numeric(source_p, &me, RPL_ENDOFLINKS, "*");
+      sendto_one_numeric(source, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
+    sendto_one_numeric(source, &me, RPL_ENDOFLINKS, "*");
   }
 }
 
 static void
-mo_links(struct Client *source_p, int parc, char *parv[])
+mo_links(struct Client *source, int parc, char *parv[])
 {
-  do_links(source_p, parv);
+  do_links(source, parv);
 }
 
 /*! \brief LINKS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -119,19 +119,19 @@ mo_links(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = servername mask
  */
 static void
-m_links(struct Client *source_p, int parc, char *parv[])
+m_links(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "LINKS");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "LINKS");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
-  do_links(source_p, parv);
+  do_links(source, parv);
 }
 
 static struct Command links_msgtab =

@@ -38,17 +38,17 @@
 /*! \brief LOAD subcommand handler
  *         Attempts to load a module, throwing an error if
  *         the module has already been loaded
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_load(struct Client *source_p, const char *arg)
+module_load(struct Client *source, const char *arg)
 {
   const char *m_bn = NULL;
 
   if (findmodule_byname((m_bn = libio_basename(arg))))
   {
-    sendto_one_notice(source_p, &me, ":Module %s is already loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is already loaded", m_bn);
     return;
   }
 
@@ -58,47 +58,47 @@ module_load(struct Client *source_p, const char *arg)
 /*! \brief UNLOAD subcommand handler
  *         Attempts to unload a module, throwing an error if
  *         the module could not be found
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_unload(struct Client *source_p, const char *arg)
+module_unload(struct Client *source, const char *arg)
 {
   const char *m_bn = NULL;
   const struct module *modp = NULL;
 
   if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
     return;
   }
 
   if (modp->is_core)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is a core module and may not be unloaded",
+    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded",
                       m_bn);
     return;
   }
 
   if (modp->is_resident)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
     return;
   }
 
   if (unload_one_module(m_bn, true) == false)
-    sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
 }
 
 /*! \brief RELOAD subcommand handler
  *         Attempts to reload a module, throwing an error if
  *         the module could not be found or loaded
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_reload(struct Client *source_p, const char *arg)
+module_reload(struct Client *source, const char *arg)
 {
   const char *m_bn = NULL;
   struct module *modp = NULL;
@@ -107,7 +107,7 @@ module_reload(struct Client *source_p, const char *arg)
   {
     unsigned int modnum = list_length(modules_get_list());
 
-    sendto_one_notice(source_p, &me, ":Reloading all modules");
+    sendto_one_notice(source, &me, ":Reloading all modules");
 
     list_node_t *node, *node_next;
     LIST_FOREACH_SAFE(node, node_next, modules_get_list()->head)
@@ -132,13 +132,13 @@ module_reload(struct Client *source_p, const char *arg)
 
   if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
     return;
   }
 
   if (modp->is_resident)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is a resident module and may not be unloaded",
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded",
                       m_bn);
     return;
   }
@@ -148,7 +148,7 @@ module_reload(struct Client *source_p, const char *arg)
 
   if (unload_one_module(m_bn, true) == false)
   {
-    sendto_one_notice(source_p, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
     return;
   }
 
@@ -163,11 +163,11 @@ module_reload(struct Client *source_p, const char *arg)
 
 /*! \brief LIST subcommand handler
  *         Shows a list of loaded modules
- * \param source_p Pointer to client issuing the command
+ * \param source Pointer to client issuing the command
  * \param arg      Additional argument which might be needed by this handler
  */
 static void
-module_list(struct Client *source_p, const char *arg)
+module_list(struct Client *source, const char *arg)
 {
   list_node_t *node;
 
@@ -178,11 +178,11 @@ module_list(struct Client *source_p, const char *arg)
     if (!EmptyString(arg) && match(arg, modp->name))
       continue;
 
-    sendto_one_numeric(source_p, &me, RPL_MODLIST,
+    sendto_one_numeric(source, &me, RPL_MODLIST,
                        modp->name, modp->handle, "*", modp->is_core == true ? "(core)" : "");
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFMODLIST);
+  sendto_one_numeric(source, &me, RPL_ENDOFMODLIST);
 }
 
 struct ModuleStruct
@@ -203,7 +203,7 @@ static const struct ModuleStruct module_cmd_table[] =
 
 /*! \brief MODULE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -214,14 +214,14 @@ static const struct ModuleStruct module_cmd_table[] =
  *      - parv[2] = module name
  */
 static void
-mo_module(struct Client *source_p, int parc, char *parv[])
+mo_module(struct Client *source, int parc, char *parv[])
 {
   const char *const subcmd = parv[1];
   const char *const module = parv[2];
 
-  if (!HasOFlag(source_p, OPER_FLAG_MODULE))
+  if (!HasOFlag(source, OPER_FLAG_MODULE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "module");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "module");
     return;
   }
 
@@ -232,15 +232,15 @@ mo_module(struct Client *source_p, int parc, char *parv[])
 
     if (tab->arg_required && EmptyString(module))
     {
-      sendto_one_numeric(source_p, &me, ERR_NEEDMOREPARAMS, "MODULE");
+      sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MODULE");
       return;
     }
 
-    tab->handler(source_p, module);
+    tab->handler(source, module);
     return;
   }
 
-  sendto_one_notice(source_p, &me, ":%s is not a valid option. "
+  sendto_one_notice(source, &me, ":%s is not a valid option. "
                     "Choose from LOAD, UNLOAD, RELOAD, LIST",
                     subcmd);
 }

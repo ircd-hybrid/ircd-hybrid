@@ -39,61 +39,61 @@
 
 /*!
  *
- * \param source_p Pointer to client to set (un)away
+ * \param source Pointer to client to set (un)away
  * \param message  Away message; can be NULL
  */
 static void
-do_away(struct Client *source_p, const char *message)
+do_away(struct Client *source, const char *message)
 {
-  assert(IsClient(source_p));
+  assert(IsClient(source));
 
   if (EmptyString(message))
   {
     /* Marking as not away */
-    if (source_p->away[0])
+    if (source->away[0])
     {
-      source_p->away[0] = '\0';
+      source->away[0] = '\0';
 
       /* We now send this only if they were away before --is */
-      sendto_server(source_p, 0, 0, ":%s AWAY", source_p->id);
-      sendto_common_channels_local(source_p, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                                   source_p->name, source_p->username, source_p->host);
+      sendto_server(source, 0, 0, ":%s AWAY", source->id);
+      sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
+                                   source->name, source->username, source->host);
     }
 
-    if (MyConnect(source_p))
-      sendto_one_numeric(source_p, &me, RPL_UNAWAY);
+    if (MyConnect(source))
+      sendto_one_numeric(source, &me, RPL_UNAWAY);
     return;
   }
 
-  if (MyConnect(source_p))
+  if (MyConnect(source))
   {
-    if ((source_p->connection->away.last_attempt + ConfigGeneral.away_time) < event_base->time.sec_monotonic)
-      source_p->connection->away.count = 0;
+    if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < event_base->time.sec_monotonic)
+      source->connection->away.count = 0;
 
-    if (source_p->connection->away.count > ConfigGeneral.away_count)
+    if (source->connection->away.count > ConfigGeneral.away_count)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYAWAY);
+      sendto_one_numeric(source, &me, ERR_TOOMANYAWAY);
       return;
     }
 
-    source_p->connection->away.last_attempt = event_base->time.sec_monotonic;
-    source_p->connection->away.count++;
-    sendto_one_numeric(source_p, &me, RPL_NOWAWAY);
+    source->connection->away.last_attempt = event_base->time.sec_monotonic;
+    source->connection->away.count++;
+    sendto_one_numeric(source, &me, RPL_NOWAWAY);
 
-    if (strncmp(source_p->away, message, sizeof(source_p->away) - 1) == 0)
+    if (strncmp(source->away, message, sizeof(source->away) - 1) == 0)
       return;
   }
 
-  strlcpy(source_p->away, message, sizeof(source_p->away));
-  sendto_common_channels_local(source_p, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source_p->name, source_p->username, source_p->host, source_p->away);
-  sendto_server(source_p, 0, 0, ":%s AWAY :%s",
-                source_p->id, source_p->away);
+  strlcpy(source->away, message, sizeof(source->away));
+  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                               source->name, source->username, source->host, source->away);
+  sendto_server(source, 0, 0, ":%s AWAY :%s",
+                source->id, source->away);
 }
 
 /*! \brief AWAY command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -103,11 +103,11 @@ do_away(struct Client *source_p, const char *message)
  *      - parv[1] = away message
  */
 static void
-m_away(struct Client *source_p, int parc, char *parv[])
+m_away(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  do_away(source_p, message);
+  do_away(source, message);
 }
 
 static struct Command away_msgtab =

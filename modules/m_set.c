@@ -59,7 +59,7 @@ static struct SetStruct set_cmd_table[] =
 };
 
 static void
-set_option(struct Client *source_p, struct SetStruct *option, int value_new)
+set_option(struct Client *source, struct SetStruct *option, int value_new)
 {
   static const char *const status[] = { "OFF", "ON" };
 
@@ -67,7 +67,7 @@ set_option(struct Client *source_p, struct SetStruct *option, int value_new)
   {
     if (value_new < option->value_min || value_new > option->value_max)
     {
-      sendto_one_notice(source_p, &me, ":Value for %s must be between %i and %i",
+      sendto_one_notice(source, &me, ":Value for %s must be between %i and %i",
                         option->name, option->value_min, option->value_max);
       return;
     }
@@ -76,17 +76,17 @@ set_option(struct Client *source_p, struct SetStruct *option, int value_new)
 
     if (option->wants_bool)
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has changed %s to %s",
-                           get_oper_name(source_p), option->name, status[*option->ptr != 0]);
+                           get_oper_name(source), option->name, status[*option->ptr != 0]);
     else
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has changed %s to %i",
-                           get_oper_name(source_p), option->name, *option->ptr);
+                           get_oper_name(source), option->name, *option->ptr);
   }
   else
   {
     if (option->wants_bool)
-      sendto_one_notice(source_p, &me, ":%s is currently %s", option->name, status[*option->ptr != 0]);
+      sendto_one_notice(source, &me, ":%s is currently %s", option->name, status[*option->ptr != 0]);
     else
-      sendto_one_notice(source_p, &me, ":%s is currently %i", option->name, *option->ptr);
+      sendto_one_notice(source, &me, ":%s is currently %i", option->name, *option->ptr);
   }
 }
 
@@ -94,7 +94,7 @@ set_option(struct Client *source_p, struct SetStruct *option, int value_new)
  * list_quote_commands() sends the client all the available commands.
  */
 static void
-set_option_list(struct Client *source_p)
+set_option_list(struct Client *source)
 {
   char command_list[SET_COMMAND_LIST_SIZE] = "";
 
@@ -105,15 +105,15 @@ set_option_list(struct Client *source_p)
       strlcat(command_list, " ", sizeof(command_list));
   }
 
-  sendto_one_notice(source_p, &me, ":Available QUOTE SET commands: %s", command_list);
+  sendto_one_notice(source, &me, ":Available QUOTE SET commands: %s", command_list);
 }
 
 static void
-mo_set(struct Client *source_p, int parc, char *parv[])
+mo_set(struct Client *source, int parc, char *parv[])
 {
-  if (!HasOFlag(source_p, OPER_FLAG_SET))
+  if (!HasOFlag(source, OPER_FLAG_SET))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "set");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "set");
     return;
   }
 
@@ -141,12 +141,12 @@ mo_set(struct Client *source_p, int parc, char *parv[])
 
         if (value_new < 0)
         {
-          sendto_one_notice(source_p, &me, ":Invalid value for %s. Please use a non-negative value.", tab->name);
+          sendto_one_notice(source, &me, ":Invalid value for %s. Please use a non-negative value.", tab->name);
           return;
         }
       }
 
-      set_option(source_p, tab, value_new);
+      set_option(source, tab, value_new);
       return;
     }
 
@@ -154,11 +154,11 @@ mo_set(struct Client *source_p, int parc, char *parv[])
      * Code here will be executed when a /QUOTE SET command is not
      * found within set_cmd_table.
      */
-    sendto_one_notice(source_p, &me, ":Variable not found.");
+    sendto_one_notice(source, &me, ":Variable not found.");
     return;
   }
 
-  set_option_list(source_p);
+  set_option_list(source);
 }
 
 static struct Command set_msgtab =

@@ -48,38 +48,38 @@
  * Side effects: Any matching tklines are removed.
  */
 static void
-xline_remove(struct Client *source_p, const struct aline_ctx *aline)
+xline_remove(struct Client *source, const struct aline_ctx *aline)
 {
   struct GecosItem *gecos = gecos_find(aline->mask, irccmp);
   if (gecos == NULL)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No X-Line for %s", aline->mask);
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":No X-Line for %s", aline->mask);
     return;
   }
 
   if (gecos->in_database == false)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The X-Line for %s is in the configuration file and must be removed by hand",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":The X-Line for %s is in the configuration file and must be removed by hand",
                         gecos->mask);
     return;
   }
 
-  if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":X-Line for [%s] is removed", gecos->mask);
+  if (IsClient(source))
+    sendto_one_notice(source, &me, ":X-Line for [%s] is removed", gecos->mask);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the X-Line for: [%s]",
-                       get_oper_name(source_p), gecos->mask);
+                       get_oper_name(source), gecos->mask);
   log_write(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-            get_oper_name(source_p), gecos->mask);
+            get_oper_name(source), gecos->mask);
 
   gecos_delete(gecos, false);
 }
 
 /*! \brief UNXLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -91,22 +91,22 @@ xline_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unxline(struct Client *source_p, int parc, char *parv[])
+mo_unxline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = true };
 
-  if (!HasOFlag(source_p, OPER_FLAG_UNXLINE))
+  if (!HasOFlag(source, OPER_FLAG_UNXLINE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unxline");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "unxline");
     return;
   }
 
-  if (parse_aline("UNXLINE", source_p, parc, parv, &aline) == false)
+  if (parse_aline("UNXLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)
   {
-    sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
+    sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
                        aline.server, aline.mask);
 
     /* Allow ON to apply local unxline as well if it matches */
@@ -114,15 +114,15 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
+    cluster_distribute(source, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
                        aline.mask);
 
-  xline_remove(source_p, &aline);
+  xline_remove(source, &aline);
 }
 
 /*! \brief UNXLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -133,7 +133,7 @@ mo_unxline(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = gecos
  */
 static void
-ms_unxline(struct Client *source_p, int parc, char *parv[])
+ms_unxline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -143,15 +143,15 @@ ms_unxline(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
+  sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "UNXLINE %s %s",
                      aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNXLINE, source_p->servptr->name, source_p->username, source_p->host))
-    xline_remove(source_p, &aline);
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      shared_find(SHARED_UNXLINE, source->servptr->name, source->username, source->host))
+    xline_remove(source, &aline);
 }
 
 static struct Command unxline_msgtab =

@@ -41,7 +41,7 @@
 
 /*! \brief TOPIC command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -52,65 +52,65 @@
  *      - parv[2] = topic text, if setting topic (can be an empty string)
  */
 static void
-m_topic(struct Client *source_p, int parc, char *parv[])
+m_topic(struct Client *source, int parc, char *parv[])
 {
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
   /* Setting topic */
   if (parc > 2)
   {
-    const struct ChannelMember *member = member_find_link(source_p, channel);
+    const struct ChannelMember *member = member_find_link(source, channel);
     if (member == NULL)
     {
-      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
+      sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
       return;
     }
 
     if (HasCMode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
-      sendto_one_numeric(source_p, &me, ERR_CHANOPRIVSNEEDED, channel->name);
+      sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     else
     {
       char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
 
       snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
-               source_p->name, source_p->username, source_p->host);
+               source->name, source->username, source->host);
       channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, true);
 
-      sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
-                    source_p->id, channel->name, channel->topic);
+      sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
+                    source->id, channel->name, channel->topic);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                           source_p->name, source_p->username, source_p->host,
+                           source->name, source->username, source->host,
                            channel->name, channel->topic);
     }
   }
   else  /* Only asking for topic */
   {
-    if (!HasCMode(channel, MODE_SECRET) || member_find_link(source_p, channel))
+    if (!HasCMode(channel, MODE_SECRET) || member_find_link(source, channel))
     {
       if (channel->topic[0] == '\0')
-        sendto_one_numeric(source_p, &me, RPL_NOTOPIC, channel->name);
+        sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
       else
       {
-        sendto_one_numeric(source_p, &me, RPL_TOPIC,
+        sendto_one_numeric(source, &me, RPL_TOPIC,
                            channel->name, channel->topic);
-        sendto_one_numeric(source_p, &me, RPL_TOPICWHOTIME,
+        sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
                            channel->name, channel->topic_info, channel->topic_time);
       }
     }
     else
-      sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
+      sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
   }
 }
 
 
 /*! \brief TOPIC command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -121,36 +121,36 @@ m_topic(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = topic text (can be an empty string)
  */
 static void
-ms_topic(struct Client *source_p, int parc, char *parv[])
+ms_topic(struct Client *source, int parc, char *parv[])
 {
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  if (IsClient(source_p))
+  if (IsClient(source))
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
-             source_p->name, source_p->username, source_p->host);
-  else if (IsHidden(source_p) || ConfigServerHide.hide_servers)
+             source->name, source->username, source->host);
+  else if (IsHidden(source) || ConfigServerHide.hide_servers)
     strlcpy(topic_info, me.name, sizeof(topic_info));
   else
-    strlcpy(topic_info, source_p->name, sizeof(topic_info));
+    strlcpy(topic_info, source->name, sizeof(topic_info));
 
   channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, false);
 
-  sendto_server(source_p, 0, 0, ":%s TOPIC %s :%s",
-                source_p->id, channel->name, channel->topic);
+  sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
+                source->id, channel->name, channel->topic);
 
-  if (IsClient(source_p))
+  if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source_p->name, source_p->username, source_p->host,
+                         source->name, source->username, source->host,
                          channel->name, channel->topic);
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                         (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
+                         (IsHidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
                          channel->name, channel->topic);
 }
 

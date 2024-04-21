@@ -48,7 +48,7 @@
  * Side effects: Any matching tklines are removed.
  */
 static void
-kline_remove(struct Client *source_p, const struct aline_ctx *aline)
+kline_remove(struct Client *source, const struct aline_ctx *aline)
 {
   struct irc_ssaddr iphost, *piphost;
   struct MaskItem *conf;
@@ -60,34 +60,34 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
 
   if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)) == NULL)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
     return;
   }
 
   if (!IsConfDatabase(conf))
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",
                         conf->user, conf->host);
     return;
   }
 
-  if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":K-Line for [%s@%s] is removed",
+  if (IsClient(source))
+    sendto_one_notice(source, &me, ":K-Line for [%s@%s] is removed",
                       conf->user, conf->host);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the K-Line for: [%s@%s]",
-                       get_oper_name(source_p), conf->user, conf->host);
+                       get_oper_name(source), conf->user, conf->host);
   log_write(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-            get_oper_name(source_p), conf->user, conf->host);
+            get_oper_name(source), conf->user, conf->host);
 
   delete_one_address_conf(aline->host, conf);
 }
 
 /*! \brief UNKLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -99,22 +99,22 @@ kline_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unkline(struct Client *source_p, int parc, char *parv[])
+mo_unkline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = false };
 
-  if (!HasOFlag(source_p, OPER_FLAG_UNKLINE))
+  if (!HasOFlag(source, OPER_FLAG_UNKLINE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unkline");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "unkline");
     return;
   }
 
-  if (parse_aline("UNKLINE", source_p, parc, parv, &aline) == false)
+  if (parse_aline("UNKLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)
   {
-     sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
+     sendto_match_servs(source, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
                         aline.server, aline.user, aline.host);
 
     /* Allow ON to apply local unkline as well if it matches */
@@ -122,15 +122,15 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE, "%s %s",
+    cluster_distribute(source, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE, "%s %s",
                        aline.user, aline.host);
 
-  kline_remove(source_p, &aline);
+  kline_remove(source, &aline);
 }
 
 /*! \brief UNKLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -142,7 +142,7 @@ mo_unkline(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = host mask
  */
 static void
-ms_unkline(struct Client *source_p, int parc, char *parv[])
+ms_unkline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -153,15 +153,15 @@ ms_unkline(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
+  sendto_match_servs(source, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
                      aline.server, aline.user, aline.host);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNKLINE, source_p->servptr->name, source_p->username, source_p->host))
-    kline_remove(source_p, &aline);
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      shared_find(SHARED_UNKLINE, source->servptr->name, source->username, source->host))
+    kline_remove(source, &aline);
 }
 
 static struct Command unkline_msgtab =

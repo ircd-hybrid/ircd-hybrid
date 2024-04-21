@@ -38,7 +38,7 @@
 
 /*! \brief MLOCK command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,23 +51,23 @@
  *      - parv[4] = modes to be locked
  */
 static void
-ms_mlock(struct Client *source_p, int parc, char *parv[])
+ms_mlock(struct Client *source, int parc, char *parv[])
 {
-  assert(!MyClient(source_p));
+  assert(!MyClient(source));
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
     return;
 
   if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
-    channel_set_mode_lock(source_p, channel, parv[4]);
+    channel_set_mode_lock(source, channel, parv[4]);
 
   uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
   if (timestamp)
     channel->mode_lock_time = timestamp;
 
-  sendto_server(source_p, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
-                source_p->id, channel->creation_time, channel->name,
+  sendto_server(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
+                source->id, channel->creation_time, channel->name,
                 channel->mode_lock_time,
                 channel->mode_lock ? channel->mode_lock : "");
 }

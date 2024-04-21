@@ -35,7 +35,7 @@
 
 /*! \brief CLOSE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -44,30 +44,30 @@
  *      - parv[0] = command
  */
 static void
-mo_close(struct Client *source_p, int parc, char *parv[])
+mo_close(struct Client *source, int parc, char *parv[])
 {
-  if (!HasOFlag(source_p, OPER_FLAG_CLOSE))
+  if (!HasOFlag(source, OPER_FLAG_CLOSE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "close");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "close");
     return;
   }
 
   const unsigned int closed = list_length(&unknown_list);
   while (unknown_list.head)
   {
-    struct Client *target_p = unknown_list.head->data;
+    struct Client *target = unknown_list.head->data;
 
-    sendto_one_numeric(source_p, &me, RPL_CLOSING,
-                       client_get_name(target_p, SHOW_IP), target_p->status);
+    sendto_one_numeric(source, &me, RPL_CLOSING,
+                       client_get_name(target, SHOW_IP), target->status);
 
     /*
-     * Exit here is safe, because it is guaranteed not to be source_p
-     * because it is unregistered and source_p is an oper.
+     * Exit here is safe, because it is guaranteed not to be source
+     * because it is unregistered and source is an oper.
      */
-    exit_client(target_p, "Oper Closing");
+    exit_client(target, "Oper Closing");
   }
 
-  sendto_one_numeric(source_p, &me, RPL_CLOSEEND, closed);
+  sendto_one_numeric(source, &me, RPL_CLOSEEND, closed);
 }
 
 static struct Command close_msgtab =

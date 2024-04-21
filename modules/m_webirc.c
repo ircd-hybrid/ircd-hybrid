@@ -38,7 +38,7 @@
 
 /*! \brief WEBIRC command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,23 +51,23 @@
  *      - parv[4] = fake ip
  */
 static void
-mr_webirc(struct Client *source_p, int parc, char *parv[])
+mr_webirc(struct Client *source, int parc, char *parv[])
 {
   const char *const pass = parv[1];
   const char *const host = parv[3];
   const char *const addr = parv[4];
 
-  assert(MyConnect(source_p));
+  assert(MyConnect(source));
 
   if (!valid_hostname(host))
   {
-    exit_client(source_p, "Invalid WebIRC hostname");
+    exit_client(source, "Invalid WebIRC hostname");
     return;
   }
 
   const struct MaskItem *conf =
-    find_address_conf(source_p->host, HasFlag(source_p, FLAGS_GOTID) ?
-                      source_p->username : "webirc", &source_p->addr, pass);
+    find_address_conf(source->host, HasFlag(source, FLAGS_GOTID) ?
+                      source->username : "webirc", &source->addr, pass);
   if (conf == NULL)
     return;
 
@@ -76,19 +76,19 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (!IsConfWebIRC(conf))
   {
-    exit_client(source_p, "Not a WebIRC auth block");
+    exit_client(source, "Not a WebIRC auth block");
     return;
   }
 
   if (EmptyString(conf->passwd))
   {
-    exit_client(source_p, "WebIRC auth blocks must have a password");
+    exit_client(source, "WebIRC auth blocks must have a password");
     return;
   }
 
   if (match_conf_password(pass, conf) == false)
   {
-    exit_client(source_p, "Invalid WebIRC password");
+    exit_client(source, "Invalid WebIRC password");
     return;
   }
 
@@ -101,40 +101,40 @@ mr_webirc(struct Client *source_p, int parc, char *parv[])
 
   if (getaddrinfo(addr, NULL, &hints, &res))
   {
-    exit_client(source_p, "Invalid WebIRC IP address");
+    exit_client(source, "Invalid WebIRC IP address");
     return;
   }
 
   assert(res);
 
-  memcpy(&source_p->addr, res->ai_addr, res->ai_addrlen);
-  source_p->addr.ss_len = res->ai_addrlen;
+  memcpy(&source->addr, res->ai_addr, res->ai_addrlen);
+  source->addr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);
 
-  strlcpy(source_p->sockhost, addr, sizeof(source_p->sockhost));
+  strlcpy(source->sockhost, addr, sizeof(source->sockhost));
 
-  if (source_p->sockhost[0] == ':')
+  if (source->sockhost[0] == ':')
   {
-    memmove(source_p->sockhost + 1, source_p->sockhost, sizeof(source_p->sockhost) - 1);
-    source_p->sockhost[0] = '0';
+    memmove(source->sockhost + 1, source->sockhost, sizeof(source->sockhost) - 1);
+    source->sockhost[0] = '0';
   }
 
-  strlcpy(source_p->host, host, sizeof(source_p->host));
-  strlcpy(source_p->realhost, host, sizeof(source_p->realhost));
+  strlcpy(source->host, host, sizeof(source->host));
+  strlcpy(source->realhost, host, sizeof(source->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  conf = find_dline_conf(&source_p->addr);
+  conf = find_dline_conf(&source->addr);
   if (conf)
   {
     if (conf->type == CONF_DLINE)
     {
-      exit_client(source_p, "D-lined");
+      exit_client(source, "D-lined");
       return;
     }
   }
 
-  AddUMode(source_p, UMODE_WEBIRC);
-  sendto_one_notice(source_p, &me, ":WebIRC host/IP set to %s %s", host, addr);
+  AddUMode(source, UMODE_WEBIRC);
+  sendto_one_notice(source, &me, ":WebIRC host/IP set to %s %s", host, addr);
 }
 
 static struct Command webirc_msgtab =

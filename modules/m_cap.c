@@ -130,16 +130,16 @@ find_cap(const char **caplist_p, int *neg_p)
   return cap;  /* And return the capability (if any) */
 }
 
-/** Send a CAP \a subcmd list of capability changes to \a source_p.
+/** Send a CAP \a subcmd list of capability changes to \a source.
  * If more than one line is necessary, each line before the last has
  * an added "*" parameter before that line's capability list.
- * @param[in] source_p Client receiving capability list.
+ * @param[in] source Client receiving capability list.
  * @param[in] set Capabilities to show as set (with ack and sticky modifiers).
  * @param[in] rem Capabalities to show as removed (with no other modifier).
  * @param[in] subcmd Name of capability subcommand.
  */
 static void
-send_caplist(struct Client *source_p,
+send_caplist(struct Client *source,
              const unsigned int *const set,
              const unsigned int *const rem, const char *subcmd)
 {
@@ -149,7 +149,7 @@ send_caplist(struct Client *source_p,
 
   /* Set up the buffer for the final LS message... */
   clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ", me.name,
-                  source_p->name[0] ? source_p->name : "*", subcmd);
+                  source->name[0] ? source->name : "*", subcmd);
 
   for (i = 0, loc = 0; i < CAPAB_LIST_LEN; ++i)
   {
@@ -180,7 +180,7 @@ send_caplist(struct Client *source_p,
     if (sizeof(capbuf) < (clen + loc + len + 15))
     {
       /* Would add too much; must flush */
-      sendto_one(source_p, "%s* :%s", cmdbuf, capbuf);
+      sendto_one(source, "%s* :%s", cmdbuf, capbuf);
       capbuf[(loc = 0)] = '\0';  /* Re-terminate the buffer... */
     }
 
@@ -188,33 +188,33 @@ send_caplist(struct Client *source_p,
                     "%s%s", pfx, cap->name);
   }
 
-  sendto_one(source_p, "%s:%s", cmdbuf, capbuf);
+  sendto_one(source, "%s:%s", cmdbuf, capbuf);
 }
 
 static void
-cap_ls(struct Client *source_p, const char *arg)
+cap_ls(struct Client *source, const char *arg)
 {
-  if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
-    source_p->connection->registration |= REG_NEED_CAP;
+  if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
+    source->connection->registration |= REG_NEED_CAP;
 
   if (arg && atoi(arg) >= 302)
   {
-    source_p->connection->cap |= CAP_CAP_NOTIFY;
-    AddFlag(source_p, FLAGS_CAP302);
+    source->connection->cap |= CAP_CAP_NOTIFY;
+    AddFlag(source, FLAGS_CAP302);
   }
 
-  send_caplist(source_p, NULL, NULL, "LS");  /* Send list of capabilities */
+  send_caplist(source, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 
 static void
-cap_req(struct Client *source_p, const char *arg)
+cap_req(struct Client *source, const char *arg)
 {
   unsigned int set = 0, rem = 0;
-  unsigned int cs = source_p->connection->cap;  /* Enabled capabilities */
+  unsigned int cs = source->connection->cap;  /* Enabled capabilities */
   int neg = 0;
 
-  if (IsUnknown(source_p))  /* Registration hasn't completed; suspend it... */
-    source_p->connection->registration |= REG_NEED_CAP;
+  if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
+    source->connection->registration |= REG_NEED_CAP;
 
   /* Walk through the capabilities list... */
   for (const char *cl = arg; cl; )
@@ -227,13 +227,13 @@ cap_req(struct Client *source_p, const char *arg)
       error = true;
     else if (neg && cap->sticky)
       error = true;
-    else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source_p, FLAGS_CAP302))
+    else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
       error = true;
 
     if (error)
     {
-      sendto_one(source_p, ":%s CAP %s NAK :%s", me.name,
-                 source_p->name[0] ? source_p->name : "*", arg);
+      sendto_one(source, ":%s CAP %s NAK :%s", me.name,
+                 source->name[0] ? source->name : "*", arg);
       return;  /* Can't complete requested op... */
     }
 
@@ -253,30 +253,30 @@ cap_req(struct Client *source_p, const char *arg)
   }
 
   /* Notify client of accepted changes and copy over results. */
-  send_caplist(source_p, &set, &rem, "ACK");
+  send_caplist(source, &set, &rem, "ACK");
 
-  source_p->connection->cap = cs;
+  source->connection->cap = cs;
 }
 
 static void
-cap_end(struct Client *source_p, const char *arg)
+cap_end(struct Client *source, const char *arg)
 {
-  if (!IsUnknown(source_p))  /* Registration has completed... */
+  if (!IsUnknown(source))  /* Registration has completed... */
     return;  /* So just ignore the message... */
 
   /* Capability negotiation is now done... */
-  source_p->connection->registration &= ~REG_NEED_CAP;
+  source->connection->registration &= ~REG_NEED_CAP;
 
   /* If client is now done... */
-  if (source_p->connection->registration == 0)
-    user_register_local(source_p);
+  if (source->connection->registration == 0)
+    user_register_local(source);
 }
 
 static void
-cap_list(struct Client *source_p, const char *arg)
+cap_list(struct Client *source, const char *arg)
 {
   /* Send the list of the client's capabilities */
-  send_caplist(source_p, &source_p->connection->cap, NULL, "LIST");
+  send_caplist(source, &source->connection->cap, NULL, "LIST");
 }
 
 static struct subcmd
@@ -298,7 +298,7 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
 
 /*! \brief CAP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -309,7 +309,7 @@ subcmd_search(const char *cmd, const struct subcmd *elem)
  *      - parv[2] = space-separated list of capabilities
  */
 static void
-m_cap(struct Client *source_p, int parc, char *parv[])
+m_cap(struct Client *source, int parc, char *parv[])
 {
   const char *subcmd = parv[1], *caplist = parv[2];
   struct subcmd *cmd = NULL;
@@ -319,12 +319,12 @@ m_cap(struct Client *source_p, int parc, char *parv[])
                       sizeof(cmdlist) / sizeof(struct subcmd),
                       sizeof(struct subcmd), (bqcmp)subcmd_search)))
   {
-    sendto_one_numeric(source_p, &me, ERR_INVALIDCAPCMD, subcmd);
+    sendto_one_numeric(source, &me, ERR_INVALIDCAPCMD, subcmd);
     return;
   }
 
   /* Then execute it... */
-  cmd->proc(source_p, caplist);
+  cmd->proc(source, caplist);
 }
 
 static struct Command cap_msgtab =

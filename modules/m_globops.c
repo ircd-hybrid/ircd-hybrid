@@ -36,7 +36,7 @@
 
 /*! \brief GLOBOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -46,24 +46,24 @@
  *      - parv[1] = message text
  */
 static void
-mo_globops(struct Client *source_p, int parc, char *parv[])
+mo_globops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (!HasOFlag(source_p, OPER_FLAG_GLOBOPS))
+  if (!HasOFlag(source, OPER_FLAG_GLOBOPS))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "globops");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "globops");
     return;
   }
 
-  sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
+  sendto_server(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
-                       source_p->name, message);
+                       source->name, message);
 }
 
 /*! \brief GLOBOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -73,13 +73,13 @@ mo_globops(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = message text
  */
 static void
-ms_globops(struct Client *source_p, int parc, char *parv[])
+ms_globops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  sendto_server(source_p, 0, 0, ":%s GLOBOPS :%s", source_p->id, message);
+  sendto_server(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s",
-                       source_p->name, message);
+                       source->name, message);
 }
 
 static struct Command globops_msgtab =

@@ -36,7 +36,7 @@
 
 /*! \brief SVSKILL command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -48,40 +48,40 @@
  *      - parv[3] = kill message
  */
 static void
-ms_svskill(struct Client *source_p, int parc, char *parv[])
+ms_svskill(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
-  struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target_p->tsinfo))
+  if (ts && (ts != target->tsinfo))
     return;
 
   const char *const comment = parv[3];
-  if (MyConnect(target_p))
+  if (MyConnect(target))
   {
     char reason[REASONLEN + 1] = "SVSKilled: ";
     strlcpy(reason + 11, comment, sizeof(reason) - 11);
 
-    exit_client(target_p, reason);
+    exit_client(target, reason);
     return;
   }
 
-  if (target_p->from == source_p->from)
+  if (target->from == source->from)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Received wrong-direction SVSKILL for %s (behind %s) from %s",
-                         target_p->name, source_p->from->name,
-                         client_get_name(source_p, HIDE_IP));
+                         target->name, source->from->name,
+                         client_get_name(source, HIDE_IP));
     return;
   }
 
-  sendto_one(target_p, ":%s SVSKILL %s %ju :%s",
-             source_p->id, target_p->id, ts, comment);
+  sendto_one(target, ":%s SVSKILL %s %ju :%s",
+             source->id, target->id, ts, comment);
 }
 
 static struct Command svskill_msgtab =

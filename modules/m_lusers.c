@@ -37,7 +37,7 @@
 
 /*! \brief LUSERS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -48,28 +48,28 @@
  *      - parv[2] = nickname/servername
  */
 static void
-m_lusers(struct Client *source_p, int parc, char *parv[])
+m_lusers(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "LUSERS");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "LUSERS");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
       return;
 
-  show_lusers(source_p);
+  show_lusers(source);
 }
 
 /*! \brief LUSERS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -80,12 +80,12 @@ m_lusers(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = nickname/servername
  */
 static void
-ms_lusers(struct Client *source_p, int parc, char *parv[])
+ms_lusers(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s LUSERS %s :%s", 2, parv)->ret != HUNTED_ISME)
     return;
 
-  show_lusers(source_p);
+  show_lusers(source);
 }
 
 static struct Command lusers_msgtab =

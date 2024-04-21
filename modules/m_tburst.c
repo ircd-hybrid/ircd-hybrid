@@ -37,7 +37,7 @@
 
 /*! \brief TBURST command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,7 +51,7 @@
  *      - parv[5] = topic (can be an empty string)
  */
 static void
-ms_tburst(struct Client *source_p, int parc, char *parv[])
+ms_tburst(struct Client *source, int parc, char *parv[])
 {
   uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
   uintmax_t remote_topic_ts = strtoumax(parv[3], NULL, 10);
@@ -84,7 +84,7 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
    *        the TS of the remote topic is newer than ours
    */
   bool accept_remote = false;
-  if (HasFlag(source_p, FLAGS_SERVICE))
+  if (HasFlag(source, FLAGS_SERVICE))
     accept_remote = true;
   else if (remote_channel_ts < channel->creation_time)
     accept_remote = true;
@@ -95,23 +95,23 @@ ms_tburst(struct Client *source_p, int parc, char *parv[])
   if (accept_remote)
   {
     bool topic_differs = strncmp(channel->topic, topic, sizeof(channel->topic) - 1);
-    bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source_p));
+    bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source));
 
     channel_set_topic(channel, topic, setby, remote_topic_ts, false);
 
-    sendto_server(source_p, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
-                  source_p->id, parv[1], parv[2], parv[3], setby, topic);
+    sendto_server(source, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
+                  source->id, parv[1], parv[2], parv[3], setby, topic);
 
     /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
     if (topic_differs)
     {
-      if (IsClient(source_p))
+      if (IsClient(source))
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                             source_p->name, source_p->username, source_p->host,
+                             source->name, source->username, source->host,
                              channel->name, channel->topic);
       else
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                             hidden_server ? me.name : source_p->name,
+                             hidden_server ? me.name : source->name,
                              channel->name, channel->topic);
     }
   }

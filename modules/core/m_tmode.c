@@ -37,7 +37,7 @@
 
 /*! \brief TMODE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -49,21 +49,21 @@
  *      - parv[3] = modes to be added or removed
  */
 static void
-ms_tmode(struct Client *source_p, int parc, char *parv[])
+ms_tmode(struct Client *source, int parc, char *parv[])
 {
-  assert(!MyClient(source_p));
+  assert(!MyClient(source));
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, parv[2]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
   }
 
   if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 
-  channel_mode_set(source_p, channel, parc - 3, parv + 3);
+  channel_mode_set(source, channel, parc - 3, parv + 3);
 }
 
 static struct Command tmode_msgtab =

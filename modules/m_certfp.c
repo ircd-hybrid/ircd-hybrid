@@ -34,7 +34,7 @@
 
 /*! \brief CERTFP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -44,16 +44,16 @@
  *      - parv[1] = certificate fingerprint
  */
 static void
-ms_certfp(struct Client *source_p, int parc, char *parv[])
+ms_certfp(struct Client *source, int parc, char *parv[])
 {
-  if (!IsClient(source_p))
+  if (!IsClient(source))
     return;
 
-  xfree(source_p->tls_certfp);
-  source_p->tls_certfp = xstrdup(parv[1]);
+  xfree(source->tls_certfp);
+  source->tls_certfp = xstrdup(parv[1]);
 
-  sendto_server(source_p, 0, 0, ":%s CERTFP %s",
-                source_p->id, source_p->tls_certfp);
+  sendto_server(source, 0, 0, ":%s CERTFP %s",
+                source->id, source->tls_certfp);
 }
 
 static struct Command certfp_msgtab =

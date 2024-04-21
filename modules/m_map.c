@@ -83,13 +83,13 @@ static void dump_map(struct Client *client,
   list_node_t *node;
   LIST_FOREACH(node, server->serv->server_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    if (IsHidden(target_p))
+    if (IsHidden(target))
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
-    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
@@ -98,19 +98,19 @@ static void dump_map(struct Client *client,
 
   LIST_FOREACH(node, server->serv->server_list.head)
   {
-    struct Client *target_p = node->data;
+    struct Client *target = node->data;
 
-    if (IsHidden(target_p))
+    if (IsHidden(target))
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
-    if (HasFlag(target_p, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
     if (--cnt == 0)
       *p = '`';
-    dump_map(client, target_p, prompt_length + 2);
+    dump_map(client, target, prompt_length + 2);
   }
 
   if (prompt_length)
@@ -120,20 +120,20 @@ static void dump_map(struct Client *client,
 /*! \brief Sends a network topology map and notifies irc-operators
  *         about the MAP request
  *
- * \param source_p Pointer to client to report to
+ * \param source Pointer to client to report to
  */
 static void
-do_map(struct Client *source_p)
+do_map(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
-  dump_map(source_p, &me, 0);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
+  dump_map(source, &me, 0);
 }
 
 /*! \brief MAP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -142,31 +142,31 @@ do_map(struct Client *source_p)
  *      - parv[0] = command
  */
 static void
-m_map(struct Client *source_p, int parc, char *parv[])
+m_map(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if (ConfigServerHide.flatten_links)
   {
-    m_not_oper(source_p, parc, parv);
+    m_not_oper(source, parc, parv);
     return;
   }
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "MAP");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "MAP");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
-  do_map(source_p);
-  sendto_one_numeric(source_p, &me, RPL_MAPEND);
+  do_map(source);
+  sendto_one_numeric(source, &me, RPL_MAPEND);
 }
 
 /*! \brief MAP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -175,10 +175,10 @@ m_map(struct Client *source_p, int parc, char *parv[])
  *      - parv[0] = command
  */
 static void
-mo_map(struct Client *source_p, int parc, char *parv[])
+mo_map(struct Client *source, int parc, char *parv[])
 {
-  do_map(source_p);
-  sendto_one_numeric(source_p, &me, RPL_MAPEND);
+  do_map(source);
+  sendto_one_numeric(source, &me, RPL_MAPEND);
 }
 
 static struct Command map_msgtab =

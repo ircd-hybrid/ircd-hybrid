@@ -651,12 +651,12 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int capab,
+sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab,
                    const char *pattern, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
-  dbuf_put_fmt(buffer, ":%s ", source_p->id);
+  dbuf_put_fmt(buffer, ":%s ", source->id);
 
   va_list args;
   va_start(args, pattern);
@@ -678,7 +678,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
       continue;
 
     /* ... or the source */
-    if (target->from == source_p->from)
+    if (target->from == source->from)
       continue;
 
     if (target->from->connection->send_marker == send_marker)
@@ -691,7 +691,7 @@ sendto_match_servs(const struct Client *source_p, const char *mask, unsigned int
       continue;
 
     target->from->connection->send_marker = send_marker;
-    send_message_remote(target->from, source_p, buffer);
+    send_message_remote(target->from, source, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -832,15 +832,15 @@ sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
  * side effects - Send a wallops to local opers
  */
 void
-sendto_wallops_flags(unsigned int flags, const struct Client *source_p,
+sendto_wallops_flags(unsigned int flags, const struct Client *source,
                      const char *pattern, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
-  if (IsClient(source_p))
-    dbuf_put_fmt(buffer, ":%s!%s@%s WALLOPS :", source_p->name, source_p->username, source_p->host);
+  if (IsClient(source))
+    dbuf_put_fmt(buffer, ":%s!%s@%s WALLOPS :", source->name, source->username, source->host);
   else
-    dbuf_put_fmt(buffer, ":%s WALLOPS :", source_p->name);
+    dbuf_put_fmt(buffer, ":%s WALLOPS :", source->name);
 
   va_list args;
   va_start(args, pattern);

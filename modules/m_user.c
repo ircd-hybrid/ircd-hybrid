@@ -37,7 +37,7 @@
 
 /*! \brief USER command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -50,33 +50,33 @@
  *      - parv[4] = user's real name info
  */
 static void
-mr_user(struct Client *source_p, int parc, char *parv[])
+mr_user(struct Client *source, int parc, char *parv[])
 {
   const char *const username = parv[1];
   const char *const realname = parv[4];
 
-  assert(IsUnknown(source_p));
+  assert(IsUnknown(source));
 
-  if (listener_has_flag(source_p->connection->listener, LISTENER_SERVER))
+  if (listener_has_flag(source->connection->listener, LISTENER_SERVER))
   {
-    exit_client(source_p, "Use a different port");
+    exit_client(source, "Use a different port");
     return;
   }
 
-  if (!HasFlag(source_p, FLAGS_GOTID))
+  if (!HasFlag(source, FLAGS_GOTID))
   {
     char *p = strchr(username, '@');
     if (p)
       *p = '\0';
 
-    strlcpy(source_p->username, username, sizeof(source_p->username));
+    strlcpy(source->username, username, sizeof(source->username));
   }
 
-  strlcpy(source_p->info, realname, sizeof(source_p->info));
-  source_p->connection->registration &= ~REG_NEED_USER;
+  strlcpy(source->info, realname, sizeof(source->info));
+  source->connection->registration &= ~REG_NEED_USER;
 
-  if (source_p->connection->registration == 0)
-    user_register_local(source_p);
+  if (source->connection->registration == 0)
+    user_register_local(source);
 }
 
 static struct Command user_msgtab =

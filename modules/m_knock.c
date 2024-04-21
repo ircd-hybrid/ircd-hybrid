@@ -43,7 +43,7 @@
 
 /*! \brief KNOCK command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -53,76 +53,76 @@
  *      - parv[1] = channel name
  */
 static void
-m_knock(struct Client *source_p, int parc, char *parv[])
+m_knock(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
   /* Normal channel, just be sure they aren't on it. */
-  if (member_find_link(source_p, channel))
+  if (member_find_link(source, channel))
   {
-    sendto_one_numeric(source_p, &me, ERR_KNOCKONCHAN, channel->name);
+    sendto_one_numeric(source, &me, ERR_KNOCKONCHAN, channel->name);
     return;
   }
 
   if (!HasCMode(channel, MODE_INVITEONLY))
   {
-    sendto_one_numeric(source_p, &me, ERR_CHANOPEN, channel->name);
+    sendto_one_numeric(source, &me, ERR_CHANOPEN, channel->name);
     return;
   }
 
-  if (MyClient(source_p))
+  if (MyClient(source))
   {
     if (HasCMode(channel, MODE_NOKNOCK))
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
+      sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
       return;
     }
 
     /* Don't allow a knock if the user is banned. */
-    if (is_banned(channel, source_p, NULL) || is_banned(channel, source_p, &extban_knock))
+    if (is_banned(channel, source, NULL) || is_banned(channel, source, &extban_knock))
     {
-      sendto_one_numeric(source_p, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
+      sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
       return;
     }
 
-    if ((source_p->connection->knock.last_attempt + ConfigChannel.knock_client_time) < event_base->time.sec_monotonic)
-      source_p->connection->knock.count = 0;
+    if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < event_base->time.sec_monotonic)
+      source->connection->knock.count = 0;
 
-    if (source_p->connection->knock.count > ConfigChannel.knock_client_count)
+    if (source->connection->knock.count > ConfigChannel.knock_client_count)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, channel->name, "user");
+      sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "user");
       return;
     }
 
     if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
     {
-      sendto_one_numeric(source_p, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
+      sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
       return;
     }
 
-    source_p->connection->knock.last_attempt = event_base->time.sec_monotonic;
-    source_p->connection->knock.count++;
+    source->connection->knock.last_attempt = event_base->time.sec_monotonic;
+    source->connection->knock.count++;
 
-    sendto_one_numeric(source_p, &me, RPL_KNOCKDLVR, channel->name);
+    sendto_one_numeric(source, &me, RPL_KNOCKDLVR, channel->name);
   }
 
   channel->last_knock_time = event_base->time.sec_monotonic;
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, channel->name, channel->name,
-                       source_p->name,
-                       source_p->username,
-                       source_p->host);
+                       source->name,
+                       source->username,
+                       source->host);
 
-  sendto_server(source_p, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                source_p->id, channel->name);
+  sendto_server(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
+                source->id, channel->name);
 }
 
 static struct Command knock_msgtab =

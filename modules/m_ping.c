@@ -38,7 +38,7 @@
 
 /*! \brief PING command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -49,37 +49,37 @@
  *      - parv[2] = destination
  */
 static void
-m_ping(struct Client *source_p, int parc, char *parv[])
+m_ping(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
+  struct Client *target = NULL;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+    sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (ConfigServerHide.disable_remote_commands && !HasUMode(source_p, UMODE_OPER))
+  if (ConfigServerHide.disable_remote_commands && !HasUMode(source, UMODE_OPER))
   {
-    sendto_one(source_p, ":%s PONG %s :%s", me.name,
+    sendto_one(source, ":%s PONG %s :%s", me.name,
                (destination) ? destination : me.name, parv[1]);
     return;
   }
 
-  if (EmptyString(destination) || ((target_p = hash_find_server(destination)) && IsMe(target_p)))
-    sendto_one(source_p, ":%s PONG %s :%s", me.name, me.name, parv[1]);
-  else if (target_p)
-    sendto_one(target_p, ":%s PING %s :%s",
-               ID_or_name(source_p, target_p), source_p->name,
-               ID_or_name(target_p, target_p));
+  if (EmptyString(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+    sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
+  else if (target)
+    sendto_one(target, ":%s PING %s :%s",
+               ID_or_name(source, target), source->name,
+               ID_or_name(target, target));
   else
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
+    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
 
 /*! \brief PING command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -90,29 +90,29 @@ m_ping(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = destination
  */
 static void
-ms_ping(struct Client *source_p, int parc, char *parv[])
+ms_ping(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target_p = NULL;
+  struct Client *target = NULL;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+    sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (EmptyString(destination) || ((target_p = hash_find_server(destination)) && IsMe(target_p)))
-    sendto_one(source_p, ":%s PONG %s :%s", ID_or_name(&me, source_p),
-               me.name, ID_or_name(source_p, source_p));
-  else if (target_p)
+  if (EmptyString(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+    sendto_one(source, ":%s PONG %s :%s", ID_or_name(&me, source),
+               me.name, ID_or_name(source, source));
+  else if (target)
   {
-    if (target_p->from != source_p->from)
-      sendto_one(target_p, ":%s PING %s :%s",
-                 ID_or_name(source_p, target_p), source_p->name,
-                 ID_or_name(target_p, target_p));
+    if (target->from != source->from)
+      sendto_one(target, ":%s PING %s :%s",
+                 ID_or_name(source, target), source->name,
+                 ID_or_name(target, target));
   }
   else if (!IsDigit(*destination))
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
+    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
 
 static struct Command ping_msgtab =

@@ -35,7 +35,7 @@
 
 /*! \brief ISON command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -45,30 +45,30 @@
  *      - parv[1] = space-separated list of nicknames
  */
 static void
-m_ison(struct Client *source_p, int parc, char *parv[])
+m_ison(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
   char *bufptr = buf, *p = NULL;
 
-  /* :me.name 303 source_p->name :nick1 nick2 ...      \r\n */
+  /* :me.name 303 source->name :nick1 nick2 ...      \r\n */
   /* 1       23456              78                     9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
 
   for (const char *name = strtok_r(parv[1], " ", &p); name;
                    name = strtok_r(NULL,    " ", &p))
   {
-    const struct Client *target_p = find_person(source_p, name);
-    if (target_p == NULL)
+    const struct Client *target = find_person(source, name);
+    if (target == NULL)
       continue;
 
-    if ((bufptr - buf) + strlen(target_p->name) + len + 1 /* +1 for space */ > sizeof(buf))
+    if ((bufptr - buf) + strlen(target->name) + len + 1 /* +1 for space */ > sizeof(buf))
       break;
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", target_p->name);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", target->name);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_ISON, buf);
+  sendto_one_numeric(source, &me, RPL_ISON, buf);
 }
 
 static struct Command ison_msgtab =

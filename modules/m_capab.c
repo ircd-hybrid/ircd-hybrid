@@ -33,7 +33,7 @@
 
 /*! \brief CAPAB command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -43,7 +43,7 @@
  *      - parv[1] = space-separated list of capabilities
  */
 static void
-mr_capab(struct Client *source_p, int parc, char *parv[])
+mr_capab(struct Client *source, int parc, char *parv[])
 {
   char *const list = parv[1];
   char *p = NULL;
@@ -53,7 +53,7 @@ mr_capab(struct Client *source_p, int parc, char *parv[])
   {
     unsigned int cap = capab_find(s);
     if (cap)
-      SetCapable(source_p, cap);
+      SetCapable(source, cap);
   }
 }
 

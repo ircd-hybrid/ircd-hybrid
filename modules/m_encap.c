@@ -40,7 +40,7 @@
  * side effects	- propagates subcommand to locally connected servers
  */
 static void
-ms_encap(struct Client *source_p, int parc, char *parv[])
+ms_encap(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
@@ -65,7 +65,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
   else
     snprintf(bufptr, sizeof(buf) - cur_len, ":%s", parv[parc - 1]);
 
-  sendto_match_servs(source_p, parv[1], CAPAB_ENCAP, "ENCAP %s", buf);
+  sendto_match_servs(source, parv[1], CAPAB_ENCAP, "ENCAP %s", buf);
 
   if (match(parv[1], me.name))
     return;
@@ -86,7 +86,7 @@ ms_encap(struct Client *source_p, int parc, char *parv[])
        (handler->empty_last_arg != true && EmptyString(parv[handler->args_min - 1]))))
     return;
 
-  handler->handler(source_p, parc, parv);
+  handler->handler(source, parc, parv);
 }
 
 static struct Command encap_msgtab =

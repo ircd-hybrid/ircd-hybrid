@@ -44,7 +44,7 @@
 enum { WHOWAS_MAX_REPLIES = 20 };
 
 static void
-do_whowas(struct Client *source_p, char *parv[])
+do_whowas(struct Client *source, char *parv[])
 {
   int count = 0, max = -1;
   list_node_t *node;
@@ -52,7 +52,7 @@ do_whowas(struct Client *source_p, char *parv[])
   if (!EmptyString(parv[2]))
     max = atoi(parv[2]);
 
-  if (!MyConnect(source_p) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
+  if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
     max = WHOWAS_MAX_REPLIES;
 
   LIST_FOREACH(node, whowas_get_hash(hash_string(parv[1]))->head)
@@ -61,19 +61,19 @@ do_whowas(struct Client *source_p, char *parv[])
 
     if (irccmp(parv[1], whowas->name) == 0)
     {
-      sendto_one_numeric(source_p, &me, RPL_WHOWASUSER,
+      sendto_one_numeric(source, &me, RPL_WHOWASUSER,
                          whowas->name, whowas->username, whowas->hostname, whowas->realname);
 
-      if (HasUMode(source_p, UMODE_OPER))
-        sendto_one_numeric(source_p, &me, RPL_WHOISACTUALLY,
+      if (HasUMode(source, UMODE_OPER))
+        sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                            whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
       if (strcmp(whowas->account, "*"))
-        sendto_one_numeric(source_p, &me, RPL_WHOISACCOUNT,
+        sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
                            whowas->name, whowas->account, "was");
 
       bool server_hidden = false;
-      if (!HasUMode(source_p, UMODE_OPER))
+      if (!HasUMode(source, UMODE_OPER))
       {
         if (whowas->server_hidden || ConfigServerHide.hide_servers)
           server_hidden = true;
@@ -82,10 +82,10 @@ do_whowas(struct Client *source_p, char *parv[])
       }
 
       if (server_hidden)
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER,
+        sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                            whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
       else
-        sendto_one_numeric(source_p, &me, RPL_WHOISSERVER,
+        sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                            whowas->name, whowas->servername, date_ctime(whowas->logoff));
       ++count;
     }
@@ -95,14 +95,14 @@ do_whowas(struct Client *source_p, char *parv[])
   }
 
   if (count == 0)
-    sendto_one_numeric(source_p, &me, ERR_WASNOSUCHNICK, parv[1]);
+    sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, parv[1]);
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFWHOWAS, parv[1]);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOWAS, parv[1]);
 }
 
 /*! \brief WHOWAS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -114,34 +114,34 @@ do_whowas(struct Client *source_p, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-m_whowas(struct Client *source_p, int parc, char *parv[])
+m_whowas(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "WHOWAS");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOWAS");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
       return;
 
-  do_whowas(source_p, parv);
+  do_whowas(source, parv);
 }
 
 /*! \brief WHOWAS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -153,18 +153,18 @@ m_whowas(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_whowas(struct Client *source_p, int parc, char *parv[])
+ms_whowas(struct Client *source, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NONICKNAMEGIVEN);
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  if (server_hunt(source_p, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
     return;
 
-  do_whowas(source_p, parv);
+  do_whowas(source, parv);
 }
 
 static struct Command whowas_msgtab =

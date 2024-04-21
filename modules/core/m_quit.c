@@ -35,7 +35,7 @@
 
 /*! \brief QUIT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -45,21 +45,21 @@
  *      - parv[1] = quit message
  */
 static void
-m_quit(struct Client *source_p, int parc, char *parv[])
+m_quit(struct Client *source, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "Quit: ";
 
-  if (!EmptyString(parv[1]) && (HasUMode(source_p, UMODE_OPER) ||
-      (source_p->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
+  if (!EmptyString(parv[1]) && (HasUMode(source, UMODE_OPER) ||
+      (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
       < event_base->time.sec_monotonic))
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
-  exit_client(source_p, reason);
+  exit_client(source, reason);
 }
 
 /*! \brief QUIT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -69,14 +69,14 @@ m_quit(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = quit message
  */
 static void
-ms_quit(struct Client *source_p, int parc, char *parv[])
+ms_quit(struct Client *source, int parc, char *parv[])
 {
   char reason[KICKLEN + 1] = "";  /* Essential that buf[0] = '\0' */
 
   if (!EmptyString(parv[1]))
     strlcpy(reason, parv[1], sizeof(reason));
 
-  exit_client(source_p, reason);
+  exit_client(source, reason);
 }
 
 static struct Command quit_msgtab =

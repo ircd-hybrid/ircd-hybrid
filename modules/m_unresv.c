@@ -42,38 +42,38 @@
 
 
 static void
-resv_remove(struct Client *source_p, const struct aline_ctx *aline)
+resv_remove(struct Client *source, const struct aline_ctx *aline)
 {
   struct ResvItem *resv = resv_find(aline->mask, irccmp);
   if (resv == NULL)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":No RESV for %s", aline->mask);
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":No RESV for %s", aline->mask);
     return;
   }
 
   if (resv->in_database == false)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
                         resv->mask);
     return;
   }
 
-  if (IsClient(source_p))
-    sendto_one_notice(source_p, &me, ":RESV for [%s] is removed", resv->mask);
+  if (IsClient(source))
+    sendto_one_notice(source, &me, ":RESV for [%s] is removed", resv->mask);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the RESV for: [%s]",
-                       get_oper_name(source_p), resv->mask);
+                       get_oper_name(source), resv->mask);
   log_write(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-            get_oper_name(source_p), resv->mask);
+            get_oper_name(source), resv->mask);
 
   resv_delete(resv, false);
 }
 
 /*! \brief UNRESV command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -85,22 +85,22 @@ resv_remove(struct Client *source_p, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unresv(struct Client *source_p, int parc, char *parv[])
+mo_unresv(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = true };
 
-  if (!HasOFlag(source_p, OPER_FLAG_UNRESV))
+  if (!HasOFlag(source, OPER_FLAG_UNRESV))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "unresv");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "unresv");
     return;
   }
 
-  if (parse_aline("UNRESV", source_p, parc, parv, &aline) == false)
+  if (parse_aline("UNRESV", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)
   {
-    sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
+    sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
                        aline.server, aline.mask);
 
     /* Allow ON to apply local unresv as well if it matches */
@@ -108,14 +108,14 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, aline.mask);
+    cluster_distribute(source, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, aline.mask);
 
-  resv_remove(source_p, &aline);
+  resv_remove(source, &aline);
 }
 
 /*! \brief UNRESV command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -126,7 +126,7 @@ mo_unresv(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = name mask
  */
 static void
-ms_unresv(struct Client *source_p, int parc, char *parv[])
+ms_unresv(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -136,15 +136,15 @@ ms_unresv(struct Client *source_p, int parc, char *parv[])
     .server = parv[1]
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
+  sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "UNRESV %s %s",
                      aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNRESV, source_p->servptr->name, source_p->username, source_p->host))
-    resv_remove(source_p, &aline);
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      shared_find(SHARED_UNRESV, source->servptr->name, source->username, source->host))
+    resv_remove(source, &aline);
 }
 
 static struct Command unresv_msgtab =

@@ -36,7 +36,7 @@
 
 /*! \brief RESTART command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -46,25 +46,25 @@
  *      - parv[1] = server name
  */
 static void
-mo_restart(struct Client *source_p, int parc, char *parv[])
+mo_restart(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
 
-  if (!HasOFlag(source_p, OPER_FLAG_RESTART))
+  if (!HasOFlag(source, OPER_FLAG_RESTART))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "restart");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "restart");
     return;
   }
 
   if (irccmp(name, me.name))
   {
-    sendto_one_notice(source_p, &me, ":Mismatch on /restart %s", me.name);
+    sendto_one_notice(source, &me, ":Mismatch on /restart %s", me.name);
     return;
   }
 
   char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "received RESTART command from %s",
-           client_get_name(source_p, HIDE_IP));
+           client_get_name(source, HIDE_IP));
   server_die(buf, true);
 }
 

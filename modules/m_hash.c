@@ -36,7 +36,7 @@
 
 
 static void
-do_hash(struct Client *source_p, unsigned int type)
+do_hash(struct Client *source, unsigned int type)
 {
   unsigned int max_chain = 0;
   unsigned int buckets   = 0;
@@ -75,13 +75,13 @@ do_hash(struct Client *source_p, unsigned int type)
     [HASH_TYPE_CHANNEL] = "Channel",
   };
 
-  sendto_one_notice(source_p, &me, ":%s: entries: %u buckets: %u max chain: %u",
+  sendto_one_notice(source, &me, ":%s: entries: %u buckets: %u max chain: %u",
                     strtype[type], count, buckets, max_chain);
 }
 
 /*! \brief HASH command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -90,11 +90,11 @@ do_hash(struct Client *source_p, unsigned int type)
  *      - parv[0] = command
  */
 static void
-mo_hash(struct Client *source_p, int parc, char *parv[])
+mo_hash(struct Client *source, int parc, char *parv[])
 {
-  do_hash(source_p, HASH_TYPE_CLIENT);
-  do_hash(source_p, HASH_TYPE_ID);
-  do_hash(source_p, HASH_TYPE_CHANNEL);
+  do_hash(source, HASH_TYPE_CLIENT);
+  do_hash(source, HASH_TYPE_ID);
+  do_hash(source, HASH_TYPE_CHANNEL);
 }
 
 static struct Command hash_msgtab =

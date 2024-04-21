@@ -41,7 +41,7 @@
 
 /*! \brief OPME command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,28 +51,28 @@
  *      - parv[1] = channel name
  */
 static void
-mo_opme(struct Client *source_p, int parc, char *parv[])
+mo_opme(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
   list_node_t *node;
 
-  if (!HasOFlag(source_p, OPER_FLAG_OPME))
+  if (!HasOFlag(source, OPER_FLAG_OPME))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "opme");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "opme");
     return;
   }
 
   struct Channel *channel = hash_find_channel(name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  struct ChannelMember *member = member_find_link(source_p, channel);
+  struct ChannelMember *member = member_find_link(source, channel);
   if (member == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_NOTONCHANNEL, channel->name);
+    sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
     return;
   }
 
@@ -82,24 +82,24 @@ mo_opme(struct Client *source_p, int parc, char *parv[])
 
     if (member_highest_rank(tmp) > CHACCESS_HALFOP)
     {
-      sendto_one_notice(source_p, &me, ":Cannot use OPME on %s: channel is not opless",
+      sendto_one_notice(source, &me, ":Cannot use OPME on %s: channel is not opless",
                         channel->name);
       return;
     }
   }
 
   log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
-       get_oper_name(source_p), channel->name);
+       get_oper_name(source), channel->name);
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s used OPME on channel %s",
-                       me.name, get_oper_name(source_p), channel->name);
+                       me.name, get_oper_name(source), channel->name);
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
-                me.id, get_oper_name(source_p), channel->name);
+                me.id, get_oper_name(source), channel->name);
 
   AddMemberFlag(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
-                       me.name, channel->name, source_p->name);
+                       me.name, channel->name, source->name);
   sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,
-                channel->name, source_p->id);
+                channel->name, source->id);
 }
 
 static struct Command opme_msgtab =

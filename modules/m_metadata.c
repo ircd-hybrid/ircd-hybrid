@@ -36,7 +36,7 @@
 
 /*! \brief METADATA command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -45,43 +45,43 @@
  *      - parv[0] = command
  */
 static void
-ms_metadata(struct Client *source_p, int parc, char *parv[])
+ms_metadata(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
   if (irccmp(parv[1], "client") == 0)
   {
-    struct Client *target_p = find_person(source_p, parv[2]);
-    if (target_p == NULL)
+    struct Client *target = find_person(source, parv[2]);
+    if (target == NULL)
       return;
 
     if (irccmp(parv[3], "cipher") == 0)
     {
-      xfree(target_p->tls_cipher);
+      xfree(target->tls_cipher);
       if (!EmptyString(parv[4]))
-        target_p->tls_cipher = xstrdup(parv[4]);
+        target->tls_cipher = xstrdup(parv[4]);
       else
-        target_p->tls_cipher = NULL;
+        target->tls_cipher = NULL;
     }
 
     if (irccmp(parv[3], "certfp") == 0)
     {
-      xfree(target_p->tls_certfp);
+      xfree(target->tls_certfp);
       if (!EmptyString(parv[4]))
-        target_p->tls_certfp = xstrdup(parv[4]);
+        target->tls_certfp = xstrdup(parv[4]);
       else
-        target_p->tls_certfp = NULL;
+        target->tls_certfp = NULL;
     }
   }
 
   if (parc == 4)
-    sendto_server(source_p, 0, 0, ":%s METADATA %s %s %s",
-                  source_p->id,
+    sendto_server(source, 0, 0, ":%s METADATA %s %s %s",
+                  source->id,
                   parv[1], parv[2], parv[3]);
   else  /* parc == 5 */
-    sendto_server(source_p, 0, 0, ":%s METADATA %s %s %s :%s",
-                  source_p->id,
+    sendto_server(source, 0, 0, ":%s METADATA %s %s %s :%s",
+                  source->id,
                   parv[1], parv[2], parv[3], parv[4]);
 }
 

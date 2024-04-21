@@ -39,7 +39,7 @@ enum { RFC1459_MAX_USERHOST_LIST = 5 };
 
 /*! \brief USERHOST command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -49,22 +49,22 @@ enum { RFC1459_MAX_USERHOST_LIST = 5 };
  *      - parv[1] = space-separated list of up to 5 nicknames
  */
 static void
-m_userhost(struct Client *source_p, int parc, char *parv[])
+m_userhost(struct Client *source, int parc, char *parv[])
 {
   char response[NICKLEN + USERLEN + HOSTLEN + 5]; /* +5 for "*=+@\0" */
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
   char *bufptr = buf, *p = NULL;
   size_t masklen, i = 0;
 
-  /* :me.name 302 source_p->name :n1*=+u1@h1 n2=-u2@h2 ...\r\n */
+  /* :me.name 302 source->name :n1*=+u1@h1 n2=-u2@h2 ...\r\n */
   /* 1       23456              78                        9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < RFC1459_MAX_USERHOST_LIST;
                    name = strtok_r(NULL,    " ", &p))
   {
-    const struct Client *target_p = find_person(source_p, name);
-    if (target_p == NULL)
+    const struct Client *target = find_person(source, name);
+    if (target == NULL)
       continue;
 
     /*
@@ -73,21 +73,21 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
      * lookup (USERHOST) to figure out what the clients' local IP
      * is. Useful for things like NAT, and dynamic dial-up users.
      */
-    if (target_p == source_p)
+    if (target == source)
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
-                         target_p->name,
-                         HasUMode(target_p, UMODE_OPER) ? "*" : "",
-                         (target_p->away[0]) ? '-' : '+',
-                         target_p->username,
-                         target_p->sockhost);
+                         target->name,
+                         HasUMode(target, UMODE_OPER) ? "*" : "",
+                         (target->away[0]) ? '-' : '+',
+                         target->username,
+                         target->sockhost);
     else
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
-                         target_p->name, (HasUMode(target_p, UMODE_OPER) &&
-                                          (!HasUMode(target_p, UMODE_HIDDEN) ||
-                                            HasUMode(source_p, UMODE_OPER))) ? "*" : "",
-                         (target_p->away[0]) ? '-' : '+',
-                         target_p->username,
-                         target_p->host);
+                         target->name, (HasUMode(target, UMODE_OPER) &&
+                                          (!HasUMode(target, UMODE_HIDDEN) ||
+                                            HasUMode(source, UMODE_OPER))) ? "*" : "",
+                         (target->away[0]) ? '-' : '+',
+                         target->username,
+                         target->host);
 
     if ((bufptr - buf) + masklen + len + 1 /* +1 for space */ > sizeof(buf))
       break;
@@ -95,7 +95,7 @@ m_userhost(struct Client *source_p, int parc, char *parv[])
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s" : "%s", response);
   }
 
-  sendto_one_numeric(source_p, &me, RPL_USERHOST, buf);
+  sendto_one_numeric(source, &me, RPL_USERHOST, buf);
 }
 
 static struct Command userhost_msgtab =

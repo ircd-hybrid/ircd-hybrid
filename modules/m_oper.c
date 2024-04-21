@@ -39,79 +39,79 @@
 #include "packet.h"
 
 
-/*! \brief Blindly opers up given source_p, using conf info.
+/*! \brief Blindly opers up given source, using conf info.
  *         All checks on passwords have already been done.
- * \param source_p Pointer to given client to oper
+ * \param source Pointer to given client to oper
  * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *source_p, const struct MaskItem *conf)
+oper_up(struct Client *source, const struct MaskItem *conf)
 {
-  const unsigned int oldmodes = source_p->umodes;
+  const unsigned int oldmodes = source->umodes;
 
   ++Count.oper;
-  SetOper(source_p);
+  SetOper(source);
 
   if (conf->modes)
-    AddUMode(source_p, conf->modes);
+    AddUMode(source, conf->modes);
   else if (ConfigGeneral.oper_umodes)
-    AddUMode(source_p, ConfigGeneral.oper_umodes);
+    AddUMode(source, ConfigGeneral.oper_umodes);
 
-  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source_p, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source, UMODE_INVISIBLE))
     ++Count.invisi;
 
-  assert(list_find(&oper_list, source_p) == NULL);
-  list_add(source_p, list_make_node(), &oper_list);
+  assert(list_find(&oper_list, source) == NULL);
+  list_add(source, list_make_node(), &oper_list);
 
-  AddOFlag(source_p, conf->port);
+  AddOFlag(source, conf->port);
 
-  if (HasOFlag(source_p, OPER_FLAG_ADMIN))
-    AddUMode(source_p, UMODE_ADMIN);
+  if (HasOFlag(source, OPER_FLAG_ADMIN))
+    AddUMode(source, UMODE_ADMIN);
 
   if (!EmptyString(conf->whois))
   {
-    svstag_attach(&source_p->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
+    svstag_attach(&source->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
     sendto_server(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                  me.id, source_p->id, source_p->tsinfo, RPL_WHOISOPERATOR, conf->whois);
+                  me.id, source->id, source->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-            conf->name, client_get_name(source_p, HIDE_IP));
+            conf->name, client_get_name(source, HIDE_IP));
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
-                       get_oper_name(source_p));
+                       get_oper_name(source));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                me.id, get_oper_name(source_p));
+                me.id, get_oper_name(source));
 
-  send_umode(source_p, oldmodes, true, true);
-  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
+  send_umode(source, oldmodes, true, true);
+  sendto_one_numeric(source, &me, RPL_YOUREOPER);
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled
  *
- * \param source_p Client doing /oper ...
+ * \param source Client doing /oper ...
  * \param name     The nick they tried to oper as
  * \param reason   The reason why they have failed
  */
 static void
-failed_oper_notice(struct Client *source_p, enum irc_numerics numeric,
+failed_oper_notice(struct Client *source, enum irc_numerics numeric,
                    const char *name, const char *reason)
 {
   if (numeric)
-    sendto_one_numeric(source_p, &me, numeric);
+    sendto_one_numeric(source, &me, numeric);
 
   if (ConfigGeneral.failed_oper_notice)
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Failed OPER attempt as %s by %s - %s",
-                         name, client_get_name(source_p, HIDE_IP), reason);
+                         name, client_get_name(source, HIDE_IP), reason);
 
   log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
-            name, client_get_name(source_p, HIDE_IP), reason);
+            name, client_get_name(source, HIDE_IP), reason);
 }
 
 /*! \brief OPER command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -122,53 +122,53 @@ failed_oper_notice(struct Client *source_p, enum irc_numerics numeric,
  *      - parv[2] = oper password
  */
 static void
-m_oper(struct Client *source_p, int parc, char *parv[])
+m_oper(struct Client *source, int parc, char *parv[])
 {
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
-  struct MaskItem *conf = operator_find(source_p, opername);
+  struct MaskItem *conf = operator_find(source, opername);
   if (conf == NULL)
   {
     conf = operator_find(NULL, opername);
-    failed_oper_notice(source_p, ERR_NOOPERHOST, opername, conf ? "host mismatch" : "no operator {} block");
+    failed_oper_notice(source, ERR_NOOPERHOST, opername, conf ? "host mismatch" : "no operator {} block");
     return;
   }
 
-  if (IsConfTLS(conf) && !HasUMode(source_p, UMODE_SECURE))
+  if (IsConfTLS(conf) && !HasUMode(source, UMODE_SECURE))
   {
-    failed_oper_notice(source_p, ERR_NOOPERHOST, opername, "requires TLS");
+    failed_oper_notice(source, ERR_NOOPERHOST, opername, "requires TLS");
     return;
   }
 
   if (!EmptyString(conf->certfp))
   {
-    if (EmptyString(source_p->tls_certfp) || strcasecmp(source_p->tls_certfp, conf->certfp))
+    if (EmptyString(source->tls_certfp) || strcasecmp(source->tls_certfp, conf->certfp))
     {
-      failed_oper_notice(source_p, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
+      failed_oper_notice(source, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
       return;
     }
   }
 
   if (match_conf_password(password, conf) == false)
   {
-    failed_oper_notice(source_p, ERR_PASSWDMISMATCH, opername, "password mismatch");
+    failed_oper_notice(source, ERR_PASSWDMISMATCH, opername, "password mismatch");
     return;
   }
 
-  if (conf_attach(source_p, conf))
+  if (conf_attach(source, conf))
   {
-    sendto_one_notice(source_p, &me, ":Can't attach conf!");
-    failed_oper_notice(source_p, 0, opername, "can't attach conf!");
+    sendto_one_notice(source, &me, ":Can't attach conf!");
+    failed_oper_notice(source, 0, opername, "can't attach conf!");
     return;
   }
 
-  oper_up(source_p, conf);
+  oper_up(source, conf);
 }
 
 /*! \brief OPER command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -179,9 +179,9 @@ m_oper(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = oper password
  */
 static void
-mo_oper(struct Client *source_p, int parc, char *parv[])
+mo_oper(struct Client *source, int parc, char *parv[])
 {
-  sendto_one_numeric(source_p, &me, RPL_YOUREOPER);
+  sendto_one_numeric(source, &me, RPL_YOUREOPER);
 }
 
 static struct Command oper_msgtab =

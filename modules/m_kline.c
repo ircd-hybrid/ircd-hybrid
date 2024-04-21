@@ -82,17 +82,17 @@ kline_check(const struct AddressRec *arec)
  * side effects - tkline as given is placed
  */
 static void
-kline_handle(struct Client *source_p, const struct aline_ctx *aline)
+kline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
   int bits = 0;
   unsigned int min_cidr = 0;
   struct irc_ssaddr iphost, *piphost = NULL;
 
-  if (!HasFlag(source_p, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
+  if (!HasFlag(source, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me,
+    if (IsClient(source))
+      sendto_one_notice(source, &me,
                         ":Please include at least %u non-wildcard characters with the mask",
                         ConfigGeneral.min_nonwildcard);
     return;
@@ -112,18 +112,18 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
       break;
   }
 
-  if (min_cidr > 0 && !HasFlag(source_p, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
+  if (min_cidr > 0 && !HasFlag(source, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
     return;
   }
 
   struct MaskItem *conf;
   if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
                         aline->user, aline->host, conf->user, conf->host, conf->reason);
     return;
   }
@@ -145,26 +145,26 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
   {
     conf->until = event_base->time.sec_real + aline->duration;
 
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added temporary %ju min. K-Line [%s@%s]",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",
                         aline->duration / 60, conf->user, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p), aline->duration / 60, conf->user, conf->host, conf->reason);
+                         get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-              get_oper_name(source_p), aline->duration / 60, conf->user, conf->host, conf->reason);
+              get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
   }
   else
   {
-    if (IsClient(source_p))
-      sendto_one_notice(source_p, &me, ":Added K-Line [%s@%s]",
+    if (IsClient(source))
+      sendto_one_notice(source, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s added K-Line for [%s@%s] [%s]",
-                         get_oper_name(source_p), conf->user, conf->host, conf->reason);
+                         get_oper_name(source), conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
-              get_oper_name(source_p), conf->user, conf->host, conf->reason);
+              get_oper_name(source), conf->user, conf->host, conf->reason);
   }
 
   kline_check(add_conf_by_address(CONF_KLINE, conf));
@@ -180,22 +180,22 @@ kline_handle(struct Client *source_p, const struct aline_ctx *aline)
  * side effects - k line is added
  */
 static void
-mo_kline(struct Client *source_p, int parc, char *parv[])
+mo_kline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = false };
 
-  if (!HasOFlag(source_p, OPER_FLAG_KLINE))
+  if (!HasOFlag(source, OPER_FLAG_KLINE))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "kline");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "kline");
     return;
   }
 
-  if (parse_aline("KLINE", source_p, parc, parv, &aline) == false)
+  if (parse_aline("KLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)
   {
-    sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
+    sendto_match_servs(source, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
                        aline.server, aline.duration, aline.user, aline.host, aline.reason);
 
     /* Allow ON to apply local kline as well if it matches */
@@ -203,15 +203,15 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source_p, "KLINE", CAPAB_KLN, CLUSTER_KLINE, "%ju %s %s :%s",
+    cluster_distribute(source, "KLINE", CAPAB_KLN, CLUSTER_KLINE, "%ju %s %s :%s",
                        aline.duration, aline.user, aline.host, aline.reason);
 
-  kline_handle(source_p, &aline);
+  kline_handle(source, &aline);
 }
 
 /*! \brief KLINE command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -225,7 +225,7 @@ mo_kline(struct Client *source_p, int parc, char *parv[])
  *      - parv[5] = reason
  */
 static void
-ms_kline(struct Client *source_p, int parc, char *parv[])
+ms_kline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -238,15 +238,15 @@ ms_kline(struct Client *source_p, int parc, char *parv[])
     .duration = strtoumax(parv[2], NULL, 10)
   };
 
-  sendto_match_servs(source_p, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
+  sendto_match_servs(source, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
                      aline.server, aline.duration, aline.user, aline.host, aline.reason);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source_p, FLAGS_SERVICE) ||
-      shared_find(SHARED_KLINE, source_p->servptr->name, source_p->username, source_p->host))
-    kline_handle(source_p, &aline);
+  if (HasFlag(source, FLAGS_SERVICE) ||
+      shared_find(SHARED_KLINE, source->servptr->name, source->username, source->host))
+    kline_handle(source, &aline);
 }
 
 static struct Command kline_msgtab =

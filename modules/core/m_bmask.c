@@ -39,7 +39,7 @@
 
 /*! \brief BMASK command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -52,7 +52,7 @@
  *      - parv[4] = space delimited list of masks to add
  */
 static void
-ms_bmask(struct Client *source_p, int parc, char *parv[])
+ms_bmask(struct Client *source, int parc, char *parv[])
 {
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];
@@ -94,7 +94,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
   s = banbuf;
 
   mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
-                  (IsHidden(source_p) || ConfigServerHide.hide_servers) ? me.name : source_p->name,
+                  (IsHidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
                   channel->name);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
@@ -109,7 +109,7 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     if (tlen > MODEBUFLEN)
       break;
 
-    if (tlen && *s != ':' && (mask = add_id(source_p, channel, s, list, type)))
+    if (tlen && *s != ':' && (mask = add_id(source, channel, s, list, type)))
     {
       /* add_id can modify the actual ban mask */
       tlen = strlen(mask);
@@ -140,8 +140,8 @@ ms_bmask(struct Client *source_p, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
   }
 
-  sendto_server(source_p, 0, 0, ":%s BMASK %ju %s %s :%s",
-                source_p->id, channel->creation_time, channel->name, parv[3], parv[4]);
+  sendto_server(source, 0, 0, ":%s BMASK %ju %s %s :%s",
+                source->id, channel->creation_time, channel->name, parv[3], parv[4]);
 }
 
 static struct Command bmask_msgtab =

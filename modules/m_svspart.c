@@ -37,7 +37,7 @@
 
 /*! \brief SVSPART command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -49,36 +49,36 @@
  *      - parv[3] = part message
  */
 static void
-ms_svspart(struct Client *source_p, int parc, char *parv[])
+ms_svspart(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
-  struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
     return;
 
-  if (MyConnect(target_p))
+  if (MyConnect(target))
   {
-    channel_part_list(target_p, parv[2], parv[3]);
+    channel_part_list(target, parv[2], parv[3]);
     return;
   }
 
-  if (target_p->from == source_p->from)
+  if (target->from == source->from)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "Received wrong-direction SVSPART for %s (behind %s) from %s",
-                         target_p->name, source_p->from->name,
-                         client_get_name(source_p, HIDE_IP));
+                         target->name, source->from->name,
+                         client_get_name(source, HIDE_IP));
     return;
   }
 
   if (EmptyString(parv[3]))
-    sendto_one(target_p, ":%s SVSPART %s %s",
-               source_p->id, target_p->id, parv[2]);
+    sendto_one(target, ":%s SVSPART %s %s",
+               source->id, target->id, parv[2]);
   else
-    sendto_one(target_p, ":%s SVSPART %s %s :%s",
-               source_p->id, target_p->id, parv[2], parv[3]);
+    sendto_one(target, ":%s SVSPART %s %s :%s",
+               source->id, target->id, parv[2], parv[3]);
 }
 
 static struct Command svspart_msgtab =

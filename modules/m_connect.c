@@ -38,9 +38,9 @@
 
 
 static void
-do_connect(struct Client *source_p, const char *name)
+do_connect(struct Client *source, const char *name)
 {
-  assert(IsClient(source_p));
+  assert(IsClient(source));
 
   /*
    * Try to find the name. If it fails, notify and bail.
@@ -48,21 +48,21 @@ do_connect(struct Client *source_p, const char *name)
   struct MaskItem *conf = connect_find(name, match);
   if (conf == NULL)
   {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s not listed in configuration file", name);
+    sendto_one_notice(source, &me, ":Connect: Server %s not listed in configuration file", name);
     return;
   }
 
-  const struct Client *target_p = hash_find_server(conf->name);
-  if (target_p)
+  const struct Client *target = hash_find_server(conf->name);
+  if (target)
   {
-    sendto_one_notice(source_p, &me, ":Connect: Server %s already exists from %s",
-                      target_p->name, target_p->from->name);
+    sendto_one_notice(source, &me, ":Connect: Server %s already exists from %s",
+                      target->name, target->from->name);
     return;
   }
 
   if (find_servconn_in_progress(conf->name))
   {
-    sendto_one_notice(source_p, &me, ":Connect: a connection to %s is already in progress",
+    sendto_one_notice(source, &me, ":Connect: a connection to %s is already in progress",
                       conf->name);
     return;
   }
@@ -72,29 +72,29 @@ do_connect(struct Client *source_p, const char *name)
   {
     "Remote", "Local"
   };
-  const char *const type_p = type[MyConnect(source_p) != 0];
+  const char *const type_p = type[MyConnect(source) != 0];
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                       me.name, type_p, name, conf->port, get_oper_name(source_p));
+                       me.name, type_p, name, conf->port, get_oper_name(source));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                me.id, type_p, name, conf->port, get_oper_name(source_p));
+                me.id, type_p, name, conf->port, get_oper_name(source));
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            type_p, name, conf->port, get_oper_name(source_p));
+            type_p, name, conf->port, get_oper_name(source));
 
   /*
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block.
    */
-  if (server_connect(conf, source_p) == false)
-    sendto_one_notice(source_p, &me, ":*** Couldn't connect to %s.%u",
+  if (server_connect(conf, source) == false)
+    sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
                       conf->name, conf->port);
-  else if (MyConnect(source_p) &&
-           (ConfigServerHide.hide_server_ips == 0 && HasUMode(source_p, UMODE_ADMIN)))
-    sendto_one_notice(source_p, &me, ":*** Connecting to %s[%s].%u",
+  else if (MyConnect(source) &&
+           (ConfigServerHide.hide_server_ips == 0 && HasUMode(source, UMODE_ADMIN)))
+    sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
                       conf->name, conf->host, conf->port);
   else
-    sendto_one_notice(source_p, &me, ":*** Connecting to %s.%u",
+    sendto_one_notice(source, &me, ":*** Connecting to %s.%u",
                       conf->name, conf->port);
 
   /*
@@ -105,7 +105,7 @@ do_connect(struct Client *source_p, const char *name)
 
 /*! \brief CONNECT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -117,33 +117,33 @@ do_connect(struct Client *source_p, const char *name)
  *      - parv[3] = nickname/servername
  */
 static void
-mo_connect(struct Client *source_p, int parc, char *parv[])
+mo_connect(struct Client *source, int parc, char *parv[])
 {
   if (!EmptyString(parv[3]))
   {
-    if (!HasOFlag(source_p, OPER_FLAG_CONNECT_REMOTE))
+    if (!HasOFlag(source, OPER_FLAG_CONNECT_REMOTE))
     {
-      sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect:remote");
+      sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect:remote");
       return;
     }
 
-    if (server_hunt(source_p, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
       return;
   }
 
-  if (!HasOFlag(source_p, OPER_FLAG_CONNECT))
+  if (!HasOFlag(source, OPER_FLAG_CONNECT))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "connect");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect");
     return;
   }
 
   const char *const name = parv[1];
-  do_connect(source_p, name);
+  do_connect(source, name);
 }
 
 /*! \brief CONNECT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -155,13 +155,13 @@ mo_connect(struct Client *source_p, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_connect(struct Client *source_p, int parc, char *parv[])
+ms_connect(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
     return;
 
   const char *const name = parv[1];
-  do_connect(source_p, name);
+  do_connect(source, name);
 }
 
 static struct Command connect_msgtab =

@@ -40,7 +40,7 @@
 
 /*! \brief PART command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -51,9 +51,9 @@
  *      - parv[2] = part message
  */
 static void
-m_part(struct Client *source_p, int parc, char *parv[])
+m_part(struct Client *source, int parc, char *parv[])
 {
-  channel_part_list(source_p, parv[1], parv[2]);
+  channel_part_list(source, parv[1], parv[2]);
 }
 
 static struct Command part_msgtab =

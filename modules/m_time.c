@@ -38,7 +38,7 @@
 
 /*! \brief TIME command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -48,19 +48,19 @@
  *      - parv[1] = nickname/servername
  */
 static void
-m_time(struct Client *source_p, int parc, char *parv[])
+m_time(struct Client *source, int parc, char *parv[])
 {
   /* This is safe enough to use during non hidden server mode */
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
-  sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
+  sendto_one_numeric(source, &me, RPL_TIME, me.name, date(0));
 }
 
 /*! \brief TIME command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -70,12 +70,12 @@ m_time(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_time(struct Client *source_p, int parc, char *parv[])
+ms_time(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
     return;
 
-  sendto_one_numeric(source_p, &me, RPL_TIME, me.name, date(0));
+  sendto_one_numeric(source, &me, RPL_TIME, me.name, date(0));
 }
 
 static struct Command time_msgtab =

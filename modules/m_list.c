@@ -39,14 +39,14 @@
 
 
 static void
-do_list(struct Client *source_p, char *arg)
+do_list(struct Client *source, char *arg)
 {
   bool no_masked_channels = true;
 
-  if (source_p->connection->list_task)
+  if (source->connection->list_task)
   {
-    free_list_task(source_p);
-    sendto_one_numeric(source_p, &me, RPL_LISTEND);
+    free_list_task(source);
+    sendto_one_numeric(source, &me, RPL_LISTEND);
     return;
   }
 
@@ -54,8 +54,8 @@ do_list(struct Client *source_p, char *arg)
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
-  source_p->connection->list_task = lt;
-  list_add(source_p, &lt->node, &listing_client_list);
+  source->connection->list_task = lt;
+  list_add(source, &lt->node, &listing_client_list);
 
   if (!EmptyString(arg))
   {
@@ -153,19 +153,19 @@ do_list(struct Client *source_p, char *arg)
 
     if (error)
     {
-      free_list_task(source_p);
-      sendto_one_numeric(source_p, &me, ERR_LISTSYNTAX);
+      free_list_task(source);
+      sendto_one_numeric(source, &me, ERR_LISTSYNTAX);
       return;
     }
   }
 
-  sendto_one_numeric(source_p, &me, RPL_LISTSTART);
-  safe_list_channels(source_p, no_masked_channels && lt->show_mask.head != NULL);
+  sendto_one_numeric(source, &me, RPL_LISTSTART);
+  safe_list_channels(source, no_masked_channels && lt->show_mask.head != NULL);
 }
 
 /*! \brief LIST command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -175,9 +175,9 @@ do_list(struct Client *source_p, char *arg)
  *      - parv[1] = channel name/list options
  */
 static void
-m_list(struct Client *source_p, int parc, char *parv[])
+m_list(struct Client *source, int parc, char *parv[])
 {
-  do_list(source_p, parv[1]);
+  do_list(source, parv[1]);
 }
 
 static struct Command list_msgtab =

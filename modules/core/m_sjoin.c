@@ -202,7 +202,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, list_t *li
  * all the specified users while sending JOIN/MODEs to local clients
  */
 static void
-ms_sjoin(struct Client *source_p, int parc, char *parv[])
+ms_sjoin(struct Client *source, int parc, char *parv[])
 {
   struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
   int args = 0;
@@ -215,14 +215,14 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   char *pbuf = parabuf;
   unsigned int pargs = 0;
 
-  if (!IsServer(source_p))
+  if (!IsServer(source))
     return;
 
   if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
-                         source_p->name, source_p->from->name, parv[2]);
+                         source->name, source->from->name, parv[2]);
     return;
   }
 
@@ -293,8 +293,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
   set_final_mode(&mode, oldmode, modebuf, parabuf);
   channel->mode = mode;
 
-  const struct Client *origin = source_p;
-  if (IsHidden(source_p) || ConfigServerHide.hide_servers)
+  const struct Client *origin = source;
+  if (IsHidden(source) || ConfigServerHide.hide_servers)
     origin = &me;
 
   /* Lost the TS, other side wins, so remove modes on this side */
@@ -316,7 +316,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     clear_ban_cache_list(&channel->members_local);
     invite_clear_list(&channel->invites);
 
-    channel_set_mode_lock(source_p, channel, NULL);
+    channel_set_mode_lock(source, channel, NULL);
 
     if (channel->topic[0])
     {
@@ -333,8 +333,8 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
   const size_t buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
-                                 source_p->id, channel->creation_time, channel->name,
-                                 channel_modes(channel, source_p, true));
+                                 source->id, channel->creation_time, channel->name,
+                                 channel_modes(channel, source, true));
   char *uid_ptr = uid_buf + buflen;
   char *const uid_buf_start = uid_ptr;
 
@@ -353,11 +353,11 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.
      */
-    struct Client *target_p = find_person(source_p, s);
-    if (target_p == NULL || target_p->from != source_p->from)
+    struct Client *target = find_person(source, s);
+    if (target == NULL || target->from != source->from)
       continue;
 
-    size_t len_uid = strlen(target_p->id);
+    size_t len_uid = strlen(target->id);
     char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
 
     if (flags && keep_new_modes)
@@ -370,26 +370,26 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
 
     if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
     {
-      sendto_server(source_p, 0, 0, "%s", uid_buf);
+      sendto_server(source, 0, 0, "%s", uid_buf);
       uid_ptr = uid_buf_start;
     }
 
-    uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), uid_ptr != uid_buf_start ? " %s%s" : "%s%s", uid_prefix, target_p->id);
+    uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), uid_ptr != uid_buf_start ? " %s%s" : "%s%s", uid_prefix, target->id);
 
-    if (member_find_link(target_p, channel) == NULL)
+    if (member_find_link(target, channel) == NULL)
     {
-      bool synced = HasFlag(source_p, FLAGS_EOB) != 0;
-      channel_add_user(channel, target_p, flags, synced);
+      bool synced = HasFlag(source, FLAGS_EOB) != 0;
+      channel_add_user(channel, target, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           target_p->name, target_p->username, target_p->host, channel->name,
-                           target_p->account, target_p->info);
+                           target->name, target->username, target->host, channel->name,
+                           target->account, target->info);
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           target_p->name, target_p->username, target_p->host, channel->name);
+                           target->name, target->username, target->host, channel->name);
 
-      if (target_p->away[0])
-        sendto_channel_local(target_p, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                             target_p->name, target_p->username, target_p->host, target_p->away);
+      if (target->away[0])
+        sendto_channel_local(target, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                             target->name, target->username, target->host, target->away);
     }
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
@@ -397,7 +397,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
       if (flags & tab->flag)
       {
         *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", target_p->name);
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", target->name);
 
         if (++pargs >= MAXMODEPARAMS)
         {
@@ -420,7 +420,7 @@ ms_sjoin(struct Client *source_p, int parc, char *parv[])
                          origin->name, channel->name, modebuf, parabuf);
   }
 
-  sendto_server(source_p, 0, 0, "%s", uid_buf);
+  sendto_server(source, 0, 0, "%s", uid_buf);
 
   if (list_length(&channel->members) == 0 && isnew)
     channel_free(channel);

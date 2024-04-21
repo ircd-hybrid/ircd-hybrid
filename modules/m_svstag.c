@@ -36,7 +36,7 @@
 
 /*! \brief SVSTAG command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -50,34 +50,34 @@
  *      - parv[5] = tag line
  */
 static void
-ms_svstag(struct Client *source_p, int parc, char *parv[])
+ms_svstag(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source_p, FLAGS_SERVICE) && !IsServer(source_p))
+  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
-  struct Client *target_p = find_person(source_p, parv[1]);
-  if (target_p == NULL)
+  struct Client *target = find_person(source, parv[1]);
+  if (target == NULL)
     return;
 
   uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target_p->tsinfo))
+  if (ts && (ts != target->tsinfo))
     return;
 
   if (strcmp(parv[3], "-") == 0)
   {
-    svstag_clear_list(&target_p->svstags);
-    sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju -",
-                  source_p->id, target_p->id, target_p->tsinfo);
+    svstag_clear_list(&target->svstags);
+    sendto_server(source, 0, 0, ":%s SVSTAG %s %ju -",
+                  source->id, target->id, target->tsinfo);
     return;
   }
 
   if (EmptyString(parv[5]))
     return;
 
-  svstag_attach(&target_p->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
+  svstag_attach(&target->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
-  sendto_server(source_p, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
-                source_p->id, target_p->id, target_p->tsinfo, parv[3], parv[4], parv[5]);
+  sendto_server(source, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
+                source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);
 }
 
 static struct Command svstag_msgtab =

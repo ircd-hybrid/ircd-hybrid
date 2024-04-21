@@ -35,7 +35,7 @@
 
 /*! \brief ERROR command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -45,11 +45,11 @@
  *      - parv[1] = error message
  */
 static void
-mr_error(struct Client *source_p, int parc, char *parv[])
+mr_error(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source_p));
+  assert(MyConnect(source));
 
-  if (!IsHandshake(source_p) && !IsConnecting(source_p))
+  if (!IsHandshake(source) && !IsConnecting(source))
     return;
 
   const char *message = "<>";
@@ -57,17 +57,17 @@ mr_error(struct Client *source_p, int parc, char *parv[])
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-            client_get_name(source_p, SHOW_IP), message);
+            client_get_name(source, SHOW_IP), message);
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "ERROR :from %s -- %s",
-                       client_get_name(source_p, HIDE_IP), message);
+                       client_get_name(source, HIDE_IP), message);
   sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE, "ERROR :from %s -- %s",
-                       client_get_name(source_p, MASK_IP), message);
+                       client_get_name(source, MASK_IP), message);
 }
 
 /*! \brief ERROR command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -77,21 +77,21 @@ mr_error(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = error message
  */
 static void
-ms_error(struct Client *source_p, int parc, char *parv[])
+ms_error(struct Client *source, int parc, char *parv[])
 {
   const char *message = "<>";
   if (!EmptyString(parv[1]))
     message = parv[1];
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-            client_get_name(source_p, SHOW_IP), message);
+            client_get_name(source, SHOW_IP), message);
 
-  if (MyConnect(source_p))
+  if (MyConnect(source))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "ERROR :from %s -- %s",
-                         client_get_name(source_p->from, MASK_IP), message);
+                         client_get_name(source->from, MASK_IP), message);
   else
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "ERROR :from %s via %s -- %s",
-                         source_p->name, client_get_name(source_p->from, MASK_IP), message);
+                         source->name, client_get_name(source->from, MASK_IP), message);
 }
 
 static struct Command error_msgtab =

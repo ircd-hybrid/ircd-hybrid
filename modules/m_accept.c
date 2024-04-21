@@ -40,20 +40,20 @@
 /*! \brief Sends a list of nick!user\@host masks a Client
  *         has on its acceptlist.
  *
- * \param source_p The actual Client the list will be sent to.
+ * \param source The actual Client the list will be sent to.
  */
 static void
-accept_list(struct Client *source_p)
+accept_list(struct Client *source)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   list_node_t *node;
 
-  /* :me.name 281 source_p->name :n1!u1@h1 n2!u2@h2 ...\r\n */
+  /* :me.name 281 source->name :n1!u1@h1 n2!u2@h2 ...\r\n */
   /* 1       23456              78                     9 10 */
-  size_t len = strlen(me.name) + strlen(source_p->name) + 10;
+  size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  LIST_FOREACH(node, source_p->connection->acceptlist.head)
+  LIST_FOREACH(node, source->connection->acceptlist.head)
   {
     const struct AcceptItem *const accept = node->data;
     size_t masklen = strlen(accept->nick) +
@@ -62,7 +62,7 @@ accept_list(struct Client *source_p)
 
     if ((bufptr - buf) + masklen + len > sizeof(buf))
     {
-      sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
+      sendto_one_numeric(source, &me, RPL_ACCEPTLIST, buf);
       bufptr = buf;
     }
 
@@ -73,14 +73,14 @@ accept_list(struct Client *source_p)
   }
 
   if (bufptr != buf)
-    sendto_one_numeric(source_p, &me, RPL_ACCEPTLIST, buf);
+    sendto_one_numeric(source, &me, RPL_ACCEPTLIST, buf);
 
-  sendto_one_numeric(source_p, &me, RPL_ENDOFACCEPT);
+  sendto_one_numeric(source, &me, RPL_ENDOFACCEPT);
 }
 
 /*! \brief ACCEPT command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -90,7 +90,7 @@ accept_list(struct Client *source_p)
  *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
 static void
-m_accept(struct Client *source_p, int parc, char *parv[])
+m_accept(struct Client *source, int parc, char *parv[])
 {
   struct split_nuh_item nuh;
   char nick[NICKLEN + 1];
@@ -101,7 +101,7 @@ m_accept(struct Client *source_p, int parc, char *parv[])
 
   if (EmptyString(mask) || strcmp(mask, "*") == 0)
   {
-    accept_list(source_p);
+    accept_list(source);
     return;
   }
 
@@ -122,20 +122,20 @@ m_accept(struct Client *source_p, int parc, char *parv[])
       split_nuh(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source_p->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
       if (accept == NULL)
       {
-        sendto_one_numeric(source_p, &me, ERR_ACCEPTNOT, nick, user, host);
+        sendto_one_numeric(source, &me, ERR_ACCEPTNOT, nick, user, host);
         continue;
       }
 
-      accept_del(accept, &source_p->connection->acceptlist);
+      accept_del(accept, &source->connection->acceptlist);
     }
     else if (*mask)
     {
-      if (list_length(&source_p->connection->acceptlist) >= ConfigGeneral.max_accept)
+      if (list_length(&source->connection->acceptlist) >= ConfigGeneral.max_accept)
       {
-        sendto_one_numeric(source_p, &me, ERR_ACCEPTFULL);
+        sendto_one_numeric(source, &me, ERR_ACCEPTFULL);
         return;
       }
 
@@ -151,15 +151,15 @@ m_accept(struct Client *source_p, int parc, char *parv[])
       split_nuh(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source_p->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
       if (accept)
       {
-        sendto_one_numeric(source_p, &me, ERR_ACCEPTEXIST, nick, user, host);
+        sendto_one_numeric(source, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;
       }
 
-      accept_add(nick, user, host, &source_p->connection->acceptlist);
-      accept_list(source_p);
+      accept_add(nick, user, host, &source->connection->acceptlist);
+      accept_list(source);
     }
   }
 }

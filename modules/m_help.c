@@ -38,7 +38,7 @@
 enum { HELPLEN = 400 };
 
 static void
-sendhelpfile(struct Client *source_p, const char *path, const char *topic)
+sendhelpfile(struct Client *source, const char *path, const char *topic)
 {
   FILE *file = NULL;
   char *p = NULL;
@@ -46,13 +46,13 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
 
   if ((file = fopen(path, "r")) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (fgets(line, sizeof(line), file) == NULL)
   {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     fclose(file);
     return;
   }
@@ -60,22 +60,22 @@ sendhelpfile(struct Client *source_p, const char *path, const char *topic)
   if ((p = strpbrk(line, "\r\n")))
     *p = '\0';
 
-  sendto_one_numeric(source_p, &me, RPL_HELPSTART, topic, line);
+  sendto_one_numeric(source, &me, RPL_HELPSTART, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
     if ((p = strpbrk(line, "\r\n")))
       *p = '\0';
 
-    sendto_one_numeric(source_p, &me, RPL_HELPTXT, topic, line);
+    sendto_one_numeric(source, &me, RPL_HELPTXT, topic, line);
   }
 
   fclose(file);
-  sendto_one_numeric(source_p, &me, RPL_ENDOFHELP, topic);
+  sendto_one_numeric(source, &me, RPL_ENDOFHELP, topic);
 }
 
 static void
-do_help(struct Client *source_p, char *topic)
+do_help(struct Client *source, char *topic)
 {
   char h_index[] = "index";
   struct stat sb;
@@ -88,7 +88,7 @@ do_help(struct Client *source_p, char *topic)
 
   if (strpbrk(topic, "/\\"))
   {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
@@ -97,22 +97,22 @@ do_help(struct Client *source_p, char *topic)
 
   if (stat(path, &sb) < 0)
   {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    sendto_one_numeric(source_p, &me, ERR_HELPNOTFOUND, topic);
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
-  sendhelpfile(source_p, path, topic);
+  sendhelpfile(source, path, topic);
 }
 
 /*! \brief HELP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -122,24 +122,24 @@ do_help(struct Client *source_p, char *topic)
  *      - parv[1] = help topic
  */
 static void
-m_help(struct Client *source_p, int parc, char *parv[])
+m_help(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "HELP");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "HELP");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
-  do_help(source_p, parv[1]);
+  do_help(source, parv[1]);
 }
 
 /*! \brief HELP command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -149,9 +149,9 @@ m_help(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = help topic
  */
 static void
-mo_help(struct Client *source_p, int parc, char *parv[])
+mo_help(struct Client *source, int parc, char *parv[])
 {
-  do_help(source_p, parv[1]);
+  do_help(source, parv[1]);
 }
 
 static struct Command help_msgtab =

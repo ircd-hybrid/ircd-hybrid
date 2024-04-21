@@ -39,7 +39,7 @@
 
 /*! \brief LOCOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -49,24 +49,24 @@
  *      - parv[1] = message text
  */
 static void
-mo_locops(struct Client *source_p, int parc, char *parv[])
+mo_locops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (!HasOFlag(source_p, OPER_FLAG_LOCOPS))
+  if (!HasOFlag(source, OPER_FLAG_LOCOPS))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "locops");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "locops");
     return;
   }
 
   sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
-                       source_p->name, message);
-  cluster_distribute(source_p, "LOCOPS", 0, CLUSTER_LOCOPS, message);
+                       source->name, message);
+  cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, message);
 }
 
 /*! \brief LOCOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -77,20 +77,20 @@ mo_locops(struct Client *source_p, int parc, char *parv[])
  *      - parv[2] = message text
  */
 static void
-ms_locops(struct Client *source_p, int parc, char *parv[])
+ms_locops(struct Client *source, int parc, char *parv[])
 {
   const char *const targets = parv[1];
   const char *const message = parv[2];
 
-  sendto_match_servs(source_p, targets, CAPAB_CLUSTER, "LOCOPS %s :%s",
+  sendto_match_servs(source, targets, CAPAB_CLUSTER, "LOCOPS %s :%s",
                      targets, message);
 
   if (match(targets, me.name))
     return;
 
-  if (shared_find(SHARED_LOCOPS, source_p->servptr->name, "*", "*"))
+  if (shared_find(SHARED_LOCOPS, source->servptr->name, "*", "*"))
     sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
-                         source_p->name, message);
+                         source->name, message);
 }
 
 static struct Command locops_msgtab =

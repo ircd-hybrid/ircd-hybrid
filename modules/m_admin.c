@@ -37,28 +37,28 @@
 
 /*! \brief Sends administrative information about this server.
  *
- * \param source_p Pointer to client to report to
+ * \param source Pointer to client to report to
  */
 static void
-do_admin(struct Client *source_p)
+do_admin(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "ADMIN requested by %s (%s@%s) [%s]",
-                       source_p->name, source_p->username,
-                       source_p->host, source_p->servptr->name);
+                       source->name, source->username,
+                       source->host, source->servptr->name);
 
-  sendto_one_numeric(source_p, &me, RPL_ADMINME, me.name);
+  sendto_one_numeric(source, &me, RPL_ADMINME, me.name);
 
   if (!EmptyString(ConfigAdminInfo.name))
-    sendto_one_numeric(source_p, &me, RPL_ADMINLOC1, ConfigAdminInfo.name);
+    sendto_one_numeric(source, &me, RPL_ADMINLOC1, ConfigAdminInfo.name);
   if (!EmptyString(ConfigAdminInfo.description))
-    sendto_one_numeric(source_p, &me, RPL_ADMINLOC2, ConfigAdminInfo.description);
+    sendto_one_numeric(source, &me, RPL_ADMINLOC2, ConfigAdminInfo.description);
   if (!EmptyString(ConfigAdminInfo.email))
-    sendto_one_numeric(source_p, &me, RPL_ADMINEMAIL, ConfigAdminInfo.email);
+    sendto_one_numeric(source, &me, RPL_ADMINEMAIL, ConfigAdminInfo.email);
 }
 
 /*! \brief ADMIN command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -68,28 +68,28 @@ do_admin(struct Client *source_p)
  *      - parv[1] = nickname/servername
  */
 static void
-m_admin(struct Client *source_p, int parc, char *parv[])
+m_admin(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
   if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
   {
-    sendto_one_numeric(source_p, &me, RPL_LOAD2HI, "ADMIN");
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "ADMIN");
     return;
   }
 
   last_used = event_base->time.sec_monotonic;
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source_p, ":%s ADMIN :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_hunt(source, ":%s ADMIN :%s", 1, parv)->ret != HUNTED_ISME)
       return;
 
-  do_admin(source_p);
+  do_admin(source);
 }
 
 /*! \brief ADMIN command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -99,12 +99,12 @@ m_admin(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_admin(struct Client *source_p, int parc, char *parv[])
+ms_admin(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source_p, ":%s ADMIN :%s", 1, parv)->ret != HUNTED_ISME)
+  if (server_hunt(source, ":%s ADMIN :%s", 1, parv)->ret != HUNTED_ISME)
     return;
 
-  do_admin(source_p);
+  do_admin(source);
 }
 
 static struct Command admin_msgtab =

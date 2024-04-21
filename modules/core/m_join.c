@@ -137,7 +137,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
 
 /*! \brief JOIN command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -148,9 +148,9 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  *      - parv[2] = channel password (key)
  */
 static void
-m_join(struct Client *source_p, int parc, char *parv[])
+m_join(struct Client *source, int parc, char *parv[])
 {
-  channel_join_list(source_p, parv[1], parv[2]);
+  channel_join_list(source, parv[1], parv[2]);
 }
 
 /* ms_join()
@@ -167,18 +167,18 @@ m_join(struct Client *source_p, int parc, char *parv[])
  *		  and use it for the TimeStamp on a new channel.
  */
 static void
-ms_join(struct Client *source_p, int parc, char *parv[])
+ms_join(struct Client *source, int parc, char *parv[])
 {
   bool keep_our_modes = true;
 
-  if (!IsClient(source_p))
+  if (!IsClient(source))
     return;
 
   if (channel_check_name(parv[2], false) == false)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "*** Too long or invalid channel name from %s(via %s): %s",
-                         source_p->name, source_p->from->name, parv[2]);
+                         source->name, source->from->name, parv[2]);
     return;
   }
 
@@ -188,9 +188,9 @@ ms_join(struct Client *source_p, int parc, char *parv[])
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
-    if (IsCapable(source_p->from, CAPAB_RESYNC))
+    if (IsCapable(source->from, CAPAB_RESYNC))
     {
-      sendto_one(source_p, ":%s RESYNC %s", me.id, parv[2]);
+      sendto_one(source, ":%s RESYNC %s", me.id, parv[2]);
       return;
     }
 
@@ -204,8 +204,8 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     channel->creation_time = newts;
   }
 
-  const struct Client *origin = source_p->servptr;
-  if (IsHidden(source_p->servptr) || ConfigServerHide.hide_servers)
+  const struct Client *origin = source->servptr;
+  if (IsHidden(source->servptr) || ConfigServerHide.hide_servers)
     origin = &me;
 
   /* Lost the TS, other side wins, so remove modes on this side */
@@ -229,7 +229,7 @@ ms_join(struct Client *source_p, int parc, char *parv[])
 
     invite_clear_list(&channel->invites);
 
-    channel_set_mode_lock(source_p->from, channel, NULL);
+    channel_set_mode_lock(source->from, channel, NULL);
 
     if (modebuf[0])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
@@ -243,23 +243,23 @@ ms_join(struct Client *source_p, int parc, char *parv[])
     }
   }
 
-  if (member_find_link(source_p, channel) == NULL)
+  if (member_find_link(source, channel) == NULL)
   {
-    channel_add_user(channel, source_p, 0, true);
+    channel_add_user(channel, source, 0, true);
 
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                         source_p->name, source_p->username, source_p->host, channel->name,
-                         source_p->account, source_p->info);
+                         source->name, source->username, source->host, channel->name,
+                         source->account, source->info);
     sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                         source_p->name, source_p->username, source_p->host, channel->name);
+                         source->name, source->username, source->host, channel->name);
 
-    if (source_p->away[0])
-      sendto_channel_local(source_p, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           source_p->name, source_p->username, source_p->host, source_p->away);
+    if (source->away[0])
+      sendto_channel_local(source, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                           source->name, source->username, source->host, source->away);
   }
 
-  sendto_server(source_p, 0, 0, ":%s JOIN %ju %s +",
-                source_p->id, channel->creation_time, channel->name);
+  sendto_server(source, 0, 0, ":%s JOIN %ju %s +",
+                source->id, channel->creation_time, channel->name);
 }
 
 static struct Command join_msgtab =

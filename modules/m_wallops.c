@@ -36,7 +36,7 @@
 
 /*! \brief WALLOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -46,23 +46,23 @@
  *      - parv[1] = message text
  */
 static void
-mo_wallops(struct Client *source_p, int parc, char *parv[])
+mo_wallops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (!HasOFlag(source_p, OPER_FLAG_WALLOPS))
+  if (!HasOFlag(source, OPER_FLAG_WALLOPS))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOPRIVS, "wallops");
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "wallops");
     return;
   }
 
-  sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
-  sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
+  sendto_wallops_flags(UMODE_WALLOP, source, "%s", message);
+  sendto_server(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
 }
 
 /*! \brief WALLOPS command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -72,12 +72,12 @@ mo_wallops(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = message text
  */
 static void
-ms_wallops(struct Client *source_p, int parc, char *parv[])
+ms_wallops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
-  sendto_server(source_p, 0, 0, ":%s WALLOPS :%s", source_p->id, message);
+  sendto_wallops_flags(UMODE_WALLOP, source, "%s", message);
+  sendto_server(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
 }
 
 static struct Command wallops_msgtab =

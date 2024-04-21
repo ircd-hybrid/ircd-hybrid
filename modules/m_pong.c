@@ -39,7 +39,7 @@
 
 /*! \brief PONG command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -50,34 +50,34 @@
  *      - parv[2] = destination
  */
 static void
-ms_pong(struct Client *source_p, int parc, char *parv[])
+ms_pong(struct Client *source, int parc, char *parv[])
 {
   if (EmptyString(parv[1]))
   {
-    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+    sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
   }
 
   const char *const destination = parv[2];
   if (!EmptyString(destination))
   {
-    struct Client *target_p;
-    if ((target_p = hash_find_client(destination)) ||
-        (target_p = hash_find_id(destination)))
+    struct Client *target;
+    if ((target = hash_find_client(destination)) ||
+        (target = hash_find_id(destination)))
     {
-      if (!IsMe(target_p) && target_p->from != source_p->from)
-        sendto_one(target_p, ":%s PONG %s %s",
-                   ID_or_name(source_p, target_p), parv[1],
-                   ID_or_name(target_p, target_p));
+      if (!IsMe(target) && target->from != source->from)
+        sendto_one(target, ":%s PONG %s %s",
+                   ID_or_name(source, target), parv[1],
+                   ID_or_name(target, target));
     }
     else if (!IsDigit(*destination))
-      sendto_one_numeric(source_p, &me, ERR_NOSUCHSERVER, destination);
+      sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
   }
 }
 
 /*! \brief PONG command handler
  *
- * \param source_p Pointer to allocated Client struct from which the message
+ * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
  * \param parc     Integer holding the number of supplied arguments.
  * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
@@ -87,30 +87,30 @@ ms_pong(struct Client *source_p, int parc, char *parv[])
  *      - parv[1] = origin/ping cookie
  */
 static void
-mr_pong(struct Client *source_p, int parc, char *parv[])
+mr_pong(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source_p));
+  assert(MyConnect(source));
 
   if (parc == 2 && !EmptyString(parv[1]))
   {
-    if (ConfigGeneral.ping_cookie && source_p->connection->random_ping)
+    if (ConfigGeneral.ping_cookie && source->connection->random_ping)
     {
       unsigned int incoming_ping = strtoul(parv[1], NULL, 10);
 
-      if (source_p->connection->random_ping == incoming_ping)
+      if (source->connection->random_ping == incoming_ping)
       {
-        AddFlag(source_p, FLAGS_PING_COOKIE);
+        AddFlag(source, FLAGS_PING_COOKIE);
 
-        if (source_p->connection->registration == 0)
-          user_register_local(source_p);
+        if (source->connection->registration == 0)
+          user_register_local(source);
       }
       else
-        sendto_one_numeric(source_p, &me, ERR_WRONGPONG,
-                           source_p->connection->random_ping);
+        sendto_one_numeric(source, &me, ERR_WRONGPONG,
+                           source->connection->random_ping);
     }
   }
   else
-    sendto_one_numeric(source_p, &me, ERR_NOORIGIN);
+    sendto_one_numeric(source, &me, ERR_NOORIGIN);
 }
 
 static struct Command pong_msgtab =

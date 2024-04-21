@@ -485,8 +485,8 @@ auth_connect_callback(fde_t *F, int error, void *data)
   if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
   {
-    report_error(L_ALL, "auth get{sock,peer}name error %s:%s",
-                 client_get_name(auth->client, SHOW_IP), errno);
+    log_write(LOG_TYPE_IRCD, "auth get{sock,peer}name error %s: %s",
+              client_get_name(auth->client, SHOW_IP), strerror(errno));
     auth_error(auth);
     return;
   }
@@ -537,8 +537,8 @@ auth_start_query(struct AuthRequest *auth)
   int fd = comm_socket(auth->client->addr.ss.ss_family, SOCK_STREAM, 0);
   if (fd == -1)
   {
-    report_error(L_ALL, "creating auth stream socket %s:%s",
-                 client_get_name(auth->client, SHOW_IP), errno);
+    log_write(LOG_TYPE_IRCD, "creating auth stream socket %s: %s",
+              client_get_name(auth->client, SHOW_IP), strerror(errno));
     ++ServerStats.is_abad;
     return;
   }

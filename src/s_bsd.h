@@ -51,7 +51,6 @@ enum { SELECT_DELAY = 500 };
 struct Listener;
 
 extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
-extern void report_error(int, const char *, const char *, int);
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
 
 extern int comm_get_sockerr(fde_t *);

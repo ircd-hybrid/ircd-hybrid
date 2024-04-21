@@ -91,31 +91,6 @@ comm_get_sockerr(fde_t *F)
 }
 
 /*
- * report_error - report an error from an errno.
- * Record error to log and also send a copy to all *LOCAL* opers online.
- *
- *        text        is a *format* string for outputing error. It must
- *                contain only two '%s', the first will be replaced
- *                by the sockhost from the client, and the latter will
- *                be taken from sys_errlist[errno].
- *
- *        client        if not NULL, is the *LOCAL* client associated with
- *                the error.
- *
- * Cannot use perror() within daemon. stderr is closed in
- * ircd and cannot be used. And, worse yet, it might have
- * been reassigned to a normal connection...
- *
- * Actually stderr is still there IFF ircd was run with -s --Rodder
- */
-void
-report_error(int level, const char *text, const char *who, int error)
-{
-  who = (who) ? who : "";
-  log_write(LOG_TYPE_IRCD, text, who, strerror(error));
-}
-
-/*
  * setup_socket()
  *
  * Set the socket non-blocking, and other wonderful bits.

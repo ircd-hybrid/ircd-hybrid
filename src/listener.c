@@ -28,6 +28,7 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include "list.h"
+#include "log.h"
 #include "listener.h"
 #include "client.h"
 #include "fdlist.h"
@@ -210,8 +211,8 @@ listener_finalize(struct Listener *listener)
   int fd = comm_socket(listener->addr.ss.ss_family, SOCK_STREAM, 0);
   if (fd == -1)
   {
-    report_error(L_ALL, "opening listener socket %s:%s",
-                 listener_get_name(listener), errno);
+    log_write(LOG_TYPE_IRCD, "opening listener socket %s: %s",
+              listener_get_name(listener), strerror(errno));
     return false;
   }
 
@@ -221,8 +222,8 @@ listener_finalize(struct Listener *listener)
   {
     if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
     {
-      report_error(L_ALL, "setting IPV6_V6ONLY for listener %s:%s",
-                   listener_get_name(listener), errno);
+      log_write(LOG_TYPE_IRCD, "setting IPV6_V6ONLY for listener %s: %s",
+                listener_get_name(listener), strerror(errno));
       close(fd);
       return false;
     }
@@ -231,8 +232,8 @@ listener_finalize(struct Listener *listener)
 
   if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
   {
-    report_error(L_ALL, "setting SO_REUSEADDR for listener %s:%s",
-                 listener_get_name(listener), errno);
+    log_write(LOG_TYPE_IRCD, "setting SO_REUSEADDR for listener %s: %s",
+              listener_get_name(listener), strerror(errno));
     close(fd);
     return false;
   }
@@ -243,16 +244,16 @@ listener_finalize(struct Listener *listener)
    */
   if (bind(fd, (const struct sockaddr *)&listener->addr, listener->addr.ss_len))
   {
-    report_error(L_ALL, "binding listener socket %s:%s",
-                 listener_get_name(listener), errno);
+    log_write(LOG_TYPE_IRCD, "binding listener socket %s: %s",
+              listener_get_name(listener), strerror(errno));
     close(fd);
     return false;
   }
 
   if (listen(fd, LISTEN_BACKLOG))
   {
-    report_error(L_ALL, "listen failed for %s:%s",
-                 listener_get_name(listener), errno);
+    log_write(LOG_TYPE_IRCD, "listen failed for %s: %s",
+              listener_get_name(listener), strerror(errno));
     close(fd);
     return false;
   }

@@ -410,7 +410,8 @@ server_connect(struct MaskItem *conf, struct Client *by)
   if (fd == -1)
   {
     /* Eek, failure to create the socket */
-    report_error(L_ALL, "opening stream socket to %s: %s", conf->name, errno);
+    log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
+              conf->name, strerror(errno));
     return false;
   }
 

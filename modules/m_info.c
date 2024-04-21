@@ -270,8 +270,7 @@ static void
 send_info_text(struct Client *client)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "INFO requested by %s (%s@%s) [%s]",
-                       client->name, client->username,
-                       client->host, client->servptr->name);
+                       client->name, client->username, client->host, client->servptr->name);
 
   for (const char **text = infotext; *text; ++text)
   {

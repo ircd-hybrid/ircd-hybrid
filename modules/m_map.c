@@ -126,8 +126,7 @@ static void
 do_map(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                       source->name, source->username,
-                       source->host, source->servptr->name);
+                       source->name, source->username, source->host, source->servptr->name);
   dump_map(source, &me, 0);
 }
 

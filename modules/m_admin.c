@@ -43,8 +43,7 @@ static void
 do_admin(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "ADMIN requested by %s (%s@%s) [%s]",
-                       source->name, source->username,
-                       source->host, source->servptr->name);
+                       source->name, source->username, source->host, source->servptr->name);
 
   sendto_one_numeric(source, &me, RPL_ADMINME, me.name);
 

@@ -54,7 +54,7 @@
 static void
 set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
 {
-  int what = MODE_QUERY;
+  int what = MODE_NONE;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {

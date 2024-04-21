@@ -36,7 +36,7 @@ enum { MAXMODEPARAMS = 6 };
 
 enum
 {
-  MODE_QUERY,
+  MODE_NONE,
   MODE_DEL,
   MODE_ADD
 };

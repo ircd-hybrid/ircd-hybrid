@@ -599,7 +599,7 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
 
   char buf[UMODE_MAX_STR];
   char *m = buf;
-  int what = MODE_QUERY;
+  int what = MODE_NONE;
 
   /*
    * Construct a string in the 'buf' array to represent the modifications in the user's mode

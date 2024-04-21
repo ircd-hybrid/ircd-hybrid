@@ -536,7 +536,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
       list = NULL;  /* Let it crash */
   }
 
-  if (dir == MODE_QUERY || parc <= *parn)
+  if (parc <= *parn)
   {
     if (*errors & errtype)
       return;
@@ -597,7 +597,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
 
-  if (dir == MODE_QUERY || parc <= *parn)
+  if (parc <= *parn)
     return;
 
   struct Client *client_target = find_chasing(client, parv[(*parn)++]);
@@ -645,9 +645,6 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
     return;
 
-  if (dir == MODE_QUERY)
-    return;
-
   if (dir == MODE_ADD && parc > *parn)
   {
     char *const lstr = parv[(*parn)++];
@@ -689,9 +686,6 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
-    return;
-
-  if (dir == MODE_QUERY)
     return;
 
   if (dir == MODE_ADD && parc > *parn)
@@ -745,7 +739,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
   char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
   char *parptr = parabuf;
   unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  unsigned int dir = MODE_QUERY;
+  unsigned int dir = MODE_NONE;
 
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
                  client->id, channel->creation_time, channel->name);
@@ -786,7 +780,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
       pbl = 0;
       parabuf[0] = '\0';
       parptr = parabuf;
-      dir = MODE_QUERY;
+      dir = MODE_NONE;
     }
 
     if (dir != mode_changes[i].dir)
@@ -829,7 +823,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
   char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
   char *parptr = parabuf;
   unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  unsigned int dir = MODE_QUERY;
+  unsigned int dir = MODE_NONE;
 
   if (IsClient(client))
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", client->name,
@@ -870,7 +864,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
       pbl = 0;
       parabuf[0] = '\0';
       parptr = parabuf;
-      dir = MODE_QUERY;
+      dir = MODE_NONE;
     }
 
     if (dir != mode_changes[i].dir)
@@ -1036,9 +1030,6 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
         break;
       case '-':
         dir = MODE_DEL;
-        break;
-      case '=':
-        dir = MODE_QUERY;
         break;
       default:
       {

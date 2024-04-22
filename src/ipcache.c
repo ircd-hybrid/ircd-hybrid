@@ -49,7 +49,7 @@ ipcache_get_trie(void *addr)
 
 /* ipcache_find_or_add_address()
  *
- * inputs       - pointer to struct irc_ssaddr
+ * inputs       - pointer to struct io_addr
  * output       - pointer to a struct ip_entry
  * side effects -
  *

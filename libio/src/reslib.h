@@ -6,6 +6,7 @@
 #define INCLUDED_reslib_h
 
 #include "config.h"  /* WORDS_BIGENDIAN */
+#include "address.h"
 
 
 /*%
@@ -132,7 +133,7 @@ typedef struct
   unsigned  arcount : 16;  /**< Number of resource entries */
 } HEADER;
 
-extern struct irc_ssaddr reslib_nsaddr_list[];
+extern struct io_addr reslib_nsaddr_list[];
 extern unsigned int reslib_nscount;
 extern void reslib_res_init(void);
 extern int reslib_dn_expand(const unsigned char *, const unsigned char *, const unsigned char *, char *, int);

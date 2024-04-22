@@ -221,7 +221,7 @@ cloak_initialize(void)
 /**
  * @brief Compute the MAC and compose the cloaked hostname for the given address.
  *
- * This function takes an irc_ssaddr structure, extracts the address and its length,
+ * This function takes an io_addr structure, extracts the address and its length,
  * combines it with the secret key, computes the SHA3 hash, and finally creates a cloaked
  * hostname by encoding the hash in base32 and appending the configured suffix.
  *
@@ -229,7 +229,7 @@ cloak_initialize(void)
  * @return The statically allocated cloaked hostname string.
  */
 static const char *
-cloak_mac_and_compose(const struct irc_ssaddr *addr)
+cloak_mac_and_compose(const struct io_addr *addr)
 {
   const void *addr_ptr;
   size_t addr_len;
@@ -285,14 +285,14 @@ cloak_mac_and_compose(const struct irc_ssaddr *addr)
  * @return The cloaked hostname, or NULL if cloaking is disabled or the configuration is incomplete.
  */
 const char *
-cloak_compute(const struct irc_ssaddr *addr)
+cloak_compute(const struct io_addr *addr)
 {
   if (config->enabled == 0)
     return NULL;
   if (config->num_bits == 0 || EmptyString(config->secret))
     return NULL;
 
-  struct irc_ssaddr tmp;
+  struct io_addr tmp;
   memcpy(&tmp, addr, sizeof(tmp));
 
   if (addr->ss.ss_family == AF_INET6)

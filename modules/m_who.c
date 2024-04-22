@@ -258,7 +258,7 @@ who_matches(struct Client *source, const struct Client *target,
 
   if ((who->matchsel & WHO_FIELD_NIP) && HasUMode(source, UMODE_OPER))
   {
-    struct irc_ssaddr addr;
+    struct io_addr addr;
     int bits = 0;
     const int ret = parse_netmask(mask, &addr, &bits);
 

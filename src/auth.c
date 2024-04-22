@@ -223,7 +223,7 @@ auth_verify_hostname(const char *hostname)
  * @param namelength The length of the resolved hostname string.
  */
 static void
-auth_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
+auth_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
 {
   struct AuthRequest *const auth = vptr;
   enum auth_report_type report_type;
@@ -478,10 +478,10 @@ auth_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  struct irc_ssaddr us;
-  struct irc_ssaddr them;
-  socklen_t ulen = sizeof(struct irc_ssaddr);
-  socklen_t tlen = sizeof(struct irc_ssaddr);
+  struct io_addr us;
+  struct io_addr them;
+  socklen_t ulen = sizeof(struct io_addr);
+  socklen_t tlen = sizeof(struct io_addr);
   if (getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&us, &ulen) ||
       getpeername(auth->client->connection->fd->fd, (struct sockaddr *)&them, &tlen))
   {
@@ -527,7 +527,7 @@ auth_connect_callback(fde_t *F, int error, void *data)
 static void
 auth_start_query(struct AuthRequest *auth)
 {
-  struct irc_ssaddr localaddr;
+  struct io_addr localaddr;
   socklen_t locallen = sizeof(localaddr);
 
   assert(auth->client);

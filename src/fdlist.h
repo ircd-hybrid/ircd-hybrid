@@ -32,6 +32,7 @@
 #define INCLUDED_fdlist_h
 
 #include "io.h"
+#include "address.h"
 #include "ircd_defs.h"
 #include "tls.h"
 
@@ -86,7 +87,7 @@ typedef struct _fde
   /**@{*/
   struct
   {
-    struct irc_ssaddr addr;  /**< Host address information. */
+    struct io_addr addr;  /**< Host address information. */
     void (*callback)(struct _fde *, int, void *);  /**< Callback function for connection events. */
     void *data;  /**< Data for the connection callback. */
     /* Retry count could be added here in the future -- adrian */

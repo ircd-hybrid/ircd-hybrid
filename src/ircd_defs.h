@@ -58,17 +58,4 @@
 #define KEYLEN          23  /**< Maximum size of a channel key. */
 
 /** @} */
-
-/**
- * @struct irc_ssaddr
- * @brief Structure to handle sockaddr_storage with compatibility for different implementations.
- *
- * This structure provides a consistent interface for sockaddr_storage with compatibility
- * for different implementations that may or may not include the ss_len member.
- */
-struct irc_ssaddr
-{
-  struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
-  socklen_t ss_len;  /**< Length of the sockaddr_storage. */
-};
 #endif /* INCLUDED_ircd_defs_h */

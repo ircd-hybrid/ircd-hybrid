@@ -32,6 +32,7 @@
 #include "ircd_defs.h"
 #include "dbuf.h"
 #include "auth.h"
+#include "address.h"
 
 
 /** Client connection states */
@@ -365,7 +366,7 @@ struct Client
   list_t channel;  /**< Chain of channel pointer blocks */
   list_t svstags;  /**< List of ServicesTag items */
 
-  struct irc_ssaddr addr;  /**< Real IP address */
+  struct io_addr addr;  /**< Real IP address */
 
   char *tls_certfp;  /**< TLS certificate fingerprint */
   char *tls_cipher;  /**< Exact copy of tls_get_cipher() */

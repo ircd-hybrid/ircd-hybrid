@@ -44,7 +44,7 @@ struct ResvExemptItem
   char *name;
   char *user;
   char *host;
-  struct irc_ssaddr addr;
+  struct io_addr addr;
   int bits;
   int type;
 };

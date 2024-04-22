@@ -83,7 +83,7 @@ extern char conffilebuf[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
 
 
-/* struct MaskItem *find_conf_by_address(const char *, struct irc_ssaddr *,
+/* struct MaskItem *find_conf_by_address(const char *, struct io_addr *,
  *                                         int type, int fam, const char *username)
  * Input: The hostname, the address, the type of mask to find, the address
  *        family, the username.
@@ -94,7 +94,7 @@ extern int yyparse(); /* defined in y.tab.c */
  * should always be true (i.e. conf->flags & CONF_FLAGS_NEED_PASSWORD == 0)
  */
 struct MaskItem *
-find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned int type,
+find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int type,
                      const char *username, const char *password, int do_match)
 {
   unsigned int hprecv = 0;
@@ -203,13 +203,13 @@ find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned i
 }
 
 /* struct MaskItem* find_address_conf(const char*, const char*,
- * 	                               struct irc_ssaddr*, int, char *);
+ * 	                               struct io_addr*, int, char *);
  * Input: The hostname, username, address, address family.
  * Output: The applicable MaskItem.
  * Side-effects: None
  */
 struct MaskItem *
-find_address_conf(const char *host, const char *user, const struct irc_ssaddr *addr, const char *password)
+find_address_conf(const char *host, const char *user, const struct io_addr *addr, const char *password)
 {
   struct MaskItem *authcnf = NULL, *killcnf = NULL;
 
@@ -234,14 +234,14 @@ find_address_conf(const char *host, const char *user, const struct irc_ssaddr *a
   return authcnf;
 }
 
-/* struct MaskItem* find_dline_conf(struct irc_ssaddr*, int)
+/* struct MaskItem* find_dline_conf(struct io_addr*, int)
  *
  * Input:	An address, an address family.
  * Output:	The best matching D-line or exempt line.
  * Side effects: None.
  */
 struct MaskItem *
-find_dline_conf(const struct irc_ssaddr *addr)
+find_dline_conf(const struct io_addr *addr)
 {
   struct MaskItem *eline;
 
@@ -308,7 +308,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
   int bits = 0;
   uint32_t hv = 0;
   list_node_t *node;
-  struct irc_ssaddr addr;
+  struct io_addr addr;
 
   switch (parse_netmask(address, &addr, &bits))
   {
@@ -441,7 +441,7 @@ hostmask_expire_temporary(void)
  * if successful save hp in the conf item it was called with
  */
 static void
-conf_dns_callback(void *vptr, const struct irc_ssaddr *addr, const char *name, size_t namelength)
+conf_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
 {
   struct MaskItem *const conf = vptr;
 
@@ -1053,7 +1053,7 @@ conf_rehash(bool sig)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct irc_ssaddr *addr)
+conf_connect_allowed(struct io_addr *addr)
 {
   const struct MaskItem *conf = find_dline_conf(addr);
 

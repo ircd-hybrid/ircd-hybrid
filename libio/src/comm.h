@@ -48,17 +48,17 @@ enum
 /** How long can comm_select() wait for network events [milliseconds] */
 enum { SELECT_DELAY = 500 };
 
-extern void remove_ipv6_mapping(struct irc_ssaddr *);
+extern void remove_ipv6_mapping(struct io_addr *);
 
 extern int comm_get_sockerr(fde_t *);
 extern bool comm_ignore_errno(int);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(fde_t *, const struct irc_ssaddr *, unsigned short, const struct irc_ssaddr *, void (fde_t *, int, void *), void *, uintmax_t);
+extern void comm_connect_tcp(fde_t *, const struct io_addr *, unsigned short, const struct io_addr *, void (fde_t *, int, void *), void *, uintmax_t);
 extern const char *comm_errstr(int);
 extern int comm_socket(int, int, int);
-extern int comm_accept(fde_t *, struct irc_ssaddr *);
+extern int comm_accept(fde_t *, struct io_addr *);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void comm_select_init(void);

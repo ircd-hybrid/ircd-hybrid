@@ -43,5 +43,5 @@ extern void cloak_set_num_bits(int);
 extern void cloak_set_secret(const char *);
 extern void cloak_set_suffix(const char *);
 extern void cloak_initialize(void);
-extern const char *cloak_compute(const struct irc_ssaddr *);
+extern const char *cloak_compute(const struct io_addr *);
 #endif  /* INCLUDED_cloak_h */

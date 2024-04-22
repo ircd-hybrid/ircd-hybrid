@@ -28,6 +28,7 @@
 
 #include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
 #include "extban.h"
+#include "address.h"
 
 #define AddMemberFlag(x, y) ((x)->flags |=  (y))
 #define DelMemberFlag(x, y) ((x)->flags &= ~(y))
@@ -111,7 +112,7 @@ struct Ban
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
   size_t banstr_len;  /**< Cached string length of Ban::banstr */
   uintmax_t when;  /**< Time this ban has been set; real time */
-  struct irc_ssaddr addr;
+  struct io_addr addr;
   int bits;
   int type;
 };

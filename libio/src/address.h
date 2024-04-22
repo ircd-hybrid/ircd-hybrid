@@ -35,13 +35,26 @@ enum hostmask_type
 
 enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
 
-extern uint32_t hash_ipv4(const struct irc_ssaddr *, int);
-extern uint32_t hash_ipv6(const struct irc_ssaddr *, int);
+/**
+ * @struct io_addr
+ * @brief Structure to handle sockaddr_storage with compatibility for different implementations.
+ *
+ * This structure provides a consistent interface for sockaddr_storage with compatibility
+ * for different implementations that may or may not include the ss_len member.
+ */
+struct io_addr
+{
+  struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
+  socklen_t ss_len;  /**< Length of the sockaddr_storage. */
+};
+
+extern uint32_t hash_ipv4(const struct io_addr *, int);
+extern uint32_t hash_ipv6(const struct io_addr *, int);
 extern uint32_t hash_text(const char *);
 extern uint32_t get_mask_hash(const char *);
-extern int parse_netmask(const char *, struct irc_ssaddr *, int *);
-extern void address_mask(struct irc_ssaddr *, int);
+extern int parse_netmask(const char *, struct io_addr *, int *);
+extern void address_mask(struct io_addr *, int);
 extern bool address_compare(const void *, const void *, bool, bool, int);
-extern bool match_ipv6(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
-extern bool match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
+extern bool match_ipv6(const struct io_addr *, const struct io_addr *, int);
+extern bool match_ipv4(const struct io_addr *, const struct io_addr *, int);
 #endif  /* INCLUDED_address_h */

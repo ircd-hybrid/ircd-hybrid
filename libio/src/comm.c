@@ -235,7 +235,7 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *F, const struct irc_ssaddr *caddr, unsigned short port, const struct irc_ssaddr *baddr,
+comm_connect_tcp(fde_t *F, const struct io_addr *caddr, unsigned short port, const struct io_addr *baddr,
                  void (*callback)(fde_t *, int, void *), void *data, uintmax_t timeout)
 {
   assert(callback);
@@ -390,7 +390,7 @@ comm_socket(int family, int sock_type, int proto)
  * fd_open (this function no longer does it).
  */
 int
-comm_accept(fde_t *F, struct irc_ssaddr *addr)
+comm_accept(fde_t *F, struct io_addr *addr)
 {
   socklen_t addrlen = sizeof(*addr);
 
@@ -426,7 +426,7 @@ comm_accept(fde_t *F, struct irc_ssaddr *addr)
  *
  */
 void
-remove_ipv6_mapping(struct irc_ssaddr *addr)
+remove_ipv6_mapping(struct io_addr *addr)
 {
   if (addr->ss.ss_family == AF_INET6)
   {

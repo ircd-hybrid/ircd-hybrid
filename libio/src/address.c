@@ -39,7 +39,7 @@
                          ch = ch - 'a' + 10; \
                        } while (false);
 
-/* int try_parse_v6_netmask(const char *, struct irc_ssaddr *, int *);
+/* int try_parse_v6_netmask(const char *, struct io_addr *, int *);
  * Input: A possible IPV6 address as a string.
  * Output: An integer describing whether it is an IPV6 or hostmask,
  *         an address(if it is IPV6), a bitlength(if it is IPV6).
@@ -47,7 +47,7 @@
  * Comments: Called from parse_netmask
  */
 static int
-try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
+try_parse_v6_netmask(const char *text, struct io_addr *addr, int *b)
 {
   char c;
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -156,7 +156,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   return HM_IPV6;
 }
 
-/* int try_parse_v4_netmask(const char *, struct irc_ssaddr *, int *);
+/* int try_parse_v4_netmask(const char *, struct io_addr *, int *);
  * Input: A possible IPV4 address as a string.
  * Output: An integer describing whether it is an IPV4 or hostmask,
  *         an address(if it is IPV4), a bitlength(if it is IPV4).
@@ -164,7 +164,7 @@ try_parse_v6_netmask(const char *text, struct irc_ssaddr *addr, int *b)
  * Comments: Called from parse_netmask
  */
 static int
-try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
+try_parse_v4_netmask(const char *text, struct io_addr *addr, int *b)
 {
   const char *digits[4];
   uint8_t addb[4];
@@ -241,7 +241,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
   return HM_IPV4;
 }
 
-/* int parse_netmask(const char *, struct irc_ssaddr *, int *);
+/* int parse_netmask(const char *, struct io_addr *, int *);
  * Input: A hostmask, or an IPV4/6 address.
  * Output: An integer describing whether it is an IPV4, IPV6 address or a
  *         hostmask, an address(if it is an IP mask),
@@ -249,7 +249,7 @@ try_parse_v4_netmask(const char *text, struct irc_ssaddr *addr, int *b)
  * Side effects: None
  */
 int
-parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
+parse_netmask(const char *text, struct io_addr *addr, int *b)
 {
   if (addr)
     memset(addr, 0, sizeof(*addr));
@@ -268,7 +268,7 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
  * This function masks the given IP address based on the specified number of bits,
  * effectively setting to zero the bits beyond the specified prefix length.
  *
- * @param addr Pointer to the irc_ssaddr structure representing the IP address.
+ * @param addr Pointer to the io_addr structure representing the IP address.
  * @param bits The number of bits to preserve in the address (prefix length).
  *
  * @note The function handles both IPv4 and IPv6 addresses.
@@ -277,7 +277,7 @@ parse_netmask(const char *text, struct irc_ssaddr *addr, int *b)
  * and the remaining octets are set to zero.
  */
 void
-address_mask(struct irc_ssaddr *addr, int bits)
+address_mask(struct io_addr *addr, int bits)
 {
   if (addr->ss.ss_family != AF_INET6)
   {
@@ -313,8 +313,8 @@ address_mask(struct irc_ssaddr *addr, int bits)
  * This function compares two network addresses for equality or matching based on
  * specified criteria such as exact match, port match, and subnet match.
  *
- * @param p1    Pointer to the first network address (struct irc_ssaddr).
- * @param p2    Pointer to the second network address (struct irc_ssaddr).
+ * @param p1    Pointer to the first network address (struct io_addr).
+ * @param p2    Pointer to the second network address (struct io_addr).
  * @param exact If true, performs an exact address match (ignores bits parameter).
  * @param port  If true, compares port numbers for equality.
  * @param bits  Number of bits to consider for subnet matching (ignored if exact is true).
@@ -324,8 +324,8 @@ address_mask(struct irc_ssaddr *addr, int bits)
 bool
 address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
 {
-  const struct irc_ssaddr *const addr = p1;
-  const struct irc_ssaddr *const mask = p2;
+  const struct io_addr *const addr = p1;
+  const struct io_addr *const mask = p2;
 
   /* Check if address families are the same */
   if (addr->ss.ss_family != mask->ss.ss_family)
@@ -361,13 +361,13 @@ address_compare(const void *p1, const void *p2, bool exact, bool port, int bits)
 }
 
 /* The address matching stuff... */
-/* int match_ipv6(struct irc_ssaddr *, struct irc_ssaddr *, int)
+/* int match_ipv6(struct io_addr *, struct io_addr *, int)
  * Input: An IP address, an IP mask, the number of bits in the mask.
  * Output: if match, -1 else 0
  * Side effects: None
  */
 bool
-match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bits)
+match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
   int i, m, n = bits / 8;
   const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
@@ -385,13 +385,13 @@ match_ipv6(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bit
   return false;
 }
 
-/* int match_ipv4(struct irc_ssaddr *, struct irc_ssaddr *, int)
+/* int match_ipv4(struct io_addr *, struct io_addr *, int)
  * Input: An IP address, an IP mask, the number of bits in the mask.
  * Output: if match, -1 else 0
  * Side Effects: None
  */
 bool
-match_ipv4(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bits)
+match_ipv4(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
   const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
   const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)mask;
@@ -402,13 +402,13 @@ match_ipv4(const struct irc_ssaddr *addr, const struct irc_ssaddr *mask, int bit
   return false;
 }
 
-/* unsigned long hash_ipv4(struct irc_ssaddr*)
+/* unsigned long hash_ipv4(struct io_addr*)
  * Input: An IP address.
  * Output: A hash value of the IP address.
  * Side effects: None
  */
 uint32_t
-hash_ipv4(const struct irc_ssaddr *addr, int bits)
+hash_ipv4(const struct io_addr *addr, int bits)
 {
   if (bits)
   {
@@ -421,13 +421,13 @@ hash_ipv4(const struct irc_ssaddr *addr, int bits)
   return 0;
 }
 
-/* unsigned long hash_ipv6(struct irc_ssaddr*)
+/* unsigned long hash_ipv6(struct io_addr*)
  * Input: An IP address.
  * Output: A hash value of the IP address.
  * Side effects: None
  */
 uint32_t
-hash_ipv6(const struct irc_ssaddr *addr, int bits)
+hash_ipv6(const struct io_addr *addr, int bits)
 {
   uint32_t v = 0, n;
   const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;

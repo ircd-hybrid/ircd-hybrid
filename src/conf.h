@@ -129,8 +129,8 @@ struct MaskItem
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
   uintmax_t          timeout;
-  struct irc_ssaddr  *bind;  /* ip to bind to for outgoing connect */
-  struct irc_ssaddr  *addr;  /* ip to connect to */
+  struct io_addr  *bind;  /* ip to bind to for outgoing connect */
+  struct io_addr  *addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */
@@ -302,7 +302,7 @@ struct AddressRec
     struct
     {
       /* Pointer into MaskItem... -A1kmm */
-      struct irc_ssaddr addr;
+      struct io_addr addr;
       int bits;
     } ipa;
 
@@ -332,9 +332,9 @@ extern struct config_admin_entry ConfigAdminInfo;
 
 extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
-extern struct MaskItem *find_dline_conf(const struct irc_ssaddr *);
-extern struct MaskItem *find_address_conf(const char *, const char *, const struct irc_ssaddr *, const char *);
-extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *, unsigned int, const char *, const char *, int);
+extern struct MaskItem *find_dline_conf(const struct io_addr *);
+extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
+extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
 
 extern bool valid_wild_card_simple(const char *);
 extern bool valid_wild_card(int, ...);
@@ -347,7 +347,7 @@ extern bool conf_check_client(struct Client *);
 
 extern void conf_detach(struct Client *, enum maskitem_type);
 extern struct MaskItem *find_conf_name(list_t *, const char *, enum maskitem_type);
-extern int conf_connect_allowed(struct irc_ssaddr *);
+extern int conf_connect_allowed(struct io_addr *);
 extern void split_nuh(struct split_nuh_item *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);
 extern struct MaskItem *connect_find(const char *, int (*)(const char *, const char *));

@@ -53,7 +53,7 @@ listener_get_list(void)
 }
 
 static struct Listener *
-listener_make(const int port, const struct irc_ssaddr *addr)
+listener_make(const int port, const struct io_addr *addr)
 {
   struct Listener *listener = xcalloc(sizeof(*listener));
 
@@ -156,7 +156,7 @@ ssl_handshake(fde_t *F, void *data)
  * any client list yet.
  */
 static void
-add_connection(struct Listener *listener, struct irc_ssaddr *addr, int fd)
+add_connection(struct Listener *listener, struct io_addr *addr, int fd)
 {
   struct Client *client = client_make(NULL);
 
@@ -205,7 +205,7 @@ static void
 listener_accept_connection(fde_t *F, void *data)
 {
   static uintmax_t rate = 0;
-  struct irc_ssaddr addr;
+  struct io_addr addr;
   int fd;
   int pe;
   struct Listener *const listener = data;
@@ -386,7 +386,7 @@ listener_finalize(struct Listener *listener)
 }
 
 static struct Listener *
-listener_find(int port, struct irc_ssaddr *addr)
+listener_find(int port, struct io_addr *addr)
 {
   list_node_t *node;
   struct Listener *listener    = NULL;
@@ -466,7 +466,7 @@ listener_release(struct Listener *listener)
 void
 listener_add(int port, const char *vhost_ip, unsigned int flags)
 {
-  struct irc_ssaddr vaddr;
+  struct io_addr vaddr;
   struct addrinfo hints, *res;
   char portname[PORTNAMELEN + 1];
   static short int pass = 0; /* if ipv6 and no address specified we need to

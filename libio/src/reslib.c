@@ -97,7 +97,7 @@
 
 #define MAXLINE 128
 
-struct irc_ssaddr reslib_nsaddr_list[RESLIB_MAXNS];
+struct io_addr reslib_nsaddr_list[RESLIB_MAXNS];
 unsigned int reslib_nscount = 0;
 
 static inline bool reslib_special(int);

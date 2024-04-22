@@ -50,7 +50,7 @@
 static void
 dline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct irc_ssaddr iphost, *piphost;
+  struct io_addr iphost, *piphost;
   struct MaskItem *conf;
 
   if (parse_netmask(aline->host, &iphost, NULL) != HM_HOST)

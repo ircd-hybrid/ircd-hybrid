@@ -85,7 +85,7 @@ struct reslist
   unsigned int sends;                        /**< Number of sends (>1 means resent). */
   uintmax_t sentat;                          /**< Timestamp we last sent this request. */
   uintmax_t timeout;                         /**< When this request times out. */
-  struct irc_ssaddr addr;                    /**< Address for this request. */
+  struct io_addr addr;                    /**< Address for this request. */
   char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
   size_t name_len;                         /**< Actual hostname length. */
   dns_callback_fnc callback;                 /**< Callback function on completion. */
@@ -138,7 +138,7 @@ make_request(dns_callback_fnc callback, void *ctx)
  *      revised for ircd, cryogen(stu) may03
  */
 static bool
-res_ourserver(const struct irc_ssaddr *inp)
+res_ourserver(const struct io_addr *inp)
 {
   for (unsigned int i = 0; i < reslib_nscount; ++i)
     if (address_compare(inp, &reslib_nsaddr_list[i], true, true, 0))
@@ -301,7 +301,7 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
  */
 static void
 do_query_number(dns_callback_fnc callback, void *ctx,
-                const struct irc_ssaddr *addr,
+                const struct io_addr *addr,
                 struct reslist *request)
 {
   char ipbuf[128] = "";
@@ -366,7 +366,7 @@ gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int 
  * gethost_byaddr - get host name from address
  */
 void
-gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct irc_ssaddr *addr)
+gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct io_addr *addr)
 {
   do_query_number(callback, ctx, addr, NULL);
 }
@@ -505,7 +505,7 @@ res_readreply(fde_t *F, void *data)
 {
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
   ssize_t rc;
-  struct irc_ssaddr addr;
+  struct io_addr addr;
   socklen_t len = sizeof(addr);
 
   while ((rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len)) != -1)

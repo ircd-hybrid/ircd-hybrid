@@ -87,7 +87,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   char buf[IRCD_BUFSIZE];
   int bits = 0;
   unsigned int min_cidr = 0;
-  struct irc_ssaddr iphost, *piphost = NULL;
+  struct io_addr iphost, *piphost = NULL;
 
   if (!HasFlag(source, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
   {

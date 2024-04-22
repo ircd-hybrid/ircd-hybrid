@@ -82,7 +82,7 @@ static void
 dline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
-  struct irc_ssaddr addr;
+  struct io_addr addr;
   int bits = 0;
   unsigned int min_cidr = 0;
 

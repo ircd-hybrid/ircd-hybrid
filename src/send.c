@@ -548,7 +548,7 @@ match_it(const struct Client *one, const char *mask, bool host)
 {
   if (host)
   {
-    struct irc_ssaddr addr;
+    struct io_addr addr;
     int bits = 0;
     const int ret = parse_netmask(mask, &addr, &bits);
 

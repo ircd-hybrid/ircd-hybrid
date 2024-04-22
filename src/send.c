@@ -31,7 +31,7 @@
 #include "dbuf.h"
 #include "irc_string.h"
 #include "ircd.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "server_capab.h"
 #include "conf_class.h"
 #include "log.h"

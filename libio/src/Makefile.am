@@ -3,6 +3,8 @@ noinst_LTLIBRARIES = libio.la
 
 libio_la_SOURCES =  base32.c      \
                     base32.h.h    \
+                    comm.c        \
+                    comm.h        \
                     dbuf.c        \
                     dbuf.h        \
                     event.c       \

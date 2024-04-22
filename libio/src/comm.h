@@ -48,9 +48,6 @@ enum
 /** How long can comm_select() wait for network events [milliseconds] */
 enum { SELECT_DELAY = 500 };
 
-struct Listener;
-
-extern void add_connection(struct Listener *, struct irc_ssaddr *, int);
 extern void remove_ipv6_mapping(struct irc_ssaddr *);
 
 extern int comm_get_sockerr(fde_t *);

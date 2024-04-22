@@ -50,7 +50,7 @@
 #include "ircd.h"
 #include "packet.h"
 #include "res.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "log.h"
 #include "send.h"
 #include "memory.h"

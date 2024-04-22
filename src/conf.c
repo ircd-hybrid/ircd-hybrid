@@ -40,7 +40,6 @@
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
-#include "s_bsd.h"
 #include "ircd.h"
 #include "listener.h"
 #include "hostmask.h"

@@ -33,7 +33,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "auth.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "conf.h"
 #include "conf_gecos.h"
 #include "log.h"

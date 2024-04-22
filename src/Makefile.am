@@ -108,8 +108,6 @@ ircd_SOURCES = accept.c          \
                tls_wolfssl.h     \
                restart.c         \
                restart.h         \
-               s_bsd.c           \
-               s_bsd.h           \
                send.c            \
                send.h            \
                server.c          \

@@ -27,7 +27,7 @@
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
 #include "fdlist.h"
 #include "ircd.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "log.h"
 #include "memory.h"
 #include <sys/epoll.h>

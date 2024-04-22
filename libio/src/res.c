@@ -49,7 +49,7 @@
 #include "ircd.h"
 #include "rng_mt.h"
 #include "fdlist.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "misc.h"
 #include "res.h"
 #include "reslib.h"

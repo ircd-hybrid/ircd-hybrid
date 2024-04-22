@@ -35,7 +35,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "ircd_defs.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "conf.h"
 #include "send.h"
 #include "memory.h"
@@ -99,6 +99,106 @@ listener_count_memory(unsigned int *count, size_t *bytes)
 {
   (*count) = list_length(&listener_list);
   (*bytes) = *count * sizeof(struct Listener);
+}
+
+/*
+ * ssl_handshake - let OpenSSL initialize the protocol. Register for
+ * read/write events if necessary.
+ */
+static void
+ssl_handshake(fde_t *F, void *data)
+{
+  struct Client *client = data;
+
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == F);
+
+  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, NULL);
+  if (ret != TLS_HANDSHAKE_DONE)
+  {
+    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+    {
+      exit_client(client, "Timeout during TLS handshake");
+      return;
+    }
+
+    switch (ret)
+    {
+      case TLS_HANDSHAKE_WANT_WRITE:
+        comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
+        return;
+      case TLS_HANDSHAKE_WANT_READ:
+        comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
+        return;
+      default:
+        exit_client(client, "Error during TLS handshake");
+        return;
+    }
+  }
+
+  comm_settimeout(F, 0, NULL, NULL);
+  comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+
+  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->tls_certfp) == false)
+    log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+         client_get_name(client, MASK_IP));
+
+  auth_start(client);
+}
+
+/*
+ * add_connection - creates a client which has just connected to us on
+ * the given fd. The sockhost field is initialized with the ip# of the host.
+ * An unique id is calculated now, in case it is needed for auth.
+ * The client is sent to the auth module for verification, and not put in
+ * any client list yet.
+ */
+static void
+add_connection(struct Listener *listener, struct irc_ssaddr *addr, int fd)
+{
+  struct Client *client = client_make(NULL);
+
+  client->connection->fd = fd_open(fd, true, listener_has_flag(listener, LISTENER_TLS) ?
+                                   "Incoming TLS connection" : "Incoming connection");
+
+  /*
+   * copy address to 'sockhost' as a string, copy it to host too
+   * so we have something valid to put into error messages...
+   */
+  client->addr = *addr;
+
+  getnameinfo((const struct sockaddr *)&client->addr,
+              client->addr.ss_len, client->sockhost,
+              sizeof(client->sockhost), NULL, 0, NI_NUMERICHOST);
+
+  if (client->sockhost[0] == ':' &&
+      client->sockhost[1] == ':')
+  {
+    memmove(client->sockhost + 1, client->sockhost, sizeof(client->sockhost) - 1);
+    client->sockhost[0] = '0';
+  }
+
+  strlcpy(client->host, client->sockhost, sizeof(client->host));
+
+  client->connection->listener = listener;
+  ++listener->ref_count;
+
+  if (listener_has_flag(listener, LISTENER_TLS))
+  {
+    if (tls_new(&client->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
+    {
+      SetDead(client);
+      exit_client(client, "TLS context initialization failed");
+      return;
+    }
+
+    AddFlag(client, FLAGS_TLS);
+    ssl_handshake(client->connection->fd, client);
+  }
+  else
+    auth_start(client);
 }
 
 static void

@@ -50,7 +50,7 @@
 #include "parse.h"
 #include "res.h"
 #include "rng_mt.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "log.h"
 #include "server.h"
 #include "server_capab.h"

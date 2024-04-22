@@ -132,13 +132,12 @@ am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) channel.$(OBJEXT) \
 	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
 	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
 	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	fdlist.$(OBJEXT) hash.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) \
-	ircd.$(OBJEXT) ircd_signal.$(OBJEXT) isupport.$(OBJEXT) \
-	listener.$(OBJEXT) modules.$(OBJEXT) monitor.$(OBJEXT) \
-	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) restart.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	hash.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
+	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	restart.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -180,16 +179,15 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/auth.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/fdlist.Po ./$(DEPDIR)/hash.Po ./$(DEPDIR)/id.Po \
-	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
-	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/listener.Po ./$(DEPDIR)/modules.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/restart.Po \
-	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/user.Po \
-	./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/id.Po ./$(DEPDIR)/ipcache.Po \
+	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
+	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/listener.Po \
+	./$(DEPDIR)/modules.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
+	./$(DEPDIR)/restart.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -460,8 +458,6 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
-               fdlist.c          \
-               fdlist.h          \
                hash.c            \
                hash.h            \
                id.c              \
@@ -632,7 +628,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@ # am--include-marker
@@ -857,7 +852,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_server.Po
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
-	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
@@ -955,7 +949,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_server.Po
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
-	-rm -f ./$(DEPDIR)/fdlist.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po

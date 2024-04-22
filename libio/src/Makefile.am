@@ -14,6 +14,8 @@ libio_la_SOURCES =  address.c     \
                     dbuf.h        \
                     event.c       \
                     event.h       \
+                    fdlist.c      \
+                    fdlist.h      \
                     hook.c        \
                     hook.h        \
                     io.h          \

@@ -62,8 +62,6 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
-               fdlist.c          \
-               fdlist.h          \
                hash.c            \
                hash.h            \
                id.c              \

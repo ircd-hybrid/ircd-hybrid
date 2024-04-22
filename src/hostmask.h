@@ -26,8 +26,6 @@
 #ifndef INCLUDED_hostmask_h
 #define INCLUDED_hostmask_h
 
-enum { ATABLE_SIZE = 0x1000 };
-
 enum hostmask_type
 {
   HM_HOST,
@@ -35,49 +33,13 @@ enum hostmask_type
   HM_IPV6
 };
 
-struct AddressRec
-{
-  list_node_t node;
-
-  /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
-  enum hostmask_type masktype;
-  /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
-  enum maskitem_type type;
-
-  union
-  {
-    struct
-    {
-      /* Pointer into MaskItem... -A1kmm */
-      struct irc_ssaddr addr;
-      int bits;
-    } ipa;
-
-    /* Pointer into MaskItem... -A1kmm */
-    const char *hostname;
-  } Mask;
-
-  /* Higher precedences overrule lower ones... */
-  unsigned int precedence;
-
-  /* Only checked if !(type & 1)... */
-  const char *username;
-  struct MaskItem *conf;
-};
-
-extern list_t atable[ATABLE_SIZE];
+extern uint32_t hash_ipv4(const struct irc_ssaddr *, int);
+extern uint32_t hash_ipv6(const struct irc_ssaddr *, int);
+extern uint32_t hash_text(const char *);
+extern uint32_t get_mask_hash(const char *);
 extern int parse_netmask(const char *, struct irc_ssaddr *, int *);
 extern void address_mask(struct irc_ssaddr *, int);
 extern bool address_compare(const void *, const void *, bool, bool, int);
 extern bool match_ipv6(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
 extern bool match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
-
-extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
-extern void delete_one_address_conf(const char *, struct MaskItem *);
-extern void clear_out_address_conf(void);
-extern void hostmask_expire_temporary(void);
-
-extern struct MaskItem *find_address_conf(const char *, const char *, const struct irc_ssaddr *, const char *);
-extern struct MaskItem *find_dline_conf(const struct irc_ssaddr *);
-extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *, unsigned int, const char *, const char *, int);
 #endif  /* INCLUDED_hostmask_h */

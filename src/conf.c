@@ -62,6 +62,9 @@
 #include "whowas.h"
 
 
+/* Hashtable stuff...now external as it's used in m_stats.c */
+list_t atable[ATABLE_SIZE];
+
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
 struct config_general_entry ConfigGeneral;
@@ -79,6 +82,353 @@ extern char linebuf[];
 extern char conffilebuf[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
 
+
+/* struct MaskItem *find_conf_by_address(const char *, struct irc_ssaddr *,
+ *                                         int type, int fam, const char *username)
+ * Input: The hostname, the address, the type of mask to find, the address
+ *        family, the username.
+ * Output: The matching value with the highest precedence.
+ * Side-effects: None
+ * Note: Setting bit 0 of the type means that the username is ignored.
+ * Warning: IsNeedPassword for everything that is not an auth{} entry
+ * should always be true (i.e. conf->flags & CONF_FLAGS_NEED_PASSWORD == 0)
+ */
+struct MaskItem *
+find_conf_by_address(const char *name, const struct irc_ssaddr *addr, unsigned int type,
+                     const char *username, const char *password, int do_match)
+{
+  unsigned int hprecv = 0;
+  list_node_t *node;
+  struct MaskItem *hprec = NULL;
+  struct AddressRec *arec = NULL;
+  int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
+
+  if (addr)
+  {
+    /* Check for IPV6 matches... */
+    if (addr->ss.ss_family == AF_INET6)
+    {
+      for (int b = 128; b >= 0; b -= 16)
+      {
+        LIST_FOREACH(node, atable[hash_ipv6(addr, b)].head)
+        {
+          arec = node->data;
+
+          if ((arec->type == type) &&
+              arec->precedence > hprecv &&
+              arec->masktype == HM_IPV6 &&
+              match_ipv6(addr, &arec->Mask.ipa.addr,
+                         arec->Mask.ipa.bits) &&
+              (!username || !cmpfunc(arec->username, username)) &&
+              (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+               match_conf_password(password, arec->conf)))
+          {
+            hprecv = arec->precedence;
+            hprec = arec->conf;
+          }
+        }
+      }
+    }
+    else if (addr->ss.ss_family == AF_INET)
+    {
+      for (int b = 32; b >= 0; b -= 8)
+      {
+        LIST_FOREACH(node, atable[hash_ipv4(addr, b)].head)
+        {
+          arec = node->data;
+
+          if ((arec->type == type) &&
+              arec->precedence > hprecv &&
+              arec->masktype == HM_IPV4 &&
+              match_ipv4(addr, &arec->Mask.ipa.addr,
+                         arec->Mask.ipa.bits) &&
+              (!username || !cmpfunc(arec->username, username)) &&
+              (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+               match_conf_password(password, arec->conf)))
+          {
+            hprecv = arec->precedence;
+            hprec = arec->conf;
+          }
+        }
+      }
+    }
+  }
+
+  if (name)
+  {
+    const char *p = name;
+
+    while (true)
+    {
+        LIST_FOREACH(node, atable[hash_text(p)].head)
+        {
+          arec = node->data;
+          if ((arec->type == type) &&
+            arec->precedence > hprecv &&
+            (arec->masktype == HM_HOST) &&
+            !cmpfunc(arec->Mask.hostname, name) &&
+            (!username || !cmpfunc(arec->username, username)) &&
+            (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+             match_conf_password(password, arec->conf)))
+        {
+          hprecv = arec->precedence;
+          hprec = arec->conf;
+        }
+      }
+
+      if ((p = strchr(p, '.')) == NULL)
+        break;
+      ++p;
+    }
+
+    LIST_FOREACH(node, atable[0].head)
+    {
+      arec = node->data;
+
+      if (arec->type == type &&
+          arec->precedence > hprecv &&
+          arec->masktype == HM_HOST &&
+          !cmpfunc(arec->Mask.hostname, name) &&
+          (!username || !cmpfunc(arec->username, username)) &&
+          (IsNeedPassword(arec->conf) || arec->conf->passwd == NULL ||
+           match_conf_password(password, arec->conf)))
+      {
+        hprecv = arec->precedence;
+        hprec = arec->conf;
+      }
+    }
+  }
+
+  return hprec;
+}
+
+/* struct MaskItem* find_address_conf(const char*, const char*,
+ * 	                               struct irc_ssaddr*, int, char *);
+ * Input: The hostname, username, address, address family.
+ * Output: The applicable MaskItem.
+ * Side-effects: None
+ */
+struct MaskItem *
+find_address_conf(const char *host, const char *user, const struct irc_ssaddr *addr, const char *password)
+{
+  struct MaskItem *authcnf = NULL, *killcnf = NULL;
+
+  /* Find the best auth{} block... If none, return NULL -A1kmm */
+  if ((authcnf = find_conf_by_address(host, addr, CONF_CLIENT, user, password, 1)) == NULL)
+    return NULL;
+
+  /* If they are exempt from K-lines, return the best auth{} block. -A1kmm */
+  if (IsConfExemptKline(authcnf))
+    return authcnf;
+
+  /* Find the best K-line... -A1kmm */
+  killcnf = find_conf_by_address(host, addr, CONF_KLINE, user, NULL, 1);
+
+  /*
+   * If they are K-lined, return the K-line. Otherwise, return the
+   * auth {} block. -A1kmm
+   */
+  if (killcnf)
+    return killcnf;
+
+  return authcnf;
+}
+
+/* struct MaskItem* find_dline_conf(struct irc_ssaddr*, int)
+ *
+ * Input:	An address, an address family.
+ * Output:	The best matching D-line or exempt line.
+ * Side effects: None.
+ */
+struct MaskItem *
+find_dline_conf(const struct irc_ssaddr *addr)
+{
+  struct MaskItem *eline;
+
+  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, NULL, NULL, 1);
+  if (eline)
+    return eline;
+
+  return find_conf_by_address(NULL, addr, CONF_DLINE, NULL, NULL, 1);
+}
+
+/* void add_conf_by_address(int, struct MaskItem *aconf)
+ * Input:
+ * Output: None
+ * Side-effects: Adds this entry to the hash table.
+ */
+struct AddressRec *
+add_conf_by_address(const unsigned int type, struct MaskItem *conf)
+{
+  const char *const hostname = conf->host;
+  const char *const username = conf->user;
+  static unsigned int prec_value = UINT_MAX;
+  int bits = 0;
+
+  assert(type && !EmptyString(hostname));
+
+  struct AddressRec *arec = xcalloc(sizeof(*arec));
+  arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
+  arec->Mask.ipa.bits = bits;
+  arec->username = username;
+  arec->conf = conf;
+  arec->precedence = prec_value--;
+  arec->type = type;
+
+  switch (arec->masktype)
+  {
+    case HM_IPV4:
+      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+      bits -= bits % 8;
+      list_add(arec, &arec->node, &atable[hash_ipv4(&arec->Mask.ipa.addr, bits)]);
+      break;
+    case HM_IPV6:
+      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+      bits -= bits % 16;
+      list_add(arec, &arec->node, &atable[hash_ipv6(&arec->Mask.ipa.addr, bits)]);
+      break;
+    default: /* HM_HOST */
+      arec->Mask.hostname = hostname;
+      list_add(arec, &arec->node, &atable[get_mask_hash(hostname)]);
+      break;
+  }
+
+  return arec;
+}
+
+/* void delete_one_address(const char*, struct MaskItem*)
+ * Input: An address string, the associated MaskItem.
+ * Output: None
+ * Side effects: Deletes an address record. Frees the MaskItem if there
+ *               is nothing referencing it, sets it as illegal otherwise.
+ */
+void
+delete_one_address_conf(const char *address, struct MaskItem *conf)
+{
+  int bits = 0;
+  uint32_t hv = 0;
+  list_node_t *node;
+  struct irc_ssaddr addr;
+
+  switch (parse_netmask(address, &addr, &bits))
+  {
+    case HM_IPV4:
+      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+      bits -= bits % 8;
+      hv = hash_ipv4(&addr, bits);
+      break;
+    case HM_IPV6:
+      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
+      bits -= bits % 16;
+      hv = hash_ipv6(&addr, bits);
+      break;
+    default: /* HM_HOST */
+      hv = get_mask_hash(address);
+      break;
+  }
+
+  LIST_FOREACH(node, atable[hv].head)
+  {
+    struct AddressRec *arec = node->data;
+
+    if (arec->conf == conf)
+    {
+      list_remove(&arec->node, &atable[hv]);
+
+      if (conf->ref_count == 0)
+        conf_free(conf);
+
+      xfree(arec);
+      return;
+    }
+  }
+}
+
+/* void clear_out_address_conf(void)
+ * Input: None
+ * Output: None
+ * Side effects: Clears out all address records in the hash table,
+ *               frees them, and frees the MaskItems if nothing references
+ *               them, otherwise sets them as illegal.
+ */
+static void
+clear_out_address_conf(void)
+{
+  list_node_t *node, *node_next;
+
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  {
+    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
+    {
+      struct AddressRec *arec = node->data;
+
+      /*
+       * Destroy the ircd.conf items and keep those that are in the databases
+       */
+      if (IsConfDatabase(arec->conf))
+        continue;
+
+      list_remove(&arec->node, &atable[i]);
+      arec->conf->active = false;
+
+      if (arec->conf->ref_count == 0)
+        conf_free(arec->conf);
+      xfree(arec);
+    }
+  }
+}
+
+static void
+hostmask_send_expiration(const struct AddressRec *const arec)
+{
+  char ban_type = '?';
+
+  switch (arec->type)
+  {
+    case CONF_KLINE:
+      ban_type = 'K';
+      break;
+    case CONF_DLINE:
+      ban_type = 'D';
+      break;
+    default: break;
+  }
+
+  sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE,
+                       "Temporary %c-line for [%s@%s] expired", ban_type,
+                       (arec->conf->user) ? arec->conf->user : "*",
+                       (arec->conf->host) ? arec->conf->host : "*");
+}
+
+static void
+hostmask_expire_temporary(void)
+{
+  list_node_t *node, *node_next;
+
+  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  {
+    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
+    {
+      struct AddressRec *arec = node->data;
+
+      if (arec->conf->until == 0 || arec->conf->until > event_base->time.sec_real)
+        continue;
+
+      switch (arec->type)
+      {
+        case CONF_KLINE:
+        case CONF_DLINE:
+          hostmask_send_expiration(arec);
+
+          list_remove(&arec->node, &atable[i]);
+          conf_free(arec->conf);
+          xfree(arec);
+          break;
+        default: break;
+      }
+    }
+  }
+}
 
 /* conf_dns_callback()
  *

@@ -29,6 +29,7 @@
 #include "client.h"
 #include "conf_class.h"
 #include "tls.h"
+#include "hostmask.h"
 
 
 enum maskitem_type
@@ -287,6 +288,39 @@ struct aline_ctx
   uintmax_t duration;
 };
 
+struct AddressRec
+{
+  list_node_t node;
+
+  /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
+  enum hostmask_type masktype;
+  /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
+  enum maskitem_type type;
+
+  union
+  {
+    struct
+    {
+      /* Pointer into MaskItem... -A1kmm */
+      struct irc_ssaddr addr;
+      int bits;
+    } ipa;
+
+    /* Pointer into MaskItem... -A1kmm */
+    const char *hostname;
+  } Mask;
+
+  /* Higher precedences overrule lower ones... */
+  unsigned int precedence;
+
+  /* Only checked if !(type & 1)... */
+  const char *username;
+  struct MaskItem *conf;
+};
+
+enum { ATABLE_SIZE = 0x1000 };
+
+extern list_t atable[ATABLE_SIZE];
 extern list_t flatten_links;
 extern list_t connect_items;
 extern list_t operator_items;
@@ -297,6 +331,12 @@ extern struct config_channel_entry ConfigChannel;
 extern struct config_serverhide_entry ConfigServerHide;
 extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
+
+extern void delete_one_address_conf(const char *, struct MaskItem *);
+extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
+extern struct MaskItem *find_dline_conf(const struct irc_ssaddr *);
+extern struct MaskItem *find_address_conf(const char *, const char *, const struct irc_ssaddr *, const char *);
+extern struct MaskItem *find_conf_by_address(const char *, const struct irc_ssaddr *, unsigned int, const char *, const char *, int);
 
 extern bool valid_wild_card_simple(const char *);
 extern bool valid_wild_card(int, ...);

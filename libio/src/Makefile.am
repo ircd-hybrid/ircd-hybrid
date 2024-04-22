@@ -5,6 +5,9 @@ libio_la_SOURCES =  base32.c      \
                     base32.h.h    \
                     comm.c        \
                     comm.h        \
+                    comm_epoll.c  \
+                    comm_kqueue.c \
+                    comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
                     event.c       \

@@ -94,9 +94,6 @@ ircd_SOURCES = accept.c          \
                parse.c           \
                parse.h           \
                stdinc.h          \
-               s_bsd_epoll.c     \
-               s_bsd_poll.c      \
-               s_bsd_kqueue.c    \
                tls.h             \
                tls_gnutls.c      \
                tls_gnutls.h      \

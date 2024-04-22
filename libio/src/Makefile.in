@@ -117,9 +117,10 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_DEPENDENCIES = @LTLIBOBJS@
-am_libio_la_OBJECTS = base32.lo comm.lo dbuf.lo event.lo hook.lo \
-	io_getopt.lo irc_string.lo list.lo log.lo match.lo misc.lo \
-	memory.lo patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo
+am_libio_la_OBJECTS = base32.lo comm.lo comm_epoll.lo comm_kqueue.lo \
+	comm_poll.lo dbuf.lo event.lo hook.lo io_getopt.lo \
+	irc_string.lo list.lo log.lo match.lo misc.lo memory.lo \
+	patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -141,10 +142,11 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/base32.Plo ./$(DEPDIR)/comm.Plo \
-	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/event.Plo \
-	./$(DEPDIR)/hook.Plo ./$(DEPDIR)/io_getopt.Plo \
-	./$(DEPDIR)/irc_string.Plo ./$(DEPDIR)/list.Plo \
-	./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
+	./$(DEPDIR)/comm_epoll.Plo ./$(DEPDIR)/comm_kqueue.Plo \
+	./$(DEPDIR)/comm_poll.Plo ./$(DEPDIR)/dbuf.Plo \
+	./$(DEPDIR)/event.Plo ./$(DEPDIR)/hook.Plo \
+	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/irc_string.Plo \
+	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/res.Plo \
 	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/rng_mt.Plo \
@@ -346,6 +348,9 @@ libio_la_SOURCES = base32.c      \
                     base32.h.h    \
                     comm.c        \
                     comm.h        \
+                    comm_epoll.c  \
+                    comm_kqueue.c \
+                    comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
                     event.c       \
@@ -434,6 +439,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_epoll.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_kqueue.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_poll.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
@@ -612,6 +620,9 @@ clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
+	-rm -f ./$(DEPDIR)/comm_epoll.Plo
+	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
+	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
@@ -674,6 +685,9 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
+	-rm -f ./$(DEPDIR)/comm_epoll.Plo
+	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
+	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo

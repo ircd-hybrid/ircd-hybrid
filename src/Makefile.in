@@ -137,11 +137,10 @@ am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) channel.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
 	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	s_bsd_epoll.$(OBJEXT) s_bsd_poll.$(OBJEXT) \
-	s_bsd_kqueue.$(OBJEXT) tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) \
-	tls_openssl.$(OBJEXT) tls_wolfssl.$(OBJEXT) restart.$(OBJEXT) \
-	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) whowas.$(OBJEXT)
+	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
+	tls_wolfssl.$(OBJEXT) restart.$(OBJEXT) send.$(OBJEXT) \
+	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -191,12 +190,11 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/auth.Po \
 	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
 	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
 	./$(DEPDIR)/parse.Po ./$(DEPDIR)/restart.Po \
-	./$(DEPDIR)/s_bsd_epoll.Po ./$(DEPDIR)/s_bsd_kqueue.Po \
-	./$(DEPDIR)/s_bsd_poll.Po ./$(DEPDIR)/send.Po \
-	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/tls_gnutls.Po ./$(DEPDIR)/tls_none.Po \
-	./$(DEPDIR)/tls_openssl.Po ./$(DEPDIR)/tls_wolfssl.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
+	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/tls_gnutls.Po \
+	./$(DEPDIR)/tls_none.Po ./$(DEPDIR)/tls_openssl.Po \
+	./$(DEPDIR)/tls_wolfssl.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -499,9 +497,6 @@ ircd_SOURCES = accept.c          \
                parse.c           \
                parse.h           \
                stdinc.h          \
-               s_bsd_epoll.c     \
-               s_bsd_poll.c      \
-               s_bsd_kqueue.c    \
                tls.h             \
                tls_gnutls.c      \
                tls_gnutls.h      \
@@ -669,9 +664,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_epoll.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_kqueue.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_bsd_poll.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
@@ -902,9 +894,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
 	-rm -f ./$(DEPDIR)/restart.Po
-	-rm -f ./$(DEPDIR)/s_bsd_epoll.Po
-	-rm -f ./$(DEPDIR)/s_bsd_kqueue.Po
-	-rm -f ./$(DEPDIR)/s_bsd_poll.Po
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
@@ -1008,9 +997,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
 	-rm -f ./$(DEPDIR)/restart.Po
-	-rm -f ./$(DEPDIR)/s_bsd_epoll.Po
-	-rm -f ./$(DEPDIR)/s_bsd_kqueue.Po
-	-rm -f ./$(DEPDIR)/s_bsd_poll.Po
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po

@@ -137,10 +137,8 @@ am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) channel.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
 	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
 	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	tls_gnutls.$(OBJEXT) tls_none.$(OBJEXT) tls_openssl.$(OBJEXT) \
-	tls_wolfssl.$(OBJEXT) restart.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	restart.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -191,9 +189,7 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/auth.Po \
 	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
 	./$(DEPDIR)/parse.Po ./$(DEPDIR)/restart.Po \
 	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/tls_gnutls.Po \
-	./$(DEPDIR)/tls_none.Po ./$(DEPDIR)/tls_openssl.Po \
-	./$(DEPDIR)/tls_wolfssl.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/user.Po \
 	./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -497,15 +493,6 @@ ircd_SOURCES = accept.c          \
                parse.c           \
                parse.h           \
                stdinc.h          \
-               tls.h             \
-               tls_gnutls.c      \
-               tls_gnutls.h      \
-               tls_none.c        \
-               tls_none.h        \
-               tls_openssl.c     \
-               tls_openssl.h     \
-               tls_wolfssl.c     \
-               tls_wolfssl.h     \
                restart.c         \
                restart.h         \
                send.c            \
@@ -667,10 +654,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_wolfssl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@ # am--include-marker
 
@@ -897,10 +880,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
-	-rm -f ./$(DEPDIR)/tls_gnutls.Po
-	-rm -f ./$(DEPDIR)/tls_none.Po
-	-rm -f ./$(DEPDIR)/tls_openssl.Po
-	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
@@ -1000,10 +979,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
-	-rm -f ./$(DEPDIR)/tls_gnutls.Po
-	-rm -f ./$(DEPDIR)/tls_none.Po
-	-rm -f ./$(DEPDIR)/tls_openssl.Po
-	-rm -f ./$(DEPDIR)/tls_wolfssl.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile

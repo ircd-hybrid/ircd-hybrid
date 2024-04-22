@@ -94,15 +94,6 @@ ircd_SOURCES = accept.c          \
                parse.c           \
                parse.h           \
                stdinc.h          \
-               tls.h             \
-               tls_gnutls.c      \
-               tls_gnutls.h      \
-               tls_none.c        \
-               tls_none.h        \
-               tls_openssl.c     \
-               tls_openssl.h     \
-               tls_wolfssl.c     \
-               tls_wolfssl.h     \
                restart.c         \
                restart.h         \
                send.c            \

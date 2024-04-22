@@ -120,7 +120,8 @@ libio_la_DEPENDENCIES = @LTLIBOBJS@
 am_libio_la_OBJECTS = base32.lo comm.lo comm_epoll.lo comm_kqueue.lo \
 	comm_poll.lo dbuf.lo event.lo hook.lo io_getopt.lo \
 	irc_string.lo list.lo log.lo match.lo misc.lo memory.lo \
-	patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo
+	patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo tls_gnutls.lo \
+	tls_none.lo tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -150,7 +151,9 @@ am__depfiles_remade = ./$(DEPDIR)/base32.Plo ./$(DEPDIR)/comm.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/res.Plo \
 	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/rng_mt.Plo \
-	./$(DEPDIR)/sha3.Plo
+	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
+	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
+	./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -380,7 +383,16 @@ libio_la_SOURCES = base32.c      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \
-                    sha3.h
+                    sha3.h        \
+                    tls.h         \
+                    tls_gnutls.c  \
+                    tls_gnutls.h  \
+                    tls_none.c    \
+                    tls_none.h    \
+                    tls_openssl.c \
+                    tls_openssl.h \
+                    tls_wolfssl.c \
+                    tls_wolfssl.h
 
 libio_la_LIBADD = @LTLIBOBJS@
 all: all-am
@@ -457,6 +469,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_none.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_openssl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_wolfssl.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -638,6 +654,10 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
+	-rm -f ./$(DEPDIR)/tls_gnutls.Plo
+	-rm -f ./$(DEPDIR)/tls_none.Plo
+	-rm -f ./$(DEPDIR)/tls_openssl.Plo
+	-rm -f ./$(DEPDIR)/tls_wolfssl.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -703,6 +723,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
+	-rm -f ./$(DEPDIR)/tls_gnutls.Plo
+	-rm -f ./$(DEPDIR)/tls_none.Plo
+	-rm -f ./$(DEPDIR)/tls_openssl.Plo
+	-rm -f ./$(DEPDIR)/tls_wolfssl.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

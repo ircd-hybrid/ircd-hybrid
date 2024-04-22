@@ -37,6 +37,15 @@ libio_la_SOURCES =  base32.c      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \
-                    sha3.h
+                    sha3.h        \
+                    tls.h         \
+                    tls_gnutls.c  \
+                    tls_gnutls.h  \
+                    tls_none.c    \
+                    tls_none.h    \
+                    tls_openssl.c \
+                    tls_openssl.h \
+                    tls_wolfssl.c \
+                    tls_wolfssl.h
 
 libio_la_LIBADD = @LTLIBOBJS@

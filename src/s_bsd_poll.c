@@ -30,7 +30,7 @@
 #include "list.h"
 #include "memory.h"
 #include "ircd.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "log.h"
 
 /* I hate linux -- adrian */

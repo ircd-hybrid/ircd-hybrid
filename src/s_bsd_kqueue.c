@@ -28,7 +28,7 @@
 #include <sys/event.h>
 #include "fdlist.h"
 #include "ircd.h"
-#include "s_bsd.h"
+#include "comm.h"
 #include "log.h"
 
 enum { KE_LENGTH = 128 };

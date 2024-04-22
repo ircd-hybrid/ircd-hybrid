@@ -27,8 +27,8 @@
  * avoiding the use of getopt_long() as it is a GNU extension.
  */
 
-#ifndef INCLUDED_ircd_getopt_h
-#define INCLUDED_ircd_getopt_h
+#ifndef INCLUDED_io_getopt_h
+#define INCLUDED_io_getopt_h
 
 /**
  * @struct io_getopt
@@ -47,4 +47,4 @@ struct io_getopt
 };
 
 extern void io_getopt(int *, char ***, struct io_getopt *);
-#endif /* INCLUDED_ircd_getopt_h */
+#endif /* INCLUDED_io_getopt_h */

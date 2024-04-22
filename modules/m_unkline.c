@@ -34,7 +34,6 @@
 #include "address.h"
 #include "numeric.h"
 #include "log.h"
-#include "misc.h"
 #include "send.h"
 #include "server_capab.h"
 #include "parse.h"

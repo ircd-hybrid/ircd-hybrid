@@ -24,29 +24,11 @@
  */
 
 #include "stdinc.h"
-#include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include "list.h"
 #include "fdlist.h"
 #include "comm.h"
-#include "client.h"
-#include "dbuf.h"
 #include "event.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "listener.h"
-#include "numeric.h"
-#include "packet.h"
-#include "res.h"
-#include "restart.h"
-#include "conf.h"
-#include "log.h"
-#include "server.h"
-#include "send.h"
-#include "memory.h"
-#include "user.h"
-
 
 static const char *const comm_err_str[] =
 {

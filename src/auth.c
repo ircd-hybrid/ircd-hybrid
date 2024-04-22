@@ -39,8 +39,6 @@
  */
 
 #include "stdinc.h"
-#include "list.h"
-#include "ircd_defs.h"
 #include "fdlist.h"
 #include "auth.h"
 #include "conf.h"
@@ -54,7 +52,6 @@
 #include "log.h"
 #include "send.h"
 #include "memory.h"
-#include "misc.h"
 #include "address.h"
 
 /**

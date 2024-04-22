@@ -33,8 +33,6 @@
 #ifndef INCLUDED_cloak_h
 #define INCLUDED_cloak_h
 
-#include "ircd_defs.h"
-
 extern void cloak_set_enabled(void);
 extern void cloak_set_disabled(void);
 extern void cloak_set_cidr_len_ipv4(int);

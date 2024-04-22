@@ -29,7 +29,6 @@
 #include "event.h"
 #include "memory.h"
 #include "conf.h"
-#include "ircd.h"
 #include "patricia.h"
 
 

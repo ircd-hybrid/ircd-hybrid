@@ -23,8 +23,8 @@
  * \brief A header for the network subsystem.
  */
 
-#ifndef INCLUDED_s_bsd_h
-#define INCLUDED_s_bsd_h
+#ifndef INCLUDED_comm_h
+#define INCLUDED_comm_h
 
 #include "fdlist.h"
 
@@ -64,4 +64,4 @@ extern int comm_accept(fde_t *, struct io_addr *);
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
-#endif  /* INCLUDED_s_bsd_h */
+#endif  /* INCLUDED_comm_h */

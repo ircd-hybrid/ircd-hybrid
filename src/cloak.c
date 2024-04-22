@@ -36,7 +36,6 @@
 #include "stdinc.h"
 #include "base32.h"
 #include "sha3.h"
-#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "conf.h"

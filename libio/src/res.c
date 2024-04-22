@@ -46,7 +46,6 @@
 #include "list.h"
 #include "event.h"
 #include "irc_string.h"
-#include "ircd.h"
 #include "rng_mt.h"
 #include "fdlist.h"
 #include "comm.h"

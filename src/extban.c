@@ -25,10 +25,9 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "list.h"
 #include "irc_string.h"
-#include "user.h"
+#include "client.h"
 #include "isupport.h"
 #include "extban.h"
 

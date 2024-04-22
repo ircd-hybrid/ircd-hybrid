@@ -20,7 +20,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "list.h"
 #include "memory.h"
 #include "irc_string.h"

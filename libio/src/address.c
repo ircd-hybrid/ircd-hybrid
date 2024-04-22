@@ -24,11 +24,8 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "address.h"
 #include "irc_string.h"
-#include "ircd.h"
-
 
 #define DigitParse(ch) do { \
                        if (ch >= '0' && ch <= '9') \

@@ -90,7 +90,6 @@
  */
 
 #include "stdinc.h"
-#include "ircd_defs.h"
 #include "res.h"
 #include "reslib.h"
 #include "irc_string.h"

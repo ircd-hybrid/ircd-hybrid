@@ -32,7 +32,6 @@
 
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
-#include "stdinc.h"
 
 /**
  * @defgroup ircd_constants IRCd Constants

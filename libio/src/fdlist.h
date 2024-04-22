@@ -33,7 +33,6 @@
 
 #include "io.h"
 #include "address.h"
-#include "ircd_defs.h"
 #include "tls.h"
 
 /**

@@ -29,7 +29,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
-#include "hostmask.h"
+#include "address.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"

@@ -42,7 +42,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
-#include "hostmask.h"
+#include "address.h"
 #include "modules.h"
 #include "numeric.h"
 #include "fdlist.h"
@@ -63,7 +63,7 @@
 
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
-list_t atable[ATABLE_SIZE];
+list_t atable[ADDRESS_HASHSIZE];
 
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
@@ -356,7 +356,7 @@ clear_out_address_conf(void)
 {
   list_node_t *node, *node_next;
 
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH_SAFE(node, node_next, atable[i].head)
     {
@@ -405,7 +405,7 @@ hostmask_expire_temporary(void)
 {
   list_node_t *node, *node_next;
 
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH_SAFE(node, node_next, atable[i].head)
     {

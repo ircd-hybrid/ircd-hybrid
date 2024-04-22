@@ -38,7 +38,7 @@
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "hostmask.h"
+#include "address.h"
 #include "numeric.h"
 #include "send.h"
 #include "fdlist.h"
@@ -495,7 +495,7 @@ stats_deny(struct Client *client, int parc, char *parv[])
 {
   list_node_t *node;
 
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {
@@ -525,7 +525,7 @@ stats_tdeny(struct Client *client, int parc, char *parv[])
 {
   list_node_t *node;
 
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {
@@ -560,7 +560,7 @@ stats_exempt(struct Client *client, int parc, char *parv[])
   }
 
   list_node_t *node;
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {
@@ -682,7 +682,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
   }
 
   list_node_t *node;
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {
@@ -722,7 +722,7 @@ stats_kill(struct Client *client, int parc, char *parv[])
   }
 
   list_node_t *node;
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {
@@ -753,7 +753,7 @@ stats_tkill(struct Client *client, int parc, char *parv[])
   }
 
   list_node_t *node;
-  for (unsigned int i = 0; i < ATABLE_SIZE; ++i)
+  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(node, atable[i].head)
     {

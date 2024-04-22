@@ -38,7 +38,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "hostmask.h"
+#include "address.h"
 
 
 /** Maximum number of lines to send in response to a /WHO. */

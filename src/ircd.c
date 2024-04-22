@@ -46,7 +46,6 @@
 #include "memory.h"
 #include "motd.h"
 #include "conf.h"
-#include "hostmask.h"
 #include "parse.h"
 #include "res.h"
 #include "rng_mt.h"

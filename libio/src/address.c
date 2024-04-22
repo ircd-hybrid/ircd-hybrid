@@ -25,8 +25,7 @@
 
 #include "stdinc.h"
 #include "ircd_defs.h"
-#include "conf.h"
-#include "hostmask.h"
+#include "address.h"
 #include "irc_string.h"
 #include "ircd.h"
 
@@ -416,7 +415,7 @@ hash_ipv4(const struct irc_ssaddr *addr, int bits)
     const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
     uint32_t av = ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1);
 
-    return (av ^ (av >> 12) ^ (av >> 24)) & (ATABLE_SIZE - 1);
+    return (av ^ (av >> 12) ^ (av >> 24)) & (ADDRESS_HASHSIZE - 1);
   }
 
   return 0;
@@ -443,13 +442,13 @@ hash_ipv6(const struct irc_ssaddr *addr, int bits)
     else if (bits)
     {
       v ^= v6->sin6_addr.s6_addr[n] & ~((1 << (8 - bits)) - 1);
-      return v & (ATABLE_SIZE - 1);
+      return v & (ADDRESS_HASHSIZE - 1);
     }
     else
-      return v & (ATABLE_SIZE - 1);
+      return v & (ADDRESS_HASHSIZE - 1);
   }
 
-  return v & (ATABLE_SIZE - 1);
+  return v & (ADDRESS_HASHSIZE - 1);
 }
 
 /* int hash_text(const char *start)
@@ -465,7 +464,7 @@ hash_text(const char *start)
   for (const char *p = start; *p; ++p)
     h = (h << 4) - (h + ToLower(*p));
 
-  return h & (ATABLE_SIZE - 1);
+  return h & (ADDRESS_HASHSIZE - 1);
 }
 
 /* unsigned long get_hash_mask(const char *)

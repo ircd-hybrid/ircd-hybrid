@@ -90,7 +90,7 @@
 #include "memory.h"
 #include "modules.h"
 #include "server.h"
-#include "hostmask.h"
+#include "address.h"
 #include "listener.h"
 #include "user.h"
 #include "motd.h"

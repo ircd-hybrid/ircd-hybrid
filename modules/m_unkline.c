@@ -31,7 +31,7 @@
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"
-#include "hostmask.h"
+#include "address.h"
 #include "numeric.h"
 #include "log.h"
 #include "misc.h"

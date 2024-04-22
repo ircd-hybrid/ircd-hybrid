@@ -33,7 +33,7 @@
 #include "hash.h"
 #include "conf.h"
 #include "conf_resv.h"
-#include "hostmask.h"
+#include "address.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"

@@ -36,7 +36,7 @@
 #include "conf_class.h"
 #include "log.h"
 #include "conf.h"
-#include "hostmask.h"
+#include "address.h"
 
 
 static uintmax_t send_marker;

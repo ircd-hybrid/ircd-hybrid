@@ -55,7 +55,7 @@
 #include "send.h"
 #include "memory.h"
 #include "misc.h"
-#include "hostmask.h"
+#include "address.h"
 
 /**
  * @enum auth_report_type

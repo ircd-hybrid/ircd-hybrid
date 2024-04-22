@@ -34,7 +34,6 @@
 #include "log.h"
 #include "send.h"
 #include "irc_string.h"
-#include "hostmask.h"
 
 
 /*! \brief Return the version number on the file.  Return 0 if there is no version
@@ -493,7 +492,7 @@ save_kline_database(const char *filename)
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(ptr, atable[i].head)
     {
@@ -506,7 +505,7 @@ save_kline_database(const char *filename)
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(ptr, atable[i].head)
     {
@@ -583,7 +582,7 @@ save_dline_database(const char *filename)
   if ((f = open_db(filename, "w", KLINE_DB_VERSION)) == NULL)
     return;
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(ptr, atable[i].head)
     {
@@ -596,7 +595,7 @@ save_dline_database(const char *filename)
 
   SAFE_WRITE(write_uint32(records, f), filename);
 
-  for (i = 0; i < ATABLE_SIZE; ++i)
+  for (i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     LIST_FOREACH(ptr, atable[i].head)
     {

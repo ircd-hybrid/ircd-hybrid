@@ -1,8 +1,10 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libio.la
 
-libio_la_SOURCES =  base32.c      \
-                    base32.h.h    \
+libio_la_SOURCES =  address.c     \
+                    address.h     \
+                    base32.c      \
+                    base32.h      \
                     comm.c        \
                     comm.h        \
                     comm_epoll.c  \

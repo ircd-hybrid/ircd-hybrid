@@ -66,8 +66,6 @@ ircd_SOURCES = accept.c          \
                fdlist.h          \
                hash.c            \
                hash.h            \
-               hostmask.c        \
-               hostmask.h        \
                id.c              \
                id.h              \
                ipcache.c         \

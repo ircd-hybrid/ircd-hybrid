@@ -23,8 +23,8 @@
  * \brief A header for the hostmask code.
  */
 
-#ifndef INCLUDED_hostmask_h
-#define INCLUDED_hostmask_h
+#ifndef INCLUDED_address_h
+#define INCLUDED_address_h
 
 enum hostmask_type
 {
@@ -32,6 +32,8 @@ enum hostmask_type
   HM_IPV4,
   HM_IPV6
 };
+
+enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
 
 extern uint32_t hash_ipv4(const struct irc_ssaddr *, int);
 extern uint32_t hash_ipv6(const struct irc_ssaddr *, int);
@@ -42,4 +44,4 @@ extern void address_mask(struct irc_ssaddr *, int);
 extern bool address_compare(const void *, const void *, bool, bool, int);
 extern bool match_ipv6(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
 extern bool match_ipv4(const struct irc_ssaddr *, const struct irc_ssaddr *, int);
-#endif  /* INCLUDED_hostmask_h */
+#endif  /* INCLUDED_address_h */

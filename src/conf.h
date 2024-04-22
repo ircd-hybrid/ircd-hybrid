@@ -29,7 +29,7 @@
 #include "client.h"
 #include "conf_class.h"
 #include "tls.h"
-#include "hostmask.h"
+#include "address.h"
 
 
 enum maskitem_type
@@ -318,9 +318,7 @@ struct AddressRec
   struct MaskItem *conf;
 };
 
-enum { ATABLE_SIZE = 0x1000 };
-
-extern list_t atable[ATABLE_SIZE];
+extern list_t atable[ADDRESS_HASHSIZE];
 extern list_t flatten_links;
 extern list_t connect_items;
 extern list_t operator_items;

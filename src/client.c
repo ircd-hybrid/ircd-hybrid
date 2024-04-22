@@ -43,7 +43,6 @@
 #include "whowas.h"
 #include "user.h"
 #include "memory.h"
-#include "hostmask.h"
 #include "listener.h"
 #include "monitor.h"
 #include "rng_mt.h"

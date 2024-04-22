@@ -36,7 +36,7 @@
 #include "memory.h"
 #include "log.h"
 #include "motd.h"
-#include "hostmask.h"
+#include "address.h"
 #include "misc.h"
 
 

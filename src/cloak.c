@@ -40,7 +40,7 @@
 #include "irc_string.h"
 #include "memory.h"
 #include "conf.h"
-#include "hostmask.h"
+#include "address.h"
 #include "cloak.h"
 
 /**

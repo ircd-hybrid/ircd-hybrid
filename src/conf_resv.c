@@ -35,7 +35,7 @@
 #include "misc.h"
 #include "conf.h"
 #include "conf_resv.h"
-#include "hostmask.h"
+#include "address.h"
 
 
 static list_t resv_chan_list;

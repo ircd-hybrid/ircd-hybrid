@@ -32,7 +32,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
-#include "hostmask.h"
 #include "user.h"
 
 

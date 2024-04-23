@@ -223,8 +223,8 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   clear_ban_cache_list(&channel->members_local);
 
   if (IsClient(client))
-    snprintf(ban->who, sizeof(ban->who), "%s!%s@%s", client->name,
-             client->username, client->host);
+    snprintf(ban->who, sizeof(ban->who), "%s!%s@%s",
+             client->name, client->username, client->host);
   else if (IsHidden(client) || ConfigServerHide.hide_servers)
     strlcpy(ban->who, me.name, sizeof(ban->who));
   else
@@ -407,8 +407,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
     {
       if (!(*errors & SM_ERR_ONLYSERVER))
         sendto_one_numeric(client, &me,
-                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                           ERR_ONLYSERVERSCANCHANGE, channel->name);
+                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_ONLYSERVERSCANCHANGE, channel->name);
 
       *errors |= SM_ERR_ONLYSERVER;
       return false;
@@ -419,8 +418,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   {
     if (!(*errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL :
-                         ERR_CHANOPRIVSNEEDED, channel->name);
+                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED, channel->name);
 
     *errors |= SM_ERR_NOOPS;
     return false;
@@ -429,8 +427,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   if (channel->mode_lock && strchr(channel->mode_lock, c))
   {
     if (!(*errors & SM_ERR_MLOCK))
-      sendto_one_numeric(client, &me, ERR_MLOCKRESTRICTED,
-                         channel->name, c, channel->mode_lock);
+      sendto_one_numeric(client, &me, ERR_MLOCKRESTRICTED, channel->name, c, channel->mode_lock);
 
     *errors |= SM_ERR_MLOCK;
     return false;
@@ -547,8 +544,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     LIST_FOREACH(node, list->head)
     {
       const struct Ban *ban = node->data;
-      sendto_one_numeric(client, &me, rpl_list, channel->name,
-                         ban->banstr, ban->who, ban->when);
+      sendto_one_numeric(client, &me, rpl_list, channel->name, ban->banstr, ban->who, ban->when);
     }
 
     sendto_one_numeric(client, &me, rpl_endlist, channel->name);
@@ -826,12 +822,11 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
   unsigned int dir = MODE_NONE;
 
   if (IsClient(client))
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", client->name,
-                   client->username, client->host, channel->name);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
+                   client->name, client->username, client->host, channel->name);
   else
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(client) ||
-                   ConfigServerHide.hide_servers) ?
-                   me.name : client->name, channel->name);
+    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
+                   (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
 
   for (unsigned int i = 0; i < mode_count; ++i)
   {
@@ -854,12 +849,11 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
       paracount = 0;
 
       if (IsClient(client))
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ", client->name,
-                       client->username, client->host, channel->name);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
+                       client->name, client->username, client->host, channel->name);
       else
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ", (IsHidden(client) ||
-                       ConfigServerHide.hide_servers) ?
-                       me.name : client->name, channel->name);
+        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
+                       (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -981,10 +975,9 @@ channel_mode_init(void)
   }
 
   char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "%s,%s,%s,%s", cmode_class[MODE_CLASS_A],
-           cmode_class[MODE_CLASS_B],
-           cmode_class[MODE_CLASS_C],
-           cmode_class[MODE_CLASS_D]);
+  snprintf(buf, sizeof(buf), "%s,%s,%s,%s",
+           cmode_class[MODE_CLASS_A], cmode_class[MODE_CLASS_B],
+           cmode_class[MODE_CLASS_C], cmode_class[MODE_CLASS_D]);
   isupport_add("CHANMODES", buf, -1);
 
 

@@ -38,7 +38,7 @@
 #include "sha3.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "conf.h"
+#include "ircd_defs.h"
 #include "address.h"
 #include "cloak.h"
 

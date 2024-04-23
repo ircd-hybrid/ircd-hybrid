@@ -93,10 +93,8 @@ channel_add_user(struct Channel *channel, struct Client *client,
       if (channel->sent_join_flood_notice == false)
       {
         channel->sent_join_flood_notice = true;
-        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
-                             "Possible Join Flooder %s on %s target: %s",
-                             client_get_name(client, HIDE_IP),
-                             client->servptr->name, channel->name);
+        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE, "Possible Join Flooder %s on %s target: %s",
+                             client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
       }
     }
 
@@ -295,8 +293,7 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
    */
   if (channel->topic_time)
     sendto_one(client, ":%s TBURST %ju %s %ju %s :%s",
-               me.id, channel->creation_time,
-               channel->name, channel->topic_time,
+               me.id, channel->creation_time, channel->name, channel->topic_time,
                channel->topic_info, channel->topic);
 
   if (IsCapable(client, CAPAB_MLOCK))
@@ -497,12 +494,10 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       if (uhnames)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
                            member_get_prefix(member, multi_prefix),
-                           member->client->name, member->client->username,
-                           member->client->host);
+                           member->client->name, member->client->username, member->client->host);
       else
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s" : "%s%s",
-                           member_get_prefix(member, multi_prefix),
-                           member->client->name);
+                           member_get_prefix(member, multi_prefix), member->client->name);
     }
 
     if (bufptr != buf)
@@ -925,8 +920,7 @@ channel_check_spambot_warning(struct Client *client, const char *name)
       /* It's already known as a possible spambot */
       sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
                            "User %s (%s@%s) trying to join %s is a possible spambot",
-                           client->name, client->username,
-                           client->host, name);
+                           client->name, client->username, client->host, name);
     }
   }
   else
@@ -1023,8 +1017,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
         ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
     {
       sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
-                           "Forbidding reserved channel %s from user %s",
+      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Forbidding reserved channel %s from user %s",
                            name, client_get_name(client, HIDE_IP));
       continue;
     }
@@ -1070,40 +1063,32 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       AddCMode(channel, MODE_NOPRIVMSGS);
 
       sendto_server(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
-                    me.id, channel->creation_time,
-                    channel->name, client->id);
+                    me.id, channel->creation_time, channel->name, client->id);
 
       /*
        * Notify all other users on the new channel
        */
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           client->name, client->username,
-                           client->host, channel->name, client->account, client->info);
+                           client->name, client->username, client->host, channel->name, client->account, client->info);
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           client->name, client->username,
-                           client->host, channel->name);
+                           client->name, client->username, client->host, channel->name);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
                            me.name, channel->name);
     }
     else
     {
       sendto_server(NULL, 0, 0, ":%s JOIN %ju %s +",
-                    client->id, channel->creation_time,
-                    channel->name);
+                    client->id, channel->creation_time, channel->name);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           client->name, client->username,
-                           client->host, channel->name, client->account, client->info);
+                           client->name, client->username, client->host, channel->name, client->account, client->info);
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           client->name, client->username,
-                           client->host, channel->name);
+                           client->name, client->username, client->host, channel->name);
     }
 
     if (client->away[0])
-      sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0,
-                           ":%s!%s@%s AWAY :%s",
-                           client->name, client->username,
-                           client->host, client->away);
+      sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                           client->name, client->username, client->host, client->away);
 
     struct Invite *invite = invite_find(channel, client);
     if (invite)
@@ -1112,8 +1097,8 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     if (channel->topic[0])
     {
       sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
-      sendto_one_numeric(client, &me, RPL_TOPICWHOTIME, channel->name,
-                         channel->topic_info, channel->topic_time);
+      sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,
+                         channel->name, channel->topic_info, channel->topic_time);
     }
 
     channel_send_namereply(client, channel);
@@ -1168,16 +1153,14 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     sendto_server(client, 0, 0, ":%s PART %s :%.*s",
                   client->id, channel->name, KICKLEN, reason);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s :%.*s",
-                         client->name, client->username,
-                         client->host, channel->name, KICKLEN, reason);
+                         client->name, client->username, client->host, channel->name, KICKLEN, reason);
   }
   else
   {
     sendto_server(client, 0, 0, ":%s PART %s",
                   client->id, channel->name);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s",
-                         client->name, client->username,
-                         client->host, channel->name);
+                         client->name, client->username, client->host, channel->name);
   }
 
   channel_remove_user(member);

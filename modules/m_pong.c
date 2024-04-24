@@ -67,8 +67,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
     {
       if (!IsMe(target) && target->from != source->from)
         sendto_one(target, ":%s PONG %s %s",
-                   ID_or_name(source, target), parv[1],
-                   ID_or_name(target, target));
+                   ID_or_name(source, target), parv[1], ID_or_name(target, target));
     }
     else if (!IsDigit(*destination))
       sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);

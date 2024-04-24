@@ -107,12 +107,10 @@ ms_tburst(struct Client *source, int parc, char *parv[])
     {
       if (IsClient(source))
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                             source->name, source->username, source->host,
-                             channel->name, channel->topic);
+                             source->name, source->username, source->host, channel->name, channel->topic);
       else
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                             hidden_server ? me.name : source->name,
-                             channel->name, channel->topic);
+                             hidden_server ? me.name : source->name, channel->name, channel->topic);
     }
   }
 }

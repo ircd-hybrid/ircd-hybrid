@@ -130,12 +130,11 @@ whois_person(struct Client *source, struct Client *target)
 
   if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
       !(HasUMode(source, UMODE_OPER) || source == target))
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER, target->name,
-                       ConfigServerHide.hidden_name,
-                       ConfigServerInfo.network_description);
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                       target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);
   else
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER, target->name,
-                       target->servptr->name, target->servptr->info);
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                       target->name, target->servptr->name, target->servptr->info);
 
   if (HasUMode(target, UMODE_REGISTERED))
     sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);

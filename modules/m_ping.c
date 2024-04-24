@@ -62,8 +62,8 @@ m_ping(struct Client *source, int parc, char *parv[])
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
   if (ConfigServerHide.disable_remote_commands && !HasUMode(source, UMODE_OPER))
   {
-    sendto_one(source, ":%s PONG %s :%s", me.name,
-               (destination) ? destination : me.name, parv[1]);
+    sendto_one(source, ":%s PONG %s :%s",
+               me.name, (destination) ? destination : me.name, parv[1]);
     return;
   }
 
@@ -71,8 +71,7 @@ m_ping(struct Client *source, int parc, char *parv[])
     sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target)
     sendto_one(target, ":%s PING %s :%s",
-               ID_or_name(source, target), source->name,
-               ID_or_name(target, target));
+               ID_or_name(source, target), source->name, ID_or_name(target, target));
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
@@ -102,14 +101,13 @@ ms_ping(struct Client *source, int parc, char *parv[])
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
   if (EmptyString(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
-    sendto_one(source, ":%s PONG %s :%s", ID_or_name(&me, source),
-               me.name, ID_or_name(source, source));
+    sendto_one(source, ":%s PONG %s :%s",
+               ID_or_name(&me, source), me.name, ID_or_name(source, source));
   else if (target)
   {
     if (target->from != source->from)
       sendto_one(target, ":%s PING %s :%s",
-                 ID_or_name(source, target), source->name,
-                 ID_or_name(target, target));
+                 ID_or_name(source, target), source->name, ID_or_name(target, target));
   }
   else if (!IsDigit(*destination))
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);

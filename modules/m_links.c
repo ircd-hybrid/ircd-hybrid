@@ -75,8 +75,7 @@ do_links(struct Client *source, char *parv[])
        * or they're an oper.
        */
       sendto_one_numeric(source, &me, RPL_LINKS,
-                         target->name, target->servptr->name,
-                         target->hopcount, target->info);
+                         target->name, target->servptr->name, target->hopcount, target->info);
     }
 
     sendto_one_numeric(source, &me, RPL_ENDOFLINKS,

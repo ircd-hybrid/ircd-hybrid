@@ -190,8 +190,8 @@ mo_dline(struct Client *source, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source, "DLINE", CAPAB_DLN, CLUSTER_DLINE,
-                       "%ju %s :%s", aline.duration, aline.host, aline.reason);
+    cluster_distribute(source, "DLINE", CAPAB_DLN, CLUSTER_DLINE, "%ju %s :%s",
+                       aline.duration, aline.host, aline.reason);
 
   dline_handle(source, &aline);
 }

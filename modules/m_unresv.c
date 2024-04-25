@@ -108,7 +108,8 @@ mo_unresv(struct Client *source, int parc, char *parv[])
       return;
   }
   else
-    cluster_distribute(source, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, aline.mask);
+    cluster_distribute(source, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, "%s",
+                       aline.mask);
 
   resv_remove(source, &aline);
 }

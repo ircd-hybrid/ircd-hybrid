@@ -72,37 +72,38 @@ m_topic(struct Client *source, int parc, char *parv[])
     }
 
     if (HasCMode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
-      sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
-    else
     {
-      char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-
-      snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
-               source->name, source->username, source->host);
-      channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, true);
-
-      sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
-                    source->id, channel->name, channel->topic);
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                           source->name, source->username, source->host, channel->name, channel->topic);
+      sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
+      return;
     }
+
+    char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
+    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
+             source->name, source->username, source->host);
+    channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, true);
+
+    sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
+                  source->id, channel->name, channel->topic);
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+                         source->name, source->username, source->host, channel->name, channel->topic);
   }
   else  /* Only asking for topic */
   {
-    if (!HasCMode(channel, MODE_SECRET) || member_find_link(source, channel))
+    if (HasCMode(channel, MODE_SECRET) && member_find_link(source, channel) == NULL)
     {
-      if (channel->topic[0] == '\0')
-        sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
-      else
-      {
-        sendto_one_numeric(source, &me, RPL_TOPIC,
-                           channel->name, channel->topic);
-        sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
-                           channel->name, channel->topic_info, channel->topic_time);
-      }
-    }
-    else
       sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
+      return;
+    }
+
+    if (channel->topic[0] == '\0')
+      sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
+    else
+    {
+      sendto_one_numeric(source, &me, RPL_TOPIC,
+                         channel->name, channel->topic);
+      sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
+                         channel->name, channel->topic_info, channel->topic_time);
+    }
   }
 }
 

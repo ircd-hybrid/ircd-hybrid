@@ -33,14 +33,11 @@
 #include "parse.h"
 
 
-static void dump_map(struct Client *client,
-                     struct Client *server,
-                     unsigned int prompt_length)
+static void
+dump_map(struct Client *client, struct Client *server, unsigned int prompt_length)
 {
   static char prompt[64];
-  char buf[IRCD_BUFSIZE];
   char *p = prompt + prompt_length;
-  unsigned int cnt = 0;
 
   *p = '\0';
 
@@ -48,6 +45,7 @@ static void dump_map(struct Client *client,
     sendto_one_numeric(client, &me, RPL_MAPMORE, prompt, server->name);
   else
   {
+    char buf[IRCD_BUFSIZE];
     unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
 
     if (HasUMode(client, UMODE_OPER))
@@ -80,6 +78,7 @@ static void dump_map(struct Client *client,
     return;
   strcpy(p, "|-");
 
+  unsigned int count = 0;
   list_node_t *node;
   LIST_FOREACH(node, server->serv->server_list.head)
   {
@@ -93,7 +92,7 @@ static void dump_map(struct Client *client,
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
-    ++cnt;
+    ++count;
   }
 
   LIST_FOREACH(node, server->serv->server_list.head)
@@ -108,7 +107,7 @@ static void dump_map(struct Client *client,
       if (!HasUMode(client, UMODE_OPER))
         continue;
 
-    if (--cnt == 0)
+    if (--count == 0)
       *p = '`';
     dump_map(client, target, prompt_length + 2);
   }

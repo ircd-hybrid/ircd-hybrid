@@ -34,7 +34,7 @@
 
 
 static void
-dump_map(struct Client *client, struct Client *server, unsigned int prompt_length)
+dump_map(struct Client *client, const struct Client *server, unsigned int prompt_length)
 {
   static char prompt[64];
   char *p = prompt + prompt_length;
@@ -82,7 +82,7 @@ dump_map(struct Client *client, struct Client *server, unsigned int prompt_lengt
   list_node_t *node;
   LIST_FOREACH(node, server->serv->server_list.head)
   {
-    struct Client *target = node->data;
+    const struct Client *target = node->data;
 
     if (IsHidden(target))
       if (!HasUMode(client, UMODE_OPER))
@@ -97,7 +97,7 @@ dump_map(struct Client *client, struct Client *server, unsigned int prompt_lengt
 
   LIST_FOREACH(node, server->serv->server_list.head)
   {
-    struct Client *target = node->data;
+    const struct Client *target = node->data;
 
     if (IsHidden(target))
       if (!HasUMode(client, UMODE_OPER))

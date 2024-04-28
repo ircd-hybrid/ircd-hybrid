@@ -26,6 +26,7 @@
 #include "stdinc.h"
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include "address.h"
 #include "fdlist.h"
 #include "comm.h"
 #include "event.h"
@@ -393,40 +394,10 @@ comm_accept(fde_t *F, struct io_addr *addr)
   if (fd < 0)
     return -1;
 
-  remove_ipv6_mapping(addr);
+  address_strip_ipv4(addr);
 
   setup_socket(fd);
 
   /* .. and return */
   return fd;
-}
-
-/*
- * remove_ipv6_mapping() - Removes IPv4-In-IPv6 mapping from an address
- * OSes with IPv6 mapping listening on both
- * AF_INET and AF_INET6 map AF_INET connections inside AF_INET6 structures
- *
- */
-void
-remove_ipv6_mapping(struct io_addr *addr)
-{
-  if (addr->ss.ss_family == AF_INET6)
-  {
-    if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
-    {
-      struct sockaddr_in6 v6;
-      struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
-
-      memcpy(&v6, addr, sizeof(v6));
-      memset(v4, 0, sizeof(struct sockaddr_in));
-      memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
-
-      addr->ss.ss_family = AF_INET;
-      addr->ss_len = sizeof(struct sockaddr_in);
-    }
-    else
-      addr->ss_len = sizeof(struct sockaddr_in6);
-  }
-  else
-    addr->ss_len = sizeof(struct sockaddr_in);
 }

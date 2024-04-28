@@ -48,8 +48,6 @@ enum
 /** How long can comm_select() wait for network events [milliseconds] */
 enum { SELECT_DELAY = 500 };
 
-extern void remove_ipv6_mapping(struct io_addr *);
-
 extern int comm_get_sockerr(fde_t *);
 extern bool comm_ignore_errno(int);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);

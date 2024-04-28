@@ -260,6 +260,38 @@ parse_netmask(const char *text, struct io_addr *addr, int *b)
 }
 
 /**
+ * @brief Strips IPv4 mapping from an IPv6 address if present.
+ *
+ * This function removes the IPv4 mapping from an IPv6 address if it is present,
+ * effectively converting an IPv6-mapped IPv4 address to a standard IPv4 address.
+ *
+ * @param addr Pointer to the io_addr structure representing the IP address.
+ */
+void
+address_strip_ipv4(struct io_addr *addr)
+{
+  if (addr->ss.ss_family == AF_INET6)
+  {
+    if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
+    {
+      struct sockaddr_in6 v6;
+      struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+
+      memcpy(&v6, addr, sizeof(v6));
+      memset(v4, 0, sizeof(struct sockaddr_in));
+      memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+
+      addr->ss.ss_family = AF_INET;
+      addr->ss_len = sizeof(struct sockaddr_in);
+    }
+    else
+      addr->ss_len = sizeof(struct sockaddr_in6);
+  }
+  else
+    addr->ss_len = sizeof(struct sockaddr_in);
+}
+
+/**
  * @brief Masks the address based on the specified number of bits.
  *
  * This function masks the given IP address based on the specified number of bits,

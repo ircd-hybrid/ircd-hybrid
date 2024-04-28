@@ -552,7 +552,7 @@ auth_start_query(struct AuthRequest *auth)
   memset(&localaddr, 0, locallen);
   getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&localaddr, &locallen);
 
-  remove_ipv6_mapping(&localaddr);
+  address_strip_ipv4(&localaddr);
 
   struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&localaddr;
   v6->sin6_port = htons(0);

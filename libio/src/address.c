@@ -270,25 +270,34 @@ parse_netmask(const char *text, struct io_addr *addr, int *b)
 void
 address_strip_ipv4(struct io_addr *addr)
 {
-  if (addr->ss.ss_family == AF_INET6)
+  /* Check if the address family is not IPv6. */
+  if (addr->ss.ss_family != AF_INET6)
   {
-    if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
-    {
-      struct sockaddr_in6 v6;
-      struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+    /* If the address is not IPv6, set length for IPv4 and return. */
+    addr->ss_len = sizeof(struct sockaddr_in);
+    return;
+  }
 
-      memcpy(&v6, addr, sizeof(v6));
-      memset(v4, 0, sizeof(struct sockaddr_in));
-      memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+  /* Check if the address is an IPv6-mapped IPv4 address. */
+  if (IN6_IS_ADDR_V4MAPPED(&((struct sockaddr_in6 *)addr)->sin6_addr))
+  {
+    /* If IPv6-mapped IPv4, extract IPv4 portion and update address. */
+    struct sockaddr_in6 v6;
+    struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
 
-      addr->ss.ss_family = AF_INET;
-      addr->ss_len = sizeof(struct sockaddr_in);
-    }
-    else
-      addr->ss_len = sizeof(struct sockaddr_in6);
+    memcpy(&v6, addr, sizeof(v6));
+    memset(v4, 0, sizeof(struct sockaddr_in));
+
+    /* Copy the IPv4 portion from the IPv6-mapped address to the input address. */
+    memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+
+    /* Update address family and length to indicate IPv4. */
+    addr->ss.ss_family = AF_INET;
+    addr->ss_len = sizeof(struct sockaddr_in);
   }
   else
-    addr->ss_len = sizeof(struct sockaddr_in);
+    /* If the address is not an IPv6-mapped IPv4 address, set length for IPv6. */
+    addr->ss_len = sizeof(struct sockaddr_in6);
 }
 
 /**

@@ -76,18 +76,18 @@ client_dopacket(struct Client *client, char *buffer, size_t length)
  * side effects - one line is copied and removed from the dbuf
  */
 static size_t
-extract_one_line(struct dbuf_queue *qptr, char *buffer)
+extract_one_line(struct dbuf_queue *queue, char *buffer)
 {
   size_t line_bytes = 0, eol_bytes = 0;
   list_node_t *node;
 
-  LIST_FOREACH(node, qptr->blocks.head)
+  LIST_FOREACH(node, queue->blocks.head)
   {
     const struct dbuf_block *block = node->data;
     size_t idx;
 
-    if (node == qptr->blocks.head)
-      idx = qptr->pos;
+    if (node == queue->blocks.head)
+      idx = queue->pos;
     else
       idx = 0;
 
@@ -122,7 +122,7 @@ out:
     line_bytes = 0;
 
   /* Remove what is now unnecessary */
-  dbuf_delete(qptr, line_bytes + eol_bytes);
+  dbuf_delete(queue, line_bytes + eol_bytes);
 
   return IRCD_MIN(line_bytes, IRCD_BUFSIZE - 2);
 }

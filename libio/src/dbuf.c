@@ -91,33 +91,33 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 }
 
 void
-dbuf_put_fmt(struct dbuf_block *dbuf, const char *pattern, ...)
+dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
 {
   va_list args;
 
-  assert(dbuf->refs == 1);
+  assert(block->refs == 1);
 
   va_start(args, pattern);
-  dbuf_put_args(dbuf, pattern, args);
+  dbuf_put_args(block, pattern, args);
   va_end(args);
 }
 
 void
-dbuf_put_args(struct dbuf_block *dbuf, const char *data, va_list args)
+dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
 {
-  assert(dbuf->refs == 1);
+  assert(block->refs == 1);
 
-  dbuf->size += vsnprintf(dbuf->data + dbuf->size, sizeof(dbuf->data) - dbuf->size, data, args);
+  block->size += vsnprintf(block->data + block->size, sizeof(block->data) - block->size, data, args);
 
   /* As per C99, (v)snprintf returns the length the resulting string would be */
-  if (dbuf->size > sizeof(dbuf->data))
-    dbuf->size = sizeof(dbuf->data);
+  if (block->size > sizeof(block->data))
+    block->size = sizeof(block->data);
 }
 
 void
-dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
+dbuf_put(struct dbuf_queue *queue, const char *buf, size_t length)
 {
-  while (sz > 0)
+  while (length > 0)
   {
     struct dbuf_block *block = dbuf_length(queue) ? queue->blocks.tail->data : NULL;
 
@@ -128,15 +128,15 @@ dbuf_put(struct dbuf_queue *queue, const char *buf, size_t sz)
     }
 
     size_t avail = sizeof(block->data) - block->size;
-    if (avail > sz)
-      avail = sz;
+    if (avail > length)
+      avail = length;
 
     memcpy(&block->data[block->size], buf, avail);
     block->size += avail;
 
     queue->total_size += avail;
 
-    sz -= avail;
+    length -= avail;
     buf += avail;
   }
 }

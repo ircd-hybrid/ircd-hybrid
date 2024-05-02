@@ -40,21 +40,21 @@ dbuf_alloc(void)
 {
   struct dbuf_block *block = xcalloc(sizeof(*block));
 
-  ++block->refs;
+  ++block->ref_count;
   return block;
 }
 
 void
 dbuf_ref_free(struct dbuf_block *block)
 {
-  if (--block->refs <= 0)
+  if (--block->ref_count <= 0)
     xfree(block);
 }
 
 void
 dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
 {
-  block->refs++;
+  block->ref_count++;
   list_add_tail(block, list_make_node(), &queue->blocks);
   queue->total_size += block->size;
 }
@@ -95,7 +95,7 @@ dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
 {
   va_list args;
 
-  assert(block->refs == 1);
+  assert(block->ref_count == 1);
 
   va_start(args, pattern);
   dbuf_put_args(block, pattern, args);
@@ -105,7 +105,7 @@ dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
 void
 dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
 {
-  assert(block->refs == 1);
+  assert(block->ref_count == 1);
 
   block->size += vsnprintf(block->data + block->size, sizeof(block->data) - block->size, data, args);
 

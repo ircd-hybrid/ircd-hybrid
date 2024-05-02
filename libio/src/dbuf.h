@@ -58,7 +58,7 @@ enum { DBUF_BLOCK_SIZE = 1024 };
  */
 struct dbuf_block
 {
-  int refs;  /**< Reference count for the data block. */
+  int ref_count;  /**< Reference count for the data block. */
   size_t size;  /**< Size of the data block. */
   char data[DBUF_BLOCK_SIZE];  /**< Actual data stored in the block. */
 };

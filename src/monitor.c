@@ -218,10 +218,9 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 void
 monitor_clear_list(struct Client *client)
 {
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, client->connection->monitors.head)
+  while (client->connection->monitors.head)
   {
+    list_node_t *node = client->connection->monitors.head;
     struct Monitor *monitor = node->data;
 
     assert(list_find(&monitor->monitored_by, client));

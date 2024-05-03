@@ -96,7 +96,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (parse_aline("UNRESV", source, parc, parv, &aline) == false)
+  if (aline_parse("UNRESV", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)

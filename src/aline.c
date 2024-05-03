@@ -34,7 +34,7 @@
  * side effects - none
  */
 bool
-valid_wild_card_simple(const char *data)
+aline_valid_mask_simple(const char *data)
 {
   const unsigned char *p = (const unsigned char *)data;
   unsigned char tmpch = '\0';
@@ -69,7 +69,7 @@ valid_wild_card_simple(const char *data)
  * side effects - NOTICE is given to client if warn is 1
  */
 bool
-valid_wild_card(int count, ...)
+aline_valid_mask(int count, ...)
 {
   unsigned char tmpch = '\0';
   unsigned int nonwild = 0;
@@ -117,7 +117,7 @@ valid_wild_card(int count, ...)
 }
 
 static intmax_t
-valid_aline_time(const char *data)
+aline_valid_time(const char *data)
 {
   static const unsigned int max_aline_time = 24*60*360;
   const unsigned char *p = (const unsigned char *)data;
@@ -171,7 +171,7 @@ valid_aline_time(const char *data)
  * - Dianora
  */
 bool
-parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struct aline_ctx *aline)
+aline_parse(const char *cmd, struct Client *client, int parc, char **parv, struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];
@@ -181,7 +181,7 @@ parse_aline(const char *cmd, struct Client *client, int parc, char **parv, struc
   ++parv;
   --parc;
 
-  if (aline->add && (duration = valid_aline_time(*parv)) >= 0)
+  if (aline->add && (duration = aline_valid_time(*parv)) >= 0)
   {
     aline->duration = duration;
     ++parv;

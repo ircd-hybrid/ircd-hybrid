@@ -73,7 +73,7 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
 
   if (!HasFlag(source, FLAGS_SERVICE))
   {
-    if (valid_wild_card_simple(aline->mask) == false)
+    if (aline_valid_mask_simple(aline->mask) == false)
     {
       if (IsClient(source))
         sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the xline",
@@ -153,7 +153,7 @@ mo_xline(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (parse_aline("XLINE", source, parc, parv, &aline) == false)
+  if (aline_parse("XLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)

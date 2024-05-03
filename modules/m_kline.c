@@ -90,7 +90,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   unsigned int min_cidr = 0;
   struct io_addr iphost, *piphost = NULL;
 
-  if (!HasFlag(source, FLAGS_SERVICE) && valid_wild_card(2, aline->user, aline->host) == false)
+  if (!HasFlag(source, FLAGS_SERVICE) && aline_valid_mask(2, aline->user, aline->host) == false)
   {
     if (IsClient(source))
       sendto_one_notice(source, &me,
@@ -191,7 +191,7 @@ mo_kline(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (parse_aline("KLINE", source, parc, parv, &aline) == false)
+  if (aline_parse("KLINE", source, parc, parv, &aline) == false)
     return;
 
   if (aline.server)

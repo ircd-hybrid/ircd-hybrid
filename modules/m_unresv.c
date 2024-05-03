@@ -39,6 +39,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "memory.h"
+#include "aline.h"
 
 
 static void

@@ -276,18 +276,6 @@ struct config_log_entry
   unsigned int use_logging;
 };
 
-struct aline_ctx
-{
-  bool add;
-  bool simple_mask;
-  char *mask;
-  char *user;
-  char *host;
-  char *reason;
-  char *server;
-  uintmax_t duration;
-};
-
 struct AddressRec
 {
   list_node_t node;
@@ -336,9 +324,6 @@ extern struct MaskItem *find_dline_conf(const struct io_addr *);
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
 
-extern bool valid_wild_card_simple(const char *);
-extern bool valid_wild_card(int, ...);
-
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern void conf_read_files(bool);
 extern int conf_attach(struct Client *, struct MaskItem *);
@@ -360,9 +345,6 @@ extern void conf_dns_lookup(struct MaskItem *);
 extern void conf_add_class_to_conf(struct MaskItem *, const char *);
 
 extern const char *get_oper_name(const struct Client *);
-
-/* XXX should the parse_aline stuff go into another file ?? */
-extern bool parse_aline(const char *, struct Client *, int, char **, struct aline_ctx *);
 
 extern bool match_conf_password(const char *, const struct MaskItem *);
 #endif  /* INCLUDED_conf_h */

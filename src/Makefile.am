@@ -11,6 +11,8 @@ ircd_DEPENDENCIES = $(LTDLDEPS)
 
 ircd_SOURCES = accept.c          \
                accept.h          \
+               aline.c           \
+               aline.h           \
                auth.c            \
                auth.h            \
                channel.c         \

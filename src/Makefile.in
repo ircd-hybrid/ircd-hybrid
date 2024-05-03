@@ -118,26 +118,27 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = accept.$(OBJEXT) auth.$(OBJEXT) channel.$(OBJEXT) \
-	channel_invite.$(OBJEXT) channel_mode.$(OBJEXT) \
-	client.$(OBJEXT) client_svstag.$(OBJEXT) cloak.$(OBJEXT) \
-	command.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
-	conf_cluster.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
-	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
-	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
-	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
-	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
-	extban_fingerprint.$(OBJEXT) extban_gecos.$(OBJEXT) \
-	extban_join.$(OBJEXT) extban_knock.$(OBJEXT) \
-	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
-	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
-	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	hash.$(OBJEXT) id.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
-	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	restart.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
+am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
+	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
+	channel_mode.$(OBJEXT) client.$(OBJEXT) \
+	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
+	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
+	conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) \
+	conf_resv.$(OBJEXT) conf_service.$(OBJEXT) \
+	conf_shared.$(OBJEXT) conf_parser.$(OBJEXT) \
+	conf_lexer.$(OBJEXT) extban.$(OBJEXT) extban_account.$(OBJEXT) \
+	extban_channel.$(OBJEXT) extban_fingerprint.$(OBJEXT) \
+	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
+	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
+	extban_nick.$(OBJEXT) extban_operclass.$(OBJEXT) \
+	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
+	extban_usermode.$(OBJEXT) hash.$(OBJEXT) id.$(OBJEXT) \
+	ipcache.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	isupport.$(OBJEXT) listener.$(OBJEXT) modules.$(OBJEXT) \
+	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) restart.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -162,18 +163,18 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/auth.Po \
-	./$(DEPDIR)/channel.Po ./$(DEPDIR)/channel_invite.Po \
-	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/client.Po \
-	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
-	./$(DEPDIR)/command.Po ./$(DEPDIR)/conf.Po \
-	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
-	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
-	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
-	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
-	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
-	./$(DEPDIR)/extban.Po ./$(DEPDIR)/extban_account.Po \
-	./$(DEPDIR)/extban_channel.Po \
+am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
+	./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
+	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
+	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
+	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
+	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
+	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_db.Po \
+	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
+	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
+	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
+	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/extban.Po \
+	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
@@ -407,6 +408,8 @@ ircd_LDADD = $(LIBLTDL) ../libio/src/.libs/libio.a
 ircd_DEPENDENCIES = $(LTDLDEPS)
 ircd_SOURCES = accept.c          \
                accept.h          \
+               aline.c           \
+               aline.h           \
                auth.c            \
                auth.h            \
                channel.c         \
@@ -596,6 +599,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accept.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aline.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
@@ -820,6 +824,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/accept.Po
+	-rm -f ./$(DEPDIR)/aline.Po
 	-rm -f ./$(DEPDIR)/auth.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
@@ -917,6 +922,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/accept.Po
+	-rm -f ./$(DEPDIR)/aline.Po
 	-rm -f ./$(DEPDIR)/auth.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po

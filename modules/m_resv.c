@@ -37,6 +37,7 @@
 #include "conf_resv.h"
 #include "conf_shared.h"
 #include "log.h"
+#include "aline.h"
 
 
 /* parse_resv()

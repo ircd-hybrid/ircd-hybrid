@@ -171,7 +171,7 @@ aline_valid_time(const char *data)
  * - Dianora
  */
 bool
-aline_parse(const char *cmd, struct Client *client, int parc, char **parv, struct aline_ctx *aline)
+aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];

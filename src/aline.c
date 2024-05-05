@@ -73,7 +73,6 @@ aline_valid_mask(int count, ...)
 {
   unsigned char tmpch = '\0';
   unsigned int nonwild = 0;
-  va_list args;
 
   /*
    * Now we must check the user and host to make sure there
@@ -86,7 +85,7 @@ aline_valid_mask(int count, ...)
    * be disallowed.
    * -wnder
    */
-
+  va_list args;
   va_start(args, count);
 
   while (count--)
@@ -188,7 +187,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
     --parc;
   }
 
-  if (parc == 0)
+  if (parc == 0 || EmptyString(*parv))
   {
     sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, cmd);
     return false;

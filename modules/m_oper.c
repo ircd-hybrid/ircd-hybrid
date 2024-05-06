@@ -36,7 +36,6 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 
 
 /*! \brief Blindly opers up given source, using conf info.

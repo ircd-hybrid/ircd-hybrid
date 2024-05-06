@@ -32,8 +32,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "conf.h"
-#include "server.h"
-#include "user.h"
 #include "isupport.h"
 
 

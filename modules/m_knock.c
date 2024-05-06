@@ -29,7 +29,6 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
-#include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
@@ -37,7 +36,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "server_capab.h"
-#include "user.h"
 #include "isupport.h"
 
 

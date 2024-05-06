@@ -27,15 +27,8 @@
 #include "list.h"
 #include "channel.h"
 #include "client.h"
-#include "hash.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "conf.h"
-#include "packet.h"
 
 
 /*! \brief PART command handler

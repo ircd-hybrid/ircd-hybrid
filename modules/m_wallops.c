@@ -31,7 +31,6 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "server.h"
 
 
 /*! \brief WALLOPS command handler

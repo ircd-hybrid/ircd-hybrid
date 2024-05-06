@@ -25,7 +25,6 @@
 
 #include "stdinc.h"
 #include "client.h"
-#include "irc_string.h"
 #include "server_capab.h"
 #include "parse.h"
 #include "modules.h"

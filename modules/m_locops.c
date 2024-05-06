@@ -29,7 +29,6 @@
 #include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"
 #include "server_capab.h"

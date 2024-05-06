@@ -31,7 +31,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "irc_string.h"
-#include "conf.h"
 
 
 /*! \brief SVSKILL command handler

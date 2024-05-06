@@ -26,10 +26,8 @@
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "irc_string.h"
 #include "numeric.h"
 #include "send.h"
-#include "server.h"
 #include "parse.h"
 #include "modules.h"
 

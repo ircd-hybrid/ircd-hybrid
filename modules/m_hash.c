@@ -28,7 +28,6 @@
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

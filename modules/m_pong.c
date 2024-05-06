@@ -34,7 +34,6 @@
 #include "irc_string.h"
 #include "parse.h"
 #include "modules.h"
-#include "server.h"
 
 
 /*! \brief PONG command handler

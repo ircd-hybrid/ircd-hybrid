@@ -33,7 +33,6 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "user.h"
 #include "memory.h"
 #include "isupport.h"
 

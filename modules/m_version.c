@@ -29,7 +29,6 @@
 #include "numeric.h"
 #include "conf.h"
 #include "server.h"
-#include "user.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

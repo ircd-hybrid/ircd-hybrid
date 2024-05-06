@@ -32,7 +32,6 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
-#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"

@@ -33,7 +33,6 @@
 #include "modules.h"
 #include "hash.h"
 #include "conf.h"
-#include "server.h"
 
 
 /*! \brief PING command handler

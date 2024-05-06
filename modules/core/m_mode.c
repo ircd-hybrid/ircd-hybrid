@@ -36,11 +36,9 @@
 #include "numeric.h"
 #include "user.h"
 #include "conf.h"
-#include "server.h"
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 
 
 /* set_user_mode()

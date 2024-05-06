@@ -36,8 +36,6 @@
 #include "modules.h"
 #include "parse.h"
 #include "hash.h"
-#include "packet.h"
-#include "server.h"
 
 
 /*! \brief KICK command handler

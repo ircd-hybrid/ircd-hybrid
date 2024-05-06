@@ -44,7 +44,6 @@
 #include "server.h"
 #include "send.h"
 #include "memory.h"
-#include "packet.h"
 #include "rng_mt.h"
 #include "misc.h"
 #include "parse.h"

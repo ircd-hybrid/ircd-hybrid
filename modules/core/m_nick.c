@@ -39,7 +39,6 @@
 #include "channel_mode.h"
 #include "parse.h"
 #include "modules.h"
-#include "packet.h"
 #include "monitor.h"
 #include "misc.h"
 #include "id.h"

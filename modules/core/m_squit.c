@@ -61,7 +61,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
   {
     struct Client *tmp = node->data;
 
-    if (IsServer(tmp) || IsMe(tmp))
+    if (IsServer(tmp))
     {
       if (match(name, tmp->name) == 0)
       {
@@ -71,7 +71,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
     }
   }
 
-  if (target == NULL || IsMe(target))
+  if (target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, name);
     return;

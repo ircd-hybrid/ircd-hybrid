@@ -44,10 +44,40 @@
 enum { WHOWAS_MAX_REPLIES = 20 };
 
 static void
-do_whowas(struct Client *source, char *parv[])
+whowas_send(struct Client *source, const struct Whowas *whowas)
+{
+  sendto_one_numeric(source, &me, RPL_WHOWASUSER,
+                     whowas->name, whowas->username, whowas->hostname, whowas->realname);
+
+  if (HasUMode(source, UMODE_OPER))
+    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
+                       whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
+
+  if (strcmp(whowas->account, "*"))
+    sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
+                       whowas->name, whowas->account, "was");
+
+  bool server_hidden = false;
+  if (!HasUMode(source, UMODE_OPER))
+  {
+    if (whowas->server_hidden || ConfigServerHide.hide_servers)
+      server_hidden = true;
+    else if (ConfigServerHide.hide_services && service_find(whowas->servername, irccmp))
+      server_hidden = true;
+  }
+
+  if (server_hidden)
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                       whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
+  else
+    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                       whowas->name, whowas->servername, date_ctime(whowas->logoff));
+}
+
+static void
+whowas_do(struct Client *source, char *parv[])
 {
   int count = 0, max = -1;
-  list_node_t *node;
 
   if (!EmptyString(parv[2]))
     max = atoi(parv[2]);
@@ -55,38 +85,13 @@ do_whowas(struct Client *source, char *parv[])
   if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
     max = WHOWAS_MAX_REPLIES;
 
+  list_node_t *node;
   LIST_FOREACH(node, whowas_get_hash(hash_string(parv[1]))->head)
   {
     const struct Whowas *whowas = node->data;
-
     if (irccmp(parv[1], whowas->name) == 0)
     {
-      sendto_one_numeric(source, &me, RPL_WHOWASUSER,
-                         whowas->name, whowas->username, whowas->hostname, whowas->realname);
-
-      if (HasUMode(source, UMODE_OPER))
-        sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
-                           whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
-
-      if (strcmp(whowas->account, "*"))
-        sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
-                           whowas->name, whowas->account, "was");
-
-      bool server_hidden = false;
-      if (!HasUMode(source, UMODE_OPER))
-      {
-        if (whowas->server_hidden || ConfigServerHide.hide_servers)
-          server_hidden = true;
-        else if (ConfigServerHide.hide_services && service_find(whowas->servername, irccmp))
-          server_hidden = true;
-      }
-
-      if (server_hidden)
-        sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                           whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
-      else
-        sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                           whowas->name, whowas->servername, date_ctime(whowas->logoff));
+      whowas_send(source, whowas);
       ++count;
     }
 
@@ -136,7 +141,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
     if (server_hunt(source, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
       return;
 
-  do_whowas(source, parv);
+  whowas_do(source, parv);
 }
 
 /*! \brief WHOWAS command handler
@@ -164,7 +169,7 @@ ms_whowas(struct Client *source, int parc, char *parv[])
   if (server_hunt(source, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)
     return;
 
-  do_whowas(source, parv);
+  whowas_do(source, parv);
 }
 
 static struct Command whowas_msgtab =

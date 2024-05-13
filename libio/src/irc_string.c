@@ -66,22 +66,22 @@ has_wildcards(const char *str)
  * This function removes leading and trailing whitespaces (spaces and tabs)
  * from the input string and returns a pointer to the modified string.
  *
- * @param txt Input string to be stripped.
+ * @param str Input string to be stripped.
  * @return Pointer to the stripped string.
  */
 const char *
-stripws(char *txt)
+stripws(char *str)
 {
-  while (*txt == '\t' || *txt == ' ')
-    ++txt;
+  while (*str == '\t' || *str == ' ')
+    ++str;
 
-  char *tmp = txt + strlen(txt) - 1;
-  while (tmp >= txt && (*tmp == '\t' || *tmp == ' '))
-    --tmp;
+  char *end = str + strlen(str) - 1;
+  while (end >= str && (*end == '\t' || *end == ' '))
+    --end;
 
-  *(tmp + 1) = '\0';
+  *(end + 1) = '\0';
 
-  return txt;
+  return str;
 }
 
 /**

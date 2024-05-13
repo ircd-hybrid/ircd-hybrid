@@ -788,15 +788,16 @@ pseudo_target: T_TARGET '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh;
-
-    nuh.nuhmask  = yylval.string;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.nick.buf;
-    nuh.hostptr  = block_state.host.buf;
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(block_state.nick.buf);
-    nuh.hostsize = sizeof(block_state.host.buf);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = yylval.string,
+      .nickptr = NULL,
+      .userptr = block_state.nick.buf,
+      .hostptr = block_state.host.buf,
+      .nicksize = 0,
+      .usersize = sizeof(block_state.nick.buf),
+      .hostsize = sizeof(block_state.host.buf)
+    };
 
     split_nuh(&nuh);
   }
@@ -920,20 +921,21 @@ oper_entry: OPERATOR
 
   LIST_FOREACH(node, block_state.mask.list.head)
   {
-    struct split_nuh_item nuh;
     char *s = node->data;
 
     if (EmptyString(s))
       continue;
 
-    nuh.nuhmask  = s;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.user.buf;
-    nuh.hostptr  = block_state.host.buf;
-
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(block_state.user.buf);
-    nuh.hostsize = sizeof(block_state.host.buf);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = s,
+      .nickptr = NULL,
+      .userptr = block_state.user.buf,
+      .hostptr = block_state.host.buf,
+      .nicksize = 0,
+      .usersize = sizeof(block_state.user.buf),
+      .hostsize = sizeof(block_state.host.buf)
+    };
 
     split_nuh(&nuh);
 
@@ -1548,20 +1550,21 @@ auth_entry: IRCD_AUTH
 
   LIST_FOREACH(node, block_state.mask.list.head)
   {
-    struct split_nuh_item nuh;
     char *s = node->data;
 
     if (EmptyString(s))
       continue;
 
-    nuh.nuhmask  = s;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.user.buf;
-    nuh.hostptr  = block_state.host.buf;
-
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(block_state.user.buf);
-    nuh.hostsize = sizeof(block_state.host.buf);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = s,
+      .nickptr = NULL,
+      .userptr = block_state.user.buf,
+      .hostptr = block_state.host.buf,
+      .nicksize = 0,
+      .usersize = sizeof(block_state.user.buf),
+      .hostsize = sizeof(block_state.host.buf)
+    };
 
     split_nuh(&nuh);
 
@@ -1800,16 +1803,16 @@ shared_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh;
-
-    nuh.nuhmask  = yylval.string;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.user.buf;
-    nuh.hostptr  = block_state.host.buf;
-
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(block_state.user.buf);
-    nuh.hostsize = sizeof(block_state.host.buf);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = yylval.string,
+      .nickptr = NULL,
+      .userptr = block_state.user.buf,
+      .hostptr = block_state.host.buf,
+      .nicksize = 0,
+      .usersize = sizeof(block_state.user.buf),
+      .hostsize = sizeof(block_state.host.buf)
+    };
 
     split_nuh(&nuh);
   }
@@ -2209,16 +2212,16 @@ kill_user: USER '=' QSTRING ';'
 
   if (conf_parser_ctx.pass == 2)
   {
-    struct split_nuh_item nuh;
-
-    nuh.nuhmask  = yylval.string;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = block_state.user.buf;
-    nuh.hostptr  = block_state.host.buf;
-
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(block_state.user.buf);
-    nuh.hostsize = sizeof(block_state.host.buf);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = yylval.string,
+      .nickptr = NULL,
+      .userptr = block_state.user.buf,
+      .hostptr = block_state.host.buf,
+      .nicksize = 0,
+      .usersize = sizeof(block_state.user.buf),
+      .hostsize = sizeof(block_state.host.buf)
+    };
 
     split_nuh(&nuh);
   }

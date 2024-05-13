@@ -108,20 +108,20 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 
     LIST_FOREACH(node, elist->head)
     {
+      char *s = node->data;
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
       char host[HOSTLEN + 1];
-      struct split_nuh_item nuh;
-      char *s = node->data;
-
-      nuh.nuhmask  = s;
-      nuh.nickptr  = nick;
-      nuh.userptr  = user;
-      nuh.hostptr  = host;
-
-      nuh.nicksize = sizeof(nick);
-      nuh.usersize = sizeof(user);
-      nuh.hostsize = sizeof(host);
+      struct split_nuh_item nuh =
+      {
+        .nuhmask = s,
+        .nickptr = nick,
+        .userptr = user,
+        .hostptr = host,
+        .nicksize = sizeof(nick),
+        .usersize = sizeof(user),
+        .hostsize = sizeof(host)
+      };
 
       split_nuh(&nuh);
 

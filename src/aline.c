@@ -201,16 +201,16 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
   }
   else
   {
-    struct split_nuh_item nuh;
-
-    nuh.nuhmask  = *parv;
-    nuh.nickptr  = NULL;
-    nuh.userptr  = user;
-    nuh.hostptr  = host;
-
-    nuh.nicksize = 0;
-    nuh.usersize = sizeof(user);
-    nuh.hostsize = sizeof(host);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = *parv,
+      .nickptr = NULL,
+      .userptr = user,
+      .hostptr = host,
+      .nicksize = 0,
+      .usersize = sizeof(user),
+      .hostsize = sizeof(host)
+    };
 
     split_nuh(&nuh);
 

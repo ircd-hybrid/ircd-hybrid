@@ -187,16 +187,16 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     strlcpy(ban->host, maskptr, sizeof(ban->host));
   else
   {
-    struct split_nuh_item nuh;
-
-    nuh.nuhmask  = maskptr;
-    nuh.nickptr  = ban->name;
-    nuh.userptr  = ban->user;
-    nuh.hostptr  = ban->host;
-
-    nuh.nicksize = sizeof(ban->name);
-    nuh.usersize = sizeof(ban->user);
-    nuh.hostsize = sizeof(ban->host);
+    struct split_nuh_item nuh =
+    {
+      .nuhmask = maskptr,
+      .nickptr = ban->name,
+      .userptr = ban->user,
+      .hostptr = ban->host,
+      .nicksize = sizeof(ban->name),
+      .usersize = sizeof(ban->user),
+      .hostsize = sizeof(ban->host)
+    };
 
     split_nuh(&nuh);
 

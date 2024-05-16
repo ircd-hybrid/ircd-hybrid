@@ -40,6 +40,6 @@ extern void cloak_set_cidr_len_ipv6(int);
 extern void cloak_set_num_bits(int);
 extern void cloak_set_secret(const char *);
 extern void cloak_set_suffix(const char *);
-extern void cloak_initialize(void);
+extern void cloak_init(void);
 extern const char *cloak_compute(const struct io_addr *);
 #endif  /* INCLUDED_cloak_h */

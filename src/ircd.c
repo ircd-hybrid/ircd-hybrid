@@ -565,7 +565,7 @@ main(int argc, char *argv[])
   read_links_file();
   motd_init();
   user_modes_init();
-  cloak_initialize();
+  cloak_init();
 
   if (EmptyString(ConfigServerInfo.name))
   {

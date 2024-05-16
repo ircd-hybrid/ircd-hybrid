@@ -203,7 +203,7 @@ cloak_set_suffix(const char *value)
  * It is idempotent, meaning it has no effect if called more than once.
  */
 void
-cloak_initialize(void)
+cloak_init(void)
 {
   if (config)
     return;

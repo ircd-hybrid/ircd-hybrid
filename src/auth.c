@@ -55,6 +55,26 @@
 #include "address.h"
 
 /**
+ * @var AUTH_BUFSIZE
+ * @brief Maximum buffer size for RFC 1413 ident replies.
+ *
+ * The AUTH_BUFSIZE constant represents the maximum buffer size, in bytes, that is
+ * allowed for RFC 1413 ident replies. According to the RFC 1413 standard, a server
+ * should not send more than 512 octets of user ID and a client must accept at least
+ * 512 octets of user ID.
+ */
+enum { AUTH_BUFSIZE = 512 };
+
+/**
+ * @var AUTH_PORTNUM
+ * @brief Port number for the (Ident) server.
+ *
+ * The AUTH_PORTNUM constant represents the TCP port number (113) on which the
+ * Ident server listens, adhering to the guidelines outlined in RFC 1413.
+ */
+enum { AUTH_PORTNUM = 113 };
+
+/**
  * @enum auth_report_type
  * @brief Enumerates the different types of reports generated during the authentication process.
  *

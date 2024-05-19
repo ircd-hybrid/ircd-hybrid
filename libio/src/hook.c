@@ -92,18 +92,18 @@ hook_container_register(const char *name, HCFUNC *func)
     if (container)
     {
       if (func)
-        list_add_tail(func, xcalloc(sizeof(list_node_t)), &container->chain);
+        list_add_tail(func, io_calloc(sizeof(list_node_t)), &container->chain);
       return container;
     }
   }
 
-  container = xcalloc(sizeof(*container));
+  container = io_calloc(sizeof(*container));
   if (func)
-    list_add(func, xcalloc(sizeof(list_node_t)), &container->chain);
+    list_add(func, io_calloc(sizeof(list_node_t)), &container->chain);
 
   if (name)
   {
-    container->name = xstrdup(name);
+    container->name = io_strdup(name);
     list_add(container, &container->node, &hook_container_list);
   }
 
@@ -204,7 +204,7 @@ hook_container_find(const char *name)
 list_node_t *
 hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert position)
 {
-  list_node_t *node = xcalloc(sizeof(*node));
+  list_node_t *node = io_calloc(sizeof(*node));
 
   switch (position)
   {

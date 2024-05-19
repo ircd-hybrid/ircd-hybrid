@@ -176,7 +176,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   if (EmptyString(maskptr))
     return NULL;
 
-  struct Ban *ban = xcalloc(sizeof(*ban));
+  struct Ban *ban = io_calloc(sizeof(*ban));
   ban->extban = extbans;
   ban->when = event_base->time.sec_real;
 
@@ -215,7 +215,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
     if (irccmp(tmp->banstr, ban->banstr) == 0)
     {
-      xfree(ban);
+      io_free(ban);
       return NULL;
     }
   }

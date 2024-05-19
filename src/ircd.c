@@ -588,7 +588,7 @@ main(int argc, char *argv[])
   {
     log_write(LOG_TYPE_IRCD, "Generating server ID");
     generate_sid();
-    ConfigServerInfo.sid = xstrdup(me.id);
+    ConfigServerInfo.sid = io_strdup(me.id);
   }
   else
     strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));

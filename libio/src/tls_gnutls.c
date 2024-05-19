@@ -66,7 +66,7 @@ tls_free_credentials(tls_context_t cred)
 
   gnutls_global_deinit();
 
-  xfree(cred);
+  io_free(cred);
 }
 
 bool
@@ -79,13 +79,13 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  context = xcalloc(sizeof(*context));
+  context = io_calloc(sizeof(*context));
 
   int ret = gnutls_global_init();
   if (ret != GNUTLS_E_SUCCESS)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
-    xfree(context);
+    io_free(context);
     return false;
   }
 
@@ -93,7 +93,7 @@ tls_new_credentials(void)
   if (ret != GNUTLS_E_SUCCESS)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
-    xfree(context);
+    io_free(context);
     return false;
   }
 
@@ -108,7 +108,7 @@ tls_new_credentials(void)
 
     gnutls_certificate_free_credentials(context->x509_cred);
     gnutls_priority_deinit(context->priorities);
-    xfree(context);
+    io_free(context);
     return false;
   }
 
@@ -116,7 +116,7 @@ tls_new_credentials(void)
   if (ret != GNUTLS_E_SUCCESS)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
-    xfree(context);
+    io_free(context);
     return false;
   }
 
@@ -350,7 +350,7 @@ tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint
     goto info_done_dealloc;
 
   binary_to_hex(digestbuf, buf, digest_size);
-  *fingerprint = xstrdup(buf);
+  *fingerprint = io_strdup(buf);
 
   gnutls_x509_crt_deinit(cert);
   return true;

@@ -144,8 +144,8 @@ monitor_free(struct Monitor *monitor)
 
   list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
 
-  xfree(monitor->name);
-  xfree(monitor);
+  io_free(monitor->name);
+  io_free(monitor);
 }
 
 /*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
@@ -162,8 +162,8 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
   struct Monitor *monitor = monitor_find_hash(name);
   if (monitor == NULL)
   {
-    monitor = xcalloc(sizeof(*monitor));
-    monitor->name = xstrdup(name);
+    monitor = io_calloc(sizeof(*monitor));
+    monitor->name = io_strdup(name);
     monitor->hash_value = hash_string(monitor->name);
 
     list_add(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);

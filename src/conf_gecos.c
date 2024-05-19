@@ -63,15 +63,15 @@ gecos_delete(struct GecosItem *gecos, bool expired)
                          gecos->mask);
 
   list_remove(&gecos->node, &gecos_list);
-  xfree(gecos->mask);
-  xfree(gecos->reason);
-  xfree(gecos);
+  io_free(gecos->mask);
+  io_free(gecos->reason);
+  io_free(gecos);
 }
 
 struct GecosItem *
 gecos_make(void)
 {
-  struct GecosItem *gecos = xcalloc(sizeof(*gecos));
+  struct GecosItem *gecos = io_calloc(sizeof(*gecos));
   list_add(gecos, &gecos->node, &gecos_list);
 
   return gecos;

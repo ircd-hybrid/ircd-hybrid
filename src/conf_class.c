@@ -46,7 +46,7 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *class = xcalloc(sizeof(*class));
+  struct ClassItem *class = io_calloc(sizeof(*class));
 
   class->active = true;
   class->con_freq = DEFAULT_CONNECTFREQUENCY;
@@ -74,15 +74,15 @@ class_free(struct ClassItem *const class)
     patricia_destroy(class->ip_tree_v4, NULL);
 
   list_remove(&class->node, &class_list);
-  xfree(class->name);
-  xfree(class);
+  io_free(class->name);
+  io_free(class);
 }
 
 void
 class_init(void)
 {
   class_default = class_make();
-  class_default->name = xstrdup("default");
+  class_default->name = io_strdup("default");
 }
 
 const struct ClassItem *

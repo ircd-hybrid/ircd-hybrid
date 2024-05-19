@@ -426,7 +426,7 @@ tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint
       if (X509_digest(cert, digest, md, &n))
       {
         binary_to_hex(md, buf, n);
-        *fingerprint = xstrdup(buf);
+        *fingerprint = io_strdup(buf);
       }
     default:
       break;

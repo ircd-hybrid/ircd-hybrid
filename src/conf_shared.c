@@ -47,17 +47,17 @@ shared_clear(void)
     struct SharedItem *shared = shared_list.head->data;
 
     list_remove(&shared->node, &shared_list);
-    xfree(shared->server);
-    xfree(shared->user);
-    xfree(shared->host);
-    xfree(shared);
+    io_free(shared->server);
+    io_free(shared->user);
+    io_free(shared->host);
+    io_free(shared);
   }
 }
 
 struct SharedItem *
 shared_make(void)
 {
-  struct SharedItem *shared = xcalloc(sizeof(*shared));
+  struct SharedItem *shared = io_calloc(sizeof(*shared));
   list_add(shared, &shared->node, &shared_list);
 
   return shared;

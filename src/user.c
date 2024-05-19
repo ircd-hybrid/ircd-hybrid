@@ -236,7 +236,7 @@ user_welcome(struct Client *client)
   {
     AddUMode(client, UMODE_SECURE);
 
-    client->tls_cipher = xstrdup(tls_get_cipher(&client->connection->fd->tls));
+    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
 
@@ -361,7 +361,7 @@ user_register_local(struct Client *client)
     }
   }
 
-  xfree(client->connection->password);
+  io_free(client->connection->password);
   client->connection->password = NULL;
 
   const char *id;

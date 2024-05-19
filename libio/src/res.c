@@ -104,7 +104,7 @@ static void
 rem_request(struct reslist *request)
 {
   list_remove(&request->node, &request_list);
-  xfree(request);
+  io_free(request);
 }
 
 /*
@@ -113,7 +113,7 @@ rem_request(struct reslist *request)
 static struct reslist *
 make_request(dns_callback_fnc callback, void *ctx)
 {
-  struct reslist *request = xcalloc(sizeof(*request));
+  struct reslist *request = io_calloc(sizeof(*request));
 
   request->sentat = event_base->time.sec_monotonic;
   request->retries = 2;

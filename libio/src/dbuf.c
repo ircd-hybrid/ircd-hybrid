@@ -38,7 +38,7 @@
 struct dbuf_block *
 dbuf_alloc(void)
 {
-  struct dbuf_block *block = xcalloc(sizeof(*block));
+  struct dbuf_block *block = io_calloc(sizeof(*block));
 
   ++block->ref_count;
   return block;
@@ -48,7 +48,7 @@ void
 dbuf_ref_free(struct dbuf_block *block)
 {
   if (--block->ref_count <= 0)
-    xfree(block);
+    io_free(block);
 }
 
 void

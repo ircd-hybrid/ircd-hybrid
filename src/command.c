@@ -122,7 +122,7 @@ command_tree_add_element(struct CommandTree *tree, struct Command *command, cons
     struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
     if (current == NULL)
     {
-      current = xcalloc(sizeof(*current));
+      current = io_calloc(sizeof(*current));
       tree->pointers[*name & (MAXPTRLEN - 1)] = current;
 
       tree->links++;  /* Have new pointer, so up ref count */
@@ -179,7 +179,7 @@ command_tree_del_element(struct CommandTree *tree, const char *const name)
       {
         tree->pointers[*name & (MAXPTRLEN - 1)] = NULL;
         tree->links--;
-        xfree(current);
+        io_free(current);
       }
     }
   }

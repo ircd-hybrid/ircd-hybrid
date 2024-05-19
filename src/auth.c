@@ -136,7 +136,7 @@ static const char *const HeaderMessages[] =
 static struct AuthRequest *
 auth_make(struct Client *client)
 {
-  struct AuthRequest *auth = xcalloc(sizeof(*auth));
+  struct AuthRequest *auth = io_calloc(sizeof(*auth));
 
   auth->client = client;
   auth->client->connection->auth = auth;
@@ -155,7 +155,7 @@ static void
 auth_free(struct AuthRequest *auth)
 {
   auth->client = NULL;
-  xfree(auth);
+  io_free(auth);
 }
 
 /**

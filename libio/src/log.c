@@ -89,9 +89,9 @@ static list_t log_list;
 struct Log *
 log_add(enum log_type type, bool main, size_t max_file_size, const char *file_name)
 {
-  struct Log *log = xcalloc(sizeof(*log));
+  struct Log *log = io_calloc(sizeof(*log));
   log->type = type;
-  log->file_name = xstrdup(file_name);
+  log->file_name = io_strdup(file_name);
   log->max_file_size = max_file_size;
   log->main = main;
   log->flush_immediately = true;
@@ -259,8 +259,8 @@ log_destroy(struct Log *log)
   if (log->file)
     fclose(log->file);
 
-  xfree(log->file_name);
-  xfree(log);
+  io_free(log->file_name);
+  io_free(log);
 }
 
 /**

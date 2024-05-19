@@ -68,8 +68,8 @@ service_clear(void)
     struct ServiceItem *service = service_list.head->data;
 
     list_remove(&service->node, &service_list);
-    xfree(service->name);
-    xfree(service);
+    io_free(service->name);
+    io_free(service);
   }
 }
 
@@ -84,7 +84,7 @@ service_clear(void)
 struct ServiceItem *
 service_make(void)
 {
-  struct ServiceItem *service = xcalloc(sizeof(*service));
+  struct ServiceItem *service = io_calloc(sizeof(*service));
   list_add(service, &service->node, &service_list);
 
   return service;

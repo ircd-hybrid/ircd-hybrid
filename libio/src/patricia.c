@@ -112,7 +112,7 @@ New_Prefix2(int family, void *dest, int bitlen, prefix_t *prefix)
 
   if (prefix == NULL)
   {
-    prefix = xcalloc(sizeof(*prefix));
+    prefix = io_calloc(sizeof(*prefix));
     dynamic_allocated = 1;
   }
 
@@ -212,7 +212,7 @@ Deref_Prefix(prefix_t *prefix)
   /* For secure programming, raise an assert. No static prefix can call this */
   assert(prefix->ref_count > 0);
   if (--prefix->ref_count <= 0)
-    xfree(prefix);
+    io_free(prefix);
 }
 /* } */
 
@@ -223,7 +223,7 @@ Deref_Prefix(prefix_t *prefix)
 patricia_tree_t *
 patricia_new(unsigned int maxbits)
 {
-  patricia_tree_t *patricia = xcalloc(sizeof(*patricia));
+  patricia_tree_t *patricia = io_calloc(sizeof(*patricia));
   patricia->maxbits = maxbits;
 
   assert(maxbits <= PATRICIA_MAXBITS);  /* XXX */
@@ -262,7 +262,7 @@ patricia_clear(patricia_tree_t *patricia, void (*func)(void *))
         assert(Xrn->data == NULL);
       }
 
-      xfree(Xrn);
+      io_free(Xrn);
       patricia->num_active_node--;
 
       if (l)
@@ -298,7 +298,7 @@ void
 patricia_destroy(patricia_tree_t *patricia, void (*func)(void *))
 {
   patricia_clear(patricia, func);
-  xfree(patricia);
+  io_free(patricia);
 }
 
 /*
@@ -506,7 +506,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 
   if (patricia->head == NULL)
   {
-    node = xcalloc(sizeof(*node));
+    node = io_calloc(sizeof(*node));
     node->bit = prefix->bitlen;
     node->prefix = Ref_Prefix(prefix);
     patricia->head = node;
@@ -631,7 +631,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
     return node;
   }
 
-  new_node = xcalloc(sizeof(*new_node));
+  new_node = io_calloc(sizeof(*new_node));
   new_node->bit = prefix->bitlen;
   new_node->prefix = Ref_Prefix(prefix);
   patricia->num_active_node++;
@@ -692,7 +692,7 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
   }
   else
   {
-    glue = xcalloc(sizeof(*glue));
+    glue = io_calloc(sizeof(*glue));
     glue->bit = differ_bit;
     glue->parent = node->parent;
     patricia->num_active_node++;
@@ -771,7 +771,7 @@ patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
 
     parent = node->parent;
     Deref_Prefix(node->prefix);
-    xfree(node);
+    io_free(node);
     patricia->num_active_node--;
 
     if (parent == NULL)
@@ -814,7 +814,7 @@ patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
     }
 
     child->parent = parent->parent;
-    xfree(parent);
+    io_free(parent);
     patricia->num_active_node--;
     return;
   }
@@ -838,7 +838,7 @@ patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
   child->parent = parent;
 
   Deref_Prefix(node->prefix);
-  xfree(node);
+  io_free(node);
   patricia->num_active_node--;
 
   if (parent == NULL)

@@ -55,7 +55,7 @@ listener_get_list(void)
 static struct Listener *
 listener_make(const int port, const struct io_addr *addr)
 {
-  struct Listener *listener = xcalloc(sizeof(*listener));
+  struct Listener *listener = io_calloc(sizeof(*listener));
 
   listener->port = port;
   listener->addr = *addr;
@@ -68,8 +68,8 @@ static void
 listener_free(struct Listener *listener)
 {
   list_remove(&listener->node, &listener_list);
-  xfree(listener->name);
-  xfree(listener);
+  io_free(listener->name);
+  io_free(listener);
 }
 
 /*
@@ -303,7 +303,7 @@ listener_finalize(struct Listener *listener)
     buf[0] = '0';
   }
 
-  listener->name = xstrdup(buf);
+  listener->name = io_strdup(buf);
 
   /*
    * At first, open a new socket

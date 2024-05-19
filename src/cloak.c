@@ -172,8 +172,8 @@ cloak_set_secret(const char *value)
   if (EmptyString(value))
     return;
 
-  xfree(config->secret);
-  config->secret = xstrdup(value);
+  io_free(config->secret);
+  config->secret = io_strdup(value);
   config->secret_len = strlen(config->secret);
 }
 
@@ -191,8 +191,8 @@ cloak_set_suffix(const char *value)
   if (EmptyString(value))
     return;
 
-  xfree(config->suffix);
-  config->suffix = xstrdup(value);
+  io_free(config->suffix);
+  config->suffix = io_strdup(value);
   config->suffix_len = strlen(config->suffix);
 }
 
@@ -208,7 +208,7 @@ cloak_init(void)
   if (config)
     return;
 
-  config = xcalloc(sizeof(*config));
+  config = io_calloc(sizeof(*config));
   cloak_set_enabled();
   cloak_set_num_bits(80);
   cloak_set_cidr_len_ipv4(32);

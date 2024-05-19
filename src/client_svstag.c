@@ -35,8 +35,8 @@ static void
 svstag_free(struct ServicesTag *svstag, list_t *list)
 {
   list_remove(&svstag->node, list);
-  xfree(svstag->tag);
-  xfree(svstag);
+  io_free(svstag->tag);
+  io_free(svstag);
 }
 
 void
@@ -60,9 +60,9 @@ svstag_attach(list_t *list, unsigned int numeric,
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;
 
-  struct ServicesTag *svstag = xcalloc(sizeof(*svstag));
+  struct ServicesTag *svstag = io_calloc(sizeof(*svstag));
   svstag->numeric = numeric;
-  svstag->tag = xstrdup(tag);
+  svstag->tag = io_strdup(tag);
 
   const struct user_modes *tab;
   for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)

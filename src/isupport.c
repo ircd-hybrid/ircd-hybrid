@@ -94,7 +94,7 @@ isupport_clear_lines(void)
   {
     list_node_t *node = isupport_list_lines.head;
     list_remove(node, &isupport_list_lines);
-    xfree(node->data);
+    io_free(node->data);
     list_free_node(node);
   }
 }
@@ -136,7 +136,7 @@ isupport_build_lines(void)
       if (bufptr[len - 1] == ' ')
         bufptr[--len] = '\0';
 
-      list_add_tail(xstrdup(buf), list_make_node(), &isupport_list_lines);
+      list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
       bufptr = buf;
       len = 0;
       tokens = 0;
@@ -148,7 +148,7 @@ isupport_build_lines(void)
     if (bufptr[len - 1] == ' ')
       bufptr[--len] = '\0';
 
-    list_add_tail(xstrdup(buf), list_make_node(), &isupport_list_lines);
+    list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
   }
 }
 
@@ -208,9 +208,9 @@ isupport_init(void)
 static struct Isupport *
 isupport_create(const char *name, const char *options, int number)
 {
-  struct Isupport *support = xcalloc(sizeof(*support));
-  support->name = xstrdup(name);
-  support->options = (options) ? xstrdup(options) : NULL;
+  struct Isupport *support = io_calloc(sizeof(*support));
+  support->name = io_strdup(name);
+  support->options = (options) ? io_strdup(options) : NULL;
   support->number = number;
   list_add_tail(support, &support->node, &isupport_list);
 
@@ -228,9 +228,9 @@ static void
 isupport_destroy(struct Isupport *support)
 {
   list_remove(&support->node, &isupport_list);
-  xfree(support->name);
-  xfree(support->options);
-  xfree(support);
+  io_free(support->name);
+  io_free(support->options);
+  io_free(support);
 }
 
 /**

@@ -61,8 +61,8 @@ cluster_clear(void)
     struct ClusterItem *cluster = cluster_list.head->data;
 
     list_remove(&cluster->node, &cluster_list);
-    xfree(cluster->server);
-    xfree(cluster);
+    io_free(cluster->server);
+    io_free(cluster);
   }
 }
 
@@ -77,7 +77,7 @@ cluster_clear(void)
 struct ClusterItem *
 cluster_make(void)
 {
-  struct ClusterItem *cluster = xcalloc(sizeof(*cluster));
+  struct ClusterItem *cluster = io_calloc(sizeof(*cluster));
   list_add(cluster, &cluster->node, &cluster_list);
 
   return cluster;

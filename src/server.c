@@ -74,7 +74,7 @@ write_links_file(void *unused)
   LIST_FOREACH_SAFE(node, node_next, flatten_links.head)
   {
     list_remove(node, &flatten_links);
-    xfree(node->data);
+    io_free(node->data);
     list_free_node(node);
   }
 
@@ -99,7 +99,7 @@ write_links_file(void *unused)
      * - madmax
      */
     snprintf(buf, sizeof(buf), "%s %s :1 %s", client->name, me.name, client->info);
-    list_add_tail(xstrdup(buf), list_make_node(), &flatten_links);
+    list_add_tail(io_strdup(buf), list_make_node(), &flatten_links);
 
     strlcat(buf, "\n", sizeof(buf));
     fputs(buf, file);
@@ -130,7 +130,7 @@ read_links_file(void)
     if (p)
       *p = '\0';
 
-    list_add_tail(xstrdup(buf), list_make_node(), &flatten_links);
+    list_add_tail(io_strdup(buf), list_make_node(), &flatten_links);
   }
 
   fclose(file);
@@ -355,7 +355,7 @@ struct Server *
 server_make(struct Client *client)
 {
   if (client->serv == NULL)
-    client->serv = xcalloc(sizeof(*client->serv));
+    client->serv = io_calloc(sizeof(*client->serv));
 
   return client->serv;
 }

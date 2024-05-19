@@ -54,7 +54,7 @@ static void (*outofmemory)(void) = abort;
  * @return A pointer to the allocated memory block.
  */
 void *
-xcalloc(size_t size)
+io_calloc(size_t size)
 {
   void *ret = calloc(1, size);
 
@@ -75,7 +75,7 @@ xcalloc(size_t size)
  * @return A pointer to the reallocated memory block.
  */
 void *
-xrealloc(void *x, size_t y)
+io_realloc(void *x, size_t y)
 {
   void *ret = realloc(x, y);
 
@@ -93,7 +93,7 @@ xrealloc(void *x, size_t y)
  * @param x Pointer to the memory block to deallocate.
  */
 void
-xfree(void *x)
+io_free(void *x)
 {
   free(x);
 }
@@ -108,7 +108,7 @@ xfree(void *x)
  * @return A pointer to the duplicated string.
  */
 void *
-xstrdup(const char *s)
+io_strdup(const char *s)
 {
   void *ret = malloc(strlen(s) + 1);
 
@@ -131,7 +131,7 @@ xstrdup(const char *s)
  * @return A pointer to the duplicated string.
  */
 void *
-xstrndup(const char *s, size_t len)
+io_strndup(const char *s, size_t len)
 {
   void *ret = malloc(len + 1);
 

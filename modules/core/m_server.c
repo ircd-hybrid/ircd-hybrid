@@ -155,7 +155,7 @@ server_burst(struct Client *client_p)
 static void
 server_estab(struct Client *client_p)
 {
-  xfree(client_p->connection->password);
+  io_free(client_p->connection->password);
   client_p->connection->password = NULL;
 
   if (ConfigServerInfo.hub == 0 && list_length(&local_server_list))
@@ -211,7 +211,7 @@ server_estab(struct Client *client_p)
   /* Show the real host/IP to admins */
   if (tls_isusing(&client_p->connection->fd->tls))
   {
-    client_p->tls_cipher = xstrdup(tls_get_cipher(&client_p->connection->fd->tls));
+    client_p->tls_cipher = io_strdup(tls_get_cipher(&client_p->connection->fd->tls));
 
     /* Show the real host/IP to admins */
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,

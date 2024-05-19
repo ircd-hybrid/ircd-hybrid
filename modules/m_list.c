@@ -49,7 +49,7 @@ do_list(struct Client *source, char *arg)
     return;
   }
 
-  struct ListTask *lt = xcalloc(sizeof(*lt));
+  struct ListTask *lt = io_calloc(sizeof(*lt));
   lt->users_max = UINT_MAX;
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
@@ -146,7 +146,7 @@ do_list(struct Client *source, char *arg)
             error = true;
 
           if (error == false)
-            list_add(xstrdup(opt), list_make_node(), list);
+            list_add(io_strdup(opt), list_make_node(), list);
       }
     }
 

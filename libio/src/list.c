@@ -47,7 +47,7 @@
 list_node_t *
 list_make_node(void)
 {
-  list_node_t *node = xcalloc(sizeof(*node));
+  list_node_t *node = io_calloc(sizeof(*node));
 
   return node;
 }
@@ -62,7 +62,7 @@ list_make_node(void)
 void
 list_free_node(list_node_t *node)
 {
-  xfree(node);
+  io_free(node);
 }
 
 /**

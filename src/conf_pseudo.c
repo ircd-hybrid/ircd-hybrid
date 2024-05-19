@@ -115,13 +115,13 @@ pseudo_register(const char *name, const char *nick, const char *server,
   if (command_find(command))
     return;
 
-  struct PseudoItem *pseudo = xcalloc(sizeof(*pseudo));
-  pseudo->name = xstrdup(name);
-  pseudo->nick = xstrdup(nick);
-  pseudo->server = xstrdup(server);
-  pseudo->command = xstrdup(command);
+  struct PseudoItem *pseudo = io_calloc(sizeof(*pseudo));
+  pseudo->name = io_strdup(name);
+  pseudo->nick = io_strdup(nick);
+  pseudo->server = io_strdup(server);
+  pseudo->command = io_strdup(command);
   if (!EmptyString(prepend))
-    pseudo->prepend = xstrdup(prepend);
+    pseudo->prepend = io_strdup(prepend);
 
   pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
@@ -155,11 +155,11 @@ pseudo_clear(void)
     command_del(&pseudo->command_struct);
     list_remove(&pseudo->node, &pseudo_list);
 
-    xfree(pseudo->name);
-    xfree(pseudo->nick);
-    xfree(pseudo->server);
-    xfree(pseudo->prepend);
-    xfree(pseudo->command);
-    xfree(pseudo);
+    io_free(pseudo->name);
+    io_free(pseudo->nick);
+    io_free(pseudo->server);
+    io_free(pseudo->prepend);
+    io_free(pseudo->command);
+    io_free(pseudo);
   }
 }

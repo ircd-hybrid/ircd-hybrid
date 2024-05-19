@@ -118,7 +118,7 @@ reset_block_state(void)
   {
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
-      xfree(node->data);
+      io_free(node->data);
       list_remove(node, *list);
       list_free_node(node);
     }
@@ -467,8 +467,8 @@ serverinfo_tls_certificate_file: TLS_CERTIFICATE_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_certificate_file);
-    ConfigServerInfo.tls_certificate_file = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_certificate_file);
+    ConfigServerInfo.tls_certificate_file = io_strdup(yylval.string);
   }
 };
 
@@ -476,8 +476,8 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.rsa_private_key_file);
-    ConfigServerInfo.rsa_private_key_file = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.rsa_private_key_file);
+    ConfigServerInfo.rsa_private_key_file = io_strdup(yylval.string);
   }
 };
 
@@ -485,8 +485,8 @@ serverinfo_tls_dh_param_file: TLS_DH_PARAM_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_dh_param_file);
-    ConfigServerInfo.tls_dh_param_file = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_dh_param_file);
+    ConfigServerInfo.tls_dh_param_file = io_strdup(yylval.string);
   }
 };
 
@@ -494,8 +494,8 @@ serverinfo_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_cipher_list);
-    ConfigServerInfo.tls_cipher_list = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_cipher_list);
+    ConfigServerInfo.tls_cipher_list = io_strdup(yylval.string);
   }
 };
 
@@ -503,8 +503,8 @@ serverinfo_tls_cipher_suites: TLS_CIPHER_SUITES '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_cipher_suites);
-    ConfigServerInfo.tls_cipher_suites = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_cipher_suites);
+    ConfigServerInfo.tls_cipher_suites = io_strdup(yylval.string);
   }
 };
 
@@ -512,8 +512,8 @@ serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRIN
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_message_digest_algorithm);
-    ConfigServerInfo.tls_message_digest_algorithm = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_message_digest_algorithm);
+    ConfigServerInfo.tls_message_digest_algorithm = io_strdup(yylval.string);
   }
 }
 
@@ -521,8 +521,8 @@ serverinfo_tls_supported_groups: TLS_SUPPORTED_GROUPS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.tls_supported_groups);
-    ConfigServerInfo.tls_supported_groups = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.tls_supported_groups);
+    ConfigServerInfo.tls_supported_groups = io_strdup(yylval.string);
   }
 };
 
@@ -532,7 +532,7 @@ serverinfo_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
   {
     if (server_valid_name(yylval.string))
-      ConfigServerInfo.name = xstrdup(yylval.string);
+      ConfigServerInfo.name = io_strdup(yylval.string);
     else
     {
       conf_error_report("Ignoring serverinfo::name -- invalid name. Aborting.");
@@ -547,7 +547,7 @@ serverinfo_sid: IRCD_SID '=' QSTRING ';'
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.sid == NULL)
   {
     if (valid_sid(yylval.string))
-      ConfigServerInfo.sid = xstrdup(yylval.string);
+      ConfigServerInfo.sid = io_strdup(yylval.string);
     else
     {
       conf_error_report("Ignoring serverinfo::sid -- invalid SID. Aborting.");
@@ -560,8 +560,8 @@ serverinfo_description: DESCRIPTION '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerInfo.description);
-    ConfigServerInfo.description = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.description);
+    ConfigServerInfo.description = io_strdup(yylval.string);
     strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
   }
 };
@@ -575,8 +575,8 @@ serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'
     if (p)
       *p = '\0';
 
-    xfree(ConfigServerInfo.network_name);
-    ConfigServerInfo.network_name = xstrdup(yylval.string);
+    io_free(ConfigServerInfo.network_name);
+    ConfigServerInfo.network_name = io_strdup(yylval.string);
   }
 };
 
@@ -585,8 +585,8 @@ serverinfo_network_description: NETWORK_DESCRIPTION '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigServerInfo.network_description);
-  ConfigServerInfo.network_description = xstrdup(yylval.string);
+  io_free(ConfigServerInfo.network_description);
+  ConfigServerInfo.network_description = io_strdup(yylval.string);
 };
 
 serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
@@ -681,8 +681,8 @@ admin_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigAdminInfo.name);
-  ConfigAdminInfo.name = xstrdup(yylval.string);
+  io_free(ConfigAdminInfo.name);
+  ConfigAdminInfo.name = io_strdup(yylval.string);
 };
 
 admin_email: EMAIL '=' QSTRING ';'
@@ -690,8 +690,8 @@ admin_email: EMAIL '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigAdminInfo.email);
-  ConfigAdminInfo.email = xstrdup(yylval.string);
+  io_free(ConfigAdminInfo.email);
+  ConfigAdminInfo.email = io_strdup(yylval.string);
 };
 
 admin_description: DESCRIPTION '=' QSTRING ';'
@@ -699,8 +699,8 @@ admin_description: DESCRIPTION '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  xfree(ConfigAdminInfo.description);
-  ConfigAdminInfo.description = xstrdup(yylval.string);
+  io_free(ConfigAdminInfo.description);
+  ConfigAdminInfo.description = io_strdup(yylval.string);
 };
 
 
@@ -731,7 +731,7 @@ motd_item:  motd_mask | motd_file | error ';' ;
 motd_mask: MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 motd_file: T_FILE '=' QSTRING ';'
@@ -940,19 +940,19 @@ oper_entry: OPERATOR
     split_nuh(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_OPER);
-    conf->addr = xcalloc(sizeof(*conf->addr));
-    conf->name = xstrdup(block_state.name.buf);
-    conf->user = xstrdup(block_state.user.buf);
-    conf->host = xstrdup(block_state.host.buf);
+    conf->addr = io_calloc(sizeof(*conf->addr));
+    conf->name = io_strdup(block_state.name.buf);
+    conf->user = io_strdup(block_state.user.buf);
+    conf->host = io_strdup(block_state.host.buf);
 
     if (block_state.cert.buf[0])
-      conf->certfp = xstrdup(block_state.cert.buf);
+      conf->certfp = io_strdup(block_state.cert.buf);
 
     if (block_state.rpass.buf[0])
-      conf->passwd = xstrdup(block_state.rpass.buf);
+      conf->passwd = io_strdup(block_state.rpass.buf);
 
     if (block_state.whois.buf[0])
-      conf->whois = xstrdup(block_state.whois.buf);
+      conf->whois = io_strdup(block_state.whois.buf);
 
     conf->flags = block_state.flags.value;
     conf->modes = block_state.modes.value;
@@ -985,7 +985,7 @@ oper_name: NAME '=' QSTRING ';'
 oper_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 oper_password: PASSWORD '=' QSTRING ';'
@@ -1288,8 +1288,8 @@ class_entry: CLASS
     class = class_make();
 
   class->active = true;
-  xfree(class->name);
-  class->name = xstrdup(block_state.class.buf);
+  io_free(class->name);
+  class->name = io_strdup(block_state.class.buf);
   class->ping_freq = block_state.ping_freq.value;
   class->max_perip_local = block_state.max_perip_local.value;
   class->max_perip_global = block_state.max_perip_global.value;
@@ -1569,13 +1569,13 @@ auth_entry: IRCD_AUTH
     split_nuh(&nuh);
 
     struct MaskItem *conf = conf_make(CONF_CLIENT);
-    conf->user = xstrdup(block_state.user.buf);
-    conf->host = xstrdup(block_state.host.buf);
+    conf->user = io_strdup(block_state.user.buf);
+    conf->host = io_strdup(block_state.host.buf);
 
     if (block_state.rpass.buf[0])
-      conf->passwd = xstrdup(block_state.rpass.buf);
+      conf->passwd = io_strdup(block_state.rpass.buf);
     if (block_state.name.buf[0])
-      conf->name = xstrdup(block_state.name.buf);
+      conf->name = io_strdup(block_state.name.buf);
 
     conf->flags = block_state.flags.value;
     conf->port = block_state.port.value;
@@ -1599,7 +1599,7 @@ auth_item:      auth_user |
 auth_user: USER '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 auth_passwd: PASSWORD '=' QSTRING ';'
@@ -1739,7 +1739,7 @@ resv_reason: REASON '=' QSTRING ';'
 resv_exempt: EXEMPT '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.mask.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 };
 
 
@@ -1759,7 +1759,7 @@ service_name: NAME '=' QSTRING ';'
   if (server_valid_name(yylval.string))
   {
     struct ServiceItem *service = service_make();
-    service->name = xstrdup(yylval.string);
+    service->name = io_strdup(yylval.string);
   }
 };
 
@@ -1785,9 +1785,9 @@ shared_entry: T_SHARED
 
   struct SharedItem *shared = shared_make();
   shared->type = block_state.flags.value;
-  shared->server = xstrdup(block_state.name.buf);
-  shared->user = xstrdup(block_state.user.buf);
-  shared->host = xstrdup(block_state.host.buf);
+  shared->server = io_strdup(block_state.name.buf);
+  shared->user = io_strdup(block_state.user.buf);
+  shared->host = io_strdup(block_state.host.buf);
 };
 
 shared_items: shared_items shared_item | shared_item;
@@ -1887,7 +1887,7 @@ cluster_entry: T_CLUSTER
 
   struct ClusterItem *cluster = cluster_make();
   cluster->type = block_state.flags.value;
-  cluster->server = xstrdup(block_state.name.buf);
+  cluster->server = io_strdup(block_state.name.buf);
 };
 
 cluster_items:  cluster_items cluster_item | cluster_item;
@@ -1985,21 +1985,21 @@ connect_entry: CONNECT
     break;
 
   struct MaskItem *conf = conf_make(CONF_SERVER);
-  conf->addr = xcalloc(sizeof(*conf->addr));
+  conf->addr = io_calloc(sizeof(*conf->addr));
   conf->port = block_state.port.value;
   conf->timeout = block_state.timeout.value;
   conf->flags = block_state.flags.value;
   conf->aftype = block_state.aftype.value;
-  conf->host = xstrdup(block_state.host.buf);
-  conf->name = xstrdup(block_state.name.buf);
-  conf->passwd = xstrdup(block_state.rpass.buf);
-  conf->spasswd = xstrdup(block_state.spass.buf);
+  conf->host = io_strdup(block_state.host.buf);
+  conf->name = io_strdup(block_state.name.buf);
+  conf->passwd = io_strdup(block_state.rpass.buf);
+  conf->spasswd = io_strdup(block_state.spass.buf);
 
   if (block_state.cert.buf[0])
-    conf->certfp = xstrdup(block_state.cert.buf);
+    conf->certfp = io_strdup(block_state.cert.buf);
 
   if (block_state.ciph.buf[0])
-    conf->cipher_list = xstrdup(block_state.ciph.buf);
+    conf->cipher_list = io_strdup(block_state.ciph.buf);
 
   list_move_list(&block_state.leaf.list, &conf->leaf_list);
   list_move_list(&block_state.hub.list, &conf->hub_list);
@@ -2018,7 +2018,7 @@ connect_entry: CONNECT
     {
       assert(res);
 
-      conf->bind = xcalloc(sizeof(*conf->bind));
+      conf->bind = io_calloc(sizeof(*conf->bind));
 
       memcpy(conf->bind, res->ai_addr, res->ai_addrlen);
       conf->bind->ss_len = res->ai_addrlen;
@@ -2150,13 +2150,13 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
 connect_hub_mask: HUB_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.hub.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.hub.list);
 };
 
 connect_leaf_mask: LEAF_MASK '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    list_add(xstrdup(yylval.string), list_make_node(), &block_state.leaf.list);
+    list_add(io_strdup(yylval.string), list_make_node(), &block_state.leaf.list);
 };
 
 connect_class: CLASS '=' QSTRING ';'
@@ -2194,13 +2194,13 @@ kill_entry: KILL
     break;
 
   struct MaskItem *conf = conf_make(CONF_KLINE);
-  conf->user = xstrdup(block_state.user.buf);
-  conf->host = xstrdup(block_state.host.buf);
+  conf->user = io_strdup(block_state.user.buf);
+  conf->host = io_strdup(block_state.host.buf);
 
   if (block_state.rpass.buf[0])
-    conf->reason = xstrdup(block_state.rpass.buf);
+    conf->reason = io_strdup(block_state.rpass.buf);
   else
-    conf->reason = xstrdup(CONF_NOREASON);
+    conf->reason = io_strdup(CONF_NOREASON);
   add_conf_by_address(CONF_KLINE, conf);
 };
 
@@ -2252,12 +2252,12 @@ deny_entry: DENY
   if (parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
   {
     struct MaskItem *conf = conf_make(CONF_DLINE);
-    conf->host = xstrdup(block_state.addr.buf);
+    conf->host = io_strdup(block_state.addr.buf);
 
     if (block_state.rpass.buf[0])
-      conf->reason = xstrdup(block_state.rpass.buf);
+      conf->reason = io_strdup(block_state.rpass.buf);
     else
-      conf->reason = xstrdup(CONF_NOREASON);
+      conf->reason = io_strdup(CONF_NOREASON);
     add_conf_by_address(CONF_DLINE, conf);
   }
 };
@@ -2293,7 +2293,7 @@ exempt_ip: IP '=' QSTRING ';'
     if (*yylval.string && parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
     {
       struct MaskItem *conf = conf_make(CONF_EXEMPT);
-      conf->host = xstrdup(yylval.string);
+      conf->host = io_strdup(yylval.string);
 
       add_conf_by_address(CONF_EXEMPT, conf);
     }
@@ -2316,12 +2316,12 @@ gecos_entry: GECOS
     break;
 
   struct GecosItem *gecos = gecos_make();
-  gecos->mask = xstrdup(block_state.name.buf);
+  gecos->mask = io_strdup(block_state.name.buf);
 
   if (block_state.rpass.buf[0])
-    gecos->reason = xstrdup(block_state.rpass.buf);
+    gecos->reason = io_strdup(block_state.rpass.buf);
   else
-    gecos->reason = xstrdup(CONF_NOREASON);
+    gecos->reason = io_strdup(CONF_NOREASON);
 };
 
 gecos_items: gecos_items gecos_item | gecos_item;
@@ -2914,8 +2914,8 @@ serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerHide.flatten_links_file);
-    ConfigServerHide.flatten_links_file = xstrdup(yylval.string);
+    io_free(ConfigServerHide.flatten_links_file);
+    ConfigServerHide.flatten_links_file = io_strdup(yylval.string);
   }
 };
 
@@ -2941,8 +2941,8 @@ serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    xfree(ConfigServerHide.hidden_name);
-    ConfigServerHide.hidden_name = xstrdup(yylval.string);
+    io_free(ConfigServerHide.hidden_name);
+    ConfigServerHide.hidden_name = io_strdup(yylval.string);
   }
 };
 

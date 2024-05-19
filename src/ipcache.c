@@ -64,7 +64,7 @@ ipcache_record_find_or_add(void *addr)
   if (pnode->data)  /* Deliberate crash if 'pnode' is NULL */
     return pnode->data;  /* Already added to the trie */
 
-  struct ip_entry *iptr = xcalloc(sizeof(*iptr));
+  struct ip_entry *iptr = io_calloc(sizeof(*iptr));
   iptr->trie_pointer = ptrie;
   list_add(pnode, &iptr->node, &ipcache_list);
 
@@ -84,7 +84,7 @@ ipcache_record_delete(patricia_node_t *pnode)
     patricia_remove(iptr->trie_pointer, pnode);
 
     list_remove(&iptr->node, &ipcache_list);
-    xfree(iptr);
+    io_free(iptr);
   }
 }
 

@@ -136,10 +136,10 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   conf = conf_make(CONF_KLINE);
-  conf->user = xstrdup(aline->user);
-  conf->host = xstrdup(aline->host);
+  conf->user = io_strdup(aline->user);
+  conf->host = io_strdup(aline->host);
   conf->setat = event_base->time.sec_real;
-  conf->reason = xstrdup(buf);
+  conf->reason = io_strdup(buf);
   SetConfDatabase(conf);
 
   if (aline->duration)

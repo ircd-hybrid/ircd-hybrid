@@ -132,7 +132,7 @@ io_getopt(int *argc, char ***argv, struct io_getopt *opts)
             io_getopt_usage(progname, opts);
           }
 
-          *((char **)opts[i].argloc) = xstrdup((*argv)[1]);
+          *((char **)opts[i].argloc) = io_strdup((*argv)[1]);
           (*argc)--;
           (*argv)++;
           break;

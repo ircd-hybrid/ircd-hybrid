@@ -50,11 +50,11 @@ void
 accept_add(const char *nick, const char *user,
            const char *host, list_t *list)
 {
-  struct AcceptItem *accept = xcalloc(sizeof(*accept));
+  struct AcceptItem *accept = io_calloc(sizeof(*accept));
 
-  accept->nick = xstrdup(nick);
-  accept->user = xstrdup(user);
-  accept->host = xstrdup(host);
+  accept->nick = io_strdup(nick);
+  accept->user = io_strdup(user);
+  accept->host = io_strdup(host);
 
   list_add(accept, &accept->node, list);
 }
@@ -64,10 +64,10 @@ accept_del(struct AcceptItem *accept, list_t *list)
 {
   list_remove(&accept->node, list);
 
-  xfree(accept->nick);
-  xfree(accept->user);
-  xfree(accept->host);
-  xfree(accept);
+  io_free(accept->nick);
+  io_free(accept->user);
+  io_free(accept->host);
+  io_free(accept);
 }
 
 /* del_all_accepts()

@@ -483,7 +483,7 @@ free_list_task(struct Client *client)
   {
     list_node_t *node = lt->show_mask.head;
     list_remove(node, &lt->show_mask);
-    xfree(node->data);
+    io_free(node->data);
     list_free_node(node);
   }
 
@@ -491,11 +491,11 @@ free_list_task(struct Client *client)
   {
     list_node_t *node = lt->hide_mask.head;
     list_remove(node, &lt->hide_mask);
-    xfree(node->data);
+    io_free(node->data);
     list_free_node(node);
   }
 
-  xfree(lt);
+  io_free(lt);
   client->connection->list_task = NULL;
 }
 

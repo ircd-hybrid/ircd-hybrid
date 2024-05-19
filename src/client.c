@@ -80,14 +80,14 @@ static list_node_t *eac_next;  /* next aborted client to exit */
 struct Client *
 client_make(struct Client *from)
 {
-  struct Client *client = xcalloc(sizeof(*client));
+  struct Client *client = io_calloc(sizeof(*client));
 
   if (from)
     client->from = from;
   else
   {
     client->from = client;  /* 'from' of local client is self! */
-    client->connection = xcalloc(sizeof(*client->connection));
+    client->connection = io_calloc(sizeof(*client->connection));
     client->connection->last_data = event_base->time.sec_monotonic;
     client->connection->last_ping = event_base->time.sec_monotonic;
     client->connection->created_real = event_base->time.sec_real;
@@ -141,9 +141,9 @@ client_free(struct Client *client)
   assert(client->svstags.tail == NULL);
 
 
-  xfree(client->serv);
-  xfree(client->tls_certfp);
-  xfree(client->tls_cipher);
+  io_free(client->serv);
+  io_free(client->tls_certfp);
+  io_free(client->tls_cipher);
 
   if (MyConnect(client))
   {
@@ -186,11 +186,11 @@ client_free(struct Client *client)
     dbuf_clear(&client->connection->buf_recvq);
     dbuf_clear(&client->connection->buf_sendq);
 
-    xfree(client->connection);
+    io_free(client->connection);
     client->connection = NULL;
   }
 
-  xfree(client);
+  io_free(client);
 }
 
 /* check_pings_list()
@@ -622,7 +622,7 @@ client_close_connection(struct Client *client)
   dbuf_clear(&client->connection->buf_sendq);
   dbuf_clear(&client->connection->buf_recvq);
 
-  xfree(client->connection->password);
+  io_free(client->connection->password);
   client->connection->password = NULL;
 
   conf_detach(client, CONF_CLIENT | CONF_OPER | CONF_SERVER);

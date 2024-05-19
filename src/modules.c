@@ -91,7 +91,7 @@ unload_one_module(const char *name, bool warn)
     modp->modexit();
 
   list_remove(&modp->node, &modules_list);
-  xfree(modp->name);
+  io_free(modp->name);
 
   lt_dlclose(modp->handle);
 
@@ -143,7 +143,7 @@ load_a_module(const char *path, bool warn)
   }
 
   modp->handle = tmpptr;
-  modp->name = xstrdup(mod_basename);
+  modp->name = io_strdup(mod_basename);
   list_add(modp, &modp->node, &modules_list);
 
   if (modp->modinit)
@@ -213,8 +213,8 @@ mod_add_path(const char *path)
   if (mod_find_path(path))
     return;
 
-  pathst = xcalloc(sizeof(*pathst));
-  pathst->path = xstrdup(path);
+  pathst = io_calloc(sizeof(*pathst));
+  pathst->path = io_strdup(path);
   list_add(pathst, &pathst->node, &modules_path);
 }
 
@@ -229,8 +229,8 @@ add_conf_module(const char *name)
 {
   struct module_path *pathst;
 
-  pathst = xcalloc(sizeof(*pathst));
-  pathst->path = xstrdup(name);
+  pathst = io_calloc(sizeof(*pathst));
+  pathst->path = io_strdup(name);
   list_add(pathst, &pathst->node, &modules_conf);
 }
 
@@ -248,8 +248,8 @@ modules_conf_clear(void)
     struct module_path *path = modules_path.head->data;
 
     list_remove(&path->node, &modules_path);
-    xfree(path->path);
-    xfree(path);
+    io_free(path->path);
+    io_free(path);
   }
 
   while (modules_conf.head)
@@ -257,8 +257,8 @@ modules_conf_clear(void)
     struct module_path *path = modules_conf.head->data;
 
     list_remove(&path->node, &modules_conf);
-    xfree(path->path);
-    xfree(path);
+    io_free(path->path);
+    io_free(path);
   }
 }
 

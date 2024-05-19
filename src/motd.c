@@ -57,7 +57,7 @@ static struct
 static struct Motd *
 motd_create(const char *mask, const char *path)
 {
-  struct Motd *motd = xcalloc(sizeof(*motd));
+  struct Motd *motd = io_calloc(sizeof(*motd));
 
   if (EmptyString(mask))
     motd->type = MOTD_UNIVERSAL;
@@ -80,9 +80,9 @@ motd_create(const char *mask, const char *path)
   }
 
   if (mask)
-    motd->mask = xstrdup(mask);
+    motd->mask = io_strdup(mask);
 
-  motd->path = xstrdup(path);
+  motd->path = io_strdup(path);
   motd->maxcount = MOTD_MAXLINES;
 
   return motd;
@@ -138,9 +138,9 @@ motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  struct MotdCache *cache = xcalloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
+  struct MotdCache *cache = io_calloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref = 1;
-  cache->path = xstrdup(motd->path);
+  cache->path = io_strdup(motd->path);
   cache->maxcount = motd->maxcount;
   cache->modtime = sb.st_mtime;  /* Store modtime */
 
@@ -157,9 +157,9 @@ motd_cache(struct Motd *motd)
   fclose(file);  /* Close the file */
 
   /* Trim memory usage a little */
-  motd->cache = xcalloc(sizeof(*motd->cache) + (MOTD_LINESIZE * cache->count));
+  motd->cache = io_calloc(sizeof(*motd->cache) + (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(*motd->cache) + (MOTD_LINESIZE * cache->count));
-  xfree(cache);
+  io_free(cache);
 
   /* Now link it in */
   list_add(motd->cache, &motd->cache->node, &MotdList.cachelist);
@@ -185,8 +185,8 @@ motd_decache(struct Motd *motd)
   if (--cache->ref == 0)  /* Reduce reference count */
   {
     list_remove(&cache->node, &MotdList.cachelist);
-    xfree(cache->path);  /* Free path info */
-    xfree(cache);  /* Very simple for a reason */
+    io_free(cache->path);  /* Free path info */
+    io_free(cache);  /* Very simple for a reason */
   }
 }
 
@@ -202,9 +202,9 @@ motd_destroy(struct Motd *motd)
   if (motd->cache)  /* Drop the cache */
     motd_decache(motd);
 
-  xfree(motd->path);  /* We always must have a path */
-  xfree(motd->mask);
-  xfree(motd);
+  io_free(motd->path);  /* We always must have a path */
+  io_free(motd->mask);
+  io_free(motd);
 }
 
 /*! \brief Find the first matching MOTD block for a user.

@@ -46,7 +46,7 @@ fdlist_init(void)
    * some not really LEAKED_FDS
    */
   hard_fdlimit = IRCD_MAX(hard_fdlimit, LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
-  fd_table = xcalloc(sizeof(*fd_table) * hard_fdlimit);
+  fd_table = io_calloc(sizeof(*fd_table) * hard_fdlimit);
 }
 
 static void
@@ -97,7 +97,7 @@ fd_open(int fd, bool is_socket, const char *desc)
   F->flags.is_socket = is_socket;
 
   if (desc)
-    F->desc = xstrndup(desc, FD_DESC_SIZE);
+    F->desc = io_strndup(desc, FD_DESC_SIZE);
 
   fdlist_update_highest_fd(F->fd, true);
   ++number_fd;
@@ -118,7 +118,7 @@ fd_close(fde_t *F)
   if (tls_isusing(&F->tls))
     tls_free(&F->tls);
 
-  xfree(F->desc);
+  io_free(F->desc);
   /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
   F->flags.open = false;  /* Must set F->flags.open == false before fdlist_update_highest_fd() */
@@ -149,12 +149,12 @@ fd_note(fde_t *F, const char *format, ...)
     vsnprintf(buf, sizeof(buf), format, args);
     va_end(args);
 
-    xfree(F->desc);
-    F->desc = xstrdup(buf);
+    io_free(F->desc);
+    F->desc = io_strdup(buf);
   }
   else
   {
-    xfree(F->desc);
+    io_free(F->desc);
     F->desc = NULL;
   }
 }

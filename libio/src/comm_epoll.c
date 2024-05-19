@@ -67,10 +67,10 @@ comm_select_init(void)
 
   fd_open(fd, false, "epoll file descriptor");
 
-  epollop = xcalloc(sizeof(*epollop));
+  epollop = io_calloc(sizeof(*epollop));
   epollop->fd = fd;
   epollop->nevents = INITIAL_NEVENT;
-  epollop->events = xcalloc(epollop->nevents * sizeof(*epollop->events));
+  epollop->events = io_calloc(epollop->nevents * sizeof(*epollop->events));
 }
 
 /*
@@ -199,7 +199,7 @@ comm_select(void)
      * ready for more events next time.
      */
     int new_nevents = epollop->nevents * 2;
-    struct epoll_event *new_events = xrealloc(epollop->events, new_nevents * sizeof(*epollop->events));
+    struct epoll_event *new_events = io_realloc(epollop->events, new_nevents * sizeof(*epollop->events));
 
     epollop->events = new_events;
     epollop->nevents = new_nevents;

@@ -267,7 +267,7 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 
   assert(type && !EmptyString(hostname));
 
-  struct AddressRec *arec = xcalloc(sizeof(*arec));
+  struct AddressRec *arec = io_calloc(sizeof(*arec));
   arec->masktype = parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
   arec->Mask.ipa.bits = bits;
   arec->username = username;
@@ -338,7 +338,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
       if (conf->ref_count == 0)
         conf_free(conf);
 
-      xfree(arec);
+      io_free(arec);
       return;
     }
   }
@@ -373,7 +373,7 @@ clear_out_address_conf(void)
 
       if (arec->conf->ref_count == 0)
         conf_free(arec->conf);
-      xfree(arec);
+      io_free(arec);
     }
   }
 }
@@ -422,7 +422,7 @@ hostmask_expire_temporary(void)
 
           list_remove(&arec->node, &atable[i]);
           conf_free(arec->conf);
-          xfree(arec);
+          io_free(arec);
           break;
         default: break;
       }
@@ -524,7 +524,7 @@ map_to_list(enum maskitem_type type)
 struct MaskItem *
 conf_make(enum maskitem_type type)
 {
-  struct MaskItem *const conf = xcalloc(sizeof(*conf));
+  struct MaskItem *const conf = io_calloc(sizeof(*conf));
   list_t *list = NULL;
 
   conf->type   = type;
@@ -545,7 +545,7 @@ conf_free(struct MaskItem *conf)
   if ((list = map_to_list(conf->type)))
     list_find_remove(list, conf);
 
-  xfree(conf->name);
+  io_free(conf->name);
 
   if (conf->dns_pending)
     delete_resolver_queries(conf);
@@ -556,32 +556,32 @@ conf_free(struct MaskItem *conf)
 
   conf->class = NULL;
 
-  xfree(conf->passwd);
-  xfree(conf->spasswd);
-  xfree(conf->reason);
-  xfree(conf->certfp);
-  xfree(conf->whois);
-  xfree(conf->user);
-  xfree(conf->host);
-  xfree(conf->addr);
-  xfree(conf->bind);
-  xfree(conf->cipher_list);
+  io_free(conf->passwd);
+  io_free(conf->spasswd);
+  io_free(conf->reason);
+  io_free(conf->certfp);
+  io_free(conf->whois);
+  io_free(conf->user);
+  io_free(conf->host);
+  io_free(conf->addr);
+  io_free(conf->bind);
+  io_free(conf->cipher_list);
 
   LIST_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
-    xfree(node->data);
+    io_free(node->data);
     list_remove(node, &conf->hub_list);
     list_free_node(node);
   }
 
   LIST_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
   {
-    xfree(node->data);
+    io_free(node->data);
     list_remove(node, &conf->leaf_list);
     list_free_node(node);
   }
 
-  xfree(conf);
+  io_free(conf);
 }
 
 /* attach_iline()
@@ -901,8 +901,8 @@ conf_set_defaults(void)
    */
   assert(class_default == class_get_list()->tail->data);
 
-  ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
-  ConfigServerInfo.network_description = xstrdup(NETWORK_DESCRIPTION_DEFAULT);
+  ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
+  ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
   ConfigServerInfo.max_topic_length = 80;
@@ -931,7 +931,7 @@ conf_set_defaults(void)
   ConfigServerHide.hidden = 0;
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.hide_services = 0;
-  ConfigServerHide.hidden_name = xstrdup(NETWORK_NAME_DEFAULT);
+  ConfigServerHide.hidden_name = io_strdup(NETWORK_NAME_DEFAULT);
   ConfigServerHide.hide_server_ips = 0;
   ConfigServerHide.disable_remote_commands = 0;
 
@@ -988,10 +988,10 @@ static void
 conf_validate(void)
 {
   if (EmptyString(ConfigServerInfo.network_name))
-    ConfigServerInfo.network_name = xstrdup(NETWORK_NAME_DEFAULT);
+    ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
 
   if (EmptyString(ConfigServerInfo.network_description))
-    ConfigServerInfo.network_description = xstrdup(NETWORK_DESCRIPTION_DEFAULT);
+    ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
 /* conf_read()
@@ -1198,39 +1198,39 @@ conf_clear(void)
   log_clear();
 
   /* Clean out ConfigServerInfo */
-  xfree(ConfigServerInfo.description);
+  io_free(ConfigServerInfo.description);
   ConfigServerInfo.description = NULL;
-  xfree(ConfigServerInfo.network_name);
+  io_free(ConfigServerInfo.network_name);
   ConfigServerInfo.network_name = NULL;
-  xfree(ConfigServerInfo.network_description);
+  io_free(ConfigServerInfo.network_description);
   ConfigServerInfo.network_description = NULL;
-  xfree(ConfigServerInfo.rsa_private_key_file);
+  io_free(ConfigServerInfo.rsa_private_key_file);
   ConfigServerInfo.rsa_private_key_file = NULL;
-  xfree(ConfigServerInfo.tls_certificate_file);
+  io_free(ConfigServerInfo.tls_certificate_file);
   ConfigServerInfo.tls_certificate_file = NULL;
-  xfree(ConfigServerInfo.tls_dh_param_file);
+  io_free(ConfigServerInfo.tls_dh_param_file);
   ConfigServerInfo.tls_dh_param_file = NULL;
-  xfree(ConfigServerInfo.tls_supported_groups);
+  io_free(ConfigServerInfo.tls_supported_groups);
   ConfigServerInfo.tls_supported_groups = NULL;
-  xfree(ConfigServerInfo.tls_cipher_list);
+  io_free(ConfigServerInfo.tls_cipher_list);
   ConfigServerInfo.tls_cipher_list = NULL;
-  xfree(ConfigServerInfo.tls_cipher_suites);
+  io_free(ConfigServerInfo.tls_cipher_suites);
   ConfigServerInfo.tls_cipher_suites = NULL;
-  xfree(ConfigServerInfo.tls_message_digest_algorithm);
+  io_free(ConfigServerInfo.tls_message_digest_algorithm);
   ConfigServerInfo.tls_message_digest_algorithm = NULL;
 
   /* Clean out ConfigAdminInfo */
-  xfree(ConfigAdminInfo.name);
+  io_free(ConfigAdminInfo.name);
   ConfigAdminInfo.name = NULL;
-  xfree(ConfigAdminInfo.email);
+  io_free(ConfigAdminInfo.email);
   ConfigAdminInfo.email = NULL;
-  xfree(ConfigAdminInfo.description);
+  io_free(ConfigAdminInfo.description);
   ConfigAdminInfo.description = NULL;
 
   /* Clean out ConfigServerHide */
-  xfree(ConfigServerHide.flatten_links_file);
+  io_free(ConfigServerHide.flatten_links_file);
   ConfigServerHide.flatten_links_file = NULL;
-  xfree(ConfigServerHide.hidden_name);
+  io_free(ConfigServerHide.hidden_name);
   ConfigServerHide.hidden_name = NULL;
 
   /* Clean out listeners */

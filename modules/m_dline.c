@@ -124,8 +124,8 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   conf = conf_make(CONF_DLINE);
-  conf->host = xstrdup(aline->host);
-  conf->reason = xstrdup(buf);
+  conf->host = io_strdup(aline->host);
+  conf->reason = io_strdup(buf);
   conf->setat = event_base->time.sec_real;
   SetConfDatabase(conf);
 

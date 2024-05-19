@@ -56,7 +56,7 @@ void
 comm_select_init(void)
 {
   pollfds_size = hard_fdlimit;
-  pollfds = xcalloc(sizeof(struct pollfd) * pollfds_size);
+  pollfds = io_calloc(sizeof(struct pollfd) * pollfds_size);
 }
 
 /*
@@ -122,7 +122,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
         if (pollnum >= pollfds_size)
         {
           pollfds_size *= 2;
-          pollfds = xrealloc(pollfds, sizeof(struct pollfd) * pollfds_size);
+          pollfds = io_realloc(pollfds, sizeof(struct pollfd) * pollfds_size);
         }
 
         F->comm_index = pollnum++;

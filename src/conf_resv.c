@@ -66,16 +66,16 @@ resv_delete(struct ResvItem *resv, bool expired)
     struct ResvExemptItem *exempt = resv->exempt_list.head->data;
 
     list_remove(&exempt->node, &resv->exempt_list);
-    xfree(exempt->name);
-    xfree(exempt->user);
-    xfree(exempt->host);
-    xfree(exempt);
+    io_free(exempt->name);
+    io_free(exempt->user);
+    io_free(exempt->host);
+    io_free(exempt);
   }
 
   list_remove(&resv->node, resv->list);
-  xfree(resv->mask);
-  xfree(resv->reason);
-  xfree(resv);
+  io_free(resv->mask);
+  io_free(resv->reason);
+  io_free(resv);
 }
 
 /* create_resv()
@@ -96,10 +96,10 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
   else
     list = &resv_nick_list;
 
-  struct ResvItem *resv = xcalloc(sizeof(*resv));
+  struct ResvItem *resv = io_calloc(sizeof(*resv));
   resv->list = list;
-  resv->mask = xstrdup(mask);
-  resv->reason = xstrndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
+  resv->mask = io_strdup(mask);
+  resv->reason = io_strndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
   list_add(resv, &resv->node, resv->list);
 
   if (elist)
@@ -125,10 +125,10 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 
       split_nuh(&nuh);
 
-      struct ResvExemptItem *exempt = xcalloc(sizeof(*exempt));
-      exempt->name = xstrdup(nick);
-      exempt->user = xstrdup(user);
-      exempt->host = xstrdup(host);
+      struct ResvExemptItem *exempt = io_calloc(sizeof(*exempt));
+      exempt->name = io_strdup(nick);
+      exempt->user = io_strdup(user);
+      exempt->host = io_strdup(host);
       exempt->type = parse_netmask(host, &exempt->addr, &exempt->bits);
       list_add(exempt, &exempt->node, &resv->exempt_list);
     }

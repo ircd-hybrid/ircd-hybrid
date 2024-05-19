@@ -32,9 +32,9 @@
 #ifndef INCLUDED_memory_h
 #define INCLUDED_memory_h
 
-extern void *xcalloc(size_t);
-extern void *xrealloc(void *, size_t);
-extern void xfree(void *);
-extern void *xstrdup(const char *);
-extern void *xstrndup(const char *, size_t);
+extern void *io_calloc(size_t);
+extern void *io_realloc(void *, size_t);
+extern void io_free(void *);
+extern void *io_strdup(const char *);
+extern void *io_strndup(const char *, size_t);
 #endif  /* INCLUDED_memory_h */

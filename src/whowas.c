@@ -80,7 +80,7 @@ static void
 whowas_free(struct Whowas *whowas)
 {
   whowas_unlink(whowas);
-  xfree(whowas);
+  io_free(whowas);
 }
 
 /**
@@ -100,7 +100,7 @@ whowas_make(void)
       list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
   else
-    whowas = xcalloc(sizeof(*whowas));
+    whowas = io_calloc(sizeof(*whowas));
 
   return whowas;
 }

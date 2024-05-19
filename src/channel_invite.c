@@ -75,7 +75,7 @@ invite_add(struct Channel *channel, struct Client *client)
   if (invite)
     invite_del(invite);
 
-  invite = xcalloc(sizeof(*invite));
+  invite = io_calloc(sizeof(*invite));
   invite->client = client;
   invite->channel = channel;
   invite->when = event_base->time.sec_monotonic;
@@ -103,7 +103,7 @@ invite_del(struct Invite *invite)
   list_remove(&invite->chan_node, &invite->channel->invites);
 
   /* Release memory pointed to by 'invite' */
-  xfree(invite);
+  io_free(invite);
 }
 
 /*! \brief Removes and frees all Invite blocks from a list

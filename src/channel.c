@@ -101,7 +101,7 @@ channel_add_user(struct Channel *channel, struct Client *client,
     channel->last_join_time = event_base->time.sec_monotonic;
   }
 
-  struct ChannelMember *member = xcalloc(sizeof(*member));
+  struct ChannelMember *member = io_calloc(sizeof(*member));
   member->client = client;
   member->channel = channel;
   member->flags = flags;
@@ -131,7 +131,7 @@ channel_remove_user(struct ChannelMember *member)
 
   list_remove(&member->usernode, &client->channel);
 
-  xfree(member);
+  io_free(member);
 
   if (channel->members.head == NULL)
     channel_free(channel);
@@ -337,7 +337,7 @@ void
 remove_ban(struct Ban *ban, list_t *list)
 {
   list_remove(&ban->node, list);
-  xfree(ban);
+  io_free(ban);
 }
 
 /* channel_free_mask_list()
@@ -366,7 +366,7 @@ channel_make(const char *name)
 {
   assert(!EmptyString(name));
 
-  struct Channel *channel = xcalloc(sizeof(*channel));
+  struct Channel *channel = io_calloc(sizeof(*channel));
   channel->hnextch = channel;
   /* Doesn't hurt to set it here */
   channel->creation_time = event_base->time.sec_real;
@@ -428,8 +428,8 @@ channel_free(struct Channel *channel)
   assert(channel->invexlist.head == NULL);
   assert(channel->invexlist.tail == NULL);
 
-  xfree(channel->mode_lock);
-  xfree(channel);
+  io_free(channel->mode_lock);
+  io_free(channel);
 }
 
 /*!
@@ -976,11 +976,11 @@ void
 channel_set_mode_lock(struct Client *client, struct Channel *channel,
                       const char *mode_lock)
 {
-  xfree(channel->mode_lock);
+  io_free(channel->mode_lock);
   channel->mode_lock = NULL;
 
   if (!EmptyString(mode_lock))
-    channel->mode_lock = xstrdup(mode_lock);
+    channel->mode_lock = io_strdup(mode_lock);
 }
 
 void

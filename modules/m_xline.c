@@ -98,8 +98,8 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
     snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   gecos = gecos_make();
-  gecos->mask = xstrdup(aline->mask);
-  gecos->reason = xstrdup(buf);
+  gecos->mask = io_strdup(aline->mask);
+  gecos->reason = io_strdup(buf);
   gecos->setat = event_base->time.sec_real;
   gecos->in_database = true;
 

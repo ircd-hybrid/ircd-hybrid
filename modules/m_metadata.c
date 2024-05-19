@@ -58,18 +58,18 @@ ms_metadata(struct Client *source, int parc, char *parv[])
 
     if (irccmp(parv[3], "cipher") == 0)
     {
-      xfree(target->tls_cipher);
+      io_free(target->tls_cipher);
       if (!EmptyString(parv[4]))
-        target->tls_cipher = xstrdup(parv[4]);
+        target->tls_cipher = io_strdup(parv[4]);
       else
         target->tls_cipher = NULL;
     }
 
     if (irccmp(parv[3], "certfp") == 0)
     {
-      xfree(target->tls_certfp);
+      io_free(target->tls_certfp);
       if (!EmptyString(parv[4]))
-        target->tls_certfp = xstrdup(parv[4]);
+        target->tls_certfp = io_strdup(parv[4]);
       else
         target->tls_certfp = NULL;
     }

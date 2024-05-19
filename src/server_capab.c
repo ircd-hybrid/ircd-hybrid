@@ -68,9 +68,9 @@ capab_init(void)
 void
 capab_add(const char *name, unsigned int flag, bool active)
 {
-  struct Capability *cap = xcalloc(sizeof(*cap));
+  struct Capability *cap = io_calloc(sizeof(*cap));
 
-  cap->name = xstrdup(name);
+  cap->name = io_strdup(name);
   cap->cap = flag;
   cap->active = active;
   list_add(cap, &cap->node, &capab_list);
@@ -96,8 +96,8 @@ capab_del(const char *name)
     if (irccmp(cap->name, name) == 0)
     {
       list_remove(node, &capab_list);
-      xfree(cap->name);
-      xfree(cap);
+      io_free(cap->name);
+      io_free(cap);
     }
   }
 }

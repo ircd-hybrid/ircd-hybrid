@@ -211,7 +211,7 @@ delete_resolver_queries(const void *vptr)
 static void
 send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 {
-  unsigned int max_queries = IRCD_MIN(reslib_nscount, rcount);
+  unsigned int max_queries = IO_MIN(reslib_nscount, rcount);
 
   /* RES_PRIMARY option is not implemented
    * if (res.options & RES_PRIMARY || 0 == max_queries)

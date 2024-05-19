@@ -45,7 +45,7 @@ fdlist_init(void)
    * Allow MAXCLIENTS_MIN clients even at the cost of MAX_BUFFER and
    * some not really LEAKED_FDS
    */
-  hard_fdlimit = IRCD_MAX(hard_fdlimit, LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
+  hard_fdlimit = IO_MAX(hard_fdlimit, LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
   fd_table = io_calloc(sizeof(*fd_table) * hard_fdlimit);
 }
 

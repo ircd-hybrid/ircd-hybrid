@@ -595,7 +595,7 @@ mr_nick(struct Client *source, int parc, char *parv[])
 
   /* Copy the nick and terminate it */
   char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
   if (valid_nickname(nick, true) == false)
@@ -648,7 +648,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 
   /* Terminate nick to NICKLEN */
   char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IRCD_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
   if (valid_nickname(nick, true) == false)

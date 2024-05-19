@@ -124,7 +124,7 @@ out:
   /* Remove what is now unnecessary */
   dbuf_delete(queue, line_bytes + eol_bytes);
 
-  return IRCD_MIN(line_bytes, IRCD_BUFSIZE - 2);
+  return IO_MIN(line_bytes, IRCD_BUFSIZE - 2);
 }
 
 /*

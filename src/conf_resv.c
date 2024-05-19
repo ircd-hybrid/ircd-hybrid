@@ -99,7 +99,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
   struct ResvItem *resv = io_calloc(sizeof(*resv));
   resv->list = list;
   resv->mask = io_strdup(mask);
-  resv->reason = io_strndup(reason, IRCD_MIN(strlen(reason), REASONLEN));
+  resv->reason = io_strndup(reason, IO_MIN(strlen(reason), REASONLEN));
   list_add(resv, &resv->node, resv->list);
 
   if (elist)

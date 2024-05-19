@@ -30,22 +30,22 @@
 #include <stdint.h>
 
 /**
- * @def IRCD_MAX
+ * @def IO_MAX
  * @brief Macro for maximum of two values.
  * @param a First value.
  * @param b Second value.
  * @return The greater of the two values.
  */
-#define IRCD_MAX(a, b)  ((a) > (b) ? (a) : (b))
+#define IO_MAX(a, b)  ((a) > (b) ? (a) : (b))
 
 /**
- * @def IRCD_MIN
+ * @def IO_MIN
  * @brief Macro for minimum of two values.
  * @param a First value.
  * @param b Second value.
  * @return The smaller of the two values.
  */
-#define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
+#define IO_MIN(a, b)  ((a) < (b) ? (a) : (b))
 
 /**
  * @def IO_ARRAY_LENGTH

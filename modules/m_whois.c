@@ -98,7 +98,7 @@ whois_person(struct Client *source, struct Client *target)
     if (MyConnect(source))
       len += strlen(me.name) + strlen(source->name);
     else
-      len += IRCD_MAX(strlen(me.name), strlen(me.id)) + IRCD_MAX(strlen(source->name), strlen(source->id));
+      len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
 
     LIST_FOREACH(node, target->channel.head)
     {

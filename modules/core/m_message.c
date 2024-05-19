@@ -461,7 +461,7 @@ build_target_list(bool notice, struct Client *source, char *list, const char *te
     unsigned int ret;
     while ((ret = channel_prefix_to_rank(*name)) != CHACCESS_PEON)
     {
-      rank = IRCD_MIN(rank, ret);
+      rank = IO_MIN(rank, ret);
       ++name;
     }
 

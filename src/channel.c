@@ -959,7 +959,7 @@ channel_set_topic(struct Channel *channel, const char *topic,
                   const char *topic_info, uintmax_t topicts, bool local)
 {
   if (local)
-    strlcpy(channel->topic, topic, IRCD_MIN(sizeof(channel->topic), ConfigServerInfo.max_topic_length + 1));
+    strlcpy(channel->topic, topic, IO_MIN(sizeof(channel->topic), ConfigServerInfo.max_topic_length + 1));
   else
     strlcpy(channel->topic, topic, sizeof(channel->topic));
 

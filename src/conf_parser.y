@@ -428,7 +428,7 @@ modules_item:   modules_module | modules_path | error ';' ;
 modules_module: MODULE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    add_conf_module(libio_basename(yylval.string));
+    add_conf_module(io_basename(yylval.string));
 };
 
 modules_path: PATH '=' QSTRING ';'

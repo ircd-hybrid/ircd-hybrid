@@ -145,7 +145,7 @@ token_vector(char *names, char token, char *vector[], unsigned int size)
  * @return A pointer to the extracted base name within the input path.
  */
 const char *
-libio_basename(const char *path)
+io_basename(const char *path)
 {
   const char *s = strrchr(path, '/');
 

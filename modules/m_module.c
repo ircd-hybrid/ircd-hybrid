@@ -46,7 +46,7 @@ module_load(struct Client *source, const char *arg)
 {
   const char *m_bn = NULL;
 
-  if (findmodule_byname((m_bn = libio_basename(arg))))
+  if (findmodule_byname((m_bn = io_basename(arg))))
   {
     sendto_one_notice(source, &me, ":Module %s is already loaded", m_bn);
     return;
@@ -67,7 +67,7 @@ module_unload(struct Client *source, const char *arg)
   const char *m_bn = NULL;
   const struct module *modp = NULL;
 
-  if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
+  if ((modp = findmodule_byname((m_bn = io_basename(arg)))) == NULL)
   {
     sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
     return;
@@ -130,7 +130,7 @@ module_reload(struct Client *source, const char *arg)
     return;
   }
 
-  if ((modp = findmodule_byname((m_bn = libio_basename(arg)))) == NULL)
+  if ((modp = findmodule_byname((m_bn = io_basename(arg)))) == NULL)
   {
     sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
     return;

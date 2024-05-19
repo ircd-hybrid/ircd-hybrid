@@ -101,7 +101,7 @@ extern const unsigned char ToUpperTab[];  /*!< Lookup table for converting chara
 
 extern const unsigned int CharAttrs[];
 
-extern const char *libio_basename(const char *);
+extern const char *io_basename(const char *);
 extern const char *stripws(char *);
 extern bool has_wildcards(const char *);
 extern int match(const char *, const char *);

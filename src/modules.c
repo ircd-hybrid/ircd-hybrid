@@ -115,7 +115,7 @@ load_a_module(const char *path, bool warn)
 {
   const char *mod_basename;
 
-  if (findmodule_byname((mod_basename = libio_basename(path))))
+  if (findmodule_byname((mod_basename = io_basename(path))))
     return false;
 
   lt_dlhandle tmpptr = lt_dlopen(path);

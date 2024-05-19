@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "misc.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -56,8 +57,6 @@ static struct capabilities
   _CAP(CAP_CHGHOST, false, "chghost")
 #undef _CAP
 };
-
-#define CAPAB_LIST_LEN  (sizeof(capab_list) / sizeof(struct capabilities))
 
 static int
 capab_sort(const struct capabilities *cap1, const struct capabilities *cap2)
@@ -106,9 +105,8 @@ find_cap(const char **caplist_p, int *neg_p)
   /* OK, now see if we can look up the capability... */
   if (*caplist)
   {
-    if (!(cap = bsearch(caplist, capab_list, CAPAB_LIST_LEN,
-                        sizeof(struct capabilities),
-                        (bqcmp)capab_search)))
+    if (!(cap = bsearch(caplist, capab_list, IO_ARRAY_LENGTH(capab_list),
+                        sizeof(struct capabilities), (bqcmp)capab_search)))
     {
       /* Couldn't find the capability; advance to first whitespace character */
       while (*caplist && !IsSpace(*caplist))
@@ -151,7 +149,7 @@ send_caplist(struct Client *source,
   clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ", me.name,
                   source->name[0] ? source->name : "*", subcmd);
 
-  for (i = 0, loc = 0; i < CAPAB_LIST_LEN; ++i)
+  for (i = 0, loc = 0; i < IO_ARRAY_LENGTH(capab_list); ++i)
   {
     const struct capabilities *cap = &capab_list[i];
 
@@ -315,8 +313,7 @@ m_cap(struct Client *source, int parc, char *parv[])
   struct subcmd *cmd = NULL;
 
   /* Find the subcommand handler */
-  if (!(cmd = bsearch(subcmd, cmdlist,
-                      sizeof(cmdlist) / sizeof(struct subcmd),
+  if (!(cmd = bsearch(subcmd, cmdlist, IO_ARRAY_LENGTH(cmdlist),
                       sizeof(struct subcmd), (bqcmp)subcmd_search)))
   {
     sendto_one_numeric(source, &me, ERR_INVALIDCAPCMD, subcmd);
@@ -341,7 +338,7 @@ static void
 module_init(void)
 {
   /* First, let's sort the array */
-  qsort(capab_list, CAPAB_LIST_LEN, sizeof(struct capabilities), (bqcmp)capab_sort);
+  qsort(capab_list, IO_ARRAY_LENGTH(capab_list), sizeof(struct capabilities), (bqcmp)capab_sort);
   command_add(&cap_msgtab);
 }
 

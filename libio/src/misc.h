@@ -48,6 +48,14 @@
 #define IRCD_MIN(a, b)  ((a) < (b) ? (a) : (b))
 
 /**
+ * @def IO_ARRAY_LENGTH
+ * @brief Macro to determine the number of elements in an array.
+ * @param x Array whose number of elements is to be determined.
+ * @return The number of elements in the array.
+ */
+#define IO_ARRAY_LENGTH(x) ((sizeof(x)) / sizeof(x[0]))
+
+/**
  * @def _1MEG
  * @brief Represents 1 Mebibyte (MiB).
  *

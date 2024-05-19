@@ -95,7 +95,7 @@ oper_privs_as_string(const unsigned int flags)
     { 0, '\0' }
   };
 
-  static char buf[sizeof(flag_table) / sizeof(flag_table[0])];
+  static char buf[IO_ARRAY_LENGTH(flag_table)];
   char *bufptr = buf;
 
   for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
@@ -130,7 +130,7 @@ report_shared(struct Client *client)
     { 0, '\0' }
   };
 
-  char buf[sizeof(flag_table) / sizeof(flag_table[0]) + 1];  /* +1 for 'c' */
+  char buf[IO_ARRAY_LENGTH(flag_table) + 1];  /* +1 for 'c' */
 
   list_node_t *node;
   LIST_FOREACH(node, shared_get_list()->head)
@@ -173,7 +173,7 @@ report_cluster(struct Client *client)
     { 0, '\0' }
   };
 
-  char buf[sizeof(flag_table) / sizeof(flag_table[0]) + 1];  /* +1 for 'C' */
+  char buf[IO_ARRAY_LENGTH(flag_table) + 1];  /* +1 for 'C' */
 
   list_node_t *node;
   LIST_FOREACH(node, cluster_get_list()->head)

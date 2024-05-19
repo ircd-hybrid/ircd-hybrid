@@ -33,10 +33,6 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_WOLFSSL
-#if LIBWOLFSSL_VERSION_HEX < 0x04003000
-#error "wolfSSL 4.3.0 and above is required to build this module"
-#endif
-
 static bool TLS_initialized;
 
 /*

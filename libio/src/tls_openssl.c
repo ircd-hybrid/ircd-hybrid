@@ -33,10 +33,6 @@
 #include "memory.h"
 
 #ifdef HAVE_TLS_OPENSSL
-#if OPENSSL_VERSION_NUMBER < 0x1010100fL
-#error "OpenSSL 1.1.1 and above is required to build this module"
-#endif
-
 static bool TLS_initialized;
 
 /*

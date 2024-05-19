@@ -113,37 +113,36 @@ unload_one_module(const char *name, bool warn)
 bool
 load_a_module(const char *path, bool warn)
 {
-  const char *mod_basename;
-
-  if (findmodule_byname((mod_basename = io_basename(path))))
+  const char *const name = io_basename(path);
+  if (findmodule_byname(name))
     return false;
 
-  lt_dlhandle tmpptr = lt_dlopen(path);
-  if (tmpptr == NULL)
+  lt_dlhandle handle = lt_dlopen(path);
+  if (handle == NULL)
   {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Error loading module %s: %s",
-                         mod_basename, err);
-    log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
+                         name, err);
+    log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", name, err);
     return false;
   }
 
-  struct module *modp = lt_dlsym(tmpptr, "module_entry");
+  struct module *modp = lt_dlsym(handle, "module_entry");
   if (modp == NULL)
   {
     const char *err = ((err = lt_dlerror())) ? err : "<unknown>";
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Error loading module %s: %s",
-                         mod_basename, err);
-    log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", mod_basename, err);
+                         name, err);
+    log_write(LOG_TYPE_IRCD, "Error loading module %s: %s", name, err);
 
-    lt_dlclose(tmpptr);
+    lt_dlclose(handle);
     return false;
   }
 
-  modp->handle = tmpptr;
-  modp->name = io_strdup(mod_basename);
+  modp->handle = handle;
+  modp->name = io_strdup(name);
   list_add(modp, &modp->node, &modules_list);
 
   if (modp->modinit)
@@ -152,8 +151,8 @@ load_a_module(const char *path, bool warn)
   if (warn)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] loaded.",
-                         modp->name, tmpptr);
-    log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded.", modp->name, tmpptr);
+                         name, handle);
+    log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded.", name, handle);
   }
 
   return true;

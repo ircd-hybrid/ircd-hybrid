@@ -44,11 +44,10 @@
 static void
 module_load(struct Client *source, const char *arg)
 {
-  const char *m_bn = NULL;
-
-  if (findmodule_byname((m_bn = io_basename(arg))))
+  const char *const name = io_basename(arg);
+  if (findmodule_byname(name))
   {
-    sendto_one_notice(source, &me, ":Module %s is already loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is already loaded", name);
     return;
   }
 
@@ -64,31 +63,29 @@ module_load(struct Client *source, const char *arg)
 static void
 module_unload(struct Client *source, const char *arg)
 {
-  const char *m_bn = NULL;
-  const struct module *modp = NULL;
+  const char *const name = io_basename(arg);
 
-  if ((modp = findmodule_byname((m_bn = io_basename(arg)))) == NULL)
+  const struct module *modp = findmodule_byname(name);
+  if (modp == NULL)
   {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
     return;
   }
 
   if (modp->is_core)
   {
-    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded",
-                      m_bn);
+    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded", name);
     return;
   }
 
   if (modp->is_resident)
   {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded",
-                      m_bn);
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", name);
     return;
   }
 
-  if (unload_one_module(m_bn, true) == false)
-    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
+  if (unload_one_module(name, true) == false)
+    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
 }
 
 /*! \brief RELOAD subcommand handler
@@ -100,9 +97,6 @@ module_unload(struct Client *source, const char *arg)
 static void
 module_reload(struct Client *source, const char *arg)
 {
-  const char *m_bn = NULL;
-  struct module *modp = NULL;
-
   if (strcmp(arg, "*") == 0)
   {
     unsigned int modnum = list_length(modules_get_list());
@@ -112,8 +106,7 @@ module_reload(struct Client *source, const char *arg)
     list_node_t *node, *node_next;
     LIST_FOREACH_SAFE(node, node_next, modules_get_list()->head)
     {
-      modp = node->data;
-
+      const struct module *modp = node->data;
       if (modp->is_resident == false)
         unload_one_module(modp->name, false);
     }
@@ -130,25 +123,26 @@ module_reload(struct Client *source, const char *arg)
     return;
   }
 
-  if ((modp = findmodule_byname((m_bn = io_basename(arg)))) == NULL)
+  const char *const name = io_basename(arg);
+  const struct module *modp = findmodule_byname(name);
+  if (modp == NULL)
   {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
     return;
   }
 
   if (modp->is_resident)
   {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded",
-                      m_bn);
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", name);
     return;
   }
 
   /* Cache modp->is_core for later use after the module is unloaded */
   bool is_core = modp->is_core;
 
-  if (unload_one_module(m_bn, true) == false)
+  if (unload_one_module(name, true) == false)
   {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", m_bn);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
     return;
   }
 
@@ -240,8 +234,7 @@ mo_module(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  sendto_one_notice(source, &me, ":%s is not a valid option. "
-                    "Choose from LOAD, UNLOAD, RELOAD, LIST",
+  sendto_one_notice(source, &me, ":%s is not a valid option. Choose from LOAD, UNLOAD, RELOAD, LIST",
                     subcmd);
 }
 

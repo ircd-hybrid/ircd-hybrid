@@ -128,7 +128,7 @@ hook_run_chain(struct HookContainer *container, ...)
   container->last = event_base->time.sec_monotonic;
 
   /* Check if the hook chain is empty. */
-  if (list_length(&container->chain) == 0)
+  if (list_is_empty(&container->chain))
     return NULL;  /* No hooks to execute. */
 
   va_list args;

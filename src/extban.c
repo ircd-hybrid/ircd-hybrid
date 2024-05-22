@@ -257,7 +257,7 @@ extban_get_isupport(void)
   char extban_chars[256] = { 0 };
   static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
 
-  if (list_length(&extban_list) == 0)
+  if (list_is_empty(&extban_list))
     return NULL;
 
   list_node_t *node;

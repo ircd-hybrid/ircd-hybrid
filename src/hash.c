@@ -511,11 +511,11 @@ free_list_task(struct Client *client)
 static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
-  if (list_length(&lt->show_mask))
+  if (list_is_empty(&lt->show_mask) == false)
     if (list_find_cmp(&lt->show_mask, name, match) == NULL)
       return false;
 
-  if (list_length(&lt->hide_mask))
+  if (list_is_empty(&lt->hide_mask) == false)
     if (list_find_cmp(&lt->hide_mask, name, match))
       return false;
 

@@ -119,7 +119,7 @@ monitor_del(struct Client *source, char *list)
 {
   char *p = NULL;
 
-  if (list_length(&source->connection->monitors) == 0)
+  if (list_is_empty(&source->connection->monitors))
     return;
 
   for (const char *name = strtok_r(list, ",", &p); name;

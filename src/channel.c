@@ -237,7 +237,7 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
   size_t len;
   char buf[IRCD_BUFSIZE];
 
-  if (list_length(list) == 0)
+  if (list_is_empty(list))
     return;
 
   char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :", me.id,

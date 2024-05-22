@@ -66,6 +66,21 @@ list_free_node(list_node_t *node)
 }
 
 /**
+ * @brief Checks if a double-linked list is empty.
+ *
+ * This function checks if the specified double-linked list is empty by
+ * examining its head pointer.
+ *
+ * @param list Pointer to the double-linked list.
+ * @return true if the list is empty, false otherwise.
+ */
+bool
+list_is_empty(const list_t *list)
+{
+  return list->head == NULL;
+}
+
+/**
  * @brief Adds a node to the beginning of a double-linked list.
  *
  * This function adds a node containing the specified data to the beginning of

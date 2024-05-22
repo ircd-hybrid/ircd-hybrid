@@ -31,6 +31,7 @@
 
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h
+#include <stdbool.h>
 
 /**
  * @def LIST_FOREACH
@@ -101,6 +102,7 @@ typedef struct _list
 
 typedef void (*list_iterate_callback)(void *, void *);
 
+extern bool list_is_empty(const list_t *);
 extern void list_free_node(list_node_t *);
 extern void list_add(void *, list_node_t *, list_t *);
 extern void list_add_after(void *, list_node_t *, list_node_t *, list_t *);

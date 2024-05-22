@@ -133,7 +133,7 @@ channel_remove_user(struct ChannelMember *member)
 
   io_free(member);
 
-  if (channel->members.head == NULL)
+  if (list_is_empty(&channel->members))
     channel_free(channel);
 }
 

@@ -230,7 +230,7 @@ monitor_clear_list(struct Client *client)
       list_free_node(temp);
 
     /* If this leaves a header without notifies, remove it. */
-    if (monitor->monitored_by.head == NULL)
+    if (list_is_empty(&monitor->monitored_by))
       monitor_free(monitor);
 
     list_remove(node, &client->connection->monitors);

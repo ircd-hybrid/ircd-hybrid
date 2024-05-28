@@ -39,9 +39,14 @@
 /**
  * @brief Matches a string against a wildcard pattern with support for '*' and '?' wildcards.
  *
- * This function compares a given string against a wildcard pattern, supporting '*' to match
- * any sequence of characters and '?' to match any single character. Backslash '\' is used as
- * an escape character, allowing literal matching of '*' and '?'.
+ * This function compares a given string against a wildcard pattern, supporting the following:
+ * - '*' matches any sequence of characters (including an empty sequence).
+ * - '?' matches any single character.
+ * - '\' is used as an escape character to allow literal matching of '*' and '?'.
+ *
+ * The function performs a case-insensitive comparison of the string against the pattern.
+ * Escaping a character using '\' enforces an exact match for that character, treating
+ * it as a literal rather than a wildcard.
  *
  * @param mask The wildcard pattern to match against.
  * @param name The string to match.

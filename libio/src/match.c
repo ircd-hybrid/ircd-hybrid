@@ -50,86 +50,65 @@
 int
 match(const char *mask, const char *name)
 {
-  const char *m = mask, *n = name;
-  const char *m_tmp = mask, *n_tmp = name;
-  bool star = false;
+  const unsigned char *m = (const unsigned char *)mask;
+  const unsigned char *n = (const unsigned char *)name;
+  const unsigned char *m_tmp = NULL;  /* Temporary pointer for backtracking in the pattern. */
+  const unsigned char *n_tmp = NULL;  /* Temporary pointer for backtracking in the string. */
 
-  while (true)
+  while (*n)
   {
     switch (*m)
     {
-      case '\0':
-        if (*n == '\0')
+      case '*':
+        while (*m == '*')  /* Skip multiple '*' characters. */
+          ++m;
+
+        if (*m == '\0')  /* Trailing '*' matches the rest of the string. */
           return 0;
-  backtrack:
-        if (m_tmp == mask)
-          return 1;
 
-        m = m_tmp;
-        n = ++n_tmp;
-
+        /* Save current positions for potential backtracking. */
+        m_tmp = m;
+        n_tmp = n;
+        break;
+      case '?':
         if (*n == '\0')
-          return 1;
+          return 1;  /* '?' cannot match the end of the string. */
+
+        /* Match one character and continue. */
+        ++m, ++n;
         break;
       case '\\':
-        ++m;
+        ++m;  /* Skip the escape character. */
+        if (*m == '\0' || *m != *n)  /* Ensure the next character matches exactly. */
+          return 1;
 
-        /* allow escaping to force capitalization */
-        if (*m++ != *n++)
-          goto backtrack;
+        /* Match the escaped character and continue. */
+        ++m, ++n;
         break;
-      case '*':
-      case '?':
-        for (star = false; ; ++m)
-        {
-          if (*m == '*')
-            star = true;
-          else if (*m == '?')
-          {
-            if (*n++ == '\0')
-              goto backtrack;
-          }
-          else
-            break;
-        }
-
-        if (star)
-        {
-          if (*m == '\0')
-            return 0;
-          else if (*m == '\\')
-          {
-            m_tmp = ++m;
-
-            if (*m == '\0')
-              return 1;
-            for (n_tmp = n; *n && *n != *m; ++n)
-              ;
-
-            if (*n == '\0' || *n++ != *m++)
-              return 1;
-          }
-          else
-          {
-            m_tmp = m;
-            for (n_tmp = n; *n && (ToLower(*n) != ToLower(*m)); ++n)
-              ;
-          }
-        }
-
-        continue;
       default:
-        if (*n == '\0')
-          return *m != '\0';
-        if (ToLower(*m) != ToLower(*n))
-          goto backtrack;
-        ++m;
-        ++n;
+        if (*n == '\0' || ToLower(*m) != ToLower(*n))  /* Case-insensitive character comparison. */
+        {
+          if (m_tmp == NULL)
+            return 1;  /* No '*' to backtrack to, match fails. */
+
+          /* Backtrack to the last '*' position. */
+          m = m_tmp;
+          n = ++n_tmp;
+        }
+        else
+          /* Characters match, continue. */
+          ++m, ++n;
+
         break;
     }
   }
 
-  return 1;
+  /* Check for trailing '*' characters in the pattern. */
+  while (*m == '*')
+    ++m;
+
+  /* If end of pattern is reached, match is successful. */
+  return *m != '\0';
 }
 
 /**

@@ -21,6 +21,7 @@
 
 #ifndef INCLUDED_aline_h
 #define INCLUDED_aline_h
+
 struct aline_ctx
 {
   bool add;

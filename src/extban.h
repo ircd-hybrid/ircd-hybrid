@@ -63,17 +63,6 @@ struct Extban
   unsigned int flag;
 };
 
-extern void extban_init(void);
-extern void extban_add(struct Extban *);
-extern void extban_del(struct Extban *);
-extern struct Extban *extban_find(unsigned char);
-extern struct Extban *extban_find_flag(unsigned int);
-extern enum extban_type extban_parse(const char *, unsigned int *, unsigned int *);
-extern size_t extban_format(unsigned int, char *);
-extern unsigned int extban_matching_mask(void);
-extern unsigned int extban_acting_mask(void);
-extern const char *extban_get_isupport(void);
-
 extern struct Extban extban_account;
 extern struct Extban extban_channel;
 extern struct Extban extban_fingerprint;
@@ -86,4 +75,15 @@ extern struct Extban extban_operclass;
 extern struct Extban extban_server;
 extern struct Extban extban_tlsinfo;
 extern struct Extban extban_usermode;
+
+extern void extban_init(void);
+extern void extban_add(struct Extban *);
+extern void extban_del(struct Extban *);
+extern struct Extban *extban_find(unsigned char);
+extern struct Extban *extban_find_flag(unsigned int);
+extern enum extban_type extban_parse(const char *, unsigned int *, unsigned int *);
+extern size_t extban_format(unsigned int, char *);
+extern unsigned int extban_matching_mask(void);
+extern unsigned int extban_acting_mask(void);
+extern const char *extban_get_isupport(void);
 #endif  /* INCLUDED_extban_h */

@@ -30,7 +30,6 @@
 #include "numeric.h"
 #include "user.h"
 
-
 static void
 svstag_free(struct ServicesTag *svstag, list_t *list)
 {
@@ -54,8 +53,7 @@ svstag_detach(list_t *list, unsigned int numeric)
 }
 
 void
-svstag_attach(list_t *list, unsigned int numeric,
-              const char *umodes, const char *tag)
+svstag_attach(list_t *list, unsigned int numeric, const char *umodes, const char *tag)
 {
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;

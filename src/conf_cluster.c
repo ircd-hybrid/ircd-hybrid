@@ -34,7 +34,6 @@
 
 static list_t cluster_list;  /**< List to manage cluster items. */
 
-
 /**
  * @brief Retrieves the list of cluster items.
  *
@@ -100,9 +99,9 @@ void
 cluster_distribute(const void *client, const char *command, unsigned int capab,
                    unsigned int type, const char *pattern, ...)
 {
-  va_list args;
   char buf[IRCD_BUFSIZE];
 
+  va_list args;
   va_start(args, pattern);
   vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
@@ -113,7 +112,7 @@ cluster_distribute(const void *client, const char *command, unsigned int capab,
     const struct ClusterItem *cluster = node->data;
 
     if (cluster->type & type)
-      sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab,
-                         "%s %s %s", command, cluster->server, buf);
+      sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab, "%s %s %s",
+                         command, cluster->server, buf);
   }
 }

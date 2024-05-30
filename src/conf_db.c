@@ -24,7 +24,6 @@
  * \brief Includes file utilities for database handling
  */
 
-
 #include "stdinc.h"
 #include "conf.h"
 #include "conf_db.h"
@@ -34,7 +33,6 @@
 #include "log.h"
 #include "send.h"
 #include "irc_string.h"
-
 
 /*! \brief Return the version number on the file.  Return 0 if there is no version
  * number or the number doesn't make sense (i.e. less than 1 or greater
@@ -51,14 +49,14 @@ get_file_version(struct dbFILE *f)
   if (read_uint32(&version, f) == false)
   {
     log_write(LOG_TYPE_IRCD, "Error reading version number on %s: %s",
-         f->filename, strerror(errno));
+              f->filename, strerror(errno));
     return 0;
   }
 
   if (version < 1)
   {
     log_write(LOG_TYPE_IRCD, "Invalid version number (%u) on %s",
-         version, f->filename);
+              version, f->filename);
     return 0;
   }
 
@@ -76,7 +74,7 @@ write_file_version(struct dbFILE *f, uint32_t version)
   if (write_uint32(version, f) == false)
   {
     log_write(LOG_TYPE_IRCD, "Error writing version number on %s",
-         f->filename);
+              f->filename);
     return false;
   }
 
@@ -132,7 +130,7 @@ open_db_write(const char *filename, uint32_t version)
   if (f->tempname[0] == '\0' || strcmp(f->tempname, filename) == 0)
   {
     log_write(LOG_TYPE_IRCD, "Opening database file %s for write: Filename too long",
-         filename);
+              filename);
     io_free(f);
     errno = ENAMETOOLONG;
     return NULL;
@@ -163,7 +161,7 @@ open_db_write(const char *filename, uint32_t version)
 
     errno = errno_save;
     log_write(LOG_TYPE_IRCD, "Cannot create temporary database file %s",
-        f->tempname);
+              f->tempname);
 
     if (f->fp)
       fclose(f->fp);
@@ -259,8 +257,8 @@ close_db(struct dbFILE *f)
                            "data to database file %s; new data NOT saved.",
                            f->filename);
       errno = errno_save;
-      log_write(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new "
-           "data NOT saved.", f->filename);
+      log_write(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new data NOT saved.",
+                f->filename);
       remove(f->tempname);
     }
   }
@@ -381,7 +379,6 @@ read_uint64(uint64_t *ret, struct dbFILE *f)
          c5 << 24 | c6 << 16 | c7 <<  8 | c8;
   return true;
 }
-
 
 /*! \brief Write a unsigned 64bit integer
  *

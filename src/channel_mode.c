@@ -41,7 +41,6 @@
 #include "isupport.h"
 #include "server_capab.h"
 
-
 /** Buffer holding a list of channel modes to be used for RPL_MYINFO */
 char cmode_rpl04[2][256];
 /** Buffer holding a list of channel modes to be used for RPL_ISUPPORT */
@@ -51,7 +50,6 @@ static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
 static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
-
 
 /* check_string()
  *
@@ -691,7 +689,7 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
     if (EmptyString(key))
       return;
 
-    assert(key[0] != ' ');
+    assert(*key != ' ');
     strlcpy(channel->mode.key, key, sizeof(channel->mode.key));
 
     /* If somebody does MODE #channel +kk a b, accept latter --fl */
@@ -761,8 +759,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
      * If we're creeping past the buf size, we need to send it and make
      * another line for the other modes
      */
-    if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
+    if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
         sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
@@ -839,8 +836,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
     else
       arglen = 0;
 
-    if ((paracount == MAXMODEPARAMS) ||
-        ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
+    if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
         sendto_channel_local(NULL, channel, 0, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);

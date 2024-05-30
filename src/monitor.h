@@ -27,7 +27,6 @@
 #ifndef INCLUDED_monitor_h
 #define INCLUDED_monitor_h
 
-
 /** Monitor structure */
 struct Monitor
 {

@@ -24,7 +24,6 @@
  */
 
 #include "ltdl.h"
-
 #include "stdinc.h"
 #include "defaults.h"
 #include "list.h"
@@ -34,7 +33,6 @@
 #include "conf.h"
 #include "irc_string.h"
 #include "memory.h"
-
 
 static list_t modules_list;
 static list_t modules_path;

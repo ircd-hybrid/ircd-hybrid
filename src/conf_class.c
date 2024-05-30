@@ -31,11 +31,9 @@
 #include "memory.h"
 #include "patricia.h"
 
-
-struct ClassItem *class_default;
-
 static list_t class_list;
 
+struct ClassItem *class_default;
 
 const list_t *
 class_get_list(void)
@@ -47,7 +45,6 @@ struct ClassItem *
 class_make(void)
 {
   struct ClassItem *class = io_calloc(sizeof(*class));
-
   class->active = true;
   class->con_freq = DEFAULT_CONNECTFREQUENCY;
   class->ping_freq = DEFAULT_PINGFREQUENCY;
@@ -188,8 +185,8 @@ class_ip_limit_trie(struct ClassItem *class, void *addr)
 {
   if (((struct sockaddr *)addr)->sa_family == AF_INET6)
     return class->ip_tree_v6;
-  else
-    return class->ip_tree_v4;
+
+  return class->ip_tree_v4;
 }
 
 bool

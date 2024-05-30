@@ -52,7 +52,6 @@
 #include "channel_invite.h"
 #include "accept.h"
 
-
 list_t listing_client_list;
 list_t unknown_list;
 list_t local_client_list;

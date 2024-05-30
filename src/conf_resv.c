@@ -37,10 +37,8 @@
 #include "conf_resv.h"
 #include "address.h"
 
-
 static list_t resv_chan_list;
 static list_t resv_nick_list;
-
 
 const list_t *
 resv_chan_get_list(void)

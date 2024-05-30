@@ -39,7 +39,6 @@
 #include "address.h"
 #include "misc.h"
 
-
 /** Global list of messages of the day. */
 static struct
 {

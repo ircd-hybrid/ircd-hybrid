@@ -31,7 +31,6 @@
 #include "channel_invite.h"
 #include "conf.h"
 
-
 /*! \brief Checks whether a client is invited to a certain channel. While walking the
  *         shortest invitation list, expired invitations are vaccumed automatically.
  * \param channel Pointer to channel block
@@ -41,7 +40,6 @@
 struct Invite *
 invite_find(struct Channel *channel, struct Client *client)
 {
-  list_node_t *node, *node_next;
   list_t *list;
 
   /* Take the shortest of the two lists */
@@ -50,6 +48,7 @@ invite_find(struct Channel *channel, struct Client *client)
   else
     list = &channel->invites;
 
+  list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Invite *invite = node->data;

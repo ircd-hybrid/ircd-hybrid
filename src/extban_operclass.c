@@ -32,7 +32,6 @@
 #include "conf_class.h"
 #include "extban.h"
 
-
 static enum extban_match
 extban_operclass_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {

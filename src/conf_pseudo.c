@@ -108,9 +108,7 @@ pseudo_message_handler(struct Client *source, int parc, char *parv[])
  * @param command Actual command or alias being registered.
  */
 void
-pseudo_register(const char *name, const char *nick, const char *server,
-                const char *prepend,
-                const char *command)
+pseudo_register(const char *name, const char *nick, const char *server, const char *prepend, const char *command)
 {
   if (command_find(command))
     return;

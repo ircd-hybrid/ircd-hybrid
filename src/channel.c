@@ -45,10 +45,8 @@
 #include "misc.h"
 #include "extban.h"
 
-
 /** Doubly linked list containing a list of all channels. */
 static list_t channel_list;
-
 
 /*! \brief Returns the channel_list as constant
  * \return channel_list
@@ -67,8 +65,7 @@ channel_get_list(void)
  * \param flood_ctrl Whether to count this join in flood calculations
  */
 void
-channel_add_user(struct Channel *channel, struct Client *client,
-                 unsigned int flags, bool flood_ctrl)
+channel_add_user(struct Channel *channel, struct Client *client, unsigned int flags, bool flood_ctrl)
 {
   assert(IsClient(client));
 
@@ -163,7 +160,8 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
       {
         member->flags &= ~tab->flag;
         *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", member->client->name);
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s",
+                         member->client->name);
 
         if (++pargs >= MAXMODEPARAMS)
         {
@@ -217,7 +215,8 @@ channel_send_members(struct Client *client, const struct Channel *channel)
       bufptr = bufptr_start;
     }
 
-    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s%s" : "%s%s", member_get_prefix(member, true), member->client->id);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s%s" : "%s%s",
+                       member_get_prefix(member, true), member->client->id);
   }
 
   sendto_one(client, "%s", buf);
@@ -230,8 +229,7 @@ channel_send_members(struct Client *client, const struct Channel *channel)
  * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
  */
 static void
-channel_send_mask_list(struct Client *client, const struct Channel *channel,
-                       const list_t *list, const char flag)
+channel_send_mask_list(struct Client *client, const struct Channel *channel, const list_t *list, const char flag)
 {
   list_node_t *node;
   size_t len;
@@ -240,8 +238,8 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel,
   if (list_is_empty(list))
     return;
 
-  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :", me.id,
-                                channel->creation_time, channel->name, flag);
+  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :",
+                                me.id, channel->creation_time, channel->name, flag);
   char *const bufptr_start = bufptr;
 
   LIST_FOREACH(node, list->head)
@@ -809,8 +807,8 @@ msg_has_ctrls(const char *message)
  *         CAN_SEND_NO if they cannot send to channel\n
  */
 int
-can_send(struct Channel *channel, struct Client *client,
-         struct ChannelMember *member, const char *message, bool notice, const char **error)
+can_send(struct Channel *channel, struct Client *client, struct ChannelMember *member,
+         const char *message, bool notice, const char **error)
 {
   if (IsServer(client) || HasFlag(client, FLAGS_SERVICE))
     return CAN_SEND_OPV;
@@ -955,8 +953,7 @@ channel_check_spambot_warning(struct Client *client, const char *name)
  * \param local      Whether the topic is set by a local client
  */
 void
-channel_set_topic(struct Channel *channel, const char *topic,
-                  const char *topic_info, uintmax_t topicts, bool local)
+channel_set_topic(struct Channel *channel, const char *topic, const char *topic_info, uintmax_t topicts, bool local)
 {
   if (local)
     strlcpy(channel->topic, topic, IO_MIN(sizeof(channel->topic), ConfigServerInfo.max_topic_length + 1));
@@ -973,8 +970,7 @@ channel_set_topic(struct Channel *channel, const char *topic,
  * \param mode_lock  The modes to lock as a string. Can be NULL.
  */
 void
-channel_set_mode_lock(struct Client *client, struct Channel *channel,
-                      const char *mode_lock)
+channel_set_mode_lock(struct Client *client, struct Channel *channel, const char *mode_lock)
 {
   io_free(channel->mode_lock);
   channel->mode_lock = NULL;

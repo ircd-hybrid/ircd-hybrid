@@ -27,7 +27,6 @@
 #include "memory.h"
 #include "command.h"
 
-
 /*
  * (based on orabidoo's parser code)
  *

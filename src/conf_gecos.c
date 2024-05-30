@@ -31,9 +31,7 @@
 #include "memory.h"
 #include "conf_gecos.h"
 
-
 static list_t gecos_list;
-
 
 const list_t *
 gecos_get_list(void)

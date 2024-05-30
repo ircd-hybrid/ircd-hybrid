@@ -32,7 +32,6 @@
 #include "client.h"
 #include "extban.h"
 
-
 static enum extban_match
 extban_account_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {

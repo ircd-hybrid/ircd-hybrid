@@ -30,7 +30,6 @@
 #include "client.h"
 #include "extban.h"
 
-
 struct Extban extban_nick =
 {
   .character = 'n',

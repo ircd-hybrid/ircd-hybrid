@@ -31,11 +31,9 @@
 #include "conf.h"
 #include "patricia.h"
 
-
 static list_t ipcache_list;
 static patricia_tree_t *ipcache_trie_v6;
 static patricia_tree_t *ipcache_trie_v4;
-
 
 static void *
 ipcache_get_trie(void *addr)
@@ -101,7 +99,6 @@ void
 ipcache_record_remove(void *addr, bool local)
 {
   patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_get_trie(addr), addr, 0);
-
   if (pnode == NULL)
     return;
 

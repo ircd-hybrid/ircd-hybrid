@@ -47,11 +47,9 @@
  * \param source_p The actual Client the new accept is added to.
  */
 void
-accept_add(const char *nick, const char *user,
-           const char *host, list_t *list)
+accept_add(const char *nick, const char *user, const char *host, list_t *list)
 {
   struct AcceptItem *accept = io_calloc(sizeof(*accept));
-
   accept->nick = io_strdup(nick);
   accept->user = io_strdup(user);
   accept->host = io_strdup(host);

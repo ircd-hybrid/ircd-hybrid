@@ -31,10 +31,8 @@
 #include "isupport.h"
 #include "extban.h"
 
-
 static list_t extban_list;
 static unsigned int matching_mask, acting_mask;
-
 
 static unsigned int
 extban_find_mask(void)
@@ -80,7 +78,6 @@ void
 extban_add(struct Extban *extban)
 {
   unsigned int mask = extban_find_mask();
-
   if (mask == 0)
     return;
 

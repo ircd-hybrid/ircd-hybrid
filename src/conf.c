@@ -61,9 +61,12 @@
 #include "isupport.h"
 #include "whowas.h"
 
-
 /* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
+
+/* general conf items link list root, other than k lines etc. */
+list_t connect_items;
+list_t operator_items;
 
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
@@ -73,15 +76,10 @@ struct config_serverinfo_entry ConfigServerInfo;
 struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
 
-/* general conf items link list root, other than k lines etc. */
-list_t connect_items;
-list_t operator_items;
-
 extern unsigned int lineno;
 extern char linebuf[];
 extern char conffilebuf[IRCD_BUFSIZE];
 extern int yyparse(); /* defined in y.tab.c */
-
 
 /* struct MaskItem *find_conf_by_address(const char *, struct io_addr *,
  *                                         int type, int fam, const char *username)
@@ -539,16 +537,13 @@ conf_make(enum maskitem_type type)
 void
 conf_free(struct MaskItem *conf)
 {
-  list_node_t *node = NULL, *node_next = NULL;
-  list_t *list = NULL;
-
-  if ((list = map_to_list(conf->type)))
+  list_t *list = map_to_list(conf->type);
+  if (list)
     list_find_remove(list, conf);
-
-  io_free(conf->name);
 
   if (conf->dns_pending)
     delete_resolver_queries(conf);
+
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
   if (conf->spasswd)
@@ -556,6 +551,7 @@ conf_free(struct MaskItem *conf)
 
   conf->class = NULL;
 
+  io_free(conf->name);
   io_free(conf->passwd);
   io_free(conf->spasswd);
   io_free(conf->reason);
@@ -567,6 +563,7 @@ conf_free(struct MaskItem *conf)
   io_free(conf->bind);
   io_free(conf->cipher_list);
 
+  list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, conf->hub_list.head)
   {
     io_free(node->data);
@@ -796,7 +793,7 @@ conf_attach(struct Client *client, struct MaskItem *conf)
 struct MaskItem *
 find_conf_name(list_t *list, const char *name, enum maskitem_type type)
 {
-  list_node_t *node = NULL;
+  list_node_t *node;
 
   LIST_FOREACH(node, list->head)
   {
@@ -1006,6 +1003,7 @@ conf_read(FILE *file)
   lineno = 1;
 
   conf_set_defaults();  /* Set default values prior to conf parsing */
+
   conf_parser_ctx.pass = 1;
   yyparse();  /* Pick up the classes first */
 
@@ -1013,6 +1011,7 @@ conf_read(FILE *file)
 
   conf_parser_ctx.pass = 2;
   yyparse();  /* Load the values from the conf */
+
   conf_validate();  /* Check to make sure some values are still okay. */
                     /* Some global values are also loaded here. */
   whowas_trim();  /* Attempt to trim whowas list if necessary */
@@ -1146,19 +1145,15 @@ get_oper_name(const struct Client *client)
 static void
 conf_clear(void)
 {
-  list_node_t *node = NULL, *node_next = NULL;
-  list_t *free_items [] = {
-    &connect_items, &operator_items, NULL
-  };
-
-  list_t ** iterator = free_items; /* C is dumb */
+  list_t *free_items [] = { &connect_items, &operator_items, NULL };
 
   /* We only need to free anything allocated by yyparse() here.
    * Resetting structs, etc, is taken care of by conf_set_defaults().
    */
 
-  for (; *iterator; iterator++)
+  for (list_t ** iterator = free_items; *iterator; iterator++)
   {
+    list_node_t *node, *node_next;
     LIST_FOREACH_SAFE(node, node_next, (*iterator)->head)
     {
       struct MaskItem *conf = node->data;
@@ -1265,8 +1260,6 @@ conf_handle_tls(bool cold)
 void
 conf_read_files(bool cold)
 {
-  char buf[IRCD_BUFSIZE];
-
   conf_parser_ctx.boot = cold;
   conf_parser_ctx.conf_file = fopen(ConfigGeneral.configfile, "r");
 
@@ -1308,6 +1301,7 @@ conf_read_files(bool cold)
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", ConfigServerInfo.network_name, -1);
 
+  char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "beI:%u", ConfigChannel.max_bans);
   isupport_add("MAXLIST", buf, -1);
 
@@ -1358,22 +1352,20 @@ yyerror(const char *msg)
     return;
 
   const char *p = stripws(linebuf);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                       "\"%s\", line %u: %s: %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno, msg, p);
+            conffilebuf, lineno, msg, p);
 }
 
 void
 conf_error_report(const char *msg)
 {
   const char *p = stripws(linebuf);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
-                       "\"%s\", line %u: %s: %s",
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE, "\"%s\", line %u: %s: %s",
                        conffilebuf, lineno, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-       conffilebuf, lineno, msg, p);
+            conffilebuf, lineno, msg, p);
 }
 
 /* match_conf_password()
@@ -1386,11 +1378,10 @@ conf_error_report(const char *msg)
 bool
 match_conf_password(const char *password, const struct MaskItem *conf)
 {
-  const char *encr = NULL;
-
   if (EmptyString(password) || EmptyString(conf->passwd))
     return false;
 
+  const char *encr;
   if (conf->flags & CONF_FLAGS_ENCRYPTED)
     encr = crypt(password, conf->passwd);
   else

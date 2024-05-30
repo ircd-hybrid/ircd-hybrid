@@ -35,9 +35,7 @@
 #include "send.h"
 #include "monitor.h"
 
-
 static list_t monitor_hash[HASHSIZE];
-
 
 /*
  * Rough figure of the datastructures for monitor:

@@ -38,9 +38,7 @@
 #include "conf.h"
 #include "address.h"
 
-
 static uintmax_t send_marker;
-
 
 /* send_format()
  *

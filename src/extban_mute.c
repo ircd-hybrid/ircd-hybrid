@@ -31,7 +31,6 @@
 #include "client.h"
 #include "extban.h"
 
-
 struct Extban extban_mute =
 {
   .character = 'm',

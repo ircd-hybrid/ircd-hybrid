@@ -29,9 +29,7 @@
 #include "memory.h"
 #include "conf_shared.h"
 
-
 static list_t shared_list;
-
 
 const list_t *
 shared_get_list(void)
@@ -64,8 +62,7 @@ shared_make(void)
 }
 
 const struct SharedItem *
-shared_find(unsigned int type, const char *server,
-            const char *user, const char *host)
+shared_find(unsigned int type, const char *server, const char *user, const char *host)
 {
   list_node_t *node;
 

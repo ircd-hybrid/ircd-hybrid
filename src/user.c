@@ -403,10 +403,8 @@ user_register_local(struct Client *client)
                            Count.max_loc);
   }
 
-  if ((list_length(&local_client_list) +
-       list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = list_length(&local_client_list) +
-                        list_length(&local_server_list);
+  if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = list_length(&local_client_list) + list_length(&local_server_list);
 
   if (list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = list_length(&global_client_list);

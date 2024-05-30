@@ -205,7 +205,7 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
     list_free_node(node);
 
   /* In case this header is now empty of notices, remove it */
-  if (monitor->monitored_by.head == NULL)
+  if (list_is_empty(&monitor->monitored_by))
     monitor_free(monitor);
 }
 

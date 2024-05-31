@@ -108,6 +108,7 @@ extern void list_add(void *, list_node_t *, list_t *);
 extern void list_add_after(void *, list_node_t *, list_node_t *, list_t *);
 extern void list_add_before(list_node_t *, void *, list_node_t *, list_t *);
 extern void list_add_tail(void *, list_node_t *, list_t *);
+extern void list_add_sorted(void *, list_node_t *, list_t *, int (*)(const void *, const void *));
 extern void list_remove(list_node_t *, list_t *);
 extern void list_move_list(list_t *, list_t *);
 extern void list_move_node(list_node_t *, list_t *, list_t *);

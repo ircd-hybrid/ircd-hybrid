@@ -193,6 +193,44 @@ list_add_tail(void *data, list_node_t *m, list_t *list)
 }
 
 /**
+ * @brief Adds a node to the double-linked list in sorted order.
+ *
+ * This function adds a node containing the specified data to the double-linked list
+ * in a position that maintains the list in sorted order. The comparison function `cmp`
+ * determines the order.
+ *
+ * @param data Pointer to the data to be stored in the new node.
+ * @param m Pointer to the node to be added.
+ * @param list Pointer to the double-linked list.
+ * @param cmp Function pointer to the comparison function.
+ */
+void
+list_add_sorted(void *data, list_node_t *m, list_t *list, int (*cmp)(const void *, const void *))
+{
+  /* If the list is empty, simply add the node to the list. */
+  if (list_is_empty(list))
+  {
+    list_add(data, m, list);
+    return;
+  }
+
+  /* Iterate through the list to find the appropriate position. */
+  list_node_t *current = list->head;
+  while (current && cmp(current->data, data) < 0)
+    current = current->next;
+
+  /* If we've reached the end of the list, add to the tail. */
+  if (current == NULL)
+    list_add_tail(data, m, list);
+  else if (current == list->head)
+    /* If the new node should be the new head. */
+    list_add(data, m, list);
+  else
+    /* Add the new node before the current node. */
+    list_add_before(current, data, m, list);
+}
+
+/**
  * @brief Deletes a node from a double-linked list.
  *
  * This function deletes the specified node from the double-linked list.

@@ -19,8 +19,14 @@
  *  USA
  */
 
-/*! \file dbuf.c
- * \brief Supports dynamic data buffers.
+/**
+ * @file dbuf.c
+ * @brief Implements dynamic data buffer functionality.
+ *
+ * This file contains the implementation of dynamic data buffers used for efficient
+ * and flexible data storage and manipulation. The dynamic buffer module supports
+ * the allocation, management, and formatting of buffers that can dynamically grow
+ * to accommodate varying amounts of data.
  */
 
 #include <stdio.h>
@@ -34,7 +40,14 @@
 #include "dbuf.h"
 #include "memory.h"
 
-
+/**
+ * @brief Allocate a new dynamic buffer block.
+ *
+ * This function allocates memory for a new `dbuf_block` structure and initializes
+ * its reference count to 1. The allocated block has a predefined size for storing data.
+ *
+ * @return A pointer to the newly allocated `dbuf_block` structure.
+ */
 struct dbuf_block *
 dbuf_alloc(void)
 {
@@ -44,6 +57,14 @@ dbuf_alloc(void)
   return block;
 }
 
+/**
+ * @brief Decrease the reference count of a dynamic buffer block and free it if the count reaches zero.
+ *
+ * This function decrements the reference count of the given `dbuf_block`. If the reference count
+ * drops to zero, the memory allocated for the block is freed.
+ *
+ * @param block A pointer to the `dbuf_block` structure whose reference count is to be decreased.
+ */
 void
 dbuf_ref_free(struct dbuf_block *block)
 {
@@ -51,6 +72,16 @@ dbuf_ref_free(struct dbuf_block *block)
     io_free(block);
 }
 
+/**
+ * @brief Add a dynamic buffer block to a buffer queue.
+ *
+ * This function increments the reference count of the given `dbuf_block` and adds it to the end
+ * of the specified `dbuf_queue`. The total size of the queue is updated to include the size of
+ * the added block.
+ *
+ * @param queue A pointer to the `dbuf_queue` to which the block is to be added.
+ * @param block A pointer to the `dbuf_block` structure to be added to the queue.
+ */
 void
 dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
 {
@@ -59,6 +90,16 @@ dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
   queue->total_size += block->size;
 }
 
+/**
+ * @brief Remove data from a dynamic buffer queue.
+ *
+ * This function removes data from the specified `dbuf_queue` until the specified `count` of bytes
+ * is deleted or the queue becomes empty. It adjusts the total size of the queue and handles the
+ * reference counting and freeing of the blocks as needed.
+ *
+ * @param queue A pointer to the `dbuf_queue` from which data is to be removed.
+ * @param count The number of bytes to be removed from the queue.
+ */
 void
 dbuf_delete(struct dbuf_queue *queue, size_t count)
 {
@@ -90,6 +131,17 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
   }
 }
 
+/**
+ * @brief Format a string and store it in a dynamic buffer block.
+ *
+ * This function formats a string using a printf-like format specifier and stores the result
+ * in the given `dbuf_block`. The function ensures that the block has a reference count of 1
+ * before modifying its contents.
+ *
+ * @param block A pointer to the `dbuf_block` where the formatted string is to be stored.
+ * @param pattern The format string for the data.
+ * @param ... Additional arguments to be formatted according to the pattern.
+ */
 void
 dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
 {
@@ -102,6 +154,17 @@ dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
   va_end(args);
 }
 
+/**
+ * @brief Store formatted data in a dynamic buffer block using a variable argument list.
+ *
+ * This function formats data according to the provided format string and variable argument list,
+ * and stores the result in the specified `dbuf_block`. The function ensures that the block has
+ * a reference count of 1 before modifying its contents.
+ *
+ * @param block A pointer to the `dbuf_block` where the formatted data is to be stored.
+ * @param data The format string for the data.
+ * @param args A variable argument list containing the data to be formatted.
+ */
 void
 dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
 {
@@ -114,6 +177,16 @@ dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
     block->size = sizeof(block->data);
 }
 
+/**
+ * @brief Add raw data to a dynamic buffer queue.
+ *
+ * This function adds raw data to the specified `dbuf_queue`. It allocates new `dbuf_block`s
+ * as necessary and updates the total size of the queue to reflect the added data.
+ *
+ * @param queue A pointer to the `dbuf_queue` to which the data is to be added.
+ * @param buf A pointer to the raw data to be added.
+ * @param length The length of the raw data to be added.
+ */
 void
 dbuf_put(struct dbuf_queue *queue, const char *buf, size_t length)
 {

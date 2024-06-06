@@ -32,6 +32,7 @@
 #ifndef INCLUDED_memory_h
 #define INCLUDED_memory_h
 
+extern void io_set_oom_handler(void (*)(void));
 extern void *io_calloc(size_t);
 extern void *io_realloc(void *, size_t);
 extern void io_free(void *);

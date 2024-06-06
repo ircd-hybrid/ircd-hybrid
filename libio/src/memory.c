@@ -44,6 +44,23 @@
 static void (*outofmemory)(void) = abort;
 
 /**
+ * @brief Sets a custom out-of-memory handler.
+ *
+ * This function allows users to specify a custom handler to be called
+ * in case of memory allocation failure within the memory utility functions.
+ *
+ * @param handler A function pointer to the custom out-of-memory handler.
+ */
+void
+io_set_oom_handler(void (*handler)(void))
+{
+  if (handler)
+    outofmemory = handler;
+  else
+    outofmemory = abort;
+}
+
+/**
  * @brief Allocates memory using calloc.
  *
  * This function allocates memory of the specified size using calloc.

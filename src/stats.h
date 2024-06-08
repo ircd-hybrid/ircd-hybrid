@@ -33,6 +33,19 @@
 #include "client.h"
 
 /**
+ * @def STATS_ARRAY_ENTRY
+ * @brief Macro to simplify the initialization of StatsHandler entries.
+ *
+ * This macro is used to create entries for arrays of StatsHandler structures,
+ * providing a more readable and consistent initialization process.
+ *
+ * @param l The character representing the stats command.
+ * @param h The function to handle the stats command.
+ * @param r The required user modes to access this stats command.
+ */
+#define STATS_ARRAY_ENTRY(l, h, r) { .letter = l, .handler = h, .required_modes = r }
+
+/**
  * @enum stats_result
  * @brief Error codes for the stats API functions.
  *

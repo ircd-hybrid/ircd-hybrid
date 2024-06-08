@@ -1220,7 +1220,7 @@ do_stats(struct Client *client, int parc, char *parv[])
   const struct StatsHandler *handler = stats_find(letter);
   if (handler)
   {
-    if (stats_mode_allowed(handler, client->umodes))
+    if (stats_allowed(handler, client->umodes))
       handler->handler(client, parc, parv);
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);

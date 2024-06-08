@@ -54,7 +54,7 @@
 #include "ipcache.h"
 #include "channel.h"
 #include "channel_invite.h"
-
+#include "stats.h"
 
 static const char *
 oper_privs_as_string(const unsigned int flags)
@@ -1164,15 +1164,7 @@ stats_ltrace(struct Client *client, int parc, char *parv[])
     sendto_one_numeric(client, &me, ERR_NEEDMOREPARAMS, "STATS");
 }
 
-struct StatsStruct
-{
-  unsigned char letter;
-  void (*handler)(struct Client *, int, char *[]);
-  unsigned int required_modes;
-};
-
-static const struct StatsStruct *stats_map[256];
-static const struct StatsStruct  stats_tab[] =
+static const struct StatsHandler stats_tab[] =
 {
   { .letter = 'a', .handler = stats_dns_servers, .required_modes = UMODE_ADMIN },
   { .letter = 'A', .handler = stats_dns_servers, .required_modes = UMODE_ADMIN },
@@ -1212,8 +1204,7 @@ static const struct StatsStruct  stats_tab[] =
   { .letter = 'y', .handler = stats_class, .required_modes = UMODE_OPER },
   { .letter = 'Y', .handler = stats_class, .required_modes = UMODE_OPER },
   { .letter = 'z', .handler = stats_memory, .required_modes = UMODE_OPER },
-  { .letter = '?', .handler = stats_servlinks, .required_modes = UMODE_OPER },
-  { .letter = '\0' }
+  { .letter = '?', .handler = stats_servlinks, .required_modes = UMODE_OPER }
 };
 
 static void
@@ -1226,11 +1217,11 @@ do_stats(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  const struct StatsStruct *const tab = stats_map[statchar];
-  if (tab)
+  const struct StatsHandler *handler = stats_find(statchar);
+  if (handler)
   {
-    if (tab->required_modes == 0 || HasUMode(client, tab->required_modes))
-      tab->handler(client, parc, parv);
+    if (handler->required_modes == 0 || HasUMode(client, handler->required_modes))
+      handler->handler(client, parc, parv);
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
@@ -1284,13 +1275,6 @@ ms_stats(struct Client *client, int parc, char *parv[])
   do_stats(client, parc, parv);
 }
 
-static void
-stats_init(void)
-{
-  for (const struct StatsStruct *tab = stats_tab; tab->letter; ++tab)
-    stats_map[tab->letter] = tab;
-}
-
 static struct Command stats_msgtab =
 {
   .name = "STATS",
@@ -1304,13 +1288,14 @@ static struct Command stats_msgtab =
 static void
 module_init(void)
 {
-  stats_init();
+  stats_register_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
   command_add(&stats_msgtab);
 }
 
 static void
 module_exit(void)
 {
+  stats_unregister_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
   command_del(&stats_msgtab);
 }
 

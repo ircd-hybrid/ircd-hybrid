@@ -136,9 +136,9 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	ipcache.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
 	isupport.$(OBJEXT) listener.$(OBJEXT) modules.$(OBJEXT) \
 	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) restart.$(OBJEXT) \
-	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) whowas.$(OBJEXT)
+	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
+	restart.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -188,7 +188,7 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
 	./$(DEPDIR)/restart.Po ./$(DEPDIR)/send.Po \
 	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -488,6 +488,8 @@ ircd_SOURCES = accept.c          \
                packet.h          \
                parse.c           \
                parse.h           \
+               stats.c           \
+               stats.h           \
                stdinc.h          \
                restart.c         \
                restart.h         \
@@ -649,6 +651,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@ # am--include-marker
 
@@ -874,6 +877,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
+	-rm -f ./$(DEPDIR)/stats.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
@@ -972,6 +976,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
+	-rm -f ./$(DEPDIR)/stats.Po
 	-rm -f ./$(DEPDIR)/user.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile

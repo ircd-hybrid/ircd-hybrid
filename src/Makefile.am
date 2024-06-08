@@ -91,6 +91,8 @@ ircd_SOURCES = accept.c          \
                packet.h          \
                parse.c           \
                parse.h           \
+               stats.c           \
+               stats.h           \
                stdinc.h          \
                restart.c         \
                restart.h         \

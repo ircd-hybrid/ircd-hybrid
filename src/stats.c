@@ -147,3 +147,20 @@ stats_find(unsigned char letter)
 {
   return stats_handlers[letter];
 }
+
+/**
+ * @brief Checks if the user has the required user modes for a stats handler.
+ *
+ * This function checks if the user has the necessary user modes to execute a
+ * stats handler. It returns true if the user has the required user modes, or if no
+ * specific user modes are required.
+ *
+ * @param handler The stats handler containing the required user modes.
+ * @param modes The user modes the user currently has.
+ * @return True if the user has the required user modes, false otherwise.
+ */
+bool
+stats_mode_allowed(const struct StatsHandler *handler, unsigned int modes)
+{
+  return handler->required_modes == 0 || (modes & handler->required_modes) != 0;
+}

@@ -29,6 +29,7 @@
  */
 
 #include "stdinc.h"
+#include "memory.h"
 #include "defaults.h"
 #include "user.h"
 #include "list.h"
@@ -61,6 +62,7 @@
 #include "ipcache.h"
 #include "isupport.h"
 #include "extban.h"
+#include "restart.h"
 
 /**
  * @struct SetOptions
@@ -287,6 +289,25 @@ initialize_global_set_options(void)
 }
 
 /**
+ * @brief Handles out-of-memory conditions.
+ *
+ * This function reports an out-of-memory condition and restarts the program.
+ * If it is called more than once, it aborts the program execution.
+ */
+static void
+ircd_oom(void)
+{
+  static bool was_here = false;
+
+  if (was_here == false)
+    was_here = true;
+  else
+    abort();
+
+  server_die("out of memory", true);
+}
+
+/**
  * @brief Writes the process ID to the specified file.
  *
  * @param filename Path to the process ID file.
@@ -494,6 +515,8 @@ main(int argc, char *argv[])
     fprintf(stderr, "ERROR: This server won't run as root/superuser\n");
     return -1;
   }
+
+  io_set_oom_handler(ircd_oom);
 
   /* Setup corefile size immediately after boot -kre */
   setup_corefile();

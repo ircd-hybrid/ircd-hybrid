@@ -187,6 +187,26 @@ stats_set_disabled(unsigned char letter)
 }
 
 /**
+ * @brief Sets the required user modes for a stats handler.
+ *
+ * This function updates the required user modes for the specified stats handler.
+ *
+ * @param letter The character representing the stats command.
+ * @param required_modes The user modes required to access this stats command.
+ * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
+ */
+enum stats_result
+stats_set_required_modes(unsigned char letter, unsigned int required_modes)
+{
+  struct StatsHandler *handler = stats_find(letter);
+  if (handler == NULL)
+    return STATS_NOT_FOUND;
+
+  handler->required_modes = required_modes;
+  return STATS_SUCCESS;
+}
+
+/**
  * @brief Checks if the user has the required user modes for a stats handler.
  *
  * This function checks if the user has the necessary user modes to execute a

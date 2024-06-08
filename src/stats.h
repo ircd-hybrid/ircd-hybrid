@@ -90,5 +90,6 @@ extern void stats_unregister_array(const struct StatsHandler *, size_t);
 extern struct StatsHandler *stats_find(unsigned char);
 extern enum stats_result stats_set_enabled(unsigned char);
 extern enum stats_result stats_set_disabled(unsigned char);
+extern enum stats_result stats_set_required_modes(unsigned char, unsigned int);
 extern bool stats_mode_allowed(const struct StatsHandler *, unsigned int);
 #endif  /* INCLUDED_stats_h */

@@ -61,8 +61,8 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * @param required_modes The required user modes to access this stats command.
  * @return An error code indicating the result of the operation.
  */
-enum
-stats_result stats_register(unsigned char letter, stats_handler_func handler, unsigned int required_modes)
+enum stats_result
+stats_register(unsigned char letter, stats_handler_func handler, unsigned int required_modes)
 {
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;
@@ -103,8 +103,8 @@ stats_register_array(const struct StatsHandler *handlers, size_t elements)
  * @param letter The character representing the stats command.
  * @return An error code indicating the result of the operation.
  */
-enum
-stats_result stats_unregister(unsigned char letter)
+enum stats_result
+stats_unregister(unsigned char letter)
 {
   if (stats_handlers[letter] == NULL)
     return STATS_NOT_FOUND;
@@ -128,7 +128,7 @@ stats_unregister_array(const struct StatsHandler *handlers, size_t elements)
 {
   for (size_t i = 0; i < elements; ++i)
   {
-    const struct StatsHandler *tmp = &handlers[i];
+    const struct StatsHandler *const tmp = &handlers[i];
     stats_unregister(tmp->letter);
   }
 }

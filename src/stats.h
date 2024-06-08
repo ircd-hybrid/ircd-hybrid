@@ -37,13 +37,14 @@
  * @brief Macro to simplify the initialization of StatsHandler entries.
  *
  * This macro is used to create entries for arrays of StatsHandler structures,
- * providing a more readable and consistent initialization process.
+ * providing a more readable and consistent initialization process. By default,
+ * the handler is enabled.
  *
  * @param l The character representing the stats command.
  * @param h The function to handle the stats command.
  * @param r The required user modes to access this stats command.
  */
-#define STATS_ARRAY_ENTRY(l, h, r) { .letter = l, .handler = h, .required_modes = r }
+#define STATS_ARRAY_ENTRY(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
 
 /**
  * @enum stats_result
@@ -79,12 +80,15 @@ struct StatsHandler
   unsigned char letter;  /**< The character representing the stats command. */
   stats_handler_func handler;  /**< The function to handle the stats command. */
   unsigned int required_modes;  /**< The required user modes to access this stats command. */
+  bool enabled;  /**< Indicates if the handler is enabled. */
 };
 
 extern enum stats_result stats_register(unsigned char, stats_handler_func, unsigned int);
 extern void stats_register_array(const struct StatsHandler *, size_t);
 extern enum stats_result stats_unregister(unsigned char);
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
-extern const struct StatsHandler *stats_find(unsigned char);
+extern struct StatsHandler *stats_find(unsigned char);
+extern enum stats_result stats_set_enabled(unsigned char);
+extern enum stats_result stats_set_disabled(unsigned char);
 extern bool stats_mode_allowed(const struct StatsHandler *, unsigned int);
 #endif  /* INCLUDED_stats_h */

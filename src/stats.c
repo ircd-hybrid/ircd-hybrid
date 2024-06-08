@@ -142,10 +142,48 @@ stats_unregister_array(const struct StatsHandler *handlers, size_t elements)
  * @param letter The character representing the stats command.
  * @return A pointer to the StatsHandler structure or NULL if not found.
  */
-const struct StatsHandler *
+struct StatsHandler *
 stats_find(unsigned char letter)
 {
   return stats_handlers[letter];
+}
+
+/**
+ * @brief Enables a stats handler.
+ *
+ * This function sets the enabled field of the specified stats handler to true.
+ *
+ * @param letter The character representing the stats command.
+ * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
+ */
+enum stats_result
+stats_set_enabled(unsigned char letter)
+{
+  struct StatsHandler *handler = stats_find(letter);
+  if (handler == NULL)
+    return STATS_NOT_FOUND;
+
+  handler->enabled = true;
+  return STATS_SUCCESS;
+}
+
+/**
+ * @brief Disables a stats handler.
+ *
+ * This function sets the enabled field of the specified stats handler to false.
+ *
+ * @param letter The character representing the stats command.
+ * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
+ */
+enum stats_result
+stats_set_disabled(unsigned char letter)
+{
+  struct StatsHandler *handler = stats_find(letter);
+  if (handler == NULL)
+    return STATS_NOT_FOUND;
+
+  handler->enabled = false;
+  return STATS_SUCCESS;
 }
 
 /**

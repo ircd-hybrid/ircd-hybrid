@@ -1210,14 +1210,14 @@ static const struct StatsHandler stats_tab[] =
 static void
 do_stats(struct Client *client, int parc, char *parv[])
 {
-  const unsigned char statchar = *parv[1];
-  if (statchar == '\0')
+  const unsigned char letter = *parv[1];
+  if (letter == '\0')
   {
     sendto_one_numeric(client, &me, RPL_ENDOFSTATS, '*');
     return;
   }
 
-  const struct StatsHandler *handler = stats_find(statchar);
+  const struct StatsHandler *handler = stats_find(letter);
   if (handler)
   {
     if (stats_mode_allowed(handler, client->umodes))
@@ -1226,10 +1226,10 @@ do_stats(struct Client *client, int parc, char *parv[])
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
     sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "STATS %c requested by %s (%s@%s) [%s]",
-                         statchar, client->name, client->username, client->host, client->servptr->name);
+                         letter, client->name, client->username, client->host, client->servptr->name);
   }
 
-  sendto_one_numeric(client, &me, RPL_ENDOFSTATS, statchar);
+  sendto_one_numeric(client, &me, RPL_ENDOFSTATS, letter);
 }
 
 /*

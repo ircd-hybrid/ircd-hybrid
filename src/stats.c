@@ -62,7 +62,7 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * @return An error code indicating the result of the operation.
  */
 enum
-stats_result stats_register(unsigned char letter, void (*handler)(struct Client *, int, char *[]), unsigned int required_modes)
+stats_result stats_register(unsigned char letter, stats_handler_func handler, unsigned int required_modes)
 {
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;

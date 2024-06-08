@@ -47,6 +47,14 @@ enum stats_result
 };
 
 /**
+ * @typedef stats_handler_func
+ * @brief Type definition for stats handler functions.
+ *
+ * This typedef defines the function signature for stats handler functions.
+ */
+typedef void (*stats_handler_func)(struct Client *, int, char *[]);
+
+/**
  * @struct StatsHandler
  * @brief Structure for holding stats handler information.
  *
@@ -56,11 +64,11 @@ enum stats_result
 struct StatsHandler
 {
   unsigned char letter;  /**< The character representing the stats command. */
-  void (*handler)(struct Client *, int, char *[]);  /**< The function to handle the stats command. */
+  stats_handler_func handler;  /**< The function to handle the stats command. */
   unsigned int required_modes;  /**< The required user modes to access this stats command. */
 };
 
-extern enum stats_result stats_register(unsigned char, void (*)(struct Client *, int, char *[]), unsigned int);
+extern enum stats_result stats_register(unsigned char, stats_handler_func, unsigned int);
 extern void stats_register_array(const struct StatsHandler *, size_t);
 extern enum stats_result stats_unregister(unsigned char);
 extern void stats_unregister_array(const struct StatsHandler *, size_t);

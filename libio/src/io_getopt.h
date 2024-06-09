@@ -35,16 +35,17 @@
  * @brief Structure representing a command-line option.
  *
  * This structure contains information about a command-line option, including its
- * name, the location to store the argument (if any), the type of the argument,
+ * long name, short name, the location to store the argument (if any), the type of the argument,
  * and a description for usage and help printing.
  */
 struct io_getopt
 {
-  const char *opt;  /**< Name of the argument. */
-  void *argloc;  /**< Location to store the argument to it (-option argument). */
+  const char *opt;  /**< Long option name. */
+  char short_opt;  /**< Short option name (single letter). */
+  void *argloc;  /**< Location to store the argument. */
   enum { INTEGER, BOOLEAN, STRING, USAGE } argtype;  /**< Type of the argument. */
   const char *desc;  /**< Description of the argument, usage for printing help. */
 };
 
 extern void io_getopt(int *, char ***, struct io_getopt *);
-#endif /* INCLUDED_io_getopt_h */
+#endif  /* INCLUDED_io_getopt_h */

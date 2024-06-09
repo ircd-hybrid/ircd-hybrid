@@ -169,26 +169,17 @@ static bool printVersion;
  */
 static struct io_getopt myopts[] =
 {
-  { "configfile", &ConfigGeneral.configfile,
-   STRING, "File to use for ircd.conf" },
-  { "klinefile",  &ConfigGeneral.klinefile,
-   STRING, "File to use for kline database" },
-  { "dlinefile",  &ConfigGeneral.dlinefile,
-   STRING, "File to use for dline database" },
-  { "xlinefile",  &ConfigGeneral.xlinefile,
-   STRING, "File to use for xline database" },
-  { "resvfile",   &ConfigGeneral.resvfile,
-   STRING, "File to use for resv database" },
-  { "logfile",    &logFileName,
-   STRING, "File to use for ircd.log" },
-  { "pidfile",    &pidFileName,
-   STRING, "File to use for process ID" },
-  { "foreground", &server_state.foreground,
-   BOOLEAN, "Run in foreground (don't detach)" },
-  { "version",    &printVersion,
-   BOOLEAN, "Print version and exit" },
-  { "help", NULL, USAGE, "Print this text" },
-  { NULL, NULL, STRING, NULL },
+  { "configfile", 'c', &ConfigGeneral.configfile, STRING, "File to use for ircd.conf" },
+  { "klinefile", 'k', &ConfigGeneral.klinefile, STRING, "File to use for kline database" },
+  { "dlinefile", 'd', &ConfigGeneral.dlinefile, STRING, "File to use for dline database" },
+  { "xlinefile", 'x', &ConfigGeneral.xlinefile, STRING, "File to use for xline database" },
+  { "resvfile", 'r', &ConfigGeneral.resvfile, STRING, "File to use for resv database" },
+  { "logfile", 'l', &logFileName, STRING, "File to use for ircd.log" },
+  { "pidfile", 'p', &pidFileName, STRING, "File to use for process ID" },
+  { "foreground", 'f', &server_state.foreground, BOOLEAN, "Run in foreground (don't detach)" },
+  { "version", 'v', &printVersion, BOOLEAN, "Print version and exit" },
+  { "help", 'h', NULL, USAGE, "Print this text" },
+  { NULL, 0, NULL, STRING, NULL }
 };
 
 static struct event event_cleanup_tklines =

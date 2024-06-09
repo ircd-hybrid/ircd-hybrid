@@ -34,16 +34,6 @@
 #include "memory.h"
 
 /**
- * @var OPTCHAR
- * @brief Character used to denote command-line options.
- *
- * This variable defines the character used to denote command-line options. In this
- * context, options are command-line arguments preceded by a specific character,
- * typically a hyphen (-).
- */
-static const unsigned char OPTCHAR = '-';
-
-/**
  * @brief Display usage information for the program.
  *
  * Displays the program's usage information, including valid options and their descriptions,
@@ -59,12 +49,70 @@ io_getopt_usage(const char *name, const struct io_getopt *opts)
   fprintf(stderr, "Where valid options are:\n");
 
   for (; opts->opt; ++opts)
-    fprintf(stderr, "\t%c%-10s %-20s%s\n", OPTCHAR, opts->opt,
-            (opts->argtype == BOOLEAN || opts->argtype == USAGE) ? "" :
-            opts->argtype == INTEGER ? "<number>" : "<string>",
-            opts->desc);
+    if (opts->short_opt)
+      fprintf(stderr, "\t-%c, --%-10s %-20s%s\n", opts->short_opt, opts->opt,
+              (opts->argtype == BOOLEAN || opts->argtype == USAGE) ? "" :
+              opts->argtype == INTEGER ? "<number>" : "<string>",
+              opts->desc);
+    else
+      fprintf(stderr, "\t--%-10s %-20s%s\n", opts->opt,
+              (opts->argtype == BOOLEAN || opts->argtype == USAGE) ? "" :
+              opts->argtype == INTEGER ? "<number>" : "<string>",
+              opts->desc);
 
   exit(EXIT_FAILURE);
+}
+
+/**
+ * @brief Handle a command-line option.
+ *
+ * This function processes a single command-line option based on its type and updates the
+ * corresponding variable as specified by the option.
+ *
+ * @param argc Pointer to the argument count.
+ * @param argv Pointer to the argument vector.
+ * @param opts An array of io_getopt structures representing valid command-line options.
+ * @param index The index of the current option in the opts array.
+ * @param progname The name of the program.
+ */
+static void
+handle_option(int *argc, char ***argv, struct io_getopt *opts, unsigned int index, const char *progname)
+{
+  switch (opts[index].argtype)
+  {
+    case BOOLEAN:
+      *((bool *)opts[index].argloc) = true;
+      break;
+    case INTEGER:
+      if (*argc < 2)
+      {
+        fprintf(stderr, "Error: option '%s' requires an argument\n", (*argv)[0]);
+        io_getopt_usage(progname, opts);
+      }
+
+      *((int *)opts[index].argloc) = atoi((*argv)[1]);
+      (*argc)--;
+      (*argv)++;
+      break;
+    case STRING:
+      if (*argc < 2)
+      {
+        fprintf(stderr, "Error: option '%s' requires an argument\n", (*argv)[0]);
+        io_getopt_usage(progname, opts);
+      }
+
+      *((char **)opts[index].argloc) = io_strdup((*argv)[1]);
+      (*argc)--;
+      (*argv)++;
+      break;
+    case USAGE:
+      /* Print usage information and exit. */
+      io_getopt_usage(progname, opts);
+    default:
+      /* Internal error, should never reach here. */
+      fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n", __FILE__, __LINE__);
+      exit(EXIT_FAILURE);
+  }
 }
 
 /**
@@ -82,76 +130,46 @@ io_getopt(int *argc, char ***argv, struct io_getopt *opts)
 {
   const char *progname = (*argv)[0];
 
-  /* Loop through each argument */
   while (true)
   {
     bool found = false;
-    const char *opt = NULL;
+    bool long_option = false;
+    const char *opt;
 
     (*argc)--;
     (*argv)++;
 
-    if (*argc < 1 || (*argv)[0][0] != OPTCHAR)
-      return;
+    /* Break the loop if no more arguments. */
+    if (*argc < 1)
+      break;
 
-    opt = &(*argv)[0][1];
+    /* Check if the argument is an option (starts with '-'). */
+    if ((*argv)[0][0] != '-')
+      break;
 
-    /* Search through our argument list, and see if it matches */
+    /* Determine if it's a long option or short option. */
+    if ((*argv)[0][1] == '-')
+    {
+      opt = &(*argv)[0][2];
+      long_option = true;
+    }
+    else
+      opt = &(*argv)[0][1];
+
     for (unsigned int i = 0; opts[i].opt; ++i)
     {
-      if (strcmp(opts[i].opt, opt))
-        continue;
-
-      /* Found our argument */
-      found = true;
-
-      switch (opts[i].argtype)
+      if ((long_option && strcmp(opts[i].opt, opt) == 0) ||
+          (long_option == false && opts[i].short_opt == opt[0]))
       {
-        case BOOLEAN:
-          *((bool *)opts[i].argloc) = true;
-          break;
-
-        case INTEGER:
-          if (*argc < 2)
-          {
-            fprintf(stderr, "Error: option '%c%s' requires an argument\n",
-                    OPTCHAR, opts[i].opt);
-            io_getopt_usage((*argv)[0], opts);
-          }
-
-          *((int *)opts[i].argloc) = atoi((*argv)[1]);
-          (*argc)--;
-          (*argv)++;
-          break;
-
-        case STRING:
-          if (*argc < 2)
-          {
-            fprintf(stderr, "Error: option '%c%s' requires an argument\n",
-                    OPTCHAR, opts[i].opt);
-            io_getopt_usage(progname, opts);
-          }
-
-          *((char **)opts[i].argloc) = io_strdup((*argv)[1]);
-          (*argc)--;
-          (*argv)++;
-          break;
-
-        case USAGE:
-          io_getopt_usage(progname, opts);
-          /* NOTREACHED */
-
-        default:
-          fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n",
-                  __FILE__, __LINE__);
-          exit(EXIT_FAILURE);
+        found = true;
+        handle_option(argc, argv, opts, i, progname);
+        break;
       }
     }
 
     if (found == false)
     {
-      fprintf(stderr, "Error: unknown argument '%c%s'\n",
-              OPTCHAR, opt);
+      fprintf(stderr, "Error: unknown argument '%s'\n", (*argv)[0]);
       io_getopt_usage(progname, opts);
     }
   }

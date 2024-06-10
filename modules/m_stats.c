@@ -1179,13 +1179,8 @@ static void
 do_stats(struct Client *client, int parc, char *parv[])
 {
   const unsigned char letter = *parv[1];
-  if (letter == '\0')
-  {
-    sendto_one_numeric(client, &me, RPL_ENDOFSTATS, '*');
-    return;
-  }
-
   const struct StatsHandler *handler = stats_find(letter);
+
   if (handler)
   {
     if (stats_allowed(handler, client->umodes))

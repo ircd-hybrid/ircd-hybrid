@@ -3,6 +3,26 @@
   for cross-compilation scenarios
 * Fixed the issue where XLINE and UNXLINE were not working properly on servers within
   a cluster
+* Command-line options now support both short (`-c`) and long (`--configfile`) formats.
+  The available options are:
+  * `-c` or `--configfile` for the configuration file
+  * `-k` or `--klinefile` for the kline database file
+  * `-d` or `--dlinefile` for the dline database file
+  * `-x` or `--xlinefile` for the xline database file
+  * `-r` or `--resvfile` for the resv database file
+  * `-l` or `--logfile` for the log file
+  * `-p` or `--pidfile` for the PID file
+  * `-f` or `--foreground` to run in the foreground
+  * `-v` or `--version` to print the version and exit
+  * `-h` or `--help` to display help information
+* The new IRC operator flag, `message:mass`, has been implemented. This flag controls
+  access to sending mass messages using the `NOTICE $$*.mask` command.
+* Upon connecting, a user will now receive a notice with their client certificate
+  fingerprint, if provided.
+* The `INFO` command now includes the `serverinfo::name`, `serverinfo::sid`, and
+  `serverinfo::description` configuration options in its output.
+* The `STATS` subsystem has been rewritten to support dynamic registration and unregistration
+  of stats handlers. This allows modules to register and unregister their own stats handlers.
 
 
 #### Noteworthy changes in version 8.2.43 (2022-09-26)

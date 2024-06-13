@@ -84,11 +84,22 @@ match(const char *mask, const char *name)
         break;
       case '\\':
         ++m;  /* Skip the escape character. */
-        if (*m == '\0' || *m != *n)  /* Ensure the next character matches exactly. */
+        if (*m == '\0')  /* Pattern ends with escape character, which is invalid. */
           return 1;
 
-        /* Match the escaped character and continue. */
-        ++m, ++n;
+        if (*m != *n)  /* Ensure the next character matches exactly, without case-insensitivity. */
+        {
+          if (m_tmp == NULL)
+            return 1;  /* No '*' to backtrack to, match fails. */
+
+          /* Backtrack to the last '*' position. */
+          m = m_tmp;
+          n = ++n_tmp;
+        }
+        else
+          /* Match the escaped character and continue. */
+          ++m, ++n;
+
         break;
       default:
         if (*n == '\0' || ToLower(*m) != ToLower(*n))  /* Case-insensitive character comparison. */

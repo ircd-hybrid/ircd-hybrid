@@ -991,7 +991,7 @@ conf_set_defaults(void)
   cloak_set_num_bits(ConfigGeneral.cloak_num_bits);
   ConfigGeneral.cloak_secret = io_strdup("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
   cloak_set_secret(ConfigGeneral.cloak_secret);
-  ConfigGeneral.cloak_suffix = io_strdup(".irc");
+  ConfigGeneral.cloak_suffix = io_strdup("irc");
   cloak_set_suffix(ConfigGeneral.cloak_suffix);
 }
 

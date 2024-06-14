@@ -23,6 +23,26 @@
   `serverinfo::description` configuration options in its output.
 * The `STATS` subsystem has been rewritten to support dynamic registration and unregistration
   of stats handlers. This allows modules to register and unregister their own stats handlers.
+* Implemented hostname cloaking API to improve user privacy and security by obfuscating real
+  IP addresses. The cloaking process uses CIDR masking, SHA3 hashing, and base32 encoding to
+  generate secure and unique cloaked hostnames. The following configuration directives
+  have been introduced:
+  * `cloak_enabled`: Enable or disable hostname cloaking.
+  * `cloak_cidr_len_ipv4`: CIDR length for IPv4 addresses used in hostname cloaking.
+  * `cloak_cidr_len_ipv6`: CIDR length for IPv6 addresses used in hostname cloaking.
+  * `cloak_num_bits`: Number of bits for the MAC computation used in hostname cloaking.
+  * `cloak_secret`: Secret key used in the MAC computation for hostname cloaking.
+  * `cloak_suffix`: Suffix appended to the cloaked hostname.
+* Added user mode `+x` (cloak) to activate hostname cloaking for the user, replacing their
+  real IP address with a cloaked hostname.
+* The `INFO` command now includes the new cloaking configuration options in its output. The
+  following cloaking-related configuration directives will be shown:
+  * `general::cloak_enabled`
+  * `general::cloak_cidr_len_ipv4`
+  * `general::cloak_cidr_len_ipv6`
+  * `general::cloak_num_bits`
+  * `general::cloak_secret` (displayed as `REDACTED` for security)
+  * `general::cloak_suffix`
 
 
 #### Noteworthy changes in version 8.2.43 (2022-09-26)

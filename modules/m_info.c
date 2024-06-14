@@ -155,7 +155,7 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY(NULL, 0, NULL, NULL)
 };
 
-static const char *infotext[] =
+static const char *const infotext[] =
 {
   "ircd-hybrid --",
   "Based on the original code written by Jarkko Oikarinen",
@@ -252,7 +252,7 @@ send_conf_options(struct Client *client)
         value = (iptr->option && *((const char *const *)iptr->option)) ? *((const char *const *)iptr->option) : "NONE";
         break;
       case OUTPUT_STRING_LITERAL:
-        value = iptr->option ? (const char *)iptr->option : "NONE";
+        value = iptr->option ? (const char *const)iptr->option : "NONE";
         break;
       case OUTPUT_DECIMAL:  /* Output info_table[i].option as a decimal value. */
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));
@@ -282,7 +282,7 @@ send_info_text(struct Client *client)
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                        client->name, client->username, client->host, client->servptr->name);
 
-  for (const char **text = infotext; *text; ++text)
+  for (const char *const *text = infotext; *text; ++text)
   {
     const char *line = *text;
 

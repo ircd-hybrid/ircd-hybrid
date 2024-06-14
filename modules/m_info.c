@@ -46,6 +46,7 @@ struct InfoStruct
   enum
   {
     OUTPUT_STRING = 1,  /* Output option as %s w/ dereference  */
+    OUTPUT_STRING_LITERAL,
     OUTPUT_DECIMAL,  /* Output option as decimal (%d) */
     OUTPUT_BOOLEAN,  /* Output option as "YES" or "NO" */
   } output_type;  /* Type of output. See enum above */
@@ -145,6 +146,12 @@ static const struct InfoStruct info_table[] =
   INFO_ENTRY("max_targets", OUTPUT_DECIMAL, &ConfigGeneral.max_targets, "The maximum number of PRIVMSG/NOTICE targets"),
   INFO_ENTRY("throttle_count", OUTPUT_DECIMAL, &ConfigGeneral.throttle_count, "Number of connects in throttle_time before connections are blocked"),
   INFO_ENTRY("throttle_time", OUTPUT_DECIMAL, &ConfigGeneral.throttle_time, "Minimum time between client reconnects"),
+  INFO_ENTRY("cloak_enabled", OUTPUT_BOOLEAN, &ConfigGeneral.cloak_enabled, "Enable or disable hostname cloaking"),
+  INFO_ENTRY("cloak_cidr_len_ipv4", OUTPUT_DECIMAL, &ConfigGeneral.cloak_cidr_len_ipv4, "CIDR length for IPv4 addresses used in hostname cloaking"),
+  INFO_ENTRY("cloak_cidr_len_ipv6", OUTPUT_DECIMAL, &ConfigGeneral.cloak_cidr_len_ipv6, "CIDR length for IPv6 addresses used in hostname cloaking"),
+  INFO_ENTRY("cloak_num_bits", OUTPUT_DECIMAL, &ConfigGeneral.cloak_num_bits, "Number of bits for the MAC computation used in hostname cloaking"),
+  INFO_ENTRY("cloak_secret", OUTPUT_STRING_LITERAL, "<REDACTED>", "Secret key used in the MAC computation for hostname cloaking"),
+  INFO_ENTRY("cloak_suffix", OUTPUT_STRING, &ConfigGeneral.cloak_suffix, "Suffix appended to the cloaked hostname"),
   INFO_ENTRY(NULL, 0, NULL, NULL)
 };
 
@@ -243,6 +250,9 @@ send_conf_options(struct Client *client)
     {
       case OUTPUT_STRING:  /* For "char *" references */
         value = (iptr->option && *((const char *const *)iptr->option)) ? *((const char *const *)iptr->option) : "NONE";
+        break;
+      case OUTPUT_STRING_LITERAL:
+        value = iptr->option ? (const char *)iptr->option : "NONE";
         break;
       case OUTPUT_DECIMAL:  /* Output info_table[i].option as a decimal value. */
         snprintf(buf, sizeof(buf), "%u", *((const unsigned int *const)iptr->option));

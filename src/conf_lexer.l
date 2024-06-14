@@ -162,6 +162,12 @@ cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }
 class                       { return CLASS; }
 client                      { return CLIENT; }
 close                       { return CLOSE; }
+cloak_enabled               { return CLOAK_ENABLED; }
+cloak_cidr_len_ipv4         { return CLOAK_CIDR_LEN_IPV4; }
+cloak_cidr_len_ipv6         { return CLOAK_CIDR_LEN_IPV6; }
+cloak_num_bits              { return CLOAK_NUM_BITS; }
+cloak_secret                { return CLOAK_SECRET; }
+cloak_suffix                { return CLOAK_SUFFIX; }
 cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }

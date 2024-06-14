@@ -568,6 +568,7 @@ main(int argc, char *argv[])
   ipcache_init();
   client_init();
   class_init();
+  cloak_init();
   resolver_init();      /* Needs to be setup before the io loop */
   modules_init();
   conf_read_files(true);   /* cold start init conf files */
@@ -578,7 +579,6 @@ main(int argc, char *argv[])
   read_links_file();
   motd_init();
   user_modes_init();
-  cloak_init();
 
   if (EmptyString(ConfigServerInfo.name))
   {

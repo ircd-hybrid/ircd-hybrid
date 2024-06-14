@@ -50,6 +50,7 @@
 #include "listener.h"
 #include "user.h"
 #include "motd.h"
+#include "cloak.h"
 
 int yylex(void);
 
@@ -151,6 +152,12 @@ reset_block_state(void)
 %token  CIDR_BITLEN_IPV6
 %token  CLASS
 %token  CLIENT
+%token  CLOAK_ENABLED
+%token  CLOAK_CIDR_LEN_IPV4
+%token  CLOAK_CIDR_LEN_IPV6
+%token  CLOAK_NUM_BITS
+%token  CLOAK_SECRET
+%token  CLOAK_SUFFIX
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
@@ -2391,6 +2398,12 @@ general_item:       general_away_count |
                     general_stats_e_disabled |
                     general_max_monitor |
                     general_cycle_on_host_change |
+                    general_cloak_enabled |
+                    general_cloak_cidr_len_ipv4 |
+                    general_cloak_cidr_len_ipv6 |
+                    general_cloak_num_bits |
+                    general_cloak_secret |
+                    general_cloak_suffix |
                     error;
 
 
@@ -2757,6 +2770,66 @@ general_default_floodtime: DEFAULT_FLOODTIME '=' timespec ';'
   ConfigGeneral.default_floodtime = $3;
 };
 
+general_cloak_enabled: CLOAK_ENABLED '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if (yylval.number)
+  {
+    ConfigGeneral.cloak_enabled = true;
+    cloak_set_enabled();
+  }
+  else
+  {
+    ConfigGeneral.cloak_enabled = false;
+    cloak_set_disabled();
+  }
+};
+
+general_cloak_cidr_len_ipv4: CLOAK_CIDR_LEN_IPV4 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+  ConfigGeneral.cloak_cidr_len_ipv4 = $3;
+  cloak_set_cidr_len_ipv4($3);
+};
+
+general_cloak_cidr_len_ipv6: CLOAK_CIDR_LEN_IPV6 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+  ConfigGeneral.cloak_cidr_len_ipv6 = $3;
+  cloak_set_cidr_len_ipv6($3);
+};
+
+general_cloak_num_bits: CLOAK_NUM_BITS '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+  ConfigGeneral.cloak_num_bits = $3;
+  cloak_set_num_bits($3);
+};
+
+general_cloak_secret: CLOAK_SECRET '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigGeneral.cloak_secret);
+  ConfigGeneral.cloak_secret = io_strdup(yylval.string);
+  cloak_set_secret(yylval.string);
+};
+
+general_cloak_suffix: CLOAK_SUFFIX '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigGeneral.cloak_suffix);
+  ConfigGeneral.cloak_suffix = io_strdup(yylval.string);
+  cloak_set_suffix(yylval.string);
+};
 
 /***************************************************************************
  * channel {} section

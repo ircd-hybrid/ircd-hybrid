@@ -60,6 +60,7 @@
 #include "ipcache.h"
 #include "isupport.h"
 #include "whowas.h"
+#include "cloak.h"
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
@@ -979,6 +980,19 @@ conf_set_defaults(void)
   ConfigGeneral.oper_umodes = UMODE_FLOOD | UMODE_LOCOPS | UMODE_SERVNOTICE | UMODE_WALLOP;
   ConfigGeneral.throttle_count = 1;
   ConfigGeneral.throttle_time = 1;
+
+  ConfigGeneral.cloak_enabled = false;
+  cloak_set_disabled();
+  ConfigGeneral.cloak_cidr_len_ipv4 = 32;
+  cloak_set_cidr_len_ipv4(ConfigGeneral.cloak_cidr_len_ipv4);
+  ConfigGeneral.cloak_cidr_len_ipv6 = 64;
+  cloak_set_cidr_len_ipv6(ConfigGeneral.cloak_cidr_len_ipv6);
+  ConfigGeneral.cloak_num_bits = 80;
+  cloak_set_num_bits(ConfigGeneral.cloak_num_bits);
+  ConfigGeneral.cloak_secret = io_strdup("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
+  cloak_set_secret(ConfigGeneral.cloak_secret);
+  ConfigGeneral.cloak_suffix = io_strdup(".irc");
+  cloak_set_suffix(ConfigGeneral.cloak_suffix);
 }
 
 static void
@@ -1227,6 +1241,12 @@ conf_clear(void)
   ConfigServerHide.flatten_links_file = NULL;
   io_free(ConfigServerHide.hidden_name);
   ConfigServerHide.hidden_name = NULL;
+
+  /* Clean out ConfigGeneral */
+  io_free(ConfigGeneral.cloak_secret);
+  ConfigGeneral.cloak_secret = NULL;
+  io_free(ConfigGeneral.cloak_suffix);
+  ConfigGeneral.cloak_suffix = NULL;
 
   /* Clean out listeners */
   listener_close_marked();

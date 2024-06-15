@@ -33,7 +33,7 @@
 #include "client.h"
 
 /**
- * @def STATS_ARRAY_ENTRY
+ * @def STATS_HANDLER_INIT
  * @brief Macro to simplify the initialization of StatsHandler entries.
  *
  * This macro is used to create entries for arrays of StatsHandler structures,
@@ -44,7 +44,7 @@
  * @param h The function to handle the stats command.
  * @param r The required user modes to access this stats command.
  */
-#define STATS_ARRAY_ENTRY(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
+#define STATS_HANDLER_INIT(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
 
 /**
  * @enum stats_result

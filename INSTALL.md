@@ -68,7 +68,7 @@ The `configure` script accepts several optional parameters for further customiza
   ./configure --enable-assert
   ```
 
-  This option defines `NDEBUG` to disable `assert()` statements when not enabled.
+  This option removes the definition of `NDEBUG`, which enables `assert()` statements. If not specified, `NDEBUG` is defined, disabling `assert()` statements.
 
 - `--enable-debugging` - Enable debugging support. By default, this is disabled. To enable it:
 
@@ -76,7 +76,11 @@ The `configure` script accepts several optional parameters for further customiza
   ./configure --enable-debugging
   ```
 
-  This modifies `CFLAGS` to include `-g -O0` and removes any optimization flags (`-O`).
+  This modifies `CFLAGS` to include debugging information and disable optimizations. Specifically, it:
+  - Removes any existing optimization flags (e.g., `-O2`, `-O3`, `-Os`).
+  - Removes any existing debug level flags (e.g., `-g1`, `-g2`, `-g3`).
+  - Adds `-g` to include standard debugging information.
+  - Adds `-O0` to disable all optimizations, ensuring the generated code closely matches the source code for easier debugging.
 
 - `--enable-efence` - Enable linking with the Electric Fence (`efence`) memory debugger library. By default, this is disabled. To enable it:
 
@@ -130,13 +134,19 @@ The `configure` script accepts several optional parameters for further customiza
 - `--enable-epoll` - Force `epoll` usage for IO loop mechanism.
 - `--enable-poll` - Force `poll` usage for IO loop mechanism.
 
-- `--with-tls` - Enable TLS support with the specified library. Options: `openssl`, `wolfssl`, `gnutls`, or `none`. By default, TLS support is set to `auto`, which attempts to detect and utilize the best available TLS library. To explicitly specify a TLS library:
+- `--with-tls` - Enable TLS support with the specified library. Options: `openssl`, `wolfssl`, `gnutls`, or `none`. By default, TLS support is set to `auto`. In this mode, the script checks for available TLS libraries in the following order:
+  1. **OpenSSL**: Version 1.1.1 or higher
+  2. **LibreSSL**: Equivalent to OpenSSL 1.1.1 or higher
+  3. **GnuTLS**: Version 3.6.5 or higher
+  4. **wolfSSL**: Version 4.3.0 or higher (must be built with the extended/full OpenSSL compatibility layer)
+
+  If a specified TLS library is not found, the configuration process will disable TLS support and output an error message.
+
+  To explicitly specify a TLS library:
 
   ```sh
   ./configure --with-tls=openssl
   ```
-
-  If the specified TLS library is not found, the configuration process will disable TLS support and output an error message.
 
 #### TLS Library Requirements
 

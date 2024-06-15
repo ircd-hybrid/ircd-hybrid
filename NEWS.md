@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.44 (2024-??-??)
+#### Noteworthy changes in version 8.2.44 (2024-06-15)
 * Fixed FTCBFS issue caused by ./configure using macros that lacked special handling
   for cross-compilation scenarios
 * Fixed the issue where XLINE and UNXLINE were not working properly on servers within
@@ -41,7 +41,7 @@
   * `general::cloak_cidr_len_ipv4`
   * `general::cloak_cidr_len_ipv6`
   * `general::cloak_num_bits`
-  * `general::cloak_secret` (displayed as `REDACTED` for security)
+  * `general::cloak_secret` (displayed as `<REDACTED>` for security)
   * `general::cloak_suffix`
 
 

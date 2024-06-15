@@ -15784,11 +15784,10 @@ esac
 fi
 
 
-  if test "$debugging" = "yes"
+  if test "x$debugging" = "xyes"
 then :
 
-    CFLAGS=$(echo "$CFLAGS" | sed -e 's/-O[0-9s]*//g')
-    CFLAGS=$(echo "$CFLAGS" | sed -e 's/-g[0-9]*//g')
+    CFLAGS=$(echo "$CFLAGS" | sed -e 's/-O[0-9s]*//g' -e 's/-g[0-9]*//g')
 
 if test ${CFLAGS+y}
 then :

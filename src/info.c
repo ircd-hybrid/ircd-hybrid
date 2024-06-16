@@ -71,11 +71,11 @@ info_unregister(const char *name)
 
   /* Temporarily disable the warning for casting away const qualifiers. */
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
+  #pragma GCC diagnostic ignored "-Wcast-qual"
 
   /* Freeing memory allocated for const char pointers. */
-  io_free(info->name);
-  io_free(info->description);
+  io_free((void *)info->name);
+  io_free((void *)info->description);
 
   /* Re-enable the discarded qualifiers warning. */
   #pragma GCC diagnostic pop

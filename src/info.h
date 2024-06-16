@@ -87,11 +87,10 @@ typedef enum
  * @brief Structure representing an info entry.
  *
  * This structure represents an info entry, containing the name, output type,
- * pointer to the value, description, and a list node for the doubly-linked list.
+ * pointer to the value, and description.
  */
 struct InfoEntry
 {
-  list_node_t node;  /**< List node for the doubly-linked list. */
   const char *name;  /**< Displayed variable name. */
   info_output_type_t output_type;  /**< Type of output. */
   const void *option;  /**< Pointer to the value. */

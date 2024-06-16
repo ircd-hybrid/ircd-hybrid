@@ -67,7 +67,9 @@ info_register(const char *name, info_output_type_t output_type, const void *opti
   info->output_type = output_type;
   info->option = option;
   info->description = strdup(description);
-  list_add_tail(info, &info->node, &info_list);
+
+  list_node_t *node = list_make_node();
+  list_add_tail(info, node, &info_list);
 
   return INFO_SUCCESS;
 }
@@ -88,7 +90,9 @@ info_unregister(const char *name)
   if (info == NULL)
     return INFO_NOT_FOUND;
 
-  list_remove(&info->node, &info_list);
+  list_node_t *node = list_find(&info_list, info);
+  list_remove(node, &info_list);
+  list_free_node(node);
 
   /* Temporarily disable the warning for casting away const qualifiers. */
   #pragma GCC diagnostic push

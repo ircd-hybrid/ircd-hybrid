@@ -68,6 +68,8 @@ ircd_SOURCES = accept.c          \
                hash.h            \
                id.c              \
                id.h              \
+               info.c            \
+               info.h            \
                ipcache.c         \
                ipcache.h         \
                ircd.c            \

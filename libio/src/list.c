@@ -475,3 +475,86 @@ list_find_remove(list_t *list, void *data)
 
   return NULL;
 }
+
+/**
+ * @brief Adds a node at a specific position in a double-linked list.
+ *
+ * This function adds a node containing the specified data at the specified
+ * position in the double-linked list.
+ *
+ * @param data Pointer to the data to be stored in the new node.
+ * @param pos Position at which to add the new node (0-based index).
+ * @param m Pointer to the node to be added.
+ * @param list Pointer to the double-linked list.
+ * @return true if the node was added successfully, false if the position is invalid.
+ */
+bool
+list_add_at(void *data, unsigned int pos, list_node_t *m, list_t *list)
+{
+  if (pos > list->length)
+    return false;
+
+  if (pos == 0)
+    list_add(data, m, list);
+  else if (pos == list->length)
+    list_add_tail(data, m, list);
+  else
+  {
+    list_node_t *current = list->head;
+    for (unsigned int i = 0; i < pos; ++i)
+      current = current->next;
+
+    list_add_before(current, data, m, list);
+  }
+
+  return true;
+}
+
+/**
+ * @brief Removes a node at a specific position in a double-linked list.
+ *
+ * This function removes a node at the specified position in the double-linked list
+ * and frees the memory associated with it.
+ *
+ * @param pos Position of the node to be removed (0-based index).
+ * @param list Pointer to the double-linked list.
+ * @return Pointer to the data of the removed node, or NULL if the position is invalid.
+ */
+void *
+list_remove_at(unsigned int pos, list_t *list)
+{
+  if (pos >= list->length)
+    return NULL;
+
+  list_node_t *current = list->head;
+  for (unsigned int i = 0; i < pos; ++i)
+    current = current->next;
+
+  void *data = current->data;
+  list_remove(current, list);
+  list_free_node(current);
+
+  return data;
+}
+
+/**
+ * @brief Retrieves a node at a specific position in a double-linked list.
+ *
+ * This function retrieves the node at the specified position in the double-linked list.
+ *
+ * @param pos Position of the node to be retrieved (0-based index).
+ * @param list Pointer to the double-linked list.
+ * @return Pointer to the node at the specified position, or NULL if the position is invalid.
+ */
+list_node_t *
+list_get_at(unsigned int pos, const list_t *list)
+{
+  if (pos >= list->length)
+    return NULL;
+
+  list_node_t *current = list->head;
+  for (unsigned int i = 0; i < pos; ++i)
+    current = current->next;
+
+  return current;
+}

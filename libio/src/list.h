@@ -103,6 +103,7 @@ typedef struct _list
 typedef void (*list_iterate_callback)(void *, void *);
 
 extern bool list_is_empty(const list_t *);
+extern bool list_add_at(void *, unsigned int, list_node_t *, list_t *);
 extern void list_free_node(list_node_t *);
 extern void list_add(void *, list_node_t *, list_t *);
 extern void list_add_after(void *, list_node_t *, list_node_t *, list_t *);
@@ -114,8 +115,10 @@ extern void list_move_list(list_t *, list_t *);
 extern void list_move_node(list_node_t *, list_t *, list_t *);
 extern void list_iterate(list_t *, list_iterate_callback, void *);
 extern void list_iterate_safe(list_t *, list_iterate_callback, void *);
+extern void *list_remove_at(unsigned int, list_t *);
 extern list_node_t *list_find(list_t *, const void *);
 extern list_node_t *list_find_cmp(const list_t *, const void *, int (*)(const char *, const char *));
 extern list_node_t *list_find_remove(list_t *, void *);
 extern list_node_t *list_make_node(void);
+extern list_node_t *list_get_at(unsigned int, const list_t *);
 #endif  /* INCLUDED_list_h */

@@ -35,14 +35,22 @@
  * @enum hook_insert
  * @brief Enum for specifying the position for inserting hooks in a hook chain.
  *
- * This enum provides options for specifying where a new hook should be inserted
- * in a hook chain relative to existing hooks.
+ * This enum provides fine-grained options for specifying where a new hook should be
+ * inserted in a hook chain relative to existing hooks, with higher priorities
+ * reserved for system/core components.
  */
 enum hook_insert
 {
-  HOOK_INSERT_FIRST,  /**< Insert the hook at the beginning of the chain. */
-  HOOK_INSERT_MIDDLE,  /**< Insert the hook after the middle hook in the chain (if applicable). */
-  HOOK_INSERT_LAST,  /**< Insert the hook at the end of the chain. */
+  HOOK_INSERT_SYSTEM_CRITICAL,  /**< Reserved for system/core critical hooks. */
+  HOOK_INSERT_SYSTEM_HIGH,  /**< Reserved for system/core high priority hooks. */
+  HOOK_INSERT_SYSTEM,  /**< Reserved for system/core hooks. */
+  HOOK_INSERT_HIGH,  /**< High priority user hooks. */
+  HOOK_INSERT_ABOVE_NORMAL,  /**< Above normal priority user hooks. */
+  HOOK_INSERT_NORMAL,  /**< Normal priority user hooks. */
+  HOOK_INSERT_BELOW_NORMAL,  /**< Below normal priority user hooks. */
+  HOOK_INSERT_LOW,  /**< Low priority user hooks. */
+  HOOK_INSERT_LOWEST,  /**< Lowest priority user hooks. */
+  HOOK_INSERT_DEFAULT,  /**< Default priority user hooks (end of chain). */
 };
 
 /**

@@ -205,33 +205,45 @@ list_node_t *
 hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert position)
 {
   list_node_t *node = io_calloc(sizeof(*node));
+  unsigned int length = list_length(&container->chain);
+  unsigned int insert_position = 0;
 
   switch (position)
   {
-    case HOOK_INSERT_FIRST:
-      list_add(hook, node, &container->chain);
+    case HOOK_INSERT_SYSTEM_CRITICAL:
+      insert_position = 0;
       break;
-    case HOOK_INSERT_LAST:
-      list_add_tail(hook, node, &container->chain);
+    case HOOK_INSERT_SYSTEM_HIGH:
+      insert_position = (length >= 1) ? 1 : length;
       break;
-    case HOOK_INSERT_MIDDLE:
+    case HOOK_INSERT_SYSTEM:
+      insert_position = (length >= 2) ? 2 : length;
+      break;
+    case HOOK_INSERT_HIGH:
+      insert_position = length / 10;
+      break;
+    case HOOK_INSERT_ABOVE_NORMAL:
+      insert_position = length / 5;
+      break;
+    case HOOK_INSERT_NORMAL:
+      insert_position = length / 2;
+      break;
+    case HOOK_INSERT_BELOW_NORMAL:
+      insert_position = 3 * length / 4;
+      break;
+    case HOOK_INSERT_LOW:
+      insert_position = 9 * length / 10;
+      break;
+    case HOOK_INSERT_LOWEST:
+      insert_position = (length > 0) ? length - 1 : 0;
+      break;
+    case HOOK_INSERT_DEFAULT:
     default:
-    {
-      unsigned int length = list_length(&container->chain);
-      if (length == 0)
-        /* If the chain is empty, insert at the beginning. */
-        list_add(hook, node, &container->chain);
-      else
-      {
-        /* Find the middle node. */
-        list_node_t *middle = container->chain.head;
-        for (unsigned int i = 0; i < length / 2; i++)
-          middle = middle->next;
-
-        list_add_after(hook, node, middle, &container->chain);
-      }
-    }
+      insert_position = length;
+      break;
   }
+
+  list_add_at(hook, insert_position, node, &container->chain);
 
   return node;
 }

@@ -90,9 +90,9 @@ info_unregister(const char *name)
   if (info == NULL)
     return INFO_NOT_FOUND;
 
-  list_node_t *node = list_find(&info_list, info);
-  list_remove(node, &info_list);
-  list_free_node(node);
+  list_node_t *node = list_find_remove(&info_list, info);
+  if (node)
+    list_free_node(node);
 
   /* Temporarily disable the warning for casting away const qualifiers. */
   #pragma GCC diagnostic push

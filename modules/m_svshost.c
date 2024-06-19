@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "user.h"
 
 
@@ -78,19 +78,19 @@ static struct Command svshost_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&svshost_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&svshost_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

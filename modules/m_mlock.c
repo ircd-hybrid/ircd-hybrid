@@ -1,8 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 1999 Bahamut development team.
- *  Copyright (c) 2013-2024 ircd-hybrid development team
+ *  Copyright (c) 2022-2024 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,20 +19,24 @@
  *  USA
  */
 
-/*! \file m_svskill.c
- * \brief Includes required functions for processing the SVSKILL command.
+/*! \file m_mlock.c
+ * \brief Includes required functions for processing the MLOCK command.
  */
 
 #include "stdinc.h"
+#include "list.h"
+#include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
+#include "hash.h"
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
 #include "module.h"
-#include "irc_string.h"
+#include "server_capab.h"
 
 
-/*! \brief SVSKILL command handler
+/*! \brief MLOCK command handler
  *
  * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -42,52 +45,39 @@
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = nickname
- *      - parv[2] = timestamp
- *      - parv[3] = kill message
+ *      - parv[1] = timestamp
+ *      - parv[2] = channel name
+ *      - parv[3] = timestamp of the mode lock
+ *      - parv[4] = modes to be locked
  */
 static void
-ms_svskill(struct Client *source, int parc, char *parv[])
+ms_mlock(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
+  assert(!MyClient(source));
+
+  struct Channel *channel = hash_find_channel(parv[2]);
+  if (channel == NULL)
     return;
 
-  struct Client *target = find_person(source, parv[1]);
-  if (target == NULL)
-    return;
+  if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
+    channel_set_mode_lock(source, channel, parv[4]);
 
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
-    return;
+  uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
+  if (timestamp)
+    channel->mode_lock_time = timestamp;
 
-  const char *const comment = parv[3];
-  if (MyConnect(target))
-  {
-    char reason[REASONLEN + 1] = "SVSKilled: ";
-    strlcpy(reason + 11, comment, sizeof(reason) - 11);
-
-    exit_client(target, reason);
-    return;
-  }
-
-  if (target->from == source->from)
-  {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Received wrong-direction SVSKILL for %s (behind %s) from %s",
-                         target->name, source->from->name, client_get_name(source, HIDE_IP));
-    return;
-  }
-
-  sendto_one(target, ":%s SVSKILL %s %ju :%s",
-             source->id, target->id, ts, comment);
+  sendto_server(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
+                source->id, channel->creation_time, channel->name,
+                channel->mode_lock_time,
+                channel->mode_lock ? channel->mode_lock : "");
 }
 
-static struct Command svskill_msgtab =
+static struct Command mlock_msgtab =
 {
-  .name = "SVSKILL",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .name = "MLOCK",
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svskill, .args_min = 4 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
@@ -95,17 +85,20 @@ static struct Command svskill_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&svskill_msgtab);
+  command_add(&mlock_msgtab);
+  capab_add("MLOCK", CAPAB_MLOCK, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&svskill_msgtab);
+  command_del(&mlock_msgtab);
+  capab_del("MLOCK");
 }
 
 struct Module module_entry =
 {
   .init_handler = init_handler,
   .exit_handler = exit_handler,
+  .core = true
 };

@@ -28,7 +28,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 
 
 /*! \brief GET/POST/PUT command handler
@@ -80,7 +80,7 @@ static struct Command put_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&post_msgtab);
   command_add(&get_msgtab);
@@ -88,15 +88,15 @@ module_init(void)
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&post_msgtab);
   command_del(&get_msgtab);
   command_del(&put_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

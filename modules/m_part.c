@@ -19,22 +19,19 @@
  *  USA
  */
 
-/*! \file m_die.c
- * \brief Includes required functions for processing the DIE command.
+/*! \file m_part.c
+ * \brief Includes required functions for processing the PART command.
  */
 
 #include "stdinc.h"
+#include "list.h"
+#include "channel.h"
 #include "client.h"
-#include "ircd.h"
-#include "irc_string.h"
-#include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "modules.h"
-#include "restart.h"
+#include "module.h"
 
 
-/*! \brief DIE command handler
+/*! \brief PART command handler
  *
  * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -43,56 +40,40 @@
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = server name
+ *      - parv[1] = channel name
+ *      - parv[2] = part message
  */
 static void
-mo_die(struct Client *source, int parc, char *parv[])
+m_part(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
-
-  if (!HasOFlag(source, OPER_FLAG_DIE))
-  {
-    sendto_one_numeric(source, &me, ERR_NOPRIVS, "die");
-    return;
-  }
-
-  if (irccmp(name, me.name))
-  {
-    sendto_one_notice(source, &me, ":Mismatch on /die %s", me.name);
-    return;
-  }
-
-  char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "received DIE command from %s",
-           client_get_name(source, HIDE_IP));
-  server_die(buf, false);
+  channel_part_list(source, parv[1], parv[2]);
 }
 
-static struct Command die_msgtab =
+static struct Command part_msgtab =
 {
-  .name = "DIE",
+  .name = "PART",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+  .handlers[CLIENT_HANDLER] = { .handler = m_part, .args_min = 2, .end_grace_period = true },
+  .handlers[SERVER_HANDLER] = { .handler = m_part, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_die, .args_min = 2 }
+  .handlers[OPER_HANDLER] = { .handler = m_part, .args_min = 2, .end_grace_period = true }
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
-  command_add(&die_msgtab);
+  command_add(&part_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
-  command_del(&die_msgtab);
+  command_del(&part_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

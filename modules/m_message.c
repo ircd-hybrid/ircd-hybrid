@@ -32,7 +32,7 @@
 #include "server.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "irc_string.h"
@@ -600,22 +600,22 @@ static struct Command notice_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&privmsg_msgtab);
   command_add(&notice_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&privmsg_msgtab);
   command_del(&notice_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

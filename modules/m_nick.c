@@ -38,7 +38,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "monitor.h"
 #include "misc.h"
 #include "id.h"
@@ -844,22 +844,22 @@ static struct Command uid_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&uid_msgtab);
   command_add(&nick_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&uid_msgtab);
   command_del(&nick_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

@@ -19,23 +19,22 @@
  *  USA
  */
 
-/*! \file m_tmode.c
- * \brief Includes required functions for processing the TMODE command.
+/*! \file m_die.c
+ * \brief Includes required functions for processing the DIE command.
  */
 
 #include "stdinc.h"
-#include "list.h"
-#include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
 #include "ircd.h"
+#include "irc_string.h"
+#include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
+#include "restart.h"
 
 
-/*! \brief TMODE command handler
+/*! \brief DIE command handler
  *
  * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -44,53 +43,56 @@
  *                 pointers.
  * \note Valid arguments for this command are:
  *      - parv[0] = command
- *      - parv[1] = timestamp
- *      - parv[2] = channel name
- *      - parv[3] = modes to be added or removed
+ *      - parv[1] = server name
  */
 static void
-ms_tmode(struct Client *source, int parc, char *parv[])
+mo_die(struct Client *source, int parc, char *parv[])
 {
-  assert(!MyClient(source));
+  const char *const name = parv[1];
 
-  struct Channel *channel = hash_find_channel(parv[2]);
-  if (channel == NULL)
+  if (!HasOFlag(source, OPER_FLAG_DIE))
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
+    sendto_one_numeric(source, &me, ERR_NOPRIVS, "die");
     return;
   }
 
-  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
+  if (irccmp(name, me.name))
+  {
+    sendto_one_notice(source, &me, ":Mismatch on /die %s", me.name);
     return;
+  }
 
-  channel_mode_set(source, channel, parc - 3, parv + 3);
+  char buf[IRCD_BUFSIZE];
+  snprintf(buf, sizeof(buf), "received DIE command from %s",
+           client_get_name(source, HIDE_IP));
+  server_die(buf, false);
 }
 
-static struct Command tmode_msgtab =
+static struct Command die_msgtab =
 {
-  .name = "TMODE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_tmode, .args_min = 4 },
+  .name = "DIE",
+  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
+  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[OPER_HANDLER] = { .handler = mo_die, .args_min = 2 }
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
-  command_add(&tmode_msgtab);
+  command_add(&die_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
-  command_del(&tmode_msgtab);
+  command_del(&die_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

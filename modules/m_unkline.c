@@ -37,7 +37,7 @@
 #include "send.h"
 #include "server_capab.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "memory.h"
 #include "aline.h"
 
@@ -175,21 +175,21 @@ static struct Command unkline_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&unkline_msgtab);
   capab_add("UNKLN", CAPAB_UNKLN, true);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&unkline_msgtab);
   capab_del("UNKLN");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

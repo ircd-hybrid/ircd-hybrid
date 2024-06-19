@@ -32,166 +32,215 @@
 #include "log.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 
-
-/*! \brief LOAD subcommand handler
- *         Attempts to load a module, throwing an error if
- *         the module has already been loaded
- * \param source Pointer to client issuing the command
- * \param arg      Additional argument which might be needed by this handler
+/**
+ * @brief Command to load a module.
+ *
+ * This function handles the load command from a client, loading the specified module.
+ *
+ * @param source Client issuing the command.
+ * @param arg Module name to load.
  */
 static void
-module_load(struct Client *source, const char *arg)
+module_cmd_load(struct Client *source, const char *arg)
 {
-  const char *const name = io_basename(arg);
-  if (findmodule_byname(name))
+  if (module_find(arg))
   {
-    sendto_one_notice(source, &me, ":Module %s is already loaded", name);
+    sendto_one_notice(source, &me, ":Module %s is already loaded", arg);
     return;
   }
 
-  load_one_module(arg);
+  if (module_load(arg, true, false))
+  {
+    const struct Module *const module = module_find(arg);
+    sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.", module->name, module->handle);
+  }
+  else
+    sendto_one_notice(source, &me, ":Failed to load module %s: %s", arg, module_get_error());
 }
 
-/*! \brief UNLOAD subcommand handler
- *         Attempts to unload a module, throwing an error if
- *         the module could not be found
- * \param source Pointer to client issuing the command
- * \param arg      Additional argument which might be needed by this handler
+/**
+ * @brief Command to unload a module.
+ *
+ * This function handles the unload command from a client, unloading the specified module.
+ *
+ * @param source Client issuing the command.
+ * @param arg Module name to unload.
  */
 static void
-module_unload(struct Client *source, const char *arg)
+module_cmd_unload(struct Client *source, const char *arg)
 {
-  const char *const name = io_basename(arg);
-
-  const struct module *modp = findmodule_byname(name);
-  if (modp == NULL)
+  const struct Module *const module = module_find(arg);
+  if (module == NULL)
   {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
+    sendto_one_notice(source, &me, ":Module %s is not loaded", arg);
     return;
   }
 
-  if (modp->is_core)
+  if (module->core)
   {
-    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded", name);
+    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded", arg);
     return;
   }
 
-  if (modp->is_resident)
+  if (module->resident)
   {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", name);
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", arg);
     return;
   }
 
-  if (unload_one_module(name, true) == false)
-    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
+  if (module_unload(arg, true))
+    sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
+  else
+    sendto_one_notice(source, &me, ":Failed to unload module %s: %s", arg, module_get_error());
 }
 
-/*! \brief RELOAD subcommand handler
- *         Attempts to reload a module, throwing an error if
- *         the module could not be found or loaded
- * \param source Pointer to client issuing the command
- * \param arg      Additional argument which might be needed by this handler
+/**
+ * @brief Command to reload a single module.
+ *
+ * This function handles the reload command from a client, reloading the specified module.
+ *
+ * @param source Client issuing the command.
+ * @param arg Module name to reload.
  */
 static void
-module_reload(struct Client *source, const char *arg)
+module_cmd_reload_single(struct Client *source, const char *arg)
 {
-  if (strcmp(arg, "*") == 0)
+  const struct Module *module = module_find(arg);
+  if (module == NULL)
   {
-    unsigned int modnum = list_length(modules_get_list());
+    sendto_one_notice(source, &me, ":Module %s is not loaded", arg);
+    return;
+  }
 
-    sendto_one_notice(source, &me, ":Reloading all modules");
+  if (module->resident)
+  {
+    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", arg);
+    return;
+  }
 
-    list_node_t *node, *node_next;
-    LIST_FOREACH_SAFE(node, node_next, modules_get_list()->head)
+  const bool core = module->core;
+
+  if (module_unload(arg, true) == 0 || module_load(arg, true, false) == 0)
+  {
+    sendto_one_notice(source, &me, ":Failed to reload module %s: %s", arg, module_get_error());
+
+    if (core)
     {
-      const struct module *modp = node->data;
-      if (modp->is_resident == false)
-        unload_one_module(modp->name, false);
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                           "Error reloading core module: %s: terminating ircd", arg);
+      log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
+      exit(EXIT_FAILURE);
     }
 
-    load_all_modules(0);
-    load_conf_modules();
-    load_core_modules(0);
-
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Module Restart: %u modules unloaded, %u modules loaded",
-                         modnum, list_length(modules_get_list()));
-    log_write(LOG_TYPE_IRCD, "Module Restart: %u modules unloaded, %u modules loaded",
-              modnum, list_length(modules_get_list()));
     return;
   }
 
-  const char *const name = io_basename(arg);
-  const struct module *modp = findmodule_byname(name);
-  if (modp == NULL)
-  {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
-    return;
-  }
+  module = module_find(arg);
+  sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.",
+                    module->name, module->handle);
+}
 
-  if (modp->is_resident)
-  {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", name);
-    return;
-  }
+/**
+ * @brief Command to reload all modules.
+ *
+ * This function handles the reload command from a client, reloading all modules.
+ *
+ * @param source Client issuing the command.
+ */
+static void
+module_cmd_reload_all(struct Client *source)
+{
+  unsigned int unloaded_count = 0, loaded_count = 0;
+  bool success = module_reload_all(&unloaded_count, &loaded_count, true, false);
 
-  /* Cache modp->is_core for later use after the module is unloaded */
-  bool is_core = modp->is_core;
+  if (success)
+    sendto_one_notice(source, &me, ":All modules reloaded successfully");
+  else
+    sendto_one_notice(source, &me, ":Module reload encountered issues: %s", module_get_error());
 
-  if (unload_one_module(name, true) == false)
-  {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", name);
-    return;
-  }
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                       "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
+  log_write(LOG_TYPE_IRCD, "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
 
-  if (load_one_module(arg) == false && is_core)
+  list_node_t *node;
+  LIST_FOREACH(node, module_get_list()->head)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                         "Error reloading core module: %s: terminating ircd", arg);
-    log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
-    exit(EXIT_FAILURE);
+    const struct Module *const module = node->data;
+    if (module->core && module_find(module->name) == NULL)
+    {
+      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                           "Error reloading core modules: terminating ircd");
+      log_write(LOG_TYPE_IRCD, "Error reloading core modules: terminating ircd");
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
-/*! \brief LIST subcommand handler
- *         Shows a list of loaded modules
- * \param source Pointer to client issuing the command
- * \param arg      Additional argument which might be needed by this handler
+/**
+ * @brief Command to reload modules.
+ *
+ * This function handles the reload command from a client, reloading the specified module or all modules if the argument is "*".
+ *
+ * @param source Client issuing the command.
+ * @param arg Module name to reload, or "*" to reload all modules.
  */
 static void
-module_list(struct Client *source, const char *arg)
+module_cmd_reload(struct Client *source, const char *arg)
+{
+  if (strcmp(arg, "*") == 0)
+    module_cmd_reload_all(source);
+  else
+    module_cmd_reload_single(source, arg);
+}
+
+/**
+ * @brief Command to list loaded modules.
+ *
+ * This function handles the list command from a client, listing all loaded modules.
+ *
+ * @param source Client issuing the command.
+ * @param arg Optional argument to filter modules.
+ */
+static void
+module_cmd_list(struct Client *source, const char *arg)
 {
   list_node_t *node;
-
-  LIST_FOREACH(node, modules_get_list()->head)
+  LIST_FOREACH(node, module_get_list()->head)
   {
-    const struct module *modp = node->data;
-
-    if (!EmptyString(arg) && match(arg, modp->name))
+    const struct Module *const module = node->data;
+    if (!EmptyString(arg) && match(arg, module->name))
       continue;
 
-    sendto_one_numeric(source, &me, RPL_MODLIST,
-                       modp->name, modp->handle, "*", modp->is_core == true ? "(core)" : "");
+    sendto_one_numeric(source, &me, RPL_MODLIST, module->name, module->handle, "*",
+                       (module->core && module->resident) ? "(core, resident)" :
+                       module->core ? "(core)" :
+                       module->resident ? "(resident)" : "");
   }
 
   sendto_one_numeric(source, &me, RPL_ENDOFMODLIST);
 }
 
+/**
+ * @brief Module command table structure.
+ */
 struct ModuleStruct
 {
-  const char *const cmd;
-  void (*const handler)(struct Client *, const char *);
+  const char *cmd;
+  void (*handler)(struct Client *, const char *);
   bool arg_required;
 };
 
+/**
+ * @brief Module command table.
+ */
 static const struct ModuleStruct module_cmd_table[] =
 {
-  { .cmd = "LOAD", .handler = module_load, .arg_required = true },
-  { .cmd = "UNLOAD", .handler = module_unload, .arg_required = true },
-  { .cmd = "RELOAD", .handler = module_reload, .arg_required = true },
-  { .cmd = "LIST", .handler = module_list },
+  { .cmd = "LOAD", .handler = module_cmd_load, .arg_required = true  },
+  { .cmd = "UNLOAD", .handler = module_cmd_unload, .arg_required = true  },
+  { .cmd = "RELOAD", .handler = module_cmd_reload, .arg_required = true  },
+  { .cmd = "LIST", .handler = module_cmd_list, .arg_required = false },
   { .cmd = NULL }
 };
 
@@ -249,20 +298,20 @@ static struct Command module_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&module_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&module_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_resident = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .resident = true
 };

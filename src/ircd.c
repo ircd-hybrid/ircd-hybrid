@@ -55,7 +55,7 @@
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
-#include "modules.h"
+#include "module.h"
 #include "conf_db.h"
 #include "conf_class.h"
 #include "ipcache.h"
@@ -570,7 +570,8 @@ main(int argc, char *argv[])
   class_init();
   cloak_init();
   resolver_init();      /* Needs to be setup before the io loop */
-  modules_init();
+  module_init();
+  module_set_base_path(MODPATH);
   conf_read_files(true);   /* cold start init conf files */
   channel_mode_init();
   extban_init();
@@ -626,9 +627,7 @@ main(int argc, char *argv[])
   load_xline_database(ConfigGeneral.xlinefile);
   load_resv_database(ConfigGeneral.resvfile);
 
-  load_all_modules(true);
-  load_conf_modules();
-  load_core_modules(true);
+  module_load_all(true, true);
 
   write_pidfile(pidFileName);
 

@@ -29,7 +29,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 
 
 /*! \brief ISON command handler
@@ -81,19 +81,19 @@ static struct Command ison_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&ison_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&ison_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

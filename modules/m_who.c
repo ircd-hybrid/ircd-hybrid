@@ -37,7 +37,7 @@
 #include "irc_string.h"
 #include "conf.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "address.h"
 
 
@@ -601,21 +601,21 @@ static struct Command who_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&who_msgtab);
   isupport_add("WHOX", NULL, -1);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&who_msgtab);
   isupport_delete("WHOX");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

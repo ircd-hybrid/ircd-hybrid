@@ -44,7 +44,7 @@
 #include "send.h"
 #include "parse.h"
 #include "memory.h"
-#include "modules.h"
+#include "module.h"
 #include "fdlist.h"
 #include "channel.h"
 
@@ -700,22 +700,22 @@ static struct Command sid_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&sid_msgtab);
   command_add(&server_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&sid_msgtab);
   command_del(&server_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

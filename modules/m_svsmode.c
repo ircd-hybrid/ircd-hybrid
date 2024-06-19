@@ -33,7 +33,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "user.h"
 #include "conf.h"
 
@@ -154,19 +154,19 @@ static struct Command svsmode_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&svsmode_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&svsmode_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

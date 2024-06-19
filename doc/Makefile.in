@@ -318,7 +318,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 man_MANS = ircd.8
-dist_sysconf_DATA = reference.conf
+dist_sysconf_DATA = reference.conf modules.conf
 all: all-am
 
 .SUFFIXES:

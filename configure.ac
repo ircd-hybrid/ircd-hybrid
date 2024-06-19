@@ -71,8 +71,6 @@ AC_CONFIG_FILES([
   libio/src/Makefile
   libltdl/Makefile
   modules/Makefile
-  modules/core/Makefile
-  modules/extra/Makefile
   doc/Makefile
   help/Makefile
   tools/Makefile

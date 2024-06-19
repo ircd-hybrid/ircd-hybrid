@@ -135,13 +135,11 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	extban_usermode.$(OBJEXT) hash.$(OBJEXT) id.$(OBJEXT) \
 	info.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
-	modules.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	stats.$(OBJEXT) restart.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	monitor.$(OBJEXT) motd.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
+	restart.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
-am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -184,13 +182,12 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/hash.Po ./$(DEPDIR)/id.Po ./$(DEPDIR)/info.Po \
 	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
 	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/listener.Po ./$(DEPDIR)/modules.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/restart.Po \
-	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/listener.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
+	./$(DEPDIR)/restart.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -404,10 +401,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_YFLAGS = -d
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 ircd_LDFLAGS = -export-dynamic
-ircd_LDADD = $(LIBLTDL) ../libio/src/.libs/libio.a
-ircd_DEPENDENCIES = $(LTDLDEPS)
+ircd_LDADD = ../libio/src/.libs/libio.la
+ircd_DEPENDENCIES = ../libio/src/.libs/libio.la
 ircd_SOURCES = accept.c          \
                accept.h          \
                aline.c           \
@@ -480,8 +477,6 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                listener.c        \
                listener.h        \
-               modules.c         \
-               modules.h         \
                monitor.c         \
                monitor.h         \
                motd.c            \
@@ -646,7 +641,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/motd.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@ # am--include-marker
@@ -873,7 +867,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
-	-rm -f ./$(DEPDIR)/modules.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po
@@ -973,7 +966,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
-	-rm -f ./$(DEPDIR)/modules.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
 	-rm -f ./$(DEPDIR)/motd.Po
 	-rm -f ./$(DEPDIR)/numeric.Po

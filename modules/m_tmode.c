@@ -1,7 +1,7 @@
 /*
  *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
  *
- *  Copyright (c) 2022-2024 ircd-hybrid development team
+ *  Copyright (c) 1997-2024 ircd-hybrid development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  *  USA
  */
 
-/*! \file m_mlock.c
- * \brief Includes required functions for processing the MLOCK command.
+/*! \file m_tmode.c
+ * \brief Includes required functions for processing the TMODE command.
  */
 
 #include "stdinc.h"
@@ -32,11 +32,10 @@
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
-#include "server_capab.h"
+#include "module.h"
 
 
-/*! \brief MLOCK command handler
+/*! \brief TMODE command handler
  *
  * \param source Pointer to allocated Client struct from which the message
  *                 originally comes from.  This can be a local or remote client.
@@ -47,58 +46,51 @@
  *      - parv[0] = command
  *      - parv[1] = timestamp
  *      - parv[2] = channel name
- *      - parv[3] = timestamp of the mode lock
- *      - parv[4] = modes to be locked
+ *      - parv[3] = modes to be added or removed
  */
 static void
-ms_mlock(struct Client *source, int parc, char *parv[])
+ms_tmode(struct Client *source, int parc, char *parv[])
 {
   assert(!MyClient(source));
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
+  {
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
+    return;
+  }
+
+  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;
 
-  if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
-    channel_set_mode_lock(source, channel, parv[4]);
-
-  uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
-  if (timestamp)
-    channel->mode_lock_time = timestamp;
-
-  sendto_server(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
-                source->id, channel->creation_time, channel->name,
-                channel->mode_lock_time,
-                channel->mode_lock ? channel->mode_lock : "");
+  channel_mode_set(source, channel, parc - 3, parv + 3);
 }
 
-static struct Command mlock_msgtab =
+static struct Command tmode_msgtab =
 {
-  .name = "MLOCK",
+  .name = "TMODE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
+  .handlers[SERVER_HANDLER] = { .handler = ms_tmode, .args_min = 4 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
-  command_add(&mlock_msgtab);
-  capab_add("MLOCK", CAPAB_MLOCK, true);
+  command_add(&tmode_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
-  command_del(&mlock_msgtab);
-  capab_del("MLOCK");
+  command_del(&tmode_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_core = true
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .core = true
 };

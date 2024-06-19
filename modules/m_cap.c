@@ -32,7 +32,7 @@
 #include "user.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "irc_string.h"
 
 
@@ -335,7 +335,7 @@ static struct Command cap_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   /* First, let's sort the array */
   qsort(capab_list, IO_ARRAY_LENGTH(capab_list), sizeof(struct capabilities), (bqcmp)capab_sort);
@@ -343,14 +343,14 @@ module_init(void)
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&cap_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
-  .is_resident = true  /* XXX for now until caps are completely modular */
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
+  .resident = true  /* XXX for now until caps are completely modular */
 };

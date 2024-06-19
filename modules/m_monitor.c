@@ -31,7 +31,7 @@
 #include "conf.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "user.h"
 #include "monitor.h"
 #include "isupport.h"
@@ -270,21 +270,21 @@ static struct Command monitor_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&monitor_msgtab);
   isupport_add("MONITOR", NULL, ConfigGeneral.max_monitor);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&monitor_msgtab);
   isupport_delete("MONITOR");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

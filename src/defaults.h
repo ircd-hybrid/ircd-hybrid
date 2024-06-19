@@ -44,7 +44,6 @@
  * ETCPATH     = directory for configuration files
  * LOGPATH     = directory for logfiles
  * MODPATH     = directory for modules
- * AUTOMODPATH = directory for autoloaded modules
  */
 
 /* dirs */
@@ -52,7 +51,6 @@
 #define BINPATH      PREFIX "/bin/"
 #define MODPATH      LIBDIR "/" PACKAGE "/modules/"
 #define HPATH        DATADIR "/" PACKAGE "/help"
-#define AUTOMODPATH  MODPATH "/autoload/"
 #define ETCPATH      SYSCONFDIR
 #define LIBPATH      LOCALSTATEDIR "/lib"
 #define LOGPATH      LOCALSTATEDIR "/log"

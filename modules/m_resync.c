@@ -27,7 +27,7 @@
 #include "client.h"
 #include "ircd.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "server_capab.h"
 #include "hash.h"
 #include "channel.h"
@@ -71,21 +71,21 @@ static struct Command resync_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&resync_msgtab);
   capab_add("RESYNC", CAPAB_RESYNC, true);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&resync_msgtab);
   capab_del("RESYNC");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

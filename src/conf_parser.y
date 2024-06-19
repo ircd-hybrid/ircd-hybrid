@@ -44,7 +44,7 @@
 #include "log.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "modules.h"
+#include "module.h"
 #include "server.h"
 #include "address.h"
 #include "listener.h"
@@ -93,6 +93,7 @@ static struct
     port,
     timeout,
     aftype,
+    attributes,
     ping_freq,
     max_perip_local,
     max_perip_global,
@@ -161,6 +162,7 @@ reset_block_state(void)
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
+%token  CORE
 %token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_FLOODTIME
@@ -222,6 +224,7 @@ reset_block_state(void)
 %token  KNOCK_DELAY_CHANNEL
 %token  LEAF_MASK
 %token  LISTEN
+%token  LOADMODULE
 %token  MASK
 %token  MASS
 %token  MAX_ACCEPT
@@ -242,7 +245,6 @@ reset_block_state(void)
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
 %token  MODULE
-%token  MODULES
 %token  MOTD
 %token  NAME
 %token  NEED_IDENT
@@ -273,6 +275,7 @@ reset_block_state(void)
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
+%token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
 %token  RSA_PRIVATE_KEY_FILE
@@ -378,7 +381,8 @@ conf:
         | conf conf_item
         ;
 
-conf_item:        admin_entry
+conf_item:        loadmodule_entry
+                | admin_entry
                 | logging_entry
                 | oper_entry
                 | channel_entry
@@ -397,7 +401,6 @@ conf_item:        admin_entry
                 | exempt_entry
                 | general_entry
                 | gecos_entry
-                | modules_entry
                 | motd_entry
                 | pseudo_entry
                 | error ';'
@@ -425,23 +428,29 @@ sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
 
 
 /***************************************************************************
- * modules {} section
+ * loadmodule section
  ***************************************************************************/
-modules_entry: MODULES '{' modules_items '}' ';';
-
-modules_items:  modules_items modules_item | modules_item;
-modules_item:   modules_module | modules_path | error ';' ;
-
-modules_module: MODULE '=' QSTRING ';'
+loadmodule_entry: LOADMODULE QSTRING module_attributes ';'
 {
   if (conf_parser_ctx.pass == 2)
-    add_conf_module(io_basename(yylval.string));
+    module_add_config($2, block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
 };
 
-modules_path: PATH '=' QSTRING ';'
+module_attributes: /* empty */
+{
+  block_state.attributes.value = 0;
+} | ':' module_attributes_items ;
+
+module_attributes_items: module_attributes_items ',' module_attributes_item | module_attributes_item;
+
+module_attributes_item: RESIDENT
 {
   if (conf_parser_ctx.pass == 2)
-    mod_add_path(yylval.string);
+    block_state.attributes.value |= MODULE_RESIDENT;
+} | CORE
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.attributes.value |= MODULE_CORE;
 };
 
 

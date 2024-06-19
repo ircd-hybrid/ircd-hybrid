@@ -27,7 +27,7 @@
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
-#include "modules.h"
+#include "module.h"
 #include "hash.h"
 #include "server_capab.h"
 #include "conf.h"
@@ -126,21 +126,21 @@ static struct Command tburst_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&tburst_msgtab);
   capab_add("TBURST", CAPAB_TBURST, true);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&tburst_msgtab);
   capab_del("TBURST");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

@@ -166,6 +166,12 @@ m_away_la_OBJECTS = $(am_m_away_la_OBJECTS)
 m_away_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_away_la_LDFLAGS) $(LDFLAGS) -o $@
+m_bmask_la_LIBADD =
+am_m_bmask_la_OBJECTS = m_bmask.lo
+m_bmask_la_OBJECTS = $(am_m_bmask_la_OBJECTS)
+m_bmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_bmask_la_LDFLAGS) $(LDFLAGS) -o $@
 m_cap_la_LIBADD =
 am_m_cap_la_OBJECTS = m_cap.lo
 m_cap_la_OBJECTS = $(am_m_cap_la_OBJECTS)
@@ -196,6 +202,12 @@ m_connect_la_OBJECTS = $(am_m_connect_la_OBJECTS)
 m_connect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_connect_la_LDFLAGS) $(LDFLAGS) -o $@
+m_die_la_LIBADD =
+am_m_die_la_OBJECTS = m_die.lo
+m_die_la_OBJECTS = $(am_m_die_la_OBJECTS)
+m_die_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_die_la_LDFLAGS) $(LDFLAGS) -o $@
 m_dline_la_LIBADD =
 am_m_dline_la_OBJECTS = m_dline.lo
 m_dline_la_OBJECTS = $(am_m_dline_la_OBJECTS)
@@ -214,6 +226,12 @@ m_eob_la_OBJECTS = $(am_m_eob_la_OBJECTS)
 m_eob_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_eob_la_LDFLAGS) $(LDFLAGS) -o $@
+m_error_la_LIBADD =
+am_m_error_la_OBJECTS = m_error.lo
+m_error_la_OBJECTS = $(am_m_error_la_OBJECTS)
+m_error_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_error_la_LDFLAGS) $(LDFLAGS) -o $@
 m_etrace_la_LIBADD =
 am_m_etrace_la_OBJECTS = m_etrace.lo
 m_etrace_la_OBJECTS = $(am_m_etrace_la_OBJECTS)
@@ -256,6 +274,24 @@ m_ison_la_OBJECTS = $(am_m_ison_la_OBJECTS)
 m_ison_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_ison_la_LDFLAGS) $(LDFLAGS) -o $@
+m_join_la_LIBADD =
+am_m_join_la_OBJECTS = m_join.lo
+m_join_la_OBJECTS = $(am_m_join_la_OBJECTS)
+m_join_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_join_la_LDFLAGS) $(LDFLAGS) -o $@
+m_kick_la_LIBADD =
+am_m_kick_la_OBJECTS = m_kick.lo
+m_kick_la_OBJECTS = $(am_m_kick_la_OBJECTS)
+m_kick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_kick_la_LDFLAGS) $(LDFLAGS) -o $@
+m_kill_la_LIBADD =
+am_m_kill_la_OBJECTS = m_kill.lo
+m_kill_la_OBJECTS = $(am_m_kill_la_OBJECTS)
+m_kill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_kill_la_LDFLAGS) $(LDFLAGS) -o $@
 m_kline_la_LIBADD =
 am_m_kline_la_OBJECTS = m_kline.lo
 m_kline_la_OBJECTS = $(am_m_kline_la_OBJECTS)
@@ -298,12 +334,30 @@ m_map_la_OBJECTS = $(am_m_map_la_OBJECTS)
 m_map_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_map_la_LDFLAGS) $(LDFLAGS) -o $@
+m_message_la_LIBADD =
+am_m_message_la_OBJECTS = m_message.lo
+m_message_la_OBJECTS = $(am_m_message_la_OBJECTS)
+m_message_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_message_la_LDFLAGS) $(LDFLAGS) -o $@
 m_metadata_la_LIBADD =
 am_m_metadata_la_OBJECTS = m_metadata.lo
 m_metadata_la_OBJECTS = $(am_m_metadata_la_OBJECTS)
 m_metadata_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_metadata_la_LDFLAGS) $(LDFLAGS) -o $@
+m_mlock_la_LIBADD =
+am_m_mlock_la_OBJECTS = m_mlock.lo
+m_mlock_la_OBJECTS = $(am_m_mlock_la_OBJECTS)
+m_mlock_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_mlock_la_LDFLAGS) $(LDFLAGS) -o $@
+m_mode_la_LIBADD =
+am_m_mode_la_OBJECTS = m_mode.lo
+m_mode_la_OBJECTS = $(am_m_mode_la_OBJECTS)
+m_mode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_mode_la_LDFLAGS) $(LDFLAGS) -o $@
 m_module_la_LIBADD =
 am_m_module_la_OBJECTS = m_module.lo
 m_module_la_OBJECTS = $(am_m_module_la_OBJECTS)
@@ -328,12 +382,30 @@ m_names_la_OBJECTS = $(am_m_names_la_OBJECTS)
 m_names_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_names_la_LDFLAGS) $(LDFLAGS) -o $@
+m_nick_la_LIBADD =
+am_m_nick_la_OBJECTS = m_nick.lo
+m_nick_la_OBJECTS = $(am_m_nick_la_OBJECTS)
+m_nick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_nick_la_LDFLAGS) $(LDFLAGS) -o $@
 m_oper_la_LIBADD =
 am_m_oper_la_OBJECTS = m_oper.lo
 m_oper_la_OBJECTS = $(am_m_oper_la_OBJECTS)
 m_oper_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_oper_la_LDFLAGS) $(LDFLAGS) -o $@
+m_opme_la_LIBADD =
+am_m_opme_la_OBJECTS = m_opme.lo
+m_opme_la_OBJECTS = $(am_m_opme_la_OBJECTS)
+m_opme_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_opme_la_LDFLAGS) $(LDFLAGS) -o $@
+m_part_la_LIBADD =
+am_m_part_la_OBJECTS = m_part.lo
+m_part_la_OBJECTS = $(am_m_part_la_OBJECTS)
+m_part_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_part_la_LDFLAGS) $(LDFLAGS) -o $@
 m_pass_la_LIBADD =
 am_m_pass_la_OBJECTS = m_pass.lo
 m_pass_la_OBJECTS = $(am_m_pass_la_OBJECTS)
@@ -358,6 +430,12 @@ m_post_la_OBJECTS = $(am_m_post_la_OBJECTS)
 m_post_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_post_la_LDFLAGS) $(LDFLAGS) -o $@
+m_quit_la_LIBADD =
+am_m_quit_la_OBJECTS = m_quit.lo
+m_quit_la_OBJECTS = $(am_m_quit_la_OBJECTS)
+m_quit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_quit_la_LDFLAGS) $(LDFLAGS) -o $@
 m_rehash_la_LIBADD =
 am_m_rehash_la_OBJECTS = m_rehash.lo
 m_rehash_la_OBJECTS = $(am_m_rehash_la_OBJECTS)
@@ -382,12 +460,30 @@ m_resync_la_OBJECTS = $(am_m_resync_la_OBJECTS)
 m_resync_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_resync_la_LDFLAGS) $(LDFLAGS) -o $@
+m_server_la_LIBADD =
+am_m_server_la_OBJECTS = m_server.lo
+m_server_la_OBJECTS = $(am_m_server_la_OBJECTS)
+m_server_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_server_la_LDFLAGS) $(LDFLAGS) -o $@
 m_set_la_LIBADD =
 am_m_set_la_OBJECTS = m_set.lo
 m_set_la_OBJECTS = $(am_m_set_la_OBJECTS)
 m_set_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_set_la_LDFLAGS) $(LDFLAGS) -o $@
+m_sjoin_la_LIBADD =
+am_m_sjoin_la_OBJECTS = m_sjoin.lo
+m_sjoin_la_OBJECTS = $(am_m_sjoin_la_OBJECTS)
+m_sjoin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_sjoin_la_LDFLAGS) $(LDFLAGS) -o $@
+m_squit_la_LIBADD =
+am_m_squit_la_OBJECTS = m_squit.lo
+m_squit_la_OBJECTS = $(am_m_squit_la_OBJECTS)
+m_squit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_squit_la_LDFLAGS) $(LDFLAGS) -o $@
 m_stats_la_LIBADD =
 am_m_stats_la_OBJECTS = m_stats.lo
 m_stats_la_OBJECTS = $(am_m_stats_la_OBJECTS)
@@ -461,6 +557,12 @@ m_time_la_OBJECTS = $(am_m_time_la_OBJECTS)
 m_time_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_time_la_LDFLAGS) $(LDFLAGS) -o $@
+m_tmode_la_LIBADD =
+am_m_tmode_la_OBJECTS = m_tmode.lo
+m_tmode_la_OBJECTS = $(am_m_tmode_la_OBJECTS)
+m_tmode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(m_tmode_la_LDFLAGS) $(LDFLAGS) -o $@
 m_topic_la_LIBADD =
 am_m_topic_la_OBJECTS = m_topic.lo
 m_topic_la_OBJECTS = $(am_m_topic_la_OBJECTS)
@@ -567,39 +669,47 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
-	./$(DEPDIR)/m_away.Plo ./$(DEPDIR)/m_cap.Plo \
-	./$(DEPDIR)/m_capab.Plo ./$(DEPDIR)/m_certfp.Plo \
-	./$(DEPDIR)/m_close.Plo ./$(DEPDIR)/m_connect.Plo \
+	./$(DEPDIR)/m_away.Plo ./$(DEPDIR)/m_bmask.Plo \
+	./$(DEPDIR)/m_cap.Plo ./$(DEPDIR)/m_capab.Plo \
+	./$(DEPDIR)/m_certfp.Plo ./$(DEPDIR)/m_close.Plo \
+	./$(DEPDIR)/m_connect.Plo ./$(DEPDIR)/m_die.Plo \
 	./$(DEPDIR)/m_dline.Plo ./$(DEPDIR)/m_encap.Plo \
-	./$(DEPDIR)/m_eob.Plo ./$(DEPDIR)/m_etrace.Plo \
-	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_hash.Plo \
-	./$(DEPDIR)/m_help.Plo ./$(DEPDIR)/m_info.Plo \
-	./$(DEPDIR)/m_invite.Plo ./$(DEPDIR)/m_ison.Plo \
+	./$(DEPDIR)/m_eob.Plo ./$(DEPDIR)/m_error.Plo \
+	./$(DEPDIR)/m_etrace.Plo ./$(DEPDIR)/m_globops.Plo \
+	./$(DEPDIR)/m_hash.Plo ./$(DEPDIR)/m_help.Plo \
+	./$(DEPDIR)/m_info.Plo ./$(DEPDIR)/m_invite.Plo \
+	./$(DEPDIR)/m_ison.Plo ./$(DEPDIR)/m_join.Plo \
+	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
 	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
 	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
 	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
-	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_metadata.Plo \
-	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
-	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
-	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_pass.Plo \
+	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_message.Plo \
+	./$(DEPDIR)/m_metadata.Plo ./$(DEPDIR)/m_mlock.Plo \
+	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_module.Plo \
+	./$(DEPDIR)/m_monitor.Plo ./$(DEPDIR)/m_motd.Plo \
+	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_nick.Plo \
+	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_opme.Plo \
+	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_pass.Plo \
 	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
-	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_rehash.Plo \
-	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
-	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_quit.Plo \
+	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
+	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_resync.Plo \
+	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
 	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
 	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
 	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
 	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
 	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
 	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
-	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
-	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
-	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
-	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
-	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_wallops.Plo \
-	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
-	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
-	./$(DEPDIR)/m_xline.Plo
+	./$(DEPDIR)/m_tmode.Plo ./$(DEPDIR)/m_topic.Plo \
+	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
+	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
+	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
+	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
+	./$(DEPDIR)/m_wallops.Plo ./$(DEPDIR)/m_webirc.Plo \
+	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
+	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -620,30 +730,38 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
-	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
-	$(m_certfp_la_SOURCES) $(m_close_la_SOURCES) \
-	$(m_connect_la_SOURCES) $(m_dline_la_SOURCES) \
+	$(m_away_la_SOURCES) $(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
+	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
+	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
+	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
 	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_etrace_la_SOURCES) $(m_globops_la_SOURCES) \
-	$(m_hash_la_SOURCES) $(m_help_la_SOURCES) $(m_info_la_SOURCES) \
+	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
+	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
+	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
 	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
+	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_map_la_SOURCES) $(m_message_la_SOURCES) \
+	$(m_metadata_la_SOURCES) $(m_mlock_la_SOURCES) \
+	$(m_mode_la_SOURCES) $(m_module_la_SOURCES) \
+	$(m_monitor_la_SOURCES) $(m_motd_la_SOURCES) \
+	$(m_names_la_SOURCES) $(m_nick_la_SOURCES) \
+	$(m_oper_la_SOURCES) $(m_opme_la_SOURCES) $(m_part_la_SOURCES) \
+	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
+	$(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
-	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
-	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
+	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
+	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
+	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
+	$(m_svsaccount_la_SOURCES) $(m_svshost_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_tmode_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
 	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
 	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
@@ -652,30 +770,38 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
 	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
 DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
-	$(m_away_la_SOURCES) $(m_cap_la_SOURCES) $(m_capab_la_SOURCES) \
-	$(m_certfp_la_SOURCES) $(m_close_la_SOURCES) \
-	$(m_connect_la_SOURCES) $(m_dline_la_SOURCES) \
+	$(m_away_la_SOURCES) $(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
+	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
+	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
+	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
 	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_etrace_la_SOURCES) $(m_globops_la_SOURCES) \
-	$(m_hash_la_SOURCES) $(m_help_la_SOURCES) $(m_info_la_SOURCES) \
+	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
+	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
+	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
 	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
+	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
 	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
 	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
 	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) \
+	$(m_map_la_SOURCES) $(m_message_la_SOURCES) \
+	$(m_metadata_la_SOURCES) $(m_mlock_la_SOURCES) \
+	$(m_mode_la_SOURCES) $(m_module_la_SOURCES) \
+	$(m_monitor_la_SOURCES) $(m_motd_la_SOURCES) \
+	$(m_names_la_SOURCES) $(m_nick_la_SOURCES) \
+	$(m_oper_la_SOURCES) $(m_opme_la_SOURCES) $(m_part_la_SOURCES) \
+	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
+	$(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
-	$(m_set_la_SOURCES) $(m_stats_la_SOURCES) \
-	$(m_svinfo_la_SOURCES) $(m_svsaccount_la_SOURCES) \
-	$(m_svshost_la_SOURCES) $(m_svsjoin_la_SOURCES) \
-	$(m_svskill_la_SOURCES) $(m_svsmode_la_SOURCES) \
-	$(m_svsnick_la_SOURCES) $(m_svspart_la_SOURCES) \
-	$(m_svstag_la_SOURCES) $(m_tburst_la_SOURCES) \
-	$(m_time_la_SOURCES) $(m_topic_la_SOURCES) \
+	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
+	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
+	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
+	$(m_svsaccount_la_SOURCES) $(m_svshost_la_SOURCES) \
+	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
+	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
+	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
+	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
+	$(m_tmode_la_SOURCES) $(m_topic_la_SOURCES) \
 	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
 	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
 	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
@@ -683,27 +809,11 @@ DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_wallops_la_SOURCES) $(m_webirc_la_SOURCES) \
 	$(m_who_la_SOURCES) $(m_whois_la_SOURCES) \
 	$(m_whowas_la_SOURCES) $(m_xline_la_SOURCES)
-RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
-	ctags-recursive dvi-recursive html-recursive info-recursive \
-	install-data-recursive install-dvi-recursive \
-	install-exec-recursive install-html-recursive \
-	install-info-recursive install-pdf-recursive \
-	install-ps-recursive install-recursive installcheck-recursive \
-	installdirs-recursive pdf-recursive ps-recursive \
-	tags-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-am__recursive_targets = \
-  $(RECURSIVE_TARGETS) \
-  $(RECURSIVE_CLEAN_TARGETS) \
-  $(am__extra_recursive_targets)
-AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	distdir distdir-am
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -721,34 +831,8 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -897,9 +981,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
-SUBDIRS = core extra
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
-modulesdir = $(pkglibdir)/modules/autoload
+modulesdir = $(pkglibdir)/modules
 modules_LTLIBRARIES = m_accept.la     \
                       m_admin.la      \
                       m_away.la       \
@@ -931,6 +1014,7 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_motd.la       \
                       m_names.la      \
                       m_oper.la       \
+                      m_opme.la       \
                       m_pass.la       \
                       m_ping.la       \
                       m_pong.la       \
@@ -966,8 +1050,56 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_who.la        \
                       m_whois.la      \
                       m_whowas.la     \
-                      m_xline.la
+                      m_xline.la \
+                      m_bmask.la   \
+                      m_die.la     \
+                      m_error.la   \
+                      m_join.la    \
+                      m_kick.la    \
+                      m_kill.la    \
+                      m_message.la \
+                      m_mlock.la   \
+                      m_mode.la    \
+                      m_nick.la    \
+                      m_part.la    \
+                      m_quit.la    \
+                      m_server.la  \
+                      m_sjoin.la   \
+                      m_squit.la   \
+                      m_tmode.la
 
+m_bmask_la_LDFLAGS = $(MODULE_FLAGS)
+m_die_la_LDFLAGS = $(MODULE_FLAGS)
+m_error_la_LDFLAGS = $(MODULE_FLAGS)
+m_join_la_LDFLAGS = $(MODULE_FLAGS)
+m_kick_la_LDFLAGS = $(MODULE_FLAGS)
+m_kill_la_LDFLAGS = $(MODULE_FLAGS)
+m_message_la_LDFLAGS = $(MODULE_FLAGS)
+m_mlock_la_LDFLAGS = $(MODULE_FLAGS)
+m_mode_la_LDFLAGS = $(MODULE_FLAGS)
+m_nick_la_LDFLAGS = $(MODULE_FLAGS)
+m_part_la_LDFLAGS = $(MODULE_FLAGS)
+m_quit_la_LDFLAGS = $(MODULE_FLAGS)
+m_server_la_LDFLAGS = $(MODULE_FLAGS)
+m_sjoin_la_LDFLAGS = $(MODULE_FLAGS)
+m_squit_la_LDFLAGS = $(MODULE_FLAGS)
+m_tmode_la_LDFLAGS = $(MODULE_FLAGS)
+m_bmask_la_SOURCES = m_bmask.c
+m_die_la_SOURCES = m_die.c
+m_error_la_SOURCES = m_error.c
+m_join_la_SOURCES = m_join.c
+m_kick_la_SOURCES = m_kick.c
+m_kill_la_SOURCES = m_kill.c
+m_message_la_SOURCES = m_message.c
+m_mlock_la_SOURCES = m_mlock.c
+m_mode_la_SOURCES = m_mode.c
+m_nick_la_SOURCES = m_nick.c
+m_part_la_SOURCES = m_part.c
+m_quit_la_SOURCES = m_quit.c
+m_server_la_SOURCES = m_server.c
+m_sjoin_la_SOURCES = m_sjoin.c
+m_squit_la_SOURCES = m_squit.c
+m_tmode_la_SOURCES = m_tmode.c
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
@@ -999,6 +1131,7 @@ m_monitor_la_LDFLAGS = $(MODULE_FLAGS)
 m_motd_la_LDFLAGS = $(MODULE_FLAGS)
 m_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_oper_la_LDFLAGS = $(MODULE_FLAGS)
+m_opme_la_LDFLAGS = $(MODULE_FLAGS)
 m_pass_la_LDFLAGS = $(MODULE_FLAGS)
 m_ping_la_LDFLAGS = $(MODULE_FLAGS)
 m_pong_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1066,6 +1199,7 @@ m_monitor_la_SOURCES = m_monitor.c
 m_motd_la_SOURCES = m_motd.c
 m_names_la_SOURCES = m_names.c
 m_oper_la_SOURCES = m_oper.c
+m_opme_la_SOURCES = m_opme.c
 m_pass_la_SOURCES = m_pass.c
 m_ping_la_SOURCES = m_ping.c
 m_pong_la_SOURCES = m_pong.c
@@ -1102,7 +1236,7 @@ m_who_la_SOURCES = m_who.c
 m_whois_la_SOURCES = m_whois.c
 m_whowas_la_SOURCES = m_whowas.c
 m_xline_la_SOURCES = m_xline.c
-all: all-recursive
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -1180,6 +1314,9 @@ m_admin.la: $(m_admin_la_OBJECTS) $(m_admin_la_DEPENDENCIES) $(EXTRA_m_admin_la_
 m_away.la: $(m_away_la_OBJECTS) $(m_away_la_DEPENDENCIES) $(EXTRA_m_away_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_away_la_LINK) -rpath $(modulesdir) $(m_away_la_OBJECTS) $(m_away_la_LIBADD) $(LIBS)
 
+m_bmask.la: $(m_bmask_la_OBJECTS) $(m_bmask_la_DEPENDENCIES) $(EXTRA_m_bmask_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_bmask_la_LINK) -rpath $(modulesdir) $(m_bmask_la_OBJECTS) $(m_bmask_la_LIBADD) $(LIBS)
+
 m_cap.la: $(m_cap_la_OBJECTS) $(m_cap_la_DEPENDENCIES) $(EXTRA_m_cap_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_cap_la_LINK) -rpath $(modulesdir) $(m_cap_la_OBJECTS) $(m_cap_la_LIBADD) $(LIBS)
 
@@ -1195,6 +1332,9 @@ m_close.la: $(m_close_la_OBJECTS) $(m_close_la_DEPENDENCIES) $(EXTRA_m_close_la_
 m_connect.la: $(m_connect_la_OBJECTS) $(m_connect_la_DEPENDENCIES) $(EXTRA_m_connect_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_connect_la_LINK) -rpath $(modulesdir) $(m_connect_la_OBJECTS) $(m_connect_la_LIBADD) $(LIBS)
 
+m_die.la: $(m_die_la_OBJECTS) $(m_die_la_DEPENDENCIES) $(EXTRA_m_die_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_die_la_LINK) -rpath $(modulesdir) $(m_die_la_OBJECTS) $(m_die_la_LIBADD) $(LIBS)
+
 m_dline.la: $(m_dline_la_OBJECTS) $(m_dline_la_DEPENDENCIES) $(EXTRA_m_dline_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_dline_la_LINK) -rpath $(modulesdir) $(m_dline_la_OBJECTS) $(m_dline_la_LIBADD) $(LIBS)
 
@@ -1203,6 +1343,9 @@ m_encap.la: $(m_encap_la_OBJECTS) $(m_encap_la_DEPENDENCIES) $(EXTRA_m_encap_la_
 
 m_eob.la: $(m_eob_la_OBJECTS) $(m_eob_la_DEPENDENCIES) $(EXTRA_m_eob_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_eob_la_LINK) -rpath $(modulesdir) $(m_eob_la_OBJECTS) $(m_eob_la_LIBADD) $(LIBS)
+
+m_error.la: $(m_error_la_OBJECTS) $(m_error_la_DEPENDENCIES) $(EXTRA_m_error_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_error_la_LINK) -rpath $(modulesdir) $(m_error_la_OBJECTS) $(m_error_la_LIBADD) $(LIBS)
 
 m_etrace.la: $(m_etrace_la_OBJECTS) $(m_etrace_la_DEPENDENCIES) $(EXTRA_m_etrace_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_etrace_la_LINK) -rpath $(modulesdir) $(m_etrace_la_OBJECTS) $(m_etrace_la_LIBADD) $(LIBS)
@@ -1225,6 +1368,15 @@ m_invite.la: $(m_invite_la_OBJECTS) $(m_invite_la_DEPENDENCIES) $(EXTRA_m_invite
 m_ison.la: $(m_ison_la_OBJECTS) $(m_ison_la_DEPENDENCIES) $(EXTRA_m_ison_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_ison_la_LINK) -rpath $(modulesdir) $(m_ison_la_OBJECTS) $(m_ison_la_LIBADD) $(LIBS)
 
+m_join.la: $(m_join_la_OBJECTS) $(m_join_la_DEPENDENCIES) $(EXTRA_m_join_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_join_la_LINK) -rpath $(modulesdir) $(m_join_la_OBJECTS) $(m_join_la_LIBADD) $(LIBS)
+
+m_kick.la: $(m_kick_la_OBJECTS) $(m_kick_la_DEPENDENCIES) $(EXTRA_m_kick_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_kick_la_LINK) -rpath $(modulesdir) $(m_kick_la_OBJECTS) $(m_kick_la_LIBADD) $(LIBS)
+
+m_kill.la: $(m_kill_la_OBJECTS) $(m_kill_la_DEPENDENCIES) $(EXTRA_m_kill_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_kill_la_LINK) -rpath $(modulesdir) $(m_kill_la_OBJECTS) $(m_kill_la_LIBADD) $(LIBS)
+
 m_kline.la: $(m_kline_la_OBJECTS) $(m_kline_la_DEPENDENCIES) $(EXTRA_m_kline_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_kline_la_LINK) -rpath $(modulesdir) $(m_kline_la_OBJECTS) $(m_kline_la_LIBADD) $(LIBS)
 
@@ -1246,8 +1398,17 @@ m_lusers.la: $(m_lusers_la_OBJECTS) $(m_lusers_la_DEPENDENCIES) $(EXTRA_m_lusers
 m_map.la: $(m_map_la_OBJECTS) $(m_map_la_DEPENDENCIES) $(EXTRA_m_map_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_map_la_LINK) -rpath $(modulesdir) $(m_map_la_OBJECTS) $(m_map_la_LIBADD) $(LIBS)
 
+m_message.la: $(m_message_la_OBJECTS) $(m_message_la_DEPENDENCIES) $(EXTRA_m_message_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_message_la_LINK) -rpath $(modulesdir) $(m_message_la_OBJECTS) $(m_message_la_LIBADD) $(LIBS)
+
 m_metadata.la: $(m_metadata_la_OBJECTS) $(m_metadata_la_DEPENDENCIES) $(EXTRA_m_metadata_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_metadata_la_LINK) -rpath $(modulesdir) $(m_metadata_la_OBJECTS) $(m_metadata_la_LIBADD) $(LIBS)
+
+m_mlock.la: $(m_mlock_la_OBJECTS) $(m_mlock_la_DEPENDENCIES) $(EXTRA_m_mlock_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_mlock_la_LINK) -rpath $(modulesdir) $(m_mlock_la_OBJECTS) $(m_mlock_la_LIBADD) $(LIBS)
+
+m_mode.la: $(m_mode_la_OBJECTS) $(m_mode_la_DEPENDENCIES) $(EXTRA_m_mode_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_mode_la_LINK) -rpath $(modulesdir) $(m_mode_la_OBJECTS) $(m_mode_la_LIBADD) $(LIBS)
 
 m_module.la: $(m_module_la_OBJECTS) $(m_module_la_DEPENDENCIES) $(EXTRA_m_module_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_module_la_LINK) -rpath $(modulesdir) $(m_module_la_OBJECTS) $(m_module_la_LIBADD) $(LIBS)
@@ -1261,8 +1422,17 @@ m_motd.la: $(m_motd_la_OBJECTS) $(m_motd_la_DEPENDENCIES) $(EXTRA_m_motd_la_DEPE
 m_names.la: $(m_names_la_OBJECTS) $(m_names_la_DEPENDENCIES) $(EXTRA_m_names_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_names_la_LINK) -rpath $(modulesdir) $(m_names_la_OBJECTS) $(m_names_la_LIBADD) $(LIBS)
 
+m_nick.la: $(m_nick_la_OBJECTS) $(m_nick_la_DEPENDENCIES) $(EXTRA_m_nick_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_nick_la_LINK) -rpath $(modulesdir) $(m_nick_la_OBJECTS) $(m_nick_la_LIBADD) $(LIBS)
+
 m_oper.la: $(m_oper_la_OBJECTS) $(m_oper_la_DEPENDENCIES) $(EXTRA_m_oper_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_oper_la_LINK) -rpath $(modulesdir) $(m_oper_la_OBJECTS) $(m_oper_la_LIBADD) $(LIBS)
+
+m_opme.la: $(m_opme_la_OBJECTS) $(m_opme_la_DEPENDENCIES) $(EXTRA_m_opme_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_opme_la_LINK) -rpath $(modulesdir) $(m_opme_la_OBJECTS) $(m_opme_la_LIBADD) $(LIBS)
+
+m_part.la: $(m_part_la_OBJECTS) $(m_part_la_DEPENDENCIES) $(EXTRA_m_part_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_part_la_LINK) -rpath $(modulesdir) $(m_part_la_OBJECTS) $(m_part_la_LIBADD) $(LIBS)
 
 m_pass.la: $(m_pass_la_OBJECTS) $(m_pass_la_DEPENDENCIES) $(EXTRA_m_pass_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_pass_la_LINK) -rpath $(modulesdir) $(m_pass_la_OBJECTS) $(m_pass_la_LIBADD) $(LIBS)
@@ -1276,6 +1446,9 @@ m_pong.la: $(m_pong_la_OBJECTS) $(m_pong_la_DEPENDENCIES) $(EXTRA_m_pong_la_DEPE
 m_post.la: $(m_post_la_OBJECTS) $(m_post_la_DEPENDENCIES) $(EXTRA_m_post_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_post_la_LINK) -rpath $(modulesdir) $(m_post_la_OBJECTS) $(m_post_la_LIBADD) $(LIBS)
 
+m_quit.la: $(m_quit_la_OBJECTS) $(m_quit_la_DEPENDENCIES) $(EXTRA_m_quit_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_quit_la_LINK) -rpath $(modulesdir) $(m_quit_la_OBJECTS) $(m_quit_la_LIBADD) $(LIBS)
+
 m_rehash.la: $(m_rehash_la_OBJECTS) $(m_rehash_la_DEPENDENCIES) $(EXTRA_m_rehash_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_rehash_la_LINK) -rpath $(modulesdir) $(m_rehash_la_OBJECTS) $(m_rehash_la_LIBADD) $(LIBS)
 
@@ -1288,8 +1461,17 @@ m_resv.la: $(m_resv_la_OBJECTS) $(m_resv_la_DEPENDENCIES) $(EXTRA_m_resv_la_DEPE
 m_resync.la: $(m_resync_la_OBJECTS) $(m_resync_la_DEPENDENCIES) $(EXTRA_m_resync_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_resync_la_LINK) -rpath $(modulesdir) $(m_resync_la_OBJECTS) $(m_resync_la_LIBADD) $(LIBS)
 
+m_server.la: $(m_server_la_OBJECTS) $(m_server_la_DEPENDENCIES) $(EXTRA_m_server_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_server_la_LINK) -rpath $(modulesdir) $(m_server_la_OBJECTS) $(m_server_la_LIBADD) $(LIBS)
+
 m_set.la: $(m_set_la_OBJECTS) $(m_set_la_DEPENDENCIES) $(EXTRA_m_set_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_set_la_LINK) -rpath $(modulesdir) $(m_set_la_OBJECTS) $(m_set_la_LIBADD) $(LIBS)
+
+m_sjoin.la: $(m_sjoin_la_OBJECTS) $(m_sjoin_la_DEPENDENCIES) $(EXTRA_m_sjoin_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_sjoin_la_LINK) -rpath $(modulesdir) $(m_sjoin_la_OBJECTS) $(m_sjoin_la_LIBADD) $(LIBS)
+
+m_squit.la: $(m_squit_la_OBJECTS) $(m_squit_la_DEPENDENCIES) $(EXTRA_m_squit_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_squit_la_LINK) -rpath $(modulesdir) $(m_squit_la_OBJECTS) $(m_squit_la_LIBADD) $(LIBS)
 
 m_stats.la: $(m_stats_la_OBJECTS) $(m_stats_la_DEPENDENCIES) $(EXTRA_m_stats_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_stats_la_LINK) -rpath $(modulesdir) $(m_stats_la_OBJECTS) $(m_stats_la_LIBADD) $(LIBS)
@@ -1326,6 +1508,9 @@ m_tburst.la: $(m_tburst_la_OBJECTS) $(m_tburst_la_DEPENDENCIES) $(EXTRA_m_tburst
 
 m_time.la: $(m_time_la_OBJECTS) $(m_time_la_DEPENDENCIES) $(EXTRA_m_time_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_time_la_LINK) -rpath $(modulesdir) $(m_time_la_OBJECTS) $(m_time_la_LIBADD) $(LIBS)
+
+m_tmode.la: $(m_tmode_la_OBJECTS) $(m_tmode_la_DEPENDENCIES) $(EXTRA_m_tmode_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(m_tmode_la_LINK) -rpath $(modulesdir) $(m_tmode_la_OBJECTS) $(m_tmode_la_LIBADD) $(LIBS)
 
 m_topic.la: $(m_topic_la_OBJECTS) $(m_topic_la_DEPENDENCIES) $(EXTRA_m_topic_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_topic_la_LINK) -rpath $(modulesdir) $(m_topic_la_OBJECTS) $(m_topic_la_LIBADD) $(LIBS)
@@ -1381,14 +1566,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_accept.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_admin.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_away.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_bmask.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_cap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_capab.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_certfp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_close.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_connect.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_die.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_dline.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_encap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_eob.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_error.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_etrace.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_globops.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_hash.Plo@am__quote@ # am--include-marker
@@ -1396,6 +1584,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_info.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_invite.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_ison.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_join.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kick.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kill.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_kline.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_knock.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_links.Plo@am__quote@ # am--include-marker
@@ -1403,21 +1594,31 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_locops.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_lusers.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_map.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_message.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_metadata.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mlock.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_mode.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_module.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_monitor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_motd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_names.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_nick.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_oper.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_opme.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_part.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_pass.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_ping.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_pong.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_post.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_quit.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_rehash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_restart.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_resv.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_resync.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_server.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_set.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_sjoin.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_squit.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_stats.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svinfo.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svsaccount.Plo@am__quote@ # am--include-marker
@@ -1430,6 +1631,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_svstag.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tburst.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_time.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_tmode.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_topic.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_trace.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_undline.Plo@am__quote@ # am--include-marker
@@ -1482,61 +1684,14 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run 'make' without going through this Makefile.
-# To change the values of 'make' variables: instead of editing Makefiles,
-# (1) if the variable is set in 'config.status', edit 'config.status'
-#     (which will cause the Makefiles to be regenerated when you run 'make');
-# (2) otherwise, pass the desired values on the 'make' command line.
-$(am__recursive_targets):
-	@fail=; \
-	if $(am__make_keepgoing); then \
-	  failcom='fail=yes'; \
-	else \
-	  failcom='exit 1'; \
-	fi; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-recursive
+tags: tags-am
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -1549,7 +1704,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-recursive
+ctags: ctags-am
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -1562,7 +1717,7 @@ GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
 	  && $(am__cd) $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) "$$here"
-cscopelist: cscopelist-recursive
+cscopelist: cscopelist-am
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -1613,48 +1768,22 @@ distdir-am: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    $(am__make_dryrun) \
-	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
-check: check-recursive
+check: check-am
 all-am: Makefile $(LTLIBRARIES)
-installdirs: installdirs-recursive
-installdirs-am:
+installdirs:
 	for dir in "$(DESTDIR)$(modulesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -1676,23 +1805,26 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
+clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-modulesLTLIBRARIES \
 	mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
 		-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo
+	-rm -f ./$(DEPDIR)/m_bmask.Plo
 	-rm -f ./$(DEPDIR)/m_cap.Plo
 	-rm -f ./$(DEPDIR)/m_capab.Plo
 	-rm -f ./$(DEPDIR)/m_certfp.Plo
 	-rm -f ./$(DEPDIR)/m_close.Plo
 	-rm -f ./$(DEPDIR)/m_connect.Plo
+	-rm -f ./$(DEPDIR)/m_die.Plo
 	-rm -f ./$(DEPDIR)/m_dline.Plo
 	-rm -f ./$(DEPDIR)/m_encap.Plo
 	-rm -f ./$(DEPDIR)/m_eob.Plo
+	-rm -f ./$(DEPDIR)/m_error.Plo
 	-rm -f ./$(DEPDIR)/m_etrace.Plo
 	-rm -f ./$(DEPDIR)/m_globops.Plo
 	-rm -f ./$(DEPDIR)/m_hash.Plo
@@ -1700,6 +1832,9 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_info.Plo
 	-rm -f ./$(DEPDIR)/m_invite.Plo
 	-rm -f ./$(DEPDIR)/m_ison.Plo
+	-rm -f ./$(DEPDIR)/m_join.Plo
+	-rm -f ./$(DEPDIR)/m_kick.Plo
+	-rm -f ./$(DEPDIR)/m_kill.Plo
 	-rm -f ./$(DEPDIR)/m_kline.Plo
 	-rm -f ./$(DEPDIR)/m_knock.Plo
 	-rm -f ./$(DEPDIR)/m_links.Plo
@@ -1707,21 +1842,31 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_locops.Plo
 	-rm -f ./$(DEPDIR)/m_lusers.Plo
 	-rm -f ./$(DEPDIR)/m_map.Plo
+	-rm -f ./$(DEPDIR)/m_message.Plo
 	-rm -f ./$(DEPDIR)/m_metadata.Plo
+	-rm -f ./$(DEPDIR)/m_mlock.Plo
+	-rm -f ./$(DEPDIR)/m_mode.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
 	-rm -f ./$(DEPDIR)/m_monitor.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo
+	-rm -f ./$(DEPDIR)/m_nick.Plo
 	-rm -f ./$(DEPDIR)/m_oper.Plo
+	-rm -f ./$(DEPDIR)/m_opme.Plo
+	-rm -f ./$(DEPDIR)/m_part.Plo
 	-rm -f ./$(DEPDIR)/m_pass.Plo
 	-rm -f ./$(DEPDIR)/m_ping.Plo
 	-rm -f ./$(DEPDIR)/m_pong.Plo
 	-rm -f ./$(DEPDIR)/m_post.Plo
+	-rm -f ./$(DEPDIR)/m_quit.Plo
 	-rm -f ./$(DEPDIR)/m_rehash.Plo
 	-rm -f ./$(DEPDIR)/m_restart.Plo
 	-rm -f ./$(DEPDIR)/m_resv.Plo
 	-rm -f ./$(DEPDIR)/m_resync.Plo
+	-rm -f ./$(DEPDIR)/m_server.Plo
 	-rm -f ./$(DEPDIR)/m_set.Plo
+	-rm -f ./$(DEPDIR)/m_sjoin.Plo
+	-rm -f ./$(DEPDIR)/m_squit.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo
 	-rm -f ./$(DEPDIR)/m_svsaccount.Plo
@@ -1734,6 +1879,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/m_svstag.Plo
 	-rm -f ./$(DEPDIR)/m_tburst.Plo
 	-rm -f ./$(DEPDIR)/m_time.Plo
+	-rm -f ./$(DEPDIR)/m_tmode.Plo
 	-rm -f ./$(DEPDIR)/m_topic.Plo
 	-rm -f ./$(DEPDIR)/m_trace.Plo
 	-rm -f ./$(DEPDIR)/m_undline.Plo
@@ -1753,58 +1899,61 @@ distclean: distclean-recursive
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
 install-data-am: install-modulesLTLIBRARIES
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
 install-exec-am:
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo
+	-rm -f ./$(DEPDIR)/m_bmask.Plo
 	-rm -f ./$(DEPDIR)/m_cap.Plo
 	-rm -f ./$(DEPDIR)/m_capab.Plo
 	-rm -f ./$(DEPDIR)/m_certfp.Plo
 	-rm -f ./$(DEPDIR)/m_close.Plo
 	-rm -f ./$(DEPDIR)/m_connect.Plo
+	-rm -f ./$(DEPDIR)/m_die.Plo
 	-rm -f ./$(DEPDIR)/m_dline.Plo
 	-rm -f ./$(DEPDIR)/m_encap.Plo
 	-rm -f ./$(DEPDIR)/m_eob.Plo
+	-rm -f ./$(DEPDIR)/m_error.Plo
 	-rm -f ./$(DEPDIR)/m_etrace.Plo
 	-rm -f ./$(DEPDIR)/m_globops.Plo
 	-rm -f ./$(DEPDIR)/m_hash.Plo
@@ -1812,6 +1961,9 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_info.Plo
 	-rm -f ./$(DEPDIR)/m_invite.Plo
 	-rm -f ./$(DEPDIR)/m_ison.Plo
+	-rm -f ./$(DEPDIR)/m_join.Plo
+	-rm -f ./$(DEPDIR)/m_kick.Plo
+	-rm -f ./$(DEPDIR)/m_kill.Plo
 	-rm -f ./$(DEPDIR)/m_kline.Plo
 	-rm -f ./$(DEPDIR)/m_knock.Plo
 	-rm -f ./$(DEPDIR)/m_links.Plo
@@ -1819,21 +1971,31 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_locops.Plo
 	-rm -f ./$(DEPDIR)/m_lusers.Plo
 	-rm -f ./$(DEPDIR)/m_map.Plo
+	-rm -f ./$(DEPDIR)/m_message.Plo
 	-rm -f ./$(DEPDIR)/m_metadata.Plo
+	-rm -f ./$(DEPDIR)/m_mlock.Plo
+	-rm -f ./$(DEPDIR)/m_mode.Plo
 	-rm -f ./$(DEPDIR)/m_module.Plo
 	-rm -f ./$(DEPDIR)/m_monitor.Plo
 	-rm -f ./$(DEPDIR)/m_motd.Plo
 	-rm -f ./$(DEPDIR)/m_names.Plo
+	-rm -f ./$(DEPDIR)/m_nick.Plo
 	-rm -f ./$(DEPDIR)/m_oper.Plo
+	-rm -f ./$(DEPDIR)/m_opme.Plo
+	-rm -f ./$(DEPDIR)/m_part.Plo
 	-rm -f ./$(DEPDIR)/m_pass.Plo
 	-rm -f ./$(DEPDIR)/m_ping.Plo
 	-rm -f ./$(DEPDIR)/m_pong.Plo
 	-rm -f ./$(DEPDIR)/m_post.Plo
+	-rm -f ./$(DEPDIR)/m_quit.Plo
 	-rm -f ./$(DEPDIR)/m_rehash.Plo
 	-rm -f ./$(DEPDIR)/m_restart.Plo
 	-rm -f ./$(DEPDIR)/m_resv.Plo
 	-rm -f ./$(DEPDIR)/m_resync.Plo
+	-rm -f ./$(DEPDIR)/m_server.Plo
 	-rm -f ./$(DEPDIR)/m_set.Plo
+	-rm -f ./$(DEPDIR)/m_sjoin.Plo
+	-rm -f ./$(DEPDIR)/m_squit.Plo
 	-rm -f ./$(DEPDIR)/m_stats.Plo
 	-rm -f ./$(DEPDIR)/m_svinfo.Plo
 	-rm -f ./$(DEPDIR)/m_svsaccount.Plo
@@ -1846,6 +2008,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/m_svstag.Plo
 	-rm -f ./$(DEPDIR)/m_tburst.Plo
 	-rm -f ./$(DEPDIR)/m_time.Plo
+	-rm -f ./$(DEPDIR)/m_tmode.Plo
 	-rm -f ./$(DEPDIR)/m_topic.Plo
 	-rm -f ./$(DEPDIR)/m_trace.Plo
 	-rm -f ./$(DEPDIR)/m_undline.Plo
@@ -1864,38 +2027,38 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
 uninstall-am: uninstall-modulesLTLIBRARIES
 
-.MAKE: $(am__recursive_targets) install-am install-strip
+.MAKE: install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
-	am--depfiles check check-am clean clean-generic clean-libtool \
-	clean-modulesLTLIBRARIES cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-modulesLTLIBRARIES \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-modulesLTLIBRARIES
+.PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
+	clean-generic clean-libtool clean-modulesLTLIBRARIES \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man \
+	install-modulesLTLIBRARIES install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am \
+	uninstall-modulesLTLIBRARIES
 
 .PRECIOUS: Makefile
 

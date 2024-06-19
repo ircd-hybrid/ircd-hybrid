@@ -31,7 +31,7 @@
 #include "send.h"
 #include "conf.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "irc_string.h"
 
 
@@ -165,19 +165,19 @@ static struct Command help_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&help_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&help_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

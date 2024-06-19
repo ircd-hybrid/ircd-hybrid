@@ -43,7 +43,7 @@
 #include "ircd.h"
 #include "listener.h"
 #include "address.h"
-#include "modules.h"
+#include "module.h"
 #include "numeric.h"
 #include "fdlist.h"
 #include "log.h"
@@ -1054,7 +1054,7 @@ conf_rehash(bool sig)
 
   conf_read_files(false);
 
-  load_conf_modules();
+//  load_conf_modules();
   check_conf_klines();
 }
 
@@ -1188,7 +1188,7 @@ conf_clear(void)
 
   clear_out_address_conf();
 
-  modules_conf_clear();  /* Clear modules {} items */
+  module_clear_config();  /* Clear loadmodule items */
 
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 

@@ -32,7 +32,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 #include "memory.h"
 #include "isupport.h"
 
@@ -190,7 +190,7 @@ static struct Command list_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&list_msgtab);
   isupport_add("ELIST", "CMNTU", -1);
@@ -198,15 +198,15 @@ module_init(void)
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&list_msgtab);
   isupport_delete("ELIST");
   isupport_delete("SAFELIST");
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

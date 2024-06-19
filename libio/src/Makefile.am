@@ -1,5 +1,8 @@
-AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libio.la
+libio_la_DEPENDENCIES = $(LTDLDEPS)
+libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
+libio_la_LDFLAGS = -export-dynamic -avoid-version
 
 libio_la_SOURCES =  address.c     \
                     address.h     \
@@ -32,6 +35,8 @@ libio_la_SOURCES =  address.c     \
                     misc.h        \
                     memory.c      \
                     memory.h      \
+                    module.c      \
+                    module.h      \
                     patricia.c    \
                     patricia.h    \
                     res.c         \
@@ -51,5 +56,3 @@ libio_la_SOURCES =  address.c     \
                     tls_openssl.h \
                     tls_wolfssl.c \
                     tls_wolfssl.h
-
-libio_la_LIBADD = @LTLIBOBJS@

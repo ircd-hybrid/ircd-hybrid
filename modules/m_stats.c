@@ -46,7 +46,7 @@
 #include "server.h"
 #include "server_capab.h"
 #include "event.h"
-#include "modules.h"
+#include "module.h"
 #include "whowas.h"
 #include "monitor.h"
 #include "reslib.h"
@@ -1249,21 +1249,21 @@ static struct Command stats_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   stats_register_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
   command_add(&stats_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   stats_unregister_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
   command_del(&stats_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

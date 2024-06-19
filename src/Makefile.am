@@ -3,11 +3,10 @@ AUTOMAKE_OPTIONS = foreign
 bin_PROGRAMS = ircd
 
 AM_YFLAGS = -d
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
-
+AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 ircd_LDFLAGS = -export-dynamic
-ircd_LDADD = $(LIBLTDL) ../libio/src/.libs/libio.a
-ircd_DEPENDENCIES = $(LTDLDEPS)
+ircd_LDADD = ../libio/src/.libs/libio.la
+ircd_DEPENDENCIES = ../libio/src/.libs/libio.la
 
 ircd_SOURCES = accept.c          \
                accept.h          \
@@ -81,8 +80,6 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                listener.c        \
                listener.h        \
-               modules.c         \
-               modules.h         \
                monitor.c         \
                monitor.h         \
                motd.c            \

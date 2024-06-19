@@ -172,6 +172,7 @@ cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
 connectfreq                 { return CONNECTFREQ; }
+core                        { return CORE; }
 cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 deaf                        { return T_DEAF; }
 debug                       { return T_DEBUG; }
@@ -243,6 +244,7 @@ knock_client_time           { return KNOCK_CLIENT_TIME; }
 knock_delay_channel         { return KNOCK_DELAY_CHANNEL; }
 leaf_mask                   { return LEAF_MASK; }
 listen                      { return LISTEN; }
+loadmodule                  { return LOADMODULE; }
 locops                      { return T_LOCOPS; }
 log                         { return T_LOG; }
 mask                        { return MASK; }
@@ -265,7 +267,6 @@ min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }
 module                      { return MODULE; }
-modules                     { return MODULES; }
 motd                        { return MOTD; }
 name                        { return NAME; }
 nchange                     { return T_NCHANGE; }
@@ -304,6 +305,7 @@ rehash                      { return REHASH; }
 rej                         { return T_REJ; }
 remote                      { return REMOTE; }
 remoteban                   { return REMOTEBAN; }
+resident                    { return RESIDENT; }
 restart                     { return T_RESTART; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }

@@ -33,7 +33,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 
 
 /*! \brief NAMES command handler
@@ -75,19 +75,19 @@ static struct Command names_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&names_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&names_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

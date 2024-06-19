@@ -116,17 +116,21 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-libio_la_DEPENDENCIES = @LTLIBOBJS@
+am__DEPENDENCIES_1 =
 am_libio_la_OBJECTS = address.lo base32.lo comm.lo comm_epoll.lo \
 	comm_kqueue.lo comm_poll.lo dbuf.lo event.lo fdlist.lo hook.lo \
 	io_getopt.lo irc_string.lo list.lo log.lo match.lo misc.lo \
-	memory.lo patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo \
-	tls_gnutls.lo tls_none.lo tls_openssl.lo tls_wolfssl.lo
+	memory.lo module.lo patricia.lo res.lo reslib.lo rng_mt.lo \
+	sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
+	tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libio_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libio_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -150,11 +154,11 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo ./$(DEPDIR)/base32.Plo \
 	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/irc_string.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
-	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/res.Plo \
-	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/rng_mt.Plo \
-	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
-	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
-	./$(DEPDIR)/tls_wolfssl.Plo
+	./$(DEPDIR)/module.Plo ./$(DEPDIR)/patricia.Plo \
+	./$(DEPDIR)/res.Plo ./$(DEPDIR)/reslib.Plo \
+	./$(DEPDIR)/rng_mt.Plo ./$(DEPDIR)/sha3.Plo \
+	./$(DEPDIR)/tls_gnutls.Plo ./$(DEPDIR)/tls_none.Plo \
+	./$(DEPDIR)/tls_openssl.Plo ./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -346,8 +350,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libio.la
+libio_la_DEPENDENCIES = $(LTDLDEPS)
+libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
+libio_la_LDFLAGS = -export-dynamic -avoid-version
 libio_la_SOURCES = address.c     \
                     address.h     \
                     base32.c      \
@@ -379,6 +386,8 @@ libio_la_SOURCES = address.c     \
                     misc.h        \
                     memory.c      \
                     memory.h      \
+                    module.c      \
+                    module.h      \
                     patricia.c    \
                     patricia.h    \
                     res.c         \
@@ -399,7 +408,6 @@ libio_la_SOURCES = address.c     \
                     tls_wolfssl.c \
                     tls_wolfssl.h
 
-libio_la_LIBADD = @LTLIBOBJS@
 all: all-am
 
 .SUFFIXES:
@@ -446,7 +454,7 @@ clean-noinstLTLIBRARIES:
 	}
 
 libio.la: $(libio_la_OBJECTS) $(libio_la_DEPENDENCIES) $(EXTRA_libio_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK)  $(libio_la_OBJECTS) $(libio_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libio_la_LINK)  $(libio_la_OBJECTS) $(libio_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -471,6 +479,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/res.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Plo@am__quote@ # am--include-marker
@@ -658,6 +667,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/match.Plo
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
+	-rm -f ./$(DEPDIR)/module.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/res.Plo
 	-rm -f ./$(DEPDIR)/reslib.Plo
@@ -729,6 +739,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/match.Plo
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
+	-rm -f ./$(DEPDIR)/module.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/res.Plo
 	-rm -f ./$(DEPDIR)/reslib.Plo

@@ -37,7 +37,7 @@
 #include "conf.h"
 #include "conf_service.h"
 #include "parse.h"
-#include "modules.h"
+#include "module.h"
 
 
 /** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
@@ -183,19 +183,19 @@ static struct Command whowas_msgtab =
 };
 
 static void
-module_init(void)
+init_handler(void)
 {
   command_add(&whowas_msgtab);
 }
 
 static void
-module_exit(void)
+exit_handler(void)
 {
   command_del(&whowas_msgtab);
 }
 
-struct module module_entry =
+struct Module module_entry =
 {
-  .modinit = module_init,
-  .modexit = module_exit,
+  .init_handler = init_handler,
+  .exit_handler = exit_handler,
 };

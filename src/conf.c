@@ -1054,7 +1054,8 @@ conf_rehash(bool sig)
 
   conf_read_files(false);
 
-//  load_conf_modules();
+  module_load_all(false, false);
+
   check_conf_klines();
 }
 

@@ -78,7 +78,7 @@
        This feature is not tunable; and opers also do not see the real server
        setting the mode.
 
-   Each item is briefly described in the serverhide {} block in reference.conf.
+   Each item is briefly described in the serverhide {} block in reference.ircd.conf.
 
      ----------------------------------------------------------------------
 

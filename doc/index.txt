@@ -13,6 +13,6 @@ kline.txt		- Outline of the remote K-line protocol for both,
 modeg.txt		- Description of the server-side silence user mode (+g)
 modes.txt		- A list of all user and channel modes
 monitor.txt             - Description of the MONITOR system
-reference.conf		- Overview of IRCD's configuration file
+reference.ircd.conf	- Overview of IRCD's configuration file
 resv.txt		- Outline of the RESV command
 serverhide.txt		- Information about the server hide options

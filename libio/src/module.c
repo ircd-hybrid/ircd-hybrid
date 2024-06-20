@@ -149,6 +149,19 @@ module_load(const char *path, bool warn, bool startup)
     return false;
   }
 
+  struct stat sb;
+  if (stat(path, &sb) != 0)
+  {
+    module_set_error("Error loading module %s: %s", name, strerror(errno));
+    return false;
+  }
+
+  if (!S_ISREG(sb.st_mode))
+  {
+    module_set_error("Error loading module %s: Not a regular file", name);
+    return false;
+  }
+
   lt_dlhandle handle = lt_dlopen(path);
   if (handle == NULL)
   {

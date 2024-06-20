@@ -106,6 +106,22 @@ module_find(const char *name)
   return NULL;
 }
 
+struct ModuleConfig *
+module_config_find(const char *name)
+{
+  const char *basename = io_basename(name);
+
+  list_node_t *node;
+  LIST_FOREACH(node, module_config_list.head)
+  {
+    struct ModuleConfig *config = node->data;
+    if (strcmp(config->path, basename) == 0)
+      return config;
+  }
+
+  return NULL;
+}
+
 bool
 module_unload(const char *name, bool warn)
 {
@@ -135,18 +151,24 @@ bool
 module_load(const char *path, bool warn, bool startup)
 {
   const char *const name = io_basename(path);
-  char full_path[IO_PATH_MAX];
 
-  if (module_base_path)
+  if (module_config_find(name) == NULL)
   {
-    snprintf(full_path, sizeof(full_path), "%s/%s", module_base_path, path);
-    path = full_path;
+    module_set_error("Module %s is not configured to be loaded", name);
+    return false;
   }
 
   if (module_find(name))
   {
     module_set_error("Module %s is already loaded", name);
     return false;
+  }
+
+  char full_path[IO_PATH_MAX];
+  if (module_base_path)
+  {
+    snprintf(full_path, sizeof(full_path), "%s/%s", module_base_path, path);
+    path = full_path;
   }
 
   struct stat sb;

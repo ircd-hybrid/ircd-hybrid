@@ -59,6 +59,7 @@ extern const char *module_get_error(void);
 extern bool module_load(const char *, bool, bool);
 extern bool module_unload(const char *, bool);
 extern struct Module *module_find(const char *);
+extern struct ModuleConfig *module_config_find(const char *);
 extern const list_t *module_get_list(void);
 extern void module_add_config(const char *, bool, bool);
 extern void module_clear_config(void);

@@ -43,13 +43,11 @@
  * BINPATH     = directory for binary files
  * ETCPATH     = directory for configuration files
  * LOGPATH     = directory for logfiles
- * MODPATH     = directory for modules
  */
 
 /* dirs */
 #define DPATH        PREFIX
 #define BINPATH      PREFIX "/bin/"
-#define MODPATH      LIBDIR "/" PACKAGE "/modules/"
 #define HPATH        DATADIR "/" PACKAGE "/help"
 #define ETCPATH      SYSCONFDIR
 #define LIBPATH      LOCALSTATEDIR "/lib"

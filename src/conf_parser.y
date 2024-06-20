@@ -245,6 +245,7 @@ reset_block_state(void)
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
 %token  MODULE
+%token  MODULE_BASE_PATH
 %token  MOTD
 %token  NAME
 %token  NEED_IDENT
@@ -381,7 +382,8 @@ conf:
         | conf conf_item
         ;
 
-conf_item:        loadmodule_entry
+conf_item:        module_base_path_entry
+                | loadmodule_entry
                 | admin_entry
                 | logging_entry
                 | oper_entry
@@ -425,6 +427,16 @@ sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
             NUMBER KBYTES sizespec_ { $$ = $1 * 1024 + $3; } |
             NUMBER MBYTES sizespec_ { $$ = $1 * 1024 * 1024 + $3; }
             ;
+
+
+/***************************************************************************
+ * module_base_path_entry section
+ ***************************************************************************/
+module_base_path_entry: MODULE_BASE_PATH '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    module_set_base_path(yylval.string);
+};
 
 
 /***************************************************************************

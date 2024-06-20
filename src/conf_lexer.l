@@ -267,6 +267,7 @@ min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }
 module                      { return MODULE; }
+module_base_path            { return MODULE_BASE_PATH; }
 motd                        { return MOTD; }
 name                        { return NAME; }
 nchange                     { return T_NCHANGE; }

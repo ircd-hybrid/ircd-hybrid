@@ -571,7 +571,6 @@ main(int argc, char *argv[])
   cloak_init();
   resolver_init();      /* Needs to be setup before the io loop */
   module_init();
-  module_set_base_path(MODPATH);
   conf_read_files(true);   /* cold start init conf files */
   channel_mode_init();
   extban_init();

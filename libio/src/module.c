@@ -43,6 +43,7 @@ module_get_list(void)
 void
 module_set_base_path(const char *path)
 {
+  fprintf(stderr, "module_set_base_path(%s)", path);
   io_free(module_base_path);
   module_base_path = io_strdup(path);
 }

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([ircd-hybrid], [8.2.44], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid], [8.2.45], [bugs@ircd-hybrid.org])
 AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
@@ -34,10 +34,10 @@ AC_CHECK_FUNCS_ONCE([strlcat strlcpy])
 # Checks for header files.
 AC_CHECK_HEADERS_ONCE([
   crypt.h
-  sys/param.h
-  types.h
   socket.h
+  sys/param.h
   sys/wait.h
+  types.h
 ])
 
 AC_SEARCH_LIBS([crypt], [crypt])
@@ -66,13 +66,13 @@ AX_DEFINE_BUILD_DATE
 
 AC_CONFIG_FILES([
   Makefile
-  src/Makefile
+  doc/Makefile
+  help/Makefile
   libio/Makefile
   libio/src/Makefile
   libltdl/Makefile
   modules/Makefile
-  doc/Makefile
-  help/Makefile
+  src/Makefile
   tools/Makefile
 ])
 

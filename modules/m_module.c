@@ -45,12 +45,6 @@
 static void
 module_cmd_load(struct Client *source, const char *arg)
 {
-  if (module_find(arg))
-  {
-    sendto_one_notice(source, &me, ":Module %s is already loaded", arg);
-    return;
-  }
-
   if (module_load(arg, true, false))
   {
     const struct Module *const module = module_find(arg);

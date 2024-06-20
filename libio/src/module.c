@@ -171,6 +171,12 @@ module_load(const char *path, bool warn, bool startup)
     path = full_path;
   }
 
+  if (strstr(path, "../") || strstr(path, "/.."))
+  {
+    module_set_error("Module path %s contains illegal directory traversal", path);
+    return false;
+  }
+
   struct stat sb;
   if (stat(path, &sb) != 0)
   {

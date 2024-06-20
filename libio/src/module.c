@@ -151,6 +151,11 @@ bool
 module_load(const char *path, bool warn, bool startup)
 {
   const char *const name = io_basename(path);
+  if (module_valid_suffix(name) == false)
+  {
+    module_set_error("Invalid module name %s: Expected file suffix '.la'", name);
+    return false;
+  }
 
   if (module_config_find(name) == NULL)
   {
@@ -218,9 +223,6 @@ module_load(const char *path, bool warn, bool startup)
 void
 module_add_config(const char *path, bool resident, bool core)
 {
-  if (!module_valid_suffix(path))
-    return;
-
   struct ModuleConfig *config = io_calloc(sizeof(*config));
   config->path = io_strdup(path);
   config->resident = resident;

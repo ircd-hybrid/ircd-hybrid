@@ -27,6 +27,6 @@ jobs:
     - name: configure
       run: ./configure --enable-warnings
     - name: make
-      run: make -j$(nproc)
+      run: make -j$( (nproc || sysctl -n hw.logicalcpu || echo 1) 2>/dev/null)
     - name: make install
       run: sudo make install

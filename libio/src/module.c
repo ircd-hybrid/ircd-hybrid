@@ -93,13 +93,11 @@ module_valid_suffix(const char *name)
 struct Module *
 module_find(const char *name)
 {
-  const char *basename = io_basename(name);
-
   list_node_t *node;
   LIST_FOREACH(node, module_list.head)
   {
     struct Module *module = node->data;
-    if (strcmp(module->name, basename) == 0)
+    if (strcmp(module->name, name) == 0)
       return module;
   }
 
@@ -109,13 +107,11 @@ module_find(const char *name)
 struct ModuleConfig *
 module_config_find(const char *name)
 {
-  const char *basename = io_basename(name);
-
   list_node_t *node;
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *config = node->data;
-    if (strcmp(config->path, basename) == 0)
+    if (strcmp(config->path, name) == 0)
       return config;
   }
 
@@ -148,9 +144,14 @@ module_unload(const char *name, bool warn)
 }
 
 bool
-module_load(const char *path, bool warn, bool startup)
+module_load(const char *name, bool warn, bool startup)
 {
-  const char *const name = io_basename(path);
+  if (*name == '/')
+  {
+    module_set_error("Invalid module path %s: Absolute paths are not allowed", name);
+    return false;
+  }
+
   if (module_valid_suffix(name) == false)
   {
     module_set_error("Invalid module name %s: Expected file suffix '.la'", name);
@@ -169,11 +170,13 @@ module_load(const char *path, bool warn, bool startup)
     return false;
   }
 
-  char full_path[IO_PATH_MAX];
+  char path[IO_PATH_MAX];
   if (module_base_path)
+    snprintf(path, sizeof(path), "%s/%s", module_base_path, name);
+  else
   {
-    snprintf(full_path, sizeof(full_path), "%s/%s", module_base_path, path);
-    path = full_path;
+     module_set_error("Module base path is not set");
+     return false;
   }
 
   if (strstr(path, "../") || strstr(path, "/.."))
@@ -185,13 +188,13 @@ module_load(const char *path, bool warn, bool startup)
   struct stat sb;
   if (stat(path, &sb) != 0)
   {
-    module_set_error("Error loading module %s: %s", name, strerror(errno));
+    module_set_error("Error loading module %s: %s", path, strerror(errno));
     return false;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    module_set_error("Error loading module %s: Not a regular file", name);
+    module_set_error("Error loading module %s: Not a regular file", path);
     return false;
   }
 

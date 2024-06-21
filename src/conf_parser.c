@@ -3452,7 +3452,7 @@ yyreduce:
 #line 446 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
-    module_add_config((yyvsp[-2].string), block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
+    module_config_add((yyvsp[-2].string), block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
 }
 #line 3458 "conf_parser.c"
     break;

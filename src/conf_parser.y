@@ -445,7 +445,7 @@ module_base_path_entry: MODULE_BASE_PATH '=' QSTRING ';'
 loadmodule_entry: LOADMODULE QSTRING module_attributes ';'
 {
   if (conf_parser_ctx.pass == 2)
-    module_add_config($2, block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
+    module_config_add($2, block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
 };
 
 module_attributes: /* empty */

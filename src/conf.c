@@ -1189,7 +1189,7 @@ conf_clear(void)
 
   clear_out_address_conf();
 
-  module_clear_config();  /* Clear loadmodule items */
+  module_config_clear();  /* Clear loadmodule items */
 
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 

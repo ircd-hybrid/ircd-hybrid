@@ -62,8 +62,8 @@ extern bool module_unload(const char *);
 extern struct Module *module_find(const char *);
 extern struct ModuleConfig *module_config_find(const char *);
 extern const list_t *module_get_list(void);
-extern void module_add_config(const char *, bool, bool);
-extern void module_clear_config(void);
+extern void module_config_add(const char *, bool, bool);
+extern void module_config_clear(void);
 extern bool module_reload_all(unsigned int *, unsigned int *, bool);
 extern void module_load_all(bool);
 #endif  /* INCLUDED_module_h */

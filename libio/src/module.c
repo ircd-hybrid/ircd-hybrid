@@ -239,7 +239,7 @@ module_load(const char *name, bool manual)
 }
 
 void
-module_add_config(const char *name, bool resident, bool core)
+module_config_add(const char *name, bool resident, bool core)
 {
   struct ModuleConfig *config = io_calloc(sizeof(*config));
   config->name = io_strdup(name);
@@ -249,7 +249,7 @@ module_add_config(const char *name, bool resident, bool core)
 }
 
 void
-module_clear_config(void)
+module_config_clear(void)
 {
   while (module_config_list.head)
   {

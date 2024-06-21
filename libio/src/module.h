@@ -56,6 +56,7 @@ extern void module_init(void);
 extern void module_cleanup(void);
 extern void module_set_base_path(const char *);
 extern const char *module_get_error(void);
+extern const char *module_get_attributes(const struct Module *);
 extern bool module_load(const char *, bool, bool);
 extern bool module_unload(const char *, bool);
 extern struct Module *module_find(const char *);

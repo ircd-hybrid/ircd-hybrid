@@ -80,6 +80,21 @@ module_get_error(void)
   return module_last_error;
 }
 
+const char *
+module_get_attributes(const struct Module *module)
+{
+  static char attributes[16];
+
+  if (module->core || module->resident)
+    snprintf(attributes, sizeof(attributes), "(%s%s%s)",
+             module->core ? "core" : "",
+             (module->core && module->resident) ? ", " : "", module->resident ? "resident" : "");
+  else
+    attributes[0] = '\0';
+
+  return attributes;
+}
+
 static bool
 module_valid_suffix(const char *name)
 {

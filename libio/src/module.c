@@ -19,6 +19,7 @@
  *  USA
  */
 
+#include "defaults.h"
 #include "ltdl.h"
 #include "stdinc.h"
 #include "io.h"
@@ -32,7 +33,7 @@ static list_t module_config_list;
 
 static list_t module_list;
 
-static char *module_base_path;
+static char *module_base_path = DPATH "/lib/ircd-hybrid/modules";
 
 const list_t *
 module_get_list(void)

@@ -47,7 +47,7 @@ struct Module
 struct ModuleConfig
 {
   list_node_t node;
-  char *path;
+  char *name;
   bool resident;
   bool core;
 };

@@ -111,7 +111,7 @@ module_config_find(const char *name)
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *config = node->data;
-    if (strcmp(config->path, name) == 0)
+    if (strcmp(config->name, name) == 0)
       return config;
   }
 
@@ -224,10 +224,10 @@ module_load(const char *name, bool warn, bool startup)
 }
 
 void
-module_add_config(const char *path, bool resident, bool core)
+module_add_config(const char *name, bool resident, bool core)
 {
   struct ModuleConfig *config = io_calloc(sizeof(*config));
-  config->path = io_strdup(path);
+  config->name = io_strdup(name);
   config->resident = resident;
   config->core = core;
   list_add(config, &config->node, &module_config_list);
@@ -240,7 +240,7 @@ module_clear_config(void)
   {
     struct ModuleConfig *config = module_config_list.head->data;
     list_remove(&config->node, &module_config_list);
-    io_free(config->path);
+    io_free(config->name);
     io_free(config);
   }
 }
@@ -252,14 +252,14 @@ module_load_all(bool warn, bool startup)
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *config = node->data;
-    if (module_load(config->path, warn, startup) == 0 && startup)
+    if (module_load(config->name, warn, startup) == 0 && startup)
     {
       fprintf(stderr, "Error loading module %s from: %s during startup: %s\n",
-              config->path, module_base_path, module_last_error);
+              config->name, module_base_path, module_last_error);
       exit(EXIT_FAILURE);
     }
     fprintf(stderr, "Loading module %s from: %s\n",
-              config->path, module_base_path);
+              config->name, module_base_path);
   }
 }
 
@@ -281,12 +281,12 @@ module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool
   LIST_FOREACH(node, module_config_list.head)
   {
     const struct ModuleConfig *const config = node->data;
-    if (module_load(config->path, warn, startup) == 0)
+    if (module_load(config->name, warn, startup) == 0)
     {
       if (startup && config->core)
       {
         fprintf(stderr, "Error reloading core module %s: %s\n",
-                config->path, module_last_error);
+                config->name, module_last_error);
         exit(EXIT_FAILURE);
       }
 

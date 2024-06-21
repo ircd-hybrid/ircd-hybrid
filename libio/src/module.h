@@ -57,13 +57,13 @@ extern void module_cleanup(void);
 extern void module_set_base_path(const char *);
 extern const char *module_get_error(void);
 extern const char *module_get_attributes(const struct Module *);
-extern bool module_load(const char *, bool, bool);
-extern bool module_unload(const char *, bool);
+extern bool module_load(const char *, bool);
+extern bool module_unload(const char *);
 extern struct Module *module_find(const char *);
 extern struct ModuleConfig *module_config_find(const char *);
 extern const list_t *module_get_list(void);
 extern void module_add_config(const char *, bool, bool);
 extern void module_clear_config(void);
-extern bool module_reload_all(unsigned int *, unsigned int *, bool, bool);
-extern void module_load_all(bool, bool);
+extern bool module_reload_all(unsigned int *, unsigned int *, bool);
+extern void module_load_all(bool);
 #endif  /* INCLUDED_module_h */

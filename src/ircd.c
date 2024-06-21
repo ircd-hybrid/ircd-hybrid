@@ -626,7 +626,7 @@ main(int argc, char *argv[])
   load_xline_database(ConfigGeneral.xlinefile);
   load_resv_database(ConfigGeneral.resvfile);
 
-  module_load_all(true, true);
+  module_load_all(false);
 
   write_pidfile(pidFileName);
 

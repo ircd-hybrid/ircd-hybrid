@@ -134,7 +134,7 @@ module_config_find(const char *name)
 }
 
 bool
-module_unload(const char *name, bool warn)
+module_unload(const char *name)
 {
   struct Module *module = module_find(name);
   if (module == NULL)
@@ -159,9 +159,9 @@ module_unload(const char *name, bool warn)
 }
 
 bool
-module_load(const char *name, bool warn, bool startup)
+module_load(const char *name, bool manual)
 {
-  if (*name == '/')
+  if (*name == '/' && manual)
   {
     module_set_error("Invalid module path %s: Absolute paths are not allowed", name);
     return false;
@@ -261,15 +261,15 @@ module_clear_config(void)
 }
 
 void
-module_load_all(bool warn, bool startup)
+module_load_all(bool terminate)
 {
   list_node_t *node;
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *config = node->data;
-    if (module_load(config->name, warn, startup) == 0 && startup)
+    if (module_load(config->name, false) == 0 && terminate)
     {
-      fprintf(stderr, "Error loading module %s from: %s during startup: %s\n",
+      fprintf(stderr, "Error loading module %s from: %s during exit: %s\n",
               config->name, module_base_path, module_last_error);
       exit(EXIT_FAILURE);
     }
@@ -279,7 +279,7 @@ module_load_all(bool warn, bool startup)
 }
 
 bool
-module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool warn, bool startup)
+module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool terminate)
 {
   bool success = true;
 
@@ -287,7 +287,7 @@ module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool
   LIST_FOREACH_SAFE(node, node_next, module_list.head)
   {
     const struct Module *const module = node->data;
-    if (module->resident == false && module_unload(module->name, warn))
+    if (module->resident == false && module_unload(module->name))
       ++(*unloaded_count);
     else
       success = false;
@@ -296,9 +296,9 @@ module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool
   LIST_FOREACH(node, module_config_list.head)
   {
     const struct ModuleConfig *const config = node->data;
-    if (module_load(config->name, warn, startup) == 0)
+    if (module_load(config->name, false) == 0)
     {
-      if (startup && config->core)
+      if (terminate && config->core)
       {
         fprintf(stderr, "Error reloading core module %s: %s\n",
                 config->name, module_last_error);

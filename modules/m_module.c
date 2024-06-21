@@ -45,7 +45,7 @@
 static void
 module_cmd_load(struct Client *source, const char *arg)
 {
-  if (module_load(arg, true, false))
+  if (module_load(arg, true))
   {
     const struct Module *const module = module_find(arg);
     sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.", module->name, module->handle);
@@ -84,7 +84,7 @@ module_cmd_unload(struct Client *source, const char *arg)
     return;
   }
 
-  if (module_unload(arg, true))
+  if (module_unload(arg))
     sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
   else
     sendto_one_notice(source, &me, ":Failed to unload module %s: %s", arg, module_get_error());
@@ -116,7 +116,7 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   const bool core = module->core;
 
-  if (module_unload(arg, true) == 0 || module_load(arg, true, false) == 0)
+  if (module_unload(arg) == 0 || module_load(arg, true) == 0)
   {
     sendto_one_notice(source, &me, ":Failed to reload module %s: %s", arg, module_get_error());
 
@@ -147,7 +147,7 @@ static void
 module_cmd_reload_all(struct Client *source)
 {
   unsigned int unloaded_count = 0, loaded_count = 0;
-  bool success = module_reload_all(&unloaded_count, &loaded_count, true, false);
+  bool success = module_reload_all(&unloaded_count, &loaded_count, true);
 
   if (success)
     sendto_one_notice(source, &me, ":All modules reloaded successfully");

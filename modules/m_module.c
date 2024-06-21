@@ -207,10 +207,8 @@ module_cmd_list(struct Client *source, const char *arg)
     if (!EmptyString(arg) && match(arg, module->name))
       continue;
 
-    sendto_one_numeric(source, &me, RPL_MODLIST, module->name, module->handle, "*",
-                       (module->core && module->resident) ? "(core, resident)" :
-                       module->core ? "(core)" :
-                       module->resident ? "(resident)" : "");
+    sendto_one_numeric(source, &me, RPL_MODLIST,
+                       module->name, module->handle, "*", module_get_attributes(module));
   }
 
   sendto_one_numeric(source, &me, RPL_ENDOFMODLIST);

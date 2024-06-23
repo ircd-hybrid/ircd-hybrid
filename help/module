@@ -1,24 +1,30 @@
-MODULE <option> [module name]
+MODULE <option> [module_name]
 
-<option> can be one of the following:
-  LIST    - List the modules that are currently loaded into the
-            ircd, along with their address and version.
-            When a match string is provided, LIST only prints
-            modules with names matching the match string.
+The MODULE command is used to manage modules within the IRC daemon.
+Available options are:
 
-  LOAD    - Loads a module into the ircd.
-            The optional path can be an absolute path
-            from / or from the IRCD_PREFIX
-            (ie modules/autoload/m_users.la)
+LIST
+    - Lists all loaded modules, showing names, memory addresses, and
+      attributes (core, resident). Core modules can be reloaded but not
+      unloaded. Resident modules cannot be unloaded or reloaded. If a
+      match string is provided, only matching modules will be listed.
+    - Usage: MODULE LIST [match_string]
 
-  UNLOAD  - Unload a module from the ircd.
-            Use just the module name, the path is not needed.
-            When a module is unloaded, all commands associated
-            with it are unloaded as well.
+  LOAD
+    - Loads a specified module into the ircd. The module name must be
+      provided with a relative path from the configured base directory.
+    - Usage: MODULE LOAD <module_name.la>
 
-  RELOAD  - Reloads all modules.
-            All modules are unloaded, then those in modules/autoload
-            are loaded. If "*" has been specified as module name,
-            all modules will be reloaded.
+  UNLOAD
+    - Unloads a specified module from the ircd. The module name must be
+      provided with a relative path from the configured base directory.
+      When a module is unloaded, all associated commands are also unloaded.
+    - Usage: MODULE UNLOAD <module_name.la>
+
+  RELOAD
+    - Reloads specified modules. If a module name is provided, that
+      module is reloaded. If * is provided, all configured modules are
+      reloaded.
+    - Usage: MODULE RELOAD [<module_name.la> | *]
 
 - Requires Oper Priv: module

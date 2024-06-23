@@ -34,6 +34,23 @@ static list_t module_list;
 
 static char *module_base_path;
 
+static const char *const module_error_strings[MODULE_ERR_COUNT] =
+{
+  [MODULE_SUCCESS] = "Operation completed successfully",
+  [MODULE_ERR_INIT_FAILED] = "Failed to initialize the libltdl dynamic link library: %s",
+  [MODULE_ERR_SHUTDOWN_FAILED] = "Failed to shut down the libltdl dynamic link library: %s",
+  [MODULE_ERR_LOAD_FAILED] = "Failed to load module %s: %s",
+  [MODULE_ERR_INVALID_PATH] = "Invalid module path: %s",
+  [MODULE_ERR_INVALID_SUFFIX] = "Invalid module name %s: Expected file suffix '.la'",
+  [MODULE_ERR_NOT_FOUND] = "Module not loaded: %s",
+  [MODULE_ERR_ALREADY_LOADED] = "Module already loaded: %s",
+  [MODULE_ERR_NOT_CONFIGURED] = "Module not configured to be loaded: %s",
+  [MODULE_ERR_ILLEGAL_TRAVERSAL] = "Illegal directory traversal in path: %s",
+  [MODULE_ERR_INVALID_FILE] = "Invalid file for module %s: %s",
+  [MODULE_ERR_CLOSE_FAILED] = "Failed to close module %s: %s",
+  [MODULE_ERR_CONFIG_EXISTS] = "Module configuration already exists: %s."
+};
+
 const list_t *
 module_get_list(void)
 {
@@ -43,35 +60,42 @@ module_get_list(void)
 void
 module_set_base_path(const char *path)
 {
-  fprintf(stderr, "module_set_base_path(%s)", path);
+  fprintf(stderr, "module_set_base_path(%s)\n", path);  /* XXX */
   io_free(module_base_path);
   module_base_path = io_strdup(path);
 }
 
 static void
-module_set_error(const char *format, ...)
+module_set_error(enum module_error_code code, ...)
 {
   va_list args;
-  va_start(args, format);
-  vsnprintf(module_last_error, sizeof(module_last_error), format, args);
+  va_start(args, code);
+  vsnprintf(module_last_error, sizeof(module_last_error), module_error_strings[code], args);
   va_end(args);
 }
 
-void
+enum module_error_code
 module_init(void)
 {
   if (lt_dlinit())
   {
-    module_set_error("Couldn't initialize the libltdl run time dynamic link library: %s",
-                     lt_dlerror());
-    exit(EXIT_FAILURE);
+    module_set_error(MODULE_ERR_INIT_FAILED, lt_dlerror());
+    return MODULE_ERR_INIT_FAILED;
   }
+
+  return MODULE_SUCCESS;
 }
 
-void
+enum module_error_code
 module_cleanup(void)
 {
-  lt_dlexit();
+  if (lt_dlexit())
+  {
+    module_set_error(MODULE_ERR_SHUTDOWN_FAILED, lt_dlerror());
+    return MODULE_ERR_SHUTDOWN_FAILED;
+  }
+
+  return MODULE_SUCCESS;
 }
 
 const char *
@@ -111,7 +135,7 @@ module_find(const char *name)
   list_node_t *node;
   LIST_FOREACH(node, module_list.head)
   {
-    struct Module *module = node->data;
+    struct Module *const module = node->data;
     if (strcmp(module->name, name) == 0)
       return module;
   }
@@ -125,7 +149,7 @@ module_config_find(const char *name)
   list_node_t *node;
   LIST_FOREACH(node, module_config_list.head)
   {
-    struct ModuleConfig *config = node->data;
+    struct ModuleConfig *const config = node->data;
     if (strcmp(config->name, name) == 0)
       return config;
   }
@@ -133,14 +157,14 @@ module_config_find(const char *name)
   return NULL;
 }
 
-bool
+enum module_error_code
 module_unload(const char *name)
 {
-  struct Module *module = module_find(name);
+  struct Module *const module = module_find(name);
   if (module == NULL)
   {
-    module_set_error("Module %s is not loaded", name);
-    return false;
+    module_set_error(MODULE_ERR_NOT_FOUND, name);
+    return MODULE_ERR_NOT_FOUND;
   }
 
   if (module->exit_handler)
@@ -151,38 +175,38 @@ module_unload(const char *name)
 
   if (lt_dlclose(module->handle))
   {
-    module_set_error("Error closing module %s: %s", name, lt_dlerror());
-    return false;
+    module_set_error(MODULE_ERR_CLOSE_FAILED, name, lt_dlerror());
+    return MODULE_ERR_CLOSE_FAILED;
   }
 
-  return true;
+  return MODULE_SUCCESS;
 }
 
-bool
+enum module_error_code
 module_load(const char *name, bool manual)
 {
   if (*name == '/' && manual)
   {
-    module_set_error("Invalid module path %s: Absolute paths are not allowed", name);
-    return false;
+    module_set_error(MODULE_ERR_INVALID_PATH, name);
+    return MODULE_ERR_INVALID_PATH;
   }
 
   if (module_valid_suffix(name) == false)
   {
-    module_set_error("Invalid module name %s: Expected file suffix '.la'", name);
-    return false;
+    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
+    return MODULE_ERR_INVALID_SUFFIX;
   }
 
   if (module_config_find(name) == NULL)
   {
-    module_set_error("Module %s is not configured to be loaded", name);
-    return false;
+    module_set_error(MODULE_ERR_NOT_CONFIGURED, name);
+    return MODULE_ERR_NOT_CONFIGURED;
   }
 
   if (module_find(name))
   {
-    module_set_error("Module %s is already loaded", name);
-    return false;
+    module_set_error(MODULE_ERR_ALREADY_LOADED, name);
+    return MODULE_ERR_ALREADY_LOADED;
   }
 
   char path[IO_PATH_MAX];
@@ -190,42 +214,42 @@ module_load(const char *name, bool manual)
     snprintf(path, sizeof(path), "%s/%s", module_base_path, name);
   else
   {
-     module_set_error("Module base path is not set");
-     return false;
+    module_set_error(MODULE_ERR_INVALID_PATH, "Base path is not set");
+    return MODULE_ERR_INVALID_PATH;
   }
 
   if (strstr(path, "../") || strstr(path, "/.."))
   {
-    module_set_error("Module path %s contains illegal directory traversal", path);
-    return false;
+    module_set_error(MODULE_ERR_ILLEGAL_TRAVERSAL, path);
+    return MODULE_ERR_ILLEGAL_TRAVERSAL;
   }
 
   struct stat sb;
-  if (stat(path, &sb) != 0)
+  if (stat(path, &sb))
   {
-    module_set_error("Error loading module %s: %s", path, strerror(errno));
-    return false;
+    module_set_error(MODULE_ERR_INVALID_FILE, name, strerror(errno));
+    return MODULE_ERR_INVALID_FILE;
   }
 
   if (!S_ISREG(sb.st_mode))
   {
-    module_set_error("Error loading module %s: Not a regular file", path);
-    return false;
+    module_set_error(MODULE_ERR_INVALID_FILE, name, "Not a regular file");
+    return MODULE_ERR_INVALID_FILE;
   }
 
   lt_dlhandle handle = lt_dlopen(path);
   if (handle == NULL)
   {
-    module_set_error("Error loading module %s: %s", name, lt_dlerror());
-    return false;
+    module_set_error(MODULE_ERR_LOAD_FAILED, name, lt_dlerror());
+    return MODULE_ERR_LOAD_FAILED;
   }
 
   struct Module *const module = lt_dlsym(handle, "module_entry");
   if (module == NULL)
   {
-    module_set_error("Error loading module %s: %s", name, lt_dlerror());
+    module_set_error(MODULE_ERR_LOAD_FAILED, name, lt_dlerror());
     lt_dlclose(handle);
-    return false;
+    return MODULE_ERR_LOAD_FAILED;
   }
 
   module->handle = handle;
@@ -235,17 +259,25 @@ module_load(const char *name, bool manual)
   if (module->init_handler)
     module->init_handler();
 
-  return true;
+  return MODULE_SUCCESS;
 }
 
-void
+enum module_error_code
 module_config_add(const char *name, bool resident, bool core)
 {
-  struct ModuleConfig *config = io_calloc(sizeof(*config));
+  if (module_config_find(name))
+  {
+    module_set_error(MODULE_ERR_CONFIG_EXISTS, name);
+    return MODULE_ERR_CONFIG_EXISTS;
+  }
+
+  struct ModuleConfig *const config = io_calloc(sizeof(*config));
   config->name = io_strdup(name);
   config->resident = resident;
   config->core = core;
   list_add(config, &config->node, &module_config_list);
+
+  return MODULE_SUCCESS;
 }
 
 void
@@ -253,63 +285,65 @@ module_config_clear(void)
 {
   while (module_config_list.head)
   {
-    struct ModuleConfig *config = module_config_list.head->data;
+    struct ModuleConfig *const config = module_config_list.head->data;
     list_remove(&config->node, &module_config_list);
     io_free(config->name);
     io_free(config);
   }
 }
 
-void
-module_load_all(bool terminate)
+bool
+module_load_all(bool terminate, unsigned int *loaded_count)
 {
+  bool success = true;
+
   list_node_t *node;
   LIST_FOREACH(node, module_config_list.head)
   {
-    struct ModuleConfig *config = node->data;
-    if (module_load(config->name, false) == 0 && terminate)
+    struct ModuleConfig *const config = node->data;
+    enum module_error_code code = module_load(config->name, false);
+    if (code == MODULE_SUCCESS)
     {
-      fprintf(stderr, "Error loading module %s from: %s during exit: %s\n",
-              config->name, module_base_path, module_last_error);
-      exit(EXIT_FAILURE);
+      fprintf(stderr, "Loading module %s from: %s\n", config->name, module_base_path);  /* XXX */
+
+      if (loaded_count)
+        ++(*loaded_count);
     }
-    fprintf(stderr, "Loading module %s from: %s\n",
-              config->name, module_base_path);
+    else if (code != MODULE_ERR_ALREADY_LOADED)
+    {
+      fprintf(stderr, "Error loading module %s from %s: %s\n",
+              config->name, module_base_path, module_get_error());  /* XXX */
+
+      if (terminate)
+        exit(EXIT_FAILURE);
+
+      success = false;
+    }
   }
+
+  return success;
 }
 
 bool
-module_reload_all(unsigned int *unloaded_count, unsigned int *loaded_count, bool terminate)
+module_reload_all(bool terminate, unsigned int *unloaded_count, unsigned int *loaded_count)
 {
   bool success = true;
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, module_list.head)
   {
-    const struct Module *const module = node->data;
-    if (module->resident == false && module_unload(module->name))
-      ++(*unloaded_count);
-    else
-      success = false;
-  }
-
-  LIST_FOREACH(node, module_config_list.head)
-  {
-    const struct ModuleConfig *const config = node->data;
-    if (module_load(config->name, false) == 0)
+    struct Module *const module = node->data;
+    if (module->resident == false && module_unload(module->name) == MODULE_SUCCESS)
     {
-      if (terminate && config->core)
-      {
-        fprintf(stderr, "Error reloading core module %s: %s\n",
-                config->name, module_last_error);
-        exit(EXIT_FAILURE);
-      }
-
-      success = false;
+      if (unloaded_count)
+        ++(*unloaded_count);
     }
     else
-      ++(*loaded_count);
+      success = false;
   }
+
+  if (module_load_all(terminate, loaded_count) == false)
+    success = false;
 
   return success;
 }

@@ -27,6 +27,24 @@
 
 #define MODULE_ERROR_BUFFER_SIZE 256
 
+enum module_error_code
+{
+  MODULE_SUCCESS = 0,
+  MODULE_ERR_INIT_FAILED,
+  MODULE_ERR_SHUTDOWN_FAILED,
+  MODULE_ERR_LOAD_FAILED,
+  MODULE_ERR_INVALID_PATH,
+  MODULE_ERR_INVALID_SUFFIX,
+  MODULE_ERR_NOT_FOUND,
+  MODULE_ERR_ALREADY_LOADED,
+  MODULE_ERR_NOT_CONFIGURED,
+  MODULE_ERR_ILLEGAL_TRAVERSAL,
+  MODULE_ERR_INVALID_FILE,
+  MODULE_ERR_CLOSE_FAILED,
+  MODULE_ERR_CONFIG_EXISTS,
+  MODULE_ERR_COUNT
+};
+
 enum module_attributes
 {
   MODULE_RESIDENT = 1 << 0,
@@ -52,18 +70,18 @@ struct ModuleConfig
   bool core;
 };
 
-extern void module_init(void);
-extern void module_cleanup(void);
-extern void module_set_base_path(const char *);
+extern enum module_error_code module_init(void);
+extern enum module_error_code module_cleanup(void);
+extern enum module_error_code module_load(const char *, bool);
+extern enum module_error_code module_unload(const char *);
+extern enum module_error_code module_config_add(const char *, bool, bool);
+extern const list_t *module_get_list(void);
 extern const char *module_get_error(void);
 extern const char *module_get_attributes(const struct Module *);
-extern bool module_load(const char *, bool);
-extern bool module_unload(const char *);
 extern struct Module *module_find(const char *);
 extern struct ModuleConfig *module_config_find(const char *);
-extern const list_t *module_get_list(void);
-extern void module_config_add(const char *, bool, bool);
+extern void module_set_base_path(const char *);
 extern void module_config_clear(void);
-extern bool module_reload_all(unsigned int *, unsigned int *, bool);
-extern void module_load_all(bool);
+extern bool module_reload_all(bool, unsigned int *, unsigned int *);
+extern bool module_load_all(bool, unsigned int *);
 #endif  /* INCLUDED_module_h */

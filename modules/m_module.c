@@ -45,13 +45,13 @@
 static void
 module_cmd_load(struct Client *source, const char *arg)
 {
-  if (module_load(arg, true))
+  if (module_load(arg, true) == MODULE_SUCCESS)
   {
     const struct Module *const module = module_find(arg);
     sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.", module->name, module->handle);
   }
   else
-    sendto_one_notice(source, &me, ":Failed to load module %s: %s", arg, module_get_error());
+    sendto_one_notice(source, &me, "%s", module_get_error());
 }
 
 /**
@@ -84,10 +84,10 @@ module_cmd_unload(struct Client *source, const char *arg)
     return;
   }
 
-  if (module_unload(arg))
+  if (module_unload(arg) == MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
   else
-    sendto_one_notice(source, &me, ":Failed to unload module %s: %s", arg, module_get_error());
+    sendto_one_notice(source, &me, "%s", module_get_error());
 }
 
 /**
@@ -116,9 +116,9 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   const bool core = module->core;
 
-  if (module_unload(arg) == 0 || module_load(arg, true) == 0)
+  if (module_unload(arg) != MODULE_SUCCESS || module_load(arg, true) != MODULE_SUCCESS)
   {
-    sendto_one_notice(source, &me, ":Failed to reload module %s: %s", arg, module_get_error());
+    sendto_one_notice(source, &me, "%s", module_get_error());
 
     if (core)
     {
@@ -147,12 +147,12 @@ static void
 module_cmd_reload_all(struct Client *source)
 {
   unsigned int unloaded_count = 0, loaded_count = 0;
-  bool success = module_reload_all(&unloaded_count, &loaded_count, true);
+  bool success = module_reload_all(true, &unloaded_count, &loaded_count);
 
   if (success)
     sendto_one_notice(source, &me, ":All modules reloaded successfully");
   else
-    sendto_one_notice(source, &me, ":Module reload encountered issues: %s", module_get_error());
+    sendto_one_notice(source, &me, "%s", module_get_error());
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);

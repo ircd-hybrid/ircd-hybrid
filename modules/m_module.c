@@ -51,7 +51,7 @@ module_cmd_load(struct Client *source, const char *arg)
     sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.", module->name, module->handle);
   }
   else
-    sendto_one_notice(source, &me, "%s", module_get_error());
+    sendto_one_notice(source, &me, ":%s", module_get_error());
 }
 
 /**
@@ -87,7 +87,7 @@ module_cmd_unload(struct Client *source, const char *arg)
   if (module_unload(arg) == MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
   else
-    sendto_one_notice(source, &me, "%s", module_get_error());
+    sendto_one_notice(source, &me, ":%s", module_get_error());
 }
 
 /**
@@ -118,7 +118,7 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   if (module_unload(arg) != MODULE_SUCCESS || module_load(arg, true) != MODULE_SUCCESS)
   {
-    sendto_one_notice(source, &me, "%s", module_get_error());
+    sendto_one_notice(source, &me, ":%s", module_get_error());
 
     if (core)
     {
@@ -152,7 +152,7 @@ module_cmd_reload_all(struct Client *source)
   if (success)
     sendto_one_notice(source, &me, ":All modules reloaded successfully");
   else
-    sendto_one_notice(source, &me, "%s", module_get_error());
+    sendto_one_notice(source, &me, ":%s", module_get_error());
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                        "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);

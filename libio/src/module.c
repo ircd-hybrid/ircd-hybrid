@@ -301,6 +301,7 @@ module_load_all(bool terminate, unsigned int *loaded_count)
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *const config = node->data;
+
     enum module_error_code code = module_load(config->name, false);
     if (code == MODULE_SUCCESS)
     {

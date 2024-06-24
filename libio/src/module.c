@@ -271,6 +271,12 @@ module_config_add(const char *name, bool resident, bool core)
     return MODULE_ERR_CONFIG_EXISTS;
   }
 
+  if (module_valid_suffix(name) == false)
+  {
+    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
+    return MODULE_ERR_INVALID_SUFFIX;
+  }
+
   struct ModuleConfig *const config = io_calloc(sizeof(*config));
   config->name = io_strdup(name);
   config->resident = resident;

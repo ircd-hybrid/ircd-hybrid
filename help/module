@@ -3,7 +3,7 @@ MODULE <option> [module_name]
 The MODULE command is used to manage modules within the IRC daemon.
 Available options are:
 
-LIST
+  LIST
     - Lists all loaded modules, showing names, memory addresses, and
       attributes (core, resident). Core modules can be reloaded but not
       unloaded. Resident modules cannot be unloaded or reloaded. If a

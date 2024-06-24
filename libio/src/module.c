@@ -185,13 +185,13 @@ module_unload(const char *name)
 enum module_error_code
 module_load(const char *name, bool manual)
 {
-  if (*name == '/' && manual)
+  if (manual && *name == '/')
   {
     module_set_error(MODULE_ERR_INVALID_PATH, name);
     return MODULE_ERR_INVALID_PATH;
   }
 
-  if (module_valid_suffix(name) == false)
+  if (manual && module_valid_suffix(name) == false)
   {
     module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
     return MODULE_ERR_INVALID_SUFFIX;

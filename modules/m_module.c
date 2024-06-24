@@ -34,6 +34,30 @@
 #include "parse.h"
 #include "module.h"
 
+static void
+announce_load(const char *name, const void *handle, void *user_data)
+{
+  struct Client *source = user_data;
+  sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded", name, handle);
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] loaded", name, handle);
+}
+
+static void
+announce_unload(const char *name, const void *handle, void *user_data)
+{
+  struct Client *source = user_data;
+  sendto_one_notice(source, &me, ":Module %s [handle: %p] unloaded", name, handle);
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] unloaded", name, handle);
+}
+
+static void
+announce_reload(const char *name, const void *handle, void *user_data)
+{
+  struct Client *source = user_data;
+  sendto_one_notice(source, &me, ":Module %s [handle: %p] reloaded", name, handle);
+  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] reloaded", name, handle);
+}
+
 /**
  * @brief Command to load a module.
  *
@@ -45,13 +69,12 @@
 static void
 module_cmd_load(struct Client *source, const char *arg)
 {
-  if (module_load(arg, true) == MODULE_SUCCESS)
-  {
-    const struct Module *const module = module_find(arg);
-    sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.", module->name, module->handle);
-  }
-  else
+  module_set_load_callback(announce_load);
+
+  if (module_load(arg, true, source) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
+
+  module_set_load_callback(NULL);
 }
 
 /**
@@ -65,10 +88,12 @@ module_cmd_load(struct Client *source, const char *arg)
 static void
 module_cmd_unload(struct Client *source, const char *arg)
 {
-  if (module_unload(arg, false) == MODULE_SUCCESS)
-    sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
-  else
+  module_set_unload_callback(announce_unload);
+
+  if (module_unload(arg, false, source) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
+
+  module_set_unload_callback(NULL);
 }
 
 /**
@@ -86,22 +111,20 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   const struct Module *module = module_find(arg);
   if (module)
-    core = true;
+    core = module->core;
 
-  if (module_unload(arg, true) != MODULE_SUCCESS)
+  if (module_unload(arg, true, NULL) != MODULE_SUCCESS)
   {
     sendto_one_notice(source, &me, ":%s", module_get_error());
     return;
   }
 
-  if (module_load(arg, true) == MODULE_SUCCESS)
-  {
-    module = module_find(arg);
-    sendto_one_notice(source, &me, ":Module %s [handle: %p] reloaded.", module->name, module->handle);
-    return;
-  }
-  else
+  module_set_load_callback(announce_reload);
+
+  if (module_load(arg, true, source) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
+
+  module_set_load_callback(NULL);
 
   if (core)
   {
@@ -122,27 +145,36 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 static void
 module_cmd_reload_all(struct Client *source)
 {
+  bool core = false;
   unsigned int unloaded_count = 0, loaded_count = 0;
-  bool success = module_reload_all(true, &unloaded_count, &loaded_count);
 
-  if (success)
-    sendto_one_notice(source, &me, ":All modules reloaded successfully");
-  else
+  if (module_unload_all(&unloaded_count) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
 
+  if (module_load_all(&loaded_count) != MODULE_SUCCESS)
+  {
+    sendto_one_notice(source, &me, ":%s", module_get_error());
+    core = true;
+  }
+  else
+    sendto_one_notice(source, &me, ":All modules reloaded successfully");
+
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                       "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
-  log_write(LOG_TYPE_IRCD, "Module Reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
+                       "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
+  log_write(LOG_TYPE_IRCD, "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
+
+  if (core == false)
+    return;
 
   list_node_t *node;
-  LIST_FOREACH(node, module_get_list()->head)
+  LIST_FOREACH(node, module_config_get_list()->head)
   {
-    const struct Module *const module = node->data;
-    if (module->core && module_find(module->name) == NULL)
+    const struct ModuleConfig *const config = node->data;
+    if (config->core && module_find(config->name) == NULL)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Error reloading core modules: terminating ircd");
-      log_write(LOG_TYPE_IRCD, "Error reloading core modules: terminating ircd");
+                           "Error loading core module %s: terminating ircd", config->name);
+      log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", config->name);
       exit(EXIT_FAILURE);
     }
   }

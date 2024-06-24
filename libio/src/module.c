@@ -23,6 +23,8 @@
 #include "stdinc.h"
 #include "io.h"
 #include "irc_string.h"
+#include "list.h"
+#include "log.h"
 #include "memory.h"
 #include "module.h"
 
@@ -33,6 +35,9 @@ static list_t module_config_list;
 static list_t module_list;
 
 static char *module_base_path;
+
+static void (*module_load_callback)(const char *, const void *, void *);
+static void (*module_unload_callback)(const char *, const void *, void *);
 
 static const char *const module_error_strings[MODULE_ERR_COUNT] =
 {
@@ -59,6 +64,12 @@ module_get_list(void)
   return &module_list;
 }
 
+const list_t *
+module_config_get_list(void)
+{
+  return &module_config_list;
+}
+
 void
 module_set_base_path(const char *path)
 {
@@ -74,6 +85,18 @@ module_set_error(enum module_error_code code, ...)
   va_start(args, code);
   vsnprintf(module_last_error, sizeof(module_last_error), module_error_strings[code], args);
   va_end(args);
+}
+
+void
+module_set_load_callback(void (*callback)(const char *name, const void *handle, void *user_data))
+{
+  module_load_callback = callback;
+}
+
+void
+module_set_unload_callback(void (*callback)(const char *name, const void *handle, void *user_data))
+{
+  module_unload_callback = callback;
 }
 
 enum module_error_code
@@ -168,7 +191,7 @@ module_cmp(const void *const a_, const void *const b_)
 }
 
 enum module_error_code
-module_unload(const char *name, bool reload)
+module_unload(const char *name, bool reload, void *user_data)
 {
   if (module_valid_suffix(name) == false)
   {
@@ -201,17 +224,22 @@ module_unload(const char *name, bool reload)
   list_remove(&module->node, &module_list);
   io_free(module->name);
 
+  const lt_dlhandle handle = module->handle;
   if (lt_dlclose(module->handle))
   {
     module_set_error(MODULE_ERR_CLOSE_FAILED, name, lt_dlerror());
     return MODULE_ERR_CLOSE_FAILED;
   }
 
+  if (module_unload_callback)
+    module_unload_callback(name, handle, user_data);
+
+  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] unloaded", name, handle);
   return MODULE_SUCCESS;
 }
 
 enum module_error_code
-module_load(const char *name, bool manual)
+module_load(const char *name, bool manual, void *user_data)
 {
   if (manual && *name == '/')
   {
@@ -288,6 +316,10 @@ module_load(const char *name, bool manual)
   if (module->init_handler)
     module->init_handler();
 
+  if (module_load_callback)
+    module_load_callback(name, handle, user_data);
+
+  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded", name, handle);
   return MODULE_SUCCESS;
 }
 
@@ -327,59 +359,55 @@ module_config_clear(void)
   }
 }
 
-bool
-module_load_all(bool terminate, unsigned int *loaded_count)
+enum module_error_code
+module_load_all(unsigned int *loaded_count)
 {
-  bool success = true;
+  enum module_error_code code = MODULE_SUCCESS;
 
   list_node_t *node;
   LIST_FOREACH(node, module_config_list.head)
   {
     struct ModuleConfig *const config = node->data;
 
-    enum module_error_code code = module_load(config->name, false);
-    if (code == MODULE_SUCCESS)
+    enum module_error_code tmp = module_load(config->name, false, NULL);
+    if (tmp == MODULE_SUCCESS)
     {
-      fprintf(stderr, "Loading module %s from: %s\n", config->name, module_base_path);  /* XXX */
-
       if (loaded_count)
         ++(*loaded_count);
     }
-    else if (code != MODULE_ERR_ALREADY_LOADED)
+    else if (tmp != MODULE_ERR_ALREADY_LOADED)
     {
-      fprintf(stderr, "Error loading module %s from %s: %s\n",
-              config->name, module_base_path, module_get_error());  /* XXX */
-
-      if (terminate)
-        exit(EXIT_FAILURE);
-
-      success = false;
+      code = tmp;
+      log_write(LOG_TYPE_IRCD, "Failed to load module %s: %s",
+                config->name, module_get_error());
     }
   }
 
-  return success;
+  return code;
 }
 
-bool
-module_reload_all(bool terminate, unsigned int *unloaded_count, unsigned int *loaded_count)
+enum module_error_code
+module_unload_all(unsigned int *unloaded_count)
 {
-  bool success = true;
+  enum module_error_code code = MODULE_SUCCESS;
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, module_list.head)
   {
     struct Module *const module = node->data;
-    if (module->resident == false)
+
+    if (module->resident)
+      continue;
+
+    enum module_error_code tmp = module_unload(module->name, true, NULL);
+    if (tmp == MODULE_SUCCESS)
     {
-      if (module_unload(module->name, true) != MODULE_SUCCESS)
-        success = false;
-      else if (unloaded_count)
-         ++(*unloaded_count);
+      if (unloaded_count)
+        ++(*unloaded_count);
     }
+    else
+      code = tmp;
   }
 
-  if (module_load_all(terminate, loaded_count) == false)
-    success = false;
-
-  return success;
+  return code;
 }

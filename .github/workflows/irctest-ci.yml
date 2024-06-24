@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: irctest
-          ref: 052198c61b005c009aedd1855b070289e6904257
+          ref: aaa2e26b6e468112665ad7b15d144574a969b411
           repository: progval/irctest
 
       - name: configure

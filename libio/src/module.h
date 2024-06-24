@@ -42,6 +42,8 @@ enum module_error_code
   MODULE_ERR_INVALID_FILE,
   MODULE_ERR_CLOSE_FAILED,
   MODULE_ERR_CONFIG_EXISTS,
+  MODULE_ERR_CORE_UNLOAD,
+  MODULE_ERR_RESIDENT_UNLOAD,
   MODULE_ERR_COUNT
 };
 
@@ -73,7 +75,7 @@ struct ModuleConfig
 extern enum module_error_code module_init(void);
 extern enum module_error_code module_cleanup(void);
 extern enum module_error_code module_load(const char *, bool);
-extern enum module_error_code module_unload(const char *);
+extern enum module_error_code module_unload(const char *, bool);
 extern enum module_error_code module_config_add(const char *, bool, bool);
 extern const list_t *module_get_list(void);
 extern const char *module_get_error(void);

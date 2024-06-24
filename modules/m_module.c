@@ -65,26 +65,7 @@ module_cmd_load(struct Client *source, const char *arg)
 static void
 module_cmd_unload(struct Client *source, const char *arg)
 {
-  const struct Module *const module = module_find(arg);
-  if (module == NULL)
-  {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", arg);
-    return;
-  }
-
-  if (module->core)
-  {
-    sendto_one_notice(source, &me, ":Module %s is a core module and may not be unloaded", arg);
-    return;
-  }
-
-  if (module->resident)
-  {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", arg);
-    return;
-  }
-
-  if (module_unload(arg) == MODULE_SUCCESS)
+  if (module_unload(arg, false) == MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":Module %s unloaded successfully", arg);
   else
     sendto_one_notice(source, &me, ":%s", module_get_error());
@@ -101,39 +82,34 @@ module_cmd_unload(struct Client *source, const char *arg)
 static void
 module_cmd_reload_single(struct Client *source, const char *arg)
 {
+  bool core = false;
+
   const struct Module *module = module_find(arg);
-  if (module == NULL)
-  {
-    sendto_one_notice(source, &me, ":Module %s is not loaded", arg);
-    return;
-  }
+  if (module)
+    core = true;
 
-  if (module->resident)
-  {
-    sendto_one_notice(source, &me, ":Module %s is a resident module and may not be unloaded", arg);
-    return;
-  }
-
-  const bool core = module->core;
-
-  if (module_unload(arg) != MODULE_SUCCESS || module_load(arg, true) != MODULE_SUCCESS)
+  if (module_unload(arg, true) != MODULE_SUCCESS)
   {
     sendto_one_notice(source, &me, ":%s", module_get_error());
-
-    if (core)
-    {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
-                           "Error reloading core module: %s: terminating ircd", arg);
-      log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
-      exit(EXIT_FAILURE);
-    }
-
     return;
   }
 
-  module = module_find(arg);
-  sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded.",
-                    module->name, module->handle);
+  if (module_load(arg, true) == MODULE_SUCCESS)
+  {
+    module = module_find(arg);
+    sendto_one_notice(source, &me, ":Module %s [handle: %p] reloaded.", module->name, module->handle);
+    return;
+  }
+  else
+    sendto_one_notice(source, &me, ":%s", module_get_error());
+
+  if (core)
+  {
+    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+                         "Error reloading core module: %s: terminating ircd", arg);
+    log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
+    exit(EXIT_FAILURE);
+  }
 }
 
 /**

@@ -48,7 +48,9 @@ static const char *const module_error_strings[MODULE_ERR_COUNT] =
   [MODULE_ERR_ILLEGAL_TRAVERSAL] = "Illegal directory traversal in path: %s",
   [MODULE_ERR_INVALID_FILE] = "Invalid file for module %s: %s",
   [MODULE_ERR_CLOSE_FAILED] = "Failed to close module %s: %s",
-  [MODULE_ERR_CONFIG_EXISTS] = "Module configuration already exists: %s."
+  [MODULE_ERR_CONFIG_EXISTS] = "Module configuration already exists: %s",
+  [MODULE_ERR_CORE_UNLOAD] = "Core module cannot be unloaded: %s",
+  [MODULE_ERR_RESIDENT_UNLOAD] = "Resident module cannot be unloaded: %s"
 };
 
 const list_t *
@@ -157,14 +159,40 @@ module_config_find(const char *name)
   return NULL;
 }
 
-enum module_error_code
-module_unload(const char *name)
+static int
+module_cmp(const void *const a_, const void *const b_)
 {
+  const char *const a = ((const struct Module *)a_)->name;
+  const char *const b = ((const struct Module *)b_)->name;
+  return strcmp(a, b);
+}
+
+enum module_error_code
+module_unload(const char *name, bool reload)
+{
+  if (module_valid_suffix(name) == false)
+  {
+    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
+    return MODULE_ERR_INVALID_SUFFIX;
+  }
+
   struct Module *const module = module_find(name);
   if (module == NULL)
   {
     module_set_error(MODULE_ERR_NOT_FOUND, name);
     return MODULE_ERR_NOT_FOUND;
+  }
+
+  if (reload == false && module->core)
+  {
+    module_set_error(MODULE_ERR_CORE_UNLOAD, name);
+    return MODULE_ERR_CORE_UNLOAD;
+  }
+
+  if (module->resident)
+  {
+    module_set_error(MODULE_ERR_RESIDENT_UNLOAD, name);
+    return MODULE_ERR_RESIDENT_UNLOAD;
   }
 
   if (module->exit_handler)
@@ -254,7 +282,8 @@ module_load(const char *name, bool manual)
 
   module->handle = handle;
   module->name = io_strdup(name);
-  list_add(module, &module->node, &module_list);
+
+  list_add_sorted(module, &module->node, &module_list, module_cmp);
 
   if (module->init_handler)
     module->init_handler();
@@ -340,13 +369,13 @@ module_reload_all(bool terminate, unsigned int *unloaded_count, unsigned int *lo
   LIST_FOREACH_SAFE(node, node_next, module_list.head)
   {
     struct Module *const module = node->data;
-    if (module->resident == false && module_unload(module->name) == MODULE_SUCCESS)
+    if (module->resident == false)
     {
-      if (unloaded_count)
-        ++(*unloaded_count);
+      if (module_unload(module->name, true) != MODULE_SUCCESS)
+        success = false;
+      else if (unloaded_count)
+         ++(*unloaded_count);
     }
-    else
-      success = false;
   }
 
   if (module_load_all(terminate, loaded_count) == false)

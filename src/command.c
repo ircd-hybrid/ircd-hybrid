@@ -284,7 +284,11 @@ command_report(struct Client *client)
     {
       const struct CommandTree *ptr = current->pointers[i];
       if (ptr)
+      {
+        if (top >= sizeof(stack) / sizeof(stack[0]))
+          return;
         stack[top++] = ptr;
+      }
     }
   }
 }

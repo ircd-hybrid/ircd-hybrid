@@ -189,6 +189,14 @@ module_cmp(const void *const a_, const void *const b_)
   return strcmp(a, b);
 }
 
+static int
+module_config_cmp(const void *const a_, const void *const b_)
+{
+  const char *const a = ((const struct ModuleConfig *)a_)->name;
+  const char *const b = ((const struct ModuleConfig *)b_)->name;
+  return strcmp(a, b);
+}
+
 enum module_error_code
 module_unload(const char *name, bool reload, void *user_data)
 {
@@ -341,7 +349,7 @@ module_config_add(const char *name, bool resident, bool core)
   config->name = io_strdup(name);
   config->resident = resident;
   config->core = core;
-  list_add(config, &config->node, &module_config_list);
+  list_add_sorted(config, &config->node, &module_config_list, module_config_cmp);
 
   return MODULE_SUCCESS;
 }

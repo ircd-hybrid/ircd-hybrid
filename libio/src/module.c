@@ -131,7 +131,7 @@ module_get_error(void)
 const char *
 module_get_attributes(const struct Module *module)
 {
-  static char attributes[16];
+  static char attributes[18];
 
   if (module->core || module->resident)
     snprintf(attributes, sizeof(attributes), "(%s%s%s)",

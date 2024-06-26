@@ -558,3 +558,41 @@ list_get_at(unsigned int pos, const list_t *list)
 
   return current;
 }
+
+/**
+ * @brief Returns the longer of two lists.
+ *
+ * This function compares the lengths of two lists and returns the longer list.
+ * If the lengths are equal, it returns the first list.
+ *
+ * @param list1 Pointer to the first list.
+ * @param list2 Pointer to the second list.
+ * @return Pointer to the longer list.
+ */
+list_t *
+list_get_longer(list_t *list1, list_t *list2)
+{
+  if (list1->length >= list2->length)
+    return list1;
+
+  return list2;
+}
+
+/**
+ * @brief Returns the shorter of two lists.
+ *
+ * This function compares the lengths of two lists and returns the shorter list.
+ * If the lengths are equal, it returns the first list.
+ *
+ * @param list1 Pointer to the first list.
+ * @param list2 Pointer to the second list.
+ * @return Pointer to the shorter list.
+ */
+list_t *
+list_get_shorter(list_t *list1, list_t *list2)
+{
+  if (list1->length <= list2->length)
+    return list1;
+
+  return list2;
+}

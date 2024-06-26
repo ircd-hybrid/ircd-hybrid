@@ -121,4 +121,6 @@ extern list_node_t *list_find_cmp(const list_t *, const void *, int (*)(const ch
 extern list_node_t *list_find_remove(list_t *, void *);
 extern list_node_t *list_make_node(void);
 extern list_node_t *list_get_at(unsigned int, const list_t *);
+extern list_t *list_get_longer(list_t *, list_t *);
+extern list_t *list_get_shorter(list_t *, list_t *);
 #endif  /* INCLUDED_list_h */

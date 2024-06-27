@@ -47,42 +47,43 @@ do_links(struct Client *source, char *parv[])
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
 
-  if (HasUMode(source, UMODE_OPER) || ConfigServerHide.flatten_links == 0)
+  if (ConfigServerHide.flatten_links && !HasUMode(source, UMODE_OPER))
   {
-    const char *mask = parv[2];
-    if (EmptyString(mask))
-      mask = parv[1];
+    flatten_links_send(source);
+    return;
+  }
 
-    list_node_t *node;
-    LIST_FOREACH(node, global_server_list.head)
-    {
-      const struct Client *target = node->data;
+  const char *mask = parv[2];
+  if (EmptyString(mask))
+    mask = parv[1];
 
-      /* Skip hidden servers */
-      if (IsHidden(target))
-        if (!HasUMode(source, UMODE_OPER))
-          continue;
+  list_node_t *node;
+  LIST_FOREACH(node, global_server_list.head)
+  {
+    const struct Client *target = node->data;
 
-      if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-        if (!HasUMode(source, UMODE_OPER))
-          continue;
-
-      if (!EmptyString(mask) && match(mask, target->name))
+    /* Skip hidden servers */
+    if (IsHidden(target))
+      if (!HasUMode(source, UMODE_OPER))
         continue;
 
-      /*
-       * We just send the reply, as if they are here there's either no SHIDE,
-       * or they're an oper.
-       */
-      sendto_one_numeric(source, &me, RPL_LINKS,
-                         target->name, target->servptr->name, target->hopcount, target->info);
-    }
+    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(source, UMODE_OPER))
+        continue;
 
-    sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
-                       EmptyString(mask) ? "*" : mask);
+    if (!EmptyString(mask) && match(mask, target->name))
+      continue;
+
+    /*
+     * We just send the reply, as if they are here there's either no SHIDE,
+     * or they're an oper.
+     */
+    sendto_one_numeric(source, &me, RPL_LINKS,
+                       target->name, target->servptr->name, target->hopcount, target->info);
   }
-  else
-    flatten_links_send(source);
+
+  sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
+                     EmptyString(mask) ? "*" : mask);
 }
 
 static void

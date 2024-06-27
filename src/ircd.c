@@ -62,6 +62,7 @@
 #include "isupport.h"
 #include "extban.h"
 #include "restart.h"
+#include "flatten_links.h"
 
 /**
  * @struct SetOptions
@@ -208,12 +209,6 @@ static struct event event_save_all_databases =
   .name = "save_all_databases",
   .handler = save_all_databases,
   .when = 300
-};
-
-struct event event_write_links_file =
-{
-  .name = "write_links_file",
-  .handler = write_links_file,
 };
 
 /**
@@ -576,9 +571,9 @@ main(int argc, char *argv[])
   extban_init();
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
-  read_links_file();
   motd_init();
   user_modes_init();
+  flatten_links_init();
 
   if (EmptyString(ConfigServerInfo.name))
   {
@@ -640,12 +635,6 @@ main(int argc, char *argv[])
   event_add(&event_comm_checktimeouts, NULL);
 
   event_addish(&event_save_all_databases, NULL);
-
-  if (ConfigServerHide.flatten_links_delay && event_write_links_file.active == false)
-  {
-    event_write_links_file.when = ConfigServerHide.flatten_links_delay;
-    event_add(&event_write_links_file, NULL);
-  }
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();

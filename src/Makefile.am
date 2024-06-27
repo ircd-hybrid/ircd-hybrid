@@ -63,6 +63,8 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
+               flatten_links.c   \
+               flatten_links.h   \
                hash.c            \
                hash.h            \
                id.c              \

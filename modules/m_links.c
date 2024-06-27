@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "parse.h"
 #include "module.h"
+#include "flatten_links.h"
 
 
 /*! \brief Shows a list of linked servers and notifies irc-operators
@@ -43,8 +44,6 @@
 static void
 do_links(struct Client *source, char *parv[])
 {
-  list_node_t *node;
-
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
 
@@ -54,6 +53,7 @@ do_links(struct Client *source, char *parv[])
     if (EmptyString(mask))
       mask = parv[1];
 
+    list_node_t *node;
     LIST_FOREACH(node, global_server_list.head)
     {
       const struct Client *target = node->data;
@@ -82,17 +82,7 @@ do_links(struct Client *source, char *parv[])
                        EmptyString(mask) ? "*" : mask);
   }
   else
-  {
-    /*
-     * Print our own info so at least it looks like a normal links, then
-     * print out the file (which may or may not be empty).
-     */
-    sendto_one_numeric(source, &me, RPL_LINKS, me.name, me.name, 0, me.info);
-
-    LIST_FOREACH(node, flatten_links.head)
-      sendto_one_numeric(source, &me, RPL_LINKS | SND_EXPLICIT, "%s", node->data);
-    sendto_one_numeric(source, &me, RPL_ENDOFLINKS, "*");
-  }
+    flatten_links_send(source);
 }
 
 static void

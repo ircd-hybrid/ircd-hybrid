@@ -51,6 +51,7 @@
 #include "user.h"
 #include "motd.h"
 #include "cloak.h"
+#include "flatten_links.h"
 
 int yylex(void);
 
@@ -2994,11 +2995,11 @@ serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
   {
     if ($3 > 0)
     {
-      event_write_links_file.when = $3;
-      event_add(&event_write_links_file, NULL);
+      event_flatten_links_write_file.when = $3;
+      event_add(&event_flatten_links_write_file, NULL);
     }
     else
-     event_delete(&event_write_links_file);
+     event_delete(&event_flatten_links_write_file);
 
     ConfigServerHide.flatten_links_delay = $3;
   }

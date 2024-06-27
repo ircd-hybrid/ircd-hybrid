@@ -313,7 +313,6 @@ struct AddressRec
 };
 
 extern list_t atable[ADDRESS_HASHSIZE];
-extern list_t flatten_links;
 extern list_t connect_items;
 extern list_t operator_items;
 extern struct conf_parser_context conf_parser_ctx;

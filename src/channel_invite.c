@@ -40,13 +40,7 @@
 struct Invite *
 invite_find(struct Channel *channel, struct Client *client)
 {
-  list_t *list;
-
-  /* Take the shortest of the two lists */
-  if (list_length(&client->connection->invited) < list_length(&channel->invites))
-    list = &client->connection->invited;
-  else
-    list = &channel->invites;
+  list_t *list = list_get_shorter(&client->connection->invited, &channel->invites);
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)

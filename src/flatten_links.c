@@ -71,10 +71,9 @@ flatten_links_send(struct Client *source)
 void
 flatten_links_clear(void)
 {
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, flatten_links.head)
+  while (flatten_links.head)
   {
+    list_node_t *node = flatten_links.head;
     list_remove(node, &flatten_links);
     io_free(node->data);
     list_free_node(node);

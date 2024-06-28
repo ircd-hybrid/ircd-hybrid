@@ -71,6 +71,7 @@ stats_register(unsigned char letter, stats_handler_func handler, unsigned int re
   new->letter = letter;
   new->handler = handler;
   new->required_modes = required_modes;
+  new->enabled = true;
   stats_handlers[letter] = new;
 
   return STATS_SUCCESS;

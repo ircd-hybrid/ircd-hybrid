@@ -1,4 +1,10 @@
 #### Noteworthy changes in version 8.2.45 (2024-??-??)
+* The module API has been rewritten for improved flexibility. A `modules.conf` file is now
+  required for configuring and loading modules. For further information, refer to the
+  `reference.modules.conf`.
+* The `INFO` subsystem has been updated to support dynamic registration and unregistration
+  of info entries. This allows modules to register and unregister their own info entries,
+  which are shown in the `INFO` output.
 * Added support for a flattened `MAP` output when `serverhide::flatten_links` is enabled.
   This allows users to view a simplified network topology where all servers appear as if
   they are directly connected to the local server.

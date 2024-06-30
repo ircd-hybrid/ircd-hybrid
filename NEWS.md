@@ -1,3 +1,9 @@
+#### Noteworthy changes in version 8.2.45 (2024-??-??)
+* Added support for a flattened `MAP` output when `serverhide::flatten_links` is enabled.
+  This allows users to view a simplified network topology where all servers appear as if
+  they are directly connected to the local server.
+
+
 #### Noteworthy changes in version 8.2.44 (2024-06-15)
 * Fixed FTCBFS issue caused by ./configure using macros that lacked special handling
   for cross-compilation scenarios

@@ -47,13 +47,13 @@ static void
 m_ison(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
-  char *bufptr = buf, *p = NULL;
+  char *bufptr = buf;
 
   /* :me.name 303 source->name :nick1 nick2 ...      \r\n */
-  /* 1       23456              78                     9 10 */
+  /* 1       23456            78                     9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-
+  char *p = NULL;
   for (const char *name = strtok_r(parv[1], " ", &p); name;
                    name = strtok_r(NULL,    " ", &p))
   {

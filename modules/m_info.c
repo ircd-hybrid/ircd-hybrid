@@ -226,7 +226,6 @@ send_info_text(struct Client *client)
   for (const char *const *text = infotext; *text; ++text)
   {
     const char *line = *text;
-
     if (*line == '\0')
       line = " ";
 

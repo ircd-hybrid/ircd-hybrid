@@ -92,7 +92,7 @@ whois_person(struct Client *source, struct Client *target)
     char *bufptr = buf;
 
     /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
-    /* 1       23456              7              89                           0 1  */
+    /* 1       23456            7            89                           0 1  */
     size_t len = strlen(target->name) + 11;
 
     if (MyConnect(source))

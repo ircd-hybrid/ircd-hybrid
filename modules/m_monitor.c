@@ -44,20 +44,19 @@ monitor_add(struct Client *source, char *list)
   char ofbuf[IRCD_BUFSIZE];
   char *onbufptr = onbuf;
   char *ofbufptr = ofbuf;
-  char *p = NULL;
 
   /* :me.name 730 source->name :nick!user@host,...\r\n */
-  /* 1       23456              78                  9 10 */
+  /* 1       23456            78                  9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
+  char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
     if (EmptyString(name) || valid_nickname(name, true) == false)
       continue;
 
-    if (list_length(&source->connection->monitors) >=
-        ConfigGeneral.max_monitor)
+    if (list_length(&source->connection->monitors) >= ConfigGeneral.max_monitor)
     {
       char buf[IRCD_BUFSIZE];
 
@@ -117,11 +116,10 @@ monitor_add(struct Client *source, char *list)
 static void
 monitor_del(struct Client *source, char *list)
 {
-  char *p = NULL;
-
   if (list_is_empty(&source->connection->monitors))
     return;
 
+  char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
     if (!EmptyString(name))
@@ -133,12 +131,12 @@ monitor_list(struct Client *source)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  list_node_t *node;
 
   /* :me.name 732 source->name :name1,name2,...\r\n */
-  /* 1       23456              78               9 10 */
+  /* 1       23456            78               9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
+  list_node_t *node;
   LIST_FOREACH(node, source->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;
@@ -154,6 +152,7 @@ monitor_list(struct Client *source)
 
   if (bufptr != buf)
     sendto_one_numeric(source, &me, RPL_MONLIST, buf);
+
   sendto_one_numeric(source, &me, RPL_ENDOFMONLIST);
 }
 
@@ -164,12 +163,12 @@ monitor_status(struct Client *source)
   char ofbuf[IRCD_BUFSIZE];
   char *onbufptr = onbuf;
   char *ofbufptr = ofbuf;
-  list_node_t *node;
 
   /* :me.name 730 source->name :nick!user@host,...\r\n */
-  /* 1       23456              78                  9 10 */
+  /* 1       23456            78                  9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
+  list_node_t *node;
   LIST_FOREACH(node, source->connection->monitors.head)
   {
     const struct Monitor *monitor = node->data;

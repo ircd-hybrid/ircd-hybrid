@@ -68,10 +68,7 @@ do_connect(struct Client *source, const char *name)
   }
 
   /* Notify all operators about connect requests. */
-  static const char *const type[] =
-  {
-    "Remote", "Local"
-  };
+  static const char *const type[] = { "Remote", "Local" };
   const char *const type_p = type[MyConnect(source) != 0];
 
   sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s CONNECT %s %u from %s",

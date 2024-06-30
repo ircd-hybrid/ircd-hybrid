@@ -40,8 +40,6 @@
 static void
 do_list(struct Client *source, char *arg)
 {
-  bool no_masked_channels = true;
-
   if (source->connection->list_task)
   {
     free_list_task(source);
@@ -56,6 +54,7 @@ do_list(struct Client *source, char *arg)
   source->connection->list_task = lt;
   list_add(source, &lt->node, &listing_client_list);
 
+  bool no_masked_channels = true;
   if (!EmptyString(arg))
   {
     list_t *list;

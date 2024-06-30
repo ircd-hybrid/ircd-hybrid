@@ -143,13 +143,13 @@ channel_remove_user(struct ChannelMember *member)
 void
 channel_demote_members(struct Channel *channel, const struct Client *client)
 {
-  list_node_t *node;
   char modebuf[MAXMODEPARAMS + 1];
   char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
   char *mbuf = modebuf;
   char *pbuf = parabuf;
   unsigned int pargs = 0;
 
+  list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
     struct ChannelMember *member = node->data;
@@ -194,7 +194,6 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
 static void
 channel_send_members(struct Client *client, const struct Channel *channel)
 {
-  list_node_t *node;
   size_t len;
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
@@ -202,6 +201,7 @@ channel_send_members(struct Client *client, const struct Channel *channel)
                                 channel->name, channel_modes(channel, client, true));
   char *const bufptr_start = bufptr;
 
+  list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
     const struct ChannelMember *member = node->data;
@@ -231,22 +231,19 @@ channel_send_members(struct Client *client, const struct Channel *channel)
 static void
 channel_send_mask_list(struct Client *client, const struct Channel *channel, const list_t *list, const char flag)
 {
-  list_node_t *node;
-  size_t len;
-  char buf[IRCD_BUFSIZE];
-
   if (list_is_empty(list))
     return;
 
+  char buf[IRCD_BUFSIZE];
   char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s BMASK %ju %s %c :",
                                 me.id, channel->creation_time, channel->name, flag);
   char *const bufptr_start = bufptr;
 
+  list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
     const struct Ban *ban = node->data;
-
-    len = ban->banstr_len + 1;  /* +1 for space */
+    size_t len = ban->banstr_len + 1;  /* +1 for space */
 
     /*
      * Send buffer and start over if we cannot fit another ban
@@ -744,20 +741,20 @@ member_has_flags(const struct ChannelMember *member, const unsigned int flags)
 struct ChannelMember *
 member_find_link(const struct Client *client, const struct Channel *channel)
 {
-  list_node_t *node;
-
   if (!IsClient(client))
     return NULL;
 
   /* Take the shortest of the two lists */
   if (list_length(&channel->members) < list_length(&client->channel))
   {
+    list_node_t *node;
     LIST_FOREACH(node, channel->members.head)
       if (((struct ChannelMember *)node->data)->client == client)
         return node->data;
   }
   else
   {
+    list_node_t *node;
     LIST_FOREACH(node, client->channel.head)
       if (((struct ChannelMember *)node->data)->channel == channel)
         return node->data;
@@ -982,12 +979,12 @@ channel_set_mode_lock(struct Client *client, struct Channel *channel, const char
 void
 channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
-  char *p = NULL;
   const struct ResvItem *resv = NULL;
   const struct ClassItem *const class = class_get_ptr(&client->connection->confs);
 
   assert(MyClient(client));
 
+  char *p = NULL;
   for (const char *name = strtok_r(chan_list, ",", &p); name;
                    name = strtok_r(NULL,      ",", &p))
   {
@@ -1165,9 +1162,9 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
 void
 channel_part_list(struct Client *client, char *list, const char *reason)
 {
-  char *p = NULL;
   assert(IsClient(client));
 
+  char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
     channel_part_one(client, name, reason);

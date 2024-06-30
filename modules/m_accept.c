@@ -47,12 +47,12 @@ accept_list(struct Client *source)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  list_node_t *node;
 
   /* :me.name 281 source->name :n1!u1@h1 n2!u2@h2 ...\r\n */
-  /* 1       23456              78                     9 10 */
+  /* 1       23456            78                     9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
+  list_node_t *node;
   LIST_FOREACH(node, source->connection->acceptlist.head)
   {
     const struct AcceptItem *const accept = node->data;
@@ -67,9 +67,7 @@ accept_list(struct Client *source)
     }
 
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s!%s@%s" : "%s!%s@%s",
-                       accept->nick,
-                       accept->user,
-                       accept->host);
+                       accept->nick, accept->user, accept->host);
   }
 
   if (bufptr != buf)
@@ -96,7 +94,6 @@ m_accept(struct Client *source, int parc, char *parv[])
   char nick[NICKLEN + 1];
   char user[USERLEN + 1];
   char host[HOSTLEN + 1];
-  char *p = NULL;
   char *mask = collapse(parv[1]);
 
   if (EmptyString(mask) || strcmp(mask, "*") == 0)
@@ -105,6 +102,7 @@ m_accept(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  char *p = NULL;
   for (mask = strtok_r(mask, ",", &p); mask;
        mask = strtok_r(NULL, ",", &p))
   {

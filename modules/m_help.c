@@ -40,16 +40,14 @@ enum { HELPLEN = 400 };
 static void
 sendhelpfile(struct Client *source, const char *path, const char *topic)
 {
-  FILE *file = NULL;
-  char *p = NULL;
-  char line[HELPLEN] = "";
-
-  if ((file = fopen(path, "r")) == NULL)
+  FILE *file = fopen(path, "r");
+  if (file == NULL)
   {
     sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;
   }
 
+  char line[HELPLEN];
   if (fgets(line, sizeof(line), file) == NULL)
   {
     sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
@@ -57,14 +55,16 @@ sendhelpfile(struct Client *source, const char *path, const char *topic)
     return;
   }
 
-  if ((p = strpbrk(line, "\r\n")))
+  char *p = strpbrk(line, "\r\n");
+  if (p)
     *p = '\0';
 
   sendto_one_numeric(source, &me, RPL_HELPSTART, topic, line);
 
   while (fgets(line, sizeof(line), file))
   {
-    if ((p = strpbrk(line, "\r\n")))
+    p = strpbrk(line, "\r\n");
+    if (p)
       *p = '\0';
 
     sendto_one_numeric(source, &me, RPL_HELPTXT, topic, line);
@@ -78,7 +78,6 @@ static void
 do_help(struct Client *source, char *topic)
 {
   char h_index[] = "index";
-  struct stat sb;
 
   if (EmptyString(topic))
     topic = h_index;
@@ -95,6 +94,7 @@ do_help(struct Client *source, char *topic)
   char path[sizeof(HPATH) + IRCD_BUFSIZE + 1];  /* +1 for / */
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
+  struct stat sb;
   if (stat(path, &sb) < 0)
   {
     sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);

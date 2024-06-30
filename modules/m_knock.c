@@ -112,13 +112,10 @@ m_knock(struct Client *source, int parc, char *parv[])
   }
 
   channel->last_knock_time = event_base->time.sec_monotonic;
+
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                       me.name, channel->name, channel->name,
-                       source->name,
-                       source->username,
-                       source->host);
-
+                       me.name, channel->name, channel->name, source->name, source->username, source->host);
   sendto_server(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
                 source->id, channel->name);
 }

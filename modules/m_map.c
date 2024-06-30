@@ -98,7 +98,6 @@ dump_map_flat(struct Client *client)
   }
 }
 
-
 static void
 dump_map(struct Client *client, const struct Client *server, unsigned int prompt_length)
 {

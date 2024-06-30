@@ -396,10 +396,9 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
 static void
 build_target_list(bool notice, struct Client *source, char *list, const char *text)
 {
-  char *p = NULL;
-
   ntargets = 0;
 
+  char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {

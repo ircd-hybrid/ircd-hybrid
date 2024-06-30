@@ -42,11 +42,10 @@ static void
 trace_get_dependent(unsigned int *const servers,
                     unsigned int *const clients, const struct Client *target)
 {
-  list_node_t *node;
-
   (*servers)++;
   (*clients) += list_length(&target->serv->client_list);
 
+  list_node_t *node;
   LIST_FOREACH(node, target->serv->server_list.head)
     trace_get_dependent(servers, clients, node->data);
 }
@@ -95,8 +94,8 @@ trace_send_status(struct Client *source, const struct Client *target)
       break;
     case STAT_SERVER:
     {
-      unsigned int clients = 0;
       unsigned int servers = 0;
+      unsigned int clients = 0;
 
       trace_get_dependent(&servers, &clients, target);
 

@@ -19,57 +19,103 @@
  *  USA
  */
 
+/**
+ * @file module.h
+ * @brief Defines the interface for managing modules in the application.
+ *
+ * This file contains definitions for handling module initialization, loading, unloading,
+ * and configuration within the application. It provides structures, enums, and function
+ * prototypes necessary for module management.
+ */
 
 #ifndef INCLUDED_module_h
 #define INCLUDED_module_h
 
 #include "list.h"
 
+/**
+ * @def MODULE_ERROR_BUFFER_SIZE
+ * @brief Buffer size for storing error messages.
+ *
+ * This constant defines the size of the buffer used for storing error messages
+ * encountered during module operations. It ensures that error messages are properly
+ * bounded and do not overflow.
+ */
 #define MODULE_ERROR_BUFFER_SIZE 256
 
+/**
+ * @enum module_error_code
+ * @brief Enum for representing error codes for module operations.
+ *
+ * This enum lists possible error codes returned by module operations such as initialization,
+ * loading, and unloading. Each code provides a specific reason for a failure or success state.
+ */
 enum module_error_code
 {
-  MODULE_SUCCESS = 0,
-  MODULE_ERR_INIT_FAILED,
-  MODULE_ERR_SHUTDOWN_FAILED,
-  MODULE_ERR_LOAD_FAILED,
-  MODULE_ERR_INVALID_PATH,
-  MODULE_ERR_INVALID_SUFFIX,
-  MODULE_ERR_NOT_FOUND,
-  MODULE_ERR_ALREADY_LOADED,
-  MODULE_ERR_NOT_CONFIGURED,
-  MODULE_ERR_ILLEGAL_TRAVERSAL,
-  MODULE_ERR_INVALID_FILE,
-  MODULE_ERR_CLOSE_FAILED,
-  MODULE_ERR_CONFIG_EXISTS,
-  MODULE_ERR_CORE_UNLOAD,
-  MODULE_ERR_RESIDENT_UNLOAD,
-  MODULE_ERR_COUNT
+  MODULE_SUCCESS = 0,  /**< Operation completed successfully. */
+  MODULE_ERR_INIT_FAILED,  /**< Failed to initialize module system. */
+  MODULE_ERR_SHUTDOWN_FAILED,  /**< Failed to shut down module system. */
+  MODULE_ERR_LOAD_FAILED,  /**< Failed to load module. */
+  MODULE_ERR_INVALID_PATH,  /**< Invalid module path specified. */
+  MODULE_ERR_INVALID_SUFFIX,  /**< Invalid module file suffix. */
+  MODULE_ERR_NOT_FOUND,  /**< Module not found. */
+  MODULE_ERR_ALREADY_LOADED,  /**< Module already loaded. */
+  MODULE_ERR_NOT_CONFIGURED,  /**< Module not configured to be loaded. */
+  MODULE_ERR_ILLEGAL_TRAVERSAL,  /**< Illegal directory traversal in module path. */
+  MODULE_ERR_INVALID_FILE,  /**< Invalid module file specified. */
+  MODULE_ERR_CLOSE_FAILED,  /**< Failed to close module. */
+  MODULE_ERR_CONFIG_EXISTS,  /**< Module configuration already exists. */
+  MODULE_ERR_CORE_UNLOAD,  /**< Core module cannot be unloaded. */
+  MODULE_ERR_RESIDENT_UNLOAD,  /**< Resident module cannot be unloaded. */
+  MODULE_ERR_COUNT  /**< Number of error codes defined. */
 };
 
+/**
+ * @enum module_attributes
+ * @brief Enum for representing module attributes.
+ *
+ * This enum defines attributes that can be assigned to modules, such as resident and core.
+ * Attributes determine the behavior and restrictions on module unloading and reloading.
+ */
 enum module_attributes
 {
-  MODULE_RESIDENT = 1 << 0,
-  MODULE_CORE     = 1 << 1,
+  MODULE_RESIDENT = 1 << 0,  /**< Indicates that the module is resident and cannot be unloaded. */
+  MODULE_CORE     = 1 << 1,  /**< Indicates that the module is core and essential for functionality. */
 };
 
+/**
+ * @struct Module
+ * @brief Represents a module in the application.
+ *
+ * The Module structure holds information about a loaded module, including its name,
+ * handle, initialization and exit handlers, and attributes. This structure is used
+ * to manage and interact with modules throughout their lifecycle.
+ */
 struct Module
 {
-  list_node_t node;
-  char *name;
-  void *handle;
-  void (*init_handler)(void);
-  void (*exit_handler)(void);
-  bool resident;
-  bool core;
+  list_node_t node;  /**< Doubly-linked list node for managing modules in a list. */
+  char *name;  /**< Name of the module. */
+  void *handle;  /**< Handle to the loaded module. */
+  void (*init_handler)(void);  /**< Initialization function for the module. */
+  void (*exit_handler)(void);  /**< Exit function for the module. */
+  bool resident;  /**< Indicates if the module is resident and cannot be unloaded. */
+  bool core;  /**< Indicates if the module is core and essential for functionality. */
 };
 
+/**
+ * @struct ModuleConfig
+ * @brief Represents the configuration for a module.
+ *
+ * The ModuleConfig structure holds information about the configuration of a module,
+ * including its name and attributes. This structure is used to configure modules
+ * before they are loaded.
+ */
 struct ModuleConfig
 {
-  list_node_t node;
-  char *name;
-  bool resident;
-  bool core;
+  list_node_t node;  /**< Doubly-linked list node for managing module configurations in a list. */
+  char *name;  /**< Name of the module configuration. */
+  bool resident;  /**< Indicates if the module is resident and cannot be unloaded. */
+  bool core;  /**< Indicates if the module is core and essential for functionality. */
 };
 
 extern enum module_error_code module_init(void);

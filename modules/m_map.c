@@ -193,7 +193,7 @@ do_map(struct Client *source)
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
 
-  if (ConfigServerHide.flatten_links)
+  if (ConfigServerHide.flatten_links && !HasUMode(source, UMODE_OPER))
     dump_map_flat(source);
   else
     dump_map(source, &me, 0);

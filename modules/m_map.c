@@ -55,7 +55,7 @@ dump_map_flat(struct Client *client)
   }
 
   unsigned int current_server = 0;
-  LIST_FOREACH(node, global_server_list.head)
+  LIST_FOREACH_PREV(node, global_server_list.tail)
   {
     const struct Client *const server = node->data;
 

@@ -39,6 +39,8 @@ struct dbFILE
   char tempname[IO_PATH_MAX + 1];  /**< Name of the temporary file (for writing) */
 };
 
+extern bool read_bool(bool *, struct dbFILE *);
+extern bool write_bool(bool, struct dbFILE *);
 extern bool read_uint16(uint16_t *, struct dbFILE *);
 extern bool write_uint16(uint16_t, struct dbFILE *);
 extern bool read_uint32(uint32_t *, struct dbFILE *);

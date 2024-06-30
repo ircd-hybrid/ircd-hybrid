@@ -276,6 +276,27 @@ close_db(struct dbFILE *f)
  * null-terminated.
  */
 
+bool
+read_bool(bool *ret, struct dbFILE *f)
+{
+  int c = fgetc(f->fp);
+
+  if (c == EOF)
+    return false;
+
+  *ret = (c != 0);
+  return true;
+}
+
+bool
+write_bool(bool val, struct dbFILE *f)
+{
+  if (fputc(val ? 1 : 0, f->fp) == EOF)
+    return false;
+
+  return true;
+}
+
 /*! \brief Read a unsigned 8bit integer
  *
  * \param ret 16bit integer to read

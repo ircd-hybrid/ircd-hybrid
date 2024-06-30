@@ -34,6 +34,72 @@
 
 
 static void
+dump_map_flat(struct Client *client)
+{
+  unsigned int count = 0;
+
+  list_node_t *node;
+  LIST_FOREACH(node, global_server_list.head)
+  {
+    const struct Client *const server = node->data;
+
+    if (IsHidden(server))
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
+
+    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
+
+    ++count;
+  }
+
+  unsigned int current_server = 0;
+  LIST_FOREACH(node, global_server_list.head)
+  {
+    const struct Client *const server = node->data;
+
+    if (IsHidden(server))
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
+
+    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (!HasUMode(client, UMODE_OPER))
+        continue;
+
+    char buf[IRCD_BUFSIZE];
+    unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
+
+    buf[bufpos++] = ' ';
+    unsigned int dashes = 50 - bufpos;
+
+    if (current_server)
+      dashes -= 2;
+
+    for (; dashes > 0; --dashes)
+      buf[bufpos++] = '-';
+
+    buf[bufpos++] = ' ';
+    buf[bufpos++] = '|';
+
+    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
+                       list_length(&server->serv->client_list), 100 *
+                       (float)list_length(&server->serv->client_list) /
+                       (float)list_length(&global_client_list));
+
+    if (current_server == 0)
+      sendto_one_numeric(client, &me, RPL_MAP, "", buf);
+    else if (current_server == count - 1)
+      sendto_one_numeric(client, &me, RPL_MAP, "`-", buf);
+    else
+      sendto_one_numeric(client, &me, RPL_MAP, "|-", buf);
+
+    ++current_server;
+  }
+}
+
+
+static void
 dump_map(struct Client *client, const struct Client *server, unsigned int prompt_length)
 {
   static char prompt[64];
@@ -126,7 +192,11 @@ do_map(struct Client *source)
 {
   sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
-  dump_map(source, &me, 0);
+
+  if (ConfigServerHide.flatten_links)
+    dump_map_flat(source);
+  else
+    dump_map(source, &me, 0);
 }
 
 /*! \brief MAP command handler
@@ -143,12 +213,6 @@ static void
 m_map(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
-
-  if (ConfigServerHide.flatten_links)
-  {
-    m_not_oper(source, parc, parv);
-    return;
-  }
 
   if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
   {

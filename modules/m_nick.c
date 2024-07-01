@@ -823,38 +823,36 @@ ms_uid(struct Client *source, int parc, char *parv[])
     uid_from_server(source, parc, parv);
 }
 
-static struct Command nick_msgtab =
+static struct Command command_table[] =
 {
-  .name = "NICK",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
-  .handlers[CLIENT_HANDLER] = { .handler = m_nick, .end_grace_period = true },
-  .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_nick }
-};
-
-static struct Command uid_msgtab =
-{
-  .name = "UID",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 12 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  [0] = {
+    .name = "NICK",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
+    .handlers[CLIENT_HANDLER] = { .handler = m_nick, .end_grace_period = true },
+    .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_nick }
+  },
+  [1] = {
+    .name = "UID",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
+    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+    .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 12 },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  }
 };
 
 static void
 init_handler(void)
 {
-  command_add(&uid_msgtab);
-  command_add(&nick_msgtab);
+  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&uid_msgtab);
-  command_del(&nick_msgtab);
+  command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 struct Module module_entry =

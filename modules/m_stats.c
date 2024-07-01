@@ -1238,7 +1238,7 @@ ms_stats(struct Client *client, int parc, char *parv[])
   do_stats(client, parc, parv);
 }
 
-static struct Command stats_msgtab =
+static struct Command command_table =
 {
   .name = "STATS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -1252,14 +1252,14 @@ static void
 init_handler(void)
 {
   stats_register_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
-  command_add(&stats_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
   stats_unregister_array(stats_tab, IO_ARRAY_LENGTH(stats_tab));
-  command_del(&stats_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

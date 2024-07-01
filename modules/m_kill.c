@@ -224,7 +224,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
 }
 
 
-static struct Command kill_msgtab =
+static struct Command command_table =
 {
   .name = "KILL",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -237,13 +237,13 @@ static struct Command kill_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&kill_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&kill_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

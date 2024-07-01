@@ -136,7 +136,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
   sendto_one_notice(source, &me, ":WebIRC host/IP set to %s %s", host, addr);
 }
 
-static struct Command webirc_msgtab =
+static struct Command command_table =
 {
   .name = "WEBIRC",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_webirc, .args_min = 5 },
@@ -149,13 +149,13 @@ static struct Command webirc_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&webirc_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&webirc_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

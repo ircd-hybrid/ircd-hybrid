@@ -54,7 +54,7 @@ mr_pass(struct Client *source, int parc, char *parv[])
     source->connection->password = io_strndup(password, IO_MIN(strlen(password), PASSWDLEN));
 }
 
-static struct Command pass_msgtab =
+static struct Command command_table =
 {
   .name = "PASS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pass, .args_min = 2 },
@@ -67,13 +67,13 @@ static struct Command pass_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&pass_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&pass_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

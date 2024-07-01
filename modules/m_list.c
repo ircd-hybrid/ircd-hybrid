@@ -178,7 +178,7 @@ m_list(struct Client *source, int parc, char *parv[])
   do_list(source, parv[1]);
 }
 
-static struct Command list_msgtab =
+static struct Command command_table =
 {
   .name = "LIST",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -191,7 +191,7 @@ static struct Command list_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&list_msgtab);
+  command_add(&command_table);
   isupport_add("ELIST", "CMNTU", -1);
   isupport_add("SAFELIST", NULL, -1);
 }
@@ -199,7 +199,7 @@ init_handler(void)
 static void
 exit_handler(void)
 {
-  command_del(&list_msgtab);
+  command_del(&command_table);
   isupport_delete("ELIST");
   isupport_delete("SAFELIST");
 }

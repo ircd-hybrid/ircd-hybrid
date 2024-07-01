@@ -135,7 +135,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   fd_note(target->connection->fd, "Nick: %s", target->name);
 }
 
-static struct Command svsnick_msgtab =
+static struct Command command_table =
 {
   .name = "SVSNICK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -148,13 +148,13 @@ static struct Command svsnick_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&svsnick_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&svsnick_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

@@ -60,7 +60,7 @@ ms_resync(struct Client *source, int parc, char *parv[])
   channel_send_modes(source, channel);
 }
 
-static struct Command resync_msgtab =
+static struct Command command_table =
 {
   .name = "RESYNC",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered  },
@@ -73,14 +73,14 @@ static struct Command resync_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&resync_msgtab);
+  command_add(&command_table);
   capab_add("RESYNC", CAPAB_RESYNC, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&resync_msgtab);
+  command_del(&command_table);
   capab_del("RESYNC");
 }
 

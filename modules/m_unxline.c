@@ -155,7 +155,7 @@ ms_unxline(struct Client *source, int parc, char *parv[])
     xline_remove(source, &aline);
 }
 
-static struct Command unxline_msgtab =
+static struct Command command_table =
 {
   .name = "UNXLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -168,13 +168,13 @@ static struct Command unxline_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&unxline_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&unxline_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

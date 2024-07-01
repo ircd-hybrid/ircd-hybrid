@@ -66,7 +66,7 @@ ms_tmode(struct Client *source, int parc, char *parv[])
   channel_mode_set(source, channel, parc - 3, parv + 3);
 }
 
-static struct Command tmode_msgtab =
+static struct Command command_table =
 {
   .name = "TMODE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
@@ -79,13 +79,13 @@ static struct Command tmode_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&tmode_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&tmode_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

@@ -172,7 +172,7 @@ ms_whowas(struct Client *source, int parc, char *parv[])
   whowas_do(source, parv);
 }
 
-static struct Command whowas_msgtab =
+static struct Command command_table =
 {
   .name = "WHOWAS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -185,13 +185,13 @@ static struct Command whowas_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&whowas_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&whowas_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

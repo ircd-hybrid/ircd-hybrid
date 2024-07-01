@@ -211,7 +211,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
 }
 
 
-static struct Command invite_msgtab =
+static struct Command command_table =
 {
   .name = "INVITE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -224,13 +224,13 @@ static struct Command invite_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&invite_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&invite_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

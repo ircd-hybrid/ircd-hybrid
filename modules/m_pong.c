@@ -111,7 +111,7 @@ mr_pong(struct Client *source, int parc, char *parv[])
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
 }
 
-static struct Command pong_msgtab =
+static struct Command command_table =
 {
   .name = "PONG",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pong },
@@ -124,13 +124,13 @@ static struct Command pong_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&pong_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&pong_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

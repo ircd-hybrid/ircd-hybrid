@@ -164,7 +164,7 @@ ms_unkline(struct Client *source, int parc, char *parv[])
     kline_remove(source, &aline);
 }
 
-static struct Command unkline_msgtab =
+static struct Command command_table =
 {
   .name = "UNKLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -177,14 +177,14 @@ static struct Command unkline_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&unkline_msgtab);
+  command_add(&command_table);
   capab_add("UNKLN", CAPAB_UNKLN, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&unkline_msgtab);
+  command_del(&command_table);
   capab_del("UNKLN");
 }
 

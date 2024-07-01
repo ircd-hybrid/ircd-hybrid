@@ -80,7 +80,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
                 source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);
 }
 
-static struct Command svstag_msgtab =
+static struct Command command_table =
 {
   .name = "SVSTAG",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -93,13 +93,13 @@ static struct Command svstag_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&svstag_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&svstag_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

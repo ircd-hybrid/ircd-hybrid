@@ -424,7 +424,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     channel_free(channel);
 }
 
-static struct Command sjoin_msgtab =
+static struct Command command_table =
 {
   .name = "SJOIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -437,13 +437,13 @@ static struct Command sjoin_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&sjoin_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&sjoin_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

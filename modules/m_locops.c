@@ -92,7 +92,7 @@ ms_locops(struct Client *source, int parc, char *parv[])
                          source->name, message);
 }
 
-static struct Command locops_msgtab =
+static struct Command command_table =
 {
   .name = "LOCOPS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -105,13 +105,13 @@ static struct Command locops_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&locops_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&locops_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

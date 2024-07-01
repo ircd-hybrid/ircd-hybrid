@@ -296,7 +296,7 @@ ms_info(struct Client *source, int parc, char *parv[])
   send_info_text(source);
 }
 
-static struct Command info_msgtab =
+static struct Command command_table =
 {
   .name = "INFO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -310,13 +310,13 @@ static void
 init_handler(void)
 {
   info_register_array(info_table, IO_ARRAY_LENGTH(info_table));
-  command_add(&info_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&info_msgtab);
+  command_del(&command_table);
   info_unregister_array(info_table, IO_ARRAY_LENGTH(info_table));
 }
 

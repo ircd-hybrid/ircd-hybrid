@@ -123,7 +123,7 @@ m_links(struct Client *source, int parc, char *parv[])
   do_links(source, parv);
 }
 
-static struct Command links_msgtab =
+static struct Command command_table =
 {
   .name = "LINKS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -136,13 +136,13 @@ static struct Command links_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&links_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&links_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

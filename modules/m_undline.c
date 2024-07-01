@@ -162,7 +162,7 @@ ms_undline(struct Client *source, int parc, char *parv[])
     dline_remove(source, &aline);
 }
 
-static struct Command undline_msgtab =
+static struct Command command_table =
 {
   .name = "UNDLINE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -175,14 +175,14 @@ static struct Command undline_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&undline_msgtab);
+  command_add(&command_table);
   capab_add("UNDLN", CAPAB_UNDLN, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&undline_msgtab);
+  command_del(&command_table);
   capab_del("UNDLN");
 }
 

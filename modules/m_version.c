@@ -103,7 +103,7 @@ ms_version(struct Client *source, int parc, char *parv[])
   isupport_show(source);
 }
 
-static struct Command version_msgtab =
+static struct Command command_table =
 {
   .name = "VERSION",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -116,13 +116,13 @@ static struct Command version_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&version_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&version_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

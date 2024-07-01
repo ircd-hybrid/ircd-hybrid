@@ -78,7 +78,7 @@ mr_user(struct Client *source, int parc, char *parv[])
     user_register_local(source);
 }
 
-static struct Command user_msgtab =
+static struct Command command_table =
 {
   .name = "USER",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_user, .args_min = 5 },
@@ -91,13 +91,13 @@ static struct Command user_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&user_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&user_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

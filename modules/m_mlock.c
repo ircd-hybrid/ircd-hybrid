@@ -72,7 +72,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
                 channel->mode_lock ? channel->mode_lock : "");
 }
 
-static struct Command mlock_msgtab =
+static struct Command command_table =
 {
   .name = "MLOCK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
@@ -85,14 +85,14 @@ static struct Command mlock_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&mlock_msgtab);
+  command_add(&command_table);
   capab_add("MLOCK", CAPAB_MLOCK, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&mlock_msgtab);
+  command_del(&command_table);
   capab_del("MLOCK");
 }
 

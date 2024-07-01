@@ -106,7 +106,7 @@ ms_admin(struct Client *source, int parc, char *parv[])
   do_admin(source);
 }
 
-static struct Command admin_msgtab =
+static struct Command command_table =
 {
   .name = "ADMIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -119,13 +119,13 @@ static struct Command admin_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&admin_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&admin_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

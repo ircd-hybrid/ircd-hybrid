@@ -143,7 +143,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
     send_umode(target, oldmodes, true, false);
 }
 
-static struct Command svsmode_msgtab =
+static struct Command command_table =
 {
   .name = "SVSMODE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -156,13 +156,13 @@ static struct Command svsmode_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&svsmode_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&svsmode_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

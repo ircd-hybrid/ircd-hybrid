@@ -115,7 +115,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
   }
 }
 
-static struct Command tburst_msgtab =
+static struct Command command_table =
 {
   .name = "TBURST",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -128,14 +128,14 @@ static struct Command tburst_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&tburst_msgtab);
+  command_add(&command_table);
   capab_add("TBURST", CAPAB_TBURST, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&tburst_msgtab);
+  command_del(&command_table);
   capab_del("TBURST");
 }
 

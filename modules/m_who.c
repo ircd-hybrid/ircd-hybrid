@@ -590,7 +590,7 @@ m_who(struct Client *source, int parc, char *parv[])
   sendto_one_numeric(source, &me, RPL_ENDOFWHO, EmptyString(mask) ? "*" : mask);
 }
 
-static struct Command who_msgtab =
+static struct Command command_table =
 {
   .name = "WHO",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -603,14 +603,14 @@ static struct Command who_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&who_msgtab);
+  command_add(&command_table);
   isupport_add("WHOX", NULL, -1);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&who_msgtab);
+  command_del(&command_table);
   isupport_delete("WHOX");
 }
 

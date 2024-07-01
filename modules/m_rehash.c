@@ -200,7 +200,7 @@ ms_rehash(struct Client *source, int parc, char *parv[])
   }
 }
 
-static struct Command rehash_msgtab =
+static struct Command command_table =
 {
   .name = "REHASH",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -213,13 +213,13 @@ static struct Command rehash_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&rehash_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&rehash_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

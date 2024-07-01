@@ -89,7 +89,7 @@ ms_encap(struct Client *source, int parc, char *parv[])
   handler->handler(source, parc, parv);
 }
 
-static struct Command encap_msgtab =
+static struct Command command_table =
 {
   .name = "ENCAP",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
@@ -102,14 +102,14 @@ static struct Command encap_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&encap_msgtab);
+  command_add(&command_table);
   capab_add("ENCAP", CAPAB_ENCAP, true);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&encap_msgtab);
+  command_del(&command_table);
   capab_del("ENCAP");
 }
 

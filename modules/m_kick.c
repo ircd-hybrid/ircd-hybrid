@@ -155,7 +155,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
   channel_remove_user(member_target);
 }
 
-static struct Command kick_msgtab =
+static struct Command command_table =
 {
   .name = "KICK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -168,13 +168,13 @@ static struct Command kick_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&kick_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&kick_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

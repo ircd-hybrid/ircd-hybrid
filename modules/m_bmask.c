@@ -144,7 +144,7 @@ ms_bmask(struct Client *source, int parc, char *parv[])
                 source->id, channel->creation_time, channel->name, parv[3], parv[4]);
 }
 
-static struct Command bmask_msgtab =
+static struct Command command_table =
 {
   .name = "BMASK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
@@ -157,13 +157,13 @@ static struct Command bmask_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&bmask_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&bmask_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

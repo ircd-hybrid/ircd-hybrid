@@ -80,7 +80,7 @@ ms_globops(struct Client *source, int parc, char *parv[])
                        source->name, message);
 }
 
-static struct Command globops_msgtab =
+static struct Command command_table =
 {
   .name = "GLOBOPS",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -93,13 +93,13 @@ static struct Command globops_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&globops_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&globops_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

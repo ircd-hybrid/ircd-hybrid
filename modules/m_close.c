@@ -70,7 +70,7 @@ mo_close(struct Client *source, int parc, char *parv[])
   sendto_one_numeric(source, &me, RPL_CLOSEEND, closed);
 }
 
-static struct Command close_msgtab =
+static struct Command command_table =
 {
   .name = "CLOSE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -83,13 +83,13 @@ static struct Command close_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&close_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&close_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

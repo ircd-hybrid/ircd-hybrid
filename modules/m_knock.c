@@ -120,7 +120,7 @@ m_knock(struct Client *source, int parc, char *parv[])
                 source->id, channel->name);
 }
 
-static struct Command knock_msgtab =
+static struct Command command_table =
 {
   .name = "KNOCK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -133,7 +133,7 @@ static struct Command knock_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&knock_msgtab);
+  command_add(&command_table);
   capab_add("KNOCK", CAPAB_KNOCK, true);
   isupport_add("KNOCK", NULL, -1);
 }
@@ -141,7 +141,7 @@ init_handler(void)
 static void
 exit_handler(void)
 {
-  command_del(&knock_msgtab);
+  command_del(&command_table);
   capab_del("KNOCK");
   isupport_delete("KNOCK");
 }

@@ -82,7 +82,7 @@ ms_svskill(struct Client *source, int parc, char *parv[])
              source->id, target->id, ts, comment);
 }
 
-static struct Command svskill_msgtab =
+static struct Command command_table =
 {
   .name = "SVSKILL",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -95,13 +95,13 @@ static struct Command svskill_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&svskill_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&svskill_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

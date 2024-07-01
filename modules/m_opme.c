@@ -102,7 +102,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
                 channel->name, source->id);
 }
 
-static struct Command opme_msgtab =
+static struct Command command_table =
 {
   .name = "OPME",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -115,13 +115,13 @@ static struct Command opme_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&opme_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&opme_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

@@ -152,7 +152,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
                          channel->name, channel->topic);
 }
 
-static struct Command topic_msgtab =
+static struct Command command_table =
 {
   .name = "TOPIC",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -165,13 +165,13 @@ static struct Command topic_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&topic_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&topic_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

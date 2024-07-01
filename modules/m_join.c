@@ -262,7 +262,7 @@ ms_join(struct Client *source, int parc, char *parv[])
                 source->id, channel->creation_time, channel->name);
 }
 
-static struct Command join_msgtab =
+static struct Command command_table =
 {
   .name = "JOIN",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -275,13 +275,13 @@ static struct Command join_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&join_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&join_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

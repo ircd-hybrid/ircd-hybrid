@@ -258,7 +258,7 @@ m_monitor(struct Client *source, int parc, char *parv[])
   }
 }
 
-static struct Command monitor_msgtab =
+static struct Command command_table =
 {
   .name = "MONITOR",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
@@ -271,14 +271,14 @@ static struct Command monitor_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&monitor_msgtab);
+  command_add(&command_table);
   isupport_add("MONITOR", NULL, ConfigGeneral.max_monitor);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&monitor_msgtab);
+  command_del(&command_table);
   isupport_delete("MONITOR");
 }
 

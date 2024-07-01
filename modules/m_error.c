@@ -94,7 +94,7 @@ ms_error(struct Client *source, int parc, char *parv[])
                          source->name, client_get_name(source->from, MASK_IP), message);
 }
 
-static struct Command error_msgtab =
+static struct Command command_table =
 {
   .name = "ERROR",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_error },
@@ -107,13 +107,13 @@ static struct Command error_msgtab =
 static void
 init_handler(void)
 {
-  command_add(&error_msgtab);
+  command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&error_msgtab);
+  command_del(&command_table);
 }
 
 struct Module module_entry =

@@ -90,6 +90,8 @@ struct Command
 
 extern void command_add(struct Command *);
 extern void command_del(struct Command *);
+extern void command_add_array(struct Command *, size_t);
+extern void command_del_array(struct Command *, size_t);
 extern struct Command *command_find(const char *);
 extern void command_report(struct Client *);
 #endif  /* INCLUDED_command_h */

@@ -238,6 +238,26 @@ command_del(struct Command *command)
     command_tree_del_element(&command_tree, command->name);
 }
 
+void
+command_add_array(struct Command *commands, size_t elements)
+{
+  for (size_t i = 0; i < elements; ++i)
+  {
+    struct Command *const tmp = &commands[i];
+    command_add(tmp);
+  }
+}
+
+void
+command_del_array(struct Command *commands, size_t elements)
+{
+  for (size_t i = 0; i < elements; ++i)
+  {
+    struct Command *const tmp = &commands[i];
+    command_del(tmp);
+  }
+}
+
 /* find_command()
  *
  * inputs	- command name

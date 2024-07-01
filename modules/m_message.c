@@ -578,38 +578,36 @@ m_notice(struct Client *source, int parc, char *parv[])
   m_message(true, source, parc, parv);
 }
 
-static struct Command privmsg_msgtab =
+static struct Command command_table[] =
 {
-  .name = "PRIVMSG",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
-  .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
-};
-
-static struct Command notice_msgtab =
-{
-  .name = "NOTICE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_notice },
-  .handlers[SERVER_HANDLER] = { .handler = m_notice },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_notice }
+  [0] = {
+    .name = "PRIVMSG",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+    .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
+    .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
+  },
+  [1] = {
+    .name = "NOTICE",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
+    .handlers[CLIENT_HANDLER] = { .handler = m_notice },
+    .handlers[SERVER_HANDLER] = { .handler = m_notice },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_notice }
+  }
 };
 
 static void
 init_handler(void)
 {
-  command_add(&privmsg_msgtab);
-  command_add(&notice_msgtab);
+  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&privmsg_msgtab);
-  command_del(&notice_msgtab);
+  command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 struct Module module_entry =

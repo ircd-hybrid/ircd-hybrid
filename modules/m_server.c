@@ -679,38 +679,36 @@ ms_sid(struct Client *source, int parc, char *parv[])
                        target->name, source->name);
 }
 
-static struct Command server_msgtab =
+static struct Command command_table[] =
 {
-  .name = "SERVER",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 6 },
-  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_registered }
-};
-
-static struct Command sid_msgtab =
-{
-  .name = "SID",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 6 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  [0] = {
+    .name = "SERVER",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_server, .args_min = 6 },
+    .handlers[CLIENT_HANDLER] = { .handler = m_registered },
+    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_registered }
+  },
+  [1] = {
+    .name = "SID",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
+    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+    .handlers[SERVER_HANDLER] = { .handler = ms_sid, .args_min = 6 },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  }
 };
 
 static void
 init_handler(void)
 {
-  command_add(&sid_msgtab);
-  command_add(&server_msgtab);
+  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&sid_msgtab);
-  command_del(&server_msgtab);
+  command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 struct Module module_entry =

@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "misc.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
@@ -49,50 +50,44 @@ mr_dumb_proxy(struct Client *source, int parc, char *parv[])
   exit_client(source, "Client Exit");
 }
 
-static struct Command post_msgtab =
+static struct Command command_table[] =
 {
-  .name = "POST",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
-};
-
-static struct Command get_msgtab =
-{
-  .name = "GET",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
-};
-
-static struct Command put_msgtab =
-{
-  .name = "PUT",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  [0] = {
+    .name = "GET",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
+    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  },
+  [1] = {
+    .name = "POST",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
+    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  },
+  [2] = {
+    .name = "PUT",
+    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
+    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
+    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
+    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
+    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  }
 };
 
 static void
 init_handler(void)
 {
-  command_add(&post_msgtab);
-  command_add(&get_msgtab);
-  command_add(&put_msgtab);
+  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 static void
 exit_handler(void)
 {
-  command_del(&post_msgtab);
-  command_del(&get_msgtab);
-  command_del(&put_msgtab);
+  command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
 struct Module module_entry =

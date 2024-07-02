@@ -1,3 +1,7 @@
+#### Noteworthy changes in version 8.2.46 (2024-??-??)
+*
+
+
 #### Noteworthy changes in version 8.2.45 (2024-07-02)
 * The module API has been rewritten for improved flexibility. A `modules.conf` file is now
   required for configuring and loading modules. For further information, refer to the

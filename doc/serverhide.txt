@@ -46,13 +46,6 @@
 
        This is controlled by the hidden option in ircd.conf.
 
-       +--------------------------------------------------------------------+
-       | Technically, this code is a hack. With this option enabled, the    |
-       | server will prepend '(H) ' to the server info field when           |
-       | connecting to other servers. Other servers must understand that    |
-       | the (H) means hidden.                                              |
-       +--------------------------------------------------------------------+
-
      * The hide_servers option forces the server to not be shown when a user
        issues WHOIS and other commands which may show what server a user is
        on.

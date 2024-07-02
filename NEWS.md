@@ -1,7 +1,7 @@
 #### Noteworthy changes in version 8.2.45 (2024-??-??)
 * The module API has been rewritten for improved flexibility. A `modules.conf` file is now
   required for configuring and loading modules. For further information, refer to the
-  `reference.modules.conf`.
+  `doc/reference.modules.conf`.
 * The `INFO` subsystem has been updated to support dynamic registration and unregistration
   of info entries. This allows modules to register and unregister their own info entries,
   which are shown in the `INFO` output.
@@ -13,7 +13,7 @@
 #### Noteworthy changes in version 8.2.44 (2024-06-15)
 * Fixed FTCBFS issue caused by ./configure using macros that lacked special handling
   for cross-compilation scenarios
-* Fixed the issue where XLINE and UNXLINE were not working properly on servers within
+* Fixed the issue where `XLINE` and `UNXLINE` were not working properly on servers within
   a cluster
 * Command-line options now support both short (`-c`) and long (`--configfile`) formats.
   The available options are:

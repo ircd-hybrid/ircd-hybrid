@@ -1,37 +1,79 @@
-WHO <#channel|user>
+WHO <mask> [<flags>][%[<fields>[,<querytype>]]]
 
-The WHO command displays information about a user,
-such as their GECOS information, their user@host,
-whether they are an IRC operator or not, etc.
-A sample WHO result from a command issued like
-"WHO pokey" may look something like this:
+The WHO command retrieves information about users matching the specified
+mask. If no mask is provided, it defaults to listing all users. Options
+allow filtering and customizing the output fields.
 
-#lamers pokey H pokey@ppp.newbies.net :0 Jim Jones
+Flags:
+  These specify which fields to match against the mask:
+    a - Account name
+    h - Hostname
+    i - IP address (supports CIDR notation)
+    n - Nickname
+    o - Includes only users with IRC operator status
+    r - Real name (GECOS)
+    s - Server name
+    u - Username
+  Usage: WHO <mask> nuhsr
 
-The first field indicates the last channel the user
-has joined. The second is the user's nickname.
-The third field describes the status information about
-the user. The possible combinations for this field
-are listed below:
+Fields:
+  These specify which fields to include in the output:
+    a - Account name (shows "0" if no account)
+    c - Channel name
+    d - Distance (hop count)
+    f - Flags (away, oper, chanop, etc.)
+      Flags in the output may include:
+        G - User is away
+        H - User is here
+        B - User is a bot
+        z - User is using a secure connection
+        r - User is registered
+        * - User is an IRC operator
+      Channel prefixes:
+        ~ - Channel owner
+        & - Channel admin
+        @ - Channel operator
+        % - Half-operator
+        + - Voiced user
+    h - Hostname
+    i - IP address
+    l - Idle time (0 for remote users)
+    n - Nickname
+    o - Oper level
+    r - Real name (GECOS)
+    s - Server name
+    t - Query token
+    u - Username (with eventual ~)
+  Usage: WHO <mask> %[cfhilnorst]
 
-B - The user is marked as a bot. I.e. has the bot mode set (+B).
-H - The user is not away.
-G - The user is set away.
-r - The user is using a registered nickname.
-* - The user is an IRC operator.
-@ - The user is a channel op in the channel listed in the first field.
-+ - The user is voiced in the channel listed.
-% - The user is a half-op in the channel listed.
+Query type:
+  Specifies a numeric query type token (up to three digits) for custom
+  scripts. This token is included in the output to help identify and
+  filter results.
+  Usage: WHO <mask> %[nhirs],123
 
-The next field contains the username@host of the user.
-The final field displays the number of server hops and
-the user's GECOS information.
+Defaults:
+  If no mask is provided, the command lists all users.
+  Default matching fields: nuhsr
+  Default output fields if no %[fields] option is specified: nuhs
 
-This command may be executed on a channel, such as
-"WHO #lamers"  The output will consist of WHO
-listings for each user on the channel.
+Examples:
+  WHO #channel
+    Lists all users in the specified channel.
 
-This command may also be used in conjunction with wildcards
-such as * and ?.
+  WHO nick
+    Lists information about the user with the specified nickname.
 
-See also: whois, userhost
+  WHO * o
+    Lists all IRC operators.
+
+  WHO 192.168.1.0/24 i%hilnorst,101
+    Lists users whose IP address matches the CIDR mask 192.168.1.0/24,
+    includes the following fields in the output:
+      - Hostname
+      - IP address
+      - Idle time
+      - Real name (GECOS)
+      - Server name
+    The output includes the query token 101 to help identify and filter
+    these results.

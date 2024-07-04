@@ -294,6 +294,28 @@ ircd_oom(void)
 }
 
 /**
+ * @brief Handles time provider API error conditions.
+ *
+ * This function reports an error condition encountered in the time provider API using the provided
+ * error message and restarts the program. If it is called more than once, it aborts the program execution.
+ *
+ * @param error_code The error code indicating the type of error in the time provider API.
+ * @param message The error message providing details about the time provider API error.
+ */
+static void
+ircd_time_failure(enum io_time_error_code error_code, const char *message)
+{
+  static bool was_here = false;
+
+  if (was_here == false)
+    was_here = true;
+  else
+    abort();
+
+  server_die(message, true);
+}
+
+/**
  * @brief Writes the process ID to the specified file.
  *
  * @param filename Path to the process ID file.
@@ -511,6 +533,7 @@ main(int argc, char *argv[])
 
   /* Save server boot time right away, so getrusage works correctly */
   io_time_set();
+  io_time_set_error_callback(ircd_time_failure);
 
   /* It's not random, but it ought to be a little harder to guess */
   const uint32_t seed = (uint32_t)(io_time_get(IO_TIME_REALTIME_SEC) ^

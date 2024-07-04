@@ -36,19 +36,35 @@
 #include <stdbool.h>
 
 /**
- * @struct io_time
- * @brief Structure holding real-time and monotonic time values.
+ * @def IO_TIME_ERROR_BUFFER_SIZE
+ * @brief Buffer size for storing error messages.
  *
- * This structure stores both real-time and monotonic time values in seconds and nanoseconds.
- * It is updated by the io_time_set function and accessed by the io_time_get function.
+ * This constant defines the size of the buffer used for storing error messages
+ * encountered during time provider operations. It ensures that error messages are properly
+ * bounded and do not overflow.
  */
-typedef struct
+#define IO_TIME_ERROR_BUFFER_SIZE 256
+
+/**
+ * @enum io_time_error_code
+ * @brief Enum for representing error codes for time provider operations.
+ *
+ * This enum lists possible error codes returned by time provider operations such as initialization,
+ * retrieving time, and sanity checks. Each code provides a specific reason for a failure or success state.
+ */
+enum io_time_error_code
 {
-  uintmax_t sec_real;  /**< Seconds part of the real-time clock. */
-  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock. */
-  uintmax_t sec_monotonic;  /**< Seconds part of the monotonic clock. */
-  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock. */
-} io_time;
+  IO_TIME_OK = 0,  /**< Operation completed successfully. */
+  IO_TIME_ERR_INIT,  /**< Initialization failed. */
+  IO_TIME_ERR_GET_REAL,  /**< Failed to get real-time. */
+  IO_TIME_ERR_GET_MONO,  /**< Failed to get monotonic time. */
+  IO_TIME_ERR_GET_MONO_RAW,  /**< Failed to get monotonic raw time. */
+  IO_TIME_ERR_NEGATIVE,  /**< Clock failure: negative time value. */
+  IO_TIME_ERR_NSEC_RANGE,  /**< Clock failure: nanoseconds out of range. */
+  IO_TIME_ERR_BACKWARDS,  /**< Clock failure: time running backwards. */
+  IO_TIME_ERR_LARGE_JUMP,  /**< Clock failure: large time jump. */
+  IO_TIME_ERR_COUNT  /**< Number of error codes defined. */
+};
 
 /**
  * @enum io_time_type
@@ -67,6 +83,23 @@ typedef enum
   IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part. */
 } io_time_type;
 
+/**
+ * @struct io_time
+ * @brief Structure holding real-time and monotonic time values.
+ *
+ * This structure stores both real-time and monotonic time values in seconds and nanoseconds.
+ * It is updated by the io_time_set function and accessed by the io_time_get function.
+ */
+typedef struct
+{
+  uintmax_t sec_real;  /**< Seconds part of the real-time clock. */
+  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock. */
+  uintmax_t sec_monotonic;  /**< Seconds part of the monotonic clock. */
+  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock. */
+} io_time;
+
+extern void io_time_set_error_callback(void (*)(enum io_time_error_code, const char *));
+extern const char *io_time_get_error(void);
 extern const io_time *io_time_set(void);
 extern uintmax_t io_time_get(io_time_type);
 #endif  /* INCLUDED_io_time_h */

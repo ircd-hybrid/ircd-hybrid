@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "irc_string.h"
@@ -100,12 +101,12 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
   gecos = gecos_make();
   gecos->mask = io_strdup(aline->mask);
   gecos->reason = io_strdup(buf);
-  gecos->setat = event_base->time.sec_real;
+  gecos->setat = io_time_get(IO_TIME_REALTIME_SEC);
   gecos->in_database = true;
 
   if (aline->duration)
   {
-    gecos->expire = event_base->time.sec_real + aline->duration;
+    gecos->expire = gecos->setat + aline->duration;
 
     if (IsClient(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. X-Line [%s]",

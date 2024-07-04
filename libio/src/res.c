@@ -43,6 +43,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "event.h"
 #include "irc_string.h"
@@ -115,7 +116,7 @@ make_request(dns_callback_fnc callback, void *ctx)
 {
   struct reslist *request = io_calloc(sizeof(*request));
 
-  request->sentat = event_base->time.sec_monotonic;
+  request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
   request->retries = 2;
   request->timeout = 4;  /* Start at 4 and exponential inc. */
   request->callback = callback;
@@ -608,7 +609,7 @@ resolver_timeout(void *unused)
     struct reslist *request = node->data;
     uintmax_t timeout = request->sentat + request->timeout;
 
-    if (event_base->time.sec_monotonic >= timeout)
+    if (io_time_get(IO_TIME_MONOTONIC_SEC) >= timeout)
     {
       if (--request->retries <= 0)
       {
@@ -617,7 +618,7 @@ resolver_timeout(void *unused)
       }
       else
       {
-        request->sentat = event_base->time.sec_monotonic;
+        request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
         request->timeout += request->timeout;
         resend_query(request);
       }

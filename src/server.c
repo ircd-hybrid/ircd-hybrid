@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "event.h"
@@ -185,10 +186,10 @@ try_connections(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (conf->until > event_base->time.sec_monotonic)
+    if (conf->until > io_time_get(IO_TIME_MONOTONIC_SEC))
       continue;
 
-    conf->until = event_base->time.sec_monotonic + conf->class->con_freq;
+    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
 
     /*
      * Found a CONNECT config with port specified, scan clients
@@ -414,7 +415,7 @@ server_tls_handshake(fde_t *F, void *data)
   tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_CLIENT, &sslerr);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+    if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
       exit_client(client, "Timeout during TLS handshake");
       return;

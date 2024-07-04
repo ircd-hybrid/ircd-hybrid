@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "irc_string.h"
@@ -576,7 +577,7 @@ stats_events(struct Client *client, int parc, char *parv[])
   {
     const struct event *ev = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "E :%-30s %-4ju seconds",
-                       ev->name, ev->next - event_base->time.sec_monotonic);
+                       ev->name, ev->next - io_time_get(IO_TIME_MONOTONIC_SEC));
   }
 }
 
@@ -881,7 +882,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sp.is_sbs += target->connection->send.bytes;
     sp.is_sbr += target->connection->recv.bytes;
-    sp.is_sti += event_base->time.sec_monotonic - target->connection->created_monotonic;
+    sp.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic;
     sp.is_sv++;
   }
 
@@ -890,7 +891,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sp.is_cbs += target->connection->send.bytes;
     sp.is_cbr += target->connection->recv.bytes;
-    sp.is_cti += event_base->time.sec_monotonic - target->connection->created_monotonic;
+    sp.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic;
     sp.is_cl++;
   }
 
@@ -925,7 +926,7 @@ stats_uptime(struct Client *client, int parc, char *parv[])
   else
   {
     sendto_one_numeric(client, &me, RPL_STATSUPTIME,
-                       time_format_duration(event_base->time.sec_monotonic - me.connection->created_monotonic));
+                       time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic));
     if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(client, UMODE_OPER))
        sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
@@ -955,7 +956,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
                        target->name, (target->serv->by[0] ? target->serv->by : "Remote."),
-                       "*", "*", time_format_duration(event_base->time.sec_monotonic - target->connection->last_data));
+                       "*", "*", time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data));
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",
@@ -1002,8 +1003,8 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
-                       (event_base->time.sec_monotonic - target->connection->created_monotonic),
-                       (event_base->time.sec_monotonic - target->connection->last_data),
+                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic),
+                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
                        capab_get(target, true));
   }
 
@@ -1017,7 +1018,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recv_bytes), _GMKs(recv_bytes));
 
-  const uintmax_t uptime = (event_base->time.sec_monotonic - me.connection->created_monotonic);
+  const uintmax_t uptime = (io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
                      _GMKs((me.connection->send.bytes >> 10)),
@@ -1093,8 +1094,8 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
-                       (event_base->time.sec_monotonic - target->connection->created_monotonic),
-                       (event_base->time.sec_monotonic - target->connection->last_data),
+                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic),
+                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
                        IsServer(target) ? capab_get(target, true) : "-");
   }
 }
@@ -1207,13 +1208,13 @@ m_stats(struct Client *client, int parc, char *parv[])
   static uintmax_t last_used = 0;
 
   /* Check the user is actually allowed to do /stats, and isn't flooding */
-  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
+  if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(client, &me, RPL_LOAD2HI, "STATS");
     return;
   }
 
-  last_used = event_base->time.sec_monotonic;
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Is the stats meant for us? */
   if (ConfigServerHide.disable_remote_commands == 0)

@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "send.h"
 #include "channel.h"
@@ -807,10 +808,10 @@ sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
 {
   char buffer[IRCD_BUFSIZE];
 
-  if ((event_base->time.sec_monotonic - *rate) < 20)
+  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - *rate) < 20)
     return;
 
-  *rate = event_base->time.sec_monotonic;
+  *rate = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   va_list args;
   va_start(args, pattern);

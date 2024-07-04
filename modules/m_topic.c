@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -79,7 +80,7 @@ m_topic(struct Client *source, int parc, char *parv[])
     char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
              source->name, source->username, source->host);
-    channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, true);
+    channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), true);
 
     sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
                   source->id, channel->name, channel->topic);
@@ -138,7 +139,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
   else
     strlcpy(topic_info, source->name, sizeof(topic_info));
 
-  channel_set_topic(channel, parv[2], topic_info, event_base->time.sec_real, false);
+  channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), false);
 
   sendto_server(source, 0, 0, ":%s TOPIC %s :%s",
                 source->id, channel->name, channel->topic);

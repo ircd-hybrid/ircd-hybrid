@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "irc_string.h"
 #include "list.h"
 #include "send.h"
@@ -151,7 +152,7 @@ resv_find(const char *name, int (*compare)(const char *, const char *))
     struct ResvItem *resv = node->data;
 
     if (resv->expire &&
-        (resv->expire <= event_base->time.sec_real))
+        (resv->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
       resv_delete(resv, true);
     else if (compare(resv->mask, name) == 0)
       return resv;
@@ -225,7 +226,7 @@ resv_expire(void)
       struct ResvItem *resv = node->data;
 
       if (resv->expire &&
-          (resv->expire <= event_base->time.sec_real))
+          (resv->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
         resv_delete(resv, true);
     }
   }

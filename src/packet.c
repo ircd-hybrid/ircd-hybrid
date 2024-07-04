@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "comm.h"
 #include "conf.h"
@@ -326,8 +327,8 @@ read_packet(fde_t *F, void *data)
 
     dbuf_put(&client->connection->buf_recvq, readBuf, length);
 
-    client->connection->last_ping = event_base->time.sec_monotonic;
-    client->connection->last_data = event_base->time.sec_monotonic;
+    client->connection->last_ping =
+    client->connection->last_data = io_time_get(IO_TIME_MONOTONIC_SEC);
 
     DelFlag(client, FLAGS_PINGSENT);
 

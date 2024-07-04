@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
+#include "io_time.h"
 #include "fdlist.h"
 #include "ircd.h"
 #include "comm.h"
@@ -106,7 +107,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
 
   if (timeout)
   {
-    F->timeout = event_base->time.sec_monotonic + timeout;
+    F->timeout = io_time_get(IO_TIME_MONOTONIC_SEC) + timeout;
     F->timeout_handler = handler;
     F->timeout_data = client_data;
   }
@@ -149,7 +150,7 @@ comm_select(void)
   num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, SELECT_DELAY);
   assert(num <= epollop->nevents);
 
-  event_time_set();
+  io_time_set();
 
   if (num < 0)
   {

@@ -28,6 +28,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "io_time.h"
 #include "misc.h"
 #include "event.h"
 
@@ -48,7 +49,7 @@ date(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = event_base->time.sec_real;
+    lclock = io_time_get(IO_TIME_REALTIME_SEC);
 
   if (lclock_last != lclock)
   {
@@ -76,7 +77,7 @@ date_iso8601(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = event_base->time.sec_real;
+    lclock = io_time_get(IO_TIME_REALTIME_SEC);
 
   if (lclock_last != lclock)
   {
@@ -135,7 +136,7 @@ date_ctime(uintmax_t lclock)
   static uintmax_t lclock_last;
 
   if (lclock == 0)
-    lclock = event_base->time.sec_real;
+    lclock = io_time_get(IO_TIME_REALTIME_SEC);
 
   if (lclock_last != lclock)
   {

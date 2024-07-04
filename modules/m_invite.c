@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "channel.h"
 #include "channel_invite.h"
@@ -112,7 +113,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((source->connection->invite.last_attempt + ConfigChannel.invite_client_time) < event_base->time.sec_monotonic)
+  if ((source->connection->invite.last_attempt + ConfigChannel.invite_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
     source->connection->invite.count = 0;
 
   if (source->connection->invite.count > ConfigChannel.invite_client_count)
@@ -121,15 +122,15 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > event_base->time.sec_monotonic)
+  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYINVITE, channel->name, "channel");
     return;
   }
 
-  source->connection->invite.last_attempt = event_base->time.sec_monotonic;
+  source->connection->invite.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
   source->connection->invite.count++;
-  channel->last_invite_time = event_base->time.sec_monotonic;
+  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   sendto_one_numeric(source, &me, RPL_INVITING, target->name, channel->name);
 
@@ -187,7 +188,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
     return;
 
-  channel->last_invite_time = event_base->time.sec_monotonic;
+  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   if (MyConnect(target))
   {

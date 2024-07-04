@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "memory.h"
 #include "list.h"
 #include "event.h"
@@ -48,7 +49,7 @@ invite_find(struct Channel *channel, struct Client *client)
     struct Invite *invite = node->data;
 
     if (ConfigChannel.invite_expire_time &&
-        ConfigChannel.invite_expire_time + invite->when < event_base->time.sec_monotonic)
+        ConfigChannel.invite_expire_time + invite->when < io_time_get(IO_TIME_MONOTONIC_SEC))
       invite_del(invite);
     else if (invite->channel == channel && invite->client == client)
       return invite;
@@ -71,7 +72,7 @@ invite_add(struct Channel *channel, struct Client *client)
   invite = io_calloc(sizeof(*invite));
   invite->client = client;
   invite->channel = channel;
-  invite->when = event_base->time.sec_monotonic;
+  invite->when = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Delete last link in chain if the list is max length */
   while (list_length(&client->connection->invited) &&

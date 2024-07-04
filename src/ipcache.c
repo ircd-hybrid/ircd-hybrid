@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "ipcache.h"
 #include "event.h"
@@ -77,7 +78,7 @@ ipcache_record_delete(patricia_node_t *pnode)
   struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
 
   if (iptr->count_local == 0 && iptr->count_remote == 0 &&
-      (event_base->time.sec_monotonic - iptr->last_attempt) >= ConfigGeneral.throttle_time)
+      (io_time_get(IO_TIME_MONOTONIC_SEC) - iptr->last_attempt) >= ConfigGeneral.throttle_time)
   {
     patricia_remove(iptr->trie_pointer, pnode);
 

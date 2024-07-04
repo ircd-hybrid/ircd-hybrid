@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -176,7 +177,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
   struct Ban *ban = io_calloc(sizeof(*ban));
   ban->extban = extbans;
-  ban->when = event_base->time.sec_real;
+  ban->when = io_time_get(IO_TIME_REALTIME_SEC);
 
   check_string(maskptr);
 

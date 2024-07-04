@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "client_svstag.h"
@@ -178,7 +179,7 @@ server_estab(struct Client *client_p)
   }
 
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju",
-             me.id, TS_CURRENT, TS_MINIMUM, event_base->time.sec_real);
+             me.id, TS_CURRENT, TS_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
   SetServer(client_p);
   client_p->servptr = &me;
@@ -202,8 +203,8 @@ server_estab(struct Client *client_p)
   server_make(client_p);
 
   /* Fixing eob timings.. -gnp */
-  client_p->connection->created_monotonic = event_base->time.sec_monotonic;
-  client_p->connection->created_real = event_base->time.sec_real;
+  client_p->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client_p->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
 
   if (service_find(client_p->name, irccmp))
     AddFlag(client_p, FLAGS_SERVICE);

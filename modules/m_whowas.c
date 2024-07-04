@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "whowas.h"
 #include "client.h"
@@ -129,13 +130,13 @@ m_whowas(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
+  if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOWAS");
     return;
   }
 
-  last_used = event_base->time.sec_monotonic;
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_hunt(source, ":%s WHOWAS %s %s :%s", 3, parv)->ret != HUNTED_ISME)

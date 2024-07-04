@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "client_svstag.h"
@@ -87,10 +88,10 @@ client_make(struct Client *from)
   {
     client->from = client;  /* 'from' of local client is self! */
     client->connection = io_calloc(sizeof(*client->connection));
-    client->connection->last_data = event_base->time.sec_monotonic;
-    client->connection->last_ping = event_base->time.sec_monotonic;
-    client->connection->created_real = event_base->time.sec_real;
-    client->connection->created_monotonic = event_base->time.sec_monotonic;
+    client->connection->last_data = \
+    client->connection->last_ping = \
+    client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+    client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
     client->connection->registration = REG_INIT;
 
     /* as good a place as any... */
@@ -213,7 +214,7 @@ check_pings_list(list_t *list)
       continue;  /* Ignore it, it's been exited already */
 
     unsigned int ping = class_get_ping_freq(&client->connection->confs);
-    if (ping < event_base->time.sec_monotonic - client->connection->last_ping)
+    if (ping < io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping)
     {
       if (!HasFlag(client, FLAGS_PINGSENT))
       {
@@ -223,12 +224,12 @@ check_pings_list(list_t *list)
          * it is still alive.
          */
         AddFlag(client, FLAGS_PINGSENT);
-        client->connection->last_ping = event_base->time.sec_monotonic - ping;
+        client->connection->last_ping = io_time_get(IO_TIME_MONOTONIC_SEC) - ping;
         sendto_one(client, "PING :%s", ID_or_name(&me, client));
       }
       else
       {
-        if (event_base->time.sec_monotonic - client->connection->last_ping >= 2 * ping)
+        if (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping >= 2 * ping)
         {
           /*
            * If the client/server hasn't talked to us in 2*ping seconds
@@ -247,7 +248,7 @@ check_pings_list(list_t *list)
           }
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
-                   (event_base->time.sec_monotonic - client->connection->last_ping));
+                   (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
           exit_client(client, buf);
         }
       }
@@ -275,7 +276,7 @@ check_unknowns_list(void)
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) <= 30)
+    if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) <= 30)
       continue;
 
     if (IsHandshake(client))
@@ -584,14 +585,14 @@ client_close_connection(struct Client *client)
     ++ServerStats.is_cl;
     ServerStats.is_cbs += client->connection->send.bytes;
     ServerStats.is_cbr += client->connection->recv.bytes;
-    ServerStats.is_cti += event_base->time.sec_monotonic - client->connection->created_monotonic;
+    ServerStats.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
   }
   else if (IsServer(client))
   {
     ++ServerStats.is_sv;
     ServerStats.is_sbs += client->connection->send.bytes;
     ServerStats.is_sbr += client->connection->recv.bytes;
-    ServerStats.is_sti += event_base->time.sec_monotonic - client->connection->created_monotonic;
+    ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 
     list_node_t *node;
     LIST_FOREACH(node, connect_items.head)
@@ -603,7 +604,7 @@ client_close_connection(struct Client *client)
        * this servername.
        */
       if (irccmp(conf->name, client->name) == 0)
-        conf->until = event_base->time.sec_monotonic + conf->class->con_freq;
+        conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
     }
   }
   else
@@ -787,7 +788,7 @@ exit_client(struct Client *client, const char *comment)
 
       log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
                 date_ctime(client->connection->created_real),
-                event_base->time.sec_monotonic - client->connection->created_monotonic,
+                io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic,
                 client->name, client->username, client->host,
                 client->sockhost, client->account,
                 client->connection->send.bytes >> 10,
@@ -846,11 +847,11 @@ exit_client(struct Client *client, const char *comment)
     {
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "%s was connected for %s. %ju/%ju sendK/recvK.",
-                           client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic),
+                           client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                            client->connection->send.bytes >> 10,
                            client->connection->recv.bytes >> 10);
       log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
-                client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic),
+                client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                 client->connection->send.bytes >> 10,
                 client->connection->recv.bytes >> 10);
     }
@@ -937,7 +938,7 @@ dead_link_on_read(struct Client *client, int error)
     }
 
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s was connected for %s",
-                         client->name, time_format_duration(event_base->time.sec_monotonic - client->connection->created_monotonic));
+                         client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
   }
 
   if (error == 0)
@@ -1000,11 +1001,11 @@ client_get_idle_time(const struct Client *source,
   const struct ClassItem *const class = class_get_ptr(&target->connection->confs);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
-    return event_base->time.sec_monotonic - target->connection->last_privmsg;
+    return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
   if (HasUMode(source, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return event_base->time.sec_monotonic - target->connection->last_privmsg;
+    return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
   const unsigned int min_idle = class->min_idle;
   const unsigned int max_idle = class->max_idle;
@@ -1015,7 +1016,7 @@ client_get_idle_time(const struct Client *source,
   if (class->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else
-    idle = event_base->time.sec_monotonic - target->connection->last_privmsg;
+    idle = io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
   if (max_idle)
     idle %= max_idle;

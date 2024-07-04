@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "irc_string.h"
@@ -138,13 +139,13 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   conf = conf_make(CONF_KLINE);
   conf->user = io_strdup(aline->user);
   conf->host = io_strdup(aline->host);
-  conf->setat = event_base->time.sec_real;
+  conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
   conf->reason = io_strdup(buf);
   SetConfDatabase(conf);
 
   if (aline->duration)
   {
-    conf->until = event_base->time.sec_real + aline->duration;
+    conf->until = conf->setat + aline->duration;
 
     if (IsClient(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",

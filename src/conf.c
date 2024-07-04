@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "defaults.h"
 #include "list.h"
 #include "ircd_defs.h"
@@ -410,7 +411,7 @@ hostmask_expire_temporary(void)
     {
       struct AddressRec *arec = node->data;
 
-      if (arec->conf->until == 0 || arec->conf->until > event_base->time.sec_real)
+      if (arec->conf->until == 0 || arec->conf->until > io_time_get(IO_TIME_REALTIME_SEC))
         continue;
 
       switch (arec->type)
@@ -1080,7 +1081,7 @@ conf_connect_allowed(struct io_addr *addr)
   }
 
   struct ip_entry *ip_found = ipcache_record_find_or_add(addr);
-  if ((event_base->time.sec_monotonic - ip_found->last_attempt) < ConfigGeneral.throttle_time)
+  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - ip_found->last_attempt) < ConfigGeneral.throttle_time)
   {
     if (ip_found->connection_count >= ConfigGeneral.throttle_count)
       return TOO_FAST;
@@ -1090,7 +1091,7 @@ conf_connect_allowed(struct io_addr *addr)
   else
     ip_found->connection_count = 1;
 
-  ip_found->last_attempt = event_base->time.sec_monotonic;
+  ip_found->last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
   return 0;
 }
 

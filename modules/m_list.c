@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "hash.h"
@@ -85,13 +86,13 @@ do_list(struct Client *source, char *arg)
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_max = (unsigned int)(event_base->time.sec_real - 60 * i);
+                lt->created_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
               else
                 error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->created_min = (unsigned int)(event_base->time.sec_real - 60 * i);
+                lt->created_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
               else
                 error = true;
               break;
@@ -107,13 +108,13 @@ do_list(struct Client *source, char *arg)
           {
             case '<':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_min = (unsigned int)(event_base->time.sec_real - 60 * i);
+                lt->topicts_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
               else
                 error = true;
               break;
             case '>':
               if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_max = (unsigned int)(event_base->time.sec_real - 60 * i);
+                lt->topicts_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
               else
                 error = true;
               break;

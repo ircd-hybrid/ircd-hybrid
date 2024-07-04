@@ -26,6 +26,7 @@
 #include "stdinc.h"
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include "io_time.h"
 #include "address.h"
 #include "fdlist.h"
 #include "comm.h"
@@ -136,7 +137,7 @@ comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), 
   assert(F);
   assert(F->flags.open == true);
 
-  F->timeout = timeout ? event_base->time.sec_monotonic + timeout : 0;
+  F->timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
   F->timeout_handler = callback;
   F->timeout_data = cbdata;
 }
@@ -159,7 +160,7 @@ comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), vo
   assert(F);
   assert(F->flags.open == true);
 
-  F->flush_timeout = timeout ? event_base->time.sec_monotonic + timeout : 0;
+  F->flush_timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
   F->flush_handler = callback;
   F->flush_data = cbdata;
 }
@@ -182,7 +183,7 @@ comm_checktimeouts(void *unused)
       continue;
 
     /* check flush functions */
-    if (F->flush_timeout && F->flush_timeout < event_base->time.sec_monotonic)
+    if (F->flush_timeout && F->flush_timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       void (*hdl)(fde_t *, void *) = F->flush_handler;
       void *data = F->flush_data;
@@ -192,7 +193,7 @@ comm_checktimeouts(void *unused)
     }
 
     /* check timeouts */
-    if (F->timeout && F->timeout < event_base->time.sec_monotonic)
+    if (F->timeout && F->timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       /* Call timeout handler */
       void (*hdl)(fde_t *, void *) = F->timeout_handler;

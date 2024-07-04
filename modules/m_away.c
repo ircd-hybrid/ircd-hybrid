@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -65,7 +66,7 @@ do_away(struct Client *source, const char *message)
 
   if (MyConnect(source))
   {
-    if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < event_base->time.sec_monotonic)
+    if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
       source->connection->away.count = 0;
 
     if (source->connection->away.count > ConfigGeneral.away_count)
@@ -74,7 +75,7 @@ do_away(struct Client *source, const char *message)
       return;
     }
 
-    source->connection->away.last_attempt = event_base->time.sec_monotonic;
+    source->connection->away.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
     source->connection->away.count++;
     sendto_one_numeric(source, &me, RPL_NOWAWAY);
 

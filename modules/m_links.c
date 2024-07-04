@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -112,13 +113,13 @@ m_links(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
+  if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "LINKS");
     return;
   }
 
-  last_used = event_base->time.sec_monotonic;
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   do_links(source, parv);
 }

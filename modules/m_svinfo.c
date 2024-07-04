@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
@@ -78,35 +79,36 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   /*
    * Since we're here, might as well set event_base->time.sec_real while we're at it
    */
-  event_time_set();
+  io_time_set();
 
-  uintmax_t theirtime = strtoumax(parv[4], NULL, 10);
-  intmax_t deltat = imaxabs(theirtime - event_base->time.sec_real);
+  const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);
+  const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);
+  const intmax_t delta_ts = imaxabs(remote_ts - local_ts);
 
-  if (deltat > ConfigGeneral.ts_max_delta)
+  if (delta_ts > ConfigGeneral.ts_max_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), event_base->time.sec_real, theirtime, deltat);
+              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
     log_write(LOG_TYPE_IRCD,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
 
     exit_client(source, "Excessive TS delta");
     return;
   }
 
-  if (deltat > ConfigGeneral.ts_warn_delta)
+  if (delta_ts > ConfigGeneral.ts_warn_delta)
   {
     sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
               "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), event_base->time.sec_real, theirtime, deltat);
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
               "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), event_base->time.sec_real, theirtime, deltat);
+              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
   }
 }
 

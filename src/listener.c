@@ -27,6 +27,7 @@
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include "io_time.h"
 #include "list.h"
 #include "log.h"
 #include "listener.h"
@@ -118,7 +119,7 @@ ssl_handshake(fde_t *F, void *data)
   tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, NULL);
   if (ret != TLS_HANDSHAKE_DONE)
   {
-    if ((event_base->time.sec_monotonic - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+    if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
       exit_client(client, "Timeout during TLS handshake");
       return;

@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "ircd.h"
@@ -106,14 +107,14 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
+  if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     if (target->connection->received_number_of_privmsgs)
       target->connection->received_number_of_privmsgs = 0;
     else
       DelFlag(target, FLAGS_FLOOD_NOTICED);
 
-    target->connection->first_received_message_time = event_base->time.sec_monotonic;
+    target->connection->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
   if (target->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
@@ -155,14 +156,14 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (channel->first_received_message_time + GlobalSetOptions.floodtime < event_base->time.sec_monotonic)
+  if (channel->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     if (channel->received_number_of_privmsgs)
       channel->received_number_of_privmsgs = 0;
     else
       channel->sent_message_flood_notice = false;
 
-    channel->first_received_message_time = event_base->time.sec_monotonic;
+    channel->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
   if (channel->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
@@ -280,7 +281,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
                                       "server side ignore with the exception of common channels");
 
       if ((target->connection->last_caller_id_time +
-           ConfigGeneral.caller_id_wait) < event_base->time.sec_monotonic)
+           ConfigGeneral.caller_id_wait) < io_time_get(IO_TIME_MONOTONIC_SEC))
       {
         if (notice == false)
           sendto_one_numeric(source, &me, RPL_TARGNOTIFY, target->name);
@@ -288,7 +289,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
         sendto_one_numeric(target, &me, RPL_UMODEGMSG,
                            source->name, source->username, source->host,
                            callerid ? "+g" : "+G");
-        target->connection->last_caller_id_time = event_base->time.sec_monotonic;
+        target->connection->last_caller_id_time = io_time_get(IO_TIME_MONOTONIC_SEC);
       }
 
       /* Only so opers can watch for floods */
@@ -567,7 +568,7 @@ m_privmsg(struct Client *source, int parc, char *parv[])
     return;
 
   if (MyConnect(source))
-    source->connection->last_privmsg = event_base->time.sec_monotonic;
+    source->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   m_message(false, source, parc, parv);
 }

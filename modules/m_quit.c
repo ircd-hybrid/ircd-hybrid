@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -50,7 +51,7 @@ m_quit(struct Client *source, int parc, char *parv[])
 
   if (!EmptyString(parv[1]) && (HasUMode(source, UMODE_OPER) ||
       (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
-      < event_base->time.sec_monotonic))
+      < io_time_get(IO_TIME_MONOTONIC_SEC)))
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
   exit_client(source, reason);

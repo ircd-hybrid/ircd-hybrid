@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -90,7 +91,7 @@ m_knock(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < event_base->time.sec_monotonic)
+    if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
       source->connection->knock.count = 0;
 
     if (source->connection->knock.count > ConfigChannel.knock_client_count)
@@ -99,19 +100,19 @@ m_knock(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > event_base->time.sec_monotonic)
+    if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
       return;
     }
 
-    source->connection->knock.last_attempt = event_base->time.sec_monotonic;
+    source->connection->knock.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
     source->connection->knock.count++;
 
     sendto_one_numeric(source, &me, RPL_KNOCKDLVR, channel->name);
   }
 
-  channel->last_knock_time = event_base->time.sec_monotonic;
+  channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",

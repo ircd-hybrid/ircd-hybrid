@@ -28,10 +28,8 @@
 #include "event.h"
 #include "rng_mt.h"
 #include "log.h"
+#include "io_time.h"
 
-
-struct event_base ebase;
-struct event_base *event_base = &ebase;
 
 static list_t event_list;
 
@@ -47,7 +45,7 @@ event_add(struct event *ev, void *data)
   event_delete(ev);
 
   ev->data = data;
-  ev->next = event_base->time.sec_monotonic + ev->when;
+  ev->next = io_time_get(IO_TIME_MONOTONIC_SEC) + ev->when;
   ev->active = true;
 
   list_node_t *node;
@@ -93,16 +91,16 @@ event_run(void)
 {
   static uintmax_t last = 0;
 
-  if (last == event_base->time.sec_monotonic)
+  if (last == io_time_get(IO_TIME_MONOTONIC_SEC))
     return;
-  last = event_base->time.sec_monotonic;
+  last = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   unsigned int len = list_length(&event_list);
   while (len-- && list_length(&event_list))
   {
     struct event *ev = event_list.head->data;
 
-    if (ev->next > event_base->time.sec_monotonic)
+    if (ev->next > io_time_get(IO_TIME_MONOTONIC_SEC))
       break;
 
     event_delete(ev);
@@ -112,26 +110,4 @@ event_run(void)
     if (ev->oneshot == false)
       event_add(ev, ev->data);
   }
-}
-
-void
-event_time_set(void)
-{
-  struct timespec newtime;
-
-  if (clock_gettime(CLOCK_REALTIME, &newtime))
-    exit(EXIT_FAILURE);
-  else if (event_base->time.sec_real > (uintmax_t)newtime.tv_sec)
-    log_write(LOG_TYPE_IRCD, "System clock is running backwards - (%ju < %ju)",
-         (uintmax_t)newtime.tv_sec, event_base->time.sec_real);
-  event_base->time.sec_real = newtime.tv_sec;
-
-#ifdef CLOCK_MONOTONIC_RAW
-  if (clock_gettime(CLOCK_MONOTONIC_RAW, &newtime) == 0)
-#else
-  if (clock_gettime(CLOCK_MONOTONIC, &newtime) == 0)
-#endif
-    event_base->time.sec_monotonic = newtime.tv_sec;
-  else
-    exit(EXIT_FAILURE);
 }

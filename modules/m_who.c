@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "channel.h"
@@ -324,13 +325,13 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 
   if (!HasUMode(source, UMODE_OPER))
   {
-    if ((last_used + ConfigGeneral.pace_wait) > event_base->time.sec_monotonic)
+    if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHO");
       return;
     }
 
-    last_used = event_base->time.sec_monotonic;
+    last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
   /* First, list all matching invisible clients on common channels */

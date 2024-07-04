@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "defaults.h"
 #include "list.h"
 #include "user.h"
@@ -387,7 +388,7 @@ user_register_local(struct Client *client)
   SetClient(client);
 
   client->servptr = &me;
-  client->connection->last_privmsg = event_base->time.sec_monotonic;
+  client->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   list_add(client, &client->lnode, &client->servptr->serv->client_list);
   list_add(client, &client->node, &global_client_list);

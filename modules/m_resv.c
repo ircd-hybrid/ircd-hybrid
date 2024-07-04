@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -72,12 +73,12 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   }
 
   resv = resv_make(aline->mask, aline->reason, NULL);
-  resv->setat = event_base->time.sec_real;
+  resv->setat = io_time_get(IO_TIME_REALTIME_SEC);
   resv->in_database = true;
 
   if (aline->duration)
   {
-    resv->expire = event_base->time.sec_real + aline->duration;
+    resv->expire = resv->setat + aline->duration;
 
     if (IsClient(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. RESV [%s]",

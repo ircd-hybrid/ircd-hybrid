@@ -34,6 +34,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "event.h"
@@ -125,7 +126,7 @@ void *
 hook_run_chain(struct HookContainer *container, ...)
 {
   container->called++;
-  container->last = event_base->time.sec_monotonic;
+  container->last = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Check if the hook chain is empty. */
   if (list_is_empty(&container->chain))

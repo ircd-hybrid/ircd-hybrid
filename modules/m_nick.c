@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "hash.h"
 #include "fdlist.h"
@@ -172,7 +173,7 @@ set_initial_nick(struct Client *source, const char *nick)
 {
   bool samenick = irccmp(source->name, nick) == 0;
   if (samenick == false)
-    source->tsinfo = event_base->time.sec_real;
+    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
 
   source->connection->registration &= ~REG_NEED_NICK;
 
@@ -203,7 +204,7 @@ change_local_nick(struct Client *source, const char *nick)
   assert(source->name[0] && !EmptyString(nick));
   assert(MyClient(source));
 
-  if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < event_base->time.sec_monotonic)
+  if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
     source->connection->nick.count = 0;
 
   if (ConfigGeneral.anti_nick_flood && !HasUMode(source, UMODE_OPER) &&
@@ -214,13 +215,13 @@ change_local_nick(struct Client *source, const char *nick)
     return;
   }
 
-  source->connection->nick.last_attempt = event_base->time.sec_monotonic;
+  source->connection->nick.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
   source->connection->nick.count++;
 
   bool samenick = irccmp(source->name, nick) == 0;
   if (samenick == false)
   {
-    source->tsinfo = event_base->time.sec_real;
+    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
     clear_ban_cache_list(&source->channel);
     monitor_signoff(source);
 

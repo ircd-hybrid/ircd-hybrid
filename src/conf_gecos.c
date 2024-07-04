@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "send.h"
 #include "client.h"
@@ -85,7 +86,7 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
     struct GecosItem *gecos = node->data;
 
     if (gecos->expire &&
-        (gecos->expire <= event_base->time.sec_real))
+        (gecos->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);
     else if (compare(gecos->mask, name) == 0)
       return gecos;
@@ -104,7 +105,7 @@ gecos_expire(void)
     struct GecosItem *gecos = node->data;
 
     if (gecos->expire &&
-        (gecos->expire <= event_base->time.sec_real))
+        (gecos->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);
   }
 }

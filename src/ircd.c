@@ -30,6 +30,7 @@
 
 #include "stdinc.h"
 #include "io_getopt.h"
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "irc_string.h"
@@ -509,11 +510,11 @@ main(int argc, char *argv[])
   setup_fdlimit();
 
   /* Save server boot time right away, so getrusage works correctly */
-  event_time_set();
+  io_time_set();
 
   /* It's not random, but it ought to be a little harder to guess */
-  uint32_t seed = (uint32_t)(event_base->time.sec_real ^
-                             (event_base->time.sec_monotonic | (getpid() << 16)));
+  const uint32_t seed = (uint32_t)(io_time_get(IO_TIME_REALTIME_SEC) ^
+                                   (io_time_get(IO_TIME_MONOTONIC_SEC) | (getpid() << 16)));
   init_genrand(seed);
 
   ConfigGeneral.dpath      = DPATH;
@@ -605,8 +606,8 @@ main(int argc, char *argv[])
 
   me.from = &me;
   me.servptr = &me;
-  me.connection->created_real = event_base->time.sec_real;
-  me.connection->created_monotonic = event_base->time.sec_monotonic;
+  me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+  me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   SetMe(&me);
   server_make(&me);

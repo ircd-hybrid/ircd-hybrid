@@ -39,6 +39,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "fdlist.h"
 #include "auth.h"
 #include "conf.h"
@@ -188,10 +189,10 @@ auth_release_client(struct AuthRequest *auth)
    */
   comm_setflush(client->connection->fd, 1, flood_recalc, client);
 
-  client->connection->last_ping = event_base->time.sec_monotonic;
-  client->connection->last_data = event_base->time.sec_monotonic;
-  client->connection->created_real = event_base->time.sec_real;
-  client->connection->created_monotonic = event_base->time.sec_monotonic;
+  client->connection->last_ping = \
+  client->connection->last_data = \
+  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
 
   AddFlag(client, FLAGS_FINISHED_AUTH);
 

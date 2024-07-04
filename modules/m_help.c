@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "defaults.h"
 #include "client.h"
 #include "ircd.h"
@@ -126,13 +127,13 @@ m_help(struct Client *source, int parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
+  if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "HELP");
     return;
   }
 
-  last_used = event_base->time.sec_monotonic;
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   do_help(source, parv[1]);
 }

@@ -28,6 +28,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "whowas.h"
@@ -138,7 +139,7 @@ whowas_add_history(struct Client *client, bool online)
   assert(IsClient(client));
 
   whowas->hash_value = hash_string(client->name);
-  whowas->logoff = event_base->time.sec_real;
+  whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->servptr) != 0;
 
   strlcpy(whowas->account, client->account, sizeof(whowas->account));
@@ -196,7 +197,7 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  timelimit = event_base->time.sec_real - timelimit;
+  timelimit = io_time_get(IO_TIME_REALTIME_SEC) - timelimit;
 
   list_node_t *node;
   LIST_FOREACH(node, whowas_hash[hash_string(name)].head)

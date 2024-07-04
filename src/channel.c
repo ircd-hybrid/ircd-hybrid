@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "defaults.h"
 #include "list.h"
 #include "channel.h"
@@ -74,7 +75,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
     if (flood_ctrl)
       ++channel->number_joined;
 
-    channel->number_joined -= (event_base->time.sec_monotonic - channel->last_join_time) *
+    channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
       (((float)GlobalSetOptions.joinfloodcount) /
        (float)GlobalSetOptions.joinfloodtime);
 
@@ -95,7 +96,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
       }
     }
 
-    channel->last_join_time = event_base->time.sec_monotonic;
+    channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
   struct ChannelMember *member = io_calloc(sizeof(*member));
@@ -364,8 +365,8 @@ channel_make(const char *name)
   struct Channel *channel = io_calloc(sizeof(*channel));
   channel->hnextch = channel;
   /* Doesn't hurt to set it here */
-  channel->creation_time = event_base->time.sec_real;
-  channel->last_join_time = event_base->time.sec_monotonic;
+  channel->creation_time = io_time_get(IO_TIME_REALTIME_SEC);
+  channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Cache channel name length to avoid repetitive strlen() calls. */
   channel->name_len = strlcpy(channel->name, name, sizeof(channel->name));
@@ -920,7 +921,7 @@ channel_check_spambot_warning(struct Client *client, const char *name)
   }
   else
   {
-    unsigned int t_delta = event_base->time.sec_monotonic - client->connection->last_leave_time;
+    unsigned int t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
@@ -931,14 +932,14 @@ channel_check_spambot_warning(struct Client *client, const char *name)
     }
     else
     {
-      if ((event_base->time.sec_monotonic - client->connection->last_join_time) < GlobalSetOptions.spam_time)
+      if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_join_time) < GlobalSetOptions.spam_time)
         ++client->connection->join_leave_count;  /* It's a possible spambot */
     }
 
     if (name)
-      client->connection->last_join_time = event_base->time.sec_monotonic;
+      client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     else
-      client->connection->last_leave_time = event_base->time.sec_monotonic;
+      client->connection->last_leave_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 }
 
@@ -1096,7 +1097,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
 
     channel_send_namereply(client, channel);
 
-    client->connection->last_join_time = event_base->time.sec_monotonic;
+    client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 }
 
@@ -1135,7 +1136,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
   {
     const char *error;
     if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
-          >= event_base->time.sec_monotonic)
+          >= io_time_get(IO_TIME_MONOTONIC_SEC))
       show_reason = false;
     else if (can_send(channel, client, member, reason, false, &error) == CAN_SEND_NO)
       show_reason = false;

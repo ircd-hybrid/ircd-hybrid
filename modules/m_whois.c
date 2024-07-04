@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "client_svstag.h"
@@ -273,13 +274,13 @@ m_whois(struct Client *source, int parc, char *parv[])
   if (!EmptyString(parv[2]))
   {
     /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigGeneral.pace_wait_simple) > event_base->time.sec_monotonic)
+    if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
       return;
     }
 
-    last_used = event_base->time.sec_monotonic;
+    last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
     /*
      * if we have serverhide enabled, they can either ask the clients

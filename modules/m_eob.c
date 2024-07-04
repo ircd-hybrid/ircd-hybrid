@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
@@ -50,7 +51,7 @@ ms_eob(struct Client *source, int parc, char *parv[])
   if (MyConnect(source))
     sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                          "End of burst from %s (%ju seconds)", source->name,
-                         (event_base->time.sec_monotonic - source->connection->created_monotonic));
+                         (io_time_get(IO_TIME_MONOTONIC_SEC) - source->connection->created_monotonic));
 
   AddFlag(source, FLAGS_EOB);
   sendto_server(source, 0, 0, ":%s EOB", source->id);

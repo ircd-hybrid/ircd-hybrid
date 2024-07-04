@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io_time.h"
 #include "list.h"
 #include "client.h"
 #include "hash.h"
@@ -78,18 +79,18 @@ trace_send_status(struct Client *source, const struct Client *target)
     case STAT_UNKNOWN:
       sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
                          class_name, name, target->sockhost,
-                         event_base->time.sec_monotonic - target->connection->created_monotonic);
+                         io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic);
       break;
     case STAT_CLIENT:
       if (HasUMode(target, UMODE_OPER))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, name, target->sockhost,
-                           event_base->time.sec_monotonic - target->connection->last_data,
+                           io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
                            client_get_idle_time(source, target));
       else
         sendto_one_numeric(source, &me, RPL_TRACEUSER,
                            class_name, name, target->sockhost,
-                           event_base->time.sec_monotonic - target->connection->last_data,
+                           io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
                            client_get_idle_time(source, target));
       break;
     case STAT_SERVER:
@@ -105,7 +106,7 @@ trace_send_status(struct Client *source, const struct Client *target)
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
                          class_name, servers, clients, name,
                          *(target->serv->by) ? target->serv->by : "*", "*",
-                         me.name, event_base->time.sec_monotonic - target->connection->last_data);
+                         me.name, io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data);
       break;
     }
 

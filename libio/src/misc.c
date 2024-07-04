@@ -102,17 +102,18 @@ const char *
 date_iso8601_usec(uintmax_t unused)
 {
   static char buf[64];
-  struct timeval tv;
+  const io_time *const iotime = io_time_set();
+  uintmax_t current_time = iotime->sec_real;
 
-  gettimeofday(&tv, NULL);
-  uintmax_t current_time = tv.tv_sec;
+  /* Convert to local time. */
+  const struct tm *const time_info = localtime((time_t *)&current_time);
 
-  const struct tm *time_info = localtime((time_t *)&current_time);
+  /* Format date and time. */
   size_t len = strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", time_info);
 
   /* Append microseconds. */
-  len += snprintf(buf + len, sizeof(buf) - len, ".%06ld", tv.tv_usec);
-    
+  len += snprintf(buf + len, sizeof(buf) - len, ".%06ju", iotime->nsec_real / 1000);
+
   /* Append UTC offset. */
   strftime(buf + len, sizeof(buf) - len, "%z", time_info);
 

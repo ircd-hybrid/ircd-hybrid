@@ -278,18 +278,10 @@ initialize_global_set_options(void)
  * @brief Handles out-of-memory conditions.
  *
  * This function reports an out-of-memory condition and restarts the program.
- * If it is called more than once, it aborts the program execution.
  */
 static void
 ircd_oom(void)
 {
-  static bool was_here = false;
-
-  if (was_here == false)
-    was_here = true;
-  else
-    abort();
-
   server_die("out of memory", true);
 }
 
@@ -297,7 +289,7 @@ ircd_oom(void)
  * @brief Handles time provider API error conditions.
  *
  * This function reports an error condition encountered in the time provider API using the provided
- * error message and restarts the program. If it is called more than once, it aborts the program execution.
+ * error message and restarts the program.
  *
  * @param error_code The error code indicating the type of error in the time provider API.
  * @param message The error message providing details about the time provider API error.
@@ -305,13 +297,6 @@ ircd_oom(void)
 static void
 ircd_time_failure(enum io_time_error_code error_code, const char *message)
 {
-  static bool was_here = false;
-
-  if (was_here == false)
-    was_here = true;
-  else
-    abort();
-
   server_die(message, true);
 }
 

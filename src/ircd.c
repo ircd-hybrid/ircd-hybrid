@@ -520,9 +520,20 @@ main(int argc, char *argv[])
   io_time_set();
   io_time_set_error_callback(ircd_time_failure);
 
-  /* It's not random, but it ought to be a little harder to guess */
-  const uint32_t seed = (uint32_t)(io_time_get(IO_TIME_REALTIME_SEC) ^
-                                   (io_time_get(IO_TIME_MONOTONIC_SEC) | (getpid() << 16)));
+  /*
+   * Calculate the seed using multiple sources of entropy
+   * - Real-time and monotonic clocks provide high-resolution time values
+   * - Process ID adds process-specific uniqueness
+   * This combination aims to create a seed that is harder to predict
+   */
+  const uint32_t seed = (uint32_t)(
+     (io_time_get(IO_TIME_REALTIME_SEC) % UINT32_MAX) ^  /* Real-time seconds (modulo to fit in 32 bits) */
+      io_time_get(IO_TIME_REALTIME_NSEC) ^  /* Real-time nanoseconds */
+    ((io_time_get(IO_TIME_MONOTONIC_SEC) % UINT32_MAX) ^  /* Monotonic seconds (modulo to fit in 32 bits) */
+      io_time_get(IO_TIME_MONOTONIC_NSEC) ^  /* Monotonic nanoseconds */
+    ((uint32_t)(getpid() & 0xFFFF) << 16))  /* Masked and shifted PID for added entropy */
+  );
+
   init_genrand(seed);
 
   ConfigGeneral.dpath      = DPATH;

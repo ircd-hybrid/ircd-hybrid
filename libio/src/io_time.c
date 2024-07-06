@@ -172,6 +172,9 @@ io_time_get_error(void)
 int
 io_time_init(void)
 {
+  if (initialized)
+    return 0;
+
   const io_time *const iotime = io_time_set();
   if (iotime == NULL)
   {
@@ -181,6 +184,7 @@ io_time_init(void)
     return -1;
   }
 
+  initialized = true;
   return 0;
 }
 
@@ -302,27 +306,24 @@ io_time_set(void)
   }
 #endif
 
-  if (initialized)
+  ret = io_time_sanity_check(&current_realtime, &previous_realtime);
+  if (ret != IO_TIME_OK)
   {
-    ret = io_time_sanity_check(&current_realtime, &previous_realtime);
-    if (ret != IO_TIME_OK)
-    {
-      io_time_set_error(ret, &current_realtime, &previous_realtime);
+    io_time_set_error(ret, &current_realtime, &previous_realtime);
 
-      if (io_time_error_callback)
-        io_time_error_callback(ret, io_time_get_error());
-      return NULL;
-    }
+    if (io_time_error_callback)
+      io_time_error_callback(ret, io_time_get_error());
+    return NULL;
+  }
 
-    ret = io_time_sanity_check(&current_monotonic, &previous_monotonic);
-    if (ret != IO_TIME_OK)
-    {
-      io_time_set_error(ret, &current_monotonic, &previous_monotonic);
+  ret = io_time_sanity_check(&current_monotonic, &previous_monotonic);
+  if (ret != IO_TIME_OK)
+  {
+    io_time_set_error(ret, &current_monotonic, &previous_monotonic);
 
-      if (io_time_error_callback)
-        io_time_error_callback(ret, io_time_get_error());
-      return NULL;
-    }
+    if (io_time_error_callback)
+      io_time_error_callback(ret, io_time_get_error());
+    return NULL;
   }
 
   /* Update previous time data. */
@@ -335,7 +336,6 @@ io_time_set(void)
   current_time_data.sec_monotonic = current_monotonic.tv_sec;
   current_time_data.nsec_monotonic = current_monotonic.tv_nsec;
 
-  initialized = true;
   return &current_time_data;
 }
 

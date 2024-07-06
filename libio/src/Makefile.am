@@ -24,6 +24,8 @@ libio_la_SOURCES =  address.c     \
                     io.h          \
                     io_getopt.c   \
                     io_getopt.h   \
+                    io_signal.c   \
+                    io_signal.h   \
                     irc_string.c  \
                     irc_string.h  \
                     io_time.c     \

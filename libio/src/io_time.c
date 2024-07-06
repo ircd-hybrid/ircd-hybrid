@@ -208,7 +208,7 @@ io_internal_gettime(clockid_t clock_id, struct timespec *ts)
       case CLOCK_MONOTONIC_RAW:
         return IO_TIME_ERR_GET_MONO_RAW;
       default:
-        abort();  /* Invalid type, abort the program. */
+        abort();  /* Invalid clock_id, abort the program. */
     }
   }
 

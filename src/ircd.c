@@ -289,7 +289,7 @@ ircd_oom(void)
  * @brief Handles time provider API error conditions.
  *
  * This function reports an error condition encountered in the time provider API using the provided
- * error message and restarts the program.
+ * error message. It exits with EXIT_FAILURE if the error code is IO_TIME_ERR_INIT, otherwise, it restarts the program.
  *
  * @param error_code The error code indicating the type of error in the time provider API.
  * @param message The error message providing details about the time provider API error.
@@ -297,7 +297,13 @@ ircd_oom(void)
 static void
 ircd_time_failure(enum io_time_error_code error_code, const char *message)
 {
-  server_die(message, true);
+  if (error_code == IO_TIME_ERR_INIT)
+  {
+    fprintf(stderr, "ERROR: %s\n", message);
+    exit(EXIT_FAILURE);  /* Exit with failure if initialization error. */
+  }
+
+  server_die(message, true);  /* Restart the program for other errors. */
 }
 
 /**
@@ -517,8 +523,8 @@ main(int argc, char *argv[])
   setup_fdlimit();
 
   /* Save server boot time right away, so getrusage works correctly */
-  io_time_set();
   io_time_set_error_callback(ircd_time_failure);
+  io_time_init();
 
   /*
    * Calculate the seed using multiple sources of entropy

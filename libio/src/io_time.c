@@ -97,7 +97,7 @@ static char io_time_last_error[IO_TIME_ERROR_BUFFER_SIZE];
 static const char *const io_time_error_strings[IO_TIME_ERR_COUNT] =
 {
   [IO_TIME_OK] = "Operation completed successfully",
-  [IO_TIME_ERR_INIT] = "Initialization failed",
+  [IO_TIME_ERR_INIT] = "Failed to initialize the time provider API",
   [IO_TIME_ERR_GET_REAL] = "Failed to get real-time",
   [IO_TIME_ERR_GET_MONO] = "Failed to get monotonic time",
   [IO_TIME_ERR_GET_MONO_RAW] = "Failed to get monotonic raw time",
@@ -158,6 +158,30 @@ const char *
 io_time_get_error(void)
 {
   return io_time_last_error;
+}
+
+/**
+ * @brief Initializes the time provider API.
+ *
+ * This function initializes the time provider API by calling io_time_set to retrieve the current
+ * time data. If the initialization fails, it calls the error callback with an appropriate error code
+ * and message.
+ *
+ * @return int Returns 0 on successful initialization, -1 on failure.
+ */
+int
+io_time_init(void)
+{
+  const io_time *const iotime = io_time_set();
+  if (iotime == NULL)
+  {
+    if (io_time_error_callback)
+      io_time_error_callback(IO_TIME_ERR_INIT, io_time_get_error());
+
+    return -1;
+  }
+
+  return 0;
 }
 
 /**

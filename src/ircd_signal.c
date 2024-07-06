@@ -21,155 +21,126 @@
 
 /**
  * @file ircd_signal.c
- * @brief Responsible for handling signals in the IRC daemon.
+ * @brief Implements signal handling for the IRC daemon.
  *
- * This file contains functions for handling various signals that the IRC daemon may receive.
+ * This file contains functions for setting up and managing signal handlers
+ * for the IRC daemon. It includes handlers for various signals and ensures
+ * proper reaping of zombie processes.
  */
+
+#include <signal.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 #include "stdinc.h"
-#include "ircd_signal.h"
+#include "misc.h"
+#include "io_signal.h"
 #include "ircd.h"
 #include "restart.h"
+#include "ircd_signal.h"
 
 /**
- * @brief Handles the SIGTERM signal, causing the server to exit gracefully.
+ * @var dorehash
+ * @brief Flag indicating if the server configuration should be re-read.
  *
- * This function is the signal handler for the SIGTERM signal. When the
- * server receives the SIGTERM signal, it calls this function, prompting
- * the server to exit gracefully.
+ * This global variable is set to true when the server receives the SIGHUP signal,
+ * indicating that the server configuration should be re-read.
+ */
+volatile sig_atomic_t dorehash;
+
+/**
+ * @var doremotd
+ * @brief Flag indicating if the MOTD file should be re-read.
  *
- * @param sig Signal number (SIGTERM).
+ * This global variable is set to true when the server receives the SIGUSR1 signal,
+ * indicating that the Message of the Day (MOTD) file should be re-read.
+ */
+volatile sig_atomic_t doremotd;
+
+/**
+ * @brief Unified signal handler for the IRC daemon.
+ *
+ * This function handles various signals by delegating to specific handlers
+ * based on the signal number.
+ *
+ * @param sig Signal number.
  */
 static void
-sigterm_handler(int sig)
+ircd_signal_handler(int sig)
 {
-  server_die("received signal SIGTERM", false);
+  switch (sig)
+  {
+    case SIGTERM:
+      server_die("received signal SIGTERM", false);
+      break;
+    case SIGINT:
+      server_die("received signal SIGINT", server_state.foreground ? false : true);
+      break;
+    case SIGHUP:
+      dorehash = 1;
+      break;
+    case SIGUSR1:
+      doremotd = 1;
+      break;
+    case SIGCHLD:
+    {
+      int saved_errno = errno;  /* Save errno to restore it later. */
+      int status;
+
+      /* Reap all zombie child processes. */
+      while (waitpid(-1, &status, WNOHANG) > 0)
+        ;
+      errno = saved_errno; /* Restore errno. */
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 /**
- * @brief Handles the SIGHUP signal, triggering a reread of the server configuration.
+ * @brief Initializes signal handlers for the IRC daemon.
  *
- * This function is the signal handler for the SIGHUP signal. When the
- * server receives the SIGHUP signal, it sets the global flag `dorehash`
- * to true, prompting a reread of the server configuration.
- *
- * @param sig Signal number (SIGHUP).
- */
-static void
-sighup_handler(int sig)
-{
-  dorehash = true;
-}
-
-/**
- * @brief Handles the SIGUSR1 signal, triggering a reread of the MOTD file.
- *
- * This function is the signal handler for the SIGUSR1 signal. When the
- * server receives the SIGUSR1 signal, it sets the global flag `doremotd`
- * to true, prompting a reread of the Message of the Day (MOTD) file.
- *
- * @param sig Signal number (SIGUSR1).
- */
-static void
-sigusr1_handler(int sig)
-{
-  doremotd = true;
-}
-
-/**
- * @brief Reaps zombie processes periodically as a side effect.
- *
- * This function is the signal handler for the SIGCHLD signal. When the
- * server receives the SIGCHLD signal, it reaps zombie processes
- * periodically to prevent them from lingering in the system.
- *
- * @param sig Signal number (SIGCHLD).
- */
-static void
-sigchld_handler(int sig)
-{
-  int status, errno_save = errno;
-
-  while (waitpid(-1, &status, WNOHANG) > 0)
-    ;
-  errno = errno_save;
-}
-
-/**
- * @brief Handles the SIGINT signal, restarting the server if running in the background.
- *
- * This function is the signal handler for the SIGINT signal. When the
- * server receives the SIGINT signal, it calls `server_die` to exit gracefully.
- * If the server is running in the background, it restarts the server.
- *
- * @param sig Signal number (SIGINT).
- */
-static void
-sigint_handler(int sig)
-{
-  server_die("received signal SIGINT", server_state.foreground ? false : true);
-}
-
-/**
- * @brief Initializes signal handlers for the server.
- *
- * This function sets up the signal handlers for various signals, including
- * SIGXFSZ, SIGWINCH, SIGTRAP, SIGPIPE, SIGALRM, SIGHUP, SIGINT, SIGTERM,
- * SIGUSR1, and SIGCHLD. It also specifies the corresponding signal handlers
- * for each signal.
+ * This function sets up signal handlers for various signals using the
+ * io_signal_register API. It also ignores certain signals that do not need
+ * to be handled.
  */
 void
-setup_signals(void)
+ircd_signal_init(void)
 {
-  struct sigaction act;
+  const io_signal_t signals[] =
+  {
+    { SIGTERM, ircd_signal_handler },
+    { SIGHUP, ircd_signal_handler },
+    { SIGUSR1, ircd_signal_handler },
+    { SIGCHLD, ircd_signal_handler },
+    { SIGINT, ircd_signal_handler }
+  };
 
-  act.sa_flags = 0;
-  act.sa_handler = SIG_IGN;
-
-  sigemptyset(&act.sa_mask);
+  const int ignore_signals[] =
+  {
+    SIGPIPE,
+    SIGALRM,
 #ifdef SIGXFSZ
-  sigaddset(&act.sa_mask, SIGXFSZ);
+    SIGXFSZ,
 #endif
 #ifdef SIGWINCH
-  sigaddset(&act.sa_mask, SIGWINCH);
+    SIGWINCH,
 #endif
 #ifdef SIGTRAP
-  sigaddset(&act.sa_mask, SIGTRAP);
+    SIGTRAP,
 #endif
-  sigaddset(&act.sa_mask, SIGPIPE);
-  sigaddset(&act.sa_mask, SIGALRM);
-  sigaddset(&act.sa_mask, SIGHUP);
-  sigaddset(&act.sa_mask, SIGINT);
-  sigaddset(&act.sa_mask, SIGTERM);
-  sigaddset(&act.sa_mask, SIGUSR1);
-  sigaddset(&act.sa_mask, SIGCHLD);
+  };
 
-#ifdef SIGXFSZ
-  sigaction(SIGXFSZ, &act, NULL);
-#endif
-#ifdef SIGWINCH
-  sigaction(SIGWINCH, &act, NULL);
-#endif
-#ifdef SIGTRAP
-  sigaction(SIGTRAP, &act, NULL);
-#endif
-  sigaction(SIGPIPE, &act, NULL);
-  sigaction(SIGALRM, &act, NULL);
+  if (io_signal_register(signals, IO_ARRAY_LENGTH(signals)) == -1)
+  {
+    fprintf(stderr, "Failed to set up signal handlers\n");
+    exit(EXIT_FAILURE);
+  }
 
-  act.sa_handler = sighup_handler;
-  sigaction(SIGHUP, &act, NULL);
-
-  act.sa_handler = sigint_handler;
-  sigaction(SIGINT, &act, NULL);
-
-  act.sa_handler = sigterm_handler;
-  sigaction(SIGTERM, &act, NULL);
-
-  act.sa_handler = sigusr1_handler;
-  sigaction(SIGUSR1, &act, NULL);
-
-  act.sa_handler = sigchld_handler;
-  sigaction(SIGCHLD, &act, NULL);
-
-  sigprocmask(SIG_UNBLOCK, &act.sa_mask, NULL);
+  if (io_signal_ignore(ignore_signals, IO_ARRAY_LENGTH(ignore_signals)) == -1)
+  {
+    fprintf(stderr, "Failed to ignore signals\n");
+    exit(EXIT_FAILURE);
+  }
 }

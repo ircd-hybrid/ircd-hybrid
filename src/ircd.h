@@ -148,27 +148,6 @@ extern const char *logFileName;
  */
 extern const char *pidFileName;
 
-/**
- * @extern bool dorehash
- * @brief External flag indicating whether to reload ircd configuration files.
- *
- * This flag is set to true when the ircd receives a SIGHUP signal,
- * indicating the need to reload the configuration files.
- * The ircd will perform a rehash to apply the updated configurations.
- */
-extern bool dorehash;
-
-/**
- * @extern bool doremotd
- * @brief External flag indicating whether to reload the Message of the Day (MOTD) files.
- *
- * This flag is set to true when the ircd receives a SIGUSR1 signal,
- * indicating the need to reload the MOTD files.
- * The ircd will refresh and display the updated Message of the Day to users.
- */
-extern bool doremotd;
-
-
 extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;

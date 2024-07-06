@@ -142,24 +142,6 @@ const char *logFileName = LPATH;
 const char *pidFileName = PPATH;
 
 /**
- * @var bool dorehash
- * @brief Flag indicating whether to reload ircd configuration files.
- *
- * This flag is set to true when the ircd receives a SIGHUP signal,
- * indicating the need to reload the configuration files.
- */
-bool dorehash;
-
-/**
- * @var bool doremotd
- * @brief Flag indicating whether to reload the Message of the Day (MOTD) files.
- *
- * This flag is set to true when the ircd receives a SIGUSR1 signal,
- * indicating the need to reload the MOTD files.
- */
-bool doremotd;
-
-/**
  * @var bool printVersion
  * @brief Flag indicating whether to print the version and exit.
  */
@@ -241,7 +223,7 @@ io_loop(void)
     if (dorehash)
     {
       conf_rehash(true);
-      dorehash = false;
+      dorehash = 0;
     }
 
     if (doremotd)
@@ -249,7 +231,7 @@ io_loop(void)
       motd_recache();
       sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                            "Got signal SIGUSR1, reloading motd file(s)");
-      doremotd = false;
+      doremotd = 0;
     }
   }
 }
@@ -573,7 +555,7 @@ main(int argc, char *argv[])
   else
     make_daemon();
 
-  setup_signals();
+  ircd_signal_init();
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();

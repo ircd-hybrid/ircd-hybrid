@@ -71,10 +71,10 @@ ircd_signal_handler(int sig)
   switch (sig)
   {
     case SIGTERM:
-      ircd_exit("received signal SIGTERM", false);
+      ircd_exit("received signal SIGTERM", IRCD_EXIT_TERMINATE);
       break;
     case SIGINT:
-      ircd_exit("received signal SIGINT", server_state.foreground ? false : true);
+      ircd_exit("received signal SIGINT", server_state.foreground ? IRCD_EXIT_TERMINATE : IRCD_EXIT_RESTART);
       break;
     case SIGHUP:
       dorehash = 1;

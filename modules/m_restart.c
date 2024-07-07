@@ -65,7 +65,7 @@ mo_restart(struct Client *source, int parc, char *parv[])
   char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "received RESTART command from %s",
            client_get_name(source, HIDE_IP));
-  ircd_exit(buf, true);
+  ircd_exit(buf, IRCD_EXIT_RESTART);
 }
 
 static struct Command command_table =

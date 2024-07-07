@@ -30,6 +30,7 @@
 
 #include "stdinc.h"
 #include "io_getopt.h"
+#include "io_pidfile.h"
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
@@ -289,77 +290,6 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
 }
 
 /**
- * @brief Writes the process ID to the specified file.
- *
- * @param filename Path to the process ID file.
- *
- * This function opens the specified file and writes the process ID of
- * the ircd server to it.
- */
-static void
-write_pidfile(const char *filename)
-{
-  FILE *fb = fopen(filename, "w");
-
-  if (fb)
-  {
-    char buf[IRCD_BUFSIZE];
-    unsigned int pid = (unsigned int)getpid();
-
-    snprintf(buf, sizeof(buf), "%u\n", pid);
-
-    if (fputs(buf, fb) == -1)
-      log_write(LOG_TYPE_IRCD, "Error writing to pid file %s: %s",
-                filename, strerror(errno));
-
-    fclose(fb);
-  }
-  else
-    log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
-              filename, strerror(errno));
-}
-
-/**
- * @brief Checks if the daemon is already running using the process ID file.
- *
- * This function reads the process ID from the specified file and checks
- * if the ircd server is already running. If it is, the program exits
- * to prevent multiple instances.
- *
- * @param filename Path to the process ID file.
- */
-static void
-check_pidfile(const char *filename)
-{
-  FILE *fb = fopen(filename, "r");
-
-  if (fb)
-  {
-    char buf[IRCD_BUFSIZE];
-
-    if (fgets(buf, 20, fb) == NULL)
-      log_write(LOG_TYPE_IRCD, "Error reading from pid file %s: %s",
-                filename, strerror(errno));
-    else
-    {
-      pid_t pid = atoi(buf);
-
-      if (kill(pid, 0) == 0)
-      {
-        /* log(L_ERROR, "Server is already running"); */
-        printf("ircd: daemon is already running\n");
-        exit(EXIT_FAILURE);
-      }
-    }
-
-    fclose(fb);
-  }
-  else if (errno != ENOENT)
-    log_write(LOG_TYPE_IRCD, "Error opening pid file %s: %s",
-              filename, strerror(errno));
-}
-
-/**
  * @brief Sets up the core file size to system limits.
  *
  * This function sets the core file size to the maximum allowed by the system.
@@ -565,7 +495,8 @@ main(int argc, char *argv[])
   tls_init();
 
   /* Check if there is pidfile and daemon already running */
-  check_pidfile(pidFileName);
+  if (io_pidfile_create(pidFileName))
+    exit(EXIT_FAILURE);
 
   isupport_init();
   ipcache_init();
@@ -630,8 +561,6 @@ main(int argc, char *argv[])
   load_resv_database(ConfigGeneral.resvfile);
 
   module_load_all(NULL);
-
-  write_pidfile(pidFileName);
 
   event_addish(&event_cleanup_tklines, NULL);
 

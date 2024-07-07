@@ -25,6 +25,7 @@
  */
 
 #include "stdinc.h"
+#include "io_pidfile.h"
 #include "defaults.h"
 #include "list.h"
 #include "restart.h"
@@ -78,9 +79,10 @@ server_die(const char *message, bool restart)
 
   save_all_databases(NULL);
 
-  close_fds();
+  io_pidfile_remove(pidFileName);
+  io_pidfile_close();
 
-  unlink(pidFileName);
+  close_fds();
 
   if (restart)
   {

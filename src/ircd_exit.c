@@ -20,7 +20,7 @@
  */
 
 /**
- * @file restart.c
+ * @file ircd_exit.c
  * @brief Functions to facilitate the restart and termination of the IRC server.
  */
 
@@ -28,7 +28,7 @@
 #include "io_pidfile.h"
 #include "defaults.h"
 #include "list.h"
-#include "restart.h"
+#include "ircd_exit.h"
 #include "fdlist.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -49,7 +49,7 @@
  * @param restart A boolean flag indicating whether to restart the server (true) or terminate it (false).
  */
 void
-server_die(const char *message, bool restart)
+ircd_exit(const char *message, bool restart)
 {
   char buf[IRCD_BUFSIZE];
 

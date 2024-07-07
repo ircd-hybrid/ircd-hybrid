@@ -63,7 +63,7 @@
 #include "ipcache.h"
 #include "isupport.h"
 #include "extban.h"
-#include "restart.h"
+#include "ircd_exit.h"
 #include "flatten_links.h"
 
 /**
@@ -265,7 +265,7 @@ initialize_global_set_options(void)
 static void
 ircd_oom(void)
 {
-  server_die("out of memory", true);
+  ircd_exit("out of memory", true);
 }
 
 /**
@@ -286,7 +286,7 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
     exit(EXIT_FAILURE);  /* Exit with failure if initialization error. */
   }
 
-  server_die(message, true);  /* Restart the program for other errors. */
+  ircd_exit(message, true);  /* Restart the program for other errors. */
 }
 
 /**

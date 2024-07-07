@@ -31,7 +31,7 @@
 #include "send.h"
 #include "parse.h"
 #include "module.h"
-#include "restart.h"
+#include "ircd_exit.h"
 
 
 /*! \brief DIE command handler
@@ -65,7 +65,7 @@ mo_die(struct Client *source, int parc, char *parv[])
   char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "received DIE command from %s",
            client_get_name(source, HIDE_IP));
-  server_die(buf, false);
+  ircd_exit(buf, false);
 }
 
 static struct Command command_table =

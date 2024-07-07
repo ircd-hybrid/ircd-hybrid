@@ -134,10 +134,10 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
 	extban_usermode.$(OBJEXT) flatten_links.$(OBJEXT) \
 	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
-	ircd.$(OBJEXT) ircd_signal.$(OBJEXT) isupport.$(OBJEXT) \
-	listener.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	stats.$(OBJEXT) restart.$(OBJEXT) send.$(OBJEXT) \
+	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	isupport.$(OBJEXT) listener.$(OBJEXT) monitor.$(OBJEXT) \
+	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
+	parse.$(OBJEXT) stats.$(OBJEXT) send.$(OBJEXT) \
 	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
 	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
@@ -182,14 +182,13 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
 	./$(DEPDIR)/flatten_links.Po ./$(DEPDIR)/hash.Po \
 	./$(DEPDIR)/id.Po ./$(DEPDIR)/info.Po ./$(DEPDIR)/ipcache.Po \
-	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
-	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/listener.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/restart.Po \
-	./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
+	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
+	./$(DEPDIR)/listener.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -475,6 +474,8 @@ ircd_SOURCES = accept.c          \
                ircd.c            \
                ircd.h            \
                ircd_defs.h       \
+               ircd_exit.c       \
+               ircd_exit.h       \
                ircd_signal.c     \
                ircd_signal.h     \
                isupport.c        \
@@ -494,8 +495,6 @@ ircd_SOURCES = accept.c          \
                stats.c           \
                stats.h           \
                stdinc.h          \
-               restart.c         \
-               restart.h         \
                send.c            \
                send.h            \
                server.c          \
@@ -643,6 +642,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/info.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_exit.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
@@ -651,7 +651,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/numeric.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parse.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/restart.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
@@ -870,6 +869,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/info.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
+	-rm -f ./$(DEPDIR)/ircd_exit.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
@@ -878,7 +878,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
-	-rm -f ./$(DEPDIR)/restart.Po
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po
@@ -971,6 +970,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/info.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
+	-rm -f ./$(DEPDIR)/ircd_exit.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/listener.Po
@@ -979,7 +979,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/numeric.Po
 	-rm -f ./$(DEPDIR)/packet.Po
 	-rm -f ./$(DEPDIR)/parse.Po
-	-rm -f ./$(DEPDIR)/restart.Po
 	-rm -f ./$(DEPDIR)/send.Po
 	-rm -f ./$(DEPDIR)/server.Po
 	-rm -f ./$(DEPDIR)/server_capab.Po

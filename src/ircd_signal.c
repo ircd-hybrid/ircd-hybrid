@@ -36,7 +36,7 @@
 #include "misc.h"
 #include "io_signal.h"
 #include "ircd.h"
-#include "restart.h"
+#include "ircd_exit.h"
 #include "ircd_signal.h"
 
 /**
@@ -71,10 +71,10 @@ ircd_signal_handler(int sig)
   switch (sig)
   {
     case SIGTERM:
-      server_die("received signal SIGTERM", false);
+      ircd_exit("received signal SIGTERM", false);
       break;
     case SIGINT:
-      server_die("received signal SIGINT", server_state.foreground ? false : true);
+      ircd_exit("received signal SIGINT", server_state.foreground ? false : true);
       break;
     case SIGHUP:
       dorehash = 1;

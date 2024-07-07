@@ -20,12 +20,12 @@
  */
 
 /**
- * @file restart.h
+ * @file ircd_exit.h
  * @brief Header file for server restart and termination functionality.
  */
 
-#ifndef INCLUDED_restart_h
-#define INCLUDED_restart_h
+#ifndef INCLUDED_ircd_exit_h
+#define INCLUDED_ircd_exit_h
 
-extern void server_die(const char *, bool);
-#endif  /* INCLUDED_restart_h */
+extern void ircd_exit(const char *, bool);
+#endif  /* INCLUDED_ircd_exit_h */

@@ -28,7 +28,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "restart.h"
+#include "ircd_exit.h"
 #include "send.h"
 #include "parse.h"
 #include "module.h"
@@ -65,7 +65,7 @@ mo_restart(struct Client *source, int parc, char *parv[])
   char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "received RESTART command from %s",
            client_get_name(source, HIDE_IP));
-  server_die(buf, true);
+  ircd_exit(buf, true);
 }
 
 static struct Command command_table =

@@ -71,35 +71,38 @@ io_pidfile_create(const char *path)
       else
         fprintf(stderr, "Process already running\n");
 
-      close(pidfile_fd);
-      pidfile_fd = -1;
+      io_pidfile_close();
       exit(EXIT_FAILURE);
     }
     else
     {
       fprintf(stderr, "Failed to lock PID file %s: %s\n", path, strerror(errno));
-      close(pidfile_fd);
-      pidfile_fd = -1;
+      io_pidfile_close();
       return -1;
     }
+  }
+
+  if (ftruncate(pidfile_fd, 0) == -1)
+  {
+    fprintf(stderr, "Failed to truncate PID file %s: %s\n", path, strerror(errno));
+    io_pidfile_close();
+    return -1;
   }
 
   char buf[16];
   snprintf(buf, sizeof(buf), "%d\n", getpid());
 
-  if (ftruncate(pidfile_fd, 0) == -1 || write(pidfile_fd, buf, strlen(buf)) != (ssize_t)strlen(buf))
+  if (write(pidfile_fd, buf, strlen(buf)) != (ssize_t)strlen(buf))
   {
     fprintf(stderr, "Failed to write to PID file %s: %s\n", path, strerror(errno));
-    close(pidfile_fd);
-    pidfile_fd = -1;
+    io_pidfile_close();
     return -1;
   }
 
   if (fsync(pidfile_fd) == -1)
   {
     fprintf(stderr, "Failed to sync PID file %s: %s\n", path, strerror(errno));
-    close(pidfile_fd);
-    pidfile_fd = -1;
+    io_pidfile_close();
     return -1;
   }
 

@@ -297,7 +297,7 @@ user_register_local(struct Client *client)
   if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
   {
     sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
-    exit_client(client, "Install identd");
+    client_exit(client, "Install identd");
     ++ServerStats.is_ref;
     return;
   }
@@ -309,7 +309,7 @@ user_register_local(struct Client *client)
 
     char buf[sizeof("Invalid username []") + sizeof(client->username)];
     snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
-    exit_client(client, buf);
+    client_exit(client, buf);
     ++ServerStats.is_ref;
     return;
   }
@@ -329,7 +329,7 @@ user_register_local(struct Client *client)
   {
     sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Too many clients, rejecting %s[%s].",
                          client->name, client->host);
-    exit_client(client, "Sorry, server is full - try later");
+    client_exit(client, "Sorry, server is full - try later");
     ++ServerStats.is_ref;
     return;
   }
@@ -344,7 +344,7 @@ user_register_local(struct Client *client)
                            client->info, gecos->reason,
                            client_get_name(client, HIDE_IP),
                            client->sockhost);
-      exit_client(client, "Bad user info");
+      client_exit(client, "Bad user info");
       ++ServerStats.is_ref;
       return;
     }
@@ -356,7 +356,7 @@ user_register_local(struct Client *client)
     if (match_conf_password(client->connection->password, conf) == false)
     {
       sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
-      exit_client(client, "Bad Password");
+      client_exit(client, "Bad Password");
       ++ServerStats.is_ref;
       return;
     }

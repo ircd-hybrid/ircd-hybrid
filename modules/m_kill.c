@@ -123,7 +123,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
                   source->username, source->name, REASONLEN, reason);
 
     /*
-     * Set FLAGS_KILLED. This prevents exit_client() from sending
+     * Set FLAGS_KILLED. This prevents client_exit() from sending
      * the unnecessary QUIT for this. (This flag should never be
      * set in any other place)
      */
@@ -133,7 +133,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
   char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "Killed (%s (%.*s))", source->name, REASONLEN, reason);
 
-  exit_client(target, buf);
+  client_exit(target, buf);
 }
 
 /*! \brief KILL command handler
@@ -220,7 +220,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
   else
     snprintf(buf, sizeof(buf), "Killed (%s %s)", source->name, reason);
 
-  exit_client(target, buf);
+  client_exit(target, buf);
 }
 
 

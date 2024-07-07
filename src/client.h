@@ -419,7 +419,7 @@ extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern void exit_client(struct Client *, const char *);
+extern void client_exit(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
 extern void client_init(void);

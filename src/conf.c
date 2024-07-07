@@ -718,7 +718,7 @@ conf_check_client(struct Client *client)
 
     log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
          client_get_name(client, SHOW_IP), error);
-    exit_client(client, buf);
+    client_exit(client, buf);
     return false;
   }
 

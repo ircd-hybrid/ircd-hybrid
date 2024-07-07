@@ -47,7 +47,7 @@ mr_dumb_proxy(struct Client *source, int parc, char *parv[])
 {
   sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "HTTP Proxy disconnected: [%s@%s]",
                        source->username, source->host);
-  exit_client(source, "Client Exit");
+  client_exit(source, "Client Exit");
 }
 
 static struct Command command_table[] =

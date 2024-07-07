@@ -54,7 +54,7 @@ m_quit(struct Client *source, int parc, char *parv[])
       < io_time_get(IO_TIME_MONOTONIC_SEC)))
     strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
 
-  exit_client(source, reason);
+  client_exit(source, reason);
 }
 
 /*! \brief QUIT command handler
@@ -76,7 +76,7 @@ ms_quit(struct Client *source, int parc, char *parv[])
   if (!EmptyString(parv[1]))
     strlcpy(reason, parv[1], sizeof(reason));
 
-  exit_client(source, reason);
+  client_exit(source, reason);
 }
 
 static struct Command command_table =

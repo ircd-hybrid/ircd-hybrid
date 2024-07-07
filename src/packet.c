@@ -343,7 +343,7 @@ read_packet(fde_t *F, void *data)
         (dbuf_length(&client->connection->buf_recvq) >
          class_get_recvq(&client->connection->confs)))
     {
-      exit_client(client, "Excess Flood");
+      client_exit(client, "Excess Flood");
       return;
     }
   }

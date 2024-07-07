@@ -114,7 +114,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
 
   AddFlag(target, FLAGS_SQUIT);
 
-  exit_client(target, comment);
+  client_exit(target, comment);
 }
 
 /*! \brief SQUIT command handler
@@ -178,7 +178,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
 
   AddFlag(target, FLAGS_SQUIT);
 
-  exit_client(target, comment);
+  client_exit(target, comment);
 }
 
 static struct Command command_table =

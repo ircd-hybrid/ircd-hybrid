@@ -121,7 +121,7 @@ ssl_handshake(fde_t *F, void *data)
   {
     if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
-      exit_client(client, "Timeout during TLS handshake");
+      client_exit(client, "Timeout during TLS handshake");
       return;
     }
 
@@ -134,7 +134,7 @@ ssl_handshake(fde_t *F, void *data)
         comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       default:
-        exit_client(client, "Error during TLS handshake");
+        client_exit(client, "Error during TLS handshake");
         return;
     }
   }
@@ -191,7 +191,7 @@ add_connection(struct Listener *listener, struct io_addr *addr, int fd)
     if (tls_new(&client->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
     {
       SetDead(client);
-      exit_client(client, "TLS context initialization failed");
+      client_exit(client, "TLS context initialization failed");
       return;
     }
 

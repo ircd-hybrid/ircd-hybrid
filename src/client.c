@@ -249,7 +249,7 @@ check_pings_list(list_t *list)
 
           snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
                    (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
-          exit_client(client, buf);
+          client_exit(client, buf);
         }
       }
     }
@@ -295,7 +295,7 @@ check_unknowns_list(void)
       exit = true;
 
     if (exit)
-      exit_client(client, "Registration timed out");
+      client_exit(client, "Registration timed out");
   }
 }
 
@@ -447,7 +447,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
   if (IsClient(client))
     sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
 
-  exit_client(client, reason);
+  client_exit(client, reason);
 }
 
 /* find_person()
@@ -738,7 +738,7 @@ recurse_remove_clients(struct Client *client, const char *comment)
  *               Client memory is scheduled to be freed
  */
 void
-exit_client(struct Client *client, const char *comment)
+client_exit(struct Client *client, const char *comment)
 {
   assert(!IsMe(client));
   assert(client != &me);
@@ -946,7 +946,7 @@ dead_link_on_read(struct Client *client, int error)
   else
     snprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
 
-  exit_client(client, errmsg);
+  client_exit(client, errmsg);
 }
 
 void
@@ -975,7 +975,7 @@ exit_aborted_clients(void)
     else
       notice = "Write error: connection closed";
 
-    exit_client(client, notice);
+    client_exit(client, notice);
   }
 }
 

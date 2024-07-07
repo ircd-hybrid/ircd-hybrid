@@ -383,7 +383,7 @@ server_finish_tls_handshake(struct Client *client)
                          "Lost connect{} block for %s",
                          client_get_name(client, MASK_IP));
 
-    exit_client(client, "Lost connect{} block");
+    client_exit(client, "Lost connect{} block");
     return;
   }
 
@@ -417,7 +417,7 @@ server_tls_handshake(fde_t *F, void *data)
   {
     if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
     {
-      exit_client(client, "Timeout during TLS handshake");
+      client_exit(client, "Timeout during TLS handshake");
       return;
     }
 
@@ -436,7 +436,7 @@ server_tls_handshake(fde_t *F, void *data)
         sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
                              "Error connecting to %s: %s", client->name,
                              sslerr ? sslerr : "unknown TLS error");
-        exit_client(client, "Error during TLS handshake");
+        client_exit(client, "Error during TLS handshake");
         return;
       }
     }
@@ -463,7 +463,7 @@ server_tls_connect_init(struct Client *client, const struct MaskItem *conf, fde_
   if (tls_new(&F->tls, F->fd, TLS_ROLE_CLIENT) == false)
   {
     SetDead(client);
-    exit_client(client, "TLS context initialization failed");
+    client_exit(client, "TLS context initialization failed");
     return;
   }
 
@@ -522,7 +522,7 @@ server_connect_callback(fde_t *F, int status, void *data)
     sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
                          "Lost connect{} block for %s", client_get_name(client, MASK_IP));
 
-    exit_client(client, "Lost connect{} block");
+    client_exit(client, "Lost connect{} block");
     return;
   }
 

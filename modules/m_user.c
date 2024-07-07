@@ -58,7 +58,7 @@ mr_user(struct Client *source, int parc, char *parv[])
 
   if (listener_has_flag(source->connection->listener, LISTENER_SERVER))
   {
-    exit_client(source, "Use a different port");
+    client_exit(source, "Use a different port");
     return;
   }
 

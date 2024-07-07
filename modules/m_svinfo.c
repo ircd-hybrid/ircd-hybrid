@@ -72,7 +72,7 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
               "Link %s dropped, wrong TS protocol version (%s,%s)",
               client_get_name(source, SHOW_IP), parv[1], parv[2]);
 
-    exit_client(source, "Incompatible TS version");
+    client_exit(source, "Incompatible TS version");
     return;
   }
 
@@ -97,7 +97,7 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
 
-    exit_client(source, "Excessive TS delta");
+    client_exit(source, "Excessive TS delta");
     return;
   }
 

@@ -84,7 +84,7 @@ check_clean_nick(struct Client *source, const char *nick)
     sendto_server(source, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
                   me.id, source->id, me.name);
     AddFlag(source, FLAGS_KILLED);
-    exit_client(source, "Bad Nickname");
+    client_exit(source, "Bad Nickname");
   }
 
   return false;
@@ -436,7 +436,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
     sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
     AddFlag(target, FLAGS_KILLED);
-    exit_client(target, "Nick collision (new)");
+    client_exit(target, "Nick collision (new)");
     return false;
   }
 
@@ -472,7 +472,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
                 me.id, target->id, me.name);
 
   AddFlag(target, FLAGS_KILLED);
-  exit_client(target, "Nick collision");
+  client_exit(target, "Nick collision");
 
   return true;
 }
@@ -518,8 +518,8 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
 
     AddFlag(source, FLAGS_KILLED);
     AddFlag(target, FLAGS_KILLED);
-    exit_client(source, "Nick collision (old)");
-    exit_client(target, "Nick collision (new)");
+    client_exit(source, "Nick collision (old)");
+    client_exit(target, "Nick collision (new)");
     return false;
   }
 
@@ -547,9 +547,9 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
     AddFlag(source, FLAGS_KILLED);
 
     if (sameuser)
-      exit_client(source, "Nick collision (old)");
+      client_exit(source, "Nick collision (old)");
     else
-      exit_client(source, "Nick collision (new)");
+      client_exit(source, "Nick collision (new)");
     return false;
   }
 
@@ -569,7 +569,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
   AddFlag(target, FLAGS_KILLED);
-  exit_client(target, "Nick collision");
+  client_exit(target, "Nick collision");
 
   return true;
 }
@@ -710,7 +710,7 @@ m_nick(struct Client *source, int parc, char *parv[])
      * If the client that has the nick isn't registered yet (NICK but no
      * USER) then drop the unregistered client
      */
-    exit_client(target, "Overridden by other sign on");
+    client_exit(target, "Overridden by other sign on");
     change_local_nick(source, nick);
   }
   else
@@ -747,7 +747,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
   else if (IsUnknown(target))
   {
     /* We're not living in the past anymore, an unknown client is local only. */
-    exit_client(target, "Overridden by other sign on");
+    client_exit(target, "Overridden by other sign on");
     change_remote_nick(source, parv);
   }
   else if (target == source)
@@ -808,7 +808,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
 
     ++ServerStats.is_kill;
     AddFlag(target, FLAGS_KILLED);
-    exit_client(target, "ID Collision");
+    client_exit(target, "ID Collision");
     return;
   }
 
@@ -817,7 +817,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
     uid_from_server(source, parc, parv);
   else if (IsUnknown(target))
   {
-    exit_client(target, "Overridden by other sign on");
+    client_exit(target, "Overridden by other sign on");
     uid_from_server(source, parc, parv);
   }
   else if (perform_uid_introduction_collides(source, target, parc, parv))

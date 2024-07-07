@@ -60,7 +60,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
 
   if (!valid_hostname(host))
   {
-    exit_client(source, "Invalid WebIRC hostname");
+    client_exit(source, "Invalid WebIRC hostname");
     return;
   }
 
@@ -75,19 +75,19 @@ mr_webirc(struct Client *source, int parc, char *parv[])
 
   if (!IsConfWebIRC(conf))
   {
-    exit_client(source, "Not a WebIRC auth block");
+    client_exit(source, "Not a WebIRC auth block");
     return;
   }
 
   if (EmptyString(conf->passwd))
   {
-    exit_client(source, "WebIRC auth blocks must have a password");
+    client_exit(source, "WebIRC auth blocks must have a password");
     return;
   }
 
   if (match_conf_password(pass, conf) == false)
   {
-    exit_client(source, "Invalid WebIRC password");
+    client_exit(source, "Invalid WebIRC password");
     return;
   }
 
@@ -100,7 +100,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
 
   if (getaddrinfo(addr, NULL, &hints, &res))
   {
-    exit_client(source, "Invalid WebIRC IP address");
+    client_exit(source, "Invalid WebIRC IP address");
     return;
   }
 
@@ -127,7 +127,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
   {
     if (conf->type == CONF_DLINE)
     {
-      exit_client(source, "D-lined");
+      client_exit(source, "D-lined");
       return;
     }
   }

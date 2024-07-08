@@ -92,13 +92,13 @@ mo_opme(struct Client *source, int parc, char *parv[])
        get_oper_name(source), channel->name);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
                        me.name, get_oper_name(source), channel->name);
-  sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
+  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
                 me.id, get_oper_name(source), channel->name);
 
   AddMemberFlag(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
                        me.name, channel->name, source->name);
-  sendto_server(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,
+  sendto_servers(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,
                 channel->name, source->id);
 }
 

@@ -140,7 +140,7 @@ ms_bmask(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
   }
 
-  sendto_server(source, 0, 0, ":%s BMASK %ju %s %s :%s",
+  sendto_servers(source, 0, 0, ":%s BMASK %ju %s %s :%s",
                 source->id, channel->creation_time, channel->name, parv[3], parv[4]);
 }
 

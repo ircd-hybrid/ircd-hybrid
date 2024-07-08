@@ -56,7 +56,7 @@ mo_wallops(struct Client *source, int parc, char *parv[])
   }
 
   sendto_wallops_flags(UMODE_WALLOP, source, "%s", message);
-  sendto_server(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
+  sendto_servers(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
 }
 
 /*! \brief WALLOPS command handler
@@ -76,7 +76,7 @@ ms_wallops(struct Client *source, int parc, char *parv[])
   const char *const message = parv[1];
 
   sendto_wallops_flags(UMODE_WALLOP, source, "%s", message);
-  sendto_server(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
+  sendto_servers(source, 0, 0, ":%s WALLOPS :%s", source->id, message);
 }
 
 static struct Command command_table =

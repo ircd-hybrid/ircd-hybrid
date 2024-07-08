@@ -76,11 +76,11 @@ ms_metadata(struct Client *source, int parc, char *parv[])
   }
 
   if (parc == 4)
-    sendto_server(source, 0, 0, ":%s METADATA %s %s %s",
+    sendto_servers(source, 0, 0, ":%s METADATA %s %s %s",
                   source->id,
                   parv[1], parv[2], parv[3]);
   else  /* parc == 5 */
-    sendto_server(source, 0, 0, ":%s METADATA %s %s %s :%s",
+    sendto_servers(source, 0, 0, ":%s METADATA %s %s %s :%s",
                   source->id,
                   parv[1], parv[2], parv[3], parv[4]);
 }

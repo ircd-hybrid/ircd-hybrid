@@ -72,7 +72,7 @@ ircd_exit(const char *message, ircd_exit_action_t action)
 
   sendto_clients(0, SEND_RECIPIENT_CLIENT, SEND_TYPE_NOTICE, "%s", buf);
 
-  sendto_server(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);
+  sendto_servers(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);
 
   log_write(LOG_TYPE_IRCD, "%s", buf);
 

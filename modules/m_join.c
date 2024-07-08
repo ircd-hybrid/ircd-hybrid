@@ -258,7 +258,7 @@ ms_join(struct Client *source, int parc, char *parv[])
                            source->name, source->username, source->host, source->away);
   }
 
-  sendto_server(source, 0, 0, ":%s JOIN %ju %s +",
+  sendto_servers(source, 0, 0, ":%s JOIN %ju %s +",
                 source->id, channel->creation_time, channel->name);
 }
 

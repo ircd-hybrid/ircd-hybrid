@@ -204,17 +204,17 @@ user_introduce(struct Client *client)
 {
   monitor_signon(client);
 
-  sendto_server(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+  sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                 client->servptr->id, client->name, client->hopcount + 1,
                 client->tsinfo, user_get_mode_str(client->umodes),
                 client->username, client->host, client->realhost,
                 client->sockhost, client->id, client->account, client->info);
 
   if (!EmptyString(client->tls_certfp))
-    sendto_server(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
+    sendto_servers(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
 
   if (!EmptyString(client->tls_cipher))
-    sendto_server(client, 0, 0, ":%s METADATA client %s cipher :%s",
+    sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
                   client->servptr->id, client->id, client->tls_cipher);
 }
 
@@ -636,7 +636,7 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
     sendto_one(client, ":%s!%s@%s MODE %s :%s",
                client->name, client->username, client->host, client->name, buf);
   if (send_server)
-    sendto_server(client, 0, 0, ":%s MODE %s :%s",
+    sendto_servers(client, 0, 0, ":%s MODE %s :%s",
                   client->id, client->id, buf);
 }
 
@@ -672,7 +672,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   strlcpy(client->host, hostname, sizeof(client->host));
 
   if (svshost)
-    sendto_server(client, 0, 0, ":%s SVSHOST %s %ju %s",
+    sendto_servers(client, 0, 0, ":%s SVSHOST %s %ju %s",
                   client->servptr->id, client->id, client->tsinfo, client->host);
 
   if (MyConnect(client))

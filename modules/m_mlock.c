@@ -66,7 +66,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
   if (timestamp)
     channel->mode_lock_time = timestamp;
 
-  sendto_server(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
+  sendto_servers(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
                 source->id, channel->creation_time, channel->name,
                 channel->mode_lock_time,
                 channel->mode_lock ? channel->mode_lock : "");

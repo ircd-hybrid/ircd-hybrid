@@ -123,7 +123,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   whowas_add_history(target, true);
 
-  sendto_server(NULL, 0, 0, ":%s NICK %s :%ju",
+  sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
                 target->id, new_nick, target->tsinfo);
 
   hash_del_client(target);

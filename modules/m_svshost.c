@@ -63,7 +63,7 @@ ms_svshost(struct Client *source, int parc, char *parv[])
     return;
 
   user_set_hostmask(target, parv[3], false);
-  sendto_server(source, 0, 0, ":%s SVSHOST %s %ju %s",
+  sendto_servers(source, 0, 0, ":%s SVSHOST %s %ju %s",
                 source->id, target->id, target->tsinfo, parv[3]);
 }
 

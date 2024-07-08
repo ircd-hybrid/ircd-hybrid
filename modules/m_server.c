@@ -245,7 +245,7 @@ server_estab(struct Client *client_p)
 
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
-  sendto_server(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
+  sendto_servers(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
                 me.id, client_p->name, client_p->id, IsHidden(client_p) ? "h" : "", client_p->info);
 
   /*
@@ -673,7 +673,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   hash_add_client(target);
   hash_add_id(target);
 
-  sendto_server(source->from, 0, 0, ":%s SID %s %u %s +%s :%s",
+  sendto_servers(source->from, 0, 0, ":%s SID %s %u %s +%s :%s",
                 source->id, target->name, target->hopcount + 1,
                 target->id, IsHidden(target) ? "h" : "", target->info);
   sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",

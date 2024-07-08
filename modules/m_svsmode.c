@@ -136,7 +136,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
     }
   }
 
-  sendto_server(source, 0, 0, ":%s SVSMODE %s %ju %s",
+  sendto_servers(source, 0, 0, ":%s SVSMODE %s %ju %s",
                 source->id, target->id, target->tsinfo, modes);
 
   if (MyConnect(target))

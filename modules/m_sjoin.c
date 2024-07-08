@@ -368,7 +368,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
     {
-      sendto_server(source, 0, 0, "%s", uid_buf);
+      sendto_servers(source, 0, 0, "%s", uid_buf);
       uid_ptr = uid_buf_start;
     }
 
@@ -418,7 +418,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                          origin->name, channel->name, modebuf, parabuf);
   }
 
-  sendto_server(source, 0, 0, "%s", uid_buf);
+  sendto_servers(source, 0, 0, "%s", uid_buf);
 
   if (list_length(&channel->members) == 0 && isnew)
     channel_free(channel);

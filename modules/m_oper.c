@@ -70,7 +70,7 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   if (!EmptyString(conf->whois))
   {
     svstag_attach(&source->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
-    sendto_server(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
+    sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
                   me.id, source->id, source->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
@@ -79,7 +79,7 @@ oper_up(struct Client *source, const struct MaskItem *conf)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
                        get_oper_name(source));
-  sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
+  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source));
 
   send_umode(source, oldmodes, true, true);

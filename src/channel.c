@@ -1056,7 +1056,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       AddCMode(channel, MODE_TOPICLIMIT);
       AddCMode(channel, MODE_NOPRIVMSGS);
 
-      sendto_server(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
+      sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                     me.id, channel->creation_time, channel->name, client->id);
 
       /*
@@ -1071,7 +1071,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     }
     else
     {
-      sendto_server(NULL, 0, 0, ":%s JOIN %ju %s +",
+      sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
                     client->id, channel->creation_time, channel->name);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
@@ -1144,14 +1144,14 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
 
   if (show_reason)
   {
-    sendto_server(client, 0, 0, ":%s PART %s :%.*s",
+    sendto_servers(client, 0, 0, ":%s PART %s :%.*s",
                   client->id, channel->name, KICKLEN, reason);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s :%.*s",
                          client->name, client->username, client->host, channel->name, KICKLEN, reason);
   }
   else
   {
-    sendto_server(client, 0, 0, ":%s PART %s",
+    sendto_servers(client, 0, 0, ":%s PART %s",
                   client->id, channel->name);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s",
                          client->name, client->username, client->host, channel->name);

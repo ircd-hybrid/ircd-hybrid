@@ -54,7 +54,7 @@ ms_eob(struct Client *source, int parc, char *parv[])
                          (io_time_get(IO_TIME_MONOTONIC_SEC) - source->connection->created_monotonic));
 
   AddFlag(source, FLAGS_EOB);
-  sendto_server(source, 0, 0, ":%s EOB", source->id);
+  sendto_servers(source, 0, 0, ":%s EOB", source->id);
 }
 
 static struct Command command_table =

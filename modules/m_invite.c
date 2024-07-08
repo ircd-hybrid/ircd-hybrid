@@ -154,7 +154,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0,
                        ":%s!%s@%s INVITE %s %s", source->name, source->username,
                        source->host, target->name, channel->name);
-  sendto_server(source, 0, 0, ":%s INVITE %s %s %ju",
+  sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
                 source->id, target->id, channel->name, channel->creation_time);
 }
 
@@ -207,7 +207,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0,
                        ":%s!%s@%s INVITE %s %s", source->name, source->username,
                        source->host, target->name, channel->name);
-  sendto_server(source, 0, 0, ":%s INVITE %s %s %ju",
+  sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
                 source->id, target->id, channel->name, channel->creation_time);
 }
 

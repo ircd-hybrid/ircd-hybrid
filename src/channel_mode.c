@@ -763,7 +763,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
     if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
-        sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+        sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 
       modecount = 0;
       paracount = 0;
@@ -797,7 +797,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
   }
 
   if (modecount)
-    sendto_server(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+    sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 }
 
 /* void send_mode_changes(struct Client *client,

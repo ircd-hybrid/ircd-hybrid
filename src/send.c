@@ -361,7 +361,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
   dbuf_ref_free(buffer_r);
 }
 
-/* sendto_server()
+/* sendto_servers()
  *
  * inputs       - pointer to client to NOT send to
  *              - pointer to channel
@@ -380,7 +380,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
  * -davidt
  */
 void
-sendto_server(const struct Client *one,
+sendto_servers(const struct Client *one,
               const unsigned int capab,
               const unsigned int nocapab,
               const char *format, ...)

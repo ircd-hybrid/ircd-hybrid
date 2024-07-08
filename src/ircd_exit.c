@@ -70,9 +70,7 @@ ircd_exit(const char *message, ircd_exit_action_t action)
     snprintf(buf, sizeof(buf), "Server is %s: %s",
              action == IRCD_EXIT_RESTART ? "restarting" : "terminating", message);
 
-  list_node_t *node;
-  LIST_FOREACH(node, local_client_list.head)
-    sendto_one_notice(node->data, &me, ":%s", buf);
+  sendto_clients(0, SEND_RECIPIENT_CLIENT, SEND_TYPE_NOTICE, "%s", buf);
 
   sendto_server(NULL, 0, 0, ":%s ERROR :%s", me.id, buf);
 

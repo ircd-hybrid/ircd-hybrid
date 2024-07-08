@@ -30,7 +30,6 @@
 
 #include "io_time.h"
 #include "misc.h"
-#include "event.h"
 
 /**
  * @brief Formats a given time value into a human-readable string using the strftime format.

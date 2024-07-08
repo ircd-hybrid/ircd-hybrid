@@ -27,7 +27,6 @@
 #include "io_time.h"
 #include "memory.h"
 #include "list.h"
-#include "event.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "conf.h"

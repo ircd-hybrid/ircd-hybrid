@@ -25,10 +25,9 @@
 
 #include "stdinc.h"
 #include "list.h"
-#include "event.h"
 #include "rng_mt.h"
-#include "log.h"
 #include "io_time.h"
+#include "event.h"
 
 
 static list_t event_list;

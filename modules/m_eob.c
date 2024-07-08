@@ -25,12 +25,11 @@
 
 #include "stdinc.h"
 #include "io_time.h"
+#include "module.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "server.h"
 
 
 /*! \brief EOB command handler

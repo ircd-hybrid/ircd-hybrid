@@ -54,7 +54,6 @@
 #include "res.h"
 #include "reslib.h"
 #include "memory.h"
-#include "conf.h"
 #include "address.h"
 
 #if (CHAR_BIT != 8)

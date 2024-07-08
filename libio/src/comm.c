@@ -30,7 +30,6 @@
 #include "address.h"
 #include "fdlist.h"
 #include "comm.h"
-#include "event.h"
 
 static const char *const comm_err_str[] =
 {

@@ -39,7 +39,6 @@
 #include "server.h"
 #include "channel.h"
 #include "client.h"
-#include "event.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"

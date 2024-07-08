@@ -37,7 +37,6 @@
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "event.h"
 #include "hook.h"
 
 /**

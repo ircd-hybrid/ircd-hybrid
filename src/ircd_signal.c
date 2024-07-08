@@ -28,11 +28,12 @@
  * proper reaping of zombie processes.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <errno.h>
 
-#include "stdinc.h"
 #include "misc.h"
 #include "io_signal.h"
 #include "ircd.h"

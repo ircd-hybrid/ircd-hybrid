@@ -41,7 +41,6 @@
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
-#include "event.h"
 #include "memory.h"
 #include "misc.h"
 #include "extban.h"

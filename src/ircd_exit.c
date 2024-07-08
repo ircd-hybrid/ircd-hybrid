@@ -27,8 +27,6 @@
 #include "stdinc.h"
 #include "io_pidfile.h"
 #include "defaults.h"
-#include "list.h"
-#include "ircd_exit.h"
 #include "fdlist.h"
 #include "ircd.h"
 #include "irc_string.h"
@@ -36,6 +34,7 @@
 #include "log.h"
 #include "client.h"
 #include "conf_db.h"
+#include "ircd_exit.h"
 
 /**
  * @brief Initiates server termination or restart.

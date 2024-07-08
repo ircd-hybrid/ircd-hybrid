@@ -28,7 +28,6 @@
 #include "list.h"
 #include "send.h"
 #include "client.h"
-#include "event.h"
 #include "memory.h"
 #include "conf_gecos.h"
 

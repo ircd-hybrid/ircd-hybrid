@@ -31,7 +31,6 @@
 #include "client.h"
 #include "dbuf.h"
 #include "irc_string.h"
-#include "event.h"
 #include "comm.h"
 #include "server_capab.h"
 #include "conf_class.h"

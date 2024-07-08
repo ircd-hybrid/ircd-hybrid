@@ -31,7 +31,6 @@
 #include "client.h"
 #include "memory.h"
 #include "ircd.h"
-#include "event.h"
 #include "ircd_defs.h"
 #include "misc.h"
 #include "conf.h"

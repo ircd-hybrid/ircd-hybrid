@@ -78,7 +78,6 @@ extern void sendto_servers(const struct Client *, const unsigned int, const unsi
 extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, bool, const char *, ...) IO_AFP(5,6);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients(unsigned int, send_recipient, send_type, const char *, ...) IO_AFP(4,5);
-extern void sendto_wallops_flags(unsigned int, const struct Client *, const char *, ...) IO_AFP(3,4);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
 extern void sendto_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
 #endif  /* INCLUDED_send_h */

@@ -59,7 +59,6 @@ dist_helpf_DATA = accept    \
                   user      \
                   userhost  \
                   version   \
-                  wallops   \
                   who       \
                   whois     \
                   whowas    \

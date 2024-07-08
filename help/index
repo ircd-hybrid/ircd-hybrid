@@ -14,5 +14,4 @@ RESTART         RESV            SET             SQUIT
 STATS           TIME            TOPIC           TRACE
 UMODE           UNDLINE         UNKLINE         UNRESV
 UNXLINE         USER            USERHOST        VERSION
-WALLOPS         WHO             WHOIS           WHOWAS
-XLINE
+WHO             WHOIS           WHOWAS          XLINE

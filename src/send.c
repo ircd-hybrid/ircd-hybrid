@@ -543,7 +543,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
  * side effects	- NONE
  */
 static bool
-match_it(const struct Client *one, const char *mask, bool host)
+sendto_match_butone_qualifies(const struct Client *one, const char *mask, bool host)
 {
   if (host)
   {
@@ -597,7 +597,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (one && (client == one->from))
       continue;
 
-    if (match_it(client, mask, host) == false)
+    if (sendto_match_butone_qualifies(client, mask, host) == false)
       continue;
 
     send_message(client, buffer_l);

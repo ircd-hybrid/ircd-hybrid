@@ -305,9 +305,8 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  * WARNING - +D clients are ignored
  */
 void
-sendto_channel_butone(struct Client *one, const struct Client *from,
-                      struct Channel *channel, int rank,
-                      const char *pattern, ...)
+sendto_channel_butone(struct Client *one, const struct Client *from, struct Channel *channel,
+                      int rank, const char *pattern, ...)
 {
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
@@ -380,10 +379,8 @@ sendto_channel_butone(struct Client *one, const struct Client *from,
  * -davidt
  */
 void
-sendto_servers(const struct Client *one,
-              const unsigned int capab,
-              const unsigned int nocapab,
-              const char *format, ...)
+sendto_servers(const struct Client *one, const unsigned int capab,
+               const unsigned int nocapab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -488,8 +485,8 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
  * \param pattern  Format string for command arguments
  */
 void
-sendto_channel_local(const struct Client *one, struct Channel *channel, int rank,
-                     unsigned int poscap, unsigned int negcap, const char *pattern, ...)
+sendto_channel_local(const struct Client *one, struct Channel *channel, int rank, unsigned int poscap,
+                     unsigned int negcap, const char *pattern, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -650,8 +647,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab,
-                   const char *pattern, ...)
+sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab, const char *pattern, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -706,9 +702,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
  * 		  but useful when one does not know where target "lives"
  */
 void
-sendto_anywhere(struct Client *to, const struct Client *from,
-                const char *command,
-                const char *pattern, ...)
+sendto_anywhere(struct Client *to, const struct Client *from, const char *command, const char *pattern, ...)
 {
   if (IsDead(to->from))
     return;

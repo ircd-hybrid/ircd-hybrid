@@ -89,7 +89,7 @@ send_message(struct Client *to, struct dbuf_block *buffer)
   if (dbuf_length(&to->connection->buf_sendq) + buffer->size > class_get_sendq(&to->connection->confs))
   {
     if (IsServer(to))
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "Max SendQ limit exceeded for %s: %zu > %u",
                            client_get_name(to, HIDE_IP),
                            (dbuf_length(&to->connection->buf_sendq) + buffer->size),
@@ -134,7 +134,7 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
   assert(to->from == to);
 
   if (to == from->from)
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                          to->name, from->name);
   else
     send_message(to, buffer);
@@ -734,7 +734,28 @@ sendto_anywhere(struct Client *to, const struct Client *from,
   dbuf_ref_free(buffer);
 }
 
-/* sendto_realops_flags()
+static bool
+sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_recipient recipient)
+{
+  if (flags && !HasUMode(client, flags))
+    return false;
+
+  switch (recipient)
+  {
+    case SEND_RECIPIENT_ADMIN:
+      return HasUMode(client, UMODE_ADMIN);
+    case SEND_RECIPIENT_OPER:
+      return HasUMode(client, UMODE_OPER) && !HasUMode(client, UMODE_ADMIN);
+    case SEND_RECIPIENT_OPER_ALL:
+      return HasUMode(client, UMODE_OPER);
+    case SEND_RECIPIENT_CLIENT:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/* sendto_clients()
  *
  * inputs	- flag types of messages to show to real opers
  *		- flag indicating opers/admins
@@ -743,19 +764,19 @@ sendto_anywhere(struct Client *to, const struct Client *from,
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 void
-sendto_realops_flags(unsigned int flags, int level, int type, const char *pattern, ...)
+sendto_clients(unsigned int flags, send_recipient recipient, send_type type, const char *pattern, ...)
 {
   const char *ntype = "???";
 
-  switch (type)
+  switch (recipient)
   {
-    case SEND_NOTICE:
+    case SEND_TYPE_NOTICE:
       ntype = "Notice";
       break;
-    case SEND_GLOBAL:
+    case SEND_TYPE_GLOBAL:
       ntype = "Global";
       break;
-    case SEND_LOCOPS:
+    case SEND_TYPE_LOCOPS:
       ntype = "LocOps";
       break;
     default:
@@ -770,24 +791,15 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
   send_format(buffer, pattern, args);
   va_end(args);
 
+  list_t *list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
   list_node_t *node;
-  LIST_FOREACH(node, oper_list.head)
+  LIST_FOREACH(node, list->head)
   {
     struct Client *client = node->data;
-    assert(HasUMode(client, UMODE_OPER));
-
     if (IsDead(client))
       continue;
 
-    /*
-     * If we're sending it to opers and they're an admin, skip.
-     * If we're sending it to admins, and they're not, skip.
-     */
-    if (((level == L_ADMIN) && !HasUMode(client, UMODE_ADMIN)) ||
-        ((level == L_OPER) && HasUMode(client, UMODE_ADMIN)))
-      continue;
-
-    if (!HasUMode(client, flags))
+    if (sendto_clients_qualifies(client, flags, recipient) == false)
       continue;
 
     send_message(client, buffer);
@@ -800,25 +812,24 @@ sendto_realops_flags(unsigned int flags, int level, int type, const char *patter
  *
  * inputs       - var args message
  * output       - NONE
- * side effects - Call sendto_realops_flags, with some flood checking
+ * side effects - Call sendto_clients, with some flood checking
  *                (at most 5 warnings every 5 seconds)
  */
 void
-sendto_realops_flags_ratelimited(uintmax_t *rate, const char *pattern, ...)
+sendto_clients_ratelimited(uintmax_t *rate, const char *pattern, ...)
 {
-  char buffer[IRCD_BUFSIZE];
-
   if ((io_time_get(IO_TIME_MONOTONIC_SEC) - *rate) < 20)
     return;
 
   *rate = io_time_get(IO_TIME_MONOTONIC_SEC);
 
+  char buffer[IRCD_BUFSIZE];
   va_list args;
   va_start(args, pattern);
   vsnprintf(buffer, sizeof(buffer), pattern, args);
   va_end(args);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s", buffer);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", buffer);
   log_write(LOG_TYPE_IRCD, "%s", buffer);
 }
 

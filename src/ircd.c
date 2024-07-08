@@ -230,7 +230,7 @@ io_loop(void)
     if (doremotd)
     {
       motd_recache();
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "Got signal SIGUSR1, reloading motd file(s)");
       doremotd = 0;
     }

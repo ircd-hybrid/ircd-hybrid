@@ -77,7 +77,7 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
             conf->name, client_get_name(source, HIDE_IP));
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s is now an operator",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
                        get_oper_name(source));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                 me.id, get_oper_name(source));
@@ -100,7 +100,7 @@ failed_oper_notice(struct Client *source, enum irc_numerics numeric,
     sendto_one_numeric(source, &me, numeric);
 
   if (ConfigGeneral.failed_oper_notice)
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Failed OPER attempt as %s by %s - %s",
                          name, client_get_name(source, HIDE_IP), reason);
 

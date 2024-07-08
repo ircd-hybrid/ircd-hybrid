@@ -63,7 +63,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 static void
 do_etrace(struct Client *source, const char *name)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
+  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
 
   bool doall = false;

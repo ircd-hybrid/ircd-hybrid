@@ -30,19 +30,34 @@
 #include "fdlist.h"
 #include "numeric.h"
 
-enum
+/**
+ * @enum send_recipient
+ * @brief Enum for representing the recipients of sending notices.
+ *
+ * This enum lists the possible recipients for sending notices using the sendto_clients function.
+ * Each recipient specifies a different group of clients or operators who should receive the notice.
+ */
+typedef enum
 {
-  L_ALL,
-  L_OPER,
-  L_ADMIN
-};
+  SEND_RECIPIENT_OPER_ALL,  /**< Send to all operators, regardless of their administrator status. */
+  SEND_RECIPIENT_OPER,  /**< Send to regular operators only (excluding administrators). */
+  SEND_RECIPIENT_ADMIN,  /**< Send to administrators only. */
+  SEND_RECIPIENT_CLIENT,  /**< Send to all connected clients. */
+} send_recipient;
 
-enum
+/**
+ * @enum send_type
+ * @brief Enum for representing the types of notices to be sent.
+ *
+ * This enum lists the possible types of notices that can be sent using the sendto_clients function.
+ * Each type specifies a different scope or category of the notice, which is used as a prefix in the message.
+ */
+typedef enum
 {
-  SEND_NOTICE,
-  SEND_GLOBAL,
-  SEND_LOCOPS
-};
+  SEND_TYPE_NOTICE,  /**< A general notice message. Prefix: "Notice". */
+  SEND_TYPE_GLOBAL,  /**< A global notice message. Prefix: "Global". */
+  SEND_TYPE_LOCOPS,  /**< A notice message sent to local operators. Prefix: "LocOps". */
+} send_type;
 
 /*
  * struct decls
@@ -62,8 +77,8 @@ extern void sendto_channel_local(const struct Client *, struct Channel *, int, u
 extern void sendto_server(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, bool, const char *, ...) IO_AFP(5,6);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
-extern void sendto_realops_flags(unsigned int, int, int, const char *, ...) IO_AFP(4,5);
+extern void sendto_clients(unsigned int, send_recipient, send_type, const char *, ...) IO_AFP(4,5);
 extern void sendto_wallops_flags(unsigned int, const struct Client *, const char *, ...) IO_AFP(3,4);
-extern void sendto_realops_flags_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
+extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
 extern void sendto_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
 #endif  /* INCLUDED_send_h */

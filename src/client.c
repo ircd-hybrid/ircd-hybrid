@@ -237,10 +237,10 @@ check_pings_list(list_t *list)
            */
           if (IsServer(client))
           {
-            sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+            sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                                  "No response from %s, closing link",
                                  client_get_name(client, SHOW_IP));
-            sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+            sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                                  "No response from %s, closing link",
                                  client_get_name(client, MASK_IP));
             log_write(LOG_TYPE_IRCD, "No response from %s, closing link",
@@ -281,10 +281,10 @@ check_unknowns_list(void)
 
     if (IsHandshake(client))
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                            "No response from %s during handshake, closing link",
                            client_get_name(client, SHOW_IP));
-      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "No response from %s during handshake, closing link",
                            client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
@@ -412,7 +412,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
     case CLIENT_BAN_KLINE:
       if (HasFlag(client, FLAGS_EXEMPTKLINE))
       {
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                              "KLINE over-ruled for %s, client is kline_exempt",
                              client_get_name(client, HIDE_IP));
         return;
@@ -428,7 +428,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
     case CLIENT_BAN_XLINE:
       if (HasFlag(client, FLAGS_EXEMPTXLINE))
       {
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                              "XLINE over-ruled for %s, client is xline_exempt",
                              client_get_name(client, HIDE_IP));
         return;
@@ -441,7 +441,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
       break;
   }
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%c-line active for %s",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%c-line active for %s",
                        ban_type, client_get_name(client, HIDE_IP));
 
   if (IsClient(client))
@@ -672,7 +672,7 @@ exit_one_client(struct Client *client, const char *comment)
   }
   else if (IsServer(client))
   {
-    sendto_realops_flags(UMODE_EXTERNAL, L_ALL, SEND_NOTICE, "Server %s split from %s",
+    sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
                          client->name, client->servptr->name);
 
     list_remove(&client->lnode, &client->servptr->serv->server_list);
@@ -782,7 +782,7 @@ client_exit(struct Client *client, const char *comment)
 
       monitor_clear_list(client);
 
-      sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE, "Client exiting: %s (%s@%s) [%s] [%s]",
+      sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Client exiting: %s (%s@%s) [%s] [%s]",
                            client->name, client->username, client->realhost,
                            client->sockhost, comment);
 
@@ -814,7 +814,7 @@ client_exit(struct Client *client, const char *comment)
     client_close_connection(client);
   }
   else if (IsClient(client) && HasFlag(client->servptr, FLAGS_EOB))
-    sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                          client->servptr->name, client->name,
                          client->username, client->realhost, client->sockhost, comment);
@@ -845,7 +845,7 @@ client_exit(struct Client *client, const char *comment)
 
     if (MyConnect(client))
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "%s was connected for %s. %ju/%ju sendK/recvK.",
                            client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                            client->connection->send.bytes >> 10,
@@ -916,10 +916,10 @@ dead_link_on_read(struct Client *client, int error)
   {
     if (error == 0)
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                            "Server %s closed the connection",
                            client_get_name(client, SHOW_IP));
-      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "Server %s closed the connection",
                            client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "Server %s closed the connection",
@@ -927,17 +927,17 @@ dead_link_on_read(struct Client *client, int error)
     }
     else
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                            "Lost connection to %s: %s",
                            client_get_name(client, SHOW_IP), strerror(current_error));
-      sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "Lost connection to %s: %s",
                            client_get_name(client, MASK_IP), strerror(current_error));
       log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
                 client_get_name(client, SHOW_IP), strerror(current_error));
     }
 
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s was connected for %s",
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s was connected for %s",
                          client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
   }
 
@@ -965,7 +965,7 @@ exit_aborted_clients(void)
 
     if (client == NULL)
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "Warning: null client on abort_list!");
       continue;
     }

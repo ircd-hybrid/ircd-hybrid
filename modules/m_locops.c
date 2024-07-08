@@ -58,7 +58,7 @@ mo_locops(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
+  sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                        source->name, message);
   cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, message);
 }
@@ -88,7 +88,7 @@ ms_locops(struct Client *source, int parc, char *parv[])
     return;
 
   if (shared_find(SHARED_LOCOPS, source->servptr->name, "*", "*"))
-    sendto_realops_flags(UMODE_LOCOPS, L_ALL, SEND_LOCOPS, "from %s: %s",
+    sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                          source->name, message);
 }
 

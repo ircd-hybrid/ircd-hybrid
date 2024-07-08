@@ -57,7 +57,7 @@ void
 resv_delete(struct ResvItem *resv, bool expired)
 {
   if (expired)
-    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary RESV for [%s] expired",
+    sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Temporary RESV for [%s] expired",
                          resv->mask);
 
   while (resv->exempt_list.head)

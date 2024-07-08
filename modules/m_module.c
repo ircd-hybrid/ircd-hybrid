@@ -39,7 +39,7 @@ announce_load(const char *name, const void *handle, void *user_data)
 {
   struct Client *source = user_data;
   sendto_one_notice(source, &me, ":Module %s [handle: %p] loaded", name, handle);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] loaded", name, handle);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Module %s [handle: %p] loaded", name, handle);
 }
 
 static void
@@ -47,7 +47,7 @@ announce_unload(const char *name, const void *handle, void *user_data)
 {
   struct Client *source = user_data;
   sendto_one_notice(source, &me, ":Module %s [handle: %p] unloaded", name, handle);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] unloaded", name, handle);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Module %s [handle: %p] unloaded", name, handle);
 }
 
 static void
@@ -55,7 +55,7 @@ announce_reload(const char *name, const void *handle, void *user_data)
 {
   struct Client *source = user_data;
   sendto_one_notice(source, &me, ":Module %s [handle: %p] reloaded", name, handle);
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Module %s [handle: %p] reloaded", name, handle);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Module %s [handle: %p] reloaded", name, handle);
 }
 
 /**
@@ -128,7 +128,7 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   if (core)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Error reloading core module: %s: terminating ircd", arg);
     log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", arg);
     exit(EXIT_FAILURE);
@@ -159,7 +159,7 @@ module_cmd_reload_all(struct Client *source)
   else
     sendto_one_notice(source, &me, ":All modules reloaded successfully");
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
   log_write(LOG_TYPE_IRCD, "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);
 
@@ -172,7 +172,7 @@ module_cmd_reload_all(struct Client *source)
     const struct ModuleConfig *const config = node->data;
     if (config->core && module_find(config->name) == NULL)
     {
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "Error loading core module %s: terminating ircd", config->name);
       log_write(LOG_TYPE_IRCD, "Error loading core module %s: terminating ircd", config->name);
       exit(EXIT_FAILURE);

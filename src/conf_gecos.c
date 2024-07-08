@@ -58,7 +58,7 @@ void
 gecos_delete(struct GecosItem *gecos, bool expired)
 {
   if (expired)
-    sendto_realops_flags(UMODE_EXPIRATION, L_ALL, SEND_NOTICE, "Temporary X-line for [%s] expired",
+    sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Temporary X-line for [%s] expired",
                          gecos->mask);
 
   list_remove(&gecos->node, &gecos_list);

@@ -62,10 +62,10 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
      * TS_ONLY we can't fall back to the non-TS protocol so
      * we drop the link  -orabidoo
      */
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
               "Link %s dropped, wrong TS protocol version (%s,%s)",
               client_get_name(source, SHOW_IP), parv[1], parv[2]);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
               "Link %s dropped, wrong TS protocol version (%s,%s)",
               client_get_name(source, MASK_IP), parv[1], parv[2]);
     log_write(LOG_TYPE_IRCD,
@@ -87,10 +87,10 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
 
   if (delta_ts > ConfigGeneral.ts_max_delta)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
               "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
     log_write(LOG_TYPE_IRCD,
@@ -103,10 +103,10 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
 
   if (delta_ts > ConfigGeneral.ts_warn_delta)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
               "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
               "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
               client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
   }

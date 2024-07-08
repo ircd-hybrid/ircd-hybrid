@@ -77,7 +77,7 @@ dline_remove(struct Client *source, const struct aline_ctx *aline)
     sendto_one_notice(source, &me, ":D-Line for [%s] is removed",
                       conf->host);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the D-Line for: [%s]",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the D-Line for: [%s]",
                        get_oper_name(source), conf->host);
   log_write(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
             get_oper_name(source), conf->host);

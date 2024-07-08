@@ -234,7 +234,7 @@ listener_accept_connection(fde_t *F, void *data)
     if (number_fd > hard_fdlimit - 10)
     {
       ++ServerStats.is_ref;
-      sendto_realops_flags_ratelimited(&rate, "All connections in use. (%s)",
+      sendto_clients_ratelimited(&rate, "All connections in use. (%s)",
                                        listener_get_name(listener));
 
       if (!(listener->flags & LISTENER_TLS))

@@ -91,7 +91,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
       if (channel->sent_join_flood_notice == false)
       {
         channel->sent_join_flood_notice = true;
-        sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE, "Possible Join Flooder %s on %s target: %s",
+        sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
                              client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
       }
     }
@@ -914,7 +914,7 @@ channel_check_spambot_warning(struct Client *client, const char *name)
       client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 
       /* It's already known as a possible spambot */
-      sendto_realops_flags(UMODE_FLOOD, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "User %s (%s@%s) trying to join %s is a possible spambot",
                            client->name, client->username, client->host, name);
     }
@@ -1011,7 +1011,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
         ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
     {
       sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Forbidding reserved channel %s from user %s",
+      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
                            name, client_get_name(client, HIDE_IP));
       continue;
     }

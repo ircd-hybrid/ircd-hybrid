@@ -47,7 +47,7 @@ static void
 rehash_conf(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "CONF");
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "%s is rehashing configuration file(s)",
                        get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
@@ -63,7 +63,7 @@ static void
 rehash_motd(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "MOTD");
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "%s is forcing re-reading of MOTD files",
                        get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
@@ -79,7 +79,7 @@ static void
 rehash_dns(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "DNS");
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "%s is rehashing DNS",
                        get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",

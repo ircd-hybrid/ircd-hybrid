@@ -45,7 +45,7 @@
 static void
 do_motd(struct Client *source)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "MOTD requested by %s (%s@%s) [%s]",
+  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MOTD requested by %s (%s@%s) [%s]",
                        source->name, source->username, source->host, source->servptr->name);
   motd_send(source);
 }

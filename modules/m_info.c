@@ -221,7 +221,7 @@ send_birthdate_online_time(struct Client *client)
 static void
 send_info_text(struct Client *client)
 {
-  sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "INFO requested by %s (%s@%s) [%s]",
+  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                        client->name, client->username, client->host, client->servptr->name);
 
   for (const char *const *text = infotext; *text; ++text)

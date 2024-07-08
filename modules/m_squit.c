@@ -95,7 +95,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
 
   if (MyConnect(target))
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "Received SQUIT %s from %s (%s)",
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%s)",
                          target->name, get_oper_name(source), comment);
     log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%s)",
               target->name, get_oper_name(source), comment);
@@ -148,7 +148,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
 
   if (MyConnect(target))
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
                          me.name, target->name, get_oper_name(source), comment);
     sendto_server(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
                   me.id, target->name, get_oper_name(source), comment);

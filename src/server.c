@@ -220,11 +220,11 @@ try_connections(void *unused)
        *   -- adrian
        */
       if (ConfigServerHide.hide_server_ips)
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                              "Connection to %s activated.",
                              conf->name);
       else
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                              "Connection to %s[%s] activated.",
                              conf->name, conf->host);
 
@@ -295,7 +295,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
   /* Still processing a DNS lookup? -> exit */
   if (conf->dns_pending)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} in progress.",
                          conf->name);
     return false;
@@ -303,7 +303,7 @@ server_connect(struct MaskItem *conf, struct Client *by)
 
   if (conf->dns_failed)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Error connecting to %s: DNS lookup for connect{} failed.",
                          conf->name);
     return false;
@@ -376,10 +376,10 @@ server_finish_tls_handshake(struct Client *client)
                                                 client->name, CONF_SERVER);
   if (conf == NULL)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                          "Lost connect{} block for %s",
                          client_get_name(client, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                          "Lost connect{} block for %s",
                          client_get_name(client, MASK_IP));
 
@@ -433,7 +433,7 @@ server_tls_handshake(fde_t *F, void *data)
         return;
       default:
       {
-        sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                              "Error connecting to %s: %s", client->name,
                              sslerr ? sslerr : "unknown TLS error");
         client_exit(client, "Error during TLS handshake");
@@ -496,10 +496,10 @@ server_connect_callback(fde_t *F, int status, void *data)
   if (status != COMM_OK)
   {
     /* We have an error, so report it and quit */
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                          "Error connecting to %s: %s",
                          client_get_name(client, SHOW_IP), comm_errstr(status));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                          "Error connecting to %s: %s",
                          client_get_name(client, MASK_IP), comm_errstr(status));
 
@@ -517,9 +517,9 @@ server_connect_callback(fde_t *F, int status, void *data)
                                                 client->name, CONF_SERVER);
   if (conf == NULL)
   {
-    sendto_realops_flags(UMODE_SERVNOTICE, L_ADMIN, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                          "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
-    sendto_realops_flags(UMODE_SERVNOTICE, L_OPER, SEND_NOTICE,
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                          "Lost connect{} block for %s", client_get_name(client, MASK_IP));
 
     client_exit(client, "Lost connect{} block");

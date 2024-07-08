@@ -71,7 +71,7 @@ do_connect(struct Client *source, const char *name)
   static const char *const type[] = { "Remote", "Local" };
   const char *const type_p = type[MyConnect(source) != 0];
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_GLOBAL, "from %s: %s CONNECT %s %u from %s",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
                        me.name, type_p, name, conf->port, get_oper_name(source));
   sendto_server(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
                 me.id, type_p, name, conf->port, get_oper_name(source));

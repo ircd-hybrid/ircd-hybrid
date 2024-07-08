@@ -304,7 +304,7 @@ user_register_local(struct Client *client)
 
   if (valid_username(client->username, true) == false)
   {
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Invalid username: %s (%s@%s)",
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Invalid username: %s (%s@%s)",
                          client->name, client->username, client->host);
 
     char buf[sizeof("Invalid username []") + sizeof(client->username)];
@@ -327,7 +327,7 @@ user_register_local(struct Client *client)
     max_clients += MAX_BUFFER;
   if (list_length(&local_client_list) >= max_clients)
   {
-    sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE, "Too many clients, rejecting %s[%s].",
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Too many clients, rejecting %s[%s].",
                          client->name, client->host);
     client_exit(client, "Sorry, server is full - try later");
     ++ServerStats.is_ref;
@@ -339,7 +339,7 @@ user_register_local(struct Client *client)
     const struct GecosItem *gecos = gecos_find(client->info, match);
     if (gecos)
     {
-      sendto_realops_flags(UMODE_REJ, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "X-line Rejecting [%s] [%s], user %s [%s]",
                            client->info, gecos->reason,
                            client_get_name(client, HIDE_IP),
@@ -372,7 +372,7 @@ user_register_local(struct Client *client)
   strlcpy(client->id, id, sizeof(client->id));
   hash_add_id(client);
 
-  sendto_realops_flags(UMODE_CCONN, L_ALL, SEND_NOTICE,
+  sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                        client->name, client->username, client->realhost,
                        client->sockhost,
@@ -399,7 +399,7 @@ user_register_local(struct Client *client)
     Count.max_loc = list_length(&local_client_list);
 
     if (!(Count.max_loc % 10))
-      sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE,
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                            "New peak in local client connections: %u",
                            Count.max_loc);
   }
@@ -462,7 +462,7 @@ user_register_remote(struct Client *client)
     Count.max_tot = list_length(&global_client_list);
 
   if (HasFlag(client->servptr, FLAGS_EOB))
-    sendto_realops_flags(UMODE_FARCONNECT, L_ALL, SEND_NOTICE,
+    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                          "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
                          client->servptr->name,
                          client->name, client->username, client->realhost,

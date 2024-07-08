@@ -1189,7 +1189,7 @@ do_stats(struct Client *client, int parc, char *parv[])
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
-    sendto_realops_flags(UMODE_SPY, L_ALL, SEND_NOTICE, "STATS %c requested by %s (%s@%s) [%s]",
+    sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "STATS %c requested by %s (%s@%s) [%s]",
                          letter, client->name, client->username, client->host, client->servptr->name);
   }
 

@@ -77,7 +77,7 @@ kline_remove(struct Client *source, const struct aline_ctx *aline)
     sendto_one_notice(source, &me, ":K-Line for [%s@%s] is removed",
                       conf->user, conf->host);
 
-  sendto_realops_flags(UMODE_SERVNOTICE, L_ALL, SEND_NOTICE, "%s has removed the K-Line for: [%s@%s]",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the K-Line for: [%s@%s]",
                        get_oper_name(source), conf->user, conf->host);
   log_write(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
             get_oper_name(source), conf->user, conf->host);

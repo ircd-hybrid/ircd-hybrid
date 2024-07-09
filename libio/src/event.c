@@ -38,6 +38,19 @@ event_get_list(void)
   return &event_list;
 }
 
+static int
+event_cmp(const void *a_, const void *b_)
+{
+  const struct event *const ev1 = a_;
+  const struct event *const ev2 = b_;
+
+  if (ev1->next < ev2->next)
+    return -1;
+  if (ev1->next > ev2->next)
+    return 1;
+  return 0;
+}
+
 void
 event_add(struct event *ev, void *data)
 {
@@ -46,20 +59,7 @@ event_add(struct event *ev, void *data)
   ev->data = data;
   ev->next = io_time_get(IO_TIME_MONOTONIC_SEC) + ev->when;
   ev->active = true;
-
-  list_node_t *node;
-  LIST_FOREACH(node, event_list.head)
-  {
-    struct event *e = node->data;
-
-    if (e->next > ev->next)
-    {
-      list_add_before(node, ev, &ev->node, &event_list);
-      return;
-    }
-  }
-
-  list_add_tail(ev, &ev->node, &event_list);
+  list_add_sorted(ev, &ev->node, &event_list, event_cmp);
 }
 
 void

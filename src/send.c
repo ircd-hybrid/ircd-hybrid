@@ -241,7 +241,6 @@ sendto_one(struct Client *to, const char *pattern, ...)
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 

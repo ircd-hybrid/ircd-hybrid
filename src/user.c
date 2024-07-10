@@ -687,8 +687,8 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   list_node_t *node;
   LIST_FOREACH(node, client->channel.head)
   {
-    char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
     char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
+    char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
     char *p = modebuf;
     int len = 0;
     const struct ChannelMember *member = node->data;

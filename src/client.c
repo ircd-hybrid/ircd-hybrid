@@ -202,7 +202,6 @@ client_free(struct Client *client)
 static void
 check_pings_list(list_t *list)
 {
-  char buf[32];  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
   list_node_t *node, *node_next;
 
   LIST_FOREACH_SAFE(node, node_next, list->head)
@@ -247,6 +246,7 @@ check_pings_list(list_t *list)
                       client_get_name(client, SHOW_IP));
           }
 
+          char buf[32];  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
           snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
                    (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
           client_exit(client, buf);

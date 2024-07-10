@@ -96,11 +96,6 @@ motd_create(const char *mask, const char *path)
 static struct MotdCache *
 motd_cache(struct Motd *motd)
 {
-  struct stat sb;
-  char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
-  char *tmp = NULL;
-  unsigned int i = 0;
-
   assert(motd);
   assert(motd->path);
 
@@ -122,7 +117,8 @@ motd_cache(struct Motd *motd)
   }
 
   /* Need the file's modification time */
-  if (stat(motd->path, &sb) == -1)
+  struct stat sb;
+  if (stat(motd->path, &sb))
   {
     log_write(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path, strerror(errno));
     return 0;
@@ -143,13 +139,15 @@ motd_cache(struct Motd *motd)
   cache->maxcount = motd->maxcount;
   cache->modtime = sb.st_mtime;  /* Store modtime */
 
+  char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
+    unsigned int i = 0;
     /* Copy over line, stopping when we overflow or hit line end */
-    for (tmp = line, i = 0; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
+    for (char *tmp = line; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
-    cache->motd[cache->count][i] = '\0';
 
+    cache->motd[cache->count][i] = '\0';
     cache->count++;
   }
 

@@ -448,9 +448,6 @@ channel_pub_or_secret(const struct Channel *channel)
 void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
-  char buf[IRCD_BUFSIZE];
-  char *bufptr = buf;
-  size_t masklen = 0;
   bool is_member = member_find_link(client, channel) != NULL;
   bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
   bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
@@ -459,6 +456,8 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
   if (PubChannel(channel) || is_member)
   {
+    char buf[IRCD_BUFSIZE];
+    char *bufptr = buf;
     /* :me.name 353 client->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
     /* 1       23456            789             01                        2 3  */
     size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
@@ -466,6 +465,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     list_node_t *node;
     LIST_FOREACH(node, channel->members.head)
     {
+      size_t masklen = 0;
       const struct ChannelMember *member = node->data;
 
       if (HasUMode(member->client, UMODE_INVISIBLE) && is_member == false)

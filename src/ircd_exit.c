@@ -51,8 +51,6 @@
 void
 ircd_exit(const char *message, ircd_exit_action_t action)
 {
-  char buf[IRCD_BUFSIZE];
-
   if (action == IRCD_EXIT_RESTART)
   {
     static bool was_here = false;
@@ -62,6 +60,7 @@ ircd_exit(const char *message, ircd_exit_action_t action)
     was_here = true;
   }
 
+  char buf[IRCD_BUFSIZE];
   if (EmptyString(message))
     snprintf(buf, sizeof(buf), "Server is %s",
              action == IRCD_EXIT_RESTART ? "restarting" : "terminating");

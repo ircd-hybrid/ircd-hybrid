@@ -536,19 +536,17 @@ list_allow_channel(const char *name, const struct ListTask *lt)
 static void
 list_one_channel(struct Client *client, struct Channel *channel)
 {
-  const struct ListTask *const lt = client->connection->list_task;
-  char buf[MODEBUFLEN];
-
   if (HasCMode(channel, MODE_SECRET) &&
       !(HasUMode(client, UMODE_ADMIN) || member_find_link(client, channel)))
     return;
 
-  /* Check the number of users in the channel */
+  const struct ListTask *const lt = client->connection->list_task;
+  /* Check the number of users in the channel. */
   if (list_length(&channel->members) < lt->users_min ||
       list_length(&channel->members) > lt->users_max)
     return;
 
-  /* Check the creation time of the channel */
+  /* Check the creation time of the channel. */
   if (channel->creation_time &&
       ((unsigned int)channel->creation_time < lt->created_min ||
        (unsigned int)channel->creation_time > lt->created_max))
@@ -556,7 +554,7 @@ list_one_channel(struct Client *client, struct Channel *channel)
 
   /* Check the topic time of the channel */
   if ((unsigned int)channel->topic_time < lt->topicts_min ||
-    /* If channel->topic_time is zero, treat it as UINT_MAX to ensure it is considered greater than lt->topicts_max */
+    /* If channel->topic_time is zero, treat it as UINT_MAX to ensure it is considered greater than lt->topicts_max. */
       (channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX) > lt->topicts_max)
     return;
 
@@ -566,16 +564,12 @@ list_one_channel(struct Client *client, struct Channel *channel)
   if (list_allow_channel(channel->name, lt) == false)
     return;
 
-  if (channel->topic[0])
-    snprintf(buf, sizeof(buf), "[%s] ",
-             channel_modes(channel, client, false));
-  else
-    snprintf(buf, sizeof(buf), "[%s]",
-             channel_modes(channel, client, false));
+  char buf[MODEBUFLEN];
+  snprintf(buf, sizeof(buf), channel->topic[0] == '\0' ? "[%s]" : "[%s] ",
+           channel_modes(channel, client, false));
 
-  sendto_one_numeric(client, &me, RPL_LIST, channel->name,
-                     list_length(&channel->members),
-                     buf, channel->topic);
+  sendto_one_numeric(client, &me, RPL_LIST,
+                     channel->name, list_length(&channel->members), buf, channel->topic);
 }
 
 /**

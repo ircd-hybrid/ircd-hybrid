@@ -79,7 +79,7 @@ send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
  **      sendq.
  */
 static void
-send_message(struct Client *to, struct dbuf_block *buffer)
+sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 {
   assert(!IsMe(to));
   assert(to != &me);
@@ -125,7 +125,7 @@ send_message(struct Client *to, struct dbuf_block *buffer)
  *
  */
 static void
-send_message_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
+sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
 {
   assert(MyConnect(to));
   assert(IsServer(to));
@@ -136,7 +136,7 @@ send_message_remote(struct Client *to, const struct Client *from, struct dbuf_bl
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                          to->name, from->name);
   else
-    send_message(to, buffer);
+    sendto_one_buffer(to, buffer);
 }
 
 /*
@@ -233,7 +233,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
   send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(to->from, buffer);
+  sendto_one_buffer(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -263,7 +263,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   send_format(buffer, numstr, args);
   va_end(args);
 
-  send_message(to->from, buffer);
+  sendto_one_buffer(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -286,7 +286,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
   send_format(buffer, pattern, args);
   va_end(args);
 
-  send_message(to->from, buffer);
+  sendto_one_buffer(to->from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -301,7 +301,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  * 		  but useful when one does not know where target "lives"
  */
 void
-sendto_anywhere(struct Client *to, const struct Client *from, const char *command, const char *pattern, ...)
+sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *pattern, ...)
 {
   if (IsDead(to->from))
     return;
@@ -320,9 +320,9 @@ sendto_anywhere(struct Client *to, const struct Client *from, const char *comman
   va_end(args);
 
   if (MyConnect(to))
-    send_message(to, buffer);
+    sendto_one_buffer(to, buffer);
   else
-    send_message_remote(to->from, from, buffer);
+    sendto_one_buffer_remote(to->from, from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -395,7 +395,7 @@ sendto_clients(unsigned int flags, send_recipient recipient, send_type type, con
     if (sendto_clients_qualifies(client, flags, recipient) == false)
       continue;
 
-    send_message(client, buffer);
+    sendto_one_buffer(client, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -501,7 +501,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from, const c
     if (sendto_match_butone_qualifies(client, mask, type) == false)
       continue;
 
-    send_message(client, buffer_l);
+    sendto_one_buffer(client, buffer_l);
   }
 
   /* Now scan servers */
@@ -534,7 +534,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from, const c
     if (one && (client == one->from))
       continue;
 
-    send_message_remote(client, from, buffer_r);
+    sendto_one_buffer_remote(client, from, buffer_r);
   }
 
   dbuf_ref_free(buffer_l);
@@ -591,7 +591,7 @@ sendto_servers(const struct Client *one, const unsigned int capab,
     if (IsCapable(client, nocapab))
       continue;
 
-    send_message(client, buffer);
+    sendto_one_buffer(client, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -646,7 +646,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
       continue;
 
     target->from->connection->send_marker = send_marker;
-    send_message_remote(target->from, source, buffer);
+    sendto_one_buffer_remote(target->from, source, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -701,13 +701,13 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
         continue;
 
       target->connection->send_marker = send_marker;
-      send_message(target, buffer);
+      sendto_one_buffer(target, buffer);
     }
   }
 
   if (touser && MyConnect(user) && !IsDead(user))
     if (HasCap(user, poscap) == poscap)
-      send_message(user, buffer);
+      sendto_one_buffer(user, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -752,7 +752,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
     if (negcap && HasCap(target, negcap))
       continue;
 
-    send_message(target, buffer);
+    sendto_one_buffer(target, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -814,9 +814,9 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
       continue;
 
     if (MyConnect(target))
-      send_message(target, buffer_l);
+      sendto_one_buffer(target, buffer_l);
     else if (target->from->connection->send_marker != send_marker)
-      send_message_remote(target->from, from, buffer_r);
+      sendto_one_buffer_remote(target->from, from, buffer_r);
 
     target->from->connection->send_marker = send_marker;
   }

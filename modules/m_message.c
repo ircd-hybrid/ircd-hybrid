@@ -375,7 +375,7 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
     }
 
     sendto_match_butone(IsServer(source->from) ? source->from : NULL, source, nick + 1,
-                        (*nick == '#'), "%s $%s :%s", command[notice], nick, text);
+                        (*nick == '#') ? SEND_MATCH_HOST : SEND_MATCH_SERVER, "%s $%s :%s", command[notice], nick, text);
   }
 }
 

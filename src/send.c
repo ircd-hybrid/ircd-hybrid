@@ -444,9 +444,9 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *pattern, ...)
  * side effects	- NONE
  */
 static bool
-sendto_match_butone_qualifies(const struct Client *one, const char *mask, bool host)
+sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_match_type type)
 {
-  if (host)
+  if (type == SEND_MATCH_HOST)
   {
     struct io_addr addr;
     int bits = 0;
@@ -469,8 +469,8 @@ sendto_match_butone_qualifies(const struct Client *one, const char *mask, bool h
  * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
  */
 void
-sendto_match_butone(const struct Client *one, const struct Client *from,
-                    const char *mask, bool host, const char *pattern, ...)
+sendto_match_butone(const struct Client *one, const struct Client *from, const char *mask,
+                    send_match_type type, const char *pattern, ...)
 {
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
@@ -498,7 +498,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from,
     if (one && (client == one->from))
       continue;
 
-    if (sendto_match_butone_qualifies(client, mask, host) == false)
+    if (sendto_match_butone_qualifies(client, mask, type) == false)
       continue;
 
     send_message(client, buffer_l);

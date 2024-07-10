@@ -59,6 +59,19 @@ typedef enum
   SEND_TYPE_LOCOPS,  /**< A notice message sent to local operators. Prefix: "LocOps". */
 } send_type;
 
+/**
+ * @enum send_match_type
+ * @brief Enum for representing the type of match to perform.
+ *
+ * This enum lists the possible types of matches for sending messages using the sendto_match_butone function.
+ * Each type specifies whether to match based on the client's hostname or server name.
+ */
+typedef enum
+{
+  SEND_MATCH_HOST,  /**< Match based on the client's hostname. */
+  SEND_MATCH_SERVER,  /**< Match based on the client's server name. */
+} send_match_type;
+
 /*
  * struct decls
  */
@@ -74,7 +87,7 @@ extern void sendto_one_notice(struct Client *, const struct Client *, const char
 extern void sendto_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients(unsigned int, send_recipient, send_type, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
-extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, bool, const char *, ...) IO_AFP(5,6);
+extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, send_match_type, const char *, ...) IO_AFP(5,6);
 extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);

@@ -104,6 +104,6 @@ extern info_result_t info_register(const char *, const char *, info_output_type_
 extern info_result_t info_unregister(const char *, const char *);
 extern void info_register_array(const struct InfoEntry *, size_t);
 extern void info_unregister_array(const struct InfoEntry *, size_t);
-extern struct InfoEntry *info_find(const char *, const char *);
 extern void info_send(struct Client *);
+extern struct InfoEntry *info_find(const char *, const char *);
 #endif  /* INCLUDED_info_h */

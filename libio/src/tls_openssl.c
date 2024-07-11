@@ -34,6 +34,8 @@
 
 #ifdef HAVE_TLS_OPENSSL
 static bool TLS_initialized;
+static tls_context_t tls_ctx;
+static tls_md_t message_digest_algorithm;
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -68,7 +70,7 @@ tls_is_initialized(void)
 void
 tls_init(void)
 {
-  if ((ConfigServerInfo.tls_ctx.server_ctx = SSL_CTX_new(TLS_server_method())) == NULL)
+  if ((tls_ctx.server_ctx = SSL_CTX_new(TLS_server_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -77,13 +79,13 @@ tls_init(void)
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_min_proto_version(ConfigServerInfo.tls_ctx.server_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+  SSL_CTX_set_min_proto_version(tls_ctx.server_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
-  if ((ConfigServerInfo.tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
+  if ((tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
@@ -92,10 +94,10 @@ tls_init(void)
     return;  /* Not reached */
   }
 
-  SSL_CTX_set_min_proto_version(ConfigServerInfo.tls_ctx.client_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(ConfigServerInfo.tls_ctx.client_ctx, SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(ConfigServerInfo.tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_min_proto_version(tls_ctx.client_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(tls_ctx.client_ctx, SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
 bool
@@ -106,22 +108,22 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  if (SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
-      SSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
+  if (SSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
+      SSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
-      SSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
+  if (SSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
+      SSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.server_ctx) != 1 ||
-      SSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.client_ctx) != 1)
+  if (SSL_CTX_check_private_key(tls_ctx.server_ctx) != 1 ||
+      SSL_CTX_check_private_key(tls_ctx.client_ctx) != 1)
   {
     report_crypto_errors();
     return false;
@@ -140,7 +142,7 @@ tls_new_credentials(void)
 
       if (dh)
       {
-        SSL_CTX_set_tmp_dh(ConfigServerInfo.tls_ctx.server_ctx, dh);
+        SSL_CTX_set_tmp_dh(tls_ctx.server_ctx, dh);
         DH_free(dh);
       }
     }
@@ -164,7 +166,7 @@ tls_new_credentials(void)
             if (dhpkey)
             {
               if (EVP_PKEY_is_a(dhpkey, "DH"))
-                if (SSL_CTX_set0_tmp_dh_pkey(ConfigServerInfo.tls_ctx.server_ctx, dhpkey))
+                if (SSL_CTX_set0_tmp_dh_pkey(tls_ctx.server_ctx, dhpkey))
                   break;
 
               EVP_PKEY_free(dhpkey);
@@ -183,35 +185,35 @@ tls_new_credentials(void)
   }
 
   if (ConfigServerInfo.tls_supported_groups == NULL)
-    SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-  else if (SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
+    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
+  else if (SSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
   {
-    SSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    ConfigServerInfo.message_digest_algorithm = EVP_sha256();
-  else if ((ConfigServerInfo.message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
+    message_digest_algorithm = EVP_sha256();
+  else if ((message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
-    ConfigServerInfo.message_digest_algorithm = EVP_sha256();
+    message_digest_algorithm = EVP_sha256();
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   if (ConfigServerInfo.tls_cipher_list == NULL)
-    SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
+    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+  else if (SSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
   {
-    SSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
 #ifndef LIBRESSL_VERSION_NUMBER
   if (ConfigServerInfo.tls_cipher_suites == NULL)
-    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
-  else if (SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
+    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
+  else if (SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
   {
-    SSL_CTX_set_ciphersuites(ConfigServerInfo.tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
+    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
   }
 #endif
@@ -340,9 +342,9 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     return false;
 
   if (role == TLS_ROLE_SERVER)
-    ssl = SSL_new(ConfigServerInfo.tls_ctx.server_ctx);
+    ssl = SSL_new(tls_ctx.server_ctx);
   else
-    ssl = SSL_new(ConfigServerInfo.tls_ctx.client_ctx);
+    ssl = SSL_new(tls_ctx.client_ctx);
 
   if (ssl == NULL)
   {
@@ -398,7 +400,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   SSL *ssl = *tls_data;
   unsigned int n;
@@ -419,7 +421,7 @@ tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint
     case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
       ret = true;
 
-      if (X509_digest(cert, digest, md, &n))
+      if (X509_digest(cert, message_digest_algorithm, md, &n))
       {
         binary_to_hex(md, buf, n);
         *fingerprint = io_strdup(buf);

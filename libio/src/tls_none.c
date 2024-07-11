@@ -106,7 +106,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   return false;
 }

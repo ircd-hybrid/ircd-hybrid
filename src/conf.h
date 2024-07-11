@@ -28,7 +28,6 @@
 #include "config.h"
 #include "client.h"
 #include "conf_class.h"
-#include "tls.h"
 #include "address.h"
 
 
@@ -262,8 +261,6 @@ struct config_serverinfo_entry
   char *tls_cipher_list;
   char *tls_cipher_suites;
   char *tls_message_digest_algorithm;
-  tls_context_t tls_ctx;
-  tls_md_t message_digest_algorithm;
   unsigned int hub;
   unsigned int default_max_clients;
   unsigned int max_nick_length;

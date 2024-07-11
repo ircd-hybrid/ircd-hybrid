@@ -142,7 +142,7 @@ ssl_handshake(fde_t *F, void *data)
   comm_settimeout(F, 0, NULL, NULL);
   comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
-  if (tls_verify_certificate(&F->tls, ConfigServerInfo.message_digest_algorithm, &client->tls_certfp) == false)
+  if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
     log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
          client_get_name(client, MASK_IP));
 

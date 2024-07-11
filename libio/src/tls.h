@@ -74,6 +74,6 @@ extern void tls_shutdown(tls_data_t *);
 
 extern bool tls_set_ciphers(tls_data_t *, const char *);
 
-extern bool tls_verify_certificate(tls_data_t *, tls_md_t, char **);
+extern bool tls_verify_certificate(tls_data_t *, char **);
 
 #endif  /* INCLUDED_tls_h */

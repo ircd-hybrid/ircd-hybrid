@@ -70,28 +70,28 @@ tls_init(void)
 {
   wolfSSL_Init();
 
-  if ((ConfigServerInfo.tls_ctx.server_ctx = wolfSSL_CTX_new(wolfTLS_server_method())) == NULL)
+  if ((tls_ctx.server_ctx = wolfSSL_CTX_new(wolfTLS_server_method())) == NULL)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- wolfSSL_CTX_new failed");
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
 
-  wolfSSL_CTX_SetMinVersion(ConfigServerInfo.tls_ctx.server_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(ConfigServerInfo.tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+  wolfSSL_CTX_SetMinVersion(tls_ctx.server_ctx, WOLFSSL_TLSV1_2);
+  wolfSSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
-  if ((ConfigServerInfo.tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
+  if ((tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- wolfSSL_CTX_new failed");
     exit(EXIT_FAILURE);
     return;  /* Not reached */
   }
 
-  wolfSSL_CTX_SetMinVersion(ConfigServerInfo.tls_ctx.client_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(ConfigServerInfo.tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(ConfigServerInfo.tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_SetMinVersion(tls_ctx.client_ctx, WOLFSSL_TLSV1_2);
+  wolfSSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
 }
 
 bool
@@ -102,62 +102,62 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  if (wolfSSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_certificate_chain_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS)
+  if (wolfSSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS ||
+      wolfSSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_PrivateKey_file(ConfigServerInfo.tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+  if (wolfSSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS ||
+      wolfSSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.server_ctx) != SSL_SUCCESS ||
-      wolfSSL_CTX_check_private_key(ConfigServerInfo.tls_ctx.client_ctx) != SSL_SUCCESS)
+  if (wolfSSL_CTX_check_private_key(tls_ctx.server_ctx) != SSL_SUCCESS ||
+      wolfSSL_CTX_check_private_key(tls_ctx.client_ctx) != SSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
   if (ConfigServerInfo.tls_dh_param_file)
-    if (wolfSSL_CTX_SetTmpDH_file(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+    if (wolfSSL_CTX_SetTmpDH_file(tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
        log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
 
 #ifdef SSL_CTX_set1_groups_list
   if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
+    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
+  else if (wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
   {
-    wolfSSL_CTX_set1_groups_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 #else
   if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
+    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
+  else if (wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
   {
-    wolfSSL_CTX_set1_curves_list(ConfigServerInfo.tls_ctx.server_ctx, "X25519:P-256");
+    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
   }
 #endif
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_sha256();
-  else if ((ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
+    message_digest_algorithm = wolfSSL_EVP_sha256();
+  else if ((message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
-    ConfigServerInfo.message_digest_algorithm = wolfSSL_EVP_sha256();
+    message_digest_algorithm = wolfSSL_EVP_sha256();
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   if (ConfigServerInfo.tls_cipher_list == NULL)
-    wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) != SSL_SUCCESS)
+    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+  else if (wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) != SSL_SUCCESS)
   {
-    wolfSSL_CTX_set_cipher_list(ConfigServerInfo.tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
+    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
@@ -282,9 +282,9 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     return false;
 
   if (role == TLS_ROLE_SERVER)
-    ssl = wolfSSL_new(ConfigServerInfo.tls_ctx.server_ctx);
+    ssl = wolfSSL_new(tls_ctx.server_ctx);
   else
-    ssl = wolfSSL_new(ConfigServerInfo.tls_ctx.client_ctx);
+    ssl = wolfSSL_new(tls_ctx.client_ctx);
 
   if (ssl == NULL)
   {
@@ -338,7 +338,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   WOLFSSL *ssl = *tls_data;
   unsigned int n;
@@ -359,7 +359,7 @@ tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint
     case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
       ret = true;
 
-      if (wolfSSL_X509_digest(cert, digest, md, &n))
+      if (wolfSSL_X509_digest(cert, message_digest_algorithm, md, &n))
       {
         binary_to_hex(md, buf, n);
         *fingerprint = io_strdup(buf);

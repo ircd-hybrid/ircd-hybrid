@@ -41,6 +41,8 @@ static const char tls_default_priority_string[] =
   "!VERS-TLS1.0:"
   "!VERS-SSL3.0";
 
+static tls_context_t tls_ctx;
+static tls_md_t message_digest_algorithm;
 
 bool
 tls_is_initialized(void)
@@ -137,22 +139,22 @@ tls_new_credentials(void)
   }
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;
+    message_digest_algorithm = GNUTLS_DIG_SHA256;
   else
   {
-    ConfigServerInfo.message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.tls_message_digest_algorithm);
+    message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.tls_message_digest_algorithm);
 
-    if (ConfigServerInfo.message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
+    if (message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
     {
-      ConfigServerInfo.message_digest_algorithm = GNUTLS_DIG_SHA256;
+      message_digest_algorithm = GNUTLS_DIG_SHA256;
       log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
     }
   }
 
-  if (ConfigServerInfo.tls_ctx && --ConfigServerInfo.tls_ctx->refs == 0)
-    tls_free_credentials(ConfigServerInfo.tls_ctx);
+  if (tls_ctx && --tls_ctx->refs == 0)
+    tls_free_credentials(tls_ctx);
 
-  ConfigServerInfo.tls_ctx = context;
+  tls_ctx = context;
   ++context->refs;
 
   TLS_initialized = true;
@@ -256,7 +258,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 
   gnutls_init(&tls_data->session, role == TLS_ROLE_SERVER ? GNUTLS_SERVER : GNUTLS_CLIENT);
 
-  tls_data->context = ConfigServerInfo.tls_ctx;
+  tls_data->context = tls_ctx;
   ++tls_data->context->refs;
 
   gnutls_priority_set(tls_data->session, tls_data->context->priorities);
@@ -322,7 +324,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint)
+tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   gnutls_x509_crt_t cert;
   unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
@@ -341,7 +343,7 @@ tls_verify_certificate(tls_data_t *tls_data, tls_md_t digest, char **fingerprint
   if (ret != GNUTLS_E_SUCCESS)
     goto info_done_dealloc;
 
-  ret = gnutls_x509_crt_get_fingerprint(cert, digest, digestbuf, &digest_size);
+  ret = gnutls_x509_crt_get_fingerprint(cert, message_digest_algorithm, digestbuf, &digest_size);
   if (ret != GNUTLS_E_SUCCESS)
     goto info_done_dealloc;
 

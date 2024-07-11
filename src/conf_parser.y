@@ -248,6 +248,7 @@ reset_block_state(void)
 %token  MODULE
 %token  MODULE_BASE_PATH
 %token  MOTD
+%token  MOTD_FILE
 %token  NAME
 %token  NEED_IDENT
 %token  NEED_PASSWORD
@@ -481,6 +482,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
+                        serverinfo_motd_file |
                         serverinfo_tls_dh_param_file |
                         serverinfo_tls_supported_groups |
                         serverinfo_rsa_private_key_file |
@@ -685,6 +687,15 @@ serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
   }
   else
     ConfigServerInfo.max_topic_length = $3;
+};
+
+serverinfo_motd_file: MOTD_FILE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass == 2)
+  {
+    io_free(ConfigServerInfo.motd_file);
+    ConfigServerInfo.motd_file = io_strdup(yylval.string);
+  }
 };
 
 serverinfo_hub: HUB '=' TBOOL ';'

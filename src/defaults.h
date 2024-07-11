@@ -61,7 +61,6 @@
 #define RESVPATH  LIBPATH "/resv.db"  /* resv file */
 #define DLPATH    LIBPATH "/dline.db"  /* dline file */
 #define XPATH     LIBPATH "/xline.db"  /* xline file */
-#define MPATH     ETCPATH "/ircd.motd"  /* MOTD file */
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
 

@@ -152,7 +152,6 @@ struct conf_parser_context
 struct config_general_entry
 {
   const char *dpath;
-  const char *mpath;
   const char *spath;
   const char *configfile;
   const char *klinefile;
@@ -252,6 +251,7 @@ struct config_serverinfo_entry
   char *sid;
   char *name;
   char *description;
+  char *motd_file;
   char *network_name;
   char *network_description;
   char *rsa_private_key_file;

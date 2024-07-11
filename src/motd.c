@@ -96,8 +96,8 @@ motd_create(const char *mask, const char *path)
 static struct MotdCache *
 motd_cache(struct Motd *motd)
 {
-  assert(motd);
-  assert(motd->path);
+  if (motd == NULL)
+    return NULL;
 
   if (motd->cache)
     return motd->cache;
@@ -171,7 +171,8 @@ motd_cache(struct Motd *motd)
 static void
 motd_decache(struct Motd *motd)
 {
-  assert(motd);
+  if (motd == NULL)
+    return;
 
   struct MotdCache *cache = motd->cache;
   if (cache == NULL)  /* We can be called for records with no cache */
@@ -194,7 +195,8 @@ motd_decache(struct Motd *motd)
 static void
 motd_destroy(struct Motd *motd)
 {
-  assert(motd);
+  if (motd == NULL)
+    return;
 
   if (motd->cache)  /* Drop the cache */
     motd_decache(motd);
@@ -317,8 +319,11 @@ motd_signon(struct Client *client)
 void
 motd_recache(void)
 {
-  motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
-  motd_decache(MotdList.remote);
+  if (MotdList.local)
+    motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
+
+  if (MotdList.remote)
+    motd_decache(MotdList.remote);
 
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)  /* Now all the others */
@@ -336,15 +341,25 @@ void
 motd_init(void)
 {
   if (MotdList.local)  /* Destroy old local MOTD */
+  {
     motd_destroy(MotdList.local);
-
-  MotdList.local = motd_create(NULL, MPATH);
-  motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
+    MotdList.local = NULL;
+  }
 
   if (MotdList.remote)  /* Destroy old remote MOTD */
+  {
     motd_destroy(MotdList.remote);
+    MotdList.remote = NULL;
+  }
 
-  MotdList.remote = motd_create(NULL, MPATH);
+  const char *const path = ConfigServerInfo.motd_file;
+  if (EmptyString(path))
+    return;
+
+  MotdList.local = motd_create(NULL, path);
+  motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
+
+  MotdList.remote = motd_create(NULL, path);
   motd_cache(MotdList.remote);  /* Initialize remote MOTD and cache it */
 }
 

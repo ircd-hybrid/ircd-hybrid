@@ -42,7 +42,6 @@ static const struct InfoEntry info_table[] =
 {
   INFO_ENTRY_INIT("#define", "DPATH", INFO_OUTPUT_STRING, &ConfigGeneral.dpath, "Root directory of installation"),
   INFO_ENTRY_INIT("#define", "SPATH", INFO_OUTPUT_STRING, &ConfigGeneral.spath, "Path to server executable"),
-  INFO_ENTRY_INIT("#define", "MPATH", INFO_OUTPUT_STRING, &ConfigGeneral.mpath, "Path to main motd (Message of the Day) file"),
   INFO_ENTRY_INIT("#define", "CPATH", INFO_OUTPUT_STRING, &ConfigGeneral.configfile, "Path to main configuration file"),
   INFO_ENTRY_INIT("#define, command-line", "DLPATH", INFO_OUTPUT_STRING, &ConfigGeneral.dlinefile, "Path to D-line database file"),
   INFO_ENTRY_INIT("#define, command-line", "KPATH", INFO_OUTPUT_STRING, &ConfigGeneral.klinefile, "Path to K-line database file"),
@@ -57,6 +56,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("serverinfo", "default_max_clients", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.default_max_clients, "The default maximum number of clients permitted simultaneously on this server"),
   INFO_ENTRY_INIT("serverinfo", "max_nick_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.max_nick_length, "Maximum nickname length"),
   INFO_ENTRY_INIT("serverinfo", "max_topic_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.max_topic_length, "Maximum topic length"),
+  INFO_ENTRY_INIT("serverinfo", "motd_file", INFO_OUTPUT_STRING, &ConfigServerInfo.motd_file, "Path to main motd (Message of the Day) file"),
   INFO_ENTRY_INIT("log", "use_logging", INFO_OUTPUT_BOOLEAN, &ConfigLog.use_logging, "Enable logging"),
   INFO_ENTRY_INIT("channel", "enable_extbans", INFO_OUTPUT_BOOLEAN, &ConfigChannel.enable_extbans, "Whether or not to enable extbans"),
   INFO_ENTRY_INIT("channel", "enable_owner", INFO_OUTPUT_BOOLEAN, &ConfigChannel.enable_owner, "Enables channel prefix mode +q (channel owner)"),

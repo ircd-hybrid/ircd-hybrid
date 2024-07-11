@@ -456,7 +456,6 @@ main(int argc, char *argv[])
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
-  ConfigGeneral.mpath      = MPATH;
   ConfigGeneral.configfile = CPATH;    /* Server configuration file */
   ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
   ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
@@ -510,7 +509,6 @@ main(int argc, char *argv[])
   extban_init();
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
-  motd_init();
   user_modes_init();
   flatten_links_init();
 

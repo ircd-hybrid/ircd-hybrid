@@ -3,6 +3,8 @@
   according to their respective configuration blocks for better clarity and structure
 * The `INFO` command output now shows entries from the admin {} config block
 * The `WALLOPS` command has been removed
+* The `serverinfo::motd_file` configuration directive has been added, allowing the
+  Message of the Day (MOTD) file path to be customized instead of hardcoded
 
 
 #### Noteworthy changes in version 8.2.45 (2024-07-02)

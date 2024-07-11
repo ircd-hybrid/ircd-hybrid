@@ -1228,6 +1228,8 @@ conf_clear(void)
   ConfigServerInfo.tls_cipher_suites = NULL;
   io_free(ConfigServerInfo.tls_message_digest_algorithm);
   ConfigServerInfo.tls_message_digest_algorithm = NULL;
+  io_free(ConfigServerInfo.motd_file);
+  ConfigServerInfo.motd_file = NULL;
 
   /* Clean out ConfigAdminInfo */
   io_free(ConfigAdminInfo.name);
@@ -1318,6 +1320,8 @@ conf_read_files(bool cold)
   fclose(conf_parser_ctx.conf_file);
 
   conf_handle_tls(cold);
+
+  motd_init();
 
   isupport_add("NICKLEN", NULL, ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", ConfigServerInfo.network_name, -1);

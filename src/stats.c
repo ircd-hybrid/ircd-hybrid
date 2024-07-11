@@ -61,7 +61,7 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * @param required_modes The required user modes to access this stats command.
  * @return An error code indicating the result of the operation.
  */
-enum stats_result
+stats_result_t
 stats_register(unsigned char letter, stats_handler_func handler, unsigned int required_modes)
 {
   if (stats_handlers[letter])
@@ -104,7 +104,7 @@ stats_register_array(const struct StatsHandler *handlers, size_t elements)
  * @param letter The character representing the stats command.
  * @return An error code indicating the result of the operation.
  */
-enum stats_result
+stats_result_t
 stats_unregister(unsigned char letter)
 {
   if (stats_handlers[letter] == NULL)
@@ -157,7 +157,7 @@ stats_find(unsigned char letter)
  * @param letter The character representing the stats command.
  * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
  */
-enum stats_result
+stats_result_t
 stats_set_enabled(unsigned char letter)
 {
   struct StatsHandler *handler = stats_find(letter);
@@ -176,7 +176,7 @@ stats_set_enabled(unsigned char letter)
  * @param letter The character representing the stats command.
  * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
  */
-enum stats_result
+stats_result_t
 stats_set_disabled(unsigned char letter)
 {
   struct StatsHandler *handler = stats_find(letter);
@@ -196,7 +196,7 @@ stats_set_disabled(unsigned char letter)
  * @param required_modes The user modes required to access this stats command.
  * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
  */
-enum stats_result
+stats_result_t
 stats_set_required_modes(unsigned char letter, unsigned int required_modes)
 {
   struct StatsHandler *handler = stats_find(letter);

@@ -47,18 +47,18 @@
 #define STATS_HANDLER_INIT(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
 
 /**
- * @enum stats_result
+ * @enum stats_result_t
  * @brief Error codes for the stats API functions.
  *
  * This enumeration defines error codes for the stats API functions, indicating the result of
  * registration and unregistration operations.
  */
-enum stats_result
+typedef enum
 {
   STATS_SUCCESS = 0,  /**< Indicates a successful operation. */
   STATS_ALREADY_REGISTERED,  /**< Indicates that the stats handler for the given character is already registered. */
   STATS_NOT_FOUND,  /**< Indicates that the stats handler for the given character was not found. */
-};
+} stats_result_t;
 
 /**
  * @typedef stats_handler_func
@@ -83,13 +83,13 @@ struct StatsHandler
   bool enabled;  /**< Indicates if the handler is enabled. */
 };
 
-extern enum stats_result stats_register(unsigned char, stats_handler_func, unsigned int);
+extern stats_result_t stats_register(unsigned char, stats_handler_func, unsigned int);
 extern void stats_register_array(const struct StatsHandler *, size_t);
-extern enum stats_result stats_unregister(unsigned char);
+extern stats_result_t stats_unregister(unsigned char);
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
 extern struct StatsHandler *stats_find(unsigned char);
-extern enum stats_result stats_set_enabled(unsigned char);
-extern enum stats_result stats_set_disabled(unsigned char);
-extern enum stats_result stats_set_required_modes(unsigned char, unsigned int);
+extern stats_result_t stats_set_enabled(unsigned char);
+extern stats_result_t stats_set_disabled(unsigned char);
+extern stats_result_t stats_set_required_modes(unsigned char, unsigned int);
 extern bool stats_allowed(const struct StatsHandler *, unsigned int);
 #endif  /* INCLUDED_stats_h */

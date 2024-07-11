@@ -361,7 +361,7 @@ sendto_clients(unsigned int flags, send_recipient recipient, send_type type, con
 {
   const char *ntype = "???";
 
-  switch (recipient)
+  switch (type)
   {
     case SEND_TYPE_NOTICE:
       ntype = "Notice";

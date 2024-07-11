@@ -21,12 +21,13 @@
 
 /**
  * @file info.c
- * @brief Implements dynamic registration, unregistration, and updating of info entries.
+ * @brief Implements dynamic registration and unregistration of info entries.
  *
  * This file contains the implementation of an API for dynamically registering and unregistering
  * info entries. The API supports various output types including string, unsigned integer,
  * signed integer, boolean, float, double, and char.
- * This implementation is used for showing the configuration in /INFO requests.
+ * This implementation is used for showing the configuration in /INFO requests, with optional
+ * namespace support.
  */
 
 #include "stdinc.h"
@@ -45,11 +46,45 @@
 static list_t info_list;
 
 /**
+ * @brief Compare function for sorting info entries.
+ *
+ * This function compares two InfoEntry structures, sorting entries without a namespace
+ * first in alphabetical order, followed by entries with a namespace sorted by namespace
+ * and name.
+ *
+ * @param a_ Pointer to the first InfoEntry.
+ * @param b_ Pointer to the second InfoEntry.
+ * @return A negative value if a < b, zero if a == b, and a positive value if a > b.
+ */
+static int
+info_compare(const void *const a_, const void *const b_)
+{
+  const struct InfoEntry *const a = a_;
+  const struct InfoEntry *const b = b_;
+
+  if (a->namespace == NULL && b->namespace == NULL)
+    return strcasecmp(a->name, b->name);
+
+  if (a->namespace == NULL)
+    return -1;
+
+  if (b->namespace == NULL)
+    return 1;
+
+  const int ns_cmp = strcasecmp(a->namespace, b->namespace);
+  if (ns_cmp != 0)
+    return ns_cmp;
+
+  return strcasecmp(a->name, b->name);
+}
+
+/**
  * @brief Registers a new info entry.
  *
- * This function registers a new info entry with the specified name, output type, value, and description.
- * If an entry with the same name is already registered, it returns an error code.
+ * This function registers a new info entry with the specified namespace, name, output type, value, and description.
+ * If an entry with the same namespace and name is already registered, it returns an error code.
  *
+ * @param namespace The namespace of the info entry. Can be NULL.
  * @param name The name of the info entry.
  * @param output_type The output type of the info entry.
  * @param option The pointer to the value of the info entry.
@@ -57,19 +92,20 @@ static list_t info_list;
  * @return An error code indicating the result of the operation.
  */
 info_result_t
-info_register(const char *name, info_output_type_t output_type, const void *option, const char *description)
+info_register(const char *namespace, const char *name, info_output_type_t output_type, const void *option, const char *description)
 {
-  if (info_find(name))
+  if (info_find(namespace, name))
     return INFO_ALREADY_REGISTERED;
 
   struct InfoEntry *info = io_calloc(sizeof(*info));
+  info->namespace = namespace ? strdup(namespace) : NULL;
   info->name = strdup(name);
   info->output_type = output_type;
   info->option = option;
   info->description = strdup(description);
 
   list_node_t *node = list_make_node();
-  list_add_tail(info, node, &info_list);
+  list_add_sorted(info, node, &info_list, info_compare);
 
   return INFO_SUCCESS;
 }
@@ -77,16 +113,17 @@ info_register(const char *name, info_output_type_t output_type, const void *opti
 /**
  * @brief Unregisters an existing info entry.
  *
- * This function unregisters an existing info entry with the specified name.
+ * This function unregisters an existing info entry with the specified namespace and name.
  * If the entry is not found, it returns an error code.
  *
+ * @param namespace The namespace of the info entry. Can be NULL.
  * @param name The name of the info entry to be unregistered.
  * @return An error code indicating the result of the operation.
  */
 info_result_t
-info_unregister(const char *name)
+info_unregister(const char *namespace, const char *name)
 {
-  struct InfoEntry *info = info_find(name);
+  struct InfoEntry *info = info_find(namespace, name);
   if (info == NULL)
     return INFO_NOT_FOUND;
 
@@ -99,6 +136,7 @@ info_unregister(const char *name)
   #pragma GCC diagnostic ignored "-Wcast-qual"
 
   /* Freeing memory allocated for const char pointers. */
+  io_free((void *)info->namespace);
   io_free((void *)info->name);
   io_free((void *)info->description);
 
@@ -124,7 +162,7 @@ info_register_array(const struct InfoEntry *entries, size_t elements)
   for (size_t i = 0; i < elements; ++i)
   {
     const struct InfoEntry *const tmp = &entries[i];
-    info_register(tmp->name, tmp->output_type, tmp->option, tmp->description);
+    info_register(tmp->namespace, tmp->name, tmp->output_type, tmp->option, tmp->description);
   }
 }
 
@@ -142,28 +180,31 @@ info_unregister_array(const struct InfoEntry *entries, size_t elements)
   for (size_t i = 0; i < elements; ++i)
   {
     const struct InfoEntry *const tmp = &entries[i];
-    info_unregister(tmp->name);
+    info_unregister(tmp->namespace, tmp->name);
   }
 }
 
 /**
- * @brief Finds an info entry.
+ * @brief Finds an info entry by namespace and name.
  *
- * This function looks up an info entry by its name. If found, it returns a pointer to the info structure.
+ * This function looks up an info entry by its namespace and name. If found, it returns a pointer to the info structure.
  *
+ * @param namespace The namespace of the info entry. Can be NULL.
  * @param name The name of the info entry.
  * @return A pointer to the InfoEntry structure or NULL if not found.
  */
 struct InfoEntry *
-info_find(const char *name)
+info_find(const char *namespace, const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, info_list.head)
   {
-    struct InfoEntry *info = node->data;
+    struct InfoEntry *const info = node->data;
     if (strcasecmp(info->name, name) == 0)
-      return info;
+      if ((namespace == NULL && info->namespace == NULL) ||
+          (namespace != NULL && info->namespace != NULL && strcasecmp(info->namespace, namespace) == 0))
+        return info;
   }
 
   return NULL;
@@ -233,7 +274,11 @@ info_send(struct Client *client)
         break;
     }
 
-    sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":%-30s %-5s [%s]",
-                       info->name, value, info->description);
+    if (info->namespace)
+      sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":%s::%-30s %-5s [%s]",
+                         info->namespace, info->name, value, info->description);
+    else
+      sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":%-30s %-5s [%s]",
+                         info->name, value, info->description);
   }
 }

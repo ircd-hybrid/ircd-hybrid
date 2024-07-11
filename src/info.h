@@ -21,12 +21,13 @@
 
 /**
  * @file info.h
- * @brief Implements dynamic registration, unregistration, and updating of info entries.
+ * @brief Defines the API for dynamic registration and unregistration of info entries.
  *
- * This file contains the implementation of an API for dynamically registering and unregistering
- * info entries. The API supports various output types including string, unsigned integer,
- * signed integer, boolean, float, double, and char.
- * This implementation is used for showing the configuration in /INFO requests.
+ * This file contains the definitions for an API that allows dynamic registration
+ * and unregistration of info entries. The API supports various output types including string,
+ * unsigned integer, signed integer, boolean, float, double, and char.
+ * This implementation is used for showing the configuration in /INFO requests, with optional
+ * namespace support.
  */
 
 #ifndef INCLUDED_info_h
@@ -41,12 +42,13 @@
  * This macro is used to create entries for arrays of InfoEntry structures,
  * providing a more readable and consistent initialization process.
  *
+ * @param ns The namespace of the info entry.
  * @param n The name of the info entry.
  * @param ot The output type of the info entry.
  * @param o The pointer to the value of the info entry.
  * @param d The description of the info entry.
  */
-#define INFO_ENTRY_INIT(n, ot, o, d) { .name = n, .output_type = ot, .option = o, .description = d }
+#define INFO_ENTRY_INIT(ns, n, ot, o, d) { .namespace = ns, .name = n, .output_type = ot, .option = o, .description = d }
 
 /**
  * @enum info_output_type_t
@@ -86,21 +88,22 @@ typedef enum
  * @struct InfoEntry
  * @brief Structure representing an info entry.
  *
- * This structure represents an info entry, containing the name, output type,
+ * This structure represents an info entry, containing the namespace, name, output type,
  * pointer to the value, and description.
  */
 struct InfoEntry
 {
+  const char *namespace;  /**< Namespace of the variable. */
   const char *name;  /**< Displayed variable name. */
   info_output_type_t output_type;  /**< Type of output. */
   const void *option;  /**< Pointer to the value. */
   const char *description;  /**< Description of the variable. */
 };
 
-extern info_result_t info_register(const char *, info_output_type_t, const void *, const char *);
-extern info_result_t info_unregister(const char *);
+extern info_result_t info_register(const char *, const char *, info_output_type_t, const void *, const char *);
+extern info_result_t info_unregister(const char *, const char *);
 extern void info_register_array(const struct InfoEntry *, size_t);
 extern void info_unregister_array(const struct InfoEntry *, size_t);
-extern struct InfoEntry *info_find(const char *);
+extern struct InfoEntry *info_find(const char *, const char *);
 extern void info_send(struct Client *);
 #endif  /* INCLUDED_info_h */

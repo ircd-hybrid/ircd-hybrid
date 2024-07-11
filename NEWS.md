@@ -1,5 +1,8 @@
 #### Noteworthy changes in version 8.2.46 (2024-??-??)
-*
+* The `INFO` command output now includes namespaces, organizing configuration entries
+  according to their respective configuration blocks for better clarity and structure
+* The `INFO` command output now shows entries from the admin {} config block
+* The `WALLOPS` command has been removed
 
 
 #### Noteworthy changes in version 8.2.45 (2024-07-02)

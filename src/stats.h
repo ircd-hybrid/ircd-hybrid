@@ -84,12 +84,12 @@ struct StatsHandler
 };
 
 extern stats_result_t stats_register(unsigned char, stats_handler_func, unsigned int);
-extern void stats_register_array(const struct StatsHandler *, size_t);
 extern stats_result_t stats_unregister(unsigned char);
-extern void stats_unregister_array(const struct StatsHandler *, size_t);
-extern struct StatsHandler *stats_find(unsigned char);
 extern stats_result_t stats_set_enabled(unsigned char);
 extern stats_result_t stats_set_disabled(unsigned char);
 extern stats_result_t stats_set_required_modes(unsigned char, unsigned int);
+extern void stats_register_array(const struct StatsHandler *, size_t);
+extern void stats_unregister_array(const struct StatsHandler *, size_t);
 extern bool stats_allowed(const struct StatsHandler *, unsigned int);
+extern struct StatsHandler *stats_find(unsigned char);
 #endif  /* INCLUDED_stats_h */

@@ -132,7 +132,10 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "cloak_cidr_len_ipv6", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.cloak_cidr_len_ipv6, "CIDR length for IPv6 addresses used in hostname cloaking"),
   INFO_ENTRY_INIT("general", "cloak_num_bits", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.cloak_num_bits, "Number of bits for the MAC computation used in hostname cloaking"),
   INFO_ENTRY_INIT("general", "cloak_secret", INFO_OUTPUT_STRING_LITERAL, "<REDACTED>", "Secret key used in the MAC computation for hostname cloaking"),
-  INFO_ENTRY_INIT("general", "cloak_suffix", INFO_OUTPUT_STRING, &ConfigGeneral.cloak_suffix, "Suffix appended to the cloaked hostname")
+  INFO_ENTRY_INIT("general", "cloak_suffix", INFO_OUTPUT_STRING, &ConfigGeneral.cloak_suffix, "Suffix appended to the cloaked hostname"),
+  INFO_ENTRY_INIT("admin", "name", INFO_OUTPUT_STRING, &ConfigAdminInfo.name, "Description of the server location (city, state, country), usually used for the admin's name"),
+  INFO_ENTRY_INIT("admin", "description", INFO_OUTPUT_STRING, &ConfigAdminInfo.description, "Details of the institution, usually used for the admin's role"),
+  INFO_ENTRY_INIT("admin", "email", INFO_OUTPUT_STRING, &ConfigAdminInfo.email, "Administrative contact email address")
 };
 
 static const char *const infotext[] =

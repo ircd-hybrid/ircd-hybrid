@@ -48,8 +48,8 @@ rehash_conf(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "CONF");
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "%s is rehashing configuration file(s)",
-                       get_oper_name(source));
+                 "%s is rehashing configuration file(s)",
+                 get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
             get_oper_name(source));
   conf_rehash(false);
@@ -64,8 +64,8 @@ rehash_motd(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "MOTD");
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "%s is forcing re-reading of MOTD files",
-                       get_oper_name(source));
+                 "%s is forcing re-reading of MOTD files",
+                 get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
             get_oper_name(source));
   motd_recache();
@@ -80,8 +80,8 @@ rehash_dns(struct Client *source)
 {
   sendto_one_numeric(source, &me, RPL_REHASHING, "DNS");
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "%s is rehashing DNS",
-                       get_oper_name(source));
+                 "%s is rehashing DNS",
+                 get_oper_name(source));
   log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
             get_oper_name(source));
   restart_resolver();
@@ -158,8 +158,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  sendto_one_notice(source, &me, ":%s is not a valid option. "
-                    "Choose from CONF, DNS, MOTD",
+  sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
                     option);
 }
 
@@ -186,8 +185,7 @@ ms_rehash(struct Client *source, int parc, char *parv[])
   if (match(server, me.name))
     return;
 
-  if (!shared_find(SHARED_REHASH, source->servptr->name,
-                   source->username, source->host))
+  if (!shared_find(SHARED_REHASH, source->servptr->name, source->username, source->host))
     return;
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)

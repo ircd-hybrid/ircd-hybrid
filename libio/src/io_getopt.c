@@ -114,7 +114,7 @@ handle_option(int *argc, char ***argv, struct io_getopt *opts, unsigned int inde
       io_getopt_usage(progname, opts);
     default:
       /* Internal error, should never reach here. */
-      fprintf(stderr, "Error: internal error in io_getopt() at %s:%d\n", __FILE__, __LINE__);
+      fprintf(stderr, "Error: internal error in handle_option() at %s:%d\n", __FILE__, __LINE__);
       exit(EXIT_FAILURE);
   }
 }

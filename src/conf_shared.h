@@ -50,8 +50,8 @@ struct SharedItem
   unsigned int type;
 };
 
-extern const list_t *shared_get_list(void);
 extern void shared_clear(void);
 extern struct SharedItem *shared_make(void);
+extern const list_t *shared_get_list(void);
 extern const struct SharedItem *shared_find(unsigned int, const char *, const char *, const char *);
 #endif  /* INCLUDED_conf_shared_h */

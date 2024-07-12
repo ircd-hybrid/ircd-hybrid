@@ -36,10 +36,10 @@ struct GecosItem
   bool in_database;
 };
 
-extern const list_t *gecos_get_list(void);
 extern void gecos_delete(struct GecosItem *, bool);
-extern struct GecosItem *gecos_make(void);
-extern struct GecosItem *gecos_find(const char *, int (*)(const char *, const char *));
 extern void gecos_clear(void);
 extern void gecos_expire(void);
+extern struct GecosItem *gecos_make(void);
+extern struct GecosItem *gecos_find(const char *, int (*)(const char *, const char *));
+extern const list_t *gecos_get_list(void);
 #endif  /* INCLUDED_conf_gecos_h */

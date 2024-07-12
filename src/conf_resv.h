@@ -49,12 +49,12 @@ struct ResvExemptItem
   int type;
 };
 
-extern const list_t *resv_chan_get_list(void);
-extern const list_t *resv_nick_get_list(void);
 extern void resv_delete(struct ResvItem *, bool);
-extern struct ResvItem *resv_make(const char *, const char *, const list_t *);
-extern bool resv_exempt_find(const struct Client *, const struct ResvItem *);
-extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));
 extern void resv_clear(void);
 extern void resv_expire(void);
+extern bool resv_exempt_find(const struct Client *, const struct ResvItem *);
+extern struct ResvItem *resv_make(const char *, const char *, const list_t *);
+extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));
+extern const list_t *resv_chan_get_list(void);
+extern const list_t *resv_nick_get_list(void);
 #endif  /* INCLUDED_conf_resv_h */

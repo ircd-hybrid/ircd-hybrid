@@ -32,8 +32,8 @@
 
 #include <unistd.h>
 
+extern void io_pidfile_close(void);
 extern int io_pidfile_create(const char *);
 extern int io_pidfile_read(const char *, pid_t *);
 extern int io_pidfile_remove(const char *);
-extern void io_pidfile_close(void);
 #endif  /* INCLUDED_pidfile_h */

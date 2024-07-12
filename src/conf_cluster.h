@@ -65,8 +65,8 @@ struct ClusterItem
   unsigned int type;  /**< Type of IRC command to share (using CLUSTER_* constants). */
 };
 
-extern const list_t *cluster_get_list(void);
 extern void cluster_clear(void);
-extern struct ClusterItem *cluster_make(void);
 extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
+extern struct ClusterItem *cluster_make(void);
+extern const list_t *cluster_get_list(void);
 #endif  /* INCLUDED_conf_cluster_h */

@@ -43,32 +43,53 @@
 #include "module.h"
 
 
-enum whois_show_type
+/**
+ * @enum whois_channel_visibility_t
+ * @brief Enum for representing the visibility level of a channel in a WHOIS query.
+ *
+ * This enum defines the different levels of visibility for a channel when a WHOIS query is made.
+ * Each value indicates the level of access the querying user has to the channel's information,
+ * depending on their relationship to the channel and their user modes.
+ */
+typedef enum
 {
-  WHOIS_SHOW_NORMAL,  /**< Can see just normal; no restrictions apply */
-  WHOIS_SHOW_NONPUB,  /**< Channel is either +s, or +p */
-  WHOIS_SHOW_HIDDEN,  /**< Client is +p */
-  WHOIS_SHOW_NO,  /**< May not see this channel */
-};
+  WHOIS_CHANNEL_VISIBILITY_FULL,  /**< Full visibility; no restrictions apply. Channel appears as "#channel". */
+  WHOIS_CHANNEL_VISIBILITY_LIMITED,  /**< Channel is private (+p) or secret (+s). Channel appears as "?#channel". */
+  WHOIS_CHANNEL_VISIBILITY_HIDDEN,  /**< Channel is hidden by the target's user mode (+p). Channel appears as "!#channel". */
+  WHOIS_CHANNEL_VISIBILITY_NONE,  /**< Channel is not visible to the querying user. */
+} whois_channel_visibility_t;
 
-static enum whois_show_type
-whois_show_channel(struct Channel *channel, struct Client *source, struct Client *target)
+/**
+ * @brief Determines the visibility level of a channel in a WHOIS query.
+ *
+ * This function evaluates the visibility level of a specified channel for a WHOIS query
+ * based on the relationship between the source client, target client, and the channel's
+ * properties. It returns a value indicating the level of access the querying user has
+ * to the channel's information.
+ *
+ * @param channel A pointer to the Channel structure representing a channel in which the target client is a member.
+ * @param source A pointer to the Client structure representing the querying user.
+ * @param target A pointer to the Client structure representing the user being queried.
+ * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
+*/
+static whois_channel_visibility_t
+whois_channel_visibility_get(struct Channel *channel, struct Client *source, struct Client *target)
 {
   if (PubChannel(channel) && !HasUMode(target, UMODE_HIDECHANS))
-    return WHOIS_SHOW_NORMAL;
+    return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (source == target || member_find_link(source, channel))
-    return WHOIS_SHOW_NORMAL;
+    return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (HasUMode(source, UMODE_OPER))
   {
     if (!PubChannel(channel))
-      return WHOIS_SHOW_NONPUB;
+      return WHOIS_CHANNEL_VISIBILITY_LIMITED;
     /* HasUMode(target, UMODE_HIDECHANS) == true */
-    return WHOIS_SHOW_HIDDEN;
+    return WHOIS_CHANNEL_VISIBILITY_HIDDEN;
   }
 
-  return WHOIS_SHOW_NO;
+  return WHOIS_CHANNEL_VISIBILITY_NONE;
 }
 
 /* whois_person()
@@ -104,20 +125,20 @@ whois_person(struct Client *source, struct Client *target)
     LIST_FOREACH(node, target->channel.head)
     {
       const struct ChannelMember *member = node->data;
-      enum whois_show_type show = whois_show_channel(member->channel, source, target);
+      whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
 
-      if (show != WHOIS_SHOW_NO)
+      if (vis != WHOIS_CHANNEL_VISIBILITY_NONE)
       {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (show != WHOIS_SHOW_NORMAL) + member_get_prefix_len(member, true) + len > sizeof(buf))
+        if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + member_get_prefix_len(member, true) + len > sizeof(buf))
         {
           sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
           bufptr = buf;
         }
 
         const char *channel_prefix = "";
-        if (show == WHOIS_SHOW_NONPUB)
+        if (vis == WHOIS_CHANNEL_VISIBILITY_LIMITED)
           channel_prefix = "?";
-        else if (show == WHOIS_SHOW_HIDDEN)
+        else if (vis == WHOIS_CHANNEL_VISIBILITY_HIDDEN)
           channel_prefix = "!";
 
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",

@@ -141,7 +141,7 @@ log_rotate(struct Log *log)
       /* If subsequent attempts, append ".old." with attempt number. */
       snprintf(new_file_name, sizeof(new_file_name), "%s.old.%u", log->file_name, attempt);
 
-    if (access(new_file_name, F_OK) == -1)
+    if (access(new_file_name, F_OK))
       break;
   } while (++attempt < LOG_ROTATION_ATTEMPTS);
 

@@ -81,7 +81,6 @@ monitor_find_hash(const char *name)
   LIST_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
     struct Monitor *monitor = node->data;
-
     if (irccmp(monitor->name, name) == 0)
       return monitor;
   }
@@ -141,7 +140,6 @@ monitor_free(struct Monitor *monitor)
   assert(list_find(&monitor_hash[monitor->hash_value], monitor));
 
   list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
-
   io_free(monitor->name);
   io_free(monitor);
 }
@@ -163,7 +161,6 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
     monitor = io_calloc(sizeof(*monitor));
     monitor->name = io_strdup(name);
     monitor->hash_value = hash_string(monitor->name);
-
     list_add(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
   }
   else

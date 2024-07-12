@@ -46,7 +46,6 @@ svstag_detach(list_t *list, unsigned int numeric)
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct ServicesTag *svstag = node->data;
-
     if (svstag->numeric == numeric)
       svstag_free(svstag, list);
   }

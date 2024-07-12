@@ -369,7 +369,6 @@ void
 motd_add(const char *mask, const char *path)
 {
   struct Motd *motd = motd_create(mask, path);  /* Create the motd */
-
   list_add(motd, &motd->node, &MotdList.other);
 }
 

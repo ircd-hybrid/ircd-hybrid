@@ -102,7 +102,6 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
   member->client = client;
   member->channel = channel;
   member->flags = flags;
-
   list_add(member, &member->channode, &channel->members);
 
   if (MyConnect(client))

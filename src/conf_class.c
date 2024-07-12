@@ -52,7 +52,6 @@ class_make(void)
   class->max_recvq = DEFAULT_RECVQ;
   class->ip_tree_v6 = patricia_new(128);
   class->ip_tree_v4 = patricia_new( 32);
-
   list_add(class, &class->node, &class_list);
 
   return class;
@@ -137,7 +136,6 @@ class_find(const char *name, bool active)
   LIST_FOREACH(node, class_list.head)
   {
     struct ClassItem *class = node->data;
-
     if (irccmp(class->name, name) == 0)
     {
       if (active && class->active == false)
@@ -174,7 +172,6 @@ class_delete_marked(void)
   LIST_FOREACH_SAFE(node, node_next, class_list.head)
   {
     struct ClassItem *class = node->data;
-
     if (class->active == false && class->ref_count == 0)
       class_free(class);
   }

@@ -58,7 +58,6 @@ cluster_clear(void)
   while (cluster_list.head)
   {
     struct ClusterItem *cluster = cluster_list.head->data;
-
     list_remove(&cluster->node, &cluster_list);
     io_free(cluster->server);
     io_free(cluster);
@@ -110,7 +109,6 @@ cluster_distribute(const void *client, const char *command, unsigned int capab,
   LIST_FOREACH(node, cluster_list.head)
   {
     const struct ClusterItem *cluster = node->data;
-
     if (cluster->type & type)
       sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab, "%s %s %s",
                          command, cluster->server, buf);

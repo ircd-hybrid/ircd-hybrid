@@ -356,8 +356,8 @@ print_startup(int pid)
 {
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
-  printf("ircd: running in %s mode from %s\n", !server_state.foreground ? "background"
-         : "foreground", ConfigGeneral.dpath);
+  printf("ircd: running in %s mode from %s\n",
+         server_state.foreground ? "foreground": "background", ConfigGeneral.dpath);
 }
 
 /**
@@ -372,8 +372,7 @@ static void
 make_daemon(void)
 {
   int pid = fork();
-
-  if (pid < 0)
+  if (pid == -1)
   {
     perror("fork");
     exit(EXIT_FAILURE);
@@ -392,7 +391,7 @@ make_daemon(void)
 
   /* Connect stdin, stdout, and stderr to /dev/null */
   int fd = open("/dev/null", O_RDWR);
-  if (fd < 0)
+  if (fd == -1)
   {
     perror("open");
     exit(EXIT_FAILURE);

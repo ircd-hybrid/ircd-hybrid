@@ -251,9 +251,9 @@ flood_endgrace(struct Client *client)
  * once a second on any given client. We then attempt to flush some data.
  */
 void
-flood_recalc(fde_t *F, void *data)
+flood_recalc(fde_t *F, void *data_)
 {
-  struct Client *const client = data;
+  struct Client *const client = data_;
 
   /*
    * Allow a bursting client their allocation per second, allow
@@ -281,9 +281,9 @@ flood_recalc(fde_t *F, void *data)
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
-read_packet(fde_t *F, void *data)
+read_packet(fde_t *F, void *data_)
 {
-  struct Client *const client = data;
+  struct Client *const client = data_;
   ssize_t length = 0;
 
   assert(client);

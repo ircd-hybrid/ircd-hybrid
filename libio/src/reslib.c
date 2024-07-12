@@ -241,7 +241,7 @@ reslib_dn_expand(const unsigned char *msg, const unsigned char *eom,
    root domain is returned as ".", not "".  */
 static int
 reslib_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
-                       const unsigned char *src, char *dst, size_t dstsiz)
+                          const unsigned char *src, char *dst, size_t dstsiz)
 {
   unsigned char tmp[NS_MAXCDNAME];
   int n = reslib_ns_name_unpack(msg, eom, src, tmp, sizeof tmp);
@@ -257,8 +257,7 @@ reslib_ns_name_uncompress(const unsigned char *msg, const unsigned char *eom,
    Returns -1 if it fails, or consumed octets if it succeeds.  */
 static int
 reslib_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
-                      const unsigned char *src, unsigned char *dst,
-                      size_t dstsiz)
+                      const unsigned char *src, unsigned char *dst, size_t dstsiz)
 {
   const unsigned char *srcp, *dstlim;
   unsigned char *dstp;
@@ -860,8 +859,7 @@ reslib_ns_name_compress(const char *src, unsigned char *dst, size_t dstsiz,
    pointer to the start of the message.  */
 static int
 reslib_dn_find(const unsigned char *domain, const unsigned char *msg,
-               const unsigned char **dnptrs,
-               const unsigned char **lastdnptr)
+               const unsigned char **dnptrs, const unsigned char **lastdnptr)
 {
   const unsigned char *dn, *cp, *sp;
   const unsigned char **cpp;

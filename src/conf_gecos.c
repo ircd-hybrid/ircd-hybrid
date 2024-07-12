@@ -47,7 +47,6 @@ gecos_clear(void)
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
-
     if (gecos->in_database == false)
       gecos_delete(gecos, false);
   }
@@ -83,7 +82,6 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
-
     if (gecos->expire &&
         (gecos->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);
@@ -102,7 +100,6 @@ gecos_expire(void)
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *gecos = node->data;
-
     if (gecos->expire &&
         (gecos->expire <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);

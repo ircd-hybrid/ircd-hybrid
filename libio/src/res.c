@@ -114,14 +114,13 @@ static struct reslist *
 make_request(dns_callback_fnc callback, void *ctx)
 {
   struct reslist *request = io_calloc(sizeof(*request));
-
   request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
   request->retries = 2;
   request->timeout = 4;  /* Start at 4 and exponential inc. */
   request->callback = callback;
   request->callback_ctx = ctx;
-
   list_add(request, &request->node, &request_list);
+
   return request;
 }
 
@@ -195,7 +194,6 @@ delete_resolver_queries(const void *vptr)
   LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
     struct reslist *request = node->data;
-
     if (request->callback_ctx == vptr)
       rem_request(request);
   }
@@ -277,8 +275,7 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
  * do_query_name - nameserver lookup name
  */
 static void
-do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
-              struct reslist *request, int type)
+do_query_name(dns_callback_fnc callback, void *ctx, const char *name, struct reslist *request, int type)
 {
   char host_name[RFC1035_MAX_DOMAIN_LENGTH + 1];
 
@@ -299,9 +296,7 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name,
  * do_query_number - Use this to do reverse IP# lookups.
  */
 static void
-do_query_number(dns_callback_fnc callback, void *ctx,
-                const struct io_addr *addr,
-                struct reslist *request)
+do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr, struct reslist *request)
 {
   char ipbuf[128] = "";
 

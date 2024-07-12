@@ -110,7 +110,6 @@ extban_find(unsigned char c)
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-
     if (extban->character == c)
       return extban;
   }
@@ -126,7 +125,6 @@ extban_find_flag(unsigned int flag)
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-
     if (extban->flag == flag)
       return extban;
   }
@@ -190,7 +188,6 @@ extban_format(unsigned int e, char *buf)
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-
     if (extban->type != EXTBAN_ACTING)
       continue;
 
@@ -213,7 +210,6 @@ extban_format(unsigned int e, char *buf)
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-
     if (extban->type != EXTBAN_MATCHING)
       continue;
 

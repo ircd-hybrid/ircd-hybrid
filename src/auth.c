@@ -137,7 +137,6 @@ static struct AuthRequest *
 auth_make(struct Client *client)
 {
   struct AuthRequest *auth = io_calloc(sizeof(*auth));
-
   auth->client = client;
   auth->client->connection->auth = auth;
 
@@ -420,12 +419,12 @@ auth_check_ident_reply(char *const reply)
  * marks the authentication attempt as unsuccessful.
  *
  * @param F The socket/fd to read from.
- * @param data The AuthRequest struct representing the authentication request.
+ * @param data_ The AuthRequest struct representing the authentication request.
  */
 static void
-auth_read_reply(fde_t *F, void *data)
+auth_read_reply(fde_t *F, void *data_)
 {
-  struct AuthRequest *const auth = data;
+  struct AuthRequest *const auth = data_;
   const char *username = NULL;
   ssize_t len = 0;
   char buf[AUTH_BUFSIZE + 1];
@@ -478,12 +477,12 @@ auth_read_reply(fde_t *F, void *data)
  *
  * @param F The socket/fd representing the authentication connection.
  * @param error The result of the connection attempt.
- * @param data The AuthRequest struct representing the authentication request.
+ * @param data_ The AuthRequest struct representing the authentication request.
  */
 static void
-auth_connect_callback(fde_t *F, int error, void *data)
+auth_connect_callback(fde_t *F, int error, void *data_)
 {
-  struct AuthRequest *const auth = data;
+  struct AuthRequest *const auth = data_;
 
   assert(auth->fd == F);
   assert(auth->client);

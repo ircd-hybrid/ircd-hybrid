@@ -66,7 +66,6 @@ service_clear(void)
   while (service_list.head)
   {
     struct ServiceItem *service = service_list.head->data;
-
     list_remove(&service->node, &service_list);
     io_free(service->name);
     io_free(service);
@@ -110,7 +109,6 @@ service_find(const char *name, int (*compare)(const char *, const char *))
   LIST_FOREACH(node, service_list.head)
   {
     const struct ServiceItem *service = node->data;
-
     if (compare(service->name, name) == 0)
       return service;
   }

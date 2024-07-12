@@ -121,8 +121,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
                             list_length(&channel->invexlist);
 
     /* Don't let local clients overflow the b/e/I lists */
-    if (num_mask >= ((HasCMode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large :
-                                                          ConfigChannel.max_bans))
+    if (num_mask >= ((HasCMode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
     {
       sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
       return NULL;
@@ -779,7 +778,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
 
     if (dir != mode_changes[i].dir)
     {
-      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+      modebuf[mbl++] = mode_changes[i].dir == MODE_ADD ? '+' : '-';
       dir = mode_changes[i].dir;
     }
 
@@ -789,7 +788,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
 
     if (arg)
     {
-      int len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
+      int len = sprintf(parptr, pbl == 0 ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++paracount;
@@ -860,7 +859,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 
     if (dir != mode_changes[i].dir)
     {
-      modebuf[mbl++] = (mode_changes[i].dir == MODE_ADD) ? '+' : '-';
+      modebuf[mbl++] = mode_changes[i].dir == MODE_ADD ? '+' : '-';
       dir = mode_changes[i].dir;
     }
 
@@ -870,7 +869,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
 
     if (arg)
     {
-      int len = sprintf(parptr, (pbl == 0) ? "%s" : " %s", arg);
+      int len = sprintf(parptr, pbl == 0 ? "%s" : " %s", arg);
       pbl += len;
       parptr += len;
       ++paracount;

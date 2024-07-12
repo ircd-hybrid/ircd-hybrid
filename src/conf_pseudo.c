@@ -118,9 +118,7 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   pseudo->nick = io_strdup(nick);
   pseudo->server = io_strdup(server);
   pseudo->command = io_strdup(command);
-  if (!EmptyString(prepend))
-    pseudo->prepend = io_strdup(prepend);
-
+  pseudo->prepend = !EmptyString(prepend) ? io_strdup(prepend) : NULL;
   pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
     .extra = pseudo,

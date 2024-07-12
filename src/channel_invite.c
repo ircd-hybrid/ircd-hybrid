@@ -46,7 +46,6 @@ invite_find(struct Channel *channel, struct Client *client)
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
     struct Invite *invite = node->data;
-
     if (ConfigChannel.invite_expire_time &&
         ConfigChannel.invite_expire_time + invite->when < io_time_get(IO_TIME_MONOTONIC_SEC))
       invite_del(invite);
@@ -94,8 +93,6 @@ invite_del(struct Invite *invite)
 {
   list_remove(&invite->user_node, &invite->client->connection->invited);
   list_remove(&invite->chan_node, &invite->channel->invites);
-
-  /* Release memory pointed to by 'invite' */
   io_free(invite);
 }
 

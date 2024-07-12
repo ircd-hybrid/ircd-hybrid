@@ -57,7 +57,6 @@ static struct Listener *
 listener_make(const int port, const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
-
   listener->port = port;
   listener->addr = *addr;
   list_add(listener, &listener->node, &listener_list);
@@ -99,7 +98,7 @@ void
 listener_count_memory(unsigned int *count, size_t *bytes)
 {
   (*count) = list_length(&listener_list);
-  (*bytes) = *count * sizeof(struct Listener);
+  (*bytes) = list_length(&listener_list) * sizeof(struct Listener);
 }
 
 /*
@@ -107,9 +106,9 @@ listener_count_memory(unsigned int *count, size_t *bytes)
  * read/write events if necessary.
  */
 static void
-ssl_handshake(fde_t *F, void *data)
+ssl_handshake(fde_t *F, void *data_)
 {
-  struct Client *client = data;
+  struct Client *client = data_;
 
   assert(client);
   assert(client->connection);
@@ -144,7 +143,7 @@ ssl_handshake(fde_t *F, void *data)
 
   if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
     log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
-         client_get_name(client, MASK_IP));
+              client_get_name(client, MASK_IP));
 
   auth_start(client);
 }
@@ -203,13 +202,11 @@ add_connection(struct Listener *listener, struct io_addr *addr, int fd)
 }
 
 static void
-listener_accept_connection(fde_t *F, void *data)
+listener_accept_connection(fde_t *F, void *data_)
 {
-  static uintmax_t rate = 0;
+  struct Listener *const listener = data_;
   struct io_addr addr;
   int fd;
-  int pe;
-  struct Listener *const listener = data;
 
   assert(listener);
   assert(listener->fd == F);
@@ -234,8 +231,10 @@ listener_accept_connection(fde_t *F, void *data)
     if (number_fd > hard_fdlimit - 10)
     {
       ++ServerStats.is_ref;
+
+      static uintmax_t rate = 0;
       sendto_clients_ratelimited(&rate, "All connections in use. (%s)",
-                                       listener_get_name(listener));
+                                 listener_get_name(listener));
 
       if (!(listener->flags & LISTENER_TLS))
         send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
@@ -248,7 +247,8 @@ listener_accept_connection(fde_t *F, void *data)
      * Do an initial check we aren't connecting too fast or with too many
      * from this IP...
      */
-    if ((pe = conf_connect_allowed(&addr)))
+    int pe = conf_connect_allowed(&addr);
+    if (pe)
     {
       ++ServerStats.is_ref;
 
@@ -257,10 +257,10 @@ listener_accept_connection(fde_t *F, void *data)
         switch (pe)
         {
           case BANNED_CLIENT:
-            send(fd, DLINE_WARNING, sizeof(DLINE_WARNING)-1, 0);
+            send(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1, 0);
             break;
           case TOO_FAST:
-            send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING)-1, 0);
+            send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING) - 1, 0);
             break;
         }
       }
@@ -274,8 +274,7 @@ listener_accept_connection(fde_t *F, void *data)
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection,
-                 listener, 0);
+  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection, listener, 0);
 }
 
 /**
@@ -293,7 +292,6 @@ static bool
 listener_finalize(struct Listener *listener)
 {
   char buf[HOSTIPLEN + 1];
-  const socklen_t opt = 1;
 
   getnameinfo((const struct sockaddr *)&listener->addr, listener->addr.ss_len,
               buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
@@ -317,6 +315,7 @@ listener_finalize(struct Listener *listener)
     return false;
   }
 
+  const socklen_t opt = 1;
 #ifdef IPV6_V6ONLY
   if (listener->addr.ss.ss_family == AF_INET6 &&
       IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&listener->addr)->sin6_addr))
@@ -363,10 +362,10 @@ listener_finalize(struct Listener *listener)
   if (listener_has_flag(listener, LISTENER_DEFER))
   {
     int timeout = 1;
-
     setsockopt(fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
   }
 #endif
+
 #ifdef SO_ACCEPTFILTER
   if (listener_has_flag(listener, LISTENER_DEFER))
   {
@@ -381,7 +380,6 @@ listener_finalize(struct Listener *listener)
   listener->fd = fd_open(fd, true, "Listener socket");
 
   /* Listen completion events are READ events .. */
-
   listener_accept_connection(listener->fd, listener);
   return true;
 }
@@ -389,16 +387,13 @@ listener_finalize(struct Listener *listener)
 static struct Listener *
 listener_find(int port, struct io_addr *addr)
 {
-  list_node_t *node;
-  struct Listener *listener    = NULL;
   struct Listener *last_closed = NULL;
 
+  list_node_t *node;
   LIST_FOREACH(node, listener_list.head)
   {
-    listener = node->data;
-
-    if ((port == listener->port) &&
-        (!memcmp(addr, &listener->addr, sizeof(*addr))))
+    struct Listener *listener = node->data;
+    if ((port == listener->port) && memcmp(addr, &listener->addr, sizeof(*addr)) == 0)
     {
       /* Try to return an open listener, otherwise reuse a closed one */
       if (listener->fd)
@@ -407,11 +402,11 @@ listener_find(int port, struct io_addr *addr)
         last_closed = listener;
       }
       else
-        return (listener);
+        return listener;
     }
   }
 
-  return (last_closed);
+  return last_closed;
 }
 
 /*
@@ -467,7 +462,6 @@ listener_release(struct Listener *listener)
 void
 listener_add(int port, const char *vhost_ip, unsigned int flags)
 {
-  struct io_addr vaddr;
   struct addrinfo hints, *res;
   char portname[PORTNAMELEN + 1];
   static short int pass = 0; /* if ipv6 and no address specified we need to
@@ -491,6 +485,7 @@ listener_add(int port, const char *vhost_ip, unsigned int flags)
   getaddrinfo("::", portname, &hints, &res);
   assert(res);
 
+  struct io_addr vaddr;
   memcpy((struct sockaddr *)&vaddr, res->ai_addr, res->ai_addrlen);
   vaddr.ss_len = res->ai_addrlen;
   freeaddrinfo(res);

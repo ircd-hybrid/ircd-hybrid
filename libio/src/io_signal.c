@@ -57,7 +57,7 @@ io_signal_register(const io_signal_t *signals, size_t elements)
     act.sa_handler = signals[i].handler;
     sigemptyset(&act.sa_mask);
 
-    if (sigaction(signals[i].signum, &act, NULL) == -1)
+    if (sigaction(signals[i].signum, &act, NULL))
     {
       fprintf(stderr, "Failed to set handler for signal %d: %s\n", signals[i].signum, strerror(errno));
       return -1;
@@ -66,7 +66,7 @@ io_signal_register(const io_signal_t *signals, size_t elements)
     sigaddset(&set, signals[i].signum);
   }
 
-  if (sigprocmask(SIG_UNBLOCK, &set, NULL) == -1)
+  if (sigprocmask(SIG_UNBLOCK, &set, NULL))
   {
     fprintf(stderr, "Failed to unblock signals: %s\n", strerror(errno));
     return -1;
@@ -99,7 +99,7 @@ io_signal_unregister(const int *signals, size_t elements)
     act.sa_handler = SIG_DFL;
     sigemptyset(&act.sa_mask);
 
-    if (sigaction(signals[i], &act, NULL) == -1)
+    if (sigaction(signals[i], &act, NULL))
     {
       fprintf(stderr, "Failed to unregister handler for signal %d: %s\n", signals[i], strerror(errno));
       return -1;
@@ -108,7 +108,7 @@ io_signal_unregister(const int *signals, size_t elements)
     sigaddset(&set, signals[i]);
   }
 
-  if (sigprocmask(SIG_UNBLOCK, &set, NULL) == -1)
+  if (sigprocmask(SIG_UNBLOCK, &set, NULL))
   {
     fprintf(stderr, "Failed to unblock signals: %s\n", strerror(errno));
     return -1;
@@ -141,7 +141,7 @@ io_signal_ignore(const int *signals, size_t elements)
     act.sa_handler = SIG_IGN;
     sigemptyset(&act.sa_mask);
 
-    if (sigaction(signals[i], &act, NULL) == -1)
+    if (sigaction(signals[i], &act, NULL))
     {
       fprintf(stderr, "Failed to ignore signal %d: %s\n", signals[i], strerror(errno));
       return -1;
@@ -150,7 +150,7 @@ io_signal_ignore(const int *signals, size_t elements)
     sigaddset(&set, signals[i]);
   }
 
-  if (sigprocmask(SIG_UNBLOCK, &set, NULL) == -1)
+  if (sigprocmask(SIG_UNBLOCK, &set, NULL))
   {
     fprintf(stderr, "Failed to unblock signals: %s\n", strerror(errno));
     return -1;

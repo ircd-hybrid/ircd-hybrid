@@ -60,7 +60,7 @@ io_pidfile_create(const char *path)
     return -1;
   }
 
-  if (lockf(pidfile_fd, F_TLOCK, 0) == -1)
+  if (lockf(pidfile_fd, F_TLOCK, 0))
   {
     if (errno == EACCES || errno == EAGAIN)
     {
@@ -82,7 +82,7 @@ io_pidfile_create(const char *path)
     }
   }
 
-  if (ftruncate(pidfile_fd, 0) == -1)
+  if (ftruncate(pidfile_fd, 0))
   {
     fprintf(stderr, "Failed to truncate PID file %s: %s\n", path, strerror(errno));
     io_pidfile_close();
@@ -99,7 +99,7 @@ io_pidfile_create(const char *path)
     return -1;
   }
 
-  if (fsync(pidfile_fd) == -1)
+  if (fsync(pidfile_fd))
   {
     fprintf(stderr, "Failed to sync PID file %s: %s\n", path, strerror(errno));
     io_pidfile_close();
@@ -167,7 +167,7 @@ io_pidfile_read(const char *path, pid_t *pid)
 int
 io_pidfile_remove(const char *path)
 {
-  if (unlink(path) == -1)
+  if (unlink(path))
   {
     fprintf(stderr, "Failed to remove PID file %s: %s\n", path, strerror(errno));
     return -1;
@@ -190,4 +190,3 @@ io_pidfile_close(void)
     pidfile_fd = -1;
   }
 }
-

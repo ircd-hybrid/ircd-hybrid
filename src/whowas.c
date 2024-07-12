@@ -134,10 +134,9 @@ whowas_trim(void)
 void
 whowas_add_history(struct Client *client, bool online)
 {
-  struct Whowas *whowas = whowas_make();
-
   assert(IsClient(client));
 
+  struct Whowas *whowas = whowas_make();
   whowas->hash_value = hash_string(client->name);
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->servptr) != 0;
@@ -178,7 +177,6 @@ whowas_off_history(struct Client *client)
   while (client->whowas_list.head)
   {
     struct Whowas *whowas = client->whowas_list.head->data;
-
     whowas->client = NULL;
     list_remove(&whowas->client_list_node, &client->whowas_list);
   }
@@ -203,7 +201,6 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
     struct Whowas *whowas = node->data;
-
     if (whowas->logoff < timelimit)
       continue;
     if (irccmp(name, whowas->name))

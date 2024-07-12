@@ -69,7 +69,6 @@ void
 capab_add(const char *name, unsigned int flag, bool active)
 {
   struct Capability *cap = io_calloc(sizeof(*cap));
-
   cap->name = io_strdup(name);
   cap->cap = flag;
   cap->active = active;
@@ -119,7 +118,6 @@ capab_find(const char *name)
   LIST_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;
-
     if (irccmp(cap->name, name) == 0)
       return cap->cap;
   }
@@ -150,7 +148,6 @@ capab_get(const void *ptr, bool active)
   LIST_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;
-
     if (active && cap->active == false)
       continue;
     if (ptr && !IsCapable(((const struct Client *)ptr), cap->cap))

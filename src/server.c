@@ -395,9 +395,9 @@ server_finish_tls_handshake(struct Client *client)
 }
 
 static void
-server_tls_handshake(fde_t *F, void *data)
+server_tls_handshake(fde_t *F, void *data_)
 {
-  struct Client *client = data;
+  struct Client *client = data_;
   const char *sslerr = NULL;
 
   assert(client);
@@ -475,9 +475,9 @@ server_tls_connect_init(struct Client *client, const struct MaskItem *conf, fde_
  * marked for reading.
  */
 static void
-server_connect_callback(fde_t *F, int status, void *data)
+server_connect_callback(fde_t *F, int status, void *data_)
 {
-  struct Client *const client = data;
+  struct Client *const client = data_;
 
   /* First, make sure it's a real client! */
   assert(client);

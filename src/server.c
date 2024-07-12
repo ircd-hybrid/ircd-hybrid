@@ -190,6 +190,9 @@ server_connect_auto(void *unused)
 
     conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
 
+    if (conf->class->ref_count >= conf->class->max_total)
+      continue;
+
     /*
      * Found a CONNECT config with port specified, scan clients
      * and see if this server is already connected?
@@ -197,35 +200,31 @@ server_connect_auto(void *unused)
     if (hash_find_server(conf->name))
       continue;
 
-    if (conf->class->ref_count < conf->class->max_total)
+    if (find_servconn_in_progress(conf->name))
+      continue;
+
+    /* Move this entry to the end of the list, if not already last */
+    if (node->next)
     {
-      /* Move this entry to the end of the list, if not already last */
-      if (node->next)
-      {
-        list_remove(node, &connect_items);
-        list_add_tail(conf, &conf->node, &connect_items);
-      }
-
-      if (find_servconn_in_progress(conf->name))
-        return;
-
-      /*
-       * We used to only print this if server_connect() actually
-       * succeeded, but since comm_tcp_connect() can call the callback
-       * immediately if there is an error, we were getting error messages
-       * in the wrong order. SO, we just print out the activated line,
-       * and let server_connect() / server_connect_callback() print an
-       * error afterwards if it fails.
-       *   -- adrian
-       */
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
-                     conf->name, conf->host);
-
-      server_connect(conf, NULL);
-      /* We connect only one at time... */
-      return;
+      list_remove(node, &connect_items);
+      list_add_tail(conf, &conf->node, &connect_items);
     }
+
+    /*
+     * We used to only print this if server_connect() actually
+     * succeeded, but since comm_tcp_connect() can call the callback
+     * immediately if there is an error, we were getting error messages
+     * in the wrong order. SO, we just print out the activated line,
+     * and let server_connect() / server_connect_callback() print an
+     * error afterwards if it fails.
+     *   -- adrian
+     */
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
+                   conf->name, conf->host);
+
+    server_connect(conf, NULL);
+    return;  /* We connect only one at time... */
   }
 }
 

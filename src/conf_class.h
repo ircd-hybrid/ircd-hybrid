@@ -77,19 +77,19 @@ struct ClassItem
  */
 extern struct ClassItem *class_default;
 
-extern struct ClassItem *class_make(void);
-extern const struct ClassItem *class_get_ptr(const list_t *const);
-extern const list_t *class_get_list(void);
 extern void class_free(struct ClassItem *const);
 extern void class_init(void);
-extern const char *class_get_name(const list_t *const);
+extern void class_mark_for_deletion(void);
+extern void class_delete_marked(void);
+extern void class_ip_limit_rebuild(struct ClassItem *);
+extern bool class_ip_limit_add(struct ClassItem *, void *, bool);
+extern bool class_ip_limit_remove(struct ClassItem *, void *);
 extern unsigned int class_get_ping_freq(const list_t *const);
 extern unsigned int class_get_sendq(const list_t *const);
 extern unsigned int class_get_recvq(const list_t *const);
+extern struct ClassItem *class_make(void);
 extern struct ClassItem *class_find(const char *, bool);
-extern void class_mark_for_deletion(void);
-extern void class_delete_marked(void);
-extern bool class_ip_limit_add(struct ClassItem *, void *, bool);
-extern bool class_ip_limit_remove(struct ClassItem *, void *);
-extern void class_ip_limit_rebuild(struct ClassItem *);
+extern const list_t *class_get_list(void);
+extern const char *class_get_name(const list_t *const);
+extern const struct ClassItem *class_get_ptr(const list_t *const);
 #endif  /* INCLUDED_conf_class_h */

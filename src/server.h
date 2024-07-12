@@ -52,10 +52,10 @@ struct server_hunt
   struct Client *target;
 };
 
-extern bool server_valid_name(const char *);
-extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, char *[]);
 extern void try_connections(void *);
+extern bool server_valid_name(const char *);
 extern bool server_connect(struct MaskItem *, struct Client *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *server_make(struct Client *);
+extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, char *[]);
 #endif  /* INCLUDED_server_h */

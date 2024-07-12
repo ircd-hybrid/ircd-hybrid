@@ -49,7 +49,7 @@ struct PseudoItem
   char *command;  /**< Actual command/alias to be executed. */
 };
 
-extern const list_t *pseudo_get_list(void);
 extern void pseudo_register(const char *, const char *, const char *, const char *, const char *);
 extern void pseudo_clear(void);
+extern const list_t *pseudo_get_list(void);
 #endif  /* INCLUDED_conf_pseudo_h */

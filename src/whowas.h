@@ -58,10 +58,10 @@ struct Whowas
   struct Client *client;  /**< Pointer to the current client or NULL if offline. */
 };
 
-extern const list_t *whowas_get_hash(unsigned int);
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, bool);
 extern void whowas_off_history(struct Client *);
-extern struct Client *whowas_get_history(const char *, uintmax_t);
 extern void whowas_count_memory(unsigned int *const, size_t *const);
+extern struct Client *whowas_get_history(const char *, uintmax_t);
+extern const list_t *whowas_get_hash(unsigned int);
 #endif  /* INCLUDED_whowas_h */

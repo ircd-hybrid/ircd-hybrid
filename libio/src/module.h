@@ -118,6 +118,10 @@ struct ModuleConfig
   bool core;  /**< Indicates if the module is core and essential for functionality. */
 };
 
+extern void module_set_base_path(const char *);
+extern void module_config_clear(void);
+extern void module_set_load_callback(void (*)(const char *, const void *, void *));
+extern void module_set_unload_callback(void (*)(const char *, const void *, void *));
 extern enum module_error_code module_init(void);
 extern enum module_error_code module_cleanup(void);
 extern enum module_error_code module_load(const char *, bool, void *);
@@ -125,14 +129,10 @@ extern enum module_error_code module_unload(const char *, bool, void *);
 extern enum module_error_code module_config_add(const char *, bool, bool);
 extern enum module_error_code module_unload_all(unsigned int *);
 extern enum module_error_code module_load_all(unsigned int *);
+extern struct Module *module_find(const char *);
+extern struct ModuleConfig *module_config_find(const char *);
 extern const list_t *module_get_list(void);
 extern const list_t *module_config_get_list(void);
 extern const char *module_get_error(void);
 extern const char *module_get_attributes(const struct Module *);
-extern struct Module *module_find(const char *);
-extern struct ModuleConfig *module_config_find(const char *);
-extern void module_set_base_path(const char *);
-extern void module_config_clear(void);
-extern void module_set_load_callback(void (*)(const char *, const void *, void *));
-extern void module_set_unload_callback(void (*)(const char *, const void *, void *));
 #endif  /* INCLUDED_module_h */

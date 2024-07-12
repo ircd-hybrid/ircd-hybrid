@@ -52,11 +52,11 @@ struct Listener
   unsigned int flags;  /**< Listener flags (tls, hidden, server, client, defer) */
 };
 
-extern const list_t *listener_get_list(void);
+extern bool listener_has_flag(const struct Listener *, unsigned int);
 extern void listener_add(int, const char *, unsigned int);
 extern void listener_release(struct Listener *);
 extern void listener_close_marked(void);
-extern const char *listener_get_name(const struct Listener *);
-extern bool listener_has_flag(const struct Listener *, unsigned int);
 extern void listener_count_memory(unsigned int *, size_t *);
+extern const list_t *listener_get_list(void);
+extern const char *listener_get_name(const struct Listener *);
 #endif  /* INCLUDED_listener_h */

@@ -72,8 +72,8 @@ struct Log
   const char *(*time_provider)(uintmax_t);  /**< Time provider function for log timestamp. */
 };
 
-extern struct Log *log_add(enum log_type, bool, size_t, const char *);
 extern void log_destroy(struct Log *);
 extern void log_clear(void);
 extern void log_write(enum log_type, const char *, ...) IO_AFP(2,3);
+extern struct Log *log_add(enum log_type, bool, size_t, const char *);
 #endif  /* INCLUDED_log_h */

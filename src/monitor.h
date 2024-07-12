@@ -38,8 +38,8 @@ struct Monitor
 
 extern void monitor_signon(const struct Client *);
 extern void monitor_signoff(const struct Client *);
-extern bool monitor_add_to_hash_table(const char *, struct Client *);
 extern void monitor_del_from_hash_table(const char *, struct Client *);
 extern void monitor_clear_list(struct Client *);
 extern void monitor_count_memory(unsigned int *const, size_t *const);
+extern bool monitor_add_to_hash_table(const char *, struct Client *);
 #endif  /* INCLUDED_monitor_h */

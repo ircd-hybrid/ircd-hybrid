@@ -418,7 +418,6 @@ extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
-extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern void client_exit(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
@@ -427,6 +426,7 @@ extern void dead_link_on_write(struct Client *, int);
 extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
+extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct Client *client_make(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);

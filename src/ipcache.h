@@ -36,8 +36,8 @@ struct ip_entry
   uintmax_t last_attempt;  /**< The last time someone connected from this IP; monotonic time */
 };
 
-extern struct ip_entry *ipcache_record_find_or_add(void *);
 extern void ipcache_record_remove(void *, bool);
 extern void ipcache_get_stats(unsigned int *const, size_t *const);
 extern void ipcache_init(void);
+extern struct ip_entry *ipcache_record_find_or_add(void *);
 #endif  /* INCLUDED_ipcache_h */

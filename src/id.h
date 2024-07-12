@@ -52,6 +52,6 @@ enum { TOTALSIDUID = IRC_MAXSID + IRC_MAXUID };
 extern bool valid_sid(const char *);
 extern bool valid_uid(const char *);
 extern void init_uid(void);
-extern const char *uid_get(void);
 extern void generate_sid(void);
+extern const char *uid_get(void);
 #endif  /* INCLUDED_id_h */

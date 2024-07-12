@@ -158,7 +158,7 @@ extern char cmode_rpl04[][256];
 extern char cmode_class[][256];
 
 extern void channel_mode_init(void);
-extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, unsigned int);
 extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
 extern void clear_ban_cache_list(list_t *);
+extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, unsigned int);
 #endif  /* INCLUDED_channel_mode_h */

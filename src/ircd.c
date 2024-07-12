@@ -174,10 +174,10 @@ static struct event event_cleanup_tklines =
   .when = 30
 };
 
-static struct event event_try_connections =
+static struct event event_server_connect_auto =
 {
-  .name = "try_connections",
-  .handler = try_connections,
+  .name = "server_connect_auto",
+  .handler = server_connect_auto,
   .when = 15
 };
 
@@ -562,9 +562,9 @@ main(int argc, char *argv[])
 
   event_addish(&event_cleanup_tklines, NULL);
 
-  /* We want try_connections to be called as soon as possible now! -- adrian */
+  /* We want server_connect_auto to be called as soon as possible now! -- adrian */
   /* No, 'cause after a restart it would cause all sorts of nick collides */
-  event_addish(&event_try_connections, NULL);
+  event_addish(&event_server_connect_auto, NULL);
 
   /* Setup the timeout check. I'll shift it later :)  -- adrian */
   event_add(&event_comm_checktimeouts, NULL);

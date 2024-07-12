@@ -150,7 +150,7 @@ server_hunt(struct Client *client, const char *command, const int server, char *
   return h;
 }
 
-/* try_connections()
+/* server_connect_auto()
  *
  * inputs	- void pointer which is not used
  * output	- NONE
@@ -161,7 +161,7 @@ server_hunt(struct Client *client, const char *command, const int server, char *
  * is called earlier or later...)
  */
 void
-try_connections(void *unused)
+server_connect_auto(void *unused)
 {
   if (GlobalSetOptions.autoconnect == false)
     return;

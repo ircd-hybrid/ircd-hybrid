@@ -52,9 +52,9 @@ struct server_hunt
   struct Client *target;
 };
 
-extern void try_connections(void *);
-extern bool server_valid_name(const char *);
+extern void server_connect_auto(void *);
 extern bool server_connect(struct MaskItem *, struct Client *);
+extern bool server_valid_name(const char *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *server_make(struct Client *);
 extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, char *[]);

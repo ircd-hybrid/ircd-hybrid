@@ -218,14 +218,9 @@ try_connections(void *unused)
        * error afterwards if it fails.
        *   -- adrian
        */
-      if (ConfigServerHide.hide_server_ips)
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                             "Connection to %s activated.",
-                             conf->name);
-      else
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                             "Connection to %s[%s] activated.",
-                             conf->name, conf->host);
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                     ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
+                     conf->name, conf->host);
 
       server_connect(conf, NULL);
       /* We connect only one at time... */

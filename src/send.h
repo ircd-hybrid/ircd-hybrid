@@ -31,7 +31,7 @@
 #include "numeric.h"
 
 /**
- * @enum send_recipient
+ * @enum send_recipient_t
  * @brief Enum for representing the recipients of sending notices.
  *
  * This enum lists the possible recipients for sending notices using the sendto_clients function.
@@ -43,10 +43,10 @@ typedef enum
   SEND_RECIPIENT_OPER,  /**< Send to regular operators only (excluding administrators). */
   SEND_RECIPIENT_ADMIN,  /**< Send to administrators only. */
   SEND_RECIPIENT_CLIENT,  /**< Send to all connected clients. */
-} send_recipient;
+} send_recipient_t;
 
 /**
- * @enum send_type
+ * @enum send_type_t
  * @brief Enum for representing the types of notices to be sent.
  *
  * This enum lists the possible types of notices that can be sent using the sendto_clients function.
@@ -57,10 +57,10 @@ typedef enum
   SEND_TYPE_NOTICE,  /**< A general notice message. Prefix: "Notice". */
   SEND_TYPE_GLOBAL,  /**< A global notice message. Prefix: "Global". */
   SEND_TYPE_LOCOPS,  /**< A notice message sent to local operators. Prefix: "LocOps". */
-} send_type;
+} send_type_t;
 
 /**
- * @enum send_match_type
+ * @enum send_match_type_t
  * @brief Enum for representing the type of match to perform.
  *
  * This enum lists the possible types of matches for sending messages using the sendto_match_butone function.
@@ -70,7 +70,7 @@ typedef enum
 {
   SEND_MATCH_HOST,  /**< Match based on the client's hostname. */
   SEND_MATCH_SERVER,  /**< Match based on the client's server name. */
-} send_match_type;
+} send_match_type_t;
 
 /*
  * struct decls
@@ -85,9 +85,9 @@ extern void sendto_one(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void sendto_one_numeric(struct Client *, const struct Client *, enum irc_numerics, ...);
 extern void sendto_one_notice(struct Client *, const struct Client *, const char *, ...) IO_AFP(3,4);
 extern void sendto_one_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
-extern void sendto_clients(unsigned int, send_recipient, send_type, const char *, ...) IO_AFP(4,5);
+extern void sendto_clients(unsigned int, send_recipient_t, send_type_t, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
-extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, send_match_type, const char *, ...) IO_AFP(5,6);
+extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, send_match_type_t, const char *, ...) IO_AFP(5,6);
 extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);

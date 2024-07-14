@@ -328,7 +328,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
 }
 
 static bool
-sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_recipient recipient)
+sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_recipient_t recipient)
 {
   if (flags && !HasUMode(client, flags))
     return false;
@@ -357,7 +357,7 @@ sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_r
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 void
-sendto_clients(unsigned int flags, send_recipient recipient, send_type type, const char *pattern, ...)
+sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type, const char *pattern, ...)
 {
   const char *ntype = "???";
 
@@ -444,7 +444,7 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *pattern, ...)
  * side effects	- NONE
  */
 static bool
-sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_match_type type)
+sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_match_type_t type)
 {
   if (type == SEND_MATCH_HOST)
   {
@@ -470,7 +470,7 @@ sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_m
  */
 void
 sendto_match_butone(const struct Client *one, const struct Client *from, const char *mask,
-                    send_match_type type, const char *pattern, ...)
+                    send_match_type_t type, const char *pattern, ...)
 {
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();

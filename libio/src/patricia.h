@@ -35,65 +35,12 @@
 #ifndef INCLUDED_patricia_h
 #define INCLUDED_patricia_h
 
-/* { from defs.h */
-#define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
-#define BIT_TEST(f, b)  ((f) & (b))
-/* } */
-
 #include <netinet/in.h>  /* for struct in_addr */
 #include <sys/socket.h>  /* for AF_INET */
 
-/* { from mrt.h */
-typedef struct _prefix_t
-{
-  unsigned short family;  /* AF_INET | AF_INET6 */
-  unsigned short bitlen;  /* same as mask? */
-  int ref_count;  /* reference count */
-
-  union
-  {
-    struct in_addr sin;
-    struct in6_addr sin6;
-  } add;
-} prefix_t;
-/* } */
-
-typedef struct _patricia_node_t
-{
-  unsigned int bit;  /* flag if this node used */
-  prefix_t *prefix;  /* who we are in patricia tree */
-  struct _patricia_node_t *l, *r;  /* left and right children */
-  struct _patricia_node_t *parent;  /* may be used */
-  void *data;  /* pointer to data */
-} patricia_node_t;
-
-typedef struct _patricia_tree_t
-{
-  patricia_node_t *head;
-  unsigned int maxbits;  /* for IP, 32 bit addresses */
-  int num_active_node;  /* for debug purpose */
-} patricia_tree_t;
-
-
-extern patricia_node_t *patricia_search_exact(patricia_tree_t *, prefix_t *);
-extern patricia_node_t *patricia_search_best(patricia_tree_t *, prefix_t *);
-extern patricia_node_t *patricia_search_best2(patricia_tree_t *, prefix_t *, int);
-extern patricia_node_t *patricia_lookup(patricia_tree_t *, prefix_t *);
-extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
-extern patricia_tree_t *patricia_new(unsigned int);
-extern void patricia_clear(patricia_tree_t *, void (*)(void *));
-extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
-extern void patricia_process(patricia_tree_t *, void (*)(prefix_t *, void *));
-extern const char *patricia_prefix_toa(const prefix_t *, int);
-extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
-extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
-extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *);
-extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, struct sockaddr *, int);
-extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, struct sockaddr *, int);
-
-/* { from demo.c */
-extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
-extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, struct sockaddr *, int);
+/* { from defs.h */
+#define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
+#define BIT_TEST(f, b)  ((f) & (b))
 /* } */
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)
@@ -143,4 +90,52 @@ extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, struct 
   } \
 } while (0)
 
+/* { from mrt.h */
+typedef struct _prefix_t
+{
+  unsigned short family;  /* AF_INET | AF_INET6 */
+  unsigned short bitlen;  /* same as mask? */
+  int ref_count;  /* reference count */
+
+  union
+  {
+    struct in_addr sin;
+    struct in6_addr sin6;
+  } add;
+} prefix_t;
+/* } */
+
+typedef struct _patricia_node_t
+{
+  unsigned int bit;  /* flag if this node used */
+  prefix_t *prefix;  /* who we are in patricia tree */
+  struct _patricia_node_t *l, *r;  /* left and right children */
+  struct _patricia_node_t *parent;  /* may be used */
+  void *data;  /* pointer to data */
+} patricia_node_t;
+
+typedef struct _patricia_tree_t
+{
+  patricia_node_t *head;
+  unsigned int maxbits;  /* for IP, 32 bit addresses */
+  int num_active_node;  /* for debug purpose */
+} patricia_tree_t;
+
+extern void patricia_clear(patricia_tree_t *, void (*)(void *));
+extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
+extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
+extern void patricia_process(patricia_tree_t *, void (*)(prefix_t *, void *));
+extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
+extern patricia_node_t *patricia_lookup(patricia_tree_t *, prefix_t *);
+extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, struct sockaddr *, int);
+extern patricia_node_t *patricia_search_best(patricia_tree_t *, prefix_t *);
+extern patricia_node_t *patricia_search_best2(patricia_tree_t *, prefix_t *, int);
+extern patricia_node_t *patricia_search_exact(patricia_tree_t *, prefix_t *);
+extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, struct sockaddr *, int);
+extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
+extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, struct sockaddr *, int);
+extern patricia_tree_t *patricia_new(unsigned int);
+extern const char *patricia_prefix_toa(const prefix_t *, int);
 #endif  /* INCLUDED_patricia_h */

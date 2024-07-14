@@ -416,44 +416,44 @@ motd_report(struct Client *client, int parc, char *parv[])
 void
 motd_memory_count(struct Client *client)
 {
-  unsigned int mt = 0;  /* Motd count */
-  size_t mtm = 0;  /* Memory consumed by motd */
+  unsigned int motd_count = 0;
+  size_t motd_bytes = 0;
 
   if (MotdList.local)
   {
-    ++mt;
-    mtm += sizeof(struct Motd);
-    mtm += MotdList.local->path ? strlen(MotdList.local->path) + 1 : 0;
+    ++motd_count;
+    motd_bytes += sizeof(struct Motd);
+    motd_bytes += MotdList.local->path ? strlen(MotdList.local->path) + 1 : 0;
   }
 
   if (MotdList.remote)
   {
-    ++mt;
-    mtm += sizeof(struct Motd);
-    mtm += MotdList.remote->path ? strlen(MotdList.remote->path) + 1 : 0;
+    ++motd_count;
+    motd_bytes += sizeof(struct Motd);
+    motd_bytes += MotdList.remote->path ? strlen(MotdList.remote->path) + 1 : 0;
   }
 
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)
   {
     const struct Motd *motd = node->data;
-    ++mt;
-    mtm += sizeof(struct Motd);
-    mtm += motd->path ? strlen(motd->path) + 1 : 0;
-    mtm += motd->mask ? strlen(motd->mask) + 1 : 0;
+    ++motd_count;
+    motd_bytes += sizeof(struct Motd);
+    motd_bytes += motd->path ? strlen(motd->path) + 1 : 0;
+    motd_bytes += motd->mask ? strlen(motd->mask) + 1 : 0;
   }
 
-  unsigned int mtc = 0;  /* Motd cache count */
-  size_t mtcm = 0;  /* Memory consumed by motd cache */
+  unsigned int motd_cache_count = 0;
+  size_t motd_cache_bytes = 0;
 
   LIST_FOREACH(node, MotdList.cachelist.head)
   {
     const struct MotdCache *cache = node->data;
-    ++mtc;
-    mtcm += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
-    mtcm += cache->path ? strlen(cache->path) + 1 : 0;
+    ++motd_cache_count;
+    motd_cache_bytes += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
+    motd_cache_bytes += cache->path ? strlen(cache->path) + 1 : 0;
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Motds %u(%zu) Cache %u(%zu)",
-                     mt, mtm, mtc, mtcm);
+                     motd_count, motd_bytes, motd_cache_count, motd_cache_bytes);
 }

@@ -119,7 +119,7 @@ motd_cache(struct Motd *motd)
   if (stat(motd->path, &sb))
   {
     log_write(LOG_TYPE_IRCD, "Couldn't stat \"%s\": %s", motd->path, strerror(errno));
-    return 0;
+    return NULL;
   }
 
   /* Gotta read in the file, now */
@@ -127,7 +127,7 @@ motd_cache(struct Motd *motd)
   if (file == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path, strerror(errno));
-    return 0;
+    return NULL;
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */

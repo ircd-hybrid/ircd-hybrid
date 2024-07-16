@@ -33,12 +33,19 @@
 #define AddMemberFlag(x, y) ((x)->flags |=  (y))
 #define DelMemberFlag(x, y) ((x)->flags &= ~(y))
 
-enum
+/**
+ * @enum channel_send_perm_t
+ * @brief Enum for representing the send permission of a client in a channel.
+ *
+ * This enum lists the possible permissions indicating whether a client can send messages to a channel,
+ * including their level of permission.
+ */
+typedef enum
 {
-  CAN_SEND_NO,
-  CAN_SEND_NONOP,
-  CAN_SEND_OPV
-};
+  CHANNEL_SEND_PERM_FORBIDDEN,  /**< Client cannot send messages to the channel. */
+  CHANNEL_SEND_PERM_STANDARD,  /**< Client can send messages to the channel but is not an operator. */
+  CHANNEL_SEND_PERM_ELEVATED,  /**< Client can send messages to the channel as an operator, half-operator, or voiced. */
+} channel_send_perm_t;
 
 struct Client;
 
@@ -132,11 +139,11 @@ extern bool channel_check_name(const char *, bool);
 extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct Extban *);
 extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
 extern bool member_has_flags(const struct ChannelMember *, const unsigned int);
-extern int can_send(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool, const char **);
 extern int channel_prefix_to_rank(const char);
 extern int member_highest_rank(const struct ChannelMember *);
 extern unsigned int channel_prefix_to_flag(const char);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
+extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, const char *, bool, const char **);
 extern struct Channel *channel_make(const char *);
 extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);
 extern const list_t *channel_get_list(void);

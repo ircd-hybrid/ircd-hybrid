@@ -205,10 +205,10 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
   const char *error = NULL;
 
   /* Chanops and voiced can flood their own channel with impunity */
-  int ret = can_send(channel, source, NULL, text, notice, &error);
-  if (ret != CAN_SEND_NO)
+  channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, text, notice, &error);
+  if (perm != CHANNEL_SEND_PERM_FORBIDDEN)
   {
-    if (ret == CAN_SEND_OPV || flood_attack_channel(notice, source, channel) == false)
+    if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
     {
       const char *const prefix = channel_rank_to_prefix(rank);
       sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",

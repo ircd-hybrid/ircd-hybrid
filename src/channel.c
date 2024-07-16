@@ -802,12 +802,12 @@ msg_has_ctrls(const char *message)
  *         CAN_SEND_NONOP if can send to channel but is not an op\n
  *         CAN_SEND_NO if they cannot send to channel\n
  */
-int
-can_send(struct Channel *channel, struct Client *client, struct ChannelMember *member,
-         const char *message, bool notice, const char **error)
+channel_send_perm_t
+channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
+                       const char *message, bool notice, const char **error)
 {
   if (IsServer(client) || HasFlag(client, FLAGS_SERVICE))
-    return CAN_SEND_OPV;
+    return CHANNEL_SEND_PERM_ELEVATED;
 
   if (MyConnect(client) && !HasFlag(client, FLAGS_EXEMPTRESV))
   {
@@ -817,7 +817,7 @@ can_send(struct Channel *channel, struct Client *client, struct ChannelMember *m
       if (resv && resv_exempt_find(client, resv) == false)
       {
         *error = "channel is reserved";
-        return CAN_SEND_NO;
+        return CHANNEL_SEND_PERM_FORBIDDEN;
       }
     }
   }
@@ -825,7 +825,7 @@ can_send(struct Channel *channel, struct Client *client, struct ChannelMember *m
   if (HasCMode(channel, MODE_NOCTRL) && msg_has_ctrls(message))
   {
     *error = "control codes are not permitted";
-    return CAN_SEND_NO;
+    return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
   if (HasCMode(channel, MODE_NOCTCP))
@@ -833,36 +833,36 @@ can_send(struct Channel *channel, struct Client *client, struct ChannelMember *m
     if (*message == '\001' && strncmp(message + 1, "ACTION ", 7))
     {
       *error = "CTCPs are not permitted";
-      return CAN_SEND_NO;
+      return CHANNEL_SEND_PERM_FORBIDDEN;
     }
   }
 
   if (member || (member = member_find_link(client, channel)))
     if (member_highest_rank(member) > CHACCESS_PEON)
-      return CAN_SEND_OPV;
+      return CHANNEL_SEND_PERM_ELEVATED;
 
   if (member == NULL && HasCMode(channel, MODE_NOPRIVMSGS))
   {
     *error = "external messages are not permitted";
-    return CAN_SEND_NO;
+    return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
   if (HasCMode(channel, MODE_MODERATED))
   {
     *error = "channel is moderated (+m)";
-    return CAN_SEND_NO;
+    return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
   if (HasCMode(channel, MODE_MODREG) && !HasUMode(client, UMODE_REGISTERED))
   {
     *error = "you need to identify to a registered nick";
-    return CAN_SEND_NO;
+    return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
   if (HasCMode(channel, MODE_NONOTICE) && notice)
   {
     *error = "NOTICEs are not permitted";
-    return CAN_SEND_NO;
+    return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
   *error = "you are banned (+b)";
@@ -872,24 +872,24 @@ can_send(struct Channel *channel, struct Client *client, struct ChannelMember *m
     if (member)
     {
       if (member->flags & CHFL_BAN_SILENCED)
-        return CAN_SEND_NO;
+        return CHANNEL_SEND_PERM_FORBIDDEN;
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
         if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
-          return CAN_SEND_NO;
+          return CHANNEL_SEND_PERM_FORBIDDEN;
         }
 
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
     else if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
-      return CAN_SEND_NO;
+      return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  return CAN_SEND_NONOP;
+  return CHANNEL_SEND_PERM_STANDARD;
 }
 
 /*! \brief Updates the client's oper_warn_count_down, warns the
@@ -1136,7 +1136,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
           >= io_time_get(IO_TIME_MONOTONIC_SEC))
       show_reason = false;
-    else if (can_send(channel, client, member, reason, false, &error) == CAN_SEND_NO)
+    else if (channel_send_qualifies(channel, client, member, reason, false, &error) == CHANNEL_SEND_PERM_FORBIDDEN)
       show_reason = false;
   }
 

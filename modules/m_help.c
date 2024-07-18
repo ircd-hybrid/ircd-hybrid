@@ -86,7 +86,7 @@ do_help(struct Client *source, char *topic)
     for (char *p = topic; *p; ++p)
       *p = ToLower(*p);
 
-  if (strpbrk(topic, "/\\"))
+  if (strchr(topic, '/'))
   {
     sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;

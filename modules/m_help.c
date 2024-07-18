@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "io.h"
 #include "io_time.h"
 #include "defaults.h"
 #include "client.h"
@@ -92,7 +93,7 @@ do_help(struct Client *source, char *topic)
     return;
   }
 
-  char path[sizeof(HPATH) + IRCD_BUFSIZE + 1];  /* +1 for / */
+  char path[IO_PATH_MAX];
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
   struct stat sb;

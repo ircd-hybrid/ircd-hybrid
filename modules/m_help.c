@@ -96,7 +96,7 @@ do_help(struct Client *source, char *topic)
   snprintf(path, sizeof(path), "%s/%s", HPATH, topic);
 
   struct stat sb;
-  if (stat(path, &sb) < 0)
+  if (stat(path, &sb))
   {
     sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
     return;

@@ -187,7 +187,7 @@ log_rotate_due(struct Log *log)
     return false;
 
   struct stat sb;
-  if (stat(log->file_name, &sb) < 0)
+  if (stat(log->file_name, &sb))
     return false;
 
   return (size_t)sb.st_size > log->max_file_size;

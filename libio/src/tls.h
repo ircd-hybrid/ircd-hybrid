@@ -55,25 +55,18 @@ typedef enum _tls_handshake_status
   TLS_HANDSHAKE_ERROR
 } tls_handshake_status_t;
 
-extern bool tls_is_initialized(void);
+extern void tls_free(tls_data_t *);
 extern void tls_init(void);
-extern bool tls_new_credentials(void);
-
-extern const char *tls_get_cipher(const tls_data_t *);
-extern const char *tls_get_version(void);
-
+extern void tls_shutdown(tls_data_t *);
+extern bool tls_is_initialized(void);
 extern bool tls_isusing(tls_data_t *);
 extern bool tls_new(tls_data_t *, int, tls_role_t);
-extern void tls_free(tls_data_t *);
-
-extern tls_handshake_status_t tls_handshake(tls_data_t *, tls_role_t, const char **);
+extern bool tls_new_credentials(void);
+extern bool tls_set_ciphers(tls_data_t *, const char *);
+extern bool tls_verify_certificate(tls_data_t *, char **);
 extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
 extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);
-
-extern void tls_shutdown(tls_data_t *);
-
-extern bool tls_set_ciphers(tls_data_t *, const char *);
-
-extern bool tls_verify_certificate(tls_data_t *, char **);
-
+extern tls_handshake_status_t tls_handshake(tls_data_t *, tls_role_t, const char **);
+extern const char *tls_get_cipher(const tls_data_t *);
+extern const char *tls_get_version(void);
 #endif  /* INCLUDED_tls_h */

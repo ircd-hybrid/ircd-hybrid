@@ -89,7 +89,11 @@ patricia_prefix_toa(const prefix_t *prefix, int with_len)
   inet_ntop(prefix->family, &prefix->add.sin6, buf, INET6_ADDRSTRLEN);
 
   if (with_len)
-    sprintf(buf + strlen(buf), "/%d", prefix->bitlen);
+  {
+    size_t len = strlen(buf);
+    snprintf(buf + len, sizeof(buf) - len, "/%d", prefix->bitlen);
+  }
+
   return buf;
 }
 

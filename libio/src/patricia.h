@@ -38,10 +38,8 @@
 #include <netinet/in.h>  /* for struct in_addr */
 #include <sys/socket.h>  /* for AF_INET */
 
-/* { from defs.h */
 #define prefix_touchar(prefix) ((unsigned char *)&(prefix)->add.sin)
 #define BIT_TEST(f, b)  ((f) & (b))
-/* } */
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)
 #define PATRICIA_NBIT(x)   (0x80 >> ((x) & 0x7f))
@@ -90,7 +88,6 @@
   } \
 } while (0)
 
-/* { from mrt.h */
 typedef struct _prefix_t
 {
   unsigned short family;  /* AF_INET | AF_INET6 */
@@ -103,7 +100,6 @@ typedef struct _prefix_t
     struct in6_addr sin6;
   } add;
 } prefix_t;
-/* } */
 
 typedef struct _patricia_node_t
 {

@@ -49,7 +49,7 @@
  * convert prefix information to bytes
  */
 static const unsigned char *
-prefix_tochar(const prefix_t *prefix)
+prefix_tochar(const patricia_prefix_t *prefix)
 {
   if (prefix == NULL)
     return NULL;
@@ -75,7 +75,7 @@ comp_with_mask(const void *addr, const void *dest, unsigned int mask)
  * convert prefix information to ascii string with length
  */
 const char *
-patricia_prefix_toa(const prefix_t *prefix, int with_len)
+patricia_prefix_toa(const patricia_prefix_t *prefix, int with_len)
 {
   static char buf[INET6_ADDRSTRLEN + sizeof("/128")];
 
@@ -95,8 +95,8 @@ patricia_prefix_toa(const prefix_t *prefix, int with_len)
   return buf;
 }
 
-static prefix_t *
-New_Prefix2(int family, const void *dest, int bitlen, prefix_t *prefix)
+static patricia_prefix_t *
+New_Prefix2(int family, const void *dest, int bitlen, patricia_prefix_t *prefix)
 {
   int dynamic_allocated = 0;
   int addr_size = 0;
@@ -127,7 +127,7 @@ New_Prefix2(int family, const void *dest, int bitlen, prefix_t *prefix)
   return prefix;
 }
 
-static prefix_t *
+static patricia_prefix_t *
 New_Prefix(int family, const void *dest, int bitlen)
 {
   return New_Prefix2(family, dest, bitlen, NULL);
@@ -135,7 +135,7 @@ New_Prefix(int family, const void *dest, int bitlen)
 
 /* ascii2prefix
  */
-static prefix_t *
+static patricia_prefix_t *
 ascii2prefix(int family, const char *string)
 {
   int bitlen, maxbitlen = 0;
@@ -185,8 +185,8 @@ ascii2prefix(int family, const char *string)
   return New_Prefix(family, &sin, bitlen);
 }
 
-static prefix_t *
-Ref_Prefix(prefix_t *prefix)
+static patricia_prefix_t *
+Ref_Prefix(patricia_prefix_t *prefix)
 {
   if (prefix == NULL)
     return NULL;
@@ -202,7 +202,7 @@ Ref_Prefix(prefix_t *prefix)
 }
 
 static void
-Deref_Prefix(prefix_t *prefix)
+Deref_Prefix(patricia_prefix_t *prefix)
 {
   if (prefix == NULL)
     return;
@@ -292,7 +292,7 @@ patricia_destroy(patricia_tree_t *patricia, void (*func)(void *))
  * if func is supplied, it will be called as func(node->prefix, node->data)
  */
 void
-patricia_process(patricia_tree_t *patricia, void (*func)(prefix_t *, void *))
+patricia_process(patricia_tree_t *patricia, void (*func)(patricia_prefix_t *, void *))
 {
   patricia_node_t *node;
 
@@ -304,7 +304,7 @@ patricia_process(patricia_tree_t *patricia, void (*func)(prefix_t *, void *))
 }
 
 patricia_node_t *
-patricia_search_exact(patricia_tree_t *patricia, prefix_t *prefix)
+patricia_search_exact(patricia_tree_t *patricia, patricia_prefix_t *prefix)
 {
   patricia_node_t *node;
   unsigned int bitlen;
@@ -377,7 +377,7 @@ patricia_search_exact(patricia_tree_t *patricia, prefix_t *prefix)
 
 /* if inclusive != 0, "best" may be the given prefix itself */
 patricia_node_t *
-patricia_search_best2(patricia_tree_t *patricia, prefix_t *prefix, int inclusive)
+patricia_search_best2(patricia_tree_t *patricia, patricia_prefix_t *prefix, int inclusive)
 {
   patricia_node_t *node;
   patricia_node_t *stack[PATRICIA_MAXBITS + 1];
@@ -472,13 +472,13 @@ patricia_search_best2(patricia_tree_t *patricia, prefix_t *prefix, int inclusive
 }
 
 patricia_node_t *
-patricia_search_best(patricia_tree_t *patricia, prefix_t *prefix)
+patricia_search_best(patricia_tree_t *patricia, patricia_prefix_t *prefix)
 {
   return patricia_search_best2(patricia, prefix, 1);
 }
 
 patricia_node_t *
-patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
+patricia_lookup(patricia_tree_t *patricia, patricia_prefix_t *prefix)
 {
   patricia_node_t *node, *new_node, *parent, *glue;
   unsigned int bitlen, check_bit, differ_bit;
@@ -828,7 +828,7 @@ patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
 patricia_node_t *
 patricia_make_and_lookup(patricia_tree_t *tree, const char *string)
 {
-  prefix_t *prefix = ascii2prefix(0, string);
+  patricia_prefix_t *prefix = ascii2prefix(0, string);
   if (prefix == NULL)
     return NULL;
 
@@ -860,7 +860,7 @@ patricia_make_and_lookup_addr(patricia_tree_t *tree, const struct sockaddr *addr
     dest = &((const struct sockaddr_in *)addr)->sin_addr;
   }
 
-  prefix_t *prefix = New_Prefix(family, dest, bitlen);
+  patricia_prefix_t *prefix = New_Prefix(family, dest, bitlen);
   if (prefix == NULL)
     return NULL;
 
@@ -880,7 +880,7 @@ patricia_lookup_then_remove(patricia_tree_t *tree, const char *string)
 patricia_node_t *
 patricia_try_search_exact(patricia_tree_t *tree, const char *string)
 {
-  prefix_t *prefix = ascii2prefix(0, string);
+  patricia_prefix_t *prefix = ascii2prefix(0, string);
   if (prefix == NULL)
     return NULL;
 
@@ -892,7 +892,7 @@ patricia_try_search_exact(patricia_tree_t *tree, const char *string)
 patricia_node_t *
 patricia_try_search_best(patricia_tree_t *tree, const char *string)
 {
-  prefix_t *prefix = ascii2prefix(0, string);
+  patricia_prefix_t *prefix = ascii2prefix(0, string);
   if (prefix == NULL)
     return NULL;
 
@@ -924,7 +924,7 @@ patricia_try_search_exact_addr(patricia_tree_t *tree, const struct sockaddr *add
     dest = &((const struct sockaddr_in *)addr)->sin_addr;
   }
 
-  prefix_t *prefix = New_Prefix(family, dest, bitlen);
+  patricia_prefix_t *prefix = New_Prefix(family, dest, bitlen);
   if (prefix == NULL)
     return NULL;
 
@@ -956,7 +956,7 @@ patricia_try_search_best_addr(patricia_tree_t *tree, const struct sockaddr *addr
     dest = &((const struct sockaddr_in *)addr)->sin_addr;
   }
 
-  prefix_t *prefix = New_Prefix(family, dest, bitlen);
+  patricia_prefix_t *prefix = New_Prefix(family, dest, bitlen);
   if (prefix == NULL)
     return NULL;
 

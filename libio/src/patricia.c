@@ -232,44 +232,44 @@ patricia_clear(patricia_tree_t *patricia, void (*func)(void *))
 {
   assert(patricia);
 
-  if (patricia->head)
+  if (patricia->head == NULL)
+    return;
+
+  patricia_node_t *Xstack[PATRICIA_MAXBITS + 1];
+  patricia_node_t **Xsp = Xstack;
+
+  patricia_node_t *Xrn = patricia->head;
+  while (Xrn)
   {
-    patricia_node_t *Xstack[PATRICIA_MAXBITS + 1];
-    patricia_node_t **Xsp = Xstack;
-    patricia_node_t *Xrn = patricia->head;
+    patricia_node_t *l = Xrn->l;
+    patricia_node_t *r = Xrn->r;
 
-    while (Xrn)
+    if (Xrn->prefix)
     {
-      patricia_node_t *l = Xrn->l;
-      patricia_node_t *r = Xrn->r;
+      Deref_Prefix(Xrn->prefix);
 
-      if (Xrn->prefix)
-      {
-        Deref_Prefix(Xrn->prefix);
-
-        if (Xrn->data && func)
-          func(Xrn->data);
-      }
-      else
-        assert(Xrn->data == NULL);
-
-      io_free(Xrn);
-      patricia->num_active_node--;
-
-      if (l)
-      {
-        if (r)
-          *Xsp++ = r;
-
-        Xrn = l;
-      }
-      else if (r)
-        Xrn = r;
-      else if (Xsp != Xstack)
-        Xrn = *(--Xsp);
-      else
-        Xrn = NULL;
+      if (Xrn->data && func)
+        func(Xrn->data);
     }
+    else
+      assert(Xrn->data == NULL);
+
+    io_free(Xrn);
+    patricia->num_active_node--;
+
+    if (l)
+    {
+      if (r)
+        *Xsp++ = r;
+
+      Xrn = l;
+    }
+    else if (r)
+      Xrn = r;
+    else if (Xsp != Xstack)
+      Xrn = *(--Xsp);
+    else
+      Xrn = NULL;
   }
 
   patricia->head = NULL;

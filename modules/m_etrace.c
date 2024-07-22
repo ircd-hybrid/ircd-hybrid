@@ -102,17 +102,17 @@ static void
 mo_etrace(struct Client *source, int parc, char *parv[])
 {
   if (parc > 2)
-    if (server_hunt(source, ":%s ETRACE %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s ETRACE %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  const struct server_hunt *hunt = server_hunt(source, ":%s ETRACE :%s", 1, parv);
-  switch (hunt->ret)
+  const server_route_t *route = server_route_command(source, ":%s ETRACE :%s", 1, parv);
+  switch (route->result)
   {
-    case HUNTED_PASS:
+    case SERVER_ROUTE_PASS:
       sendto_one_numeric(source, &me, RPL_TRACELINK,
-                         IRCD_VERSION, hunt->target->name, hunt->target->from->name);
+                         IRCD_VERSION, route->target->name, route->target->from->name);
       break;
-    case HUNTED_ISME:
+    case SERVER_ROUTE_ISME:
       do_etrace(source, parv[1]);
       break;
     default:

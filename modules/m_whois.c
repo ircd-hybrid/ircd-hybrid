@@ -311,7 +311,7 @@ m_whois(struct Client *source, int parc, char *parv[])
     if (ConfigServerHide.disable_remote_commands)
       parv[1] = parv[2];
 
-    if (server_hunt(source, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
     parv[1] = parv[2];
@@ -343,7 +343,7 @@ mo_whois(struct Client *source, int parc, char *parv[])
 
   if (!EmptyString(parv[2]))
   {
-    if (server_hunt(source, ":%s WHOIS %s :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
     parv[1] = parv[2];

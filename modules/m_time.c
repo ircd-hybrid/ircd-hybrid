@@ -51,7 +51,7 @@ m_time(struct Client *source, int parc, char *parv[])
 {
   /* This is safe enough to use during non hidden server mode */
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s TIME :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
   sendto_one_numeric(source, &me, RPL_TIME, me.name, date(0));
@@ -71,7 +71,7 @@ m_time(struct Client *source, int parc, char *parv[])
 static void
 ms_time(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source, ":%s TIME :%s", 1, parv)->ret != HUNTED_ISME)
+  if (server_route_command(source, ":%s TIME :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
   sendto_one_numeric(source, &me, RPL_TIME, me.name, date(0));

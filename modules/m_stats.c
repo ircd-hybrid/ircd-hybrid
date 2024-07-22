@@ -1218,7 +1218,7 @@ m_stats(struct Client *client, int parc, char *parv[])
 
   /* Is the stats meant for us? */
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(client, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
+    if (server_route_command(client, ":%s STATS %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
       return;
 
   do_stats(client, parc, parv);
@@ -1233,7 +1233,7 @@ m_stats(struct Client *client, int parc, char *parv[])
 static void
 ms_stats(struct Client *client, int parc, char *parv[])
 {
-  if (server_hunt(client, ":%s STATS %s :%s", 2, parv)->ret != HUNTED_ISME)
+  if (server_route_command(client, ":%s STATS %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
     return;
 
   do_stats(client, parc, parv);

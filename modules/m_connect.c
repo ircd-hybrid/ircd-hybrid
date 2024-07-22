@@ -124,7 +124,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if (server_hunt(source, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s CONNECT %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
       return;
   }
 
@@ -154,7 +154,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
 static void
 ms_connect(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source, ":%s CONNECT %s %s :%s", 3, parv)->ret != HUNTED_ISME)
+  if (server_route_command(source, ":%s CONNECT %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;
 
   const char *const name = parv[1];

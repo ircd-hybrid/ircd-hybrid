@@ -38,24 +38,37 @@ enum
   TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
 };
 
-/** Return values for server_hunt() */
-enum server_hunt_ret
+/**
+ * @enum server_route_result_t
+ * @brief Enum representing the result of a server route attempt.
+ *
+ * This enumeration defines the possible outcomes when attempting to route a command
+ * to a server or client. Each value indicates a specific result of the routing attempt.
+ */
+typedef enum
 {
-  HUNTED_NOSUCH,  /**< If the hunted server is not found */
-  HUNTED_ISME,  /**< If this server should execute the command */
-  HUNTED_PASS  /**< If message passed onwards successfully */
-};
+  SERVER_ROUTE_NOSUCH,  /**< Indicates the target server or client was not found. */
+  SERVER_ROUTE_ISME,  /**< Indicates that this server should execute the command. */
+  SERVER_ROUTE_PASS,  /**< Indicates the command was successfully passed to the target. */
+} server_route_result_t;
 
-struct server_hunt
+/**
+ * @struct server_route_t
+ * @brief Structure representing the result of a server routing attempt.
+ *
+ * This structure holds the result of attempting to route a command, including the target
+ * and the outcome of the routing attempt.
+ */
+typedef struct
 {
-  enum server_hunt_ret ret;
-  struct Client *target;
-};
+  server_route_result_t result;  /**< The result of the routing attempt. */
+  struct Client *target;  /**< Pointer to the target client or server. */
+} server_route_t;
 
 extern void server_connect_auto(void *);
 extern bool server_connect(struct MaskItem *, struct Client *);
 extern bool server_valid_name(const char *);
 extern struct Client *find_servconn_in_progress(const char *);
 extern struct Server *server_make(struct Client *);
-extern const struct server_hunt *server_hunt(struct Client *, const char *, const int, char *[]);
+extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);
 #endif  /* INCLUDED_server_h */

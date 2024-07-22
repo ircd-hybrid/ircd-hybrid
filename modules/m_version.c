@@ -76,7 +76,7 @@ m_version(struct Client *source, int parc, char *parv[])
   last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   if (ConfigServerHide.disable_remote_commands == 0)
-    if (server_hunt(source, ":%s VERSION :%s", 1, parv)->ret != HUNTED_ISME)
+    if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
   sendto_one_numeric(source, &me, RPL_VERSION, IRCD_VERSION, me.name, serveropts);
@@ -97,7 +97,7 @@ m_version(struct Client *source, int parc, char *parv[])
 static void
 ms_version(struct Client *source, int parc, char *parv[])
 {
-  if (server_hunt(source, ":%s VERSION :%s", 1, parv)->ret != HUNTED_ISME)
+  if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
   sendto_one_numeric(source, &me, RPL_VERSION, IRCD_VERSION, me.name, serveropts);

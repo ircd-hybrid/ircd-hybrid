@@ -44,54 +44,50 @@
 
 static void server_connect_callback(fde_t *, int, void *);
 
-/* server_hunt()
- *      Do the basic thing in delivering the message (command)
- *      across the relays to the specific server (server) for
- *      actions.
+/**
+ * @brief Routes a command to the appropriate server or client.
  *
- *      Note:   The command is a format string and *MUST* be
- *              of prefixed style (e.g. ":%s COMMAND %s ...").
- *              Command can have only max 8 parameters.
+ * This function attempts to deliver a command to the specified server or client.
+ * The command is a format string that must be prefixed (e.g., ":%s COMMAND %s ...").
+ * The command can have up to 8 parameters.
  *
- *      server  parv[server] is the parameter identifying the
- *              target server.
- *
- *      *WARNING*
- *              parv[server] is replaced with the pointer to the
- *              real servername from the matched client (I'm lazy
- *              now --msa).
- *
- *      returns: (see #defines)
+ * @param client The client issuing the command.
+ * @param command The command to be delivered.
+ * @param server The index in the parv array that identifies the target server.
+ * @param parv The parameter array for the command, where parv[server] is the target server identifier.
+ * @return A pointer to a server_route_t structure containing the result of the routing attempt.
  */
-const struct server_hunt *
-server_hunt(struct Client *client, const char *command, const int server, char *parv[])
+const server_route_t *
+server_route_command(struct Client *client, const char *command, const int server, char *parv[])
 {
-  static struct server_hunt hunt;
-  struct server_hunt *const h = &hunt;
+  static server_route_t r;
+  server_route_t *const route = &r;
   const char *const mask = parv[server];
 
-  /* Assume it's me, if no server */
+  /* Assume it's this server if no target is specified. */
   if (EmptyString(mask))
   {
-    h->target = &me;
-    h->ret = HUNTED_ISME;
-    return h;
+    route->target = &me;
+    route->result = SERVER_ROUTE_ISME;
+    return route;
   }
 
-  h->target = find_person(client, mask);
-  if (h->target == NULL)
-    h->target = hash_find_server(mask);
+  /* Attempt to find the target as a person or server. */
+  route->target = find_person(client, mask);
+  if (route->target == NULL)
+    route->target = hash_find_server(mask);
 
   /*
-   * These are to pickup matches that would cause the following
-   * message to go in the wrong direction while doing quick fast
-   * non-matching lookups.
+   * Ensure the target is not from the same upstream server as the client,
+   * unless the target is directly connected to this server. This prevents
+   * incorrect routing of the message back upstream.
    */
-  if (h->target)
-    if (h->target->from == client->from && !MyConnect(h->target))
-      h->target = NULL;
+  if (route->target)
+    if (route->target->from == client->from && !MyConnect(route->target))
+      route->target = NULL;
 
-  if (h->target == NULL && has_wildcards(mask))
+  /* Handle wildcard matches if no exact match was found. */
+  if (route->target == NULL && has_wildcards(mask))
   {
     list_node_t *node;
     LIST_FOREACH(node, global_server_list.head)
@@ -104,12 +100,12 @@ server_hunt(struct Client *client, const char *command, const int server, char *
         if (tmp->from == client->from && !MyConnect(tmp))
           continue;
 
-        h->target = tmp;
+        route->target = tmp;
         break;
       }
     }
 
-    if (h->target == NULL)
+    if (route->target == NULL)
     {
       LIST_FOREACH(node, global_client_list.head)
       {
@@ -121,33 +117,35 @@ server_hunt(struct Client *client, const char *command, const int server, char *
           if (tmp->from == client->from && !MyConnect(tmp))
             continue;
 
-          h->target = tmp;
+          route->target = tmp;
           break;
         }
       }
     }
   }
 
-  if (h->target)
+  /* Determine the result of the routing attempt. */
+  if (route->target)
   {
-    assert(IsMe(h->target) || IsServer(h->target) || IsClient(h->target));
-    if (IsMe(h->target) || MyClient(h->target))
+    assert(IsMe(route->target) || IsServer(route->target) || IsClient(route->target));
+    if (IsMe(route->target) || MyClient(route->target))
     {
-      h->ret = HUNTED_ISME;
-      return h;
+      route->result = SERVER_ROUTE_ISME;
+      return route;
     }
 
-    parv[server] = h->target->id;
-    sendto_one(h->target, command, client->id,
+    parv[server] = route->target->id;
+    sendto_one(route->target, command, client->id,
                parv[1], parv[2], parv[3], parv[4],
                parv[5], parv[6], parv[7], parv[8]);
-    h->ret = HUNTED_PASS;
-    return h;
+    route->result = SERVER_ROUTE_PASS;
+    return route;
   }
 
+  /* Handle case where the target was not found. */
   sendto_one_numeric(client, &me, ERR_NOSUCHSERVER, mask);
-  h->ret = HUNTED_NOSUCH;
-  return h;
+  route->result = SERVER_ROUTE_NOSUCH;
+  return route;
 }
 
 /* server_connect_auto()

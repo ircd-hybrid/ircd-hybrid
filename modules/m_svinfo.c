@@ -66,13 +66,13 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
      * we drop the link  -orabidoo
      */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (%d,%d)",
+              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, SHOW_IP), current_version, minimum_version);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (%d,%d)",
+              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, MASK_IP), current_version, minimum_version);
     log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, wrong TS protocol version (%d,%d)",
+              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, SHOW_IP), current_version, minimum_version);
 
     client_exit(source, "Incompatible TS version");

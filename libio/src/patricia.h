@@ -35,6 +35,7 @@
 #ifndef INCLUDED_patricia_h
 #define INCLUDED_patricia_h
 
+#include <stdbool.h>
 #include <netinet/in.h>  /* for struct in_addr */
 #include <sys/socket.h>  /* for AF_INET */
 
@@ -126,12 +127,12 @@ extern patricia_node_t *patricia_lookup(patricia_tree_t *, patricia_prefix_t *);
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, const struct sockaddr *, int);
 extern patricia_node_t *patricia_search_best(patricia_tree_t *, patricia_prefix_t *);
-extern patricia_node_t *patricia_search_best2(patricia_tree_t *, patricia_prefix_t *, int);
+extern patricia_node_t *patricia_search_best2(patricia_tree_t *, patricia_prefix_t *, bool);
 extern patricia_node_t *patricia_search_exact(patricia_tree_t *, patricia_prefix_t *);
 extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, const struct sockaddr *, int);
 extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, const struct sockaddr *, int);
 extern patricia_tree_t *patricia_new(unsigned int);
-extern const char *patricia_prefix_toa(const patricia_prefix_t *, int);
+extern const char *patricia_prefix_toa(const patricia_prefix_t *, bool);
 #endif  /* INCLUDED_patricia_h */

@@ -75,7 +75,7 @@ comp_with_mask(const void *addr, const void *dest, unsigned int mask)
  * convert prefix information to ascii string with length
  */
 const char *
-patricia_prefix_toa(const patricia_prefix_t *prefix, int with_len)
+patricia_prefix_toa(const patricia_prefix_t *prefix, bool with_len)
 {
   static char buf[INET6_ADDRSTRLEN + sizeof("/128")];
 
@@ -98,7 +98,6 @@ patricia_prefix_toa(const patricia_prefix_t *prefix, int with_len)
 static patricia_prefix_t *
 New_Prefix2(int family, const void *dest, int bitlen, patricia_prefix_t *prefix)
 {
-  int dynamic_allocated = 0;
   int addr_size = 0;
 
   switch (family)
@@ -112,16 +111,17 @@ New_Prefix2(int family, const void *dest, int bitlen, patricia_prefix_t *prefix)
     default: return NULL;
   }
 
+  bool dynamic_allocated = false;
   if (prefix == NULL)
   {
     prefix = io_calloc(sizeof(*prefix));
-    dynamic_allocated = 1;
+    dynamic_allocated = true;
   }
 
   memcpy(&prefix->add.sin6, dest, addr_size);
   prefix->bitlen = (bitlen >= 0) ? bitlen : addr_size * 8;
   prefix->family = family;
-  prefix->ref_count = dynamic_allocated == 1;
+  prefix->ref_count = dynamic_allocated == true;
 
   return prefix;
 }
@@ -337,7 +337,7 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
 /* if inclusive != 0, "best" may be the given prefix itself */
 patricia_node_t *
-patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, int inclusive)
+patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inclusive)
 {
   assert(tree);
   assert(prefix);

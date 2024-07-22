@@ -29,14 +29,19 @@
 struct Client;
 struct MaskItem;
 
-/*
- * ts stuff
+/**
+ * @enum server_ts_protocol_version_t
+ * @brief Specifies the TS protocol versions used by the server.
+ *
+ * This enumeration defines the current and minimum supported TS protocol versions
+ * to ensure compatibility between connected servers. These versions are checked
+ * during the server connection process.
  */
-enum
+typedef enum
 {
-  TS_CURRENT = 6,  /**< Current TS protocol version */
-  TS_MINIMUM = 6,  /**< Minimum supported TS protocol version */
-};
+  SERVER_TS_PROTOCOL_CURRENT = 6,  /**< The current TS protocol version supported by the server. */
+  SERVER_TS_PROTOCOL_MINIMUM = 6,  /**< The minimum TS protocol version that the server can support. */
+} server_ts_protocol_version_t;
 
 /**
  * @enum server_route_result_t

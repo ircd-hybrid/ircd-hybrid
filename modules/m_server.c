@@ -178,7 +178,7 @@ server_estab(struct Client *client_p)
   }
 
   sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju",
-             me.id, TS_CURRENT, TS_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
+             me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
   SetServer(client_p);
   client_p->servptr = &me;

@@ -55,7 +55,10 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   if (!IsServer(source) || !MyConnect(source))
     return;
 
-  if (TS_CURRENT < atoi(parv[2]) || atoi(parv[1]) < TS_MINIMUM)
+  server_ts_protocol_version_t current_version = atoi(parv[1]);
+  server_ts_protocol_version_t minimum_version = atoi(parv[2]);
+  if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
+      minimum_version > SERVER_TS_PROTOCOL_CURRENT)
   {
     /*
      * A server with the wrong TS version connected; since we're

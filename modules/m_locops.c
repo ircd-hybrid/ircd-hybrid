@@ -60,7 +60,7 @@ mo_locops(struct Client *source, int parc, char *parv[])
 
   sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                        source->name, message);
-  cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, message);
+  cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, "%s", message);
 }
 
 /*! \brief LOCOPS command handler

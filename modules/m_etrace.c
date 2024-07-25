@@ -64,7 +64,7 @@ static void
 do_etrace(struct Client *source, const char *name)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
-                       source->name, source->username, source->host, source->servptr->name);
+                 source->name, source->username, source->host, source->servptr->name);
 
   bool doall = false;
   if (EmptyString(name))

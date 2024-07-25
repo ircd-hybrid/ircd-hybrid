@@ -122,7 +122,7 @@ do_trace(struct Client *source, const char *name)
   assert(HasUMode(source, UMODE_OPER));
 
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "TRACE requested by %s (%s@%s) [%s]",
-                       source->name, source->username, source->host, source->servptr->name);
+                 source->name, source->username, source->host, source->servptr->name);
 
   bool doall = false;
   if (EmptyString(name))

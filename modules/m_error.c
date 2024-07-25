@@ -60,9 +60,9 @@ mr_error(struct Client *source, int parc, char *parv[])
             client_get_name(source, SHOW_IP), message);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                       client_get_name(source, HIDE_IP), message);
+                 client_get_name(source, HIDE_IP), message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                       client_get_name(source, MASK_IP), message);
+                 client_get_name(source, MASK_IP), message);
 }
 
 /*! \brief ERROR command handler
@@ -88,10 +88,10 @@ ms_error(struct Client *source, int parc, char *parv[])
 
   if (MyConnect(source))
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                         client_get_name(source->from, MASK_IP), message);
+                   client_get_name(source->from, MASK_IP), message);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s via %s -- %s",
-                         source->name, client_get_name(source->from, MASK_IP), message);
+                   source->name, client_get_name(source->from, MASK_IP), message);
 }
 
 static struct Command command_table =

@@ -152,8 +152,8 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
                         aline->duration / 60, conf->user, conf->host);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-                         get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
+                   "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
+                   get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
               get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
   }
@@ -164,7 +164,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
                         conf->user, conf->host);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added K-Line for [%s@%s] [%s]",
-                         get_oper_name(source), conf->user, conf->host, conf->reason);
+                   get_oper_name(source), conf->user, conf->host, conf->reason);
     log_write(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
               get_oper_name(source), conf->user, conf->host, conf->reason);
   }

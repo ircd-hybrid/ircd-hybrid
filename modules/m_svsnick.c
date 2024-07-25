@@ -79,8 +79,8 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     if (target->from == source->from)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Received wrong-direction SVSNICK for %s (behind %s) from %s",
-                           target->name, source->from->name, client_get_name(source, HIDE_IP));
+                     "Received wrong-direction SVSNICK for %s (behind %s) from %s",
+                     target->name, source->from->name, client_get_name(source, HIDE_IP));
       return;
     }
 
@@ -124,7 +124,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   whowas_add_history(target, true);
 
   sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
-                target->id, new_nick, target->tsinfo);
+                 target->id, new_nick, target->tsinfo);
 
   hash_del_client(target);
   strlcpy(target->name, new_nick, sizeof(target->name));

@@ -44,7 +44,7 @@ static void
 do_admin(struct Client *source)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ADMIN requested by %s (%s@%s) [%s]",
-                       source->name, source->username, source->host, source->servptr->name);
+                 source->name, source->username, source->host, source->servptr->name);
 
   sendto_one_numeric(source, &me, RPL_ADMINME, me.name);
 

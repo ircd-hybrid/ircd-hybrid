@@ -105,9 +105,9 @@ mo_kill(struct Client *source, int parc, char *parv[])
    * that have been around for ever, for no reason..
    */
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
-                       target->name, target->username, target->host,
-                       target->servptr->name, source->name, me.name, REASONLEN, reason);
+                 "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
+                 target->name, target->username, target->host,
+                 target->servptr->name, source->name, me.name, REASONLEN, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
             source->name, target->name, me.name, REASONLEN, reason);
@@ -119,8 +119,8 @@ mo_kill(struct Client *source, int parc, char *parv[])
   if (!MyConnect(target))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%.*s)",
-                  source->id, target->id, me.name, source->host,
-                  source->username, source->name, REASONLEN, reason);
+                   source->id, target->id, me.name, source->host,
+                   source->username, source->name, REASONLEN, reason);
 
     /*
      * Set FLAGS_KILLED. This prevents client_exit() from sending
@@ -196,21 +196,21 @@ ms_kill(struct Client *source, int parc, char *parv[])
    */
   if (IsClient(source))  /* Send it normally */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
-                         target->name, target->username, target->host,
-                         target->servptr->name, source->name,
-                         source->servptr->name, source->host, source->username, source->name, reason);
+                   "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
+                   target->name, target->username, target->host,
+                   target->servptr->name, source->name,
+                   source->servptr->name, source->host, source->username, source->name, reason);
   else
     sendto_clients(UMODE_SKILL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Received KILL message for %s!%s@%s[%s]. From %s %s",
-                         target->name, target->username, target->host,
-                         target->servptr->name, source->name, reason);
+                   "Received KILL message for %s!%s@%s[%s]. From %s %s",
+                   target->name, target->username, target->host,
+                   target->servptr->name, source->name, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
             source->name, target->name, source->name, reason);
 
   sendto_servers(source, 0, 0, ":%s KILL %s :%s %s",
-                source->id, target->id, parv[2], reason);
+                 source->id, target->id, parv[2], reason);
   AddFlag(target, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */

@@ -71,16 +71,16 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   {
     svstag_attach(&source->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                  me.id, source->id, source->tsinfo, RPL_WHOISOPERATOR, conf->whois);
+                   me.id, source->id, source->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
             conf->name, client_get_name(source, HIDE_IP));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
-                       get_oper_name(source));
+                 get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                me.id, get_oper_name(source));
+                 me.id, get_oper_name(source));
 
   send_umode(source, oldmodes, true, true);
   sendto_one_numeric(source, &me, RPL_YOUREOPER);
@@ -101,8 +101,8 @@ failed_oper_notice(struct Client *source, enum irc_numerics numeric,
 
   if (ConfigGeneral.failed_oper_notice)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Failed OPER attempt as %s by %s - %s",
-                         name, client_get_name(source, HIDE_IP), reason);
+                   "Failed OPER attempt as %s by %s - %s",
+                   name, client_get_name(source, HIDE_IP), reason);
 
   log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
             name, client_get_name(source, HIDE_IP), reason);

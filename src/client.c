@@ -237,11 +237,11 @@ check_pings_list(list_t *list)
           if (IsServer(client))
           {
             sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                                 "No response from %s, closing link",
-                                 client_get_name(client, SHOW_IP));
+                           "No response from %s, closing link",
+                           client_get_name(client, SHOW_IP));
             sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                                 "No response from %s, closing link",
-                                 client_get_name(client, MASK_IP));
+                           "No response from %s, closing link",
+                           client_get_name(client, MASK_IP));
             log_write(LOG_TYPE_IRCD, "No response from %s, closing link",
                       client_get_name(client, SHOW_IP));
           }
@@ -282,11 +282,11 @@ check_unknowns_list(void)
     if (IsHandshake(client))
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "No response from %s during handshake, closing link",
-                           client_get_name(client, SHOW_IP));
+                     "No response from %s during handshake, closing link",
+                     client_get_name(client, SHOW_IP));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "No response from %s during handshake, closing link",
-                           client_get_name(client, MASK_IP));
+                     "No response from %s during handshake, closing link",
+                     client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
                 client_get_name(client, SHOW_IP));
       exit = true;
@@ -413,8 +413,8 @@ conf_try_ban(struct Client *client, int type, const char *reason)
       if (HasFlag(client, FLAGS_EXEMPTKLINE))
       {
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                             "KLINE over-ruled for %s, client is kline_exempt",
-                             client_get_name(client, HIDE_IP));
+                       "KLINE over-ruled for %s, client is kline_exempt",
+                       client_get_name(client, HIDE_IP));
         return;
       }
 
@@ -429,8 +429,8 @@ conf_try_ban(struct Client *client, int type, const char *reason)
       if (HasFlag(client, FLAGS_EXEMPTXLINE))
       {
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                             "XLINE over-ruled for %s, client is xline_exempt",
-                             client_get_name(client, HIDE_IP));
+                       "XLINE over-ruled for %s, client is xline_exempt",
+                       client_get_name(client, HIDE_IP));
         return;
       }
 
@@ -442,7 +442,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
   }
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%c-line active for %s",
-                       ban_type, client_get_name(client, HIDE_IP));
+                 ban_type, client_get_name(client, HIDE_IP));
 
   if (IsClient(client))
     sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
@@ -673,7 +673,7 @@ exit_one_client(struct Client *client, const char *comment)
   else if (IsServer(client))
   {
     sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
-                         client->name, client->servptr->name);
+                   client->name, client->servptr->name);
 
     list_remove(&client->lnode, &client->servptr->serv->server_list);
     list_remove(&client->node, &global_server_list);
@@ -783,8 +783,8 @@ client_exit(struct Client *client, const char *comment)
       monitor_clear_list(client);
 
       sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Client exiting: %s (%s@%s) [%s] [%s]",
-                           client->name, client->username, client->realhost,
-                           client->sockhost, comment);
+                     client->name, client->username, client->realhost,
+                     client->sockhost, comment);
 
       log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
                 date_ctime(client->connection->created_real),
@@ -815,9 +815,9 @@ client_exit(struct Client *client, const char *comment)
   }
   else if (IsClient(client) && HasFlag(client->servptr, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Client exiting at %s: %s (%s@%s) [%s] [%s]",
-                         client->servptr->name, client->name,
-                         client->username, client->realhost, client->sockhost, comment);
+                   "Client exiting at %s: %s (%s@%s) [%s] [%s]",
+                   client->servptr->name, client->name,
+                   client->username, client->realhost, client->sockhost, comment);
 
   if (IsServer(client))
   {
@@ -846,10 +846,10 @@ client_exit(struct Client *client, const char *comment)
     if (MyConnect(client))
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "%s was connected for %s. %ju/%ju sendK/recvK.",
-                           client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
-                           client->connection->send.bytes >> 10,
-                           client->connection->recv.bytes >> 10);
+                     "%s was connected for %s. %ju/%ju sendK/recvK.",
+                     client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+                     client->connection->send.bytes >> 10,
+                     client->connection->recv.bytes >> 10);
       log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
                 client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
                 client->connection->send.bytes >> 10,
@@ -917,8 +917,8 @@ dead_link_on_read(struct Client *client, int error)
     if (error == 0)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Server %s closed the connection",
-                           client_get_name(client, SHOW_IP));
+                     "Server %s closed the connection",
+                     client_get_name(client, SHOW_IP));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "Server %s closed the connection",
                            client_get_name(client, MASK_IP));
@@ -928,8 +928,8 @@ dead_link_on_read(struct Client *client, int error)
     else
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Lost connection to %s: %s",
-                           client_get_name(client, SHOW_IP), strerror(current_error));
+                     "Lost connection to %s: %s",
+                     client_get_name(client, SHOW_IP), strerror(current_error));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                            "Lost connection to %s: %s",
                            client_get_name(client, MASK_IP), strerror(current_error));
@@ -938,7 +938,7 @@ dead_link_on_read(struct Client *client, int error)
     }
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s was connected for %s",
-                         client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
+                   client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
   }
 
   if (error == 0)
@@ -966,7 +966,7 @@ exit_aborted_clients(void)
     if (client == NULL)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Warning: null client on abort_list!");
+                     "Warning: null client on abort_list!");
       continue;
     }
 

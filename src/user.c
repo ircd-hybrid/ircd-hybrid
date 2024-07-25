@@ -205,17 +205,17 @@ user_introduce(struct Client *client)
   monitor_signon(client);
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-                client->servptr->id, client->name, client->hopcount + 1,
-                client->tsinfo, user_get_mode_str(client->umodes),
-                client->username, client->host, client->realhost,
-                client->sockhost, client->id, client->account, client->info);
+                 client->servptr->id, client->name, client->hopcount + 1,
+                 client->tsinfo, user_get_mode_str(client->umodes),
+                 client->username, client->host, client->realhost,
+                 client->sockhost, client->id, client->account, client->info);
 
   if (!EmptyString(client->tls_certfp))
     sendto_servers(client, 0, 0, ":%s CERTFP %s", client->id, client->tls_certfp);
 
   if (!EmptyString(client->tls_cipher))
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
-                  client->servptr->id, client->id, client->tls_cipher);
+                   client->servptr->id, client->id, client->tls_cipher);
 }
 
 /* user_welcome()
@@ -305,7 +305,7 @@ user_register_local(struct Client *client)
   if (valid_username(client->username, true) == false)
   {
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Invalid username: %s (%s@%s)",
-                         client->name, client->username, client->host);
+                   client->name, client->username, client->host);
 
     char buf[sizeof("Invalid username []") + sizeof(client->username)];
     snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
@@ -328,7 +328,7 @@ user_register_local(struct Client *client)
   if (list_length(&local_client_list) >= max_clients)
   {
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Too many clients, rejecting %s[%s].",
-                         client->name, client->host);
+                   client->name, client->host);
     client_exit(client, "Sorry, server is full - try later");
     ++ServerStats.is_ref;
     return;
@@ -339,11 +339,8 @@ user_register_local(struct Client *client)
     const struct GecosItem *gecos = gecos_find(client->info, match);
     if (gecos)
     {
-      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "X-line Rejecting [%s] [%s], user %s [%s]",
-                           client->info, gecos->reason,
-                           client_get_name(client, HIDE_IP),
-                           client->sockhost);
+      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "X-line Rejecting [%s] [%s], user %s [%s]",
+                     client->info, gecos->reason, client_get_name(client, HIDE_IP), client->sockhost);
       client_exit(client, "Bad user info");
       ++ServerStats.is_ref;
       return;
@@ -373,11 +370,9 @@ user_register_local(struct Client *client)
   hash_add_id(client);
 
   sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
-                       client->name, client->username, client->realhost,
-                       client->sockhost,
-                       class_get_name(&client->connection->confs),
-                       client->info, client->id);
+                 "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
+                 client->name, client->username, client->realhost, client->sockhost,
+                 class_get_name(&client->connection->confs), client->info, client->id);
 
   if (ConfigGeneral.invisible_on_connect)
   {
@@ -400,8 +395,8 @@ user_register_local(struct Client *client)
 
     if (!(Count.max_loc % 10))
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "New peak in local client connections: %u",
-                           Count.max_loc);
+                     "New peak in local client connections: %u",
+                     Count.max_loc);
   }
 
   if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
@@ -463,10 +458,9 @@ user_register_remote(struct Client *client)
 
   if (HasFlag(client->servptr, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
-                         client->servptr->name,
-                         client->name, client->username, client->realhost,
-                         client->sockhost, client->info, client->id);
+                   "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
+                   client->servptr->name, client->name, client->username, client->realhost,
+                   client->sockhost, client->info, client->id);
 
   user_introduce(client);
 }
@@ -637,7 +631,7 @@ send_umode(struct Client *client, unsigned int old, bool send_client, bool send_
                client->name, client->username, client->host, client->name, buf);
   if (send_server)
     sendto_servers(client, 0, 0, ":%s MODE %s :%s",
-                  client->id, client->id, buf);
+                   client->id, client->id, buf);
 }
 
 const char *
@@ -673,7 +667,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 
   if (svshost)
     sendto_servers(client, 0, 0, ":%s SVSHOST %s %ju %s",
-                  client->servptr->id, client->id, client->tsinfo, client->host);
+                   client->servptr->id, client->id, client->tsinfo, client->host);
 
   if (MyConnect(client))
   {

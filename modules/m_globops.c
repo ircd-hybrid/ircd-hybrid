@@ -56,7 +56,7 @@ mo_globops(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
-                       source->name, message);
+                 source->name, message);
 }
 
 /*! \brief GLOBOPS command handler
@@ -77,7 +77,7 @@ ms_globops(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
-                       source->name, message);
+                 source->name, message);
 }
 
 static struct Command command_table =

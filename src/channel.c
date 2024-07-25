@@ -91,7 +91,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
       {
         channel->sent_join_flood_notice = true;
         sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
-                             client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
+                       client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
       }
     }
 
@@ -913,8 +913,8 @@ channel_check_spambot_warning(struct Client *client, const char *name)
 
       /* It's already known as a possible spambot */
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "User %s (%s@%s) trying to join %s is a possible spambot",
-                           client->name, client->username, client->host, name);
+                     "User %s (%s@%s) trying to join %s is a possible spambot",
+                     client->name, client->username, client->host, name);
     }
   }
   else
@@ -1010,7 +1010,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     {
       sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
       sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
-                           name, client_get_name(client, HIDE_IP));
+                     name, client_get_name(client, HIDE_IP));
       continue;
     }
 
@@ -1055,7 +1055,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       AddCMode(channel, MODE_NOPRIVMSGS);
 
       sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
-                    me.id, channel->creation_time, channel->name, client->id);
+                     me.id, channel->creation_time, channel->name, client->id);
 
       /*
        * Notify all other users on the new channel
@@ -1070,7 +1070,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     else
     {
       sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
-                    client->id, channel->creation_time, channel->name);
+                     client->id, channel->creation_time, channel->name);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            client->name, client->username, client->host, channel->name, client->account, client->info);
@@ -1143,14 +1143,14 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
   if (show_reason)
   {
     sendto_servers(client, 0, 0, ":%s PART %s :%.*s",
-                  client->id, channel->name, KICKLEN, reason);
+                   client->id, channel->name, KICKLEN, reason);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s :%.*s",
                          client->name, client->username, client->host, channel->name, KICKLEN, reason);
   }
   else
   {
     sendto_servers(client, 0, 0, ":%s PART %s",
-                  client->id, channel->name);
+                   client->id, channel->name);
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s PART %s",
                          client->name, client->username, client->host, channel->name);
   }

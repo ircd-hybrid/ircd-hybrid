@@ -53,7 +53,7 @@ ms_certfp(struct Client *source, int parc, char *parv[])
   source->tls_certfp = io_strdup(parv[1]);
 
   sendto_servers(source, 0, 0, ":%s CERTFP %s",
-                source->id, source->tls_certfp);
+                 source->id, source->tls_certfp);
 }
 
 static struct Command command_table =

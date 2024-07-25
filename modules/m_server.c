@@ -215,15 +215,15 @@ server_estab(struct Client *client_p)
 
     /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-                         capab_get(client_p, true));
+                   "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                   client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
+                   capab_get(client_p, true));
 
     /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), client_p->tls_cipher,
-                         capab_get(client_p, true));
+                   "Link with %s established: [TLS: %s] (Capabilities: %s)",
+                   client_get_name(client_p, MASK_IP), client_p->tls_cipher,
+                   capab_get(client_p, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
               client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
               capab_get(client_p, true));
@@ -232,12 +232,12 @@ server_estab(struct Client *client_p)
   {
     /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
+                   "Link with %s established: (Capabilities: %s)",
+                   client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
     /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link with %s established: (Capabilities: %s)",
-                         client_get_name(client_p, MASK_IP), capab_get(client_p, true));
+                   "Link with %s established: (Capabilities: %s)",
+                   client_get_name(client_p, MASK_IP), capab_get(client_p, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
               client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
   }
@@ -245,7 +245,7 @@ server_estab(struct Client *client_p)
   fd_note(client_p->connection->fd, "Server: %s", client_p->name);
 
   sendto_servers(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
-                me.id, client_p->name, client_p->id, IsHidden(client_p) ? "h" : "", client_p->info);
+                 me.id, client_p->name, client_p->id, IsHidden(client_p) ? "h" : "", client_p->info);
 
   /*
    * Pass on my client information to the new server
@@ -362,11 +362,11 @@ mr_server(struct Client *source, int parc, char *parv[])
   if (server_valid_name(name) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-          "Unauthorized server connection attempt from %s: Bogus server name "
-          "for server %s", client_get_name(source, SHOW_IP), name);
+                   "Unauthorized server connection attempt from %s: Bogus server name for server %s",
+                   client_get_name(source, SHOW_IP), name);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-          "Unauthorized server connection attempt from %s: Bogus server name "
-          "for server %s", client_get_name(source, MASK_IP), name);
+                   "Unauthorized server connection attempt from %s: Bogus server name for server %s",
+                   client_get_name(source, MASK_IP), name);
     client_exit(source, "Bogus server name");
     return;
   }
@@ -374,11 +374,11 @@ mr_server(struct Client *source, int parc, char *parv[])
   if (valid_sid(sid) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source, SHOW_IP), sid);
+                   "Link %s introduced server with bogus server ID %s",
+                   client_get_name(source, SHOW_IP), sid);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source, MASK_IP), sid);
+                   "Link %s introduced server with bogus server ID %s",
+                   client_get_name(source, MASK_IP), sid);
     client_exit(source, "Bogus server ID introduced");
     return;
   }
@@ -386,11 +386,11 @@ mr_server(struct Client *source, int parc, char *parv[])
   if (IsHandshake(source) && irccmp(source->name, name))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with mismatching server name %s",
-                         client_get_name(source, SHOW_IP), name);
+                   "Link %s introduced server with mismatching server name %s",
+                   client_get_name(source, SHOW_IP), name);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with mismatching server name %s",
-                         client_get_name(source, MASK_IP), name);
+                   "Link %s introduced server with mismatching server name %s",
+                   client_get_name(source, MASK_IP), name);
     client_exit(source, "Mismatching server name introduced");
     return;
   }
@@ -421,11 +421,11 @@ mr_server(struct Client *source, int parc, char *parv[])
     if (warn)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Unauthorized server connection attempt from %s: %s for server %s",
-                           client_get_name(source, SHOW_IP), error, name);
+                     "Unauthorized server connection attempt from %s: %s for server %s",
+                     client_get_name(source, SHOW_IP), error, name);
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "Unauthorized server connection attempt from %s: %s for server %s",
-                           client_get_name(source, MASK_IP), error, name);
+                     "Unauthorized server connection attempt from %s: %s for server %s",
+                     client_get_name(source, MASK_IP), error, name);
     }
 
     client_exit(source, error);
@@ -438,11 +438,11 @@ mr_server(struct Client *source, int parc, char *parv[])
         (ConfigChannel.enable_admin == 0) != !IsCapable(source, CAPAB_AOP))
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Link %s introduced server with mismatching AOP/QOP capabilities",
-                           client_get_name(source, SHOW_IP));
+                     "Link %s introduced server with mismatching AOP/QOP capabilities",
+                     client_get_name(source, SHOW_IP));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "Link %s introduced server with mismatching AOP/QOP capabilities",
-                           client_get_name(source, MASK_IP));
+                     "Link %s introduced server with mismatching AOP/QOP capabilities",
+                     client_get_name(source, MASK_IP));
       client_exit(source, "Mismatching AOP/QOP capabilities");
       return;
     }
@@ -463,11 +463,11 @@ mr_server(struct Client *source, int parc, char *parv[])
      * connect - A1kmm.
      */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Attempt to re-introduce server %s from %s",
-                         name, client_get_name(source, SHOW_IP));
+                   "Attempt to re-introduce server %s from %s",
+                   name, client_get_name(source, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Attempt to re-introduce server %s from %s",
-                         name, client_get_name(source, MASK_IP));
+                   "Attempt to re-introduce server %s from %s",
+                   name, client_get_name(source, MASK_IP));
     client_exit(source, "Server already exists");
     return;
   }
@@ -476,11 +476,11 @@ mr_server(struct Client *source, int parc, char *parv[])
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Attempt to re-introduce server %s SID %s from %s",
-                         name, sid, client_get_name(source, SHOW_IP));
+                   "Attempt to re-introduce server %s SID %s from %s",
+                   name, sid, client_get_name(source, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Attempt to re-introduce server %s SID %s from %s",
-                         name, sid, client_get_name(source, MASK_IP));
+                   "Attempt to re-introduce server %s SID %s from %s",
+                   name, sid, client_get_name(source, MASK_IP));
     client_exit(source, "Server ID already exists");
     return;
   }
@@ -532,11 +532,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (server_valid_name(parv[1]) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server name %s",
-                         client_get_name(source->from, SHOW_IP), parv[1]);
+                   "Link %s introduced server with bogus server name %s",
+                   client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server name %s",
-                         client_get_name(source->from, MASK_IP), parv[1]);
+                   "Link %s introduced server with bogus server name %s",
+                   client_get_name(source->from, MASK_IP), parv[1]);
     client_exit(source->from, "Bogus server name introduced");
     return;
   }
@@ -544,11 +544,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (valid_sid(parv[3]) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source->from, SHOW_IP), parv[3]);
+                   "Link %s introduced server with bogus server ID %s",
+                   client_get_name(source->from, SHOW_IP), parv[3]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s introduced server with bogus server ID %s",
-                         client_get_name(source->from, MASK_IP), parv[3]);
+                   "Link %s introduced server with bogus server ID %s",
+                   client_get_name(source->from, MASK_IP), parv[3]);
     client_exit(source->from, "Bogus server ID introduced");
     return;
   }
@@ -558,11 +558,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s cancelled, server ID %s already exists",
-                         client_get_name(source->from, SHOW_IP), parv[3]);
+                   "Link %s cancelled, server ID %s already exists",
+                   client_get_name(source->from, SHOW_IP), parv[3]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s cancelled, server ID %s already exists",
-                         client_get_name(source->from, MASK_IP), parv[3]);
+                   "Link %s cancelled, server ID %s already exists",
+                   client_get_name(source->from, MASK_IP), parv[3]);
     client_exit(source->from, "Link cancelled, server ID already exists");
     return;
   }
@@ -572,11 +572,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s cancelled, server %s already exists",
-                         client_get_name(source->from, SHOW_IP), parv[1]);
+                   "Link %s cancelled, server %s already exists",
+                   client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s cancelled, server %s already exists",
-                         client_get_name(source->from, MASK_IP), parv[1]);
+                   "Link %s cancelled, server %s already exists",
+                   client_get_name(source->from, MASK_IP), parv[1]);
     client_exit(source->from, "Server exists");
     return;
   }
@@ -627,11 +627,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   {
     /* OOOPs nope can't HUB */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Non-Hub link %s introduced %s.",
-                         client_get_name(source->from, SHOW_IP), parv[1]);
+                   "Non-Hub link %s introduced %s.",
+                   client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Non-Hub link %s introduced %s.",
-                         client_get_name(source->from, MASK_IP), parv[1]);
+                   "Non-Hub link %s introduced %s.",
+                   client_get_name(source->from, MASK_IP), parv[1]);
     client_exit(source, "No matching hub_mask.");
     return;
   }
@@ -641,11 +641,11 @@ ms_sid(struct Client *source, int parc, char *parv[])
   {
     /* OOOPs nope can't HUB this leaf */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Link %s introduced leafed server %s.",
-                         client_get_name(source->from, SHOW_IP), parv[1]);
+                   "Link %s introduced leafed server %s.",
+                   client_get_name(source->from, SHOW_IP), parv[1]);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Link %s introduced leafed server %s.",
-                         client_get_name(source->from, MASK_IP), parv[1]);
+                   "Link %s introduced leafed server %s.",
+                   client_get_name(source->from, MASK_IP), parv[1]);
     client_exit(source->from, "Leafed server.");
     return;
   }
@@ -673,10 +673,9 @@ ms_sid(struct Client *source, int parc, char *parv[])
   hash_add_id(target);
 
   sendto_servers(source->from, 0, 0, ":%s SID %s %u %s +%s :%s",
-                source->id, target->name, target->hopcount + 1,
-                target->id, IsHidden(target) ? "h" : "", target->info);
+                 source->id, target->name, target->hopcount + 1, target->id, IsHidden(target) ? "h" : "", target->info);
   sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",
-                       target->name, source->name);
+                 target->name, source->name);
 }
 
 static struct Command command_table[] =

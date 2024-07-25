@@ -76,10 +76,10 @@ set_option(struct Client *source, struct SetStruct *option, int value_new)
 
     if (option->wants_bool)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %s",
-                           get_oper_name(source), option->name, status[*option->ptr != 0]);
+                     get_oper_name(source), option->name, status[*option->ptr != 0]);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %i",
-                           get_oper_name(source), option->name, *option->ptr);
+                     get_oper_name(source), option->name, *option->ptr);
   }
   else
   {

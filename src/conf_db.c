@@ -155,8 +155,8 @@ open_db_write(const char *filename, uint32_t version)
     {
       walloped = true;
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Cannot create temporary database file %s",
-                           f->tempname);
+                     "Cannot create temporary database file %s",
+                     f->tempname);
     }
 
     errno = errno_save;
@@ -254,8 +254,8 @@ close_db(struct dbFILE *f)
       int errno_save = errno;
 
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Unable to move new "
-                           "data to database file %s; new data NOT saved.",
-                           f->filename);
+                     "data to database file %s; new data NOT saved.",
+                     f->filename);
       errno = errno_save;
       log_write(LOG_TYPE_IRCD, "Unable to move new data to database file %s; new data NOT saved.",
                 f->filename);

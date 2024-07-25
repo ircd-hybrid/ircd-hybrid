@@ -139,8 +139,8 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
                         aline->duration / 60, conf->host);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "%s added temporary %ju min. D-Line for [%s] [%s]",
-                         get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
+                   "%s added temporary %ju min. D-Line for [%s] [%s]",
+                   get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
     log_write(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
               get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
   }
@@ -150,7 +150,7 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
       sendto_one_notice(source, &me, ":Added D-Line [%s]", conf->host);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added D-Line for [%s] [%s]",
-                         get_oper_name(source), conf->host, conf->reason);
+                   get_oper_name(source), conf->host, conf->reason);
     log_write(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
               get_oper_name(source), conf->host, conf->reason);
   }

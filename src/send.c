@@ -89,10 +89,10 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   {
     if (IsServer(to))
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Max SendQ limit exceeded for %s: %zu > %u",
-                           client_get_name(to, HIDE_IP),
-                           (dbuf_length(&to->connection->buf_sendq) + buffer->size),
-                           class_get_sendq(&to->connection->confs));
+                     "Max SendQ limit exceeded for %s: %zu > %u",
+                     client_get_name(to, HIDE_IP),
+                     (dbuf_length(&to->connection->buf_sendq) + buffer->size),
+                     class_get_sendq(&to->connection->confs));
 
     if (IsClient(to))
       AddFlag(to, FLAGS_SENDQEX);
@@ -134,7 +134,7 @@ sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct db
 
   if (to == from->from)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
-                         to->name, from->name);
+                   to->name, from->name);
   else
     sendto_one_buffer(to, buffer);
 }

@@ -287,16 +287,16 @@ server_connect(struct MaskItem *conf, struct Client *by)
   if (conf->dns_pending)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Error connecting to %s: DNS lookup for connect{} in progress.",
-                         conf->name);
+                   "Error connecting to %s: DNS lookup for connect{} in progress.",
+                   conf->name);
     return false;
   }
 
   if (conf->dns_failed)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Error connecting to %s: DNS lookup for connect{} failed.",
-                         conf->name);
+                   "Error connecting to %s: DNS lookup for connect{} failed.",
+                   conf->name);
     return false;
   }
 
@@ -368,11 +368,11 @@ server_finish_tls_handshake(struct Client *client)
   if (conf == NULL)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Lost connect{} block for %s",
-                         client_get_name(client, SHOW_IP));
+                   "Lost connect{} block for %s",
+                   client_get_name(client, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Lost connect{} block for %s",
-                         client_get_name(client, MASK_IP));
+                   "Lost connect{} block for %s",
+                   client_get_name(client, MASK_IP));
 
     client_exit(client, "Lost connect{} block");
     return;
@@ -424,9 +424,8 @@ server_tls_handshake(fde_t *F, void *data_)
         return;
       default:
       {
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                             "Error connecting to %s: %s", client->name,
-                             sslerr ? sslerr : "unknown TLS error");
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Error connecting to %s: %s",
+                       client->name, sslerr ? sslerr : "unknown TLS error");
         client_exit(client, "Error during TLS handshake");
         return;
       }
@@ -488,11 +487,11 @@ server_connect_callback(fde_t *F, int status, void *data_)
   {
     /* We have an error, so report it and quit */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Error connecting to %s: %s",
-                         client_get_name(client, SHOW_IP), comm_errstr(status));
+                   "Error connecting to %s: %s",
+                   client_get_name(client, SHOW_IP), comm_errstr(status));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Error connecting to %s: %s",
-                         client_get_name(client, MASK_IP), comm_errstr(status));
+                   "Error connecting to %s: %s",
+                   client_get_name(client, MASK_IP), comm_errstr(status));
 
     /*
      * If a fd goes bad, call dead_link() the socket is no
@@ -509,9 +508,9 @@ server_connect_callback(fde_t *F, int status, void *data_)
   if (conf == NULL)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
+                   "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                         "Lost connect{} block for %s", client_get_name(client, MASK_IP));
+                   "Lost connect{} block for %s", client_get_name(client, MASK_IP));
 
     client_exit(client, "Lost connect{} block");
     return;

@@ -46,7 +46,7 @@ static void
 do_links(struct Client *source, char *parv[])
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
-                       source->name, source->username, source->host, source->servptr->name);
+                 source->name, source->username, source->host, source->servptr->name);
 
   if (ConfigServerHide.flatten_links && !HasUMode(source, UMODE_OPER))
   {

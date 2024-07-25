@@ -66,8 +66,8 @@ ms_svsjoin(struct Client *source, int parc, char *parv[])
   if (target->from == source->from)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Received wrong-direction SVSJOIN for %s (behind %s) from %s",
-                         target->name, source->from->name, client_get_name(source, HIDE_IP));
+                   "Received wrong-direction SVSJOIN for %s (behind %s) from %s",
+                   target->name, source->from->name, client_get_name(source, HIDE_IP));
     return;
   }
 

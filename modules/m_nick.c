@@ -73,8 +73,7 @@ check_clean_nick(struct Client *source, const char *nick)
 
   ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
-                       nick, IsServer(source) ? source->name : source->servptr->name,
-                       source->from->name);
+                 nick, IsServer(source) ? source->name : source->servptr->name, source->from->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
@@ -82,7 +81,7 @@ check_clean_nick(struct Client *source, const char *nick)
   if (!IsServer(source))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
-                  me.id, source->id, me.name);
+                   me.id, source->id, me.name);
     AddFlag(source, FLAGS_KILLED);
     client_exit(source, "Bad Nickname");
   }
@@ -100,8 +99,8 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
 
   ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Bad UID: %s Nickname: %s From: %s(via %s)",
-                       uid, nick, source->name, source->from->name);
+                 "Bad UID: %s Nickname: %s From: %s(via %s)",
+                 uid, nick, source->name, source->from->name);
   sendto_one(source, ":%s KILL %s :%s (Bad UID)",
              me.id, uid, me.name);
   return false;
@@ -126,8 +125,8 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
 
   ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
-                       user, nick, source->name, source->from->name);
+                 "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
+                 user, nick, source->name, source->from->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
   return false;
@@ -152,8 +151,8 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
 
   ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
-                       host, nick, source->name, source->from->name);
+                 "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
+                 host, nick, source->name, source->from->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
   return false;
@@ -239,15 +238,14 @@ change_local_nick(struct Client *source, const char *nick)
    * note of change to all clients on that channel. Propagate notice
    * to other servers.
    */
-  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Nick change: From %s to %s [%s@%s]",
-                       source->name, nick, source->username, source->host);
+  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
+                 source->name, nick, source->username, source->host);
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, nick);
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                source->id, nick, source->tsinfo);
+                 source->id, nick, source->tsinfo);
 
   hash_del_client(source);
   strlcpy(source->name, nick, sizeof(source->name));
@@ -290,15 +288,14 @@ change_remote_nick(struct Client *source, char *parv[])
     assert(source->tsinfo);
   }
 
-  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Nick change: From %s to %s [%s@%s]",
-                       source->name, parv[1], source->username, source->host);
+  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
+                 source->name, parv[1], source->username, source->host);
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, parv[1]);
 
   whowas_add_history(source, true);
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                source->id, parv[1], source->tsinfo);
+                 source->id, parv[1], source->tsinfo);
 
   /* Set the new nick name */
   hash_del_client(source);
@@ -424,13 +421,13 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   if (newts == target->tsinfo)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Nick collision on %s(%s <- %s)(both killed)",
-                         target->name, target->from->name, source->from->name);
+                   "Nick collision on %s(%s <- %s)(both killed)",
+                   target->name, target->from->name, source->from->name);
 
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
-                  me.id, target->id, me.name);
+                   me.id, target->id, me.name);
 
     ++ServerStats.is_kill;
     sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
@@ -458,18 +455,18 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
 
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Nick collision on %s(%s <- %s)(older killed)",
-                         target->name, target->from->name, source->from->name);
+                   "Nick collision on %s(%s <- %s)(older killed)",
+                   target->name, target->from->name, source->from->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Nick collision on %s(%s <- %s)(newer killed)",
-                         target->name, target->from->name, source->from->name);
+                   "Nick collision on %s(%s <- %s)(newer killed)",
+                   target->name, target->from->name, source->from->name);
 
   ++ServerStats.is_kill;
   sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
-                me.id, target->id, me.name);
+                 me.id, target->id, me.name);
 
   AddFlag(target, FLAGS_KILLED);
   client_exit(target, "Nick collision");
@@ -504,17 +501,17 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   if (newts == target->tsinfo)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-               "Nick change collision from %s to %s(%s <- %s)(both killed)",
-               source->name, target->name, target->from->name,
-               source->from->name);
+                   "Nick change collision from %s to %s(%s <- %s)(both killed)",
+                   source->name, target->name, target->from->name,
+                   source->from->name);
 
     sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
     ServerStats.is_kill += 2;
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
-                  me.id, source->id, me.name);
+                   me.id, source->id, me.name);
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
-                  me.id, target->id, me.name);
+                   me.id, target->id, me.name);
 
     AddFlag(source, FLAGS_KILLED);
     AddFlag(target, FLAGS_KILLED);
@@ -531,19 +528,19 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   {
     if (sameuser)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Nick change collision from %s to %s(%s <- %s)(older killed)",
-                           source->name, target->name, target->from->name,
-                           source->from->name);
+                     "Nick change collision from %s to %s(%s <- %s)(older killed)",
+                     source->name, target->name, target->from->name,
+                     source->from->name);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-                           source->name, target->name, target->from->name,
-                           source->from->name);
+                     "Nick change collision from %s to %s(%s <- %s)(newer killed)",
+                     source->name, target->name, target->from->name,
+                     source->from->name);
 
     ++ServerStats.is_kill;
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
-                  me.id, source->id, me.name);
+                   me.id, source->id, me.name);
     AddFlag(source, FLAGS_KILLED);
 
     if (sameuser)
@@ -555,15 +552,15 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
 
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Nick collision on %s(%s <- %s)(older killed)",
-                         target->name, target->from->name, source->from->name);
+                   "Nick collision on %s(%s <- %s)(older killed)",
+                   target->name, target->from->name, source->from->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Nick collision on %s(%s <- %s)(newer killed)",
-                         target->name, target->from->name, source->from->name);
+                   "Nick collision on %s(%s <- %s)(newer killed)",
+                   target->name, target->from->name, source->from->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision)",
-                me.id, target->id, me.name);
+                 me.id, target->id, me.name);
 
   ++ServerStats.is_kill;
   sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
@@ -610,9 +607,8 @@ mr_nick(struct Client *source, int parc, char *parv[])
   if (resv)
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Forbidding reserved nick %s from user %s",
-                         nick, client_get_name(source, HIDE_IP));
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
+                   nick, client_get_name(source, HIDE_IP));
     return;
   }
 
@@ -663,9 +659,8 @@ m_nick(struct Client *source, int parc, char *parv[])
       (resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Forbidding reserved nick %s from user %s",
-                         nick, client_get_name(source, HIDE_IP));
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
+                   nick, client_get_name(source, HIDE_IP));
     return;
   }
 
@@ -800,11 +795,11 @@ ms_uid(struct Client *source, int parc, char *parv[])
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "ID collision on %s(%s <- %s)(both killed)",
-                         target->name, target->from->name, source->from->name);
+                   "ID collision on %s(%s <- %s)(both killed)",
+                   target->name, target->from->name, source->from->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
-                  me.id, target->id, me.name);
+                   me.id, target->id, me.name);
 
     ++ServerStats.is_kill;
     AddFlag(target, FLAGS_KILLED);

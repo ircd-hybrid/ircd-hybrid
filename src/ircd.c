@@ -231,7 +231,7 @@ io_loop(void)
     {
       motd_recache();
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Got signal SIGUSR1, reloading motd file(s)");
+                     "Got signal SIGUSR1, reloading motd file(s)");
       doremotd = 0;
     }
   }

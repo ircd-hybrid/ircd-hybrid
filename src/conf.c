@@ -394,9 +394,9 @@ hostmask_send_expiration(const struct AddressRec *const arec)
   }
 
   sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Temporary %c-line for [%s@%s] expired", ban_type,
-                       (arec->conf->user) ? arec->conf->user : "*",
-                       (arec->conf->host) ? arec->conf->host : "*");
+                 "Temporary %c-line for [%s@%s] expired", ban_type,
+                 (arec->conf->user) ? arec->conf->user : "*",
+                 (arec->conf->host) ? arec->conf->host : "*");
 }
 
 static void
@@ -713,7 +713,7 @@ conf_check_client(struct Client *client)
 
     if (warn)
       sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Rejecting client connection from %s: %s",
-                           client_get_name(client, SHOW_IP), error);
+                     client_get_name(client, SHOW_IP), error);
 
     log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
          client_get_name(client, SHOW_IP), error);
@@ -1044,7 +1044,7 @@ conf_rehash(bool sig)
   if (sig)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                         "Got signal SIGHUP, reloading configuration file(s)");
+                   "Got signal SIGHUP, reloading configuration file(s)");
     log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
   }
 
@@ -1269,7 +1269,7 @@ conf_handle_tls(bool cold)
     {
       /* Failed to load new settings/certs, old ones remain active */
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                           "Error reloading TLS settings, check the ircd log"); // report_crypto_errors logs this
+                     "Error reloading TLS settings, check the ircd log"); // report_crypto_errors logs this
     }
   }
 }
@@ -1297,8 +1297,8 @@ conf_read_files(bool cold)
     else
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Unable to read configuration file '%s': %s",
-                           ConfigGeneral.configfile, strerror(errno));
+                     "Unable to read configuration file '%s': %s",
+                     ConfigGeneral.configfile, strerror(errno));
       return;
     }
   }
@@ -1355,12 +1355,12 @@ conf_add_class_to_conf(struct MaskItem *conf, const char *name)
 
     if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Warning *** Defaulting to default class for %s@%s",
-                           conf->user, conf->host);
+                     "Warning *** Defaulting to default class for %s@%s",
+                     conf->user, conf->host);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "Warning *** Defaulting to default class for %s",
-                           conf->name);
+                     "Warning *** Defaulting to default class for %s",
+                     conf->name);
   }
 }
 
@@ -1378,7 +1378,7 @@ yyerror(const char *msg)
 
   const char *p = stripws(linebuf);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno, msg, p);
+                 conffilebuf, lineno, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
             conffilebuf, lineno, msg, p);
 }
@@ -1388,7 +1388,7 @@ conf_error_report(const char *msg)
 {
   const char *p = stripws(linebuf);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                       conffilebuf, lineno, msg, p);
+                 conffilebuf, lineno, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
             conffilebuf, lineno, msg, p);
 }

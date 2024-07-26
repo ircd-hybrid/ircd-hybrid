@@ -39,5 +39,6 @@ typedef enum
   IRCD_EXIT_RESTART,  /**< Restart the server. */
 } ircd_exit_action_t;
 
-extern void ircd_exit(const char *, ircd_exit_action_t);
+extern void ircd_exit(ircd_exit_action_t, const char *);
+extern void ircd_exit_fmt(ircd_exit_action_t, const char *, ...);
 #endif  /* INCLUDED_ircd_exit_h */

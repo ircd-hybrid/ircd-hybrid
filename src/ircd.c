@@ -265,7 +265,7 @@ initialize_global_set_options(void)
 static void
 ircd_oom(void)
 {
-  ircd_exit("out of memory", IRCD_EXIT_RESTART);
+  ircd_exit(IRCD_EXIT_RESTART, "out of memory");
 }
 
 /**
@@ -286,7 +286,7 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
     exit(EXIT_FAILURE);  /* Exit with failure if initialization error. */
   }
 
-  ircd_exit(message, IRCD_EXIT_RESTART);  /* Restart the program for other errors. */
+  ircd_exit(IRCD_EXIT_RESTART, message);  /* Restart the program for other errors. */
 }
 
 /**

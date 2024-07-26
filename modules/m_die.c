@@ -62,10 +62,8 @@ mo_die(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "received DIE command from %s",
-           client_get_name(source, HIDE_IP));
-  ircd_exit(buf, IRCD_EXIT_TERMINATE);
+  ircd_exit_fmt(IRCD_EXIT_TERMINATE, "received DIE command from %s",
+                client_get_name(source, HIDE_IP));
 }
 
 static struct Command command_table =

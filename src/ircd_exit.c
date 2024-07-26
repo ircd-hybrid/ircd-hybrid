@@ -37,6 +37,29 @@
 #include "ircd_exit.h"
 
 /**
+ * @brief Initiates server termination or restart with a formatted message.
+ *
+ * This function is responsible for initiating the termination or restart of the IRC server
+ * with a formatted message indicating the reason.
+ *
+ * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param format A format string indicating the reason for server termination or restart.
+ * @param ... Additional arguments to be formatted into the message.
+ */
+void
+ircd_exit_fmt(ircd_exit_action_t action, const char *format, ...)
+{
+  char buf[IRCD_BUFSIZE];
+  va_list args;
+
+  va_start(args, format);
+  vsnprintf(buf, sizeof(buf), format, args);
+  va_end(args);
+
+  ircd_exit(action, buf);
+}
+
+/**
  * @brief Initiates server termination or restart.
  *
  * This function is responsible for initiating the termination or restart of the IRC server.
@@ -45,11 +68,11 @@
  * parameter. In the case of a restart, it attempts to execute the server binary with the original
  * command line arguments.
  *
- * @param message A message indicating the reason for server termination or restart.
  * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param message A message indicating the reason for server termination or restart.
  */
 void
-ircd_exit(const char *message, ircd_exit_action_t action)
+ircd_exit(ircd_exit_action_t action, const char *message)
 {
   if (action == IRCD_EXIT_RESTART)
   {

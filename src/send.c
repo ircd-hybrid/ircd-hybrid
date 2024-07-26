@@ -44,13 +44,13 @@ static uintmax_t send_marker;
  *
  * inputs
  *		- buffer
- *		- format pattern to use
+ *		- format format to use
  *		- var args
  * output	- number of bytes formatted output
  * side effects	- modifies sendbuf
  */
 static void
-send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
+send_format(struct dbuf_block *buffer, const char *format, va_list args)
 {
   /*
    * from rfc1459
@@ -64,7 +64,7 @@ send_format(struct dbuf_block *buffer, const char *pattern, va_list args)
    * continuation message lines.  See section 7 for more details about
    * current implementations.
    */
-  dbuf_put_args(buffer, pattern, args);
+  dbuf_put_args(buffer, format, args);
 
   if (buffer->size > IRCD_BUFSIZE - 2)
     buffer->size = IRCD_BUFSIZE - 2;
@@ -221,7 +221,7 @@ send_queued_write(struct Client *to)
  * side effects	- send message to single client
  */
 void
-sendto_one(struct Client *to, const char *pattern, ...)
+sendto_one(struct Client *to, const char *format, ...)
 {
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
@@ -229,8 +229,8 @@ sendto_one(struct Client *to, const char *pattern, ...)
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   sendto_one_buffer(to->from, buffer);
@@ -269,7 +269,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 }
 
 void
-sendto_one_notice(struct Client *to, const struct Client *from, const char *pattern, ...)
+sendto_one_notice(struct Client *to, const struct Client *from, const char *format, ...)
 {
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
@@ -282,8 +282,8 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
   dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   sendto_one_buffer(to->from, buffer);
@@ -301,7 +301,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *patt
  * 		  but useful when one does not know where target "lives"
  */
 void
-sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *pattern, ...)
+sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
 {
   if (IsDead(to->from))
     return;
@@ -315,8 +315,8 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
                  ID_or_name(from, to), command, ID_or_name(to, to));
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   if (MyConnect(to))
@@ -357,7 +357,7 @@ sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_r
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 void
-sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type, const char *pattern, ...)
+sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type, const char *format, ...)
 {
   const char *ntype = "???";
 
@@ -380,8 +380,8 @@ sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type,
   dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   list_t *list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
@@ -409,7 +409,7 @@ sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type,
  *                (at most 5 warnings every 5 seconds)
  */
 void
-sendto_clients_ratelimited(uintmax_t *rate, const char *pattern, ...)
+sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
 {
   if ((io_time_get(IO_TIME_MONOTONIC_SEC) - *rate) < 20)
     return;
@@ -418,8 +418,8 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *pattern, ...)
 
   char buffer[IRCD_BUFSIZE];
   va_list args;
-  va_start(args, pattern);
-  vsnprintf(buffer, sizeof(buffer), pattern, args);
+  va_start(args, format);
+  vsnprintf(buffer, sizeof(buffer), format, args);
   va_end(args);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", buffer);
@@ -470,7 +470,7 @@ sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_m
  */
 void
 sendto_match_butone(const struct Client *one, const struct Client *from, const char *mask,
-                    send_match_type_t type, const char *pattern, ...)
+                    send_match_type_t type, const char *format, ...)
 {
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
@@ -479,10 +479,10 @@ sendto_match_butone(const struct Client *one, const struct Client *from, const c
   dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
   va_list args_l, args_r;
-  va_start(args_l, pattern);
-  va_start(args_r, pattern);
-  send_format(buffer_l, pattern, args_l);
-  send_format(buffer_r, pattern, args_r);
+  va_start(args_l, format);
+  va_start(args_r, format);
+  send_format(buffer_l, format, args_l);
+  send_format(buffer_r, format, args_r);
   va_end(args_l);
   va_end(args_r);
 
@@ -518,7 +518,7 @@ sendto_match_butone(const struct Client *one, const struct Client *from, const c
      *        if (IsRegisteredUser(target) &&
      *                        match_it(target, mask, what) &&
      *                        (target->from == client))
-     *   vsendto_prefix_one(client, from, pattern, args);
+     *   vsendto_prefix_one(client, from, format, args);
      *
      * That way, we wouldn't send the message to a server who didn't have
      * a matching client. However, on a network such as EFNet, that code
@@ -607,15 +607,15 @@ sendto_servers(const struct Client *one, const unsigned int capab,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab, const char *pattern, ...)
+sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source->id);
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   ++send_marker;
@@ -655,7 +655,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
 /* sendto_common_channels_local()
  *
  * inputs	- pointer to client
- *		- pattern to send
+ *		- format to send
  * output	- NONE
  * side effects	- Sends a message to all people on local server who are
  * 		  in same channel with user.
@@ -663,13 +663,13 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
  */
 void
 sendto_common_channels_local(struct Client *user, bool touser, unsigned int poscap,
-                             unsigned int negcap, const char *pattern, ...)
+                             unsigned int negcap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   ++send_marker;
@@ -718,17 +718,17 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
  * \param rank     Minimum channel member rank clients must have
  * \param poscap   Positive client capabilities flags (CAP)
  * \param negcap   Negative client capabilities flags (CAP)
- * \param pattern  Format string for command arguments
+ * \param format  Format string for command arguments
  */
 void
 sendto_channel_local(const struct Client *one, struct Channel *channel, int rank, unsigned int poscap,
-                     unsigned int negcap, const char *pattern, ...)
+                     unsigned int negcap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
   va_list args;
-  va_start(args, pattern);
-  send_format(buffer, pattern, args);
+  va_start(args, format);
+  send_format(buffer, format, args);
   va_end(args);
 
   list_node_t *node;
@@ -771,7 +771,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
  */
 void
 sendto_channel_butone(struct Client *one, const struct Client *from, struct Channel *channel,
-                      int rank, const char *pattern, ...)
+                      int rank, const char *format, ...)
 {
   struct dbuf_block *buffer_l = dbuf_alloc();
   struct dbuf_block *buffer_r = dbuf_alloc();
@@ -784,10 +784,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
   dbuf_put_fmt(buffer_r, ":%s ", from->id);
 
   va_list args_l, args_r;
-  va_start(args_l, pattern);
-  va_start(args_r, pattern);
-  send_format(buffer_l, pattern, args_l);
-  send_format(buffer_r, pattern, args_r);
+  va_start(args_l, format);
+  va_start(args_r, format);
+  send_format(buffer_l, format, args_l);
+  send_format(buffer_r, format, args_r);
   va_end(args_l);
   va_end(args_r);
 

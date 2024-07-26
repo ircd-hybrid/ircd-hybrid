@@ -139,18 +139,18 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
  * before modifying its contents.
  *
  * @param block A pointer to the `dbuf_block` where the formatted string is to be stored.
- * @param pattern The format string for the data.
- * @param ... Additional arguments to be formatted according to the pattern.
+ * @param format The format string for the data.
+ * @param ... Additional arguments to be formatted according to the format.
  */
 void
-dbuf_put_fmt(struct dbuf_block *block, const char *pattern, ...)
+dbuf_put_fmt(struct dbuf_block *block, const char *format, ...)
 {
   va_list args;
 
   assert(block->ref_count == 1);
 
-  va_start(args, pattern);
-  dbuf_put_args(block, pattern, args);
+  va_start(args, format);
+  dbuf_put_args(block, format, args);
   va_end(args);
 }
 

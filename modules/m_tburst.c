@@ -100,7 +100,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
     channel_set_topic(channel, topic, setby, remote_topic_ts, false);
 
     sendto_servers(source, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
-                  source->id, parv[1], parv[2], parv[3], setby, topic);
+                   source->id, parv[1], parv[2], parv[3], setby, topic);
 
     /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
     if (topic_differs)

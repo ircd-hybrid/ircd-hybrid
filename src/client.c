@@ -920,8 +920,8 @@ dead_link_on_read(struct Client *client, int error)
                      "Server %s closed the connection",
                      client_get_name(client, SHOW_IP));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "Server %s closed the connection",
-                           client_get_name(client, MASK_IP));
+                     "Server %s closed the connection",
+                     client_get_name(client, MASK_IP));
       log_write(LOG_TYPE_IRCD, "Server %s closed the connection",
                 client_get_name(client, SHOW_IP));
     }
@@ -931,8 +931,8 @@ dead_link_on_read(struct Client *client, int error)
                      "Lost connection to %s: %s",
                      client_get_name(client, SHOW_IP), strerror(current_error));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "Lost connection to %s: %s",
-                           client_get_name(client, MASK_IP), strerror(current_error));
+                     "Lost connection to %s: %s",
+                     client_get_name(client, MASK_IP), strerror(current_error));
       log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
                 client_get_name(client, SHOW_IP), strerror(current_error));
     }

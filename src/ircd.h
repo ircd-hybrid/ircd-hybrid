@@ -152,5 +152,4 @@ extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
-extern struct event event_write_links_file;
 #endif  /* INCLUDED_ircd_h */

@@ -43,6 +43,8 @@
 static void
 send_invite(struct Client *source, struct Client *target, struct Channel *channel)
 {
+  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+
   if (MyConnect(target))
   {
     sendto_one(target, ":%s!%s@%s INVITE %s :%s",
@@ -153,7 +155,6 @@ m_invite(struct Client *source, int parc, char *parv[])
 
   source->connection->invite.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
   source->connection->invite.count++;
-  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   sendto_one_numeric(source, &me, RPL_INVITING, target->name, channel->name);
 
@@ -193,10 +194,8 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
     return;
 
-  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   send_invite(source, target, channel);
 }
-
 
 static struct Command command_table =
 {

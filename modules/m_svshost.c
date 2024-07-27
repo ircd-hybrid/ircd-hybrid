@@ -64,7 +64,7 @@ ms_svshost(struct Client *source, int parc, char *parv[])
 
   user_set_hostmask(target, parv[3], false);
   sendto_servers(source, 0, 0, ":%s SVSHOST %s %ju %s",
-                source->id, target->id, target->tsinfo, parv[3]);
+                 source->id, target->id, target->tsinfo, parv[3]);
 }
 
 static struct Command command_table =

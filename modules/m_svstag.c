@@ -67,7 +67,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
   {
     svstag_clear_list(&target->svstags);
     sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju -",
-                  source->id, target->id, target->tsinfo);
+                   source->id, target->id, target->tsinfo);
     return;
   }
 
@@ -77,7 +77,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
   svstag_attach(&target->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
   sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
-                source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);
+                 source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);
 }
 
 static struct Command command_table =

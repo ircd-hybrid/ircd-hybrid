@@ -27,6 +27,8 @@
 #ifndef INCLUDED_ircd_exit_h
 #define INCLUDED_ircd_exit_h
 
+#include "io.h"
+
 /**
  * @enum ircd_exit_action_t
  * @brief Actions for server exit.
@@ -40,5 +42,5 @@ typedef enum
 } ircd_exit_action_t;
 
 extern void ircd_exit(ircd_exit_action_t, const char *);
-extern void ircd_exit_fmt(ircd_exit_action_t, const char *, ...);
+extern void ircd_exit_fmt(ircd_exit_action_t, const char *, ...) IO_AFP(2,3);
 #endif  /* INCLUDED_ircd_exit_h */

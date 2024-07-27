@@ -40,6 +40,29 @@
 #include "module.h"
 
 
+static void
+send_invite(struct Client *source, struct Client *target, struct Channel *channel)
+{
+  if (MyConnect(target))
+  {
+    sendto_one(target, ":%s!%s@%s INVITE %s :%s",
+               source->name, source->username, source->host, target->name, channel->name);
+
+    if (HasCMode(channel, MODE_INVITEONLY))
+      invite_add(channel, target);  /* Add the invite if channel is +i */
+  }
+
+  if (HasCMode(channel, MODE_INVITEONLY))
+    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
+                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
+                         me.name, channel->name, source->name, target->name, channel->name);
+
+  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0, ":%s!%s@%s INVITE %s %s",
+                       source->name, source->username, source->host, target->name, channel->name);
+  sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
+                 source->id, target->id, channel->name, channel->creation_time);
+}
+
 /*! \brief INVITE command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -137,25 +160,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   if (target->away[0])
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
-  if (MyConnect(target))
-  {
-    sendto_one(target, ":%s!%s@%s INVITE %s :%s",
-               source->name, source->username, source->host, target->name, channel->name);
-
-    if (HasCMode(channel, MODE_INVITEONLY))
-      invite_add(channel, target);  /* Add the invite if channel is +i */
-  }
-
-  if (HasCMode(channel, MODE_INVITEONLY))
-    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
-                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, channel->name, source->name, target->name, channel->name);
-
-  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0,
-                       ":%s!%s@%s INVITE %s %s", source->name, source->username,
-                       source->host, target->name, channel->name);
-  sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
-                source->id, target->id, channel->name, channel->creation_time);
+  send_invite(source, target, channel);
 }
 
 /*! \brief INVITE command handler
@@ -189,26 +194,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
     return;
 
   channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-  if (MyConnect(target))
-  {
-    sendto_one(target, ":%s!%s@%s INVITE %s :%s",
-               source->name, source->username, source->host, target->name, channel->name);
-
-    if (HasCMode(channel, MODE_INVITEONLY))
-      invite_add(channel, target);  /* Add the invite if channel is +i */
-  }
-
-  if (HasCMode(channel, MODE_INVITEONLY))
-    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
-                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, channel->name, source->name, target->name, channel->name);
-
-  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0,
-                       ":%s!%s@%s INVITE %s %s", source->name, source->username,
-                       source->host, target->name, channel->name);
-  sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
-                source->id, target->id, channel->name, channel->creation_time);
+  send_invite(source, target, channel);
 }
 
 

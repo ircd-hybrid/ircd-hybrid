@@ -118,7 +118,7 @@ m_knock(struct Client *source, int parc, char *parv[])
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, channel->name, channel->name, source->name, source->username, source->host);
   sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                source->id, channel->name);
+                 source->id, channel->name);
 }
 
 static struct Command command_table =

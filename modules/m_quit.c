@@ -47,14 +47,14 @@
 static void
 m_quit(struct Client *source, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = "Quit: ";
+  const char *reason = "";
 
   if (!EmptyString(parv[1]) && (HasUMode(source, UMODE_OPER) ||
       (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
       < io_time_get(IO_TIME_MONOTONIC_SEC)))
-    strlcpy(reason + 6, parv[1], sizeof(reason) - 6);
+    reason = parv[1];
 
-  client_exit(source, reason);
+  client_exit_fmt(source, "Quit: %.*s", KICKLEN, reason);
 }
 
 /*! \brief QUIT command handler
@@ -71,12 +71,12 @@ m_quit(struct Client *source, int parc, char *parv[])
 static void
 ms_quit(struct Client *source, int parc, char *parv[])
 {
-  char reason[KICKLEN + 1] = "";  /* Essential that buf[0] = '\0' */
+  const char *reason = "";
 
   if (!EmptyString(parv[1]))
-    strlcpy(reason, parv[1], sizeof(reason));
+    reason = parv[1];
 
-  client_exit(source, reason);
+  client_exit_fmt(source, "%.*s", KICKLEN, reason);
 }
 
 static struct Command command_table =

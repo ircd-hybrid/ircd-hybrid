@@ -706,9 +706,6 @@ conf_check_client(struct Client *client)
 
   if (error)
   {
-    char buf[REASONLEN + 1];
-    snprintf(buf, sizeof(buf), "Connection rejected - %s", error);
-
     ++ServerStats.is_ref;
 
     if (warn)
@@ -717,7 +714,7 @@ conf_check_client(struct Client *client)
 
     log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
          client_get_name(client, SHOW_IP), error);
-    client_exit(client, buf);
+    client_exit_fmt(client, "Connection rejected - %s", error);
     return false;
   }
 

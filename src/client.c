@@ -246,10 +246,8 @@ check_pings_list(list_t *list)
                       client_get_name(client, SHOW_IP));
           }
 
-          char buf[32];  /* 32 = sizeof("Ping timeout: 999999999 seconds") */
-          snprintf(buf, sizeof(buf), "Ping timeout: %ju seconds",
-                   (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
-          client_exit(client, buf);
+          client_exit_fmt(client, "Ping timeout: %ju seconds",
+                          (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
         }
       }
     }
@@ -870,6 +868,19 @@ client_exit(struct Client *client, const char *comment)
   exit_one_client(client, comment);
 }
 
+void
+client_exit_fmt(struct Client *client, const char *format, ...)
+{
+  char buf[IRCD_BUFSIZE];
+  va_list args;
+
+  va_start(args, format);
+  vsnprintf(buf, sizeof(buf), format, args);
+  va_end(args);
+
+  client_exit(client, buf);
+}
+
 /*
  * dead_link_on_write - report a write error if not already dead,
  *			mark it as dead then exit it
@@ -901,7 +912,6 @@ dead_link_on_write(struct Client *client, int ierrno)
 void
 dead_link_on_read(struct Client *client, int error)
 {
-  char errmsg[IRCD_BUFSIZE];
   int current_error;
 
   if (IsDefunct(client))
@@ -942,11 +952,9 @@ dead_link_on_read(struct Client *client, int error)
   }
 
   if (error == 0)
-    strlcpy(errmsg, "Remote host closed the connection", sizeof(errmsg));
+    client_exit(client, "Remote host closed the connection");
   else
-    snprintf(errmsg, sizeof(errmsg), "Read error: %s", strerror(current_error));
-
-  client_exit(client, errmsg);
+    client_exit_fmt(client, "Read error: %s", strerror(current_error));
 }
 
 void

@@ -63,10 +63,7 @@ ms_svskill(struct Client *source, int parc, char *parv[])
   const char *const comment = parv[3];
   if (MyConnect(target))
   {
-    char reason[REASONLEN + 1] = "SVSKilled: ";
-    strlcpy(reason + 11, comment, sizeof(reason) - 11);
-
-    client_exit(target, reason);
+    client_exit_fmt(target, "SVSKilled: %.*s", REASONLEN, comment);
     return;
   }
 

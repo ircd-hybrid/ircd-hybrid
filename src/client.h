@@ -27,6 +27,7 @@
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
 
+#include "io.h"
 #include "list.h"
 #include "fdlist.h"
 #include "ircd_defs.h"
@@ -419,6 +420,7 @@ extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
 extern void client_exit(struct Client *, const char *);
+extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
 extern void client_init(void);

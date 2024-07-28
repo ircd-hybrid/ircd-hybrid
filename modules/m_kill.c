@@ -130,10 +130,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     AddFlag(target, FLAGS_KILLED);
   }
 
-  char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "Killed (%s (%.*s))", source->name, REASONLEN, reason);
-
-  client_exit(target, buf);
+  client_exit_fmt(target, "Killed (%s (%.*s))", source->name, REASONLEN, reason);
 }
 
 /*! \brief KILL command handler
@@ -214,13 +211,10 @@ ms_kill(struct Client *source, int parc, char *parv[])
   AddFlag(target, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */
-  char buf[IRCD_BUFSIZE];
   if (IsServer(source) && (IsHidden(source) || ConfigServerHide.hide_servers))
-    snprintf(buf, sizeof(buf), "Killed (%s %s)", me.name, reason);
+    client_exit_fmt(target, "Killed (%s %s)", me.name, reason);
   else
-    snprintf(buf, sizeof(buf), "Killed (%s %s)", source->name, reason);
-
-  client_exit(target, buf);
+    client_exit_fmt(target, "Killed (%s %s)", source->name, reason);
 }
 
 

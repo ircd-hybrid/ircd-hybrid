@@ -306,10 +306,7 @@ user_register_local(struct Client *client)
   {
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Invalid username: %s (%s@%s)",
                    client->name, client->username, client->host);
-
-    char buf[sizeof("Invalid username []") + sizeof(client->username)];
-    snprintf(buf, sizeof(buf), "Invalid username [%s]", client->username);
-    client_exit(client, buf);
+    client_exit_fmt(client, "Invalid username [%s]", client->username);
     ++ServerStats.is_ref;
     return;
   }

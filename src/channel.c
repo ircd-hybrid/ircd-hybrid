@@ -1045,6 +1045,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       channel_check_spambot_warning(client, channel->name);
 
     channel_add_user(channel, client, flags, true);
+    client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
     /*
      * Set channel modes if appropriate, and propagate
@@ -1094,8 +1095,6 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     }
 
     channel_send_namereply(client, channel);
-
-    client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 }
 

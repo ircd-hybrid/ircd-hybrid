@@ -226,6 +226,20 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 void
 whowas_count_memory(unsigned int *const count, size_t *const bytes)
 {
-  (*count) = list_length(&whowas_list);
-  (*bytes) = list_length(&whowas_list) * sizeof(struct Whowas);
+  *count = list_length(&whowas_list);
+  *bytes = list_length(&whowas_list) * sizeof(struct Whowas);
+
+  list_node_t *node;
+  LIST_FOREACH(node, whowas_list.head)
+  {
+    const struct Whowas *const whowas = node->data;
+    *bytes += strlen(whowas->account) + 1;
+    *bytes += strlen(whowas->name) + 1;
+    *bytes += strlen(whowas->username) + 1;
+    *bytes += strlen(whowas->hostname) + 1;
+    *bytes += strlen(whowas->realhost) + 1;
+    *bytes += strlen(whowas->sockhost) + 1;
+    *bytes += strlen(whowas->realname) + 1;
+    *bytes += strlen(whowas->servername) + 1;
+  }
 }

@@ -81,27 +81,34 @@ static void
 whowas_free(struct Whowas *whowas)
 {
   whowas_unlink(whowas);
+
+  io_free(whowas->account);
+  io_free(whowas->name);
+  io_free(whowas->username);
+  io_free(whowas->hostname);
+  io_free(whowas->realhost);
+  io_free(whowas->sockhost);
+  io_free(whowas->realname);
+  io_free(whowas->servername);
   io_free(whowas);
 }
 
 /**
  * @brief Retrieves a Whowas struct for further use.
  *
- * Allocates a new Whowas struct or returns the oldest entry from whowas_list
+ * Allocates a new Whowas struct and frees the oldest entry from whowas_list
  * if it exceeds the configured history length.
  *
- * @return A pointer to the allocated or reused Whowas struct.
+ * @return A pointer to the allocated Whowas struct.
  */
 static struct Whowas *
 whowas_make(void)
 {
-  struct Whowas *whowas;
-
   if (list_length(&whowas_list) &&
       list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas = whowas_unlink(whowas_list.tail->data);  /* Re-use oldest item */
-  else
-    whowas = io_calloc(sizeof(*whowas));
+    whowas_free(whowas_list.tail->data);  /* Free oldest item. */
+
+  struct Whowas *whowas = io_calloc(sizeof(*whowas));
 
   return whowas;
 }
@@ -140,15 +147,14 @@ whowas_add_history(struct Client *client, bool online)
   whowas->hash_value = hash_string(client->name);
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->servptr) != 0;
-
-  strlcpy(whowas->account, client->account, sizeof(whowas->account));
-  strlcpy(whowas->name, client->name, sizeof(whowas->name));
-  strlcpy(whowas->username, client->username, sizeof(whowas->username));
-  strlcpy(whowas->hostname, client->host, sizeof(whowas->hostname));
-  strlcpy(whowas->realhost, client->realhost, sizeof(whowas->realhost));
-  strlcpy(whowas->sockhost, client->sockhost, sizeof(whowas->sockhost));
-  strlcpy(whowas->realname, client->info, sizeof(whowas->realname));
-  strlcpy(whowas->servername, client->servptr->name, sizeof(whowas->servername));
+  whowas->account = io_strdup(client->account);
+  whowas->name = io_strdup(client->name);
+  whowas->username = io_strdup(client->username);
+  whowas->hostname = io_strdup(client->host);
+  whowas->realhost = io_strdup(client->realhost);
+  whowas->sockhost = io_strdup(client->sockhost);
+  whowas->realname = io_strdup(client->info);
+  whowas->servername = io_strdup(client->servptr->name);
 
   if (online)
   {

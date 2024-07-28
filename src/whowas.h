@@ -47,14 +47,14 @@ struct Whowas
   unsigned int hash_value;  /**< Hash value derived from Whowas::name. */
   uintmax_t logoff;  /**< Time when the client logged off; real time. */
   bool server_hidden;  /**< Indicates if the client's server is hidden. */
-  char account[ACCOUNTLEN + 1];  /**< Services account associated with the client. */
-  char name[NICKLEN + 1];  /**< Client's nickname. */
-  char username[USERLEN + 1];  /**< Client's username. */
-  char hostname[HOSTLEN + 1];  /**< Client's host name. */
-  char realhost[HOSTLEN + 1];  /**< Client's real host name. */
-  char sockhost[HOSTIPLEN + 1];  /**< Client's IP address as a string. */
-  char realname[REALLEN + 1];  /**< Client's real name or GECOS information. */
-  char servername[HOSTLEN + 1];  /**< Name of the server the client is using. */
+  char *account;  /**< Services account associated with the client. */
+  char *name;  /**< Client's nickname. */
+  char *username;  /**< Client's username. */
+  char *hostname;  /**< Client's host name. */
+  char *realhost;  /**< Client's real host name. */
+  char *sockhost;  /**< Client's IP address as a string. */
+  char *realname;  /**< Client's real name or GECOS information. */
+  char *servername;  /**< Name of the server the client is using. */
   struct Client *client;  /**< Pointer to the current client or NULL if offline. */
 };
 

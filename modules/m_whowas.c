@@ -86,18 +86,18 @@ whowas_do(struct Client *source, char *parv[])
   if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
     max = WHOWAS_MAX_REPLIES;
 
-  list_node_t *node;
-  LIST_FOREACH(node, whowas_get_hash(hash_string(parv[1]))->head)
+  const struct WhowasGroup *group = whowas_group_find(parv[1]);
+  if (group)
   {
-    const struct Whowas *whowas = node->data;
-    if (irccmp(parv[1], whowas->name) == 0)
+    list_node_t *node;
+    LIST_FOREACH(node, group->whowas_records.head)
     {
+      const struct Whowas *whowas = node->data;
       whowas_send(source, whowas);
-      ++count;
-    }
 
-    if (max > 0 && count >= max)
-      break;
+      if (++count == max)
+        break;
+    }
   }
 
   if (count == 0)

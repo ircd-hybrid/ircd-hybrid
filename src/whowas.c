@@ -42,35 +42,57 @@ static list_t whowas_list;  /*!< Linked list of struct Whowas pointers. */
 static list_t whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entry retrieval based on hash values. */
 
 /**
- * @brief Retrieves a slot of the whowas_hash based on the provided hash value.
+ * @brief Finds a WhowasGroup entry for the given nickname.
  *
- * @param hash_value The hash value used to locate the slot.
- * @return A pointer to the list_t associated with the specified hash value.
+ * @param name The nickname string.
+ * @return A pointer to the WhowasGroup struct if found, or NULL if not found.
  */
-const list_t *
-whowas_get_hash(unsigned int hash_value)
+struct WhowasGroup *
+whowas_group_find(const char *name)
 {
-  if (hash_value >= HASHSIZE)
-    return NULL;
+  list_node_t *node;
 
-  return &whowas_hash[hash_value];
+  LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
+  {
+    struct WhowasGroup *group = node->data;
+    if (irccmp(group->name, name) == 0)
+      return group;
+  }
+
+  return NULL;
 }
 
 /**
- * @brief Unlinks a Whowas struct from its associated lists.
- * @param whowas Pointer to the Whowas struct to be unlinked.
- * @return Pointer to the unlinked Whowas struct.
+ * @brief Creates a new WhowasGroup entry for the given nickname.
+ *
+ * @param name The nickname string.
+ * @return A pointer to the newly created WhowasGroup struct.
  */
-static struct Whowas *
-whowas_unlink(struct Whowas *whowas)
+static struct WhowasGroup *
+whowas_group_make(const char *name)
 {
-  if (whowas->client)
-    list_remove(&whowas->client_list_node, &whowas->client->whowas_list);
+  struct WhowasGroup *group = io_calloc(sizeof(*group));
+  group->name = io_strdup(name);
+  group->hash_value = hash_string(name);
+  list_add(group, &group->hash_node, &whowas_hash[group->hash_value]);
 
-  list_remove(&whowas->hash_node, &whowas_hash[whowas->hash_value]);
-  list_remove(&whowas->list_node, &whowas_list);
+  return group;
+}
 
-  return whowas;
+/**
+ * @brief Frees a WhowasGroup entry if its list is empty.
+ *
+ * @param group Pointer to the WhowasGroup struct to be freed.
+ */
+static void
+whowas_group_free(struct WhowasGroup *group)
+{
+  if (list_is_empty(&group->whowas_records) == false)
+    return;
+
+  list_remove(&group->hash_node, &whowas_hash[group->hash_value]);
+  io_free(group->name);
+  io_free(group);
 }
 
 /**
@@ -80,7 +102,13 @@ whowas_unlink(struct Whowas *whowas)
 static void
 whowas_free(struct Whowas *whowas)
 {
-  whowas_unlink(whowas);
+  if (whowas->client)
+    list_remove(&whowas->client_list_node, &whowas->client->whowas_list);
+
+  list_remove(&whowas->whowas_list_node, &whowas_list);
+  list_remove(&whowas->group_list_node, &whowas->group->whowas_records);
+
+  whowas_group_free(whowas->group);
 
   io_free(whowas->account);
   io_free(whowas->name);
@@ -109,7 +137,6 @@ whowas_make(void)
     whowas_free(whowas_list.tail->data);  /* Free oldest item. */
 
   struct Whowas *whowas = io_calloc(sizeof(*whowas));
-
   return whowas;
 }
 
@@ -130,6 +157,32 @@ whowas_trim(void)
 }
 
 /**
+ * @brief Adds a Whowas struct to the whowas list and the nickname-specific list.
+ *
+ * @param whowas Pointer to the Whowas struct to be added.
+ * @param client Pointer to the Client struct.
+ * @param online Boolean indicating whether the client is online.
+ */
+static void
+whowas_add(struct Whowas *whowas, struct Client *client, bool online)
+{
+  whowas->group = whowas_group_find(whowas->name);
+  if (whowas->group == NULL)
+    whowas->group = whowas_group_make(whowas->name);
+
+  if (online)
+  {
+    whowas->client = client;
+    list_add(whowas, &whowas->client_list_node, &client->whowas_list);
+  }
+  else
+    whowas->client = NULL;
+
+  list_add(whowas, &whowas->whowas_list_node, &whowas_list);
+  list_add(whowas, &whowas->group_list_node, &whowas->group->whowas_records);
+}
+
+/**
  * @brief Adds the current client's name to the history.
  *
  * This function is usually called before changing to a new name (nick).
@@ -144,7 +197,6 @@ whowas_add_history(struct Client *client, bool online)
   assert(IsClient(client));
 
   struct Whowas *whowas = whowas_make();
-  whowas->hash_value = hash_string(client->name);
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->servptr) != 0;
   whowas->account = io_strdup(client->account);
@@ -156,16 +208,7 @@ whowas_add_history(struct Client *client, bool online)
   whowas->realname = io_strdup(client->info);
   whowas->servername = io_strdup(client->servptr->name);
 
-  if (online)
-  {
-    whowas->client = client;
-    list_add(whowas, &whowas->client_list_node, &client->whowas_list);
-  }
-  else
-    whowas->client = NULL;
-
-  list_add(whowas, &whowas->hash_node, &whowas_hash[whowas->hash_value]);
-  list_add(whowas, &whowas->list_node, &whowas_list);
+  whowas_add(whowas, client, online);
 }
 
 /**
@@ -201,17 +244,18 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
+  struct WhowasGroup *group = whowas_group_find(name);
+  if (group == NULL)
+    return NULL;
+
   timelimit = io_time_get(IO_TIME_REALTIME_SEC) - timelimit;
 
   list_node_t *node;
-  LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
+  LIST_FOREACH(node, group->whowas_records.head)
   {
     struct Whowas *whowas = node->data;
-    if (whowas->logoff < timelimit)
-      continue;
-    if (irccmp(name, whowas->name))
-      continue;
-    return whowas->client;
+    if (whowas->logoff >= timelimit)
+      return whowas->client;
   }
 
   return NULL;

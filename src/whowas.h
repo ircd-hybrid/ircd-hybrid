@@ -33,6 +33,20 @@
 #include "client.h"
 
 /**
+ * @struct WhowasGroup
+ * @brief Structure representing a nickname and its associated WHOWAS records.
+ *
+ * This structure manages the list of Whowas structs associated with a specific nickname.
+ */
+struct WhowasGroup
+{
+  list_node_t hash_node;  /**< List node; linked into whowas_hash. */
+  char *name;  /**< Nickname string. */
+  list_t whowas_records;  /**< List of Whowas structs for this nickname. */
+  unsigned int hash_value;  /**< Hash value derived from WhowasGroup::name. */
+};
+
+/**
  * @struct Whowas
  * @brief Structure representing a historical record of an IRC user.
  *
@@ -41,10 +55,9 @@
  */
 struct Whowas
 {
-  list_node_t hash_node;  /**< List node; linked into whowas_hash. */
-  list_node_t list_node;  /**< List node; linked into whowas_list. */
+  list_node_t whowas_list_node;  /**< List node; linked into whowas_list. */
   list_node_t client_list_node;  /**< List node; linked into client->whowas_list. */
-  unsigned int hash_value;  /**< Hash value derived from Whowas::name. */
+  list_node_t group_list_node;  /**< List node; linked into WhowasGroup::whowas_records. */
   uintmax_t logoff;  /**< Time when the client logged off; real time. */
   bool server_hidden;  /**< Indicates if the client's server is hidden. */
   char *account;  /**< Services account associated with the client. */
@@ -56,6 +69,7 @@ struct Whowas
   char *realname;  /**< Client's real name or GECOS information. */
   char *servername;  /**< Name of the server the client is using. */
   struct Client *client;  /**< Pointer to the current client or NULL if offline. */
+  struct WhowasGroup *group;  /**< Pointer to the WhowasGroup this record belongs to. */
 };
 
 extern void whowas_trim(void);
@@ -63,5 +77,5 @@ extern void whowas_add_history(struct Client *, bool);
 extern void whowas_off_history(struct Client *);
 extern void whowas_count_memory(unsigned int *const, size_t *const);
 extern struct Client *whowas_get_history(const char *, uintmax_t);
-extern const list_t *whowas_get_hash(unsigned int);
+extern struct WhowasGroup *whowas_group_find(const char *);
 #endif  /* INCLUDED_whowas_h */

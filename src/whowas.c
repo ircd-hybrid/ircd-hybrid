@@ -109,13 +109,13 @@ whowas_free(struct Whowas *whowas)
 
   whowas_group_free(whowas->group);
 
-  io_free(whowas->account);
   io_free(whowas->name);
   io_free(whowas->username);
   io_free(whowas->hostname);
   io_free(whowas->realhost);
   io_free(whowas->sockhost);
   io_free(whowas->realname);
+  io_free(whowas->account);
   io_free(whowas->servername);
   io_free(whowas);
 }
@@ -198,13 +198,13 @@ whowas_add_history(struct Client *client, bool online)
   struct Whowas *whowas = whowas_make();
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->servptr) != 0;
-  whowas->account = io_strdup(client->account);
   whowas->name = io_strdup(client->name);
   whowas->username = io_strdup(client->username);
   whowas->hostname = io_strdup(client->host);
   whowas->realhost = io_strdup(client->realhost);
   whowas->sockhost = io_strdup(client->sockhost);
   whowas->realname = io_strdup(client->info);
+  whowas->account = io_strdup(client->account);
   whowas->servername = io_strdup(client->servptr->name);
 
   whowas_add(whowas, client, online);

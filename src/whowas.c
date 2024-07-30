@@ -31,12 +31,11 @@
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "whowas.h"
+#include "irc_string.h"
 #include "client.h"
 #include "hash.h"
-#include "irc_string.h"
-#include "ircd.h"
 #include "conf.h"
+#include "whowas.h"
 
 static list_t whowas_list;  /*!< Linked list of struct Whowas pointers. */
 static list_t whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entry retrieval based on hash values. */

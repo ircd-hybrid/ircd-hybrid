@@ -31,6 +31,7 @@
 #include "stdinc.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
+#include "io_rlimit.h"
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
@@ -290,60 +291,6 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
 }
 
 /**
- * @brief Sets up the core file size to system limits.
- *
- * This function sets the core file size to the maximum allowed by the system.
- */
-static void
-setup_corefile(void)
-{
-  struct rlimit rlim; /* resource limits */
-
-  /* Set corefilesize to maximum */
-  if (getrlimit(RLIMIT_CORE, &rlim) == 0)
-  {
-    rlim.rlim_cur = rlim.rlim_max;
-    setrlimit(RLIMIT_CORE, &rlim);
-  }
-}
-
-/**
- * @brief Sets up the maximum number of file descriptors.
- *
- * This function sets up the maximum number of file descriptors that
- * the ircd server is allowed to use.
- */
-static void
-setup_fdlimit(void)
-{
-  struct rlimit rlim;
-
-  if (getrlimit(RLIMIT_NOFILE, &rlim))
-  {
-    fprintf(stderr, "getrlimit: couldn't get maximum number of file descriptors: %s\n",
-            strerror(errno));
-    exit(EXIT_FAILURE);
-  }
-
-#ifdef __APPLE__
-  if (rlim.rlim_max > OPEN_MAX)
-    rlim.rlim_max = OPEN_MAX;
-#endif
-  if (rlim.rlim_max > 0xFFFF)
-    rlim.rlim_max = 0xFFFF;
-  rlim.rlim_cur = rlim.rlim_max;
-
-  if (setrlimit(RLIMIT_NOFILE, &rlim))
-  {
-    fprintf(stderr, "setrlimit: couldn't set maximum number of file descriptors: %s\n",
-            strerror(errno));
-    exit(EXIT_FAILURE);
-  }
-
-  hard_fdlimit = rlim.rlim_cur;
-}
-
-/**
  * @brief Prints startup information including version and process ID.
  *
  * This function prints information about the server version, process ID,
@@ -428,10 +375,9 @@ main(int argc, char *argv[])
 
   io_set_oom_handler(ircd_oom);
 
-  /* Setup corefile size immediately after boot -kre */
-  setup_corefile();
+  io_rlimit_set_max_core();
 
-  setup_fdlimit();
+  io_rlimit_set_max_nofile();
 
   /* Save server boot time right away, so getrusage works correctly */
   io_time_set_error_callback(ircd_time_failure);

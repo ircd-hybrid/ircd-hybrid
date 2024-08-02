@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #include "defaults.h"
+#include "io_rlimit.h"
 #include "fdlist.h"
 #include "irc_string.h"
 #include "comm.h"   /* comm_setselect */
@@ -45,6 +46,7 @@ fdlist_init(void)
    * Allow MAXCLIENTS_MIN clients even at the cost of MAX_BUFFER and
    * some not really LEAKED_FDS
    */
+  hard_fdlimit = io_rlimit_get_cur_nofile();
   hard_fdlimit = IO_MAX(hard_fdlimit, LEAKED_FDS + MAX_BUFFER + MAXCLIENTS_MIN);
   fd_table = io_calloc(sizeof(*fd_table) * hard_fdlimit);
 }

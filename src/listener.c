@@ -240,7 +240,7 @@ listener_accept_connection(fde_t *F, void *data_)
         send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
 
       close(fd);
-      break;    /* jump out and re-register a new io request */
+      continue;  /* drop the one and keep on clearing the queue */
     }
 
     /*

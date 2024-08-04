@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <sys/resource.h>
 #include "io_rlimit.h"
 

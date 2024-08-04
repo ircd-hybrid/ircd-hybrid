@@ -75,7 +75,7 @@ struct Whowas
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, bool);
 extern void whowas_off_history(struct Client *);
-extern void whowas_count_memory(unsigned int *const, size_t *const);
+extern void whowas_count_memory(unsigned int *const, size_t *const, unsigned int *const, size_t *const);
 extern struct Client *whowas_get_history(const char *, uintmax_t);
 extern struct WhowasGroup *whowas_group_find(const char *);
 #endif  /* INCLUDED_whowas_h */

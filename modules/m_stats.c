@@ -319,14 +319,12 @@ stats_memory(struct Client *client, int parc, char *parv[])
   unsigned int channel_bans = 0;
   unsigned int channel_except = 0;
   unsigned int channel_invex = 0;
-  unsigned int wwu = 0;                  /* whowas users */
   unsigned int number_ips_stored = 0;        /* number of ip addresses hashed */
   size_t channel_ban_memory = 0;
   size_t channel_except_memory = 0;
   size_t channel_invex_memory = 0;
   unsigned int safelist_count = 0;
   size_t safelist_memory = 0;
-  size_t wwm = 0;               /* whowas array memory used       */
   size_t mem_ips_stored = 0;        /* memory used by ip address hash */
   unsigned int local_client_count  = 0;
   unsigned int remote_client_count = 0;
@@ -444,9 +442,11 @@ stats_memory(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Safelist %u(%zu)",
                      safelist_count, safelist_memory);
 
-  whowas_count_memory(&wwu, &wwm);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas users %u(%zu)",
-                     wwu, wwm);
+  unsigned int group_count, whowas_count;
+  size_t group_bytes, whowas_bytes;
+  whowas_count_memory(&group_count, &group_bytes, &whowas_count, &whowas_bytes);
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas groups %u(%zu), users %u(%zu)",
+                     group_count, group_bytes, whowas_count, whowas_bytes);
 
   motd_memory_count(client);
 

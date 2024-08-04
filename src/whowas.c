@@ -261,28 +261,46 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 }
 
 /**
- * @brief Counts the allocated structures stored in whowas_list for debugging purposes.
+ * @brief Counts the allocated WhowasGroup and Whowas structures for debugging purposes.
  *
- * @param count A pointer to an unsigned integer to store the count of allocated structures.
- * @param bytes A pointer to a size_t to store the total memory occupied by the structures.
+ * This function counts the number of allocated WhowasGroup and Whowas structures
+ * and calculates the total memory occupied by these structures.
+ *
+ * @param group_count A pointer to an unsigned integer to store the count of WhowasGroup structures.
+ * @param group_bytes A pointer to a size_t to store the total memory occupied by the WhowasGroup structures.
+ * @param whowas_count A pointer to an unsigned integer to store the count of Whowas structures.
+ * @param whowas_bytes A pointer to a size_t to store the total memory occupied by the Whowas structures.
  */
 void
-whowas_count_memory(unsigned int *const count, size_t *const bytes)
+whowas_count_memory(unsigned int *const group_count, size_t *const group_bytes,
+                    unsigned int *const whowas_count, size_t *const whowas_bytes)
 {
-  *count = list_length(&whowas_list);
-  *bytes = list_length(&whowas_list) * sizeof(struct Whowas);
+  *whowas_count = *whowas_bytes = *group_count = *group_bytes = 0;
 
   list_node_t *node;
   LIST_FOREACH(node, whowas_list.head)
   {
     const struct Whowas *const whowas = node->data;
-    *bytes += strlen(whowas->account) + 1;
-    *bytes += strlen(whowas->name) + 1;
-    *bytes += strlen(whowas->username) + 1;
-    *bytes += strlen(whowas->hostname) + 1;
-    *bytes += strlen(whowas->realhost) + 1;
-    *bytes += strlen(whowas->sockhost) + 1;
-    *bytes += strlen(whowas->realname) + 1;
-    *bytes += strlen(whowas->servername) + 1;
+    ++*whowas_count;
+    *whowas_bytes += sizeof(*whowas);
+    *whowas_bytes += strlen(whowas->account) + 1;
+    *whowas_bytes += strlen(whowas->name) + 1;
+    *whowas_bytes += strlen(whowas->username) + 1;
+    *whowas_bytes += strlen(whowas->hostname) + 1;
+    *whowas_bytes += strlen(whowas->realhost) + 1;
+    *whowas_bytes += strlen(whowas->sockhost) + 1;
+    *whowas_bytes += strlen(whowas->realname) + 1;
+    *whowas_bytes += strlen(whowas->servername) + 1;
+  }
+
+  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  {
+    LIST_FOREACH(node, whowas_hash[i].head)
+    {
+      const struct WhowasGroup *const group = node->data;
+      ++*group_count;
+      *group_bytes += sizeof(*group);
+      *group_bytes += strlen(group->name) + 1;
+    }
   }
 }

@@ -108,6 +108,16 @@ set_option_list(struct Client *source)
   sendto_one_notice(source, &me, ":Available QUOTE SET commands: %s", command_list);
 }
 
+static struct SetStruct *
+set_option_find(const char *name)
+{
+  for (struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
+    if (irccmp(tab->name, name) == 0)
+      return tab;
+
+  return NULL;
+}
+
 static void
 mo_set(struct Client *source, int parc, char *parv[])
 {
@@ -117,48 +127,41 @@ mo_set(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (parc > 1)
+  if (EmptyString(parv[1]))
   {
-    /*
-     * Go through all the commands in set_cmd_table, until one is
-     * matched.
-     */
-    for (struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
-    {
-      if (irccmp(tab->name, parv[1]))
-        continue;
-
-      int value_new = -1;
-      const char *const arg = parv[2];
-      if (arg)
-      {
-        if (irccmp(arg, "yes") == 0 || irccmp(arg, "on") == 0)
-          value_new = 1;
-        else if (irccmp(arg, "no") == 0 || irccmp(arg, "off") == 0)
-          value_new = 0;
-        else
-          value_new = atoi(arg);
-
-        if (value_new < 0)
-        {
-          sendto_one_notice(source, &me, ":Invalid value for %s. Please use a non-negative value.", tab->name);
-          return;
-        }
-      }
-
-      set_option(source, tab, value_new);
-      return;
-    }
-
-    /*
-     * Code here will be executed when a /QUOTE SET command is not
-     * found within set_cmd_table.
-     */
-    sendto_one_notice(source, &me, ":Variable not found.");
+    set_option_list(source);
     return;
   }
 
-  set_option_list(source);
+  if (EmptyString(parv[2]))
+  {
+    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "SET");
+    return;
+  }
+
+  struct SetStruct *option = set_option_find(parv[1]);
+  if (option == NULL)
+  {
+    sendto_one_notice(source, &me, ":Unknown setting '%s'. Use /QUOTE SET to list available options.", parv[1]);
+    return;
+  }
+
+  int value_new = -1;
+  const char *const arg = parv[2];
+  if (irccmp(arg, "yes") == 0 || irccmp(arg, "on") == 0)
+    value_new = 1;
+  else if (irccmp(arg, "no") == 0 || irccmp(arg, "off") == 0)
+    value_new = 0;
+  else
+    value_new = atoi(arg);
+
+  if (value_new < 0)
+  {
+    sendto_one_notice(source, &me, ":Invalid value for '%s'. Please use a non-negative value.", option->name);
+    return;
+  }
+
+  set_option(source, option, value_new);
 }
 
 static struct Command command_table =

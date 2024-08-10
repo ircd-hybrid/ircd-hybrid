@@ -133,16 +133,16 @@ mo_set(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (EmptyString(parv[2]))
-  {
-    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "SET");
-    return;
-  }
-
   struct SetStruct *option = set_option_find(parv[1]);
   if (option == NULL)
   {
     sendto_one_notice(source, &me, ":Unknown setting '%s'. Use /QUOTE SET to list available options.", parv[1]);
+    return;
+  }
+
+  if (EmptyString(parv[2]))
+  {
+    set_option(source, option, -1);
     return;
   }
 

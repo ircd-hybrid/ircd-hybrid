@@ -26,6 +26,7 @@
 
 #include "stdinc.h"
 #include "misc.h"
+#include "cap.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -38,60 +39,13 @@
 
 typedef int (*bqcmp)(const void *, const void *);
 
-static struct capabilities
-{
-  unsigned int cap;
-  bool sticky;  /**< Cap may not be cleared once set */
-  const char *name;
-  size_t name_len;
-} capab_list[] = {
-#define _CAP(cap, flags, name)  \
-    { (cap), (flags), (name), sizeof(name) - 1 }
-  _CAP(CAP_UHNAMES, false, "userhost-in-names"),
-  _CAP(CAP_MULTI_PREFIX, false, "multi-prefix"),
-  _CAP(CAP_AWAY_NOTIFY, false, "away-notify"),
-  _CAP(CAP_EXTENDED_JOIN, false, "extended-join"),
-  _CAP(CAP_ACCOUNT_NOTIFY, false, "account-notify"),
-  _CAP(CAP_CAP_NOTIFY, false, "cap-notify"),
-  _CAP(CAP_INVITE_NOTIFY, false, "invite-notify"),
-  _CAP(CAP_CHGHOST, false, "chghost")
-#undef _CAP
-};
-
-static int
-capab_sort(const struct capabilities *cap1, const struct capabilities *cap2)
-{
-  return strcasecmp(cap1->name, cap2->name);
-}
-
-static int
-capab_search(const char *key, const struct capabilities *cap)
-{
-  const char *rb = cap->name;
-
-  while (ToLower(*key) == ToLower(*rb))  /* Walk equivalent part of strings */
-    if (*key++ == '\0')  /* Hit the end, all right... */
-      return 0;
-    else  /* OK, let's move on... */
-      ++rb;
-
-  /*
-   * If the character they differ on happens to be a space, and it happens
-   * to be the same length as the capability name, then we've found a
-   * match; otherwise, return the difference of the two.
-   */
-  return (IsSpace(*key) && *rb == '\0') ? 0 : (ToLower(*key) - ToLower(*rb));
-}
-
-static struct capabilities *
+static struct Cap *
 find_cap(const char **caplist_p, int *neg_p)
 {
-  const char *caplist = *caplist_p;
-  struct capabilities *cap = NULL;
-
   *neg_p = 0;  /* Clear negative flag... */
 
   /* Next, find first non-whitespace character... */
+  const char *caplist = *caplist_p;
   while (*caplist && IsSpace(*caplist))
     ++caplist;
 
@@ -102,30 +56,32 @@ find_cap(const char **caplist_p, int *neg_p)
     *neg_p = 1;  /* Remember that it is negative... */
   }
 
-  /* OK, now see if we can look up the capability... */
-  if (*caplist)
-  {
-    if (!(cap = bsearch(caplist, capab_list, IO_ARRAY_LENGTH(capab_list),
-                        sizeof(struct capabilities), (bqcmp)capab_search)))
-    {
-      /* Couldn't find the capability; advance to first whitespace character */
-      while (*caplist && !IsSpace(*caplist))
-        ++caplist;
-    }
-    else
-      caplist += cap->name_len;  /* Advance to end of capability name */
+  const char *cap_start = caplist;
+  /* Move the pointer to the end of the capability name. */
+  while (*caplist && !IsSpace(*caplist))
+    ++caplist;
 
-    /* Strip trailing spaces */
-    while (*caplist && IsSpace(*caplist))
-      ++caplist;
+  /* If the capability name is empty, return NULL. */
+  if (cap_start == caplist)
+  {
+    *caplist_p = caplist;  /* Update the pointer for the next iteration. */
+    return NULL;
   }
 
-  assert(caplist != *caplist_p || !*caplist);  /* We *must* advance */
+  const size_t capname_len = caplist - cap_start;
+  char name[capname_len + 1];
+  strlcpy(name, cap_start, sizeof(name));
 
-  /* Move ahead in capability list string--or zero pointer if we hit end */
+  /* Skip trailing whitespace. */
+  while (*caplist && IsSpace(*caplist))
+    ++caplist;
+
+  assert(caplist != *caplist_p || *caplist == '\0');  /* We *must* advance */
+
+  /* Update the input pointer for the next capability in the list. */
   *caplist_p = *caplist ? caplist : NULL;
 
-  return cap;  /* And return the capability (if any) */
+  return cap_find(name);  /* And return the capability (if any) */
 }
 
 /** Send a CAP \a subcmd list of capability changes to \a source.
@@ -143,15 +99,16 @@ send_caplist(struct Client *source,
 {
   char capbuf[IRCD_BUFSIZE] = "", pfx[4];
   char cmdbuf[IRCD_BUFSIZE] = "";
-  unsigned int i, loc, len, pfx_len, clen;
+  unsigned int loc = 0, len, pfx_len, clen;
 
   /* Set up the buffer for the final LS message... */
   clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ", me.name,
                   source->name[0] ? source->name : "*", subcmd);
 
-  for (i = 0, loc = 0; i < IO_ARRAY_LENGTH(capab_list); ++i)
+  list_node_t *node;
+  LIST_FOREACH(node, cap_get_list()->head)
   {
-    const struct capabilities *cap = &capab_list[i];
+    const struct Cap *cap = node->data;
 
     /*
      * This is a little bit subtle, but just involves applying de
@@ -159,8 +116,8 @@ send_caplist(struct Client *source,
      * capability if (and only if) it is set in \a rem or \a set, or
      * if both are null.
      */
-    if (!(rem && (*rem & cap->cap)) &&
-        !(set && (*set & cap->cap)) && (rem || set))
+    if (!(rem && (*rem & cap->flag)) &&
+        !(set && (*set & cap->flag)) && (rem || set))
       continue;
 
     /* Build the prefix (space separator and any modifiers needed). */
@@ -168,7 +125,7 @@ send_caplist(struct Client *source,
 
     if (loc)
       pfx[pfx_len++] = ' ';
-    if (rem && (*rem & cap->cap))
+    if (rem && (*rem & cap->flag))
       pfx[pfx_len++] = '-';
 
     pfx[pfx_len] = '\0';
@@ -218,14 +175,12 @@ cap_req(struct Client *source, const char *arg)
   for (const char *cl = arg; cl; )
   {
     /* Look up capability... */
-    const struct capabilities *cap = find_cap(&cl, &neg);
+    const struct Cap *cap = find_cap(&cl, &neg);
     bool error = false;
 
     if (cap == NULL)
       error = true;
-    else if (neg && cap->sticky)
-      error = true;
-    else if (neg && (cap->cap & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
+    else if (neg && (cap->flag & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
       error = true;
 
     if (error)
@@ -238,15 +193,15 @@ cap_req(struct Client *source, const char *arg)
     if (neg)
     {
       /* Set or clear the capability... */
-      rem |=  cap->cap;
-      set &= ~cap->cap;
-      cs  &= ~cap->cap;
+      rem |=  cap->flag;
+      set &= ~cap->flag;
+      cs  &= ~cap->flag;
     }
     else
     {
-      rem &= ~cap->cap;
-      set |=  cap->cap;
-      cs  |=  cap->cap;
+      rem &= ~cap->flag;
+      set |=  cap->flag;
+      cs  |=  cap->flag;
     }
   }
 
@@ -337,14 +292,30 @@ static struct Command command_table =
 static void
 init_handler(void)
 {
-  /* First, let's sort the array */
-  qsort(capab_list, IO_ARRAY_LENGTH(capab_list), sizeof(struct capabilities), (bqcmp)capab_sort);
+  cap_register(CAP_UHNAMES, "userhost-in-names", NULL);
+  cap_register(CAP_MULTI_PREFIX, "multi-prefix", NULL);
+  cap_register(CAP_AWAY_NOTIFY, "away-notify", NULL);
+  cap_register(CAP_EXTENDED_JOIN, "extended-join", NULL);
+  cap_register(CAP_ACCOUNT_NOTIFY, "account-notify", NULL);
+  cap_register(CAP_CAP_NOTIFY, "cap-notify", NULL);
+  cap_register(CAP_INVITE_NOTIFY, "invite-notify", NULL);
+  cap_register(CAP_CHGHOST, "chghost", NULL);
+
   command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
+  cap_unregister("userhost-in-names");
+  cap_unregister("multi-prefix");
+  cap_unregister("away-notify");
+  cap_unregister("extended-join");
+  cap_unregister("account-notify");
+  cap_unregister("cap-notify");
+  cap_unregister("invite-notify");
+  cap_unregister("chghost");
+
   command_del(&command_table);
 }
 

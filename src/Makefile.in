@@ -119,7 +119,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
-	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
+	cap.$(OBJEXT) channel.$(OBJEXT) channel_invite.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
 	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
@@ -164,7 +164,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
-	./$(DEPDIR)/auth.Po ./$(DEPDIR)/channel.Po \
+	./$(DEPDIR)/auth.Po ./$(DEPDIR)/cap.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
 	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
 	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
@@ -412,6 +412,8 @@ ircd_SOURCES = accept.c          \
                aline.h           \
                auth.c            \
                auth.h            \
+               cap.c             \
+               cap.h             \
                channel.c         \
                channel.h         \
                channel_invite.c  \
@@ -605,6 +607,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accept.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aline.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/auth.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
@@ -832,6 +835,7 @@ distclean: distclean-am
 		-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/aline.Po
 	-rm -f ./$(DEPDIR)/auth.Po
+	-rm -f ./$(DEPDIR)/cap.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
@@ -933,6 +937,7 @@ maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/accept.Po
 	-rm -f ./$(DEPDIR)/aline.Po
 	-rm -f ./$(DEPDIR)/auth.Po
+	-rm -f ./$(DEPDIR)/cap.Po
 	-rm -f ./$(DEPDIR)/channel.Po
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po

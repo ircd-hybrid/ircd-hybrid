@@ -14,6 +14,8 @@ ircd_SOURCES = accept.c          \
                aline.h           \
                auth.c            \
                auth.h            \
+               cap.c             \
+               cap.h             \
                channel.c         \
                channel.h         \
                channel_invite.c  \

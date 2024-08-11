@@ -25,11 +25,22 @@
 #include "cap.h"
 
 static list_t cap_list;
+static struct Cap **cap_array;
+static size_t cap_array_size;
+static bool cap_array_stale;
 
 const list_t *
 cap_get_list(void)
 {
   return &cap_list;
+}
+
+static int
+cap_compare(const void *const a_, const void *const b_)
+{
+  const struct Cap *const a = *(const struct Cap *const *)a_;
+  const struct Cap *const b = *(const struct Cap *const *)b_;
+  return strcmp(a->name, b->name);
 }
 
 void
@@ -50,6 +61,7 @@ cap_register(unsigned int flag, const char *name, const char *value)
   }
 
   list_add(cap, &cap->node, &cap_list);
+  cap_array_stale = true;
 }
 
 void
@@ -60,22 +72,56 @@ cap_unregister(const char *name)
     return;
 
   list_remove(&cap->node, &cap_list);
-  io_free(cap->name);
-  io_free(cap->value);
+
+  /* Temporarily disable the warning for casting away const qualifiers. */
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wcast-qual"
+  /* Freeing memory allocated for const char pointers. */
+  io_free((void *)cap->name);
+  io_free((void *)cap->value);
+  /* Re-enable the discarded qualifiers warning. */
+  #pragma GCC diagnostic pop
   io_free(cap);
+
+  cap_array_stale = true;
+}
+
+static void
+cap_array_update(void)
+{
+  cap_array_stale = false;
+  io_free(cap_array);
+  cap_array = NULL;
+
+  if (list_is_empty(&cap_list))
+    return;
+
+  cap_array_size = list_length(&cap_list);
+  cap_array = io_calloc(cap_array_size * sizeof(struct Cap *));
+
+  size_t i = 0;
+  list_node_t *node;
+  LIST_FOREACH(node, cap_list.head)
+  {
+    struct Cap *cap = node->data;
+    cap_array[i++] = cap;
+  }
+
+  qsort(cap_array, cap_array_size, sizeof(struct Cap *), cap_compare);
 }
 
 struct Cap *
 cap_find(const char *name)
 {
-  list_node_t *node;
+  if (cap_array_stale)
+    cap_array_update();
 
-  LIST_FOREACH(node, cap_list.head)
-  {
-    struct Cap *cap = node->data;
-    if (strcmp(cap->name, name) == 0)
-      return cap;
-  }
+  if (cap_array_size == 0)
+    return NULL;
 
-  return NULL;
+  const struct Cap key = { .name = name };
+  const struct Cap *key_ptr = &key;
+  struct Cap **cap = bsearch(&key_ptr, cap_array, cap_array_size, sizeof(struct Cap *), cap_compare);
+
+  return cap ? *cap : NULL;
 }

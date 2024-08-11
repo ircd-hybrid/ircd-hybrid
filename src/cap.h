@@ -25,8 +25,8 @@
 
 struct Cap
 {
-  char *name;
-  char *value;
+  const char *name;
+  const char *value;
   unsigned int flag;
   size_t name_len;
   size_t value_len;

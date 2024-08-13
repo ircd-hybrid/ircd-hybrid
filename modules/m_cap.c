@@ -40,21 +40,16 @@
 typedef int (*bqcmp)(const void *, const void *);
 
 static struct Cap *
-find_cap(const char **caplist_p, int *neg_p)
+find_cap(const char **caplist_p, bool *neg_p)
 {
-  *neg_p = 0;  /* Clear negative flag... */
-
-  /* Next, find first non-whitespace character... */
+  /* Skip leading whitespace. */
   const char *caplist = *caplist_p;
   while (*caplist && IsSpace(*caplist))
     ++caplist;
 
-  /* We are now at the beginning of an element of the list; is it negative? */
-  if (*caplist == '-')
-  {
-    ++caplist;  /* Yes; step past the flag... */
-    *neg_p = 1;  /* Remember that it is negative... */
-  }
+  *neg_p = *caplist == '-';  /* Check if the capability is negative. */
+  if (*neg_p)
+    ++caplist;  /* Move past the '-'. */
 
   const char *cap_start = caplist;
   /* Move the pointer to the end of the capability name. */
@@ -166,7 +161,7 @@ cap_req(struct Client *source, const char *arg)
 {
   unsigned int set = 0, rem = 0;
   unsigned int cs = source->connection->cap;  /* Enabled capabilities */
-  int neg = 0;
+  bool neg;
 
   if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;

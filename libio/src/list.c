@@ -596,3 +596,32 @@ list_get_shorter(list_t *list1, list_t *list2)
 
   return list2;
 }
+
+/**
+ * @brief Converts a double-linked list to an array.
+ *
+ * This function converts all the nodes of a double-linked list into an array of void pointers.
+ * The array will contain pointers to the data of each node, in the order they appear in the list.
+ * The caller is responsible for freeing the allocated array.
+ *
+ * @param list Pointer to the double-linked list.
+ * @return Pointer to the newly allocated array, or NULL if the list is empty or allocation fails.
+ */
+void **
+list_to_array(const list_t *list)
+{
+  if (list_is_empty(list))
+    return NULL;
+
+  void **array = io_calloc(list->length * sizeof(void *));
+
+  unsigned int index = 0;
+  list_node_t *node = list->head;
+  while (node)
+  {
+    array[index++] = node->data;
+    node = node->next;
+  }
+
+  return array;
+}

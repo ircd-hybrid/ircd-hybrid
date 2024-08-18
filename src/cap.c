@@ -90,22 +90,15 @@ static void
 cap_array_update(void)
 {
   cap_array_stale = false;
+
   io_free(cap_array);
   cap_array = NULL;
 
   if (list_is_empty(&cap_list))
     return;
 
+  cap_array = (struct Cap **)list_to_array(&cap_list);
   cap_array_size = list_length(&cap_list);
-  cap_array = io_calloc(cap_array_size * sizeof(struct Cap *));
-
-  size_t i = 0;
-  list_node_t *node;
-  LIST_FOREACH(node, cap_list.head)
-  {
-    struct Cap *cap = node->data;
-    cap_array[i++] = cap;
-  }
 
   qsort(cap_array, cap_array_size, sizeof(struct Cap *), cap_compare);
 }

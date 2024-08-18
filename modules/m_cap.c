@@ -37,35 +37,33 @@
 #include "irc_string.h"
 
 
-typedef int (*bqcmp)(const void *, const void *);
-
 static struct Cap *
-find_cap(const char **caplist_p, bool *neg_p)
+find_cap(const char **caplist_p, bool *negate_p)
 {
   /* Skip leading whitespace. */
   const char *caplist = *caplist_p;
   while (*caplist && IsSpace(*caplist))
     ++caplist;
 
-  *neg_p = *caplist == '-';  /* Check if the capability is negative. */
-  if (*neg_p)
+  *negate_p = *caplist == '-';  /* Check if the capability is negative. */
+  if (*negate_p)
     ++caplist;  /* Move past the '-'. */
 
-  const char *cap_start = caplist;
+  const char *caplist_start = caplist;
   /* Move the pointer to the end of the capability name. */
   while (*caplist && !IsSpace(*caplist))
     ++caplist;
 
   /* If the capability name is empty, return NULL. */
-  if (cap_start == caplist)
+  if (caplist_start == caplist)
   {
     *caplist_p = caplist;  /* Update the pointer for the next iteration. */
     return NULL;
   }
 
-  const size_t capname_len = caplist - cap_start;
-  char name[capname_len + 1];
-  strlcpy(name, cap_start, sizeof(name));
+  const size_t name_len = caplist - caplist_start;
+  char name[name_len + 1];
+  strlcpy(name, caplist_start, sizeof(name));
 
   /* Skip trailing whitespace. */
   while (*caplist && IsSpace(*caplist))
@@ -92,13 +90,13 @@ send_caplist(struct Client *source,
              const unsigned int *const set,
              const unsigned int *const rem, const char *subcmd)
 {
-  char capbuf[IRCD_BUFSIZE] = "", pfx[4];
+  char capbuf[IRCD_BUFSIZE] = "";
   char cmdbuf[IRCD_BUFSIZE] = "";
-  unsigned int loc = 0, len, pfx_len, clen;
+  unsigned int loc = 0, len, clen;
 
   /* Set up the buffer for the final LS message... */
-  clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ", me.name,
-                  source->name[0] ? source->name : "*", subcmd);
+  clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ",
+                  me.name, source->name[0] ? source->name : "*", subcmd);
 
   list_node_t *node;
   LIST_FOREACH(node, cap_get_list()->head)
@@ -116,7 +114,8 @@ send_caplist(struct Client *source,
       continue;
 
     /* Build the prefix (space separator and any modifiers needed). */
-    pfx_len = 0;
+    char pfx[4];
+    unsigned int pfx_len = 0;
 
     if (loc)
       pfx[pfx_len++] = ' ';
@@ -131,11 +130,11 @@ send_caplist(struct Client *source,
     {
       /* Would add too much; must flush */
       sendto_one(source, "%s* :%s", cmdbuf, capbuf);
-      capbuf[(loc = 0)] = '\0';  /* Re-terminate the buffer... */
+      loc = 0;
+      capbuf[0] = '\0';  /* Re-terminate the buffer... */
     }
 
-    loc += snprintf(capbuf + loc, sizeof(capbuf) - loc,
-                    "%s%s", pfx, cap->name);
+    loc += snprintf(capbuf + loc, sizeof(capbuf) - loc, "%s%s", pfx, cap->name);
   }
 
   sendto_one(source, "%s:%s", cmdbuf, capbuf);
@@ -161,7 +160,6 @@ cap_req(struct Client *source, const char *arg)
 {
   unsigned int set = 0, rem = 0;
   unsigned int cs = source->connection->cap;  /* Enabled capabilities */
-  bool neg;
 
   if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;
@@ -170,12 +168,13 @@ cap_req(struct Client *source, const char *arg)
   for (const char *cl = arg; cl; )
   {
     /* Look up capability... */
-    const struct Cap *cap = find_cap(&cl, &neg);
     bool error = false;
+    bool negate;
+    const struct Cap *cap = find_cap(&cl, &negate);
 
     if (cap == NULL)
       error = true;
-    else if (neg && (cap->flag & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
+    else if (negate && (cap->flag & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
       error = true;
 
     if (error)
@@ -185,7 +184,7 @@ cap_req(struct Client *source, const char *arg)
       return;  /* Can't complete requested op... */
     }
 
-    if (neg)
+    if (negate)
     {
       /* Set or clear the capability... */
       rem |=  cap->flag;
@@ -229,7 +228,7 @@ cap_list(struct Client *source, const char *arg)
 
 static struct subcmd
 {
-  const char *cmd;
+  const char *name;
   void (*proc)(struct Client *, const char *);
 } cmdlist[] = {
   { "END",  cap_end  },
@@ -239,9 +238,11 @@ static struct subcmd
 };
 
 static int
-subcmd_search(const char *cmd, const struct subcmd *elem)
+subcmd_cmp(const void *const name_, const void *const elem_)
 {
-  return strcasecmp(cmd, elem->cmd);
+  const char *const name = name_;
+  const struct subcmd *const elem = elem_;
+  return strcasecmp(name, elem->name);
 }
 
 /*! \brief CAP command handler
@@ -260,11 +261,10 @@ static void
 m_cap(struct Client *source, int parc, char *parv[])
 {
   const char *subcmd = parv[1], *caplist = parv[2];
-  struct subcmd *cmd = NULL;
 
   /* Find the subcommand handler */
-  if (!(cmd = bsearch(subcmd, cmdlist, IO_ARRAY_LENGTH(cmdlist),
-                      sizeof(struct subcmd), (bqcmp)subcmd_search)))
+  const struct subcmd *cmd = bsearch(subcmd, cmdlist, IO_ARRAY_LENGTH(cmdlist), sizeof(*cmd), subcmd_cmp);
+  if (cmd == NULL)
   {
     sendto_one_numeric(source, &me, ERR_INVALIDCAPCMD, subcmd);
     return;

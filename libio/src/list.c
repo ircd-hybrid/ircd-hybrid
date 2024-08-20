@@ -605,7 +605,7 @@ list_get_shorter(list_t *list1, list_t *list2)
  * The caller is responsible for freeing the allocated array.
  *
  * @param list Pointer to the double-linked list.
- * @return Pointer to the newly allocated array, or NULL if the list is empty or allocation fails.
+ * @return Pointer to the newly allocated array, or NULL if the list is empty.
  */
 void **
 list_to_array(const list_t *list)

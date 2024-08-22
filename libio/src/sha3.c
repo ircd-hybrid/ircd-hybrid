@@ -114,17 +114,17 @@ keccakf(uint64_t s[25])
 /* *************************** Public Inteface ************************ */
 
 /* For Init or Reset call these: */
-sha3_return_t
+sha3_result_t
 sha3_Init(void *priv, unsigned bitSize)
 {
   if (bitSize != 256 && bitSize != 384 && bitSize != 512)
-    return SHA3_RETURN_BAD_PARAMS;
+    return SHA3_RESULT_BAD_PARAMS;
 
   sha3_context *ctx = (sha3_context *)priv;
   memset(ctx, 0, sizeof(*ctx));
   ctx->capacityWords = 2 * bitSize / (8 * sizeof(uint64_t));
 
-  return SHA3_RETURN_OK;
+  return SHA3_RESULT_OK;
 }
 
 void
@@ -145,8 +145,8 @@ sha3_Init512(void *priv)
   sha3_Init(priv, 512);
 }
 
-enum SHA3_FLAGS
-sha3_SetFlags(void *priv, enum SHA3_FLAGS flags)
+sha3_flags_t
+sha3_SetFlags(void *priv, sha3_flags_t flags)
 {
   sha3_context *ctx = (sha3_context *)priv;
 

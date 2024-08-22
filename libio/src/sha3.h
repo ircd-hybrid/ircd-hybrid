@@ -40,26 +40,23 @@ typedef struct sha3_context_
   unsigned capacityWords;  /* The double size of the hash output in words (e.g. 16 for Keccak 512). */
 } sha3_context;
 
-enum SHA3_FLAGS
+typedef enum
 {
   SHA3_FLAGS_NONE = 0,
-  SHA3_FLAGS_KECCAK = 1
-};
+  SHA3_FLAGS_KECCAK
+} sha3_flags_t;
 
-enum SHA3_RETURN
+typedef enum
 {
-  SHA3_RETURN_OK = 0,
-  SHA3_RETURN_BAD_PARAMS = 1
-};
+  SHA3_RESULT_OK = 0,
+  SHA3_RESULT_BAD_PARAMS
+} sha3_result_t;
 
-typedef enum SHA3_RETURN sha3_return_t;
-
-/* For Init or Reset call these: */
-extern sha3_return_t sha3_Init(void *, unsigned);
 extern void sha3_Init256(void *);
 extern void sha3_Init384(void *);
 extern void sha3_Init512(void *);
-extern enum SHA3_FLAGS sha3_SetFlags(void *, enum SHA3_FLAGS);
 extern void sha3_Update(void *, void const *, size_t);
 extern void const *sha3_Finalize(void *);
+extern sha3_flags_t sha3_SetFlags(void *, sha3_flags_t);
+extern sha3_result_t sha3_Init(void *, unsigned);
 #endif  /* INCLUDED_sha3_h */

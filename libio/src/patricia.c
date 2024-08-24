@@ -45,16 +45,7 @@
 #include "memory.h"
 #include "patricia.h"
 
-/* prefix_tochar
- * convert prefix information to bytes
- */
-static const unsigned char *
-prefix_tochar(const patricia_prefix_t *prefix)
-{
-  if (prefix == NULL)
-    return NULL;
-  return (const unsigned char *)&prefix->add.sin;
-}
+#define prefix_to_uint8(prefix) ((const uint8_t *)&(prefix)->add.sin)
 
 static int
 comp_with_mask(const void *addr, const void *dest, unsigned int mask)
@@ -309,7 +300,7 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
     return NULL;
 
   patricia_node_t *node = tree->head;
-  const unsigned char *addr = prefix_touchar(prefix);
+  const uint8_t *addr = prefix_to_uint8(prefix);
   unsigned int bitlen = prefix->bitlen;
 
   while (node->bit < bitlen)
@@ -329,7 +320,7 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
   assert(node->bit == bitlen);
   assert(node->bit == node->prefix->bitlen);
 
-  if (comp_with_mask(prefix_tochar(node->prefix), prefix_tochar(prefix), bitlen))
+  if (comp_with_mask(prefix_to_uint8(node->prefix), prefix_to_uint8(prefix), bitlen))
     return node;
 
   return NULL;
@@ -348,7 +339,7 @@ patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inc
 
   patricia_node_t *node = tree->head;
   patricia_node_t *stack[PATRICIA_MAXBITS + 1];
-  const unsigned char *addr = prefix_touchar(prefix);
+  const uint8_t *addr = prefix_to_uint8(prefix);
   unsigned int bitlen = prefix->bitlen;
   int cnt = 0;
 
@@ -376,8 +367,8 @@ patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inc
   {
     node = stack[cnt];
 
-    if (comp_with_mask(prefix_tochar(node->prefix),
-                       prefix_tochar(prefix), node->prefix->bitlen) && node->prefix->bitlen <= bitlen)
+    if (comp_with_mask(prefix_to_uint8(node->prefix),
+                       prefix_to_uint8(prefix), node->prefix->bitlen) && node->prefix->bitlen <= bitlen)
       return node;
   }
 
@@ -408,7 +399,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
     return node;
   }
 
-  const unsigned char *addr = prefix_touchar(prefix);
+  const uint8_t *addr = prefix_to_uint8(prefix);
   unsigned int bitlen = prefix->bitlen;
   patricia_node_t *node = tree->head;
 
@@ -434,7 +425,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   assert(node->prefix);
 
-  const unsigned char *test_addr = prefix_touchar(node->prefix);
+  const uint8_t *test_addr = prefix_to_uint8(node->prefix);
 
   /* Find the first bit different */
   unsigned int check_bit = node->bit < bitlen ? node->bit : bitlen;

@@ -39,7 +39,6 @@
 #include <netinet/in.h>  /* for struct in_addr */
 #include <sys/socket.h>  /* for AF_INET */
 
-#define prefix_touchar(prefix) ((const unsigned char *)&(prefix)->add.sin)
 #define BIT_TEST(f, b)  ((f) & (b))
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)

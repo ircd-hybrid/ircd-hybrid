@@ -24,6 +24,7 @@
  */
 
 #include "stdinc.h"
+#include "cap.h"
 #include "client.h"
 #include "ircd.h"
 #include "send.h"

@@ -32,6 +32,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
+#include "cap.h"
 #include "conf.h"
 #include "conf_resv.h"
 #include "address.h"

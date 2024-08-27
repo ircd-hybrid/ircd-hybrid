@@ -23,6 +23,20 @@
 #define INCLUDED_cap_h
 #include "list.h"
 
+enum
+{
+  CAP_MULTI_PREFIX   = 1 << 0,  /**< multi-prefix client capability */
+  CAP_AWAY_NOTIFY    = 1 << 1,  /**< away-notify client capability */
+  CAP_UHNAMES        = 1 << 2,  /**< userhost-in-names client capability */
+  CAP_EXTENDED_JOIN  = 1 << 3,  /**< extended-join client capability */
+  CAP_ACCOUNT_NOTIFY = 1 << 4,  /**< account-notify client capability */
+  CAP_INVITE_NOTIFY  = 1 << 5,  /**< invite-notify client capability */
+  CAP_CHGHOST        = 1 << 6,  /**< chghost client capability */
+  CAP_CAP_NOTIFY     = 1 << 7,  /**< CAP LS 302 cap-notify client capability */
+};
+
+#define HasCap(x, y) ((x)->connection->cap & (y))
+
 struct Cap
 {
   const char *name;

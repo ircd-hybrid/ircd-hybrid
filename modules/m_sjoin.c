@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #include "list.h"
+#include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_mode.h"

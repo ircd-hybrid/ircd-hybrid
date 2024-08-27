@@ -27,6 +27,7 @@
 #include "io_time.h"
 #include "list.h"
 #include "send.h"
+#include "cap.h"
 #include "channel.h"
 #include "client.h"
 #include "dbuf.h"

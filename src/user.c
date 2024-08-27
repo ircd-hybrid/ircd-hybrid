@@ -28,6 +28,7 @@
 #include "defaults.h"
 #include "list.h"
 #include "user.h"
+#include "cap.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"

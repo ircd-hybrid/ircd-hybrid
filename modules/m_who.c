@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "io_time.h"
 #include "list.h"
+#include "cap.h"
 #include "client.h"
 #include "channel.h"
 #include "channel_mode.h"

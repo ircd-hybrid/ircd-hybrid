@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #include "io_time.h"
+#include "cap.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"

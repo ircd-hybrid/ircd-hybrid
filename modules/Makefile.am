@@ -4,7 +4,15 @@ MODULE_FLAGS = -module -avoid-version
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 modulesdir = $(pkglibdir)/modules
 
-modules_LTLIBRARIES = m_accept.la     \
+modules_LTLIBRARIES = cap_account_notify.la    \
+                      cap_away_notify.la       \
+                      cap_cap_notify.la        \
+                      cap_chghost.la           \
+                      cap_extended_join.la     \
+                      cap_invite_notify.la     \
+                      cap_multi_prefix.la      \
+                      cap_userhost_in_names.la \
+                      m_accept.la     \
                       m_admin.la      \
                       m_away.la       \
                       m_bmask.la      \
@@ -88,6 +96,15 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_whowas.la     \
                       m_xline.la
 
+
+cap_account_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_away_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_cap_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_chghost_la_LDFLAGS = $(MODULE_FLAGS)
+cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
+cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
+cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
@@ -172,6 +189,14 @@ m_whois_la_LDFLAGS = $(MODULE_FLAGS)
 m_whowas_la_LDFLAGS = $(MODULE_FLAGS)
 m_xline_la_LDFLAGS = $(MODULE_FLAGS)
 
+cap_account_notify_la_SOURCES = cap_account_notify.c
+cap_away_notify_la_SOURCES = cap_away_notify.c
+cap_cap_notify_la_SOURCES = cap_cap_notify.c
+cap_chghost_la_SOURCES = cap_chghost.c
+cap_extended_join_la_SOURCES = cap_extended_join.c
+cap_invite_notify_la_SOURCES = cap_invite_notify.c
+cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
+cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
 m_accept_la_SOURCES = m_accept.c
 m_admin_la_SOURCES = m_admin.c
 m_away_la_SOURCES = m_away.c

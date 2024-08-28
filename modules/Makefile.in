@@ -144,13 +144,70 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(modulesdir)"
 LTLIBRARIES = $(modules_LTLIBRARIES)
-m_accept_la_LIBADD =
-am_m_accept_la_OBJECTS = m_accept.lo
-m_accept_la_OBJECTS = $(am_m_accept_la_OBJECTS)
+cap_account_notify_la_LIBADD =
+am_cap_account_notify_la_OBJECTS = cap_account_notify.lo
+cap_account_notify_la_OBJECTS = $(am_cap_account_notify_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+cap_account_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_account_notify_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+cap_away_notify_la_LIBADD =
+am_cap_away_notify_la_OBJECTS = cap_away_notify.lo
+cap_away_notify_la_OBJECTS = $(am_cap_away_notify_la_OBJECTS)
+cap_away_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_away_notify_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+cap_cap_notify_la_LIBADD =
+am_cap_cap_notify_la_OBJECTS = cap_cap_notify.lo
+cap_cap_notify_la_OBJECTS = $(am_cap_cap_notify_la_OBJECTS)
+cap_cap_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_cap_notify_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+cap_chghost_la_LIBADD =
+am_cap_chghost_la_OBJECTS = cap_chghost.lo
+cap_chghost_la_OBJECTS = $(am_cap_chghost_la_OBJECTS)
+cap_chghost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_chghost_la_LDFLAGS) $(LDFLAGS) -o \
+	$@
+cap_extended_join_la_LIBADD =
+am_cap_extended_join_la_OBJECTS = cap_extended_join.lo
+cap_extended_join_la_OBJECTS = $(am_cap_extended_join_la_OBJECTS)
+cap_extended_join_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_extended_join_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+cap_invite_notify_la_LIBADD =
+am_cap_invite_notify_la_OBJECTS = cap_invite_notify.lo
+cap_invite_notify_la_OBJECTS = $(am_cap_invite_notify_la_OBJECTS)
+cap_invite_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_invite_notify_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+cap_multi_prefix_la_LIBADD =
+am_cap_multi_prefix_la_OBJECTS = cap_multi_prefix.lo
+cap_multi_prefix_la_OBJECTS = $(am_cap_multi_prefix_la_OBJECTS)
+cap_multi_prefix_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_multi_prefix_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+cap_userhost_in_names_la_LIBADD =
+am_cap_userhost_in_names_la_OBJECTS = cap_userhost_in_names.lo
+cap_userhost_in_names_la_OBJECTS =  \
+	$(am_cap_userhost_in_names_la_OBJECTS)
+cap_userhost_in_names_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_userhost_in_names_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+m_accept_la_LIBADD =
+am_m_accept_la_OBJECTS = m_accept.lo
+m_accept_la_OBJECTS = $(am_m_accept_la_OBJECTS)
 m_accept_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_accept_la_LDFLAGS) $(LDFLAGS) -o $@
@@ -662,48 +719,53 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
-	./$(DEPDIR)/m_away.Plo ./$(DEPDIR)/m_bmask.Plo \
-	./$(DEPDIR)/m_cap.Plo ./$(DEPDIR)/m_capab.Plo \
-	./$(DEPDIR)/m_certfp.Plo ./$(DEPDIR)/m_close.Plo \
-	./$(DEPDIR)/m_connect.Plo ./$(DEPDIR)/m_die.Plo \
-	./$(DEPDIR)/m_dline.Plo ./$(DEPDIR)/m_encap.Plo \
-	./$(DEPDIR)/m_eob.Plo ./$(DEPDIR)/m_error.Plo \
-	./$(DEPDIR)/m_etrace.Plo ./$(DEPDIR)/m_globops.Plo \
-	./$(DEPDIR)/m_hash.Plo ./$(DEPDIR)/m_help.Plo \
-	./$(DEPDIR)/m_info.Plo ./$(DEPDIR)/m_invite.Plo \
-	./$(DEPDIR)/m_ison.Plo ./$(DEPDIR)/m_join.Plo \
-	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
-	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
-	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
-	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
-	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_message.Plo \
-	./$(DEPDIR)/m_metadata.Plo ./$(DEPDIR)/m_mlock.Plo \
-	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_module.Plo \
-	./$(DEPDIR)/m_monitor.Plo ./$(DEPDIR)/m_motd.Plo \
-	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_nick.Plo \
-	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_opme.Plo \
-	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_pass.Plo \
-	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
-	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_quit.Plo \
-	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
-	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_resync.Plo \
-	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_set.Plo \
-	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
-	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
-	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
-	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
-	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
-	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
-	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
-	./$(DEPDIR)/m_tmode.Plo ./$(DEPDIR)/m_topic.Plo \
-	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
-	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
-	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
-	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
-	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
-	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
-	./$(DEPDIR)/m_xline.Plo
+am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
+	./$(DEPDIR)/cap_away_notify.Plo ./$(DEPDIR)/cap_cap_notify.Plo \
+	./$(DEPDIR)/cap_chghost.Plo ./$(DEPDIR)/cap_extended_join.Plo \
+	./$(DEPDIR)/cap_invite_notify.Plo \
+	./$(DEPDIR)/cap_multi_prefix.Plo \
+	./$(DEPDIR)/cap_userhost_in_names.Plo ./$(DEPDIR)/m_accept.Plo \
+	./$(DEPDIR)/m_admin.Plo ./$(DEPDIR)/m_away.Plo \
+	./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_cap.Plo \
+	./$(DEPDIR)/m_capab.Plo ./$(DEPDIR)/m_certfp.Plo \
+	./$(DEPDIR)/m_close.Plo ./$(DEPDIR)/m_connect.Plo \
+	./$(DEPDIR)/m_die.Plo ./$(DEPDIR)/m_dline.Plo \
+	./$(DEPDIR)/m_encap.Plo ./$(DEPDIR)/m_eob.Plo \
+	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_etrace.Plo \
+	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_hash.Plo \
+	./$(DEPDIR)/m_help.Plo ./$(DEPDIR)/m_info.Plo \
+	./$(DEPDIR)/m_invite.Plo ./$(DEPDIR)/m_ison.Plo \
+	./$(DEPDIR)/m_join.Plo ./$(DEPDIR)/m_kick.Plo \
+	./$(DEPDIR)/m_kill.Plo ./$(DEPDIR)/m_kline.Plo \
+	./$(DEPDIR)/m_knock.Plo ./$(DEPDIR)/m_links.Plo \
+	./$(DEPDIR)/m_list.Plo ./$(DEPDIR)/m_locops.Plo \
+	./$(DEPDIR)/m_lusers.Plo ./$(DEPDIR)/m_map.Plo \
+	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_metadata.Plo \
+	./$(DEPDIR)/m_mlock.Plo ./$(DEPDIR)/m_mode.Plo \
+	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
+	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
+	./$(DEPDIR)/m_nick.Plo ./$(DEPDIR)/m_oper.Plo \
+	./$(DEPDIR)/m_opme.Plo ./$(DEPDIR)/m_part.Plo \
+	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
+	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
+	./$(DEPDIR)/m_quit.Plo ./$(DEPDIR)/m_rehash.Plo \
+	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
+	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_server.Plo \
+	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_sjoin.Plo \
+	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_stats.Plo \
+	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
+	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
+	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
+	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
+	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
+	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_tmode.Plo \
+	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
+	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
+	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
+	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
+	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_webirc.Plo \
+	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
+	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -723,8 +785,13 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
-	$(m_away_la_SOURCES) $(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
+SOURCES = $(cap_account_notify_la_SOURCES) \
+	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
+	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
+	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
+	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
+	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
+	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
 	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
 	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
 	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
@@ -763,8 +830,13 @@ SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
 	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
 	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
 	$(m_xline_la_SOURCES)
-DIST_SOURCES = $(m_accept_la_SOURCES) $(m_admin_la_SOURCES) \
-	$(m_away_la_SOURCES) $(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
+DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
+	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
+	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
+	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
+	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
+	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
+	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
 	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
 	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
 	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
@@ -977,7 +1049,15 @@ AUTOMAKE_OPTIONS = foreign
 MODULE_FLAGS = -module -avoid-version
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 modulesdir = $(pkglibdir)/modules
-modules_LTLIBRARIES = m_accept.la     \
+modules_LTLIBRARIES = cap_account_notify.la    \
+                      cap_away_notify.la       \
+                      cap_cap_notify.la        \
+                      cap_chghost.la           \
+                      cap_extended_join.la     \
+                      cap_invite_notify.la     \
+                      cap_multi_prefix.la      \
+                      cap_userhost_in_names.la \
+                      m_accept.la     \
                       m_admin.la      \
                       m_away.la       \
                       m_bmask.la      \
@@ -1061,6 +1141,14 @@ modules_LTLIBRARIES = m_accept.la     \
                       m_whowas.la     \
                       m_xline.la
 
+cap_account_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_away_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_cap_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_chghost_la_LDFLAGS = $(MODULE_FLAGS)
+cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
+cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
+cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
+cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1144,6 +1232,14 @@ m_who_la_LDFLAGS = $(MODULE_FLAGS)
 m_whois_la_LDFLAGS = $(MODULE_FLAGS)
 m_whowas_la_LDFLAGS = $(MODULE_FLAGS)
 m_xline_la_LDFLAGS = $(MODULE_FLAGS)
+cap_account_notify_la_SOURCES = cap_account_notify.c
+cap_away_notify_la_SOURCES = cap_away_notify.c
+cap_cap_notify_la_SOURCES = cap_cap_notify.c
+cap_chghost_la_SOURCES = cap_chghost.c
+cap_extended_join_la_SOURCES = cap_extended_join.c
+cap_invite_notify_la_SOURCES = cap_invite_notify.c
+cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
+cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
 m_accept_la_SOURCES = m_accept.c
 m_admin_la_SOURCES = m_admin.c
 m_away_la_SOURCES = m_away.c
@@ -1295,6 +1391,30 @@ clean-modulesLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+
+cap_account_notify.la: $(cap_account_notify_la_OBJECTS) $(cap_account_notify_la_DEPENDENCIES) $(EXTRA_cap_account_notify_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_account_notify_la_LINK) -rpath $(modulesdir) $(cap_account_notify_la_OBJECTS) $(cap_account_notify_la_LIBADD) $(LIBS)
+
+cap_away_notify.la: $(cap_away_notify_la_OBJECTS) $(cap_away_notify_la_DEPENDENCIES) $(EXTRA_cap_away_notify_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_away_notify_la_LINK) -rpath $(modulesdir) $(cap_away_notify_la_OBJECTS) $(cap_away_notify_la_LIBADD) $(LIBS)
+
+cap_cap_notify.la: $(cap_cap_notify_la_OBJECTS) $(cap_cap_notify_la_DEPENDENCIES) $(EXTRA_cap_cap_notify_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_cap_notify_la_LINK) -rpath $(modulesdir) $(cap_cap_notify_la_OBJECTS) $(cap_cap_notify_la_LIBADD) $(LIBS)
+
+cap_chghost.la: $(cap_chghost_la_OBJECTS) $(cap_chghost_la_DEPENDENCIES) $(EXTRA_cap_chghost_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_chghost_la_LINK) -rpath $(modulesdir) $(cap_chghost_la_OBJECTS) $(cap_chghost_la_LIBADD) $(LIBS)
+
+cap_extended_join.la: $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_DEPENDENCIES) $(EXTRA_cap_extended_join_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_extended_join_la_LINK) -rpath $(modulesdir) $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_LIBADD) $(LIBS)
+
+cap_invite_notify.la: $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_DEPENDENCIES) $(EXTRA_cap_invite_notify_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_invite_notify_la_LINK) -rpath $(modulesdir) $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_LIBADD) $(LIBS)
+
+cap_multi_prefix.la: $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_DEPENDENCIES) $(EXTRA_cap_multi_prefix_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_multi_prefix_la_LINK) -rpath $(modulesdir) $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_LIBADD) $(LIBS)
+
+cap_userhost_in_names.la: $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_DEPENDENCIES) $(EXTRA_cap_userhost_in_names_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_userhost_in_names_la_LINK) -rpath $(modulesdir) $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_LIBADD) $(LIBS)
 
 m_accept.la: $(m_accept_la_OBJECTS) $(m_accept_la_DEPENDENCIES) $(EXTRA_m_accept_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_accept_la_LINK) -rpath $(modulesdir) $(m_accept_la_OBJECTS) $(m_accept_la_LIBADD) $(LIBS)
@@ -1551,6 +1671,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_account_notify.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_away_notify.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_cap_notify.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_chghost.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_extended_join.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_invite_notify.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_multi_prefix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_userhost_in_names.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_accept.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_admin.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_away.Plo@am__quote@ # am--include-marker
@@ -1798,7 +1926,15 @@ clean-am: clean-generic clean-libtool clean-modulesLTLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/m_accept.Plo
+		-rm -f ./$(DEPDIR)/cap_account_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_away_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_cap_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_chghost.Plo
+	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
+	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
+	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
+	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo
 	-rm -f ./$(DEPDIR)/m_bmask.Plo
@@ -1926,7 +2062,15 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/m_accept.Plo
+		-rm -f ./$(DEPDIR)/cap_account_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_away_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_cap_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_chghost.Plo
+	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
+	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
+	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
+	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
+	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo
 	-rm -f ./$(DEPDIR)/m_bmask.Plo

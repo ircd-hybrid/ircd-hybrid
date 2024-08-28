@@ -287,30 +287,12 @@ static struct Command command_table =
 static void
 init_handler(void)
 {
-  cap_register(CAP_UHNAMES, "userhost-in-names", NULL);
-  cap_register(CAP_MULTI_PREFIX, "multi-prefix", NULL);
-  cap_register(CAP_AWAY_NOTIFY, "away-notify", NULL);
-  cap_register(CAP_EXTENDED_JOIN, "extended-join", NULL);
-  cap_register(CAP_ACCOUNT_NOTIFY, "account-notify", NULL);
-  cap_register(CAP_CAP_NOTIFY, "cap-notify", NULL);
-  cap_register(CAP_INVITE_NOTIFY, "invite-notify", NULL);
-  cap_register(CAP_CHGHOST, "chghost", NULL);
-
   command_add(&command_table);
 }
 
 static void
 exit_handler(void)
 {
-  cap_unregister("userhost-in-names");
-  cap_unregister("multi-prefix");
-  cap_unregister("away-notify");
-  cap_unregister("extended-join");
-  cap_unregister("account-notify");
-  cap_unregister("cap-notify");
-  cap_unregister("invite-notify");
-  cap_unregister("chghost");
-
   command_del(&command_table);
 }
 

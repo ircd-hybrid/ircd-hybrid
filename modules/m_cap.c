@@ -37,7 +37,7 @@
 #include "irc_string.h"
 
 
-static struct Cap *
+static const struct Cap *
 find_cap(const char **caplist_p, bool *negate_p)
 {
   /* Skip leading whitespace. */

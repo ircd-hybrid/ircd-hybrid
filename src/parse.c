@@ -33,6 +33,7 @@
 #include "numeric.h"
 #include "log.h"
 #include "send.h"
+#include "user_mode.h"
 #include "conf.h"
 #include "packet.h"
 #include "parse.h"
@@ -133,7 +134,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, int parc, char
 
     /* Fake it for server hiding, if it's our client */
     if ((ConfigServerHide.hide_servers || IsHidden(source)) && MyConnect(target) &&
-        !HasUMode(target, UMODE_OPER))
+        user_mode_has_flag(target, UMODE_OPER) == false)
       sendto_one_numeric(target, &me, numeric | SND_EXPLICIT, "%s", parv[2]);
     else
       sendto_one_numeric(target, source, numeric | SND_EXPLICIT, "%s", parv[2]);

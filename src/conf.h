@@ -117,7 +117,6 @@ struct MaskItem
   bool       dns_failed;
   bool       dns_pending;
   unsigned int       flags;
-  unsigned int       modes;
   unsigned int       port;
   unsigned int       aftype;
   unsigned int       htype;
@@ -137,6 +136,7 @@ struct MaskItem
   char              *reason;
   char              *certfp;
   char              *whois;
+  char              *modes;
   char              *cipher_list;
 };
 
@@ -158,6 +158,7 @@ struct config_general_entry
   const char *resvfile;
   char *cloak_secret;
   char *cloak_suffix;
+  char *oper_umodes;
 
   unsigned int dline_min_cidr;
   unsigned int dline_min_cidr6;
@@ -190,8 +191,6 @@ struct config_general_entry
   unsigned int opers_bypass_callerid;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;
-  unsigned int oper_only_umodes;
-  unsigned int oper_umodes;
   unsigned int max_targets;
   unsigned int caller_id_wait;
   unsigned int min_nonwildcard;

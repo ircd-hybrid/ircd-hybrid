@@ -41,6 +41,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "user_mode.h"
 #include "memory.h"
 #include "dbuf.h"
 
@@ -537,7 +538,7 @@ static void
 list_one_channel(struct Client *client, struct Channel *channel)
 {
   if (HasCMode(channel, MODE_SECRET) &&
-      !(HasUMode(client, UMODE_ADMIN) || member_find_link(client, channel)))
+      !(user_mode_has_flag(client, UMODE_ADMIN) || member_find_link(client, channel)))
     return;
 
   const struct ListTask *const lt = client->connection->list_task;

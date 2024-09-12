@@ -32,7 +32,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "log.h"
-#include "user.h"
+#include "user_mode.h"
 #include "send.h"
 #include "parse.h"
 #include "module.h"
@@ -46,17 +46,17 @@
 static void
 oper_up(struct Client *source, const struct MaskItem *conf)
 {
-  const unsigned int oldmodes = source->umodes;
+  const uint64_t oldmodes = source->umodes;
 
   ++Count.oper;
   SetOper(source);
 
   if (conf->modes)
-    AddUMode(source, conf->modes);
+    user_mode_set_flag(source, user_mode_string_to_flags(conf->modes));
   else if (ConfigGeneral.oper_umodes)
-    AddUMode(source, ConfigGeneral.oper_umodes);
+    user_mode_set_flag(source, user_mode_string_to_flags(ConfigGeneral.oper_umodes));
 
-  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && user_mode_has_flag(source, UMODE_INVISIBLE))
     ++Count.invisi;
 
   assert(list_find(&oper_list, source) == NULL);
@@ -65,7 +65,7 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   AddOFlag(source, conf->port);
 
   if (HasOFlag(source, OPER_FLAG_ADMIN))
-    AddUMode(source, UMODE_ADMIN);
+    user_mode_set_flag(source, UMODE_ADMIN);
 
   if (!EmptyString(conf->whois))
   {
@@ -82,7 +82,7 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                  me.id, get_oper_name(source));
 
-  send_umode(source, oldmodes, true, true);
+  user_mode_send(source, oldmodes, true, true);
   sendto_one_numeric(source, &me, RPL_YOUREOPER);
 }
 
@@ -134,7 +134,7 @@ m_oper(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (IsConfTLS(conf) && !HasUMode(source, UMODE_SECURE))
+  if (IsConfTLS(conf) && user_mode_has_flag(source, UMODE_SECURE) == false)
   {
     failed_oper_notice(source, ERR_NOOPERHOST, opername, "requires TLS");
     return;

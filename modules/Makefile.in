@@ -704,6 +704,198 @@ m_xline_la_OBJECTS = $(am_m_xline_la_OBJECTS)
 m_xline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_xline_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_admin_la_LIBADD =
+am_umode_admin_la_OBJECTS = umode_admin.lo
+umode_admin_la_OBJECTS = $(am_umode_admin_la_OBJECTS)
+umode_admin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_admin_la_LDFLAGS) $(LDFLAGS) -o \
+	$@
+umode_bot_la_LIBADD =
+am_umode_bot_la_OBJECTS = umode_bot.lo
+umode_bot_la_OBJECTS = $(am_umode_bot_la_OBJECTS)
+umode_bot_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(umode_bot_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_callerid_la_LIBADD =
+am_umode_callerid_la_OBJECTS = umode_callerid.lo
+umode_callerid_la_OBJECTS = $(am_umode_callerid_la_OBJECTS)
+umode_callerid_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_callerid_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_cloak_la_LIBADD =
+am_umode_cloak_la_OBJECTS = umode_cloak.lo
+umode_cloak_la_OBJECTS = $(am_umode_cloak_la_OBJECTS)
+umode_cloak_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_cloak_la_LDFLAGS) $(LDFLAGS) -o \
+	$@
+umode_connect_la_LIBADD =
+am_umode_connect_la_OBJECTS = umode_connect.lo
+umode_connect_la_OBJECTS = $(am_umode_connect_la_OBJECTS)
+umode_connect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_connect_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_deaf_la_LIBADD =
+am_umode_deaf_la_OBJECTS = umode_deaf.lo
+umode_deaf_la_OBJECTS = $(am_umode_deaf_la_OBJECTS)
+umode_deaf_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(umode_deaf_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_expiration_la_LIBADD =
+am_umode_expiration_la_OBJECTS = umode_expiration.lo
+umode_expiration_la_OBJECTS = $(am_umode_expiration_la_OBJECTS)
+umode_expiration_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_expiration_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_external_la_LIBADD =
+am_umode_external_la_OBJECTS = umode_external.lo
+umode_external_la_OBJECTS = $(am_umode_external_la_OBJECTS)
+umode_external_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_external_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_farconnect_la_LIBADD =
+am_umode_farconnect_la_OBJECTS = umode_farconnect.lo
+umode_farconnect_la_OBJECTS = $(am_umode_farconnect_la_OBJECTS)
+umode_farconnect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_farconnect_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_flood_la_LIBADD =
+am_umode_flood_la_OBJECTS = umode_flood.lo
+umode_flood_la_OBJECTS = $(am_umode_flood_la_OBJECTS)
+umode_flood_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_flood_la_LDFLAGS) $(LDFLAGS) -o \
+	$@
+umode_hidden_la_LIBADD =
+am_umode_hidden_la_OBJECTS = umode_hidden.lo
+umode_hidden_la_OBJECTS = $(am_umode_hidden_la_OBJECTS)
+umode_hidden_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_hidden_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_hidechans_la_LIBADD =
+am_umode_hidechans_la_OBJECTS = umode_hidechans.lo
+umode_hidechans_la_OBJECTS = $(am_umode_hidechans_la_OBJECTS)
+umode_hidechans_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_hidechans_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_hideidle_la_LIBADD =
+am_umode_hideidle_la_OBJECTS = umode_hideidle.lo
+umode_hideidle_la_OBJECTS = $(am_umode_hideidle_la_OBJECTS)
+umode_hideidle_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_hideidle_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_invisible_la_LIBADD =
+am_umode_invisible_la_OBJECTS = umode_invisible.lo
+umode_invisible_la_OBJECTS = $(am_umode_invisible_la_OBJECTS)
+umode_invisible_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_invisible_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_locops_la_LIBADD =
+am_umode_locops_la_OBJECTS = umode_locops.lo
+umode_locops_la_OBJECTS = $(am_umode_locops_la_OBJECTS)
+umode_locops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_locops_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_nickchange_la_LIBADD =
+am_umode_nickchange_la_OBJECTS = umode_nickchange.lo
+umode_nickchange_la_OBJECTS = $(am_umode_nickchange_la_OBJECTS)
+umode_nickchange_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_nickchange_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_oper_la_LIBADD =
+am_umode_oper_la_OBJECTS = umode_oper.lo
+umode_oper_la_OBJECTS = $(am_umode_oper_la_OBJECTS)
+umode_oper_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(umode_oper_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_registered_la_LIBADD =
+am_umode_registered_la_OBJECTS = umode_registered.lo
+umode_registered_la_OBJECTS = $(am_umode_registered_la_OBJECTS)
+umode_registered_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_registered_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_regonly_la_LIBADD =
+am_umode_regonly_la_OBJECTS = umode_regonly.lo
+umode_regonly_la_OBJECTS = $(am_umode_regonly_la_OBJECTS)
+umode_regonly_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_regonly_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_reject_la_LIBADD =
+am_umode_reject_la_OBJECTS = umode_reject.lo
+umode_reject_la_OBJECTS = $(am_umode_reject_la_OBJECTS)
+umode_reject_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_reject_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_secure_la_LIBADD =
+am_umode_secure_la_OBJECTS = umode_secure.lo
+umode_secure_la_OBJECTS = $(am_umode_secure_la_OBJECTS)
+umode_secure_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_secure_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_secureonly_la_LIBADD =
+am_umode_secureonly_la_OBJECTS = umode_secureonly.lo
+umode_secureonly_la_OBJECTS = $(am_umode_secureonly_la_OBJECTS)
+umode_secureonly_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_secureonly_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_servnotice_la_LIBADD =
+am_umode_servnotice_la_OBJECTS = umode_servnotice.lo
+umode_servnotice_la_OBJECTS = $(am_umode_servnotice_la_OBJECTS)
+umode_servnotice_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_servnotice_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_skill_la_LIBADD =
+am_umode_skill_la_OBJECTS = umode_skill.lo
+umode_skill_la_OBJECTS = $(am_umode_skill_la_OBJECTS)
+umode_skill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_skill_la_LDFLAGS) $(LDFLAGS) -o \
+	$@
+umode_softcallerid_la_LIBADD =
+am_umode_softcallerid_la_OBJECTS = umode_softcallerid.lo
+umode_softcallerid_la_OBJECTS = $(am_umode_softcallerid_la_OBJECTS)
+umode_softcallerid_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_softcallerid_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+umode_spy_la_LIBADD =
+am_umode_spy_la_OBJECTS = umode_spy.lo
+umode_spy_la_OBJECTS = $(am_umode_spy_la_OBJECTS)
+umode_spy_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(umode_spy_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_wallops_la_LIBADD =
+am_umode_wallops_la_OBJECTS = umode_wallops.lo
+umode_wallops_la_OBJECTS = $(am_umode_wallops_la_OBJECTS)
+umode_wallops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_wallops_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
+umode_webirc_la_LIBADD =
+am_umode_webirc_la_OBJECTS = umode_webirc.lo
+umode_webirc_la_OBJECTS = $(am_umode_webirc_la_OBJECTS)
+umode_webirc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(umode_webirc_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -765,7 +957,22 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
 	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_webirc.Plo \
 	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
-	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo
+	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo \
+	./$(DEPDIR)/umode_admin.Plo ./$(DEPDIR)/umode_bot.Plo \
+	./$(DEPDIR)/umode_callerid.Plo ./$(DEPDIR)/umode_cloak.Plo \
+	./$(DEPDIR)/umode_connect.Plo ./$(DEPDIR)/umode_deaf.Plo \
+	./$(DEPDIR)/umode_expiration.Plo \
+	./$(DEPDIR)/umode_external.Plo \
+	./$(DEPDIR)/umode_farconnect.Plo ./$(DEPDIR)/umode_flood.Plo \
+	./$(DEPDIR)/umode_hidden.Plo ./$(DEPDIR)/umode_hidechans.Plo \
+	./$(DEPDIR)/umode_hideidle.Plo ./$(DEPDIR)/umode_invisible.Plo \
+	./$(DEPDIR)/umode_locops.Plo ./$(DEPDIR)/umode_nickchange.Plo \
+	./$(DEPDIR)/umode_oper.Plo ./$(DEPDIR)/umode_registered.Plo \
+	./$(DEPDIR)/umode_regonly.Plo ./$(DEPDIR)/umode_reject.Plo \
+	./$(DEPDIR)/umode_secure.Plo ./$(DEPDIR)/umode_secureonly.Plo \
+	./$(DEPDIR)/umode_servnotice.Plo ./$(DEPDIR)/umode_skill.Plo \
+	./$(DEPDIR)/umode_softcallerid.Plo ./$(DEPDIR)/umode_spy.Plo \
+	./$(DEPDIR)/umode_wallops.Plo ./$(DEPDIR)/umode_webirc.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -829,7 +1036,21 @@ SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
 	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
 	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_xline_la_SOURCES) $(umode_admin_la_SOURCES) \
+	$(umode_bot_la_SOURCES) $(umode_callerid_la_SOURCES) \
+	$(umode_cloak_la_SOURCES) $(umode_connect_la_SOURCES) \
+	$(umode_deaf_la_SOURCES) $(umode_expiration_la_SOURCES) \
+	$(umode_external_la_SOURCES) $(umode_farconnect_la_SOURCES) \
+	$(umode_flood_la_SOURCES) $(umode_hidden_la_SOURCES) \
+	$(umode_hidechans_la_SOURCES) $(umode_hideidle_la_SOURCES) \
+	$(umode_invisible_la_SOURCES) $(umode_locops_la_SOURCES) \
+	$(umode_nickchange_la_SOURCES) $(umode_oper_la_SOURCES) \
+	$(umode_registered_la_SOURCES) $(umode_regonly_la_SOURCES) \
+	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
+	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
+	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
+	$(umode_spy_la_SOURCES) $(umode_wallops_la_SOURCES) \
+	$(umode_webirc_la_SOURCES)
 DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
 	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
@@ -874,7 +1095,21 @@ DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
 	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
 	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES)
+	$(m_xline_la_SOURCES) $(umode_admin_la_SOURCES) \
+	$(umode_bot_la_SOURCES) $(umode_callerid_la_SOURCES) \
+	$(umode_cloak_la_SOURCES) $(umode_connect_la_SOURCES) \
+	$(umode_deaf_la_SOURCES) $(umode_expiration_la_SOURCES) \
+	$(umode_external_la_SOURCES) $(umode_farconnect_la_SOURCES) \
+	$(umode_flood_la_SOURCES) $(umode_hidden_la_SOURCES) \
+	$(umode_hidechans_la_SOURCES) $(umode_hideidle_la_SOURCES) \
+	$(umode_invisible_la_SOURCES) $(umode_locops_la_SOURCES) \
+	$(umode_nickchange_la_SOURCES) $(umode_oper_la_SOURCES) \
+	$(umode_registered_la_SOURCES) $(umode_regonly_la_SOURCES) \
+	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
+	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
+	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
+	$(umode_spy_la_SOURCES) $(umode_wallops_la_SOURCES) \
+	$(umode_webirc_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1057,6 +1292,34 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
                       cap_userhost_in_names.la \
+                      umode_admin.la           \
+                      umode_bot.la             \
+                      umode_callerid.la        \
+                      umode_cloak.la           \
+                      umode_connect.la         \
+                      umode_deaf.la            \
+                      umode_expiration.la      \
+                      umode_external.la        \
+                      umode_farconnect.la      \
+                      umode_flood.la           \
+                      umode_hidden.la          \
+                      umode_hidechans.la       \
+                      umode_hideidle.la        \
+                      umode_invisible.la       \
+                      umode_locops.la          \
+                      umode_nickchange.la      \
+                      umode_oper.la            \
+                      umode_registered.la      \
+                      umode_regonly.la         \
+                      umode_reject.la          \
+                      umode_secure.la          \
+                      umode_secureonly.la      \
+                      umode_servnotice.la      \
+                      umode_skill.la           \
+                      umode_softcallerid.la    \
+                      umode_spy.la             \
+                      umode_wallops.la         \
+                      umode_webirc.la          \
                       m_accept.la     \
                       m_admin.la      \
                       m_away.la       \
@@ -1149,6 +1412,34 @@ cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
 cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
 cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
 cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
+umode_admin_la_LDFLAGS = $(MODULE_FLAGS)
+umode_bot_la_LDFLAGS = $(MODULE_FLAGS)
+umode_deaf_la_LDFLAGS = $(MODULE_FLAGS)
+umode_callerid_la_LDFLAGS = $(MODULE_FLAGS)
+umode_cloak_la_LDFLAGS = $(MODULE_FLAGS)
+umode_connect_la_LDFLAGS = $(MODULE_FLAGS)
+umode_expiration_la_LDFLAGS = $(MODULE_FLAGS)
+umode_external_la_LDFLAGS = $(MODULE_FLAGS)
+umode_farconnect_la_LDFLAGS = $(MODULE_FLAGS)
+umode_flood_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hidden_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hidechans_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hideidle_la_LDFLAGS = $(MODULE_FLAGS)
+umode_invisible_la_LDFLAGS = $(MODULE_FLAGS)
+umode_locops_la_LDFLAGS = $(MODULE_FLAGS)
+umode_nickchange_la_LDFLAGS = $(MODULE_FLAGS)
+umode_oper_la_LDFLAGS = $(MODULE_FLAGS)
+umode_registered_la_LDFLAGS = $(MODULE_FLAGS)
+umode_regonly_la_LDFLAGS = $(MODULE_FLAGS)
+umode_reject_la_LDFLAGS = $(MODULE_FLAGS)
+umode_secure_la_LDFLAGS = $(MODULE_FLAGS)
+umode_secureonly_la_LDFLAGS = $(MODULE_FLAGS)
+umode_servnotice_la_LDFLAGS = $(MODULE_FLAGS)
+umode_skill_la_LDFLAGS = $(MODULE_FLAGS)
+umode_softcallerid_la_LDFLAGS = $(MODULE_FLAGS)
+umode_spy_la_LDFLAGS = $(MODULE_FLAGS)
+umode_wallops_la_LDFLAGS = $(MODULE_FLAGS)
+umode_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1240,6 +1531,34 @@ cap_extended_join_la_SOURCES = cap_extended_join.c
 cap_invite_notify_la_SOURCES = cap_invite_notify.c
 cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
 cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
+umode_admin_la_SOURCES = umode_admin.c
+umode_bot_la_SOURCES = umode_bot.c
+umode_callerid_la_SOURCES = umode_callerid.c
+umode_cloak_la_SOURCES = umode_cloak.c
+umode_connect_la_SOURCES = umode_connect.c
+umode_deaf_la_SOURCES = umode_deaf.c
+umode_expiration_la_SOURCES = umode_expiration.c
+umode_external_la_SOURCES = umode_external.c
+umode_farconnect_la_SOURCES = umode_farconnect.c
+umode_flood_la_SOURCES = umode_flood.c
+umode_hidden_la_SOURCES = umode_hidden.c
+umode_hidechans_la_SOURCES = umode_hidechans.c
+umode_hideidle_la_SOURCES = umode_hideidle.c
+umode_invisible_la_SOURCES = umode_invisible.c
+umode_locops_la_SOURCES = umode_locops.c
+umode_nickchange_la_SOURCES = umode_nickchange.c
+umode_oper_la_SOURCES = umode_oper.c
+umode_registered_la_SOURCES = umode_registered.c
+umode_regonly_la_SOURCES = umode_regonly.c
+umode_reject_la_SOURCES = umode_reject.c
+umode_secure_la_SOURCES = umode_secure.c
+umode_secureonly_la_SOURCES = umode_secureonly.c
+umode_servnotice_la_SOURCES = umode_servnotice.c
+umode_skill_la_SOURCES = umode_skill.c
+umode_softcallerid_la_SOURCES = umode_softcallerid.c
+umode_spy_la_SOURCES = umode_spy.c
+umode_wallops_la_SOURCES = umode_wallops.c
+umode_webirc_la_SOURCES = umode_webirc.c
 m_accept_la_SOURCES = m_accept.c
 m_admin_la_SOURCES = m_admin.c
 m_away_la_SOURCES = m_away.c
@@ -1665,6 +1984,90 @@ m_whowas.la: $(m_whowas_la_OBJECTS) $(m_whowas_la_DEPENDENCIES) $(EXTRA_m_whowas
 m_xline.la: $(m_xline_la_OBJECTS) $(m_xline_la_DEPENDENCIES) $(EXTRA_m_xline_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_xline_la_LINK) -rpath $(modulesdir) $(m_xline_la_OBJECTS) $(m_xline_la_LIBADD) $(LIBS)
 
+umode_admin.la: $(umode_admin_la_OBJECTS) $(umode_admin_la_DEPENDENCIES) $(EXTRA_umode_admin_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_admin_la_LINK) -rpath $(modulesdir) $(umode_admin_la_OBJECTS) $(umode_admin_la_LIBADD) $(LIBS)
+
+umode_bot.la: $(umode_bot_la_OBJECTS) $(umode_bot_la_DEPENDENCIES) $(EXTRA_umode_bot_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_bot_la_LINK) -rpath $(modulesdir) $(umode_bot_la_OBJECTS) $(umode_bot_la_LIBADD) $(LIBS)
+
+umode_callerid.la: $(umode_callerid_la_OBJECTS) $(umode_callerid_la_DEPENDENCIES) $(EXTRA_umode_callerid_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_callerid_la_LINK) -rpath $(modulesdir) $(umode_callerid_la_OBJECTS) $(umode_callerid_la_LIBADD) $(LIBS)
+
+umode_cloak.la: $(umode_cloak_la_OBJECTS) $(umode_cloak_la_DEPENDENCIES) $(EXTRA_umode_cloak_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_cloak_la_LINK) -rpath $(modulesdir) $(umode_cloak_la_OBJECTS) $(umode_cloak_la_LIBADD) $(LIBS)
+
+umode_connect.la: $(umode_connect_la_OBJECTS) $(umode_connect_la_DEPENDENCIES) $(EXTRA_umode_connect_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_connect_la_LINK) -rpath $(modulesdir) $(umode_connect_la_OBJECTS) $(umode_connect_la_LIBADD) $(LIBS)
+
+umode_deaf.la: $(umode_deaf_la_OBJECTS) $(umode_deaf_la_DEPENDENCIES) $(EXTRA_umode_deaf_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_deaf_la_LINK) -rpath $(modulesdir) $(umode_deaf_la_OBJECTS) $(umode_deaf_la_LIBADD) $(LIBS)
+
+umode_expiration.la: $(umode_expiration_la_OBJECTS) $(umode_expiration_la_DEPENDENCIES) $(EXTRA_umode_expiration_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_expiration_la_LINK) -rpath $(modulesdir) $(umode_expiration_la_OBJECTS) $(umode_expiration_la_LIBADD) $(LIBS)
+
+umode_external.la: $(umode_external_la_OBJECTS) $(umode_external_la_DEPENDENCIES) $(EXTRA_umode_external_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_external_la_LINK) -rpath $(modulesdir) $(umode_external_la_OBJECTS) $(umode_external_la_LIBADD) $(LIBS)
+
+umode_farconnect.la: $(umode_farconnect_la_OBJECTS) $(umode_farconnect_la_DEPENDENCIES) $(EXTRA_umode_farconnect_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_farconnect_la_LINK) -rpath $(modulesdir) $(umode_farconnect_la_OBJECTS) $(umode_farconnect_la_LIBADD) $(LIBS)
+
+umode_flood.la: $(umode_flood_la_OBJECTS) $(umode_flood_la_DEPENDENCIES) $(EXTRA_umode_flood_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_flood_la_LINK) -rpath $(modulesdir) $(umode_flood_la_OBJECTS) $(umode_flood_la_LIBADD) $(LIBS)
+
+umode_hidden.la: $(umode_hidden_la_OBJECTS) $(umode_hidden_la_DEPENDENCIES) $(EXTRA_umode_hidden_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_hidden_la_LINK) -rpath $(modulesdir) $(umode_hidden_la_OBJECTS) $(umode_hidden_la_LIBADD) $(LIBS)
+
+umode_hidechans.la: $(umode_hidechans_la_OBJECTS) $(umode_hidechans_la_DEPENDENCIES) $(EXTRA_umode_hidechans_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_hidechans_la_LINK) -rpath $(modulesdir) $(umode_hidechans_la_OBJECTS) $(umode_hidechans_la_LIBADD) $(LIBS)
+
+umode_hideidle.la: $(umode_hideidle_la_OBJECTS) $(umode_hideidle_la_DEPENDENCIES) $(EXTRA_umode_hideidle_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_hideidle_la_LINK) -rpath $(modulesdir) $(umode_hideidle_la_OBJECTS) $(umode_hideidle_la_LIBADD) $(LIBS)
+
+umode_invisible.la: $(umode_invisible_la_OBJECTS) $(umode_invisible_la_DEPENDENCIES) $(EXTRA_umode_invisible_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_invisible_la_LINK) -rpath $(modulesdir) $(umode_invisible_la_OBJECTS) $(umode_invisible_la_LIBADD) $(LIBS)
+
+umode_locops.la: $(umode_locops_la_OBJECTS) $(umode_locops_la_DEPENDENCIES) $(EXTRA_umode_locops_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_locops_la_LINK) -rpath $(modulesdir) $(umode_locops_la_OBJECTS) $(umode_locops_la_LIBADD) $(LIBS)
+
+umode_nickchange.la: $(umode_nickchange_la_OBJECTS) $(umode_nickchange_la_DEPENDENCIES) $(EXTRA_umode_nickchange_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_nickchange_la_LINK) -rpath $(modulesdir) $(umode_nickchange_la_OBJECTS) $(umode_nickchange_la_LIBADD) $(LIBS)
+
+umode_oper.la: $(umode_oper_la_OBJECTS) $(umode_oper_la_DEPENDENCIES) $(EXTRA_umode_oper_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_oper_la_LINK) -rpath $(modulesdir) $(umode_oper_la_OBJECTS) $(umode_oper_la_LIBADD) $(LIBS)
+
+umode_registered.la: $(umode_registered_la_OBJECTS) $(umode_registered_la_DEPENDENCIES) $(EXTRA_umode_registered_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_registered_la_LINK) -rpath $(modulesdir) $(umode_registered_la_OBJECTS) $(umode_registered_la_LIBADD) $(LIBS)
+
+umode_regonly.la: $(umode_regonly_la_OBJECTS) $(umode_regonly_la_DEPENDENCIES) $(EXTRA_umode_regonly_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_regonly_la_LINK) -rpath $(modulesdir) $(umode_regonly_la_OBJECTS) $(umode_regonly_la_LIBADD) $(LIBS)
+
+umode_reject.la: $(umode_reject_la_OBJECTS) $(umode_reject_la_DEPENDENCIES) $(EXTRA_umode_reject_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_reject_la_LINK) -rpath $(modulesdir) $(umode_reject_la_OBJECTS) $(umode_reject_la_LIBADD) $(LIBS)
+
+umode_secure.la: $(umode_secure_la_OBJECTS) $(umode_secure_la_DEPENDENCIES) $(EXTRA_umode_secure_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_secure_la_LINK) -rpath $(modulesdir) $(umode_secure_la_OBJECTS) $(umode_secure_la_LIBADD) $(LIBS)
+
+umode_secureonly.la: $(umode_secureonly_la_OBJECTS) $(umode_secureonly_la_DEPENDENCIES) $(EXTRA_umode_secureonly_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_secureonly_la_LINK) -rpath $(modulesdir) $(umode_secureonly_la_OBJECTS) $(umode_secureonly_la_LIBADD) $(LIBS)
+
+umode_servnotice.la: $(umode_servnotice_la_OBJECTS) $(umode_servnotice_la_DEPENDENCIES) $(EXTRA_umode_servnotice_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_servnotice_la_LINK) -rpath $(modulesdir) $(umode_servnotice_la_OBJECTS) $(umode_servnotice_la_LIBADD) $(LIBS)
+
+umode_skill.la: $(umode_skill_la_OBJECTS) $(umode_skill_la_DEPENDENCIES) $(EXTRA_umode_skill_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_skill_la_LINK) -rpath $(modulesdir) $(umode_skill_la_OBJECTS) $(umode_skill_la_LIBADD) $(LIBS)
+
+umode_softcallerid.la: $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_DEPENDENCIES) $(EXTRA_umode_softcallerid_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_softcallerid_la_LINK) -rpath $(modulesdir) $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_LIBADD) $(LIBS)
+
+umode_spy.la: $(umode_spy_la_OBJECTS) $(umode_spy_la_DEPENDENCIES) $(EXTRA_umode_spy_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_spy_la_LINK) -rpath $(modulesdir) $(umode_spy_la_OBJECTS) $(umode_spy_la_LIBADD) $(LIBS)
+
+umode_wallops.la: $(umode_wallops_la_OBJECTS) $(umode_wallops_la_DEPENDENCIES) $(EXTRA_umode_wallops_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_wallops_la_LINK) -rpath $(modulesdir) $(umode_wallops_la_OBJECTS) $(umode_wallops_la_LIBADD) $(LIBS)
+
+umode_webirc.la: $(umode_webirc_la_OBJECTS) $(umode_webirc_la_DEPENDENCIES) $(EXTRA_umode_webirc_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(umode_webirc_la_LINK) -rpath $(modulesdir) $(umode_webirc_la_OBJECTS) $(umode_webirc_la_LIBADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -1762,6 +2165,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_whois.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_whowas.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_xline.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_admin.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_bot.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_callerid.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_cloak.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_connect.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_deaf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_expiration.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_external.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_farconnect.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_flood.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_hidden.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_hidechans.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_hideidle.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_invisible.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_locops.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_nickchange.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_oper.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_registered.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_regonly.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_reject.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_secure.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_secureonly.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_servnotice.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_skill.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_softcallerid.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_spy.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_wallops.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_webirc.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -2017,6 +2448,34 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/m_whois.Plo
 	-rm -f ./$(DEPDIR)/m_whowas.Plo
 	-rm -f ./$(DEPDIR)/m_xline.Plo
+	-rm -f ./$(DEPDIR)/umode_admin.Plo
+	-rm -f ./$(DEPDIR)/umode_bot.Plo
+	-rm -f ./$(DEPDIR)/umode_callerid.Plo
+	-rm -f ./$(DEPDIR)/umode_cloak.Plo
+	-rm -f ./$(DEPDIR)/umode_connect.Plo
+	-rm -f ./$(DEPDIR)/umode_deaf.Plo
+	-rm -f ./$(DEPDIR)/umode_expiration.Plo
+	-rm -f ./$(DEPDIR)/umode_external.Plo
+	-rm -f ./$(DEPDIR)/umode_farconnect.Plo
+	-rm -f ./$(DEPDIR)/umode_flood.Plo
+	-rm -f ./$(DEPDIR)/umode_hidden.Plo
+	-rm -f ./$(DEPDIR)/umode_hidechans.Plo
+	-rm -f ./$(DEPDIR)/umode_hideidle.Plo
+	-rm -f ./$(DEPDIR)/umode_invisible.Plo
+	-rm -f ./$(DEPDIR)/umode_locops.Plo
+	-rm -f ./$(DEPDIR)/umode_nickchange.Plo
+	-rm -f ./$(DEPDIR)/umode_oper.Plo
+	-rm -f ./$(DEPDIR)/umode_registered.Plo
+	-rm -f ./$(DEPDIR)/umode_regonly.Plo
+	-rm -f ./$(DEPDIR)/umode_reject.Plo
+	-rm -f ./$(DEPDIR)/umode_secure.Plo
+	-rm -f ./$(DEPDIR)/umode_secureonly.Plo
+	-rm -f ./$(DEPDIR)/umode_servnotice.Plo
+	-rm -f ./$(DEPDIR)/umode_skill.Plo
+	-rm -f ./$(DEPDIR)/umode_softcallerid.Plo
+	-rm -f ./$(DEPDIR)/umode_spy.Plo
+	-rm -f ./$(DEPDIR)/umode_wallops.Plo
+	-rm -f ./$(DEPDIR)/umode_webirc.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -2153,6 +2612,34 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/m_whois.Plo
 	-rm -f ./$(DEPDIR)/m_whowas.Plo
 	-rm -f ./$(DEPDIR)/m_xline.Plo
+	-rm -f ./$(DEPDIR)/umode_admin.Plo
+	-rm -f ./$(DEPDIR)/umode_bot.Plo
+	-rm -f ./$(DEPDIR)/umode_callerid.Plo
+	-rm -f ./$(DEPDIR)/umode_cloak.Plo
+	-rm -f ./$(DEPDIR)/umode_connect.Plo
+	-rm -f ./$(DEPDIR)/umode_deaf.Plo
+	-rm -f ./$(DEPDIR)/umode_expiration.Plo
+	-rm -f ./$(DEPDIR)/umode_external.Plo
+	-rm -f ./$(DEPDIR)/umode_farconnect.Plo
+	-rm -f ./$(DEPDIR)/umode_flood.Plo
+	-rm -f ./$(DEPDIR)/umode_hidden.Plo
+	-rm -f ./$(DEPDIR)/umode_hidechans.Plo
+	-rm -f ./$(DEPDIR)/umode_hideidle.Plo
+	-rm -f ./$(DEPDIR)/umode_invisible.Plo
+	-rm -f ./$(DEPDIR)/umode_locops.Plo
+	-rm -f ./$(DEPDIR)/umode_nickchange.Plo
+	-rm -f ./$(DEPDIR)/umode_oper.Plo
+	-rm -f ./$(DEPDIR)/umode_registered.Plo
+	-rm -f ./$(DEPDIR)/umode_regonly.Plo
+	-rm -f ./$(DEPDIR)/umode_reject.Plo
+	-rm -f ./$(DEPDIR)/umode_secure.Plo
+	-rm -f ./$(DEPDIR)/umode_secureonly.Plo
+	-rm -f ./$(DEPDIR)/umode_servnotice.Plo
+	-rm -f ./$(DEPDIR)/umode_skill.Plo
+	-rm -f ./$(DEPDIR)/umode_softcallerid.Plo
+	-rm -f ./$(DEPDIR)/umode_spy.Plo
+	-rm -f ./$(DEPDIR)/umode_wallops.Plo
+	-rm -f ./$(DEPDIR)/umode_webirc.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

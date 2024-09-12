@@ -36,6 +36,7 @@
 #include "numeric.h"
 #include "server.h"
 #include "send.h"
+#include "user_mode.h"
 #include "memory.h"
 #include "parse.h"
 #include "extban.h"
@@ -389,7 +390,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 
   if (mode->only_opers)
   {
-    if (!HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(client, UMODE_OPER) == false)
     {
       if (!(*errors & SM_ERR_NOTOPER))
         sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);

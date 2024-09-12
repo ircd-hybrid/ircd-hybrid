@@ -30,6 +30,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "server.h"
+#include "user_mode.h"
 #include "send.h"
 #include "conf.h"
 #include "parse.h"
@@ -48,7 +49,7 @@ do_links(struct Client *source, char *parv[])
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->servptr->name);
 
-  if (ConfigServerHide.flatten_links && !HasUMode(source, UMODE_OPER))
+  if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
   {
     flatten_links_send(source);
     return;
@@ -65,11 +66,11 @@ do_links(struct Client *source, char *parv[])
 
     /* Skip hidden servers */
     if (IsHidden(target))
-      if (!HasUMode(source, UMODE_OPER))
+      if (user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 
     if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(source, UMODE_OPER))
+      if (user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 
     if (!EmptyString(mask) && match(mask, target->name))

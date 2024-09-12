@@ -29,6 +29,7 @@
 #include "ircd.h"
 #include "irc_string.h"
 #include "parse.h"
+#include "user_mode.h"
 #include "module.h"
 #include "conf.h"
 
@@ -49,7 +50,7 @@ m_quit(struct Client *source, int parc, char *parv[])
 {
   const char *reason = "";
 
-  if (!EmptyString(parv[1]) && (HasUMode(source, UMODE_OPER) ||
+  if (!EmptyString(parv[1]) && (user_mode_has_flag(source, UMODE_OPER) ||
       (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
       < io_time_get(IO_TIME_MONOTONIC_SEC)))
     reason = parv[1];

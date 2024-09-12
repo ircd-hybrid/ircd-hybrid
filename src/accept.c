@@ -26,6 +26,7 @@
 #include "channel.h"
 #include "client.h"
 #include "conf.h"
+#include "user_mode.h"
 #include "accept.h"
 
 /*
@@ -111,14 +112,14 @@ accept_message(struct Client *source, struct Client *target)
   list_node_t *node;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      (HasUMode(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
+      (user_mode_has_flag(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
   if (source == target || accept_find(source->name, source->username, source->host,
                                       &target->connection->acceptlist, match))
     return true;
 
-  if (!HasUMode(target, UMODE_CALLERID) && HasUMode(target, UMODE_SOFTCALLERID))
+  if (user_mode_has_flag(target, UMODE_CALLERID) == false && user_mode_has_flag(target, UMODE_SOFTCALLERID))
     LIST_FOREACH(node, target->channel.head)
       if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
         return true;

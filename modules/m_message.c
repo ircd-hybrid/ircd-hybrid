@@ -33,6 +33,7 @@
 #include "server.h"
 #include "send.h"
 #include "parse.h"
+#include "user_mode.h"
 #include "module.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -101,7 +102,7 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (HasUMode(source, UMODE_OPER))
+  if (user_mode_has_flag(source, UMODE_OPER))
     return false;
 
   if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
@@ -150,7 +151,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (HasUMode(source, UMODE_OPER))
+  if (user_mode_has_flag(source, UMODE_OPER))
     return false;
 
   if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
@@ -237,7 +238,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
     if (target->away[0] && notice == false)
       sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
-    if (HasUMode(target, UMODE_SECUREONLY) && !HasUMode(source, UMODE_SECURE))
+    if (user_mode_has_flag(target, UMODE_SECUREONLY) && user_mode_has_flag(source, UMODE_SECURE) == false)
     {
       if (notice == false)
         sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
@@ -245,7 +246,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
     }
 
-    if (HasUMode(source, UMODE_SECUREONLY) && !HasUMode(target, UMODE_SECURE))
+    if (user_mode_has_flag(source, UMODE_SECUREONLY) && user_mode_has_flag(target, UMODE_SECURE) == false)
     {
       if (notice == false)
         sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
@@ -253,9 +254,9 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
     }
 
-    if (HasUMode(target, UMODE_REGONLY) && target != source)
+    if (user_mode_has_flag(target, UMODE_REGONLY) && target != source)
     {
-      if (!HasUMode(source, UMODE_REGISTERED | UMODE_OPER))
+      if (user_mode_has_flag(source, UMODE_REGISTERED | UMODE_OPER) == false)
       {
         if (notice == false)
           sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
@@ -267,10 +268,10 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 
   if (MyClient(target) && IsClient(source))
   {
-    if (HasUMode(target, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
+    if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
         accept_message(source, target) == false)
     {
-      bool callerid = HasUMode(target, UMODE_CALLERID) != 0;
+      bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
 
       /* check for accept, flag recipient incoming message */
       if (notice == false)
@@ -353,7 +354,7 @@ handle_special(bool notice, struct Client *source, const char *nick, const char 
    */
   if (*nick == '$')
   {
-    if (!HasUMode(source, UMODE_OPER))
+    if (user_mode_has_flag(source, UMODE_OPER) == false)
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
       return;

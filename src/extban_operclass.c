@@ -30,12 +30,13 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "conf_class.h"
+#include "user_mode.h"
 #include "extban.h"
 
 static enum extban_match
 extban_operclass_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  if (MyConnect(client) && HasUMode(client, UMODE_OPER))
+  if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER))
     if (match(ban->host, class_get_name(&client->connection->confs)) == 0)
       return EXTBAN_MATCH;
 

@@ -122,43 +122,34 @@ enum
 #define DelFlag(x, y) ((x)->flags &= ~(y))
 
 
-/** User mode flags */
-enum
-{
-  UMODE_SERVNOTICE   = 1 <<  0,  /**< Server notices such as kill */
-  UMODE_CCONN        = 1 <<  1,  /**< Can see client connection notices */
-  UMODE_REJ          = 1 <<  2,  /**< Bot Rejections */
-  UMODE_SKILL        = 1 <<  3,  /**< Server Killed */
-  UMODE_FLOOD        = 1 <<  4,  /**< Flooding/spambot notices */
-  UMODE_SPY          = 1 <<  5,  /**< See STATS / LINKS */
-  UMODE_CLOAK        = 1 <<  6,
-  UMODE_NCHANGE      = 1 <<  7,  /**< Nick change notice */
-  UMODE_WALLOP       = 1 <<  8,  /**< Send wallops to them */
-  UMODE_INVISIBLE    = 1 <<  9,  /**< Makes user invisible */
-  UMODE_EXTERNAL     = 1 << 10,  /**< Show servers introduced and splitting */
-  UMODE_CALLERID     = 1 << 11,  /**< Block unless caller id's */
-  UMODE_SOFTCALLERID = 1 << 12,  /**< Block unless on common channel */
-  UMODE_LOCOPS       = 1 << 13,  /**< Can see LOCOPS messages */
-  UMODE_DEAF         = 1 << 14,  /**< Don't receive channel messages */
-  UMODE_REGISTERED   = 1 << 15,  /**< User has identified for that nick. */
-  UMODE_REGONLY      = 1 << 16,  /**< Only registered nicks may PM */
-  UMODE_HIDDEN       = 1 << 17,  /**< IRC operator status is hidden */
-  UMODE_OPER         = 1 << 18,  /**< IRC operator */
-  UMODE_ADMIN        = 1 << 19,  /**< Admin on server */
-  UMODE_FARCONNECT   = 1 << 20,  /**< Can see remote client connects/exits */
-  UMODE_SECURE       = 1 << 21,  /**< User is connected via TLS */
-  UMODE_WEBIRC       = 1 << 22,  /**< User connected via a webirc gateway */
-  UMODE_HIDEIDLE     = 1 << 23,  /**< Hides idle and signon time in WHOIS */
-  UMODE_HIDECHANS    = 1 << 24,  /**< Hides channel list in WHOIS */
-  UMODE_EXPIRATION   = 1 << 25,  /**< Receives *LINE expiration notices */
-  UMODE_BOT          = 1 << 26,  /**< Client is marked as a bot in WHOIS and WHO */
-  UMODE_SECUREONLY   = 1 << 27,  /**< Client may only receive private messages from secure connections */
-};
-
-#define HasUMode(x, y) ((x)->umodes &   (y))
-#define AddUMode(x, y) ((x)->umodes |=  (y))
-#define DelUMode(x, y) ((x)->umodes &= ~(y))
-
+extern uint64_t UMODE_BOT;
+extern uint64_t UMODE_DEAF;
+extern uint64_t UMODE_FARCONNECT;
+extern uint64_t UMODE_SOFTCALLERID;
+extern uint64_t UMODE_HIDDEN;
+extern uint64_t UMODE_EXPIRATION;
+extern uint64_t UMODE_REGONLY;
+extern uint64_t UMODE_SECURE;
+extern uint64_t UMODE_WEBIRC;
+extern uint64_t UMODE_SECUREONLY;
+extern uint64_t UMODE_ADMIN;
+extern uint64_t UMODE_CCONN;
+extern uint64_t UMODE_EXTERNAL;
+extern uint64_t UMODE_FLOOD;
+extern uint64_t UMODE_CALLERID;
+extern uint64_t UMODE_INVISIBLE;
+extern uint64_t UMODE_REJ;
+extern uint64_t UMODE_SKILL;
+extern uint64_t UMODE_LOCOPS;
+extern uint64_t UMODE_NCHANGE;
+extern uint64_t UMODE_OPER;
+extern uint64_t UMODE_HIDECHANS;
+extern uint64_t UMODE_HIDEIDLE;
+extern uint64_t UMODE_REGISTERED;
+extern uint64_t UMODE_SERVNOTICE;
+extern uint64_t UMODE_WALLOP;
+extern uint64_t UMODE_CLOAK;
+extern uint64_t UMODE_SPY;
 
 /** irc-operator privilege flags */
 enum
@@ -342,7 +333,7 @@ struct Client
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
 
   unsigned int flags;  /**< Client flags */
-  unsigned int umodes;  /**< User modes this client has set */
+  uint64_t umodes;  /**< User modes this client has set */
   unsigned int hopcount;  /**< Number of servers to this 0 = local */
   unsigned int status;  /**< Client type */
   unsigned int handler;  /**< Handler index */

@@ -35,6 +35,7 @@
 #include "module.h"
 #include "irc_string.h"
 #include "user.h"
+#include "user_mode.h"
 #include "hash.h"
 #include "monitor.h"
 #include "whowas.h"
@@ -110,12 +111,12 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   clear_ban_cache_list(&target->channel);
   monitor_signoff(target);
 
-  if (HasUMode(target, UMODE_REGISTERED))
+  if (user_mode_has_flag(target, UMODE_REGISTERED))
   {
-    const unsigned int oldmodes = target->umodes;
-    DelUMode(target, UMODE_REGISTERED);
+    const uint64_t oldmodes = target->umodes;
+    user_mode_unset_flag(target, UMODE_REGISTERED);
 
-    send_umode(target, oldmodes, true, false);
+    user_mode_send(target, oldmodes, true, false);
   }
 
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",

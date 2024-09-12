@@ -33,6 +33,7 @@
 #include "numeric.h"
 #include "server.h"
 #include "send.h"
+#include "user_mode.h"
 #include "parse.h"
 #include "module.h"
 #include "conf.h"
@@ -68,11 +69,11 @@ trace_send_status(struct Client *source, const struct Client *target)
   {
     case STAT_CONNECTING:
       sendto_one_numeric(source, &me, RPL_TRACECONNECTING,
-                         class_name, HasUMode(source, UMODE_ADMIN) ? name : target->name);
+                         class_name, user_mode_has_flag(source, UMODE_ADMIN) ? name : target->name);
       break;
     case STAT_HANDSHAKE:
       sendto_one_numeric(source, &me, RPL_TRACEHANDSHAKE,
-                         class_name, HasUMode(source, UMODE_ADMIN) ? name : target->name);
+                         class_name, user_mode_has_flag(source, UMODE_ADMIN) ? name : target->name);
       break;
     case STAT_ME:
       break;
@@ -82,7 +83,7 @@ trace_send_status(struct Client *source, const struct Client *target)
                          io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic);
       break;
     case STAT_CLIENT:
-      if (HasUMode(target, UMODE_OPER))
+      if (user_mode_has_flag(target, UMODE_OPER))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, name, target->sockhost,
                            io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
@@ -100,7 +101,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 
       trace_get_dependent(&servers, &clients, target);
 
-      if (!HasUMode(source, UMODE_ADMIN))
+      if (user_mode_has_flag(source, UMODE_ADMIN) == false)
         name = client_get_name(target, MASK_IP);
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
@@ -119,7 +120,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 static void
 do_trace(struct Client *source, const char *name)
 {
-  assert(HasUMode(source, UMODE_OPER));
+  assert(user_mode_has_flag(source, UMODE_OPER));
 
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "TRACE requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->servptr->name);

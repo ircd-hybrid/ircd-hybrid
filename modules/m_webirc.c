@@ -33,6 +33,7 @@
 #include "module.h"
 #include "conf.h"
 #include "user.h"
+#include "user_mode.h"
 
 
 /*! \brief WEBIRC command handler
@@ -132,7 +133,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
     }
   }
 
-  AddUMode(source, UMODE_WEBIRC);
+  user_mode_set_flag(source, UMODE_WEBIRC);
   sendto_one_notice(source, &me, ":WebIRC host/IP set to %s %s", host, addr);
 }
 

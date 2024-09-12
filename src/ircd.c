@@ -454,7 +454,6 @@ main(int argc, char *argv[])
   extban_init();
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
-  user_modes_init();
   flatten_links_init();
 
   if (EmptyString(ConfigServerInfo.name))

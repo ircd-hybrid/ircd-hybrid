@@ -79,6 +79,7 @@ static struct
     rpass,
     spass,
     whois,
+    modes,
     class,
     target,
     prepend,
@@ -88,7 +89,6 @@ static struct
   {
     unsigned int value;
   } flags,
-    modes,
     size,
     type,
     port,
@@ -145,7 +145,6 @@ reset_block_state(void)
 %token  AUTOCONN
 %token  AWAY_COUNT
 %token  AWAY_TIME
-%token  BOT
 %token  BYTES KBYTES MBYTES
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
@@ -186,7 +185,6 @@ reset_block_state(void)
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
-%token  EXPIRATION
 %token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
 %token  FLATTEN_LINKS_DELAY
@@ -260,7 +258,6 @@ reset_block_state(void)
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP_GLOBAL
 %token  NUMBER_PER_IP_LOCAL
-%token  OPER_ONLY_UMODES
 %token  OPER_UMODES
 %token  OPERATOR
 %token  OPERS_BYPASS_CALLERID
@@ -300,41 +297,26 @@ reset_block_state(void)
 %token  STATS_U_OPER_ONLY
 %token  T_ALL
 %token  T_BIND
-%token  T_CALLERID
-%token  T_CCONN
 %token  T_COMMAND
 %token  T_CLUSTER
-%token  T_DEAF
 %token  T_DEBUG
 %token  T_DLINE
-%token  T_EXTERNAL
-%token  T_FARCONNECT
 %token  T_FILE
-%token  T_FLOOD
 %token  T_GLOBOPS
-%token  T_INVISIBLE
 %token  T_IPV4
 %token  T_IPV6
 %token  T_LOCOPS
 %token  T_LOG
-%token  T_NCHANGE
-%token  T_NONONREG
 %token  T_OPME
 %token  T_PREPEND
 %token  T_PSEUDO
 %token  T_RECVQ
-%token  T_REJ
 %token  T_RESTART
-%token  T_SECUREONLY
 %token  T_SERVER
 %token  T_SERVICE
-%token  T_SERVNOTICE
 %token  T_SET
 %token  T_SHARED
 %token  T_SIZE
-%token  T_SKILL
-%token  T_SOFTCALLERID
-%token  T_SPY
 %token  T_TARGET
 %token  T_TLS
 %token  T_UMODES
@@ -342,8 +324,6 @@ reset_block_state(void)
 %token  T_UNLIMITED
 %token  T_UNRESV
 %token  T_UNXLINE
-%token  T_WALLOP
-%token  T_WALLOPS
 %token  T_WEBIRC
 %token  TBOOL
 %token  THROTTLE_COUNT
@@ -994,8 +974,10 @@ oper_entry: OPERATOR
     if (block_state.whois.buf[0])
       conf->whois = io_strdup(block_state.whois.buf);
 
+    if (block_state.modes.buf[0])
+      conf->modes = io_strdup(block_state.modes.buf);
+
     conf->flags = block_state.flags.value;
-    conf->modes = block_state.modes.value;
     conf->port  = block_state.port.value;
     conf->htype = parse_netmask(conf->host, conf->addr, &conf->bits);
 
@@ -1074,101 +1056,10 @@ oper_class: CLASS '=' QSTRING ';'
     strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
 };
 
-oper_umodes: T_UMODES
+oper_umodes: T_UMODES '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.modes.value = 0;
-} '=' oper_umodes_items ';' ;
-
-oper_umodes_items: oper_umodes_items ',' oper_umodes_item | oper_umodes_item;
-oper_umodes_item: BOT
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_BOT;
-} | T_CCONN
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_CCONN;
-} | T_DEAF
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_DEAF;
-} | T_FLOOD
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_FLOOD;
-} | HIDDEN
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_HIDDEN;
-} | HIDE_CHANS
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_HIDECHANS;
-} | HIDE_IDLE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_HIDEIDLE;
-} | T_SKILL
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_SKILL;
-} | T_NCHANGE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_NCHANGE;
-} | T_REJ
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_REJ;
-} | T_SPY
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_SPY;
-} | T_EXTERNAL
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_EXTERNAL;
-} | T_SERVNOTICE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_SERVNOTICE;
-} | T_INVISIBLE
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_INVISIBLE;
-} | T_WALLOP
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_WALLOP;
-} | T_SOFTCALLERID
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_SOFTCALLERID;
-} | T_CALLERID
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_CALLERID;
-} | T_LOCOPS
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_LOCOPS;
-} | T_NONONREG
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_REGONLY;
-} | T_FARCONNECT
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_FARCONNECT;
-} | EXPIRATION
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_EXPIRATION;
-} | T_SECUREONLY
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.modes.value |= UMODE_SECUREONLY;
+    strlcpy(block_state.modes.buf, yylval.string, sizeof(block_state.modes.buf));
 };
 
 oper_flags: IRCD_FLAGS
@@ -1250,10 +1141,6 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_GLOBOPS;
-} | T_WALLOPS
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_WALLOPS;
 } | T_LOCOPS
 {
   if (conf_parser_ctx.pass == 2)
@@ -2411,7 +2298,6 @@ general_item:       general_away_count |
                     general_pace_wait_simple |
                     general_short_motd |
                     general_no_oper_flood |
-                    general_oper_only_umodes |
                     general_max_targets |
                     general_oper_umodes |
                     general_caller_id_wait |
@@ -2635,152 +2521,13 @@ general_throttle_time: THROTTLE_TIME '=' timespec ';'
   ConfigGeneral.throttle_time = $3;
 };
 
-general_oper_umodes: OPER_UMODES
+general_oper_umodes: OPER_UMODES '=' QSTRING ';'
 {
-  ConfigGeneral.oper_umodes = 0;
-} '=' umode_oitems ';' ;
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-umode_oitems:    umode_oitems ',' umode_oitem | umode_oitem;
-umode_oitem: BOT
-{
-  ConfigGeneral.oper_umodes |= UMODE_BOT;
-} | T_CCONN
-{
-  ConfigGeneral.oper_umodes |= UMODE_CCONN;
-} | T_DEAF
-{
-  ConfigGeneral.oper_umodes |= UMODE_DEAF;
-} | T_FLOOD
-{
-  ConfigGeneral.oper_umodes |= UMODE_FLOOD;
-} | HIDDEN
-{
-  ConfigGeneral.oper_umodes |= UMODE_HIDDEN;
-} | HIDE_CHANS
-{
-  ConfigGeneral.oper_umodes |= UMODE_HIDECHANS;
-} | HIDE_IDLE
-{
-  ConfigGeneral.oper_umodes |= UMODE_HIDEIDLE;
-} | T_SKILL
-{
-  ConfigGeneral.oper_umodes |= UMODE_SKILL;
-} | T_NCHANGE
-{
-  ConfigGeneral.oper_umodes |= UMODE_NCHANGE;
-} | T_REJ
-{
-  ConfigGeneral.oper_umodes |= UMODE_REJ;
-} | T_SPY
-{
-  ConfigGeneral.oper_umodes |= UMODE_SPY;
-} | T_EXTERNAL
-{
-  ConfigGeneral.oper_umodes |= UMODE_EXTERNAL;
-} | T_SERVNOTICE
-{
-  ConfigGeneral.oper_umodes |= UMODE_SERVNOTICE;
-} | T_INVISIBLE
-{
-  ConfigGeneral.oper_umodes |= UMODE_INVISIBLE;
-} | T_WALLOP
-{
-  ConfigGeneral.oper_umodes |= UMODE_WALLOP;
-} | T_SOFTCALLERID
-{
-  ConfigGeneral.oper_umodes |= UMODE_SOFTCALLERID;
-} | T_CALLERID
-{
-  ConfigGeneral.oper_umodes |= UMODE_CALLERID;
-} | T_LOCOPS
-{
-  ConfigGeneral.oper_umodes |= UMODE_LOCOPS;
-} | T_NONONREG
-{
-  ConfigGeneral.oper_umodes |= UMODE_REGONLY;
-} | T_FARCONNECT
-{
-  ConfigGeneral.oper_umodes |= UMODE_FARCONNECT;
-} | EXPIRATION
-{
-  ConfigGeneral.oper_umodes |= UMODE_EXPIRATION;
-} | T_SECUREONLY
-{
-  ConfigGeneral.oper_umodes |= UMODE_SECUREONLY;
-};
-
-general_oper_only_umodes: OPER_ONLY_UMODES
-{
-  ConfigGeneral.oper_only_umodes = 0;
-} '=' umode_items ';' ;
-
-umode_items:  umode_items ',' umode_item | umode_item;
-umode_item: BOT
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_BOT;
-} | T_CCONN
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_CCONN;
-} | T_DEAF
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_DEAF;
-} | T_FLOOD
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_FLOOD;
-} | T_SKILL
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_SKILL;
-} | HIDDEN
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_HIDDEN;
-} | HIDE_CHANS
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_HIDECHANS;
-} | HIDE_IDLE
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_HIDEIDLE;
-} | T_NCHANGE
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_NCHANGE;
-} | T_REJ
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_REJ;
-} | T_SPY
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_SPY;
-} | T_EXTERNAL
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_EXTERNAL;
-} | T_SERVNOTICE
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_SERVNOTICE;
-} | T_INVISIBLE
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_INVISIBLE;
-} | T_WALLOP
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_WALLOP;
-} | T_SOFTCALLERID
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_SOFTCALLERID;
-} | T_CALLERID
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_CALLERID;
-} | T_LOCOPS
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_LOCOPS;
-} | T_NONONREG
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_REGONLY;
-} | T_FARCONNECT
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_FARCONNECT;
-} | EXPIRATION
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_EXPIRATION;
-} | T_SECUREONLY
-{
-  ConfigGeneral.oper_only_umodes |= UMODE_SECUREONLY;
+  io_free(ConfigGeneral.oper_umodes);
+  ConfigGeneral.oper_umodes = io_strdup(yylval.string);
 };
 
 general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'

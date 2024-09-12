@@ -34,7 +34,7 @@
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "user.h"
+#include "user_mode.h"
 #include "conf.h"
 #include "send.h"
 #include "parse.h"
@@ -51,11 +51,6 @@
 static void
 set_user_mode(struct Client *source, const int parc, char *parv[])
 {
-  const struct user_modes *tab = NULL;
-  const unsigned int oldmodes = source->umodes;
-  bool badmode = false;
-  int what = MODE_ADD;
-
   const struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
   {
@@ -73,9 +68,13 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
   if (parc < 3)
   {
     sendto_one_numeric(source, &me, RPL_UMODEIS,
-                       user_get_mode_str(source->umodes));
+                       user_mode_to_str(source->umodes));
     return;
   }
+
+  const uint64_t oldmodes = source->umodes;
+  user_mode_action_t action = USER_MODE_ADD;
+  bool badmode = false;
 
   /* Parse user mode change string */
   for (const char *m = parv[2]; *m; ++m)
@@ -83,96 +82,14 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
     switch (*m)
     {
       case '+':
-        what = MODE_ADD;
+        action = USER_MODE_ADD;
         break;
       case '-':
-        what = MODE_DEL;
+        action = USER_MODE_DEL;
         break;
-      case 'o':
-        if (what == MODE_ADD)
-        {
-          if (!MyConnect(source) && !HasUMode(source, UMODE_OPER))
-          {
-            ++Count.oper;
-            SetOper(source);
-          }
-        }
-        else
-        {
-          if (!HasUMode(source, UMODE_OPER))
-            break;
-
-          ClearOper(source);
-          --Count.oper;
-
-          if (MyConnect(source))
-          {
-            svstag_detach(&source->svstags, RPL_WHOISOPERATOR);
-            conf_detach(source, CONF_OPER);
-
-            ClrOFlag(source);
-            DelUMode(source, ConfigGeneral.oper_only_umodes);
-
-            list_node_t *node = list_find_remove(&oper_list, source);
-            if (node)
-              list_free_node(node);
-          }
-        }
-
-        break;
-      case 'x':
-        if (what == MODE_ADD)
-        {
-          if (HasUMode(source, UMODE_CLOAK))
-            break;
-
-          if (MyConnect(source))
-          {
-            if (HasFlag(source, FLAGS_SPOOF))
-              break;
-
-            const char *const cloak = cloak_compute(&source->addr);
-            if (cloak == NULL)
-              break;
-            user_set_hostmask(source, cloak, true);
-          }
-
-          AddUMode(source, UMODE_CLOAK);
-        }
-        else
-        {
-          if (!HasUMode(source, UMODE_CLOAK))
-            break;
-
-          DelUMode(source, UMODE_CLOAK);
-
-          if (MyConnect(source))
-            user_set_hostmask(source, source->realhost, true);
-        }
-
-      case 'S':  /* Only servers may set +S in a burst */
-      case 'W':  /* Only servers may set +W in a burst */
-      case 'r':  /* Only services may set +r */
-      case 'z':  /* Only servers may set +z in a burst */
-        break;
-
       default:
-        if ((tab = umode_map[(unsigned char)*m]))
-        {
-          if (MyConnect(source) && !HasUMode(source, UMODE_OPER) &&
-              (ConfigGeneral.oper_only_umodes & tab->flag))
-            badmode = true;
-          else
-          {
-            if (what == MODE_ADD)
-              AddUMode(source, tab->flag);
-            else
-              DelUMode(source, tab->flag);
-          }
-        }
-        else if (MyConnect(source))
+        if (user_mode_change(source, *m, USER_MODE_SOURCE_REGULAR, action) < 0 && MyConnect(source))
           badmode = true;
-
         break;
     }
   }
@@ -180,23 +97,11 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
   if (badmode)
     sendto_one_numeric(source, &me, ERR_UMODEUNKNOWNFLAG);
 
-  if (MyConnect(source) && HasUMode(source, UMODE_ADMIN) &&
-      !HasOFlag(source, OPER_FLAG_ADMIN))
-  {
-    sendto_one_notice(source, &me, ":*** You have no admin flag;");
-    DelUMode(source, UMODE_ADMIN);
-  }
-
-  if (!(oldmodes & UMODE_INVISIBLE) && HasUMode(source, UMODE_INVISIBLE))
-    ++Count.invisi;
-  else if ((oldmodes & UMODE_INVISIBLE) && !HasUMode(source, UMODE_INVISIBLE))
-    --Count.invisi;
-
   /*
    * Compare new modes with old modes and send string which will cause
    * servers to update correctly.
    */
-  send_umode(source, oldmodes, MyConnect(source), true);
+  user_mode_send(source, oldmodes, MyConnect(source), true);
 }
 
 /*! \brief MODE command handler

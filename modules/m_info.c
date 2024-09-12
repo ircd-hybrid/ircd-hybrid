@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "server.h"
 #include "send.h"
+#include "user_mode.h"
 #include "conf.h"
 #include "parse.h"
 #include "module.h"
@@ -118,6 +119,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "stats_i_oper_only", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.stats_i_oper_only, "STATS I output is only shown to operators"),
   INFO_ENTRY_INIT("general", "stats_k_oper_only", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.stats_k_oper_only, "STATS K output is only shown to operators"),
   INFO_ENTRY_INIT("general", "caller_id_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.caller_id_wait, "Minimum delay between notifying UMODE +g users of messages"),
+  INFO_ENTRY_INIT("general", "oper_umodes", INFO_OUTPUT_STRING, &ConfigGeneral.oper_umodes, "Default user modes assigned to operators upon successful OPER"),
   INFO_ENTRY_INIT("general", "opers_bypass_callerid", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.opers_bypass_callerid, "Allows IRC operators to message users who are +g (callerid)"),
   INFO_ENTRY_INIT("general", "pace_wait_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait_simple, "Minimum delay between less intensive commands"),
   INFO_ENTRY_INIT("general", "pace_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait, "Minimum delay between uses of certain commands"),
@@ -236,7 +238,7 @@ send_info_text(struct Client *client)
     sendto_one_numeric(client, &me, RPL_INFO, line);
   }
 
-  if (HasUMode(client, UMODE_OPER))
+  if (user_mode_has_flag(client, UMODE_OPER))
   {
     info_send(client);
 

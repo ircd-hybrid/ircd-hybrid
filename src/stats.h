@@ -79,17 +79,17 @@ struct StatsHandler
 {
   unsigned char letter;  /**< The character representing the stats command. */
   stats_handler_func handler;  /**< The function to handle the stats command. */
-  unsigned int required_modes;  /**< The required user modes to access this stats command. */
+  uint64_t *required_modes;  /**< The required user modes to access this stats command. */
   bool enabled;  /**< Indicates if the handler is enabled. */
 };
 
 extern void stats_register_array(const struct StatsHandler *, size_t);
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
-extern bool stats_allowed(const struct StatsHandler *, unsigned int);
-extern stats_result_t stats_register(unsigned char, stats_handler_func, unsigned int);
+extern bool stats_allowed(const struct StatsHandler *, uint64_t);
+extern stats_result_t stats_register(unsigned char, stats_handler_func, uint64_t *);
 extern stats_result_t stats_unregister(unsigned char);
 extern stats_result_t stats_set_enabled(unsigned char);
 extern stats_result_t stats_set_disabled(unsigned char);
-extern stats_result_t stats_set_required_modes(unsigned char, unsigned int);
+extern stats_result_t stats_set_required_modes(unsigned char, uint64_t *);
 extern struct StatsHandler *stats_find(unsigned char);
 #endif  /* INCLUDED_stats_h */

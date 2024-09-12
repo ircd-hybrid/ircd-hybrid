@@ -33,6 +33,7 @@
 #include "server.h"
 #include "conf.h"
 #include "send.h"
+#include "user_mode.h"
 #include "whowas.h"
 #include "irc_string.h"
 #include "parse.h"
@@ -171,7 +172,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
     if (IsServer(source))
     {
       /* Don't send clients kills from a hidden server */
-      if ((IsHidden(source) || ConfigServerHide.hide_servers) && !HasUMode(target, UMODE_OPER))
+      if ((IsHidden(source) || ConfigServerHide.hide_servers) && user_mode_has_flag(target, UMODE_OPER) == false)
         sendto_one(target, ":%s KILL %s :%s",
                    me.name, target->name, reason);
       else

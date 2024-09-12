@@ -28,6 +28,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "user_mode.h"
 #include "irc_string.h"
 #include "parse.h"
 #include "module.h"
@@ -77,15 +78,15 @@ m_userhost(struct Client *source, int parc, char *parv[])
     if (target == source)
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target->name,
-                         HasUMode(target, UMODE_OPER) ? "*" : "",
+                         user_mode_has_flag(target, UMODE_OPER) ? "*" : "",
                          (target->away[0]) ? '-' : '+',
                          target->username,
                          target->sockhost);
     else
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
-                         target->name, (HasUMode(target, UMODE_OPER) &&
-                                          (!HasUMode(target, UMODE_HIDDEN) ||
-                                            HasUMode(source, UMODE_OPER))) ? "*" : "",
+                         target->name, (user_mode_has_flag(target, UMODE_OPER) &&
+                                        (user_mode_has_flag(target, UMODE_HIDDEN) == false ||
+                                         user_mode_has_flag(source, UMODE_OPER))) ? "*" : "",
                          (target->away[0]) ? '-' : '+',
                          target->username,
                          target->host);

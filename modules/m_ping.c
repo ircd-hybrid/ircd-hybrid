@@ -30,6 +30,7 @@
 #include "send.h"
 #include "irc_string.h"
 #include "parse.h"
+#include "user_mode.h"
 #include "module.h"
 #include "hash.h"
 #include "conf.h"
@@ -59,7 +60,7 @@ m_ping(struct Client *source, int parc, char *parv[])
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (ConfigServerHide.disable_remote_commands && !HasUMode(source, UMODE_OPER))
+  if (ConfigServerHide.disable_remote_commands && user_mode_has_flag(source, UMODE_OPER) == false)
   {
     sendto_one(source, ":%s PONG %s :%s",
                me.name, (destination) ? destination : me.name, parv[1]);

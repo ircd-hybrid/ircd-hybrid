@@ -42,6 +42,7 @@
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
+#include "user_mode.h"
 #include "memory.h"
 #include "misc.h"
 #include "extban.h"
@@ -468,7 +469,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       size_t masklen = 0;
       const struct ChannelMember *member = node->data;
 
-      if (HasUMode(member->client, UMODE_INVISIBLE) && is_member == false)
+      if (user_mode_has_flag(member->client, UMODE_INVISIBLE) && is_member == false)
         continue;
 
       if (uhnames)
@@ -703,13 +704,13 @@ is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 static int
 can_join(struct Client *client, struct Channel *channel, const char *key)
 {
-  if (HasCMode(channel, MODE_SECUREONLY) && !HasUMode(client, UMODE_SECURE))
+  if (HasCMode(channel, MODE_SECUREONLY) && user_mode_has_flag(client, UMODE_SECURE) == false)
     return ERR_SECUREONLYCHAN;
 
-  if (HasCMode(channel, MODE_REGONLY) && !HasUMode(client, UMODE_REGISTERED))
+  if (HasCMode(channel, MODE_REGONLY) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
     return ERR_NEEDREGGEDNICK;
 
-  if (HasCMode(channel, MODE_OPERONLY) && !HasUMode(client, UMODE_OPER))
+  if (HasCMode(channel, MODE_OPERONLY) && user_mode_has_flag(client, UMODE_OPER) == false)
     return ERR_OPERONLYCHAN;
 
   if (HasCMode(channel, MODE_INVITEONLY))
@@ -812,7 +813,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
   if (MyConnect(client) && !HasFlag(client, FLAGS_EXEMPTRESV))
   {
-    if (!(HasUMode(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
+    if (!(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
     {
       const struct ResvItem *const resv = resv_find(channel->name, match);
       if (resv && resv_exempt_find(client, resv) == false)
@@ -854,7 +855,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (HasCMode(channel, MODE_MODREG) && !HasUMode(client, UMODE_REGISTERED))
+  if (HasCMode(channel, MODE_MODREG) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
   {
     *error = "you need to identify to a registered nick";
     return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -1006,7 +1007,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     }
 
     if (!HasFlag(client, FLAGS_EXEMPTRESV) &&
-        !(HasUMode(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
+        !(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
         ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
     {
       sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
@@ -1042,7 +1043,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       channel = channel_make(name);
     }
 
-    if (!HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(client, UMODE_OPER) == false)
       channel_check_spambot_warning(client, channel->name);
 
     channel_add_user(channel, client, flags, true);
@@ -1121,7 +1122,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     return;
   }
 
-  if (MyConnect(client) && !HasUMode(client, UMODE_OPER))
+  if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
     channel_check_spambot_warning(client, NULL);
 
   /*

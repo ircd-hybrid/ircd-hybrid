@@ -34,6 +34,7 @@
 #include "conf.h"
 #include "conf_resv.h"
 #include "user.h"
+#include "user_mode.h"
 #include "whowas.h"
 #include "send.h"
 #include "channel.h"
@@ -206,7 +207,7 @@ change_local_nick(struct Client *source, const char *nick)
   if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
     source->connection->nick.count = 0;
 
-  if (ConfigGeneral.anti_nick_flood && !HasUMode(source, UMODE_OPER) &&
+  if (ConfigGeneral.anti_nick_flood && user_mode_has_flag(source, UMODE_OPER) == false &&
       (source->connection->nick.count > ConfigGeneral.max_nick_changes))
   {
     sendto_one_numeric(source, &me, ERR_NICKTOOFAST,
@@ -224,12 +225,12 @@ change_local_nick(struct Client *source, const char *nick)
     clear_ban_cache_list(&source->channel);
     monitor_signoff(source);
 
-    if (HasUMode(source, UMODE_REGISTERED))
+    if (user_mode_has_flag(source, UMODE_REGISTERED))
     {
-      const unsigned int oldmodes = source->umodes;
-      DelUMode(source, UMODE_REGISTERED);
+      const uint64_t oldmodes = source->umodes;
+      user_mode_unset_flag(source, UMODE_REGISTERED);
 
-      send_umode(source, oldmodes, true, false);
+      user_mode_send(source, oldmodes, true, false);
     }
   }
 
@@ -281,7 +282,7 @@ change_remote_nick(struct Client *source, char *parv[])
   bool samenick = irccmp(source->name, parv[1]) == 0;
   if (samenick == false)
   {
-    DelUMode(source, UMODE_REGISTERED);
+    user_mode_unset_flag(source, UMODE_REGISTERED);
     monitor_signoff(source);
 
     source->tsinfo = strtoumax(parv[2], NULL, 10);
@@ -368,16 +369,16 @@ uid_from_server(struct Client *source, int parc, char *parv[])
   /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
-    const struct user_modes *tab = umode_map[(unsigned char)*m];
-    if (tab == NULL)
-      continue;
+    const struct UserMode *mode = user_mode_find(*m);
+    if (mode == NULL)
+      continue;  /* Skip if the mode character is invalid or unregistered. */
 
-    if ((tab->flag & UMODE_INVISIBLE) && !HasUMode(client_p, UMODE_INVISIBLE))
+    if ((mode->mode_bit & UMODE_INVISIBLE) && user_mode_has_flag(client_p, UMODE_INVISIBLE) == false)
       ++Count.invisi;
-    else if ((tab->flag & UMODE_OPER) && !HasUMode(client_p, UMODE_OPER))
+    else if ((mode->mode_bit & UMODE_OPER) && user_mode_has_flag(client_p, UMODE_OPER) == false)
       ++Count.oper;
 
-    AddUMode(client_p, tab->flag);
+    user_mode_set_flag(client_p, mode->mode_bit);
   }
 
   user_register_remote(client_p);
@@ -655,7 +656,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   }
 
   if (!HasFlag(source, FLAGS_EXEMPTRESV) &&
-      !(HasUMode(source, UMODE_OPER) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
+      !(user_mode_has_flag(source, UMODE_OPER) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
       (resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);

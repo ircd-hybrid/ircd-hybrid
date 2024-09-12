@@ -34,7 +34,7 @@
 #include "channel_mode.h"
 #include "parse.h"
 #include "module.h"
-#include "user.h"
+#include "user_mode.h"
 #include "conf.h"
 
 
@@ -55,8 +55,6 @@ static void
 ms_svsmode(struct Client *source, int parc, char *parv[])
 {
   const char *const modes = parv[3];
-  const struct user_modes *tab = NULL;
-  int what = MODE_ADD;
 
   if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
@@ -69,69 +67,21 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   if (ts && (ts != target->tsinfo))
     return;
 
-  const unsigned int oldmodes = target->umodes;
+  const uint64_t oldmodes = target->umodes;
+  user_mode_action_t action = USER_MODE_ADD;
 
   for (const char *m = modes; *m; ++m)
   {
     switch (*m)
     {
       case '+':
-        what = MODE_ADD;
+        action = USER_MODE_ADD;
         break;
       case '-':
-        what = MODE_DEL;
+        action = USER_MODE_DEL;
         break;
-
-      case 'o':
-        if (what == MODE_DEL && HasUMode(target, UMODE_OPER))
-        {
-          ClearOper(target);
-          --Count.oper;
-
-          if (MyConnect(target))
-          {
-            svstag_detach(&target->svstags, RPL_WHOISOPERATOR);
-            conf_detach(target, CONF_OPER);
-
-            ClrOFlag(target);
-            DelUMode(target, ConfigGeneral.oper_only_umodes);
-
-            list_node_t *node = list_find_remove(&oper_list, target);
-            if (node)
-              list_free_node(node);
-          }
-        }
-
-        break;
-
-      case 'i':
-        if (what == MODE_ADD && !HasUMode(target, UMODE_INVISIBLE))
-        {
-          AddUMode(target, UMODE_INVISIBLE);
-          ++Count.invisi;
-        }
-        else if (what == MODE_DEL && HasUMode(target, UMODE_INVISIBLE))
-        {
-          DelUMode(target, UMODE_INVISIBLE);
-          --Count.invisi;
-        }
-
-        break;
-
-      case 'z':
-      case 'S':  /* Only servers may set +S in a burst */
-      case 'W':  /* Only servers may set +W in a burst */
-        break;
-
       default:
-        if ((tab = umode_map[(unsigned char)*m]))
-        {
-          if (what == MODE_ADD)
-            AddUMode(target, tab->flag);
-          else
-            DelUMode(target, tab->flag);
-        }
-
+        user_mode_change(target, *m, USER_MODE_SOURCE_SVSMODE, action);
         break;
     }
   }
@@ -140,7 +90,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
                  source->id, target->id, target->tsinfo, modes);
 
   if (MyConnect(target))
-    send_umode(target, oldmodes, true, false);
+    user_mode_send(target, oldmodes, true, false);
 }
 
 static struct Command command_table =

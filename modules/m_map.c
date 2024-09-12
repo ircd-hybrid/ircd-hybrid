@@ -29,6 +29,7 @@
 #include "module.h"
 #include "numeric.h"
 #include "send.h"
+#include "user_mode.h"
 #include "conf.h"
 #include "ircd.h"
 #include "parse.h"
@@ -45,11 +46,11 @@ dump_map_flat(struct Client *client)
     const struct Client *const server = node->data;
 
     if (IsHidden(server))
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     ++count;
@@ -61,11 +62,11 @@ dump_map_flat(struct Client *client)
     const struct Client *const server = node->data;
 
     if (IsHidden(server))
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     char buf[IRCD_BUFSIZE];
@@ -114,7 +115,7 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
     char buf[IRCD_BUFSIZE];
     unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
 
-    if (HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(client, UMODE_OPER))
       bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "[%s]", server->id);
 
     buf[bufpos++] = ' ';
@@ -151,11 +152,11 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
     const struct Client *target = node->data;
 
     if (IsHidden(target))
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     ++count;
@@ -166,11 +167,11 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
     const struct Client *target = node->data;
 
     if (IsHidden(target))
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (!HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
     if (--count == 0)
@@ -193,7 +194,7 @@ do_map(struct Client *source)
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->servptr->name);
 
-  if (ConfigServerHide.flatten_links && !HasUMode(source, UMODE_OPER))
+  if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
     dump_map_flat(source);
   else
     dump_map(source, &me, 0);

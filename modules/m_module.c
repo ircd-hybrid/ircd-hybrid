@@ -33,6 +33,7 @@
 #include "send.h"
 #include "parse.h"
 #include "module.h"
+#include "user_mode.h"
 
 static void
 announce_load(const char *name, const void *handle, void *user_data)
@@ -92,6 +93,8 @@ module_cmd_unload(struct Client *source, const char *arg)
 
   if (module_unload(arg, false, source) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
+  else
+    user_mode_send_invalid();  /* XXX hook */
 
   module_set_unload_callback(NULL);
 }
@@ -123,6 +126,8 @@ module_cmd_reload_single(struct Client *source, const char *arg)
 
   if (module_load(arg, true, source) != MODULE_SUCCESS)
     sendto_one_notice(source, &me, ":%s", module_get_error());
+  else
+    user_mode_send_invalid();  /* XXX hook */
 
   module_set_load_callback(NULL);
 
@@ -158,6 +163,8 @@ module_cmd_reload_all(struct Client *source)
   }
   else
     sendto_one_notice(source, &me, ":All modules reloaded successfully");
+
+  user_mode_send_invalid();  /* XXX hook */
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Module reload: %u modules unloaded, %u modules loaded", unloaded_count, loaded_count);

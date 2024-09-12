@@ -42,7 +42,7 @@
 #include "server.h"
 #include "send.h"
 #include "whowas.h"
-#include "user.h"
+#include "user_mode.h"
 #include "memory.h"
 #include "listener.h"
 #include "monitor.h"
@@ -52,6 +52,35 @@
 #include "channel.h"
 #include "channel_invite.h"
 #include "accept.h"
+
+uint64_t UMODE_BOT;
+uint64_t UMODE_DEAF;
+uint64_t UMODE_FARCONNECT;
+uint64_t UMODE_SOFTCALLERID;
+uint64_t UMODE_HIDDEN;
+uint64_t UMODE_EXPIRATION;
+uint64_t UMODE_REGONLY;
+uint64_t UMODE_SECURE;
+uint64_t UMODE_WEBIRC;
+uint64_t UMODE_SECUREONLY;
+uint64_t UMODE_ADMIN;
+uint64_t UMODE_CCONN;
+uint64_t UMODE_EXTERNAL;
+uint64_t UMODE_FLOOD;
+uint64_t UMODE_CALLERID;
+uint64_t UMODE_INVISIBLE;
+uint64_t UMODE_REJ;
+uint64_t UMODE_SKILL;
+uint64_t UMODE_LOCOPS;
+uint64_t UMODE_NCHANGE;
+uint64_t UMODE_OPER;
+uint64_t UMODE_HIDECHANS;
+uint64_t UMODE_HIDEIDLE;
+uint64_t UMODE_REGISTERED;
+uint64_t UMODE_SERVNOTICE;
+uint64_t UMODE_WALLOP;
+uint64_t UMODE_CLOAK;
+uint64_t UMODE_SPY;
 
 list_t listing_client_list;
 list_t unknown_list;
@@ -640,9 +669,9 @@ exit_one_client(struct Client *client, const char *comment)
 
   if (IsClient(client))
   {
-    if (HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(client, UMODE_OPER))
       --Count.oper;
-    if (HasUMode(client, UMODE_INVISIBLE))
+    if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
 
     list_remove(&client->lnode, &client->servptr->serv->client_list);
@@ -761,7 +790,7 @@ client_exit(struct Client *client, const char *comment)
 
     if (IsClient(client))
     {
-      if (HasUMode(client, UMODE_OPER))
+      if (user_mode_has_flag(client, UMODE_OPER))
       {
         list_node_t *node = list_find_remove(&oper_list, client);
         if (node)
@@ -1011,7 +1040,7 @@ client_get_idle_time(const struct Client *source,
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
     return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
-  if (HasUMode(source, UMODE_OPER) &&
+  if (user_mode_has_flag(source, UMODE_OPER) &&
       !(class->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
     return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 

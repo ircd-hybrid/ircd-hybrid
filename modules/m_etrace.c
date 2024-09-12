@@ -32,6 +32,7 @@
 #include "numeric.h"
 #include "server.h"
 #include "send.h"
+#include "user_mode.h"
 #include "parse.h"
 #include "module.h"
 #include "conf.h"
@@ -52,7 +53,7 @@ trace_send_status(struct Client *source, const struct Client *target)
     return;
 
   sendto_one_numeric(source, &me, RPL_ETRACE,
-                     HasUMode(target, UMODE_OPER) ? "Oper" : "User",
+                     user_mode_has_flag(target, UMODE_OPER) ? "Oper" : "User",
                      class_get_name(&target->connection->confs),
                      target->name, target->username, target->host, target->sockhost, target->info);
 }

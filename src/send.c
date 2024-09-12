@@ -34,6 +34,7 @@
 #include "irc_string.h"
 #include "comm.h"
 #include "server_capab.h"
+#include "user_mode.h"
 #include "conf_class.h"
 #include "log.h"
 #include "conf.h"
@@ -331,17 +332,17 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
 static bool
 sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_recipient_t recipient)
 {
-  if (flags && !HasUMode(client, flags))
+  if (flags && user_mode_has_flag(client, flags) == false)
     return false;
 
   switch (recipient)
   {
     case SEND_RECIPIENT_ADMIN:
-      return HasUMode(client, UMODE_ADMIN);
+      return user_mode_has_flag(client, UMODE_ADMIN);
     case SEND_RECIPIENT_OPER:
-      return HasUMode(client, UMODE_OPER) && !HasUMode(client, UMODE_ADMIN);
+      return user_mode_has_flag(client, UMODE_OPER) && user_mode_has_flag(client, UMODE_ADMIN) == false;
     case SEND_RECIPIENT_OPER_ALL:
-      return HasUMode(client, UMODE_OPER);
+      return user_mode_has_flag(client, UMODE_OPER);
     case SEND_RECIPIENT_CLIENT:
       return true;
     default:
@@ -811,7 +812,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
     if (rank && member_highest_rank(member) < rank)
       continue;
 
-    if (HasUMode(target, UMODE_DEAF))
+    if (user_mode_has_flag(target, UMODE_DEAF))
       continue;
 
     if (MyConnect(target))

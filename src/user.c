@@ -27,7 +27,6 @@
 #include "io_time.h"
 #include "defaults.h"
 #include "list.h"
-#include "user.h"
 #include "cap.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -52,57 +51,8 @@
 #include "monitor.h"
 #include "isupport.h"
 #include "tls.h"
-
-static char umode_buffer[UMODE_MAX_STR];
-
-const struct user_modes *umode_map[256];
-const struct user_modes  umode_tab[] =
-{
-  { 'B', UMODE_BOT          },
-  { 'D', UMODE_DEAF         },
-  { 'F', UMODE_FARCONNECT   },
-  { 'G', UMODE_SOFTCALLERID },
-  { 'H', UMODE_HIDDEN       },
-  { 'X', UMODE_EXPIRATION   },
-  { 'R', UMODE_REGONLY      },
-  { 'S', UMODE_SECURE       },
-  { 'W', UMODE_WEBIRC       },
-  { 'Z', UMODE_SECUREONLY   },
-  { 'a', UMODE_ADMIN        },
-  { 'c', UMODE_CCONN        },
-  { 'e', UMODE_EXTERNAL     },
-  { 'f', UMODE_FLOOD        },
-  { 'g', UMODE_CALLERID     },
-  { 'i', UMODE_INVISIBLE    },
-  { 'j', UMODE_REJ          },
-  { 'k', UMODE_SKILL        },
-  { 'l', UMODE_LOCOPS       },
-  { 'n', UMODE_NCHANGE      },
-  { 'o', UMODE_OPER         },
-  { 'p', UMODE_HIDECHANS    },
-  { 'q', UMODE_HIDEIDLE     },
-  { 'r', UMODE_REGISTERED   },
-  { 's', UMODE_SERVNOTICE   },
-  { 'w', UMODE_WALLOP       },
-  { 'x', UMODE_CLOAK        },
-  { 'y', UMODE_SPY          },
-  { 'z', UMODE_SECURE       },
-  { '\0', 0 }
-};
-
-void
-user_modes_init(void)
-{
-  char *umode_buffer_ptr = umode_buffer;
-
-  for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-  {
-    umode_map[tab->c] = tab;
-    *umode_buffer_ptr++ = tab->c;
-  }
-
-  *umode_buffer_ptr = '\0';
-}
+#include "user.h"
+#include "user_mode.h"
 
 /* show_lusers()
  *
@@ -113,7 +63,7 @@ user_modes_init(void)
 void
 show_lusers(struct Client *client)
 {
-  if (ConfigServerHide.hide_servers == 0 || HasUMode(client, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || user_mode_has_flag(client, UMODE_OPER))
     sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (list_length(&global_client_list) - Count.invisi),
                        Count.invisi, list_length(&global_server_list));
   else
@@ -129,7 +79,7 @@ show_lusers(struct Client *client)
   if (list_length(channel_get_list()))
     sendto_one_numeric(client, &me, RPL_LUSERCHANNELS, list_length(channel_get_list()));
 
-  if (ConfigServerHide.hide_servers == 0 || HasUMode(client, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || user_mode_has_flag(client, UMODE_OPER))
   {
     sendto_one_numeric(client, &me, RPL_LUSERME, list_length(&local_client_list), list_length(&local_server_list));
     sendto_one_numeric(client, &me, RPL_LOCALUSERS, list_length(&local_client_list), Count.max_loc);
@@ -207,7 +157,7 @@ user_introduce(struct Client *client)
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->servptr->id, client->name, client->hopcount + 1,
-                 client->tsinfo, user_get_mode_str(client->umodes),
+                 client->tsinfo, user_mode_to_str(client->umodes),
                  client->username, client->host, client->realhost,
                  client->sockhost, client->id, client->account, client->info);
 
@@ -236,7 +186,7 @@ user_welcome(struct Client *client)
 
   if (HasFlag(client, FLAGS_TLS))
   {
-    AddUMode(client, UMODE_SECURE);
+    user_mode_set_flag(client, UMODE_SECURE);
 
     client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
@@ -252,7 +202,7 @@ user_welcome(struct Client *client)
   sendto_one_numeric(client, &me, RPL_YOURHOST,
                      listener_get_name(client->connection->listener), IRCD_VERSION);
   sendto_one_numeric(client, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, IRCD_VERSION, umode_buffer,
+  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, IRCD_VERSION, user_mode_string,
                      cmode_rpl04[0], cmode_rpl04[1]);
 
   isupport_show(client);
@@ -374,7 +324,7 @@ user_register_local(struct Client *client)
 
   if (ConfigGeneral.invisible_on_connect)
   {
-    AddUMode(client, UMODE_INVISIBLE);
+    user_mode_set_flag(client, UMODE_INVISIBLE);
     ++Count.invisi;
   }
 
@@ -417,11 +367,11 @@ user_register_local(struct Client *client)
     if (cloak)
     {
       user_set_hostmask(client, cloak, false);
-      AddUMode(client, UMODE_CLOAK);
+      user_mode_set_flag(client, UMODE_CLOAK);
     }
   }
 
-  send_umode(client, 0, true, false);
+  user_mode_send(client, 0, true, false);
   user_introduce(client);
 }
 
@@ -570,81 +520,6 @@ valid_nickname(const char *nickname, bool local)
       return false;
 
   return p - nickname <= NICKLEN;
-}
-
-/*! \brief Builds a mode change string to buffer pointed by \a buf
- * \param client  Pointer to client
- * \param send    Whether to send a MODE message to client
- * \param old     Old user mode to compare against when building new mode buffer
- */
-void
-send_umode(struct Client *client, unsigned int old, bool send_client, bool send_server)
-{
-  /*
-   * If the client's current user modes match the old modes, indicating no change,
-   * simply return without further processing.
-   */
-  if (client->umodes == old)
-    return;
-
-  char buf[UMODE_MAX_STR];
-  char *m = buf;
-  int what = MODE_NONE;
-
-  /*
-   * Construct a string in the 'buf' array to represent the modifications in the user's mode
-   * between the current modes (client->umodes) and the provided 'old' modes.
-   */
-  for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-  {
-    if ((tab->flag & old) && !HasUMode(client, tab->flag))
-    {
-      if (what == MODE_DEL)
-        *m++ = tab->c;
-      else
-      {
-        what = MODE_DEL;
-        *m++ = '-';
-        *m++ = tab->c;
-      }
-    }
-    else if (!(tab->flag & old) && HasUMode(client, tab->flag))
-    {
-      if (what == MODE_ADD)
-        *m++ = tab->c;
-      else
-      {
-        what = MODE_ADD;
-        *m++ = '+';
-        *m++ = tab->c;
-      }
-    }
-  }
-
-  *m = '\0';
-  assert(buf[0] != '\0');
-
-  if (send_client)
-    sendto_one(client, ":%s!%s@%s MODE %s :%s",
-               client->name, client->username, client->host, client->name, buf);
-  if (send_server)
-    sendto_servers(client, 0, 0, ":%s MODE %s :%s",
-                   client->id, client->id, buf);
-}
-
-const char *
-user_get_mode_str(unsigned int modes)
-{
-  static char buf[UMODE_MAX_STR];
-  char *m = buf;
-
-  *m++ = '+';
-  for (const struct user_modes *tab = umode_tab; tab->c; ++tab)
-    if (modes &tab->flag)
-      *m++ = tab->c;
-  *m = '\0';
-
-  return buf;
 }
 
 void

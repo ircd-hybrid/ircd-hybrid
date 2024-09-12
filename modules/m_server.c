@@ -40,7 +40,7 @@
 #include "misc.h"
 #include "server.h"
 #include "server_capab.h"
-#include "user.h"
+#include "user_mode.h"
 #include "send.h"
 #include "parse.h"
 #include "memory.h"
@@ -89,7 +89,7 @@ server_send_client(struct Client *client_p, struct Client *target)
   sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target->servptr->id,
              target->name, target->hopcount + 1,
-             target->tsinfo, user_get_mode_str(target->umodes),
+             target->tsinfo, user_mode_to_str(target->umodes),
              target->username, target->host, target->realhost,
              target->sockhost, target->id,
              target->account, target->info);
@@ -110,7 +110,7 @@ server_send_client(struct Client *client_p, struct Client *target)
     const struct ServicesTag *svstag = node->data;
     sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
                target->id, target->tsinfo, svstag->numeric,
-               user_get_mode_str(svstag->umodes), svstag->tag);
+               user_mode_to_str(svstag->umodes), svstag->tag);
   }
 }
 

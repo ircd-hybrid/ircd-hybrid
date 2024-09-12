@@ -139,7 +139,7 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) auth.$(OBJEXT) \
 	motd.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
 	parse.$(OBJEXT) stats.$(OBJEXT) send.$(OBJEXT) \
 	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	user_mode.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -188,7 +188,8 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/motd.Po ./$(DEPDIR)/numeric.Po \
 	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
 	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/user_mode.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -505,6 +506,8 @@ ircd_SOURCES = accept.c          \
                server_capab.h    \
                user.c            \
                user.h            \
+               user_mode.c       \
+               user_mode.h       \
                whowas.c          \
                whowas.h
 
@@ -659,6 +662,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/server_capab.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/user_mode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -887,6 +891,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/server_capab.Po
 	-rm -f ./$(DEPDIR)/stats.Po
 	-rm -f ./$(DEPDIR)/user.Po
+	-rm -f ./$(DEPDIR)/user_mode.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -989,6 +994,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/server_capab.Po
 	-rm -f ./$(DEPDIR)/stats.Po
 	-rm -f ./$(DEPDIR)/user.Po
+	-rm -f ./$(DEPDIR)/user_mode.Po
 	-rm -f ./$(DEPDIR)/whowas.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

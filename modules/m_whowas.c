@@ -35,6 +35,7 @@
 #include "misc.h"
 #include "server.h"
 #include "send.h"
+#include "user_mode.h"
 #include "conf.h"
 #include "conf_service.h"
 #include "parse.h"
@@ -50,7 +51,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
   sendto_one_numeric(source, &me, RPL_WHOWASUSER,
                      whowas->name, whowas->username, whowas->hostname, whowas->realname);
 
-  if (HasUMode(source, UMODE_OPER))
+  if (user_mode_has_flag(source, UMODE_OPER))
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
@@ -59,7 +60,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
                        whowas->name, whowas->account, "was");
 
   bool server_hidden = false;
-  if (!HasUMode(source, UMODE_OPER))
+  if (user_mode_has_flag(source, UMODE_OPER) == false)
   {
     if (whowas->server_hidden || ConfigServerHide.hide_servers)
       server_hidden = true;

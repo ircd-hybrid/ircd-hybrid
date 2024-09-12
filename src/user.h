@@ -28,23 +28,6 @@
 
 struct Client;
 
-enum
-{
-  /** sizeof("+abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ") + 1 */
-  UMODE_MAX_STR = 56
-};
-
-struct user_modes
-{
-  unsigned char c;
-  unsigned int flag;
-};
-
-extern const struct user_modes *umode_map[];
-extern const struct user_modes  umode_tab[];
-
-extern void user_modes_init(void);
-extern void send_umode(struct Client *, unsigned int, bool, bool);
 extern void show_lusers(struct Client *);
 extern void user_set_hostmask(struct Client *, const char *, bool);
 extern void user_register_local(struct Client *);
@@ -52,5 +35,4 @@ extern void user_register_remote(struct Client *);
 extern bool valid_hostname(const char *);
 extern bool valid_username(const char *, bool);
 extern bool valid_nickname(const char *, bool);
-extern const char *user_get_mode_str(unsigned int);
 #endif  /* INCLUDED_user_h */

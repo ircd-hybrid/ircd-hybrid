@@ -107,6 +107,8 @@ ircd_SOURCES = accept.c          \
                server_capab.h    \
                user.c            \
                user.h            \
+               user_mode.c       \
+               user_mode.h       \
                whowas.c          \
                whowas.h
 

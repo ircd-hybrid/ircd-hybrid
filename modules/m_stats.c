@@ -46,6 +46,7 @@
 #include "misc.h"
 #include "server.h"
 #include "server_capab.h"
+#include "user_mode.h"
 #include "event.h"
 #include "module.h"
 #include "whowas.h"
@@ -230,7 +231,7 @@ stats_gecos(struct Client *client, int parc, char *parv[])
 static void
 stats_operator(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
+  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -242,7 +243,7 @@ stats_operator(struct Client *client, int parc, char *parv[])
     const struct MaskItem *conf = node->data;
 
     /* Don't allow non opers to see oper privs */
-    if (HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(client, UMODE_OPER))
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
                          conf->name, oper_privs_as_string(conf->port),
                          conf->class->name);
@@ -275,7 +276,7 @@ stats_connect(struct Client *client, int parc, char *parv[])
     /*
      * Allow admins to see actual ips unless 'hide_server_ips' is enabled
      */
-    if (ConfigServerHide.hide_server_ips == 0 && HasUMode(client, UMODE_ADMIN))
+    if (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(client, UMODE_ADMIN))
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
                          'C', conf->host, buf, conf->name, conf->port, conf->class->name);
     else
@@ -645,7 +646,7 @@ show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
     *bufptr++ = '=';
   if (IsConfCanFlood(conf))
     *bufptr++ = '|';
-  if (HasUMode(client, UMODE_OPER))
+  if (user_mode_has_flag(client, UMODE_OPER))
   {
     if (IsConfExemptKline(conf))
       *bufptr++ = '^';
@@ -663,7 +664,7 @@ static void
 stats_auth(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_i_oper_only && !HasUMode(client, UMODE_OPER))
+  if (ConfigGeneral.stats_i_oper_only && !user_mode_has_flag(client, UMODE_OPER))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -680,7 +681,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      if (IsConfDoSpoofIp(conf) && !HasUMode(client, UMODE_OPER))
+      if (IsConfDoSpoofIp(conf) && user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
       sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
@@ -703,7 +704,7 @@ static void
 stats_kill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !HasUMode(client, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !user_mode_has_flag(client, UMODE_OPER))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -734,7 +735,7 @@ static void
 stats_tkill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !HasUMode(client, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !user_mode_has_flag(client, UMODE_OPER))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -763,7 +764,7 @@ stats_tkill(struct Client *client, int parc, char *parv[])
 static void
 stats_messages(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
+  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
     command_report(client);
@@ -799,21 +800,21 @@ stats_operedup(struct Client *client, int parc, char *parv[])
   {
     const struct Client *target = node->data;
 
-    if (HasUMode(target, UMODE_HIDDEN) && !HasUMode(client, UMODE_OPER))
+    if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(client, UMODE_OPER) == false)
       continue;
 
     const char *duration = "n/a";
-    if (HasUMode(client, UMODE_OPER) || !HasUMode(target, UMODE_HIDEIDLE))
+    if (user_mode_has_flag(client, UMODE_OPER) || user_mode_has_flag(target, UMODE_HIDEIDLE) == false)
       duration = time_format_duration(client_get_idle_time(client, target));
 
-    if (MyConnect(client) && HasUMode(client, UMODE_OPER))
+    if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
-                         HasUMode(target, UMODE_ADMIN) ? 'A' : 'O',
+                         user_mode_has_flag(target, UMODE_ADMIN) ? 'A' : 'O',
                          oper_privs_as_string(target->connection->operflags),
                          target->name, target->username, target->host, duration);
     else
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
-                         HasUMode(target, UMODE_ADMIN) ? 'A' : 'O',
+                         user_mode_has_flag(target, UMODE_ADMIN) ? 'A' : 'O',
                          target->name, target->username, target->host, duration);
     ++count;
   }
@@ -830,7 +831,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 static void
 stats_ports(struct Client *client, int parc, char *parv[])
 {
-  if (ConfigGeneral.stats_P_oper_only && !HasUMode(client, UMODE_OPER))
+  if (ConfigGeneral.stats_P_oper_only && !user_mode_has_flag(client, UMODE_OPER))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -845,7 +846,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
 
     if (listener_has_flag(listener, LISTENER_HIDDEN))
     {
-      if (!HasUMode(client, UMODE_ADMIN))
+      if (user_mode_has_flag(client, UMODE_ADMIN) == false)
         continue;
       *bufptr++ = 'H';
     }
@@ -860,7 +861,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
       *bufptr++ = 'D';
     *bufptr = '\0';
 
-    if (HasUMode(client, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
+    if (user_mode_has_flag(client, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
       sendto_one_numeric(client, &me, RPL_STATSPLINE,
                          'P', listener->port, listener->name, listener->ref_count, buf,
                          listener->active == true ? "active" : "disabled");
@@ -921,13 +922,13 @@ stats_tstats(struct Client *client, int parc, char *parv[])
 static void
 stats_uptime(struct Client *client, int parc, char *parv[])
 {
-  if (!HasUMode(client, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
+  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
   {
     sendto_one_numeric(client, &me, RPL_STATSUPTIME,
                        time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic));
-    if (ConfigServerHide.disable_remote_commands == 0 || HasUMode(client, UMODE_OPER))
+    if (ConfigServerHide.disable_remote_commands == 0 || user_mode_has_flag(client, UMODE_OPER))
        sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
   }
@@ -997,7 +998,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
 
     /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
-                       client_get_name(target, HasUMode(client, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
+                       client_get_name(target, user_mode_has_flag(client, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
                        dbuf_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,
@@ -1084,7 +1085,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
       type = HIDE_IP;
 
     if (IsServer(target) || IsConnecting(target) || IsHandshake(target))
-      if (!HasUMode(client, UMODE_ADMIN))
+      if (user_mode_has_flag(client, UMODE_ADMIN) == false)
         type = MASK_IP;
 
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
@@ -1135,45 +1136,45 @@ stats_ltrace(struct Client *client, int parc, char *parv[])
 
 static const struct StatsHandler stats_tab[] =
 {
-  STATS_HANDLER_INIT('a', stats_dns_servers, UMODE_ADMIN),
-  STATS_HANDLER_INIT('A', stats_dns_servers, UMODE_ADMIN),
-  STATS_HANDLER_INIT('c', stats_connect, UMODE_OPER),
-  STATS_HANDLER_INIT('C', stats_connect, UMODE_OPER),
-  STATS_HANDLER_INIT('d', stats_tdeny, UMODE_OPER),
-  STATS_HANDLER_INIT('D', stats_deny, UMODE_OPER),
-  STATS_HANDLER_INIT('e', stats_exempt, UMODE_OPER),
-  STATS_HANDLER_INIT('E', stats_events, UMODE_ADMIN),
-  STATS_HANDLER_INIT('f', stats_fdlist, UMODE_ADMIN),
-  STATS_HANDLER_INIT('F', stats_fdlist, UMODE_ADMIN),
-  STATS_HANDLER_INIT('h', stats_hubleaf, UMODE_OPER),
-  STATS_HANDLER_INIT('H', stats_hubleaf, UMODE_OPER),
+  STATS_HANDLER_INIT('a', stats_dns_servers, &UMODE_ADMIN),
+  STATS_HANDLER_INIT('A', stats_dns_servers, &UMODE_ADMIN),
+  STATS_HANDLER_INIT('c', stats_connect, &UMODE_OPER),
+  STATS_HANDLER_INIT('C', stats_connect, &UMODE_OPER),
+  STATS_HANDLER_INIT('d', stats_tdeny, &UMODE_OPER),
+  STATS_HANDLER_INIT('D', stats_deny, &UMODE_OPER),
+  STATS_HANDLER_INIT('e', stats_exempt, &UMODE_OPER),
+  STATS_HANDLER_INIT('E', stats_events, &UMODE_ADMIN),
+  STATS_HANDLER_INIT('f', stats_fdlist, &UMODE_ADMIN),
+  STATS_HANDLER_INIT('F', stats_fdlist, &UMODE_ADMIN),
+  STATS_HANDLER_INIT('h', stats_hubleaf, &UMODE_OPER),
+  STATS_HANDLER_INIT('H', stats_hubleaf, &UMODE_OPER),
   STATS_HANDLER_INIT('i', stats_auth, 0),
   STATS_HANDLER_INIT('I', stats_auth, 0),
   STATS_HANDLER_INIT('k', stats_tkill, 0),
   STATS_HANDLER_INIT('K', stats_kill, 0),
-  STATS_HANDLER_INIT('l', stats_ltrace, UMODE_OPER),
-  STATS_HANDLER_INIT('L', stats_ltrace, UMODE_OPER),
+  STATS_HANDLER_INIT('l', stats_ltrace, &UMODE_OPER),
+  STATS_HANDLER_INIT('L', stats_ltrace, &UMODE_OPER),
   STATS_HANDLER_INIT('m', stats_messages, 0),
   STATS_HANDLER_INIT('M', stats_messages, 0),
   STATS_HANDLER_INIT('o', stats_operator, 0),
   STATS_HANDLER_INIT('O', stats_operator, 0),
   STATS_HANDLER_INIT('p', stats_operedup, 0),
   STATS_HANDLER_INIT('P', stats_ports, 0),
-  STATS_HANDLER_INIT('q', stats_resv, UMODE_OPER),
-  STATS_HANDLER_INIT('Q', stats_resv, UMODE_OPER),
-  STATS_HANDLER_INIT('s', stats_pseudo, UMODE_OPER),
-  STATS_HANDLER_INIT('S', stats_service, UMODE_OPER),
-  STATS_HANDLER_INIT('t', stats_tstats, UMODE_OPER),
-  STATS_HANDLER_INIT('T', motd_report, UMODE_OPER),
+  STATS_HANDLER_INIT('q', stats_resv, &UMODE_OPER),
+  STATS_HANDLER_INIT('Q', stats_resv, &UMODE_OPER),
+  STATS_HANDLER_INIT('s', stats_pseudo, &UMODE_OPER),
+  STATS_HANDLER_INIT('S', stats_service, &UMODE_OPER),
+  STATS_HANDLER_INIT('t', stats_tstats, &UMODE_OPER),
+  STATS_HANDLER_INIT('T', motd_report, &UMODE_OPER),
   STATS_HANDLER_INIT('u', stats_uptime, 0),
-  STATS_HANDLER_INIT('U', stats_shared, UMODE_OPER),
-  STATS_HANDLER_INIT('v', stats_servers, UMODE_OPER),
-  STATS_HANDLER_INIT('x', stats_gecos, UMODE_OPER),
-  STATS_HANDLER_INIT('X', stats_gecos, UMODE_OPER),
-  STATS_HANDLER_INIT('y', stats_class, UMODE_OPER),
-  STATS_HANDLER_INIT('Y', stats_class, UMODE_OPER),
-  STATS_HANDLER_INIT('z', stats_memory, UMODE_OPER),
-  STATS_HANDLER_INIT('?', stats_servlinks, UMODE_OPER)
+  STATS_HANDLER_INIT('U', stats_shared, &UMODE_OPER),
+  STATS_HANDLER_INIT('v', stats_servers, &UMODE_OPER),
+  STATS_HANDLER_INIT('x', stats_gecos, &UMODE_OPER),
+  STATS_HANDLER_INIT('X', stats_gecos, &UMODE_OPER),
+  STATS_HANDLER_INIT('y', stats_class, &UMODE_OPER),
+  STATS_HANDLER_INIT('Y', stats_class, &UMODE_OPER),
+  STATS_HANDLER_INIT('z', stats_memory, &UMODE_OPER),
+  STATS_HANDLER_INIT('?', stats_servlinks, &UMODE_OPER)
 };
 
 static void

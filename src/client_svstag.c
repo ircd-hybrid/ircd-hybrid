@@ -28,7 +28,7 @@
 #include "client_svstag.h"
 #include "memory.h"
 #include "numeric.h"
-#include "user.h"
+#include "user_mode.h"
 
 static void
 svstag_free(struct ServicesTag *svstag, list_t *list)
@@ -61,10 +61,12 @@ svstag_attach(list_t *list, unsigned int numeric, const char *umodes, const char
   svstag->numeric = numeric;
   svstag->tag = io_strdup(tag);
 
-  const struct user_modes *tab;
   for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)
-    if ((tab = umode_map[(unsigned char)*m]))
-      svstag->umodes |= tab->flag;
+  {
+    const struct UserMode *mode = user_mode_find(*m);
+    if (mode)
+      svstag->umodes |= mode->mode_bit;
+  }
 
   if (numeric != RPL_WHOISOPERATOR)
     list_add_tail(svstag, &svstag->node, list);

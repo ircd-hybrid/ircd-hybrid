@@ -62,7 +62,7 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * @return An error code indicating the result of the operation.
  */
 stats_result_t
-stats_register(unsigned char letter, stats_handler_func handler, unsigned int required_modes)
+stats_register(unsigned char letter, stats_handler_func handler, uint64_t *required_modes)
 {
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;
@@ -197,7 +197,7 @@ stats_set_disabled(unsigned char letter)
  * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
  */
 stats_result_t
-stats_set_required_modes(unsigned char letter, unsigned int required_modes)
+stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
 {
   struct StatsHandler *handler = stats_find(letter);
   if (handler == NULL)
@@ -219,9 +219,9 @@ stats_set_required_modes(unsigned char letter, unsigned int required_modes)
  * @return True if the user has the required user modes and the handler is enabled, false otherwise.
  */
 bool
-stats_allowed(const struct StatsHandler *handler, unsigned int modes)
+stats_allowed(const struct StatsHandler *handler, uint64_t modes)
 {
   if (handler->enabled == false)
     return false;
-  return handler->required_modes == 0 || (modes & handler->required_modes) != 0;
+  return handler->required_modes == NULL || (modes & *handler->required_modes) != 0;
 }

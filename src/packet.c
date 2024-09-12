@@ -35,6 +35,7 @@
 #include "packet.h"
 #include "irc_string.h"
 #include "send.h"
+#include "user_mode.h"
 #include "misc.h"
 
 
@@ -181,7 +182,7 @@ parse_client_queued(struct Client *client)
   {
     bool checkflood = true;
 
-    if (ConfigGeneral.no_oper_flood && HasUMode(client, UMODE_OPER))
+    if (ConfigGeneral.no_oper_flood && user_mode_has_flag(client, UMODE_OPER))
       checkflood = false;
     else if (HasFlag(client, FLAGS_CANFLOOD))
       checkflood = false;

@@ -36,7 +36,7 @@
 #include "conf.h"
 #include "misc.h"
 #include "server.h"
-#include "user.h"
+#include "user_mode.h"
 #include "send.h"
 #include "irc_string.h"
 #include "parse.h"
@@ -75,17 +75,17 @@ typedef enum
 static whois_channel_visibility_t
 whois_channel_visibility_get(struct Channel *channel, struct Client *source, struct Client *target)
 {
-  if (PubChannel(channel) && !HasUMode(target, UMODE_HIDECHANS))
+  if (PubChannel(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (source == target || member_find_link(source, channel))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
-  if (HasUMode(source, UMODE_OPER))
+  if (user_mode_has_flag(source, UMODE_OPER))
   {
     if (!PubChannel(channel))
       return WHOIS_CHANNEL_VISIBILITY_LIMITED;
-    /* HasUMode(target, UMODE_HIDECHANS) == true */
+    /* user_mode_has_flag(target, UMODE_HIDECHANS) == true */
     return WHOIS_CHANNEL_VISIBILITY_HIDDEN;
   }
 
@@ -151,14 +151,14 @@ whois_person(struct Client *source, struct Client *target)
   }
 
   if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
-      !(HasUMode(source, UMODE_OPER) || source == target))
+      !(user_mode_has_flag(source, UMODE_OPER) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);
   else
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, target->servptr->name, target->servptr->info);
 
-  if (HasUMode(target, UMODE_REGISTERED))
+  if (user_mode_has_flag(target, UMODE_REGISTERED))
     sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);
 
   if (strcmp(target->account, "*"))
@@ -167,9 +167,9 @@ whois_person(struct Client *source, struct Client *target)
   if (target->away[0])
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
-  if (HasUMode(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
+  if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
   {
-    bool callerid = HasUMode(target, UMODE_CALLERID) != 0;
+    bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
 
     sendto_one_numeric(source, &me, RPL_TARGUMODEG, target->name,
                        callerid ? "+g" : "+G",
@@ -177,9 +177,9 @@ whois_person(struct Client *source, struct Client *target)
                                   "server side ignore with the exception of common channels");
   }
 
-  if (HasUMode(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
+  if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
   {
-    if (!HasUMode(target, UMODE_HIDDEN) || HasUMode(source, UMODE_OPER))
+    if (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))
     {
       if (target->svstags.head)
         svstag = target->svstags.head->data;
@@ -189,9 +189,9 @@ whois_person(struct Client *source, struct Client *target)
         const char *text;
         if (HasFlag(target, FLAGS_SERVICE))
           text = "is a Network Service";
-        else if (HasUMode(target, UMODE_ADMIN))
+        else if (user_mode_has_flag(target, UMODE_ADMIN))
           text = "is a Server Administrator";
-        else  /* HasUMode(target, UMODE_OPER) == true */
+        else  /* user_mode_has_flag(target, UMODE_OPER) == true */
           text = "is an IRC Operator";
         sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
       }
@@ -203,30 +203,30 @@ whois_person(struct Client *source, struct Client *target)
     svstag = node->data;
 
     if (svstag->numeric == RPL_WHOISOPERATOR)
-      if (HasUMode(target, UMODE_HIDDEN) && !HasUMode(source, UMODE_OPER))
+      if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 
-    if (svstag->umodes == 0 || HasUMode(source, svstag->umodes))
+    if (svstag->umodes == 0 || user_mode_has_flag(source, svstag->umodes))
       sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
                          target->name, svstag->tag);
   }
 
-  if (HasUMode(target, UMODE_BOT))
+  if (user_mode_has_flag(target, UMODE_BOT))
     sendto_one_numeric(source, &me, RPL_WHOISBOT, target->name);
 
-  if (HasUMode(target, UMODE_WEBIRC))
+  if (user_mode_has_flag(target, UMODE_WEBIRC))
     sendto_one_numeric(source, &me, RPL_WHOISTEXT, target->name,
                        "User connected using a webirc gateway");
 
-  if (HasUMode(source, UMODE_OPER) || source == target)
+  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
-                       target->name, user_get_mode_str(target->umodes));
+                       target->name, user_mode_to_str(target->umodes));
 
-  if (HasUMode(source, UMODE_OPER) || source == target)
+  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        target->name, target->username, target->realhost, target->sockhost);
 
-  if (HasUMode(target, UMODE_SECURE))
+  if (user_mode_has_flag(target, UMODE_SECURE))
   {
     snprintf(buf, sizeof(buf), target->tls_cipher ?
              "is using a secure connection [%s]" :
@@ -235,15 +235,15 @@ whois_person(struct Client *source, struct Client *target)
   }
 
   if (!EmptyString(target->tls_certfp))
-    if (HasUMode(source, UMODE_OPER) || source == target)
+    if (user_mode_has_flag(source, UMODE_OPER) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISCERTFP, target->name, target->tls_certfp);
 
   if (MyConnect(target))
-    if (!HasUMode(target, UMODE_HIDEIDLE) || HasUMode(source, UMODE_OPER) || source == target)
+    if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);
 
-  if (HasUMode(target, UMODE_SPY) && source != target)
+  if (user_mode_has_flag(target, UMODE_SPY) && source != target)
     sendto_one_notice(target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
                       source->name, source->username, source->host, source->servptr->name);
 }

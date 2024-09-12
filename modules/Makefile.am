@@ -12,6 +12,34 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
                       cap_userhost_in_names.la \
+                      umode_admin.la           \
+                      umode_bot.la             \
+                      umode_callerid.la        \
+                      umode_cloak.la           \
+                      umode_connect.la         \
+                      umode_deaf.la            \
+                      umode_expiration.la      \
+                      umode_external.la        \
+                      umode_farconnect.la      \
+                      umode_flood.la           \
+                      umode_hidden.la          \
+                      umode_hidechans.la       \
+                      umode_hideidle.la        \
+                      umode_invisible.la       \
+                      umode_locops.la          \
+                      umode_nickchange.la      \
+                      umode_oper.la            \
+                      umode_registered.la      \
+                      umode_regonly.la         \
+                      umode_reject.la          \
+                      umode_secure.la          \
+                      umode_secureonly.la      \
+                      umode_servnotice.la      \
+                      umode_skill.la           \
+                      umode_softcallerid.la    \
+                      umode_spy.la             \
+                      umode_wallops.la         \
+                      umode_webirc.la          \
                       m_accept.la     \
                       m_admin.la      \
                       m_away.la       \
@@ -105,6 +133,36 @@ cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
 cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
 cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
 cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
+
+umode_admin_la_LDFLAGS = $(MODULE_FLAGS)
+umode_bot_la_LDFLAGS = $(MODULE_FLAGS)
+umode_deaf_la_LDFLAGS = $(MODULE_FLAGS)
+umode_callerid_la_LDFLAGS = $(MODULE_FLAGS)
+umode_cloak_la_LDFLAGS = $(MODULE_FLAGS)
+umode_connect_la_LDFLAGS = $(MODULE_FLAGS)
+umode_expiration_la_LDFLAGS = $(MODULE_FLAGS)
+umode_external_la_LDFLAGS = $(MODULE_FLAGS)
+umode_farconnect_la_LDFLAGS = $(MODULE_FLAGS)
+umode_flood_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hidden_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hidechans_la_LDFLAGS = $(MODULE_FLAGS)
+umode_hideidle_la_LDFLAGS = $(MODULE_FLAGS)
+umode_invisible_la_LDFLAGS = $(MODULE_FLAGS)
+umode_locops_la_LDFLAGS = $(MODULE_FLAGS)
+umode_nickchange_la_LDFLAGS = $(MODULE_FLAGS)
+umode_oper_la_LDFLAGS = $(MODULE_FLAGS)
+umode_registered_la_LDFLAGS = $(MODULE_FLAGS)
+umode_regonly_la_LDFLAGS = $(MODULE_FLAGS)
+umode_reject_la_LDFLAGS = $(MODULE_FLAGS)
+umode_secure_la_LDFLAGS = $(MODULE_FLAGS)
+umode_secureonly_la_LDFLAGS = $(MODULE_FLAGS)
+umode_servnotice_la_LDFLAGS = $(MODULE_FLAGS)
+umode_skill_la_LDFLAGS = $(MODULE_FLAGS)
+umode_softcallerid_la_LDFLAGS = $(MODULE_FLAGS)
+umode_spy_la_LDFLAGS = $(MODULE_FLAGS)
+umode_wallops_la_LDFLAGS = $(MODULE_FLAGS)
+umode_webirc_la_LDFLAGS = $(MODULE_FLAGS)
+
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
 m_away_la_LDFLAGS = $(MODULE_FLAGS)
@@ -197,6 +255,36 @@ cap_extended_join_la_SOURCES = cap_extended_join.c
 cap_invite_notify_la_SOURCES = cap_invite_notify.c
 cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
 cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
+
+umode_admin_la_SOURCES = umode_admin.c
+umode_bot_la_SOURCES = umode_bot.c
+umode_callerid_la_SOURCES = umode_callerid.c
+umode_cloak_la_SOURCES = umode_cloak.c
+umode_connect_la_SOURCES = umode_connect.c
+umode_deaf_la_SOURCES = umode_deaf.c
+umode_expiration_la_SOURCES = umode_expiration.c
+umode_external_la_SOURCES = umode_external.c
+umode_farconnect_la_SOURCES = umode_farconnect.c
+umode_flood_la_SOURCES = umode_flood.c
+umode_hidden_la_SOURCES = umode_hidden.c
+umode_hidechans_la_SOURCES = umode_hidechans.c
+umode_hideidle_la_SOURCES = umode_hideidle.c
+umode_invisible_la_SOURCES = umode_invisible.c
+umode_locops_la_SOURCES = umode_locops.c
+umode_nickchange_la_SOURCES = umode_nickchange.c
+umode_oper_la_SOURCES = umode_oper.c
+umode_registered_la_SOURCES = umode_registered.c
+umode_regonly_la_SOURCES = umode_regonly.c
+umode_reject_la_SOURCES = umode_reject.c
+umode_secure_la_SOURCES = umode_secure.c
+umode_secureonly_la_SOURCES = umode_secureonly.c
+umode_servnotice_la_SOURCES = umode_servnotice.c
+umode_skill_la_SOURCES = umode_skill.c
+umode_softcallerid_la_SOURCES = umode_softcallerid.c
+umode_spy_la_SOURCES = umode_spy.c
+umode_wallops_la_SOURCES = umode_wallops.c
+umode_webirc_la_SOURCES = umode_webirc.c
+
 m_accept_la_SOURCES = m_accept.c
 m_admin_la_SOURCES = m_admin.c
 m_away_la_SOURCES = m_away.c

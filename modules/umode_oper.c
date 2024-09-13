@@ -39,7 +39,6 @@ set_callback(struct Client *client, user_mode_source_t source)
   if (!MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
   {
     ++Count.oper;
-    SetOper(client);
     return true;
   }
 
@@ -52,12 +51,12 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (user_mode_has_flag(client, UMODE_OPER) == false)
     return false;
 
-  ClearOper(client);
   --Count.oper;
   user_mode_unset_flag(client, user_mode_get_oper_only());
 
   if (MyConnect(client))
   {
+    client->handler = CLIENT_HANDLER;
     svstag_detach(&client->svstags, RPL_WHOISOPERATOR);
     conf_detach(client, CONF_OPER);
 

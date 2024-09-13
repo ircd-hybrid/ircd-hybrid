@@ -197,15 +197,6 @@ enum
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
-
-/* oper flags */
-#define SetOper(x)              {(x)->umodes |= UMODE_OPER; \
-                                 if (MyClient((x))) (x)->handler = OPER_HANDLER;}
-
-#define ClearOper(x)            {(x)->umodes &= ~(UMODE_OPER|UMODE_ADMIN); \
-                                 if (MyClient((x))) \
-                                  (x)->handler = CLIENT_HANDLER; }
-
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 

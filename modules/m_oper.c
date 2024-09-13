@@ -49,7 +49,13 @@ oper_up(struct Client *source, const struct MaskItem *conf)
   const uint64_t oldmodes = source->umodes;
 
   ++Count.oper;
-  SetOper(source);
+  source->handler = OPER_HANDLER;
+  AddOFlag(source, conf->port);
+
+  user_mode_set_flag(source, UMODE_OPER);
+
+  if (HasOFlag(source, OPER_FLAG_ADMIN))
+    user_mode_set_flag(source, UMODE_ADMIN);
 
   if (conf->modes)
     user_mode_set_flag(source, user_mode_string_to_flags(conf->modes));
@@ -61,11 +67,6 @@ oper_up(struct Client *source, const struct MaskItem *conf)
 
   assert(list_find(&oper_list, source) == NULL);
   list_add(source, list_make_node(), &oper_list);
-
-  AddOFlag(source, conf->port);
-
-  if (HasOFlag(source, OPER_FLAG_ADMIN))
-    user_mode_set_flag(source, UMODE_ADMIN);
 
   if (!EmptyString(conf->whois))
   {

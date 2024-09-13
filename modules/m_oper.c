@@ -38,53 +38,53 @@
 #include "module.h"
 
 
-/*! \brief Blindly opers up given source, using conf info.
+/*! \brief Blindly opers up given client, using conf info.
  *         All checks on passwords have already been done.
- * \param source Pointer to given client to oper
+ * \param client Pointer to given client to oper
  * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *source, const struct MaskItem *conf)
+oper_up(struct Client *client, const struct MaskItem *conf)
 {
-  const uint64_t oldmodes = source->umodes;
+  const uint64_t oldmodes = client->umodes;
 
   ++Count.oper;
-  source->handler = OPER_HANDLER;
-  AddOFlag(source, conf->port);
+  client->handler = OPER_HANDLER;
+  AddOFlag(client, conf->port);
 
-  user_mode_set_flag(source, UMODE_OPER);
+  user_mode_set_flag(client, UMODE_OPER);
 
-  if (HasOFlag(source, OPER_FLAG_ADMIN))
-    user_mode_set_flag(source, UMODE_ADMIN);
+  if (HasOFlag(client, OPER_FLAG_ADMIN))
+    user_mode_set_flag(client, UMODE_ADMIN);
 
   if (conf->modes)
-    user_mode_set_flag(source, user_mode_string_to_flags(conf->modes));
+    user_mode_set_flag(client, user_mode_string_to_flags(conf->modes));
   else if (ConfigGeneral.oper_umodes)
-    user_mode_set_flag(source, user_mode_string_to_flags(ConfigGeneral.oper_umodes));
+    user_mode_set_flag(client, user_mode_string_to_flags(ConfigGeneral.oper_umodes));
 
-  if (!(oldmodes & UMODE_INVISIBLE) && user_mode_has_flag(source, UMODE_INVISIBLE))
+  if (!(oldmodes & UMODE_INVISIBLE) && user_mode_has_flag(client, UMODE_INVISIBLE))
     ++Count.invisi;
 
-  assert(list_find(&oper_list, source) == NULL);
-  list_add(source, list_make_node(), &oper_list);
+  assert(list_find(&oper_list, client) == NULL);
+  list_add(client, list_make_node(), &oper_list);
 
   if (!EmptyString(conf->whois))
   {
-    svstag_attach(&source->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
+    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                   me.id, source->id, source->tsinfo, RPL_WHOISOPERATOR, conf->whois);
+                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, conf->whois);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-            conf->name, client_get_name(source, HIDE_IP));
+            conf->name, client_get_name(client, HIDE_IP));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
-                 get_oper_name(source));
+                 get_oper_name(client));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                 me.id, get_oper_name(source));
+                 me.id, get_oper_name(client));
 
-  user_mode_send(source, oldmodes, true, true);
-  sendto_one_numeric(source, &me, RPL_YOUREOPER);
+  user_mode_send(client, oldmodes, true, true);
+  sendto_one_numeric(client, &me, RPL_YOUREOPER);
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled

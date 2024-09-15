@@ -298,6 +298,61 @@ user_mode_has_flag(const struct Client *client, uint64_t mode_flag)
   return (client->umodes & mode_flag) != 0;
 }
 
+bool
+user_mode_set_mode(struct Client *client, const struct UserMode *mode)
+{
+  if (mode == NULL || mode->mode_bit == 0)
+    return false;
+
+  client->umodes |= mode->mode_bit;
+  return true;
+}
+
+bool
+user_mode_set_mode_exec(struct Client *client, const struct UserMode *mode, user_mode_source_t source)
+{
+  if (mode == NULL || mode->mode_bit == 0)
+    return false;
+
+  if (mode->set_callback && mode->set_callback(client, source) == false)
+    return false;
+
+  client->umodes |= mode->mode_bit;
+  return true;
+}
+
+bool
+user_mode_unset_mode(struct Client *client, const struct UserMode *mode)
+{
+  if (mode == NULL || mode->mode_bit == 0)
+    return false;
+
+  client->umodes &= ~mode->mode_bit;
+  return true;
+}
+
+bool
+user_mode_unset_mode_exec(struct Client *client, const struct UserMode *mode, user_mode_source_t source)
+{
+  if (mode == NULL || mode->mode_bit == 0)
+    return false;
+
+  if (mode->unset_callback && mode->unset_callback(client, source) == false)
+    return false;
+
+  client->umodes &= ~mode->mode_bit;
+  return true;
+}
+
+bool
+user_mode_has_mode(const struct Client *client, const struct UserMode *mode)
+{
+  if (mode == NULL)
+    return false;
+
+  return (client->umodes & mode->mode_bit) != 0;
+}
+
 static uint64_t
 user_mode_purge_invalid(struct Client *client)
 {

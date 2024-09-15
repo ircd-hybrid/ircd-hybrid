@@ -90,7 +90,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
                  source->id, target->id, target->tsinfo, modes);
 
   if (MyConnect(target))
-    user_mode_send(target, oldmodes, true, false);
+    user_mode_send(target, oldmodes, USER_MODE_SEND_CLIENT);
 }
 
 static struct Command command_table =

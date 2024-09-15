@@ -115,8 +115,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   {
     const uint64_t oldmodes = target->umodes;
     user_mode_unset_flag(target, UMODE_REGISTERED);
-
-    user_mode_send(target, oldmodes, true, false);
+    user_mode_send(source, oldmodes, USER_MODE_SEND_CLIENT);
   }
 
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",

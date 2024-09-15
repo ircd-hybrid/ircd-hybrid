@@ -102,7 +102,8 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
    * Compare new modes with old modes and send string which will cause
    * servers to update correctly.
    */
-  user_mode_send(source, oldmodes, MyConnect(source), true);
+  user_mode_send(source, oldmodes,
+                 (MyConnect(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
 }
 
 /*! \brief MODE command handler

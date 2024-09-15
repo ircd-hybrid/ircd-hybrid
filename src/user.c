@@ -371,7 +371,7 @@ user_register_local(struct Client *client)
     }
   }
 
-  user_mode_send(client, 0, true, false);
+  user_mode_send(client, 0, USER_MODE_SEND_CLIENT);
   user_introduce(client);
 }
 

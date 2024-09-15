@@ -322,12 +322,12 @@ user_mode_send_invalid(void)
     struct Client *client = node->data;
     const uint64_t mode_flags_old = client->umodes;
     if (mode_flags_old != user_mode_purge_invalid(client))
-      user_mode_send(client, mode_flags_old, true, true);
+      user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
   }
 }
 
 void
-user_mode_send(struct Client *client, uint64_t mode_flags_old, bool send_client, bool send_server)
+user_mode_send(struct Client *client, uint64_t mode_flags_old, user_mode_send_t send)
 {
   /*
    * If the client's current user modes match the old modes, indicating no change,
@@ -369,10 +369,10 @@ user_mode_send(struct Client *client, uint64_t mode_flags_old, bool send_client,
 
   assert(buf_add[0] != '\0' || buf_del[0] != '\0');
 
-  if (send_client)
+  if (send & USER_MODE_SEND_CLIENT)
     sendto_one(client, ":%s!%s@%s MODE %s :%s%s",
                client->name, client->username, client->host, client->name, buf_add, buf_del);
-  if (send_server)
+  if (send & USER_MODE_SEND_SERVER)
     sendto_servers(client, 0, 0, ":%s MODE %s :%s%s",
                    client->id, client->id, buf_add, buf_del);
 }

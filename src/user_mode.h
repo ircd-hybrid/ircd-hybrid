@@ -55,6 +55,12 @@ typedef enum
   USER_MODE_POLICY_SERVICE_ONLY  = 1 << 3,
 } user_mode_policy_t;
 
+typedef enum
+{
+  USER_MODE_SEND_CLIENT = 1 << 0,
+  USER_MODE_SEND_SERVER = 1 << 1,
+} user_mode_send_t;
+
 typedef bool (*user_mode_callback_t)(struct Client *, user_mode_source_t);
 
 struct UserMode
@@ -69,7 +75,7 @@ struct UserMode
 
 extern char user_mode_string[];
 
-extern void user_mode_send(struct Client *, uint64_t, bool, bool);
+extern void user_mode_send(struct Client *, uint64_t, user_mode_send_t);
 extern void user_mode_send_invalid(void);
 extern bool user_mode_has(const struct Client *, char);
 extern bool user_mode_has_flag(const struct Client *, uint64_t);

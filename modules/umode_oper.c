@@ -33,16 +33,19 @@
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
 {
-  if (source != USER_MODE_SOURCE_REGULAR)
+  if (user_mode_has_flag(client, UMODE_OPER))
     return false;
 
-  if (!MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
+  ++Count.oper;
+
+  if (MyConnect(client))
   {
-    ++Count.oper;
-    return true;
+    client->handler = OPER_HANDLER;
+    assert(list_find(&oper_list, client) == NULL);
+    list_add(client, list_make_node(), &oper_list);
   }
 
-  return false;
+  return true;
 }
 
 static bool

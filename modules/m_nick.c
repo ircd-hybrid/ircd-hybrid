@@ -370,15 +370,7 @@ uid_from_server(struct Client *source, int parc, char *parv[])
   for (const char *m = &parv[4][1]; *m; ++m)
   {
     const struct UserMode *mode = user_mode_find(*m);
-    if (mode == NULL)
-      continue;  /* Skip if the mode character is invalid or unregistered. */
-
-    if ((mode->mode_bit & UMODE_INVISIBLE) && user_mode_has_flag(client_p, UMODE_INVISIBLE) == false)
-      ++Count.invisi;
-    else if ((mode->mode_bit & UMODE_OPER) && user_mode_has_flag(client_p, UMODE_OPER) == false)
-      ++Count.oper;
-
-    user_mode_set_flag(client_p, mode->mode_bit);
+    user_mode_set_mode_exec(client_p, mode, USER_MODE_SOURCE_REGULAR);
   }
 
   user_register_remote(client_p);

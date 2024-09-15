@@ -26,14 +26,25 @@ struct Client;
 
 typedef enum
 {
+  USER_MODE_SUCCESS = 0,
+  USER_MODE_RESULT_INVALID_CHAR,
+  USER_MODE_RESULT_MODE_NOT_FOUND,
+  USER_MODE_RESULT_MODE_ALREADY_EXISTS,
+  USER_MODE_RESULT_POLICY_VIOLATION,
+  USER_MODE_RESULT_CALLBACK_FAILED,
+  USER_MODE_RESULT_COUNT,
+} user_mode_result_t;
+
+typedef enum
+{
   USER_MODE_SOURCE_REGULAR,
   USER_MODE_SOURCE_SVSMODE,
 } user_mode_source_t;
 
 typedef enum
 {
-  USER_MODE_ADD,
-  USER_MODE_DEL,
+  USER_MODE_ACTION_ADD,
+  USER_MODE_ACTION_DEL,
 } user_mode_action_t;
 
 typedef enum
@@ -64,13 +75,13 @@ extern bool user_mode_has(const struct Client *, char);
 extern bool user_mode_has_flag(const struct Client *, uint64_t);
 extern bool user_mode_set_flag(struct Client *, uint64_t);
 extern bool user_mode_unset_flag(struct Client *, uint64_t);
-extern int user_mode_change(struct Client *, char, user_mode_source_t, user_mode_action_t);
-extern int user_mode_register(struct UserMode *);
-extern int user_mode_set(struct Client *, char, user_mode_source_t);
-extern int user_mode_unregister(struct UserMode *);
-extern int user_mode_unset(struct Client *, char, user_mode_source_t);
 extern uint64_t user_mode_get_oper_only(void);
 extern uint64_t user_mode_string_to_flags(const char *);
+extern user_mode_result_t user_mode_change(struct Client *, char, user_mode_source_t, user_mode_action_t);
+extern user_mode_result_t user_mode_register(struct UserMode *);
+extern user_mode_result_t user_mode_set(struct Client *, char, user_mode_source_t);
+extern user_mode_result_t user_mode_unregister(struct UserMode *);
+extern user_mode_result_t user_mode_unset(struct Client *, char, user_mode_source_t);
 extern struct UserMode *user_mode_find(char);
 extern const char *user_mode_to_str(uint64_t);
 #endif  /* INCLUDED_user_mode_h */

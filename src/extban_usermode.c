@@ -34,7 +34,7 @@
 static enum extban_match
 extban_usermode_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  user_mode_action_t action = USER_MODE_ADD;
+  user_mode_action_t action = USER_MODE_ACTION_ADD;
   uint64_t modes_del = 0, modes_add = 0;
 
   for (const char *m = ban->host; *m; ++m)
@@ -42,10 +42,10 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
     switch (*m)
     {
       case '+':
-        action = USER_MODE_ADD;
+        action = USER_MODE_ACTION_ADD;
         break;
       case '-':
-        action = USER_MODE_DEL;
+        action = USER_MODE_ACTION_DEL;
         break;
       default:
       {
@@ -54,10 +54,10 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
         {
           switch (action)
           {
-            case USER_MODE_ADD:
+            case USER_MODE_ACTION_ADD:
               modes_add |= mode->mode_bit;
               break;
-            case USER_MODE_DEL:
+            case USER_MODE_ACTION_DEL:
               modes_del |= mode->mode_bit;
               break;
           }

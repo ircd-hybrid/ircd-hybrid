@@ -68,17 +68,17 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
     return;
 
   const uint64_t oldmodes = target->umodes;
-  user_mode_action_t action = USER_MODE_ADD;
+  user_mode_action_t action = USER_MODE_ACTION_ADD;
 
   for (const char *m = modes; *m; ++m)
   {
     switch (*m)
     {
       case '+':
-        action = USER_MODE_ADD;
+        action = USER_MODE_ACTION_ADD;
         break;
       case '-':
-        action = USER_MODE_DEL;
+        action = USER_MODE_ACTION_DEL;
         break;
       default:
         user_mode_change(target, *m, USER_MODE_SOURCE_SVSMODE, action);

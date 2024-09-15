@@ -91,19 +91,19 @@ user_mode_find(char mode_char)
   return user_mode_table[index];
 }
 
-int
+user_mode_result_t
 user_mode_register(struct UserMode *mode)
 {
   int index = user_mode_char_to_index(mode->mode_char);
   if (index < 0)
-    return -1;
+    return USER_MODE_RESULT_INVALID_CHAR;
 
   if (user_mode_table[index])
-    return -1;
+    return USER_MODE_RESULT_MODE_ALREADY_EXISTS;
 
   mode->mode_bit = user_mode_char_to_bit(mode->mode_char);
   if (mode->mode_bit == 0)
-    return -1;
+    return USER_MODE_RESULT_INVALID_CHAR;
 
   if (mode->mode_flag)
     *(mode->mode_flag) = mode->mode_bit;
@@ -114,15 +114,18 @@ user_mode_register(struct UserMode *mode)
   *mode_new = *mode;
   user_mode_table[index] = mode_new;
 
-  return 0;
+  return USER_MODE_SUCCESS;
 }
 
-int
+user_mode_result_t
 user_mode_unregister(struct UserMode *mode)
 {
   int index = user_mode_char_to_index(mode->mode_char);
-  if (index < 0 || user_mode_table[index] == NULL)
-    return -1;
+  if (index < 0)
+    return USER_MODE_RESULT_INVALID_CHAR;
+
+  if (user_mode_table[index] == NULL)
+    return USER_MODE_RESULT_MODE_NOT_FOUND;
 
   if (mode->mode_flag)
     *(mode->mode_flag) = 0;
@@ -132,7 +135,7 @@ user_mode_unregister(struct UserMode *mode)
   io_free(user_mode_table[index]);
   user_mode_table[index] = NULL;
 
-  return 0;
+  return USER_MODE_SUCCESS;
 }
 
 uint64_t
@@ -186,7 +189,7 @@ user_mode_check_policy(const struct UserMode *mode, const struct Client *client,
   if (mode->policy & USER_MODE_POLICY_INTERNAL_ONLY)
     return false;
 
-  if (action == USER_MODE_ADD)
+  if (action == USER_MODE_ACTION_ADD)
     if ((mode->policy & USER_MODE_POLICY_OPER_ONLY) && source != USER_MODE_SOURCE_SVSMODE)
       if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
         return false;
@@ -197,69 +200,69 @@ user_mode_check_policy(const struct UserMode *mode, const struct Client *client,
   return true;
 }
 
-int
+user_mode_result_t
 user_mode_change(struct Client *client, char mode_char, user_mode_source_t source, user_mode_action_t action)
 {
   struct UserMode *mode = user_mode_find(mode_char);
   if (mode == NULL)
-    return -1;
+    return USER_MODE_RESULT_MODE_NOT_FOUND;
 
   if (user_mode_check_policy(mode, client, source, action) == false)
-    return 1;
+    return USER_MODE_RESULT_POLICY_VIOLATION;
 
   switch (action)
   {
-    case USER_MODE_ADD:
+    case USER_MODE_ACTION_ADD:
       if (mode->set_callback && mode->set_callback(client, source) == false)
-        return 1;
+        return USER_MODE_RESULT_CALLBACK_FAILED;
 
       user_mode_set_flag(client, mode->mode_bit);
       break;
-    case USER_MODE_DEL:
+    case USER_MODE_ACTION_DEL:
       if (mode->unset_callback && mode->unset_callback(client, source) == false)
-        return 1;
+        return USER_MODE_RESULT_CALLBACK_FAILED;
 
       user_mode_unset_flag(client, mode->mode_bit);
       break;
     default:
-      return 1;
+      abort();  /* Invalid action, abort the program. */
   }
 
-  return 0;
+  return USER_MODE_SUCCESS;
 }
 
-int
+user_mode_result_t
 user_mode_set(struct Client *client, char mode_char, user_mode_source_t source)
 {
   struct UserMode *mode = user_mode_find(mode_char);
   if (mode == NULL)
-    return -1;
+    return USER_MODE_RESULT_MODE_NOT_FOUND;
 
-  if (user_mode_check_policy(mode, client, source, USER_MODE_ADD) == false)
-    return 1;
+  if (user_mode_check_policy(mode, client, source, USER_MODE_ACTION_ADD) == false)
+    return USER_MODE_RESULT_POLICY_VIOLATION;
 
   if (mode->set_callback && mode->set_callback(client, source) == false)
-    return 1;
+    return USER_MODE_RESULT_CALLBACK_FAILED;
 
   user_mode_set_flag(client, mode->mode_bit);
-  return 0;
+  return USER_MODE_SUCCESS;
 }
 
-int
+user_mode_result_t
 user_mode_unset(struct Client *client, char mode_char, user_mode_source_t source)
 {
   struct UserMode *mode = user_mode_find(mode_char);
   if (mode == NULL)
-    return -1;
+    return USER_MODE_RESULT_MODE_NOT_FOUND;
 
-  if (user_mode_check_policy(mode, client, source, USER_MODE_DEL) == false)
-    return 1;
+  if (user_mode_check_policy(mode, client, source, USER_MODE_ACTION_DEL) == false)
+    return USER_MODE_RESULT_POLICY_VIOLATION;
 
   if (mode->unset_callback && mode->unset_callback(client, source) == false)
-    return 1;
+    return USER_MODE_RESULT_CALLBACK_FAILED;
 
   user_mode_unset_flag(client, mode->mode_bit);
-  return 0;
+  return USER_MODE_SUCCESS;
 }
 
 bool

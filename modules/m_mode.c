@@ -73,7 +73,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
   }
 
   const uint64_t oldmodes = source->umodes;
-  user_mode_action_t action = USER_MODE_ADD;
+  user_mode_action_t action = USER_MODE_ACTION_ADD;
   bool badmode = false;
 
   /* Parse user mode change string */
@@ -82,14 +82,15 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
     switch (*m)
     {
       case '+':
-        action = USER_MODE_ADD;
+        action = USER_MODE_ACTION_ADD;
         break;
       case '-':
-        action = USER_MODE_DEL;
+        action = USER_MODE_ACTION_DEL;
         break;
       default:
-        if (user_mode_change(source, *m, USER_MODE_SOURCE_REGULAR, action) < 0 && MyConnect(source))
-          badmode = true;
+        if (user_mode_change(source, *m, USER_MODE_SOURCE_REGULAR, action) == USER_MODE_RESULT_MODE_NOT_FOUND)
+          if (MyConnect(source))
+            badmode = true;
         break;
     }
   }

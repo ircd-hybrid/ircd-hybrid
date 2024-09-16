@@ -69,7 +69,6 @@ static struct UserMode cloak_mode =
 {
   .mode_char = 'x',
   .mode_flag = &UMODE_CLOAK,
-  .policy = USER_MODE_POLICY_MANUAL_ONLY,
   .set_callback = set_callback,
   .unset_callback = unset_callback
 };

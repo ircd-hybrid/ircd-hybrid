@@ -167,6 +167,7 @@ user_introduce(struct Client *client)
   if (!EmptyString(client->tls_cipher))
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
                    client->servptr->id, client->id, client->tls_cipher);
+  AddFlag(client, FLAGS_INTRODUCED);
 }
 
 /* user_welcome()
@@ -322,12 +323,6 @@ user_register_local(struct Client *client)
                  client->name, client->username, client->realhost, client->sockhost,
                  class_get_name(&client->connection->confs), client->info, client->id);
 
-  if (ConfigGeneral.invisible_on_connect)
-  {
-    user_mode_set_flag(client, UMODE_INVISIBLE);
-    ++Count.invisi;
-  }
-
   SetClient(client);
 
   client->servptr = &me;
@@ -354,6 +349,9 @@ user_register_local(struct Client *client)
     Count.max_tot = list_length(&global_client_list);
   ++Count.totalrestartcount;
 
+  if (ConfigGeneral.invisible_on_connect)
+    user_mode_set_flag_exec(client, UMODE_INVISIBLE, USER_MODE_SOURCE_REGULAR);
+
   /*
    * Report if user has &^>= etc. and set flags as needed in client
    */
@@ -361,17 +359,10 @@ user_register_local(struct Client *client)
 
   user_welcome(client);
 
-  if (!HasFlag(client, FLAGS_SPOOF))
-  {
-    const char *const cloak = cloak_compute(&client->addr);
-    if (cloak)
-    {
-      user_set_hostmask(client, cloak, false);
-      user_mode_set_flag(client, UMODE_CLOAK);
-    }
-  }
+  user_mode_set_flag_exec(client, UMODE_CLOAK, USER_MODE_SOURCE_REGULAR);
 
   user_mode_send(client, 0, USER_MODE_SEND_CLIENT);
+
   user_introduce(client);
 }
 

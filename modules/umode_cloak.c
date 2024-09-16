@@ -43,7 +43,9 @@ set_callback(struct Client *client, user_mode_source_t source)
     const char *const cloak = cloak_compute(&client->addr);
     if (cloak == NULL)
       return false;
-    user_set_hostmask(client, cloak, true);
+
+    bool svshost = HasFlag(client, FLAGS_INTRODUCED) != 0;
+    user_set_hostmask(client, cloak, svshost);
   }
 
   return true;

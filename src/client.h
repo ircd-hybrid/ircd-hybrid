@@ -115,6 +115,7 @@ enum
   FLAGS_EXEMPTXLINE   = 1 << 23,  /**< Client is exempt from x-lines */
   FLAGS_CAP302        = 1 << 24,  /**< Client supports the IRCv3 CAP 302 extension */
   FLAGS_SPOOF         = 1 << 25,
+  FLAGS_INTRODUCED    = 1 << 26,
 };
 
 #define HasFlag(x, y) ((x)->flags &   (y))

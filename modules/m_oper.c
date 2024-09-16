@@ -46,27 +46,17 @@
 static void
 oper_up(struct Client *client, const struct MaskItem *conf)
 {
-  const uint64_t oldmodes = client->umodes;
-
-  ++Count.oper;
-  client->handler = OPER_HANDLER;
   AddOFlag(client, conf->port);
 
-  user_mode_set_flag(client, UMODE_OPER);
-
-  if (HasOFlag(client, OPER_FLAG_ADMIN))
-    user_mode_set_flag(client, UMODE_ADMIN);
+  uint64_t mode_flags_old = client->umodes;
+  uint64_t mode_flags_add = UMODE_OPER | UMODE_ADMIN;
 
   if (conf->modes)
-    user_mode_set_flag(client, user_mode_string_to_flags(conf->modes));
+    mode_flags_add |= user_mode_string_to_flags(conf->modes);
   else if (ConfigGeneral.oper_umodes)
-    user_mode_set_flag(client, user_mode_string_to_flags(ConfigGeneral.oper_umodes));
+    mode_flags_add |= user_mode_string_to_flags(ConfigGeneral.oper_umodes);
 
-  if (!(oldmodes & UMODE_INVISIBLE) && user_mode_has_flag(client, UMODE_INVISIBLE))
-    ++Count.invisi;
-
-  assert(list_find(&oper_list, client) == NULL);
-  list_add(client, list_make_node(), &oper_list);
+  user_mode_set_flag_exec(client, mode_flags_add, USER_MODE_SOURCE_REGULAR);
 
   if (!EmptyString(conf->whois))
   {
@@ -83,7 +73,7 @@ oper_up(struct Client *client, const struct MaskItem *conf)
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                  me.id, get_oper_name(client));
 
-  user_mode_send(client, oldmodes, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
+  user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 }
 

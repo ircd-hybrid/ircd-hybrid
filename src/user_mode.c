@@ -283,6 +283,67 @@ user_mode_set_flag(struct Client *client, uint64_t mode_flag)
 }
 
 bool
+user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_source_t source)
+{
+  bool success = true;
+
+  if (mode_flag == 0)
+    return false;
+
+  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  {
+    const uint64_t mode_bit = 1ULL << i;
+    if (mode_flag & mode_bit)
+    {
+      const struct UserMode *mode = user_mode_table[i];
+      if (mode == NULL)
+        continue;
+
+      if (mode->set_callback && mode->set_callback(client, source) == false)
+      {
+        success = false;
+        continue;
+      }
+
+      client->umodes |= mode->mode_bit;
+    }
+  }
+
+  return success;
+}
+
+bool
+user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_source_t source)
+{
+  bool success = true;
+
+  if (mode_flag == 0)
+    return false;
+
+  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  {
+    const uint64_t mode_bit = 1ULL << i;
+    if (mode_flag & mode_bit)
+    {
+      const struct UserMode *mode = user_mode_table[i];
+      if (mode == NULL)
+        continue;
+
+      if (mode->unset_callback && mode->unset_callback(client, source) == false)
+      {
+        success = false;
+        continue;
+      }
+
+      client->umodes &= ~mode->mode_bit;
+    }
+  }
+
+  return success;
+}
+
+
+bool
 user_mode_unset_flag(struct Client *client, uint64_t mode_flag)
 {
   if (mode_flag == 0)

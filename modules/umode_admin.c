@@ -27,7 +27,7 @@
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
 {
-  return !MyConnect(client) || HasOFlag(client, OPER_FLAG_ADMIN) != 0;
+  return !MyConnect(client) || HasOFlag(client, OPER_FLAG_ADMIN);
 }
 
 static struct UserMode admin_mode =

@@ -72,7 +72,7 @@ info_compare(const void *const a_, const void *const b_)
     return 1;
 
   const int ns_cmp = strcasecmp(a->namespace, b->namespace);
-  if (ns_cmp != 0)
+  if (ns_cmp)
     return ns_cmp;
 
   return strcasecmp(a->name, b->name);

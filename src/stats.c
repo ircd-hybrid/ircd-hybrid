@@ -223,5 +223,5 @@ stats_allowed(const struct StatsHandler *handler, uint64_t modes)
 {
   if (handler->enabled == false)
     return false;
-  return handler->required_modes == NULL || (modes & *handler->required_modes) != 0;
+  return handler->required_modes == NULL || (modes & *handler->required_modes);
 }

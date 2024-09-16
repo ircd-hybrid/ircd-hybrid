@@ -342,7 +342,6 @@ user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_s
   return success;
 }
 
-
 bool
 user_mode_unset_flag(struct Client *client, uint64_t mode_flag)
 {

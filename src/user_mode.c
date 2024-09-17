@@ -30,7 +30,7 @@
 #define USER_MODE_CAPACITY 52
 
 static struct UserMode *user_mode_table[USER_MODE_CAPACITY];
-char user_mode_string[USER_MODE_CAPACITY + 1];
+static char user_mode_string[USER_MODE_CAPACITY + 1];
 
 static uint64_t
 user_mode_char_to_bit(char mode_char)
@@ -52,6 +52,12 @@ user_mode_char_to_index(char mode_char)
     return mode_char - 'A' + 26;
 
   return -1;
+}
+
+const char *
+user_mode_get_string(void)
+{
+  return user_mode_string;
 }
 
 static void

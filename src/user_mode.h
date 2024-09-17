@@ -73,8 +73,6 @@ struct UserMode
   user_mode_callback_t unset_callback;
 };
 
-extern char user_mode_string[];
-
 extern void user_mode_send(struct Client *, uint64_t, user_mode_send_t);
 extern void user_mode_send_invalid(void);
 extern bool user_mode_has(const struct Client *, char);
@@ -96,5 +94,6 @@ extern user_mode_result_t user_mode_set(struct Client *, char, user_mode_source_
 extern user_mode_result_t user_mode_unregister(struct UserMode *);
 extern user_mode_result_t user_mode_unset(struct Client *, char, user_mode_source_t);
 extern struct UserMode *user_mode_find(char);
+extern const char *user_mode_get_string(void);
 extern const char *user_mode_to_str(uint64_t);
 #endif  /* INCLUDED_user_mode_h */

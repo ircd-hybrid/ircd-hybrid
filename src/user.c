@@ -203,7 +203,7 @@ user_welcome(struct Client *client)
   sendto_one_numeric(client, &me, RPL_YOURHOST,
                      listener_get_name(client->connection->listener), IRCD_VERSION);
   sendto_one_numeric(client, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, IRCD_VERSION, user_mode_string,
+  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, IRCD_VERSION, user_mode_get_string(),
                      cmode_rpl04[0], cmode_rpl04[1]);
 
   isupport_show(client);

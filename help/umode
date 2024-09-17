@@ -24,7 +24,6 @@ User modes: (* designates that the umode is oper only)
                  Can be set only by servers and services.
          R     - Only registered clients may message you.
          s     - Can see generic server messages and oper kills.
-         S     - Client is connected via TLS (Transport Layer Security).
        * e     - Can see new server introduction and split messages.
        * a     - Is marked as a server admin in stats o/p.
          D     - "Deaf": don't receive channel messages.
@@ -32,4 +31,5 @@ User modes: (* designates that the umode is oper only)
                  any common channels with you (unless they are accepted).
          g     - "Caller ID" mode: only allow accepted clients to message you.
        * H     - IRC operator status is hidden to other users.
+         z     - Client is connected via TLS (Transport Layer Security).
          Z     - Can only receive private messages from secure connections.

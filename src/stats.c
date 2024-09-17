@@ -214,7 +214,7 @@ stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
  * stats handler and if the handler is enabled. It returns true if the user has
  * the required user modes and the handler is enabled, or if no specific user modes are required.
  *
- * @param user_modes The user modes the user currently has.
+ * @param modes The user modes the user currently has.
  * @param handler The stats handler containing the required user modes and enabled state.
  * @return True if the user has the required user modes and the handler is enabled, false otherwise.
  */

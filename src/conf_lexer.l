@@ -468,5 +468,7 @@ conf_eof(void)
    * The following call to yy_fatal_error(NULL) is intentionally placed after the return statement
    * to silence the warning about yy_fatal_error being defined but not used.
    */
+
+  /* coverity[unreachable] */
   yy_fatal_error(NULL);
 }

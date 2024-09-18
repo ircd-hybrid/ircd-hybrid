@@ -122,7 +122,7 @@ stats_unregister(unsigned char letter)
  * This function unregisters an entire array of stats handlers from the stats API.
  *
  * @param handlers The array of StatsHandler structures to be unregistered.
- * @param count The number of elements in the handlers array.
+ * @param elements The number of elements in the handlers array.
  */
 void
 stats_unregister_array(const struct StatsHandler *handlers, size_t elements)
@@ -214,8 +214,8 @@ stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
  * stats handler and if the handler is enabled. It returns true if the user has
  * the required user modes and the handler is enabled, or if no specific user modes are required.
  *
- * @param modes The user modes the user currently has.
  * @param handler The stats handler containing the required user modes and enabled state.
+ * @param modes The user modes the user currently has
  * @return True if the user has the required user modes and the handler is enabled, false otherwise.
  */
 bool

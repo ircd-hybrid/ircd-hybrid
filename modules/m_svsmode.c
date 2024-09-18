@@ -67,7 +67,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   if (ts && (ts != target->tsinfo))
     return;
 
-  const uint64_t oldmodes = target->umodes;
+  const uint64_t mode_flags_old = target->umodes;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
 
   for (const char *m = modes; *m; ++m)
@@ -90,7 +90,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
                  source->id, target->id, target->tsinfo, modes);
 
   if (MyConnect(target))
-    user_mode_send(target, oldmodes, USER_MODE_SEND_CLIENT);
+    user_mode_send(target, mode_flags_old, USER_MODE_SEND_CLIENT);
 }
 
 static struct Command command_table =

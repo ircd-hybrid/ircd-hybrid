@@ -72,7 +72,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
     return;
   }
 
-  const uint64_t oldmodes = source->umodes;
+  const uint64_t mode_flags_old = source->umodes;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
   bool badmode = false;
 
@@ -102,7 +102,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
    * Compare new modes with old modes and send string which will cause
    * servers to update correctly.
    */
-  user_mode_send(source, oldmodes,
+  user_mode_send(source, mode_flags_old,
                  (MyConnect(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
 }
 

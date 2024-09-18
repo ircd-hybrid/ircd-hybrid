@@ -76,7 +76,10 @@ io_calloc(size_t size)
   void *ret = calloc(1, size);
 
   if (ret == NULL)
+  {
     outofmemory();
+    return NULL;
+  }
 
   return ret;
 }
@@ -96,8 +99,13 @@ io_realloc(void *x, size_t y)
 {
   void *ret = realloc(x, y);
 
-  if (y && ret == NULL)
-    outofmemory();
+  if (ret == NULL)
+  {
+    if (y)
+      outofmemory();
+
+    return NULL;
+  }
 
   return ret;
 }
@@ -130,7 +138,10 @@ io_strdup(const char *s)
   void *ret = malloc(strlen(s) + 1);
 
   if (ret == NULL)
+  {
     outofmemory();
+    return NULL;
+  }
 
   strcpy(ret, s);
 
@@ -153,7 +164,10 @@ io_strndup(const char *s, size_t len)
   void *ret = malloc(len + 1);
 
   if (ret == NULL)
+  {
     outofmemory();
+    return NULL;
+  }
 
   strlcpy(ret, s, len + 1);
 

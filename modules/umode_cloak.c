@@ -89,4 +89,5 @@ struct Module module_entry =
 {
   .init_handler = init_handler,
   .exit_handler = exit_handler,
+  .core = true
 };

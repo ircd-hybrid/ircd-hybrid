@@ -558,6 +558,7 @@ conf_free(struct MaskItem *conf)
   io_free(conf->reason);
   io_free(conf->certfp);
   io_free(conf->whois);
+  io_free(conf->modes);
   io_free(conf->user);
   io_free(conf->host);
   io_free(conf->addr);

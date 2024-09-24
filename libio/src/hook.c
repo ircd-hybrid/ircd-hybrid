@@ -193,51 +193,52 @@ hook_container_find(const char *name)
  * @brief Installs a new hook into a hook container.
  *
  * This function installs a new hook into the specified hook container.
- * The new hook is added at the specified position in the chain, allowing
- * for flexible control over the hook's placement.
+ * The new hook is added at the specified priority in the chain, allowing
+ * for flexible control over the hook's placement based on the priority.
  *
  * @param container Pointer to the HookContainer structure.
  * @param hook Address of the hook function.
- * @param position Position to insert the hook in the chain.
+ * @param priority Priority level to insert the hook in the chain.
  * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
 list_node_t *
-hook_install(struct HookContainer *container, HCFUNC *hook, enum hook_insert position)
+hook_install(struct HookContainer *container, HCFUNC *hook, hook_priority_t priority)
 {
   list_node_t *node = io_calloc(sizeof(*node));
   unsigned int length = list_length(&container->chain);
   unsigned int insert_position = 0;
 
-  switch (position)
+  /* Determine the insert position based on the priority level. */
+  switch (priority)
   {
-    case HOOK_INSERT_SYSTEM_CRITICAL:
+    case HOOK_PRIORITY_SYSTEM_CRITICAL:
       insert_position = 0;
       break;
-    case HOOK_INSERT_SYSTEM_HIGH:
+    case HOOK_PRIORITY_SYSTEM_HIGH:
       insert_position = (length >= 1) ? 1 : length;
       break;
-    case HOOK_INSERT_SYSTEM:
+    case HOOK_PRIORITY_SYSTEM:
       insert_position = (length >= 2) ? 2 : length;
       break;
-    case HOOK_INSERT_HIGH:
+    case HOOK_PRIORITY_HIGH:
       insert_position = length / 10;
       break;
-    case HOOK_INSERT_ABOVE_NORMAL:
+    case HOOK_PRIORITY_ABOVE_NORMAL:
       insert_position = length / 5;
       break;
-    case HOOK_INSERT_NORMAL:
+    case HOOK_PRIORITY_NORMAL:
       insert_position = length / 2;
       break;
-    case HOOK_INSERT_BELOW_NORMAL:
+    case HOOK_PRIORITY_BELOW_NORMAL:
       insert_position = 3 * length / 4;
       break;
-    case HOOK_INSERT_LOW:
+    case HOOK_PRIORITY_LOW:
       insert_position = 9 * length / 10;
       break;
-    case HOOK_INSERT_LOWEST:
+    case HOOK_PRIORITY_LOWEST:
       insert_position = (length > 0) ? length - 1 : 0;
       break;
-    case HOOK_INSERT_DEFAULT:
+    case HOOK_PRIORITY_DEFAULT:
     default:
       insert_position = length;
       break;

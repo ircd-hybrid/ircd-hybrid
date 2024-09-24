@@ -32,26 +32,26 @@
 #define INCLUDED_hook_h
 
 /**
- * @enum hook_insert
+ * @enum hook_priority_t
  * @brief Enum for specifying the position for inserting hooks in a hook chain.
  *
  * This enum provides fine-grained options for specifying where a new hook should be
  * inserted in a hook chain relative to existing hooks, with higher priorities
  * reserved for system/core components.
  */
-enum hook_insert
+typedef enum
 {
-  HOOK_INSERT_SYSTEM_CRITICAL,  /**< Reserved for system/core critical hooks. */
-  HOOK_INSERT_SYSTEM_HIGH,  /**< Reserved for system/core high priority hooks. */
-  HOOK_INSERT_SYSTEM,  /**< Reserved for system/core hooks. */
-  HOOK_INSERT_HIGH,  /**< High priority user hooks. */
-  HOOK_INSERT_ABOVE_NORMAL,  /**< Above normal priority user hooks. */
-  HOOK_INSERT_NORMAL,  /**< Normal priority user hooks. */
-  HOOK_INSERT_BELOW_NORMAL,  /**< Below normal priority user hooks. */
-  HOOK_INSERT_LOW,  /**< Low priority user hooks. */
-  HOOK_INSERT_LOWEST,  /**< Lowest priority user hooks. */
-  HOOK_INSERT_DEFAULT,  /**< Default priority user hooks (end of chain). */
-};
+  HOOK_PRIORITY_SYSTEM_CRITICAL,  /**< Reserved for system/core critical hooks. */
+  HOOK_PRIORITY_SYSTEM_HIGH,  /**< Reserved for system/core high priority hooks. */
+  HOOK_PRIORITY_SYSTEM,  /**< Reserved for system/core hooks. */
+  HOOK_PRIORITY_HIGH,  /**< High priority user hooks. */
+  HOOK_PRIORITY_ABOVE_NORMAL,  /**< Above normal priority user hooks. */
+  HOOK_PRIORITY_NORMAL,  /**< Normal priority user hooks. */
+  HOOK_PRIORITY_BELOW_NORMAL, /**< Below normal priority user hooks. */
+  HOOK_PRIORITY_LOW,  /**< Low priority user hooks. */
+  HOOK_PRIORITY_LOWEST,  /**< Lowest priority user hooks. */
+  HOOK_PRIORITY_DEFAULT,  /**< Default priority user hooks (end of chain). */
+} hook_priority_t;
 
 /**
  * @typedef HCFUNC
@@ -81,7 +81,7 @@ extern const list_t *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *, HCFUNC *);
 extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);
-extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, enum hook_insert);
+extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, hook_priority_t);
 extern void hook_uninstall(struct HookContainer *, HCFUNC *);
 extern void *hook_advance_to_next(list_node_t *, ...);
 #endif  /* INCLUDED_hook_h */

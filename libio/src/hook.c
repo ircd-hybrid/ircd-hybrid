@@ -66,19 +66,12 @@ hook_container_get_list(void)
 /**
  * @brief Registers a new HookContainer by name.
  *
- * @param name Name used to identify the HookContainer. The name cannot be NULL.
- * @return struct HookContainer* Pointer to the registered HookContainer structure, or NULL if the name is invalid.
- *
  * This function registers a new HookContainer identified by the provided name. If a container with the
  * given name already exists, the function returns a pointer to that container without modifying it. If no
  * such container exists, a new HookContainer is created, initialized, and added to the global list of containers.
  *
- * @note Once a callback is registered, it should remain in memory for the duration of the program's
- *       execution. This is necessary because there may be modules or components that rely on the
- *       existence of the callback, even if no functions are currently attached to it. By dynamically
- *       allocating the HookContainer structure within this function, we ensure that it remains
- *       accessible and valid throughout the program's lifetime, preventing potential crashes or
- *       undefined behavior caused by premature deallocation.
+ * @param name Name used to identify the HookContainer. The name cannot be NULL.
+ * @return struct HookContainer* Pointer to the registered HookContainer structure, or NULL if the name is invalid.
  */
 struct HookContainer *
 hook_container_register(const char *name)

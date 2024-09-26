@@ -64,15 +64,14 @@ hook_container_get_list(void)
 }
 
 /**
- * @brief Registers a new callback with a hook container.
+ * @brief Registers a new HookContainer by name.
  *
- * @param name Name used to identify the callback (can be NULL for anonymous callbacks).
- * @param func Initial function attached to the chain (can be NULL to create an empty chain).
- * @return struct HookContainer* Pointer to the registered HookContainer structure.
+ * @param name Name used to identify the HookContainer. The name cannot be NULL.
+ * @return struct HookContainer* Pointer to the registered HookContainer structure, or NULL if the name is invalid.
  *
- * This function registers a new callback with a hook container. If a container with the given
- * name already exists, the function adds the provided function to its chain. If the name is NULL,
- * an anonymous container is created.
+ * This function registers a new HookContainer identified by the provided name. If a container with the
+ * given name already exists, the function returns a pointer to that container without modifying it. If no
+ * such container exists, a new HookContainer is created, initialized, and added to the global list of containers.
  *
  * @note Once a callback is registered, it should remain in memory for the duration of the program's
  *       execution. This is necessary because there may be modules or components that rely on the
@@ -82,30 +81,18 @@ hook_container_get_list(void)
  *       undefined behavior caused by premature deallocation.
  */
 struct HookContainer *
-hook_container_register(const char *name, HCFUNC *func)
+hook_container_register(const char *name)
 {
-  struct HookContainer *container;
+  if (name == NULL)
+    return NULL;
 
-  if (name)
-  {
-    container = hook_container_find(name);
-    if (container)
-    {
-      if (func)
-        list_add_tail(func, io_calloc(sizeof(list_node_t)), &container->chain);
-      return container;
-    }
-  }
+  struct HookContainer *container = hook_container_find(name);
+  if (container)
+    return container;
 
   container = io_calloc(sizeof(*container));
-  if (func)
-    list_add(func, io_calloc(sizeof(list_node_t)), &container->chain);
-
-  if (name)
-  {
-    container->name = io_strdup(name);
-    list_add(container, &container->node, &hook_container_list);
-  }
+  container->name = io_strdup(name);
+  list_add(container, &container->node, &hook_container_list);
 
   return container;
 }

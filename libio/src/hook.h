@@ -78,7 +78,7 @@ struct HookContainer
 };
 
 extern const list_t *hook_container_get_list(void);
-extern struct HookContainer *hook_container_register(const char *, HCFUNC *);
+extern struct HookContainer *hook_container_register(const char *);
 extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);
 extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, hook_priority_t);

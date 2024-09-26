@@ -83,5 +83,6 @@ extern void *hook_run_chain(struct HookContainer *, ...);
 extern struct HookContainer *hook_container_find(const char *);
 extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, hook_priority_t);
 extern void hook_uninstall(struct HookContainer *, HCFUNC *);
+extern void hook_container_unregister(const char *);
 extern void *hook_advance_to_next(list_node_t *, ...);
 #endif  /* INCLUDED_hook_h */

@@ -98,6 +98,36 @@ hook_container_register(const char *name)
 }
 
 /**
+ * @brief Unregisters and frees a HookContainer by name, along with any registered callbacks.
+ *
+ * This function removes a HookContainer from the global hook container list by its name.
+ * All callbacks registered in the container's chain are also removed.
+ *
+ * @param name The name of the HookContainer to unregister. Must be non-NULL.
+ */
+void
+hook_container_unregister(const char *name)
+{
+  if (name == NULL)
+    return;
+
+  struct HookContainer *container = hook_container_find(name);
+  if (container == NULL)
+    return;
+
+  while (container->chain.head)
+  {
+    list_node_t *node = container->chain.head;
+    list_remove(node, &container->chain);
+    list_free_node(node);
+  }
+
+  list_remove(&container->node, &hook_container_list);
+  io_free(container->name);
+  io_free(container);
+}
+
+/**
  * @brief Executes the hook chain associated with a hook container.
  *
  * This function executes the hook chain associated with the given container.

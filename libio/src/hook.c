@@ -203,7 +203,6 @@ hook_container_find(const char *name)
 list_node_t *
 hook_install(struct HookContainer *container, HCFUNC *hook, hook_priority_t priority)
 {
-  list_node_t *node = io_calloc(sizeof(*node));
   unsigned int length = list_length(&container->chain);
   unsigned int insert_position = 0;
 
@@ -243,6 +242,7 @@ hook_install(struct HookContainer *container, HCFUNC *hook, hook_priority_t prio
       break;
   }
 
+  list_node_t *node = io_calloc(sizeof(*node));
   list_add_at(hook, insert_position, node, &container->chain);
 
   return node;

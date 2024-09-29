@@ -268,6 +268,9 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 
   if (MyClient(target) && IsClient(source))
   {
+    if (flood_attack_client(notice, source, target))
+      return;
+
     if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
         accept_message(source, target) == false)
     {
@@ -293,13 +296,8 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
         target->connection->last_caller_id_time = io_time_get(IO_TIME_MONOTONIC_SEC);
       }
 
-      /* Only so opers can watch for floods */
-      flood_attack_client(notice, source, target);
       return;
     }
-
-    if (flood_attack_client(notice, source, target))
-      return;
   }
 
   sendto_one_anywhere(target, source, command[notice], ":%s", text);

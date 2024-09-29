@@ -54,12 +54,27 @@ typedef enum
 } hook_priority_t;
 
 /**
+ * @enum hook_flow_t
+ * @brief Enum for controlling the flow of hook execution.
+ *
+ * This enum defines the possible flow control signals that can be returned by a hook function.
+ * Each signal dictates how the dispatcher should behave after executing the current hook in the chain.
+ */
+typedef enum
+{
+  HOOK_FLOW_CONTINUE,  /**< Continue execution to the next hook in the chain. */
+  HOOK_FLOW_RESTART,  /**< Restart the hook execution from the beginning of the chain. */
+  HOOK_FLOW_RETRY,  /**< Retry the current hook without advancing to the next one. */
+  HOOK_FLOW_STOP,  /**< Stop execution of the hook chain immediately. */
+} hook_flow_t;
+
+/**
  * @typedef HCFUNC
  * @brief Typedef for function pointers used as hook callbacks.
  * @param va_list Argument list passed to the hook function.
- * @return void * Return value of the hook function.
+ * @return hook_flow_t Flow control signal for the hook chain execution.
  */
-typedef void *HCFUNC(va_list);
+typedef hook_flow_t (*HCFUNC)(void *);
 
 /**
  * @struct HookContainer
@@ -79,10 +94,9 @@ struct HookContainer
 
 extern const list_t *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *);
-extern void *hook_run_chain(struct HookContainer *, ...);
+extern hook_flow_t hook_dispatch(struct HookContainer *, void *);
 extern struct HookContainer *hook_container_find(const char *);
 extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, hook_priority_t);
 extern void hook_uninstall(struct HookContainer *, HCFUNC *);
 extern void hook_container_unregister(const char *);
-extern void *hook_advance_to_next(list_node_t *, ...);
 #endif  /* INCLUDED_hook_h */

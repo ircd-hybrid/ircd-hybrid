@@ -121,58 +121,47 @@ hook_container_unregister(const char *name)
 }
 
 /**
- * @brief Executes the hook chain associated with a hook container.
+ * @brief Dispatches the execution of the hook chain associated with a hook container.
  *
- * This function executes the hook chain associated with the given container.
- * It increments usage statistics and passes control to the hook functions in
- * the chain. The return value of the last executed hook function is returned.
+ * This function iterates over and executes each hook in the chain associated with the
+ * specified HookContainer. The dispatcher processes the flow control signals returned
+ * by each hook, allowing the chain to continue or stop based on the hooks' outcomes.
+ * The function increments the usage statistics for the container, including the count of
+ * how many times the chain has been executed.
  *
  * @param container Pointer to the HookContainer structure.
  * @param ... Variable arguments passed to the hook functions.
- * @return void* Return value of the last executed hook function.
+ * @return hook_flow_t The flow control signal indicating how the hook chain execution was concluded.
  */
-void *
-hook_run_chain(struct HookContainer *container, ...)
+hook_flow_t
+hook_dispatch(struct HookContainer *container, void *data)
 {
   container->called++;
   container->last = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  /* Check if the hook chain is empty. */
-  if (list_is_empty(&container->chain))
-    return NULL;  /* No hooks to execute. */
+  list_node_t *node = container->chain.head;
+  while (node)
+  {
+    HCFUNC hook_func = node->data;
+    hook_flow_t flow = hook_func(data);
 
-  va_list args;
-  va_start(args, container);
-  void *res = ((HCFUNC *)container->chain.head->data)(args);
-  va_end(args);
+    switch (flow)
+    {
+      case HOOK_FLOW_CONTINUE:
+        node = node->next;
+        break;
+      case HOOK_FLOW_RESTART:
+        node = container->chain.head;
+        break;
+      case HOOK_FLOW_RETRY:
+        break;
+      case HOOK_FLOW_STOP:
+      default:
+        return HOOK_FLOW_STOP;
+    }
+  }
 
-  return res;
-}
-
-/**
- * @brief Passes control to the next hook in the chain.
- *
- * This function is called by a hook function to pass code flow further in
- * the hook chain. It finds the next hook in the chain after the current one
- * and calls it with the provided arguments.
- *
- * @param this_hook Pointer to the list_node_t of the current hook function.
- * @param ... Original or modified arguments to be passed to the next hook.
- * @return void* Return value of the next hook function.
- */
-void *
-hook_advance_to_next(list_node_t *this_hook, ...)
-{
-  /* Check if the next hook exists. */
-  if (this_hook->next == NULL)
-    return NULL;  /* Reached the last hook in the chain. */
-
-  va_list args;
-  va_start(args, this_hook);
-  void *res = ((HCFUNC *)this_hook->next->data)(args);
-  va_end(args);
-
-  return res;
+  return HOOK_FLOW_CONTINUE;
 }
 
 /**

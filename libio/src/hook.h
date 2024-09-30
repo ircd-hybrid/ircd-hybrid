@@ -96,7 +96,7 @@ extern const list_t *hook_container_get_list(void);
 extern struct HookContainer *hook_container_register(const char *);
 extern hook_flow_t hook_dispatch(struct HookContainer *, void *);
 extern struct HookContainer *hook_container_find(const char *);
-extern list_node_t *hook_install(struct HookContainer *, HCFUNC *, hook_priority_t);
-extern void hook_uninstall(struct HookContainer *, HCFUNC *);
+extern list_node_t *hook_install(struct HookContainer *, HCFUNC, hook_priority_t);
+extern void hook_uninstall(struct HookContainer *, HCFUNC);
 extern void hook_container_unregister(const char *);
 #endif  /* INCLUDED_hook_h */

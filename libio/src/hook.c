@@ -201,7 +201,7 @@ hook_container_find(const char *name)
  * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
 list_node_t *
-hook_install(struct HookContainer *container, HCFUNC *hook, hook_priority_t priority)
+hook_install(struct HookContainer *container, HCFUNC hook, hook_priority_t priority)
 {
   unsigned int length = list_length(&container->chain);
   unsigned int insert_position = 0;
@@ -258,7 +258,7 @@ hook_install(struct HookContainer *container, HCFUNC *hook, hook_priority_t prio
  * @param hook Address of the hook function to uninstall.
  */
 void
-hook_uninstall(struct HookContainer *container, HCFUNC *hook)
+hook_uninstall(struct HookContainer *container, HCFUNC hook)
 {
   list_node_t *node = list_find_remove(&container->chain, hook);
   if (node)

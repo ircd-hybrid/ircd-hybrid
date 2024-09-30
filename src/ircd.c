@@ -65,6 +65,7 @@
 #include "isupport.h"
 #include "extban.h"
 #include "ircd_exit.h"
+#include "ircd_hook.h"
 #include "flatten_links.h"
 
 /**
@@ -442,6 +443,7 @@ main(int argc, char *argv[])
   if (io_pidfile_create(pidFileName))
     exit(EXIT_FAILURE);
 
+  ircd_hook_init();
   isupport_init();
   ipcache_init();
   client_init();

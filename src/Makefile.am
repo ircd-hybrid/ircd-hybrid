@@ -80,6 +80,8 @@ ircd_SOURCES = accept.c          \
                ircd_defs.h       \
                ircd_exit.c       \
                ircd_exit.h       \
+               ircd_hook.c       \
+               ircd_hook.h       \
                ircd_signal.c     \
                ircd_signal.h     \
                isupport.c        \

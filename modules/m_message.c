@@ -26,6 +26,7 @@
 #include "stdinc.h"
 #include "io_time.h"
 #include "list.h"
+#include "hook.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -41,6 +42,7 @@
 #include "hash.h"
 #include "misc.h"
 #include "accept.h"
+#include "ircd_hook.h"
 
 enum
 {
@@ -233,37 +235,15 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 static void
 msg_client(bool notice, struct Client *source, struct Client *target, const char *text)
 {
+  ircd_hook_msg_client_ctx ctx = { .notice = notice, .source = source, .target = target, .text = text };
+
   if (MyClient(source))
   {
     if (target->away[0] && notice == false)
       sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 
-    if (user_mode_has_flag(target, UMODE_SECUREONLY) && user_mode_has_flag(source, UMODE_SECURE) == false)
-    {
-      if (notice == false)
-        sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
-                           "You must be connected via TLS to message this user");
+    if (hook_dispatch(ircd_hook_msg_client_source_local, &ctx) == HOOK_FLOW_STOP)
       return;
-    }
-
-    if (user_mode_has_flag(source, UMODE_SECUREONLY) && user_mode_has_flag(target, UMODE_SECURE) == false)
-    {
-      if (notice == false)
-        sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
-                           "Recipient is not connected via TLS and you are +Z");
-      return;
-    }
-
-    if (user_mode_has_flag(target, UMODE_REGONLY) && target != source)
-    {
-      if (user_mode_has_flag(source, UMODE_REGISTERED | UMODE_OPER) == false)
-      {
-        if (notice == false)
-          sendto_one_numeric(source, &me, ERR_CANNOTSENDTOUSER, target->name,
-                             "You must identify to a registered account to message this user");
-        return;
-      }
-    }
   }
 
   if (MyClient(target) && IsClient(source))
@@ -271,33 +251,8 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
     if (flood_attack_client(notice, source, target))
       return;
 
-    if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID) &&
-        accept_message(source, target) == false)
-    {
-      bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
-
-      /* check for accept, flag recipient incoming message */
-      if (notice == false)
-        sendto_one_numeric(source, &me, RPL_TARGUMODEG,
-                           target->name,
-                           callerid ? "+g" : "+G",
-                           callerid ? "server side ignore" :
-                                      "server side ignore with the exception of common channels");
-
-      if ((target->connection->last_caller_id_time +
-           ConfigGeneral.caller_id_wait) < io_time_get(IO_TIME_MONOTONIC_SEC))
-      {
-        if (notice == false)
-          sendto_one_numeric(source, &me, RPL_TARGNOTIFY, target->name);
-
-        sendto_one_numeric(target, &me, RPL_UMODEGMSG,
-                           source->name, source->username, source->host,
-                           callerid ? "+g" : "+G");
-        target->connection->last_caller_id_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-      }
-
+    if (hook_dispatch(ircd_hook_msg_client_target_local, &ctx) == HOOK_FLOW_STOP)
       return;
-    }
   }
 
   sendto_one_anywhere(target, source, command[notice], ":%s", text);

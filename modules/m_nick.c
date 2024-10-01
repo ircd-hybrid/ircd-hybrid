@@ -46,6 +46,7 @@
 #include "id.h"
 #include "ipcache.h"
 #include "extban.h"
+#include "ircd_hook.h"
 
 
 /* check_clean_nick()
@@ -234,13 +235,14 @@ nick_change_local(struct Client *source, const char *nick)
     }
   }
 
+  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = nick };
+  hook_dispatch(ircd_hook_nick_change_local, &ctx);
+
   /*
    * Client just changing their nick. If they are on a channel, send
    * note of change to all clients on that channel. Propagate notice
    * to other servers.
    */
-  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
-                 source->name, nick, source->username, source->host);
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, nick);
   whowas_add_history(source, true);
@@ -289,8 +291,9 @@ nick_change_remote(struct Client *source, char *parv[])
     assert(source->tsinfo);
   }
 
-  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
-                 source->name, parv[1], source->username, source->host);
+  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = parv[1] };
+  hook_dispatch(ircd_hook_nick_change_remote, &ctx);
+
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, parv[1]);
 

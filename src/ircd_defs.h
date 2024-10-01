@@ -47,7 +47,7 @@
 #define HOSTIPLEN       45  /**< Maximum length of a string representation of an IP address. */
 
 #define PASSWDLEN       128  /**< Maximum length of a password. */
-#define IDLEN           12  /**< Maximum length of an identifier. Do not change; not the actual generated length. */
+#define IDLEN           9  /**< Maximum length of a unique identifier (UID). Do not change. */
 #define REALLEN         50  /**< Maximum size of a real name (GECOS). */
 #define CHANNELLEN      50  /**< Maximum size of a channel name. */
 #define TOPICLEN        300  /**< Maximum size of a channel topic. Do not change; configurable in ircd.conf. */

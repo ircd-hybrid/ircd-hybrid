@@ -199,7 +199,7 @@ set_initial_nick(struct Client *source, const char *nick)
  * side effects - changes nick of a LOCAL user
  */
 static void
-change_local_nick(struct Client *source, const char *nick)
+nick_change_local(struct Client *source, const char *nick)
 {
   assert(source->name[0] && !EmptyString(nick));
   assert(MyClient(source));
@@ -272,7 +272,7 @@ change_local_nick(struct Client *source, const char *nick)
  *      - parv[2] = timestamp
  */
 static void
-change_remote_nick(struct Client *source, char *parv[])
+nick_change_remote(struct Client *source, char *parv[])
 {
   assert(!EmptyString(parv[1]));
   assert(IsClient(source));
@@ -680,7 +680,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 
   struct Client *target = hash_find_client(nick);
   if (target == NULL)
-    change_local_nick(source, nick);
+    nick_change_local(source, nick);
   else if (target == source)
   {
     /*
@@ -690,7 +690,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 
     /* Check the nick isn't exactly the same */
     if (strcmp(target->name, nick))
-      change_local_nick(source, nick);
+      nick_change_local(source, nick);
   }
   else if (IsUnknown(target))
   {
@@ -699,7 +699,7 @@ m_nick(struct Client *source, int parc, char *parv[])
      * USER) then drop the unregistered client
      */
     client_exit(target, "Overridden by other sign on");
-    change_local_nick(source, nick);
+    nick_change_local(source, nick);
   }
   else
     sendto_one_numeric(source, &me, ERR_NICKNAMEINUSE, target->name);
@@ -731,20 +731,20 @@ ms_nick(struct Client *source, int parc, char *parv[])
   /* If the nick doesn't exist, allow it and process like normal */
   struct Client *target = hash_find_client(parv[1]);
   if (target == NULL)
-    change_remote_nick(source, parv);
+    nick_change_remote(source, parv);
   else if (IsUnknown(target))
   {
     /* We're not living in the past anymore, an unknown client is local only. */
     client_exit(target, "Overridden by other sign on");
-    change_remote_nick(source, parv);
+    nick_change_remote(source, parv);
   }
   else if (target == source)
   {
     if (strcmp(target->name, parv[1]))
-      change_remote_nick(source, parv);
+      nick_change_remote(source, parv);
   }
   else if (perform_nick_change_collides(source, target, parc, parv))
-    change_remote_nick(source, parv);
+    nick_change_remote(source, parv);
 }
 
 /*! \brief UID command handler

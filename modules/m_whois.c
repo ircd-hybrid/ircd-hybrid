@@ -41,6 +41,7 @@
 #include "irc_string.h"
 #include "parse.h"
 #include "module.h"
+#include "ircd_hook.h"
 
 
 /**
@@ -102,7 +103,6 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, str
 static void
 whois_send(struct Client *source, struct Client *target)
 {
-  char buf[IRCD_BUFSIZE];
   list_node_t *node;
   const struct ServicesTag *svstag = NULL;
 
@@ -115,6 +115,7 @@ whois_send(struct Client *source, struct Client *target)
 
   if (list_length(&target->channel))
   {
+    char buf[IRCD_BUFSIZE];
     char *bufptr = buf;
 
     /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
@@ -203,49 +204,13 @@ whois_send(struct Client *source, struct Client *target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
                        target->name, user_mode_to_str(target->umodes));
 
-  if (user_mode_has_flag(target, UMODE_REGISTERED))
-    sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);
-
-  if (strcmp(target->account, "*"))
-    sendto_one_numeric(source, &me, RPL_WHOISACCOUNT, target->name, target->account, "is");
-
-  if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
-  {
-    bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
-
-    sendto_one_numeric(source, &me, RPL_TARGUMODEG, target->name,
-                       callerid ? "+g" : "+G",
-                       callerid ? "server side ignore" :
-                                  "server side ignore with the exception of common channels");
-  }
-
-  if (user_mode_has_flag(target, UMODE_BOT))
-    sendto_one_numeric(source, &me, RPL_WHOISBOT, target->name);
-
-  if (user_mode_has_flag(target, UMODE_WEBIRC))
-    sendto_one_numeric(source, &me, RPL_WHOISTEXT, target->name,
-                       "User connected using a webirc gateway");
-
-  if (user_mode_has_flag(target, UMODE_SECURE))
-  {
-    snprintf(buf, sizeof(buf), target->tls_cipher ?
-             "is using a secure connection [%s]" :
-             "is using a secure connection", target->tls_cipher);
-    sendto_one_numeric(source, &me, RPL_WHOISSECURE, target->name, buf);
-  }
-
-  if (!EmptyString(target->tls_certfp))
-    if (user_mode_has_flag(source, UMODE_OPER) || source == target)
-      sendto_one_numeric(source, &me, RPL_WHOISCERTFP, target->name, target->tls_certfp);
+  ircd_hook_whois_send_ctx ctx = { .source = source, .target = target };
+  hook_dispatch(ircd_hook_whois_send, &ctx);
 
   if (MyConnect(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);
-
-  if (user_mode_has_flag(target, UMODE_SPY) && source != target)
-    sendto_one_notice(target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
-                      source->name, source->username, source->host, source->servptr->name);
 }
 
 /* do_whois()

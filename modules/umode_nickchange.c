@@ -22,7 +22,6 @@
 #include "module.h"
 #include "stdinc.h"
 #include "client.h"
-#include "numeric.h"
 #include "send.h"
 #include "ircd_hook.h"
 #include "user_mode.h"

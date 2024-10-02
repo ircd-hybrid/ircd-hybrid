@@ -22,6 +22,8 @@
 #include "module.h"
 #include "stdinc.h"
 #include "client.h"
+#include "send.h"
+#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode spy_mode =
@@ -31,16 +33,30 @@ static struct UserMode spy_mode =
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
+static hook_flow_t
+whois_send_hook(void *ctx_)
+{
+  ircd_hook_whois_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_SPY) && ctx->source != ctx->target)
+    sendto_one_notice(ctx->target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
+                      ctx->source->name, ctx->source->username, ctx->source->host, ctx->source->servptr->name);
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static void
 init_handler(void)
 {
   user_mode_register(&spy_mode);
+  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_LOWEST);
 }
 
 static void
 exit_handler(void)
 {
   user_mode_unregister(&spy_mode);
+  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
 struct Module module_entry =

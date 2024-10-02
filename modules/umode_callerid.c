@@ -65,11 +65,25 @@ msg_client_target_local_hook(void *ctx_)
   return HOOK_FLOW_STOP;
 }
 
+static hook_flow_t
+whois_send_hook(void *ctx_)
+{
+  ircd_hook_whois_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_CALLERID) == false)
+    return HOOK_FLOW_CONTINUE;
+
+  sendto_one_numeric(ctx->source, &me, RPL_TARGUMODEG,
+                     ctx->target->name, "+g", "server side ignore");
+  return HOOK_FLOW_CONTINUE;
+}
+
 static void
 init_handler(void)
 {
   user_mode_register(&callerid_mode);
   hook_install(ircd_hook_msg_client_target_local, msg_client_target_local_hook, HOOK_PRIORITY_DEFAULT);
+  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
 }
 
 static void
@@ -77,6 +91,7 @@ exit_handler(void)
 {
   user_mode_unregister(&callerid_mode);
   hook_uninstall(ircd_hook_msg_client_target_local, msg_client_target_local_hook);
+  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
 struct Module module_entry =

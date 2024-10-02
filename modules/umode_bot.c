@@ -23,6 +23,9 @@
 #include "stdinc.h"
 #include "client.h"
 #include "isupport.h"
+#include "numeric.h"
+#include "send.h"
+#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode bot_mode =
@@ -31,11 +34,23 @@ static struct UserMode bot_mode =
   .mode_flag = &UMODE_BOT
 };
 
+static hook_flow_t
+whois_send_hook(void *ctx_)
+{
+  ircd_hook_whois_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_BOT))
+    sendto_one_numeric(ctx->source, &me, RPL_WHOISBOT, ctx->target->name);
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static void
 init_handler(void)
 {
   isupport_add("BOT", "B", -1);
   user_mode_register(&bot_mode);
+  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
 }
 
 static void
@@ -43,6 +58,7 @@ exit_handler(void)
 {
   isupport_delete("BOT");
   user_mode_unregister(&bot_mode);
+  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
 struct Module module_entry =

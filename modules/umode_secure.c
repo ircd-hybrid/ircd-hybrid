@@ -21,7 +21,11 @@
 
 #include "module.h"
 #include "stdinc.h"
+#include "irc_string.h"
 #include "client.h"
+#include "numeric.h"
+#include "send.h"
+#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode secure_mode =
@@ -31,16 +35,39 @@ static struct UserMode secure_mode =
   .policy = USER_MODE_POLICY_INTERNAL_ONLY,
 };
 
+static hook_flow_t
+whois_send_hook(void *ctx_)
+{
+  ircd_hook_whois_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_SECURE) == false)
+    return HOOK_FLOW_CONTINUE;
+
+  char buf[IRCD_BUFSIZE];
+  snprintf(buf, sizeof(buf), ctx->target->tls_cipher ?
+           "is using a secure connection [%s]" :
+           "is using a secure connection", ctx->target->tls_cipher);
+  sendto_one_numeric(ctx->source, &me, RPL_WHOISSECURE, ctx->target->name, buf);
+
+  if (!EmptyString(ctx->target->tls_certfp))
+    if (user_mode_has_flag(ctx->source, UMODE_OPER) || ctx->source == ctx->target)
+      sendto_one_numeric(ctx->source, &me, RPL_WHOISCERTFP, ctx->target->name, ctx->target->tls_certfp);
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static void
 init_handler(void)
 {
   user_mode_register(&secure_mode);
+  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
 }
 
 static void
 exit_handler(void)
 {
   user_mode_unregister(&secure_mode);
+  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
 struct Module module_entry =

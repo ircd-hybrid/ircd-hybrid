@@ -40,10 +40,17 @@ typedef struct
   const char *nick;
 } ircd_hook_nick_change_ctx;
 
+typedef struct
+{
+  struct Client *source;
+  struct Client *target;
+} ircd_hook_whois_send_ctx;
+
 extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
 extern struct HookContainer *ircd_hook_nick_change_local;
 extern struct HookContainer *ircd_hook_nick_change_remote;
+extern struct HookContainer *ircd_hook_whois_send;
 
 extern void ircd_hook_init(void);
 #endif  /* INCLUDED_ircd_hook_h */

@@ -22,6 +22,9 @@
 #include "module.h"
 #include "stdinc.h"
 #include "client.h"
+#include "numeric.h"
+#include "send.h"
+#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode registered_mode =
@@ -31,16 +34,32 @@ static struct UserMode registered_mode =
   .policy = USER_MODE_POLICY_SERVICE_ONLY,
 };
 
+static hook_flow_t
+whois_send_hook(void *ctx_)
+{
+  ircd_hook_whois_send_ctx *ctx = ctx_;
+
+  if (user_mode_has_flag(ctx->target, UMODE_REGISTERED))
+    sendto_one_numeric(ctx->source, &me, RPL_WHOISREGNICK, ctx->target->name);
+
+  if (strcmp(ctx->target->account, "*"))
+    sendto_one_numeric(ctx->source, &me, RPL_WHOISACCOUNT, ctx->target->name, ctx->target->account, "is");
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static void
 init_handler(void)
 {
   user_mode_register(&registered_mode);
+  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_ABOVE_NORMAL);
 }
 
 static void
 exit_handler(void)
 {
   user_mode_unregister(&registered_mode);
+  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
 struct Module module_entry =

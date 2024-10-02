@@ -109,6 +109,10 @@ whois_person(struct Client *source, struct Client *target)
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
 
+  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
+    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
+                       target->name, target->username, target->realhost, target->sockhost);
+
   if (list_length(&target->channel))
   {
     char *bufptr = buf;
@@ -158,24 +162,8 @@ whois_person(struct Client *source, struct Client *target)
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, target->servptr->name, target->servptr->info);
 
-  if (user_mode_has_flag(target, UMODE_REGISTERED))
-    sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);
-
-  if (strcmp(target->account, "*"))
-    sendto_one_numeric(source, &me, RPL_WHOISACCOUNT, target->name, target->account, "is");
-
   if (target->away[0])
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
-
-  if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
-  {
-    bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
-
-    sendto_one_numeric(source, &me, RPL_TARGUMODEG, target->name,
-                       callerid ? "+g" : "+G",
-                       callerid ? "server side ignore" :
-                                  "server side ignore with the exception of common channels");
-  }
 
   if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
   {
@@ -211,20 +199,32 @@ whois_person(struct Client *source, struct Client *target)
                          target->name, svstag->tag);
   }
 
+  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
+    sendto_one_numeric(source, &me, RPL_WHOISMODES,
+                       target->name, user_mode_to_str(target->umodes));
+
+  if (user_mode_has_flag(target, UMODE_REGISTERED))
+    sendto_one_numeric(source, &me, RPL_WHOISREGNICK, target->name);
+
+  if (strcmp(target->account, "*"))
+    sendto_one_numeric(source, &me, RPL_WHOISACCOUNT, target->name, target->account, "is");
+
+  if (user_mode_has_flag(target, UMODE_CALLERID | UMODE_SOFTCALLERID))
+  {
+    bool callerid = user_mode_has_flag(target, UMODE_CALLERID);
+
+    sendto_one_numeric(source, &me, RPL_TARGUMODEG, target->name,
+                       callerid ? "+g" : "+G",
+                       callerid ? "server side ignore" :
+                                  "server side ignore with the exception of common channels");
+  }
+
   if (user_mode_has_flag(target, UMODE_BOT))
     sendto_one_numeric(source, &me, RPL_WHOISBOT, target->name);
 
   if (user_mode_has_flag(target, UMODE_WEBIRC))
     sendto_one_numeric(source, &me, RPL_WHOISTEXT, target->name,
                        "User connected using a webirc gateway");
-
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISMODES,
-                       target->name, user_mode_to_str(target->umodes));
-
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
-                       target->name, target->username, target->realhost, target->sockhost);
 
   if (user_mode_has_flag(target, UMODE_SECURE))
   {

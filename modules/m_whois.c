@@ -100,7 +100,7 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, str
  * side effects	- 
  */
 static void
-whois_person(struct Client *source, struct Client *target)
+whois_send(struct Client *source, struct Client *target)
 {
   char buf[IRCD_BUFSIZE];
   list_node_t *node;
@@ -262,7 +262,7 @@ do_whois(struct Client *source, const char *name)
   struct Client *target = hash_find_client(name);
 
   if (target && IsClient(target))
-    whois_person(source, target);
+    whois_send(source, target);
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 

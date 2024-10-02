@@ -70,6 +70,9 @@ whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
+  if (user_mode_has_flag(ctx->target, UMODE_SOFTCALLERID) == false)
+    return HOOK_FLOW_CONTINUE;
+
   if (user_mode_has_flag(ctx->target, UMODE_CALLERID))
     return HOOK_FLOW_CONTINUE;
 

@@ -38,18 +38,17 @@ msg_client_source_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_REGONLY) && ctx->target != ctx->source)
-  {
-    if (user_mode_has_flag(ctx->source, UMODE_REGISTERED | UMODE_OPER) == false)
-    {
-      if (ctx->notice == false)
-        sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER, ctx->target->name,
-                           "You must identify to a registered account to message this user");
-      return HOOK_FLOW_STOP;
-    }
-  }
+  if (user_mode_has_flag(ctx->target, UMODE_REGONLY) == false || ctx->target == ctx->source)
+    return HOOK_FLOW_CONTINUE;
 
-  return HOOK_FLOW_CONTINUE;
+  if (user_mode_has_flag(ctx->source, UMODE_REGISTERED | UMODE_OPER))
+    return HOOK_FLOW_CONTINUE;
+
+  if (ctx->notice == false)
+    sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER,
+                       ctx->target->name, "You must identify to a registered account to message this user");
+
+  return HOOK_FLOW_STOP;
 }
 
 static void

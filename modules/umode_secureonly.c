@@ -41,16 +41,16 @@ msg_client_source_local_hook(void *ctx_)
   if (user_mode_has_flag(ctx->target, UMODE_SECUREONLY) && user_mode_has_flag(ctx->source, UMODE_SECURE) == false)
   {
     if (ctx->notice == false)
-      sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER, ctx->target->name,
-                         "You must be connected via TLS to message this user");
+      sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER,
+                         ctx->target->name, "You must be connected via TLS to message this user");
     return HOOK_FLOW_STOP;
   }
 
   if (user_mode_has_flag(ctx->source, UMODE_SECUREONLY) && user_mode_has_flag(ctx->target, UMODE_SECURE) == false)
   {
     if (ctx->notice == false)
-      sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER, ctx->target->name,
-                         "Recipient is not connected via TLS and you are +Z");
+      sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER,
+                         ctx->target->name, "Recipient is not connected via TLS and you are +Z");
     return HOOK_FLOW_STOP;
   }
 

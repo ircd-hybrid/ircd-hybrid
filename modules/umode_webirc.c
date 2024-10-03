@@ -40,8 +40,8 @@ whois_send_hook(void *ctx_)
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
   if (user_mode_has_flag(ctx->target, UMODE_WEBIRC))
-    sendto_one_numeric(ctx->source, &me, RPL_WHOISTEXT, ctx->target->name,
-                       "User connected using a webirc gateway");
+    sendto_one_numeric(ctx->source, &me, RPL_WHOISTEXT,
+                       ctx->target->name, "User connected using a webirc gateway");
 
   return HOOK_FLOW_CONTINUE;
 }

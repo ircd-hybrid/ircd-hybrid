@@ -28,6 +28,12 @@
 
 typedef struct
 {
+  struct Client *client;
+  const char *comment;
+} ircd_hook_client_exit_ctx;
+
+typedef struct
+{
   bool notice;
   struct Client *source;
   struct Client *target;
@@ -42,14 +48,23 @@ typedef struct
 
 typedef struct
 {
+  struct Client *client;
+} ircd_hook_user_register_ctx;
+
+typedef struct
+{
   struct Client *source;
   struct Client *target;
 } ircd_hook_whois_send_ctx;
 
+extern struct HookContainer *ircd_hook_client_exit_local;
+extern struct HookContainer *ircd_hook_client_exit_remote;
 extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
 extern struct HookContainer *ircd_hook_nick_change_local;
 extern struct HookContainer *ircd_hook_nick_change_remote;
+extern struct HookContainer *ircd_hook_user_register_local;
+extern struct HookContainer *ircd_hook_user_register_remote;
 extern struct HookContainer *ircd_hook_whois_send;
 
 extern void ircd_hook_init(void);

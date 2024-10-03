@@ -36,6 +36,7 @@
 #include "id.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "listener.h"
 #include "motd.h"
 #include "numeric.h"
@@ -318,10 +319,7 @@ user_register_local(struct Client *client)
   strlcpy(client->id, id, sizeof(client->id));
   hash_add_id(client);
 
-  sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
-                 client->name, client->username, client->realhost, client->sockhost,
-                 class_get_name(&client->connection->confs), client->info, client->id);
+  hook_dispatch(ircd_hook_user_register_local, &(ircd_hook_user_register_ctx){ .client = client });
 
   SetClient(client);
 
@@ -395,11 +393,7 @@ user_register_remote(struct Client *client)
   if (list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = list_length(&global_client_list);
 
-  if (HasFlag(client->servptr, FLAGS_EOB))
-    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
-                   client->servptr->name, client->name, client->username, client->realhost,
-                   client->sockhost, client->info, client->id);
+  hook_dispatch(ircd_hook_user_register_remote, &(ircd_hook_user_register_ctx){ .client = client });
 
   user_introduce(client);
 }

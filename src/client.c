@@ -32,6 +32,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "auth.h"
 #include "comm.h"
@@ -782,6 +783,8 @@ client_exit(struct Client *client, const char *comment)
 
     AddFlag(client, FLAGS_CLOSING);
 
+    hook_dispatch(ircd_hook_client_exit_local, &(ircd_hook_client_exit_ctx){ .client = client, .comment = comment });
+
     if (client->connection->auth)
     {
       auth_delete(client->connection->auth);
@@ -808,10 +811,6 @@ client_exit(struct Client *client, const char *comment)
       accept_clear_list(&client->connection->acceptlist);
 
       monitor_clear_list(client);
-
-      sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Client exiting: %s (%s@%s) [%s] [%s]",
-                     client->name, client->username, client->realhost,
-                     client->sockhost, comment);
 
       log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
                 date_ctime(client->connection->created_real),
@@ -840,11 +839,8 @@ client_exit(struct Client *client, const char *comment)
 
     client_close_connection(client);
   }
-  else if (IsClient(client) && HasFlag(client->servptr, FLAGS_EOB))
-    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Client exiting at %s: %s (%s@%s) [%s] [%s]",
-                   client->servptr->name, client->name,
-                   client->username, client->realhost, client->sockhost, comment);
+  else
+    hook_dispatch(ircd_hook_client_exit_remote, &(ircd_hook_client_exit_ctx){ .client = client, .comment = comment });
 
   if (IsServer(client))
   {

@@ -57,6 +57,9 @@ oper_up(struct Client *client, const struct MaskItem *conf)
     mode_flags_add |= user_mode_string_to_flags(ConfigGeneral.oper_umodes);
 
   user_mode_set_flag_exec(client, mode_flags_add, USER_MODE_SOURCE_REGULAR);
+  user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
+
+  sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
   if (!EmptyString(conf->whois))
   {
@@ -72,9 +75,6 @@ oper_up(struct Client *client, const struct MaskItem *conf)
                  get_oper_name(client));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                  me.id, get_oper_name(client));
-
-  user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
-  sendto_one_numeric(client, &me, RPL_YOUREOPER);
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled

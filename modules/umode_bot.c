@@ -48,17 +48,17 @@ whois_send_hook(void *ctx_)
 static void
 init_handler(void)
 {
-  isupport_add("BOT", "B", -1);
   user_mode_register(&bot_mode);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
+  isupport_add("BOT", "B", -1);
 }
 
 static void
 exit_handler(void)
 {
-  isupport_delete("BOT");
   user_mode_unregister(&bot_mode);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
+  isupport_delete("BOT");
 }
 
 struct Module module_entry =

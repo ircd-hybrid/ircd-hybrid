@@ -34,15 +34,15 @@ static struct UserMode deaf_mode =
 static void
 init_handler(void)
 {
-  isupport_add("DEAF", "D", -1);
   user_mode_register(&deaf_mode);
+  isupport_add("DEAF", "D", -1);
 }
 
 static void
 exit_handler(void)
 {
-  isupport_delete("DEAF");
   user_mode_unregister(&deaf_mode);
+  isupport_delete("DEAF");
 }
 
 struct Module module_entry =

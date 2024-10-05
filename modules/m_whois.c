@@ -204,8 +204,7 @@ whois_send(struct Client *source, struct Client *target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
                        target->name, user_mode_to_str(target->umodes));
 
-  ircd_hook_whois_send_ctx ctx = { .source = source, .target = target };
-  hook_dispatch(ircd_hook_whois_send, &ctx);
+  hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
 
   if (MyConnect(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)

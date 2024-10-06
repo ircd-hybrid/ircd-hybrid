@@ -31,7 +31,7 @@ struct ServicesTag
   list_node_t node;
   char *tag;
   unsigned int numeric;
-  unsigned int umodes;
+  uint64_t umodes;
 };
 
 extern void svstag_detach(list_t *, unsigned int);

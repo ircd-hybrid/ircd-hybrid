@@ -41,9 +41,6 @@
 #include "memory.h"
 #include "parse.h"
 
-
-static void server_connect_callback(fde_t *, int, void *);
-
 /**
  * @brief Routes a command to the appropriate server or client.
  *
@@ -148,84 +145,6 @@ server_route_command(struct Client *client, const char *command, const int serve
   return route;
 }
 
-/* server_connect_auto()
- *
- * inputs	- void pointer which is not used
- * output	- NONE
- * side effects	-
- * scan through configuration and try new connections.
- * Returns the calendar time when the next call to this
- * function should be made latest. (No harm done if this
- * is called earlier or later...)
- */
-void
-server_connect_auto(void *unused)
-{
-  if (GlobalSetOptions.autoconnect == false)
-    return;
-
-  list_node_t *node;
-  LIST_FOREACH(node, connect_items.head)
-  {
-    struct MaskItem *conf = node->data;
-
-    assert(conf->type == CONF_SERVER);
-    assert(conf->class);
-
-    /* Also when already connecting! (update holdtimes) --SRB */
-    if (conf->port == 0 || !IsConfAllowAutoConn(conf))
-      continue;
-
-    /*
-     * Skip this entry if the use of it is still on hold until
-     * future. Otherwise handle this entry (and set it on hold
-     * until next time). Will reset only hold times, if already
-     * made one successfull connection... [this algorithm is
-     * a bit fuzzy... -- msa >;) ]
-     */
-    if (conf->until > io_time_get(IO_TIME_MONOTONIC_SEC))
-      continue;
-
-    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
-
-    if (conf->class->ref_count >= conf->class->max_total)
-      continue;
-
-    /*
-     * Found a CONNECT config with port specified, scan clients
-     * and see if this server is already connected?
-     */
-    if (hash_find_server(conf->name))
-      continue;
-
-    if (find_servconn_in_progress(conf->name))
-      continue;
-
-    /* Move this entry to the end of the list, if not already last */
-    if (node->next)
-    {
-      list_remove(node, &connect_items);
-      list_add_tail(conf, &conf->node, &connect_items);
-    }
-
-    /*
-     * We used to only print this if server_connect() actually
-     * succeeded, but since comm_tcp_connect() can call the callback
-     * immediately if there is an error, we were getting error messages
-     * in the wrong order. SO, we just print out the activated line,
-     * and let server_connect() / server_connect_callback() print an
-     * error afterwards if it fails.
-     *   -- adrian
-     */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
-                   conf->name, conf->host);
-
-    server_connect(conf, NULL);
-    return;  /* We connect only one at time... */
-  }
-}
-
 bool
 server_valid_name(const char *name)
 {
@@ -258,106 +177,6 @@ server_make(struct Client *client)
     client->serv = io_calloc(sizeof(*client->serv));
 
   return client->serv;
-}
-
-/* server_connect() - initiate a server connection
- *
- * inputs	- pointer to conf
- *		- pointer to client doing the connect
- * output	-
- * side effects	-
- *
- * This code initiates a connection to a server. It first checks to make
- * sure the given server exists. If this is the case, it creates a socket,
- * creates a client, saves the socket information in the client, and
- * initiates a connection to the server through comm_connect_tcp(). The
- * completion of this goes through serv_completed_connection().
- *
- * We return 1 if the connection is attempted, since we don't know whether
- * it suceeded or not, and 0 if it fails in here somewhere.
- */
-bool
-server_connect(struct MaskItem *conf, struct Client *by)
-{
-  assert(conf);
-  assert(conf->type == CONF_SERVER);
-  assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
-
-  /* Still processing a DNS lookup? -> exit */
-  if (conf->dns_pending)
-  {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: DNS lookup for connect{} in progress.",
-                   conf->name);
-    return false;
-  }
-
-  if (conf->dns_failed)
-  {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: DNS lookup for connect{} failed.",
-                   conf->name);
-    return false;
-  }
-
-  char buf[HOSTIPLEN + 1];
-  getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
-              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
-  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
-
-  /* Create a socket for the server connection */
-  int fd = comm_socket(conf->addr->ss.ss_family, SOCK_STREAM, 0);
-  if (fd == -1)
-  {
-    /* Eek, failure to create the socket */
-    log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
-              conf->name, strerror(errno));
-    return false;
-  }
-
-  /* Create a local client */
-  struct Client *client = client_make(NULL);
-
-  /* Copy in the server, hostname, fd */
-  strlcpy(client->name, conf->name, sizeof(client->name));
-  strlcpy(client->host, conf->host, sizeof(client->host));
-
-  /* We already converted the ip once, so lets use it - stu */
-  strlcpy(client->sockhost, buf, sizeof(client->sockhost));
-
-  client->addr = *conf->addr;
-  client->connection->fd = fd_open(fd, true, NULL);
-
-  /* Server names are always guaranteed under HOSTLEN chars */
-  fd_note(client->connection->fd, "Server: %s", client->name);
-
-  /*
-   * Attach config entries to client here rather than in server_connect_callback().
-   * This to avoid null pointer references.
-   */
-  conf_attach(client, conf);
-
-  server_make(client);
-
-  if (by && IsClient(by))
-    strlcpy(client->serv->by, by->name, sizeof(client->serv->by));
-  else
-    strlcpy(client->serv->by, "AutoConn.", sizeof(client->serv->by));
-
-  SetConnecting(client);
-
-  /* Now, initiate the connection */
-  comm_connect_tcp(client->connection->fd, conf->addr, conf->port, conf->bind,
-                   server_connect_callback, client, conf->timeout);
-
-  /*
-   * At this point we have a connection in progress and a connect {} block
-   * attached to the client, the socket info should be saved in the client
-   * and it should either be resolved or have a valid address.
-   *
-   * The socket has been connected or connect is in progress.
-   */
-  return true;
 }
 
 static void
@@ -534,6 +353,184 @@ server_connect_callback(fde_t *F, int status, void *data_)
 
   /* If we get here, we're ok, so lets start reading some data */
   read_packet(client->connection->fd, client);
+}
+
+/* server_connect() - initiate a server connection
+ *
+ * inputs	- pointer to conf
+ *		- pointer to client doing the connect
+ * output	-
+ * side effects	-
+ *
+ * This code initiates a connection to a server. It first checks to make
+ * sure the given server exists. If this is the case, it creates a socket,
+ * creates a client, saves the socket information in the client, and
+ * initiates a connection to the server through comm_connect_tcp(). The
+ * completion of this goes through serv_completed_connection().
+ *
+ * We return 1 if the connection is attempted, since we don't know whether
+ * it suceeded or not, and 0 if it fails in here somewhere.
+ */
+bool
+server_connect(struct MaskItem *conf, struct Client *by)
+{
+  assert(conf);
+  assert(conf->type == CONF_SERVER);
+  assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
+
+  /* Still processing a DNS lookup? -> exit */
+  if (conf->dns_pending)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Error connecting to %s: DNS lookup for connect{} in progress.",
+                   conf->name);
+    return false;
+  }
+
+  if (conf->dns_failed)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Error connecting to %s: DNS lookup for connect{} failed.",
+                   conf->name);
+    return false;
+  }
+
+  char buf[HOSTIPLEN + 1];
+  getnameinfo((const struct sockaddr *)conf->addr, conf->addr->ss_len,
+              buf, sizeof(buf), NULL, 0, NI_NUMERICHOST);
+  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
+
+  /* Create a socket for the server connection */
+  int fd = comm_socket(conf->addr->ss.ss_family, SOCK_STREAM, 0);
+  if (fd == -1)
+  {
+    /* Eek, failure to create the socket */
+    log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
+              conf->name, strerror(errno));
+    return false;
+  }
+
+  /* Create a local client */
+  struct Client *client = client_make(NULL);
+
+  /* Copy in the server, hostname, fd */
+  strlcpy(client->name, conf->name, sizeof(client->name));
+  strlcpy(client->host, conf->host, sizeof(client->host));
+
+  /* We already converted the ip once, so lets use it - stu */
+  strlcpy(client->sockhost, buf, sizeof(client->sockhost));
+
+  client->addr = *conf->addr;
+  client->connection->fd = fd_open(fd, true, NULL);
+
+  /* Server names are always guaranteed under HOSTLEN chars */
+  fd_note(client->connection->fd, "Server: %s", client->name);
+
+  /*
+   * Attach config entries to client here rather than in server_connect_callback().
+   * This to avoid null pointer references.
+   */
+  conf_attach(client, conf);
+
+  server_make(client);
+
+  if (by && IsClient(by))
+    strlcpy(client->serv->by, by->name, sizeof(client->serv->by));
+  else
+    strlcpy(client->serv->by, "AutoConn.", sizeof(client->serv->by));
+
+  SetConnecting(client);
+
+  /* Now, initiate the connection */
+  comm_connect_tcp(client->connection->fd, conf->addr, conf->port, conf->bind,
+                   server_connect_callback, client, conf->timeout);
+
+  /*
+   * At this point we have a connection in progress and a connect {} block
+   * attached to the client, the socket info should be saved in the client
+   * and it should either be resolved or have a valid address.
+   *
+   * The socket has been connected or connect is in progress.
+   */
+  return true;
+}
+
+/* server_connect_auto()
+ *
+ * inputs	- void pointer which is not used
+ * output	- NONE
+ * side effects	-
+ * scan through configuration and try new connections.
+ * Returns the calendar time when the next call to this
+ * function should be made latest. (No harm done if this
+ * is called earlier or later...)
+ */
+void
+server_connect_auto(void *unused)
+{
+  if (GlobalSetOptions.autoconnect == false)
+    return;
+
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    struct MaskItem *conf = node->data;
+
+    assert(conf->type == CONF_SERVER);
+    assert(conf->class);
+
+    /* Also when already connecting! (update holdtimes) --SRB */
+    if (conf->port == 0 || !IsConfAllowAutoConn(conf))
+      continue;
+
+    /*
+     * Skip this entry if the use of it is still on hold until
+     * future. Otherwise handle this entry (and set it on hold
+     * until next time). Will reset only hold times, if already
+     * made one successfull connection... [this algorithm is
+     * a bit fuzzy... -- msa >;) ]
+     */
+    if (conf->until > io_time_get(IO_TIME_MONOTONIC_SEC))
+      continue;
+
+    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
+
+    if (conf->class->ref_count >= conf->class->max_total)
+      continue;
+
+    /*
+     * Found a CONNECT config with port specified, scan clients
+     * and see if this server is already connected?
+     */
+    if (hash_find_server(conf->name))
+      continue;
+
+    if (find_servconn_in_progress(conf->name))
+      continue;
+
+    /* Move this entry to the end of the list, if not already last */
+    if (node->next)
+    {
+      list_remove(node, &connect_items);
+      list_add_tail(conf, &conf->node, &connect_items);
+    }
+
+    /*
+     * We used to only print this if server_connect() actually
+     * succeeded, but since comm_tcp_connect() can call the callback
+     * immediately if there is an error, we were getting error messages
+     * in the wrong order. SO, we just print out the activated line,
+     * and let server_connect() / server_connect_callback() print an
+     * error afterwards if it fails.
+     *   -- adrian
+     */
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
+                   conf->name, conf->host);
+
+    server_connect(conf, NULL);
+    return;  /* We connect only one at time... */
+  }
 }
 
 struct Client *

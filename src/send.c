@@ -330,7 +330,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
 }
 
 static bool
-sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_recipient_t recipient)
+sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recipient_t recipient)
 {
   if (flags && user_mode_has_flag(client, flags) == false)
     return false;
@@ -359,7 +359,7 @@ sendto_clients_qualifies(const struct Client *client, unsigned int flags, send_r
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 void
-sendto_clients(unsigned int flags, send_recipient_t recipient, send_type_t type, const char *format, ...)
+sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, const char *format, ...)
 {
   const char *ntype = "???";
 

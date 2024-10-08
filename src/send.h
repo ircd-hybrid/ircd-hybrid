@@ -85,7 +85,7 @@ extern void sendto_one(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void sendto_one_numeric(struct Client *, const struct Client *, enum irc_numerics, ...);
 extern void sendto_one_notice(struct Client *, const struct Client *, const char *, ...) IO_AFP(3,4);
 extern void sendto_one_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
-extern void sendto_clients(unsigned int, send_recipient_t, send_type_t, const char *, ...) IO_AFP(4,5);
+extern void sendto_clients(uint64_t, send_recipient_t, send_type_t, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
 extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, send_match_type_t, const char *, ...) IO_AFP(5,6);
 extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);

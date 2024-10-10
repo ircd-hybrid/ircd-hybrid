@@ -1,7 +1,7 @@
-AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
-  AC_ARG_ENABLE([warnings],[AS_HELP_STRING([--enable-warnings],[Enable compiler warnings.])],[warnings="$enableval"],[warnings="no"])
+AC_DEFUN([AX_ARG_ENABLE_WARNINGS], [
+  AC_ARG_ENABLE([warnings], [AS_HELP_STRING([--enable-warnings], [Enable compiler warnings: 'yes', 'no', 'extra', or no argument to default to 'yes'])], [warnings="$enableval"], [warnings="no"])
 
-  AS_IF([test "$warnings" = "yes"], [
+  AS_IF([test "$warnings" != "no"], [
     AX_APPEND_COMPILE_FLAGS([-Wall])
     AX_APPEND_COMPILE_FLAGS([-Wbad-function-cast])
     AX_APPEND_COMPILE_FLAGS([-Wcast-align])
@@ -31,5 +31,9 @@ AC_DEFUN([AX_ARG_ENABLE_WARNINGS],[
     AX_APPEND_COMPILE_FLAGS([-Wuninitialized])
     AX_APPEND_COMPILE_FLAGS([-Wunreachable-code-break])
     AX_APPEND_COMPILE_FLAGS([-Wwrite-strings])
+  ])
+
+  AS_IF([test "$warnings" = "extra"], [
+    AX_APPEND_COMPILE_FLAGS([-Wextra])
   ])
 ])

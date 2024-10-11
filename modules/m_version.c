@@ -41,9 +41,7 @@ static const char serveropts[] =
 {
   'T',
   'S',
-#ifdef TS_CURRENT
-  '0' + TS_CURRENT,
-#endif
+  '0' + SERVER_TS_PROTOCOL_CURRENT,
 /* ONLY do TS */
 /* ALWAYS do TS_WARNINGS */
   'o',

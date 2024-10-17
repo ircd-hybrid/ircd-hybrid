@@ -34,6 +34,8 @@
 
 #ifdef HAVE_TLS_WOLFSSL
 static bool TLS_initialized;
+static tls_context_t tls_ctx;
+static tls_md_t message_digest_algorithm;
 
 /*
  * report_crypto_errors - Dump crypto error list to log

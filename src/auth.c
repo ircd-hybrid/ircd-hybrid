@@ -343,7 +343,6 @@ auth_check_ident_reply(char *const reply)
    * Second token is the reply type
    */
   char *token = vector[IDENT_REPLY_TYPE];
-
   if (EmptyString(token))
     return NULL;
 
@@ -357,7 +356,6 @@ auth_check_ident_reply(char *const reply)
    * Third token is the os type
    */
   token = vector[IDENT_OS_TYPE];
-
   if (EmptyString(token))
     return NULL;
 
@@ -384,7 +382,6 @@ auth_check_ident_reply(char *const reply)
    * Fourth token is the username
    */
   token = vector[IDENT_INFO];
-
   if (EmptyString(token))
     return NULL;
 
@@ -543,9 +540,6 @@ auth_connect_callback(fde_t *F, int error, void *data_)
 static void
 auth_start_query(struct AuthRequest *auth)
 {
-  struct io_addr localaddr;
-  socklen_t locallen = sizeof(localaddr);
-
   assert(auth->client);
   assert(auth->client->connection);
 
@@ -568,7 +562,10 @@ auth_start_query(struct AuthRequest *auth)
    * Get the local address of the client and bind to that to
    * make the auth request.
    */
+  struct io_addr localaddr;
+  socklen_t locallen = sizeof(localaddr);
   memset(&localaddr, 0, locallen);
+
   getsockname(auth->client->connection->fd->fd, (struct sockaddr *)&localaddr, &locallen);
 
   address_strip_ipv4(&localaddr);

@@ -199,13 +199,13 @@ user_welcome(struct Client *client)
                         client->tls_certfp);
   }
 
-  sendto_one_numeric(client, &me, RPL_WELCOME, ConfigServerInfo.network_name,
-                     client->name, client->username, client->realhost);
+  sendto_one_numeric(client, &me, RPL_WELCOME,
+                     ConfigServerInfo.network_name, client->name, client->username, client->realhost);
   sendto_one_numeric(client, &me, RPL_YOURHOST,
                      listener_get_name(client->connection->listener), IRCD_VERSION);
   sendto_one_numeric(client, &me, RPL_CREATED, built_date);
-  sendto_one_numeric(client, &me, RPL_MYINFO, me.name, IRCD_VERSION, user_mode_get_string(),
-                     cmode_rpl04[0], cmode_rpl04[1]);
+  sendto_one_numeric(client, &me, RPL_MYINFO,
+                     me.name, IRCD_VERSION, user_mode_get_string(), cmode_rpl04[0], cmode_rpl04[1]);
 
   isupport_show(client);
   show_lusers(client);
@@ -518,8 +518,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
                                  client->name, client->username, client->host);
 
   sendto_common_channels_local(client, true, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
-                               client->name, client->username,
-                               client->host, client->username, hostname);
+                               client->name, client->username, client->host, client->username, hostname);
 
   strlcpy(client->host, hostname, sizeof(client->host));
 

@@ -29,7 +29,6 @@
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h
 
-#include "ircd_defs.h"
 #include "client.h"
 
 /**

@@ -125,10 +125,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
 {
   struct Channel *channel = hash_find_channel(parv[1]);
   if (channel == NULL)
-  {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
-  }
 
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
   if (IsClient(source))

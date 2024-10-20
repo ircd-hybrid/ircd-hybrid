@@ -115,12 +115,12 @@ keccakf(uint64_t s[25])
 
 /* For Init or Reset call these: */
 sha3_result_t
-sha3_Init(void *priv, unsigned bitSize)
+sha3_init(void *priv, unsigned bitSize)
 {
   if (bitSize != 256 && bitSize != 384 && bitSize != 512)
     return SHA3_RESULT_BAD_PARAMS;
 
-  sha3_context *ctx = (sha3_context *)priv;
+  sha3_context_t *ctx = (sha3_context_t *)priv;
   memset(ctx, 0, sizeof(*ctx));
   ctx->capacityWords = 2 * bitSize / (8 * sizeof(uint64_t));
 
@@ -128,27 +128,27 @@ sha3_Init(void *priv, unsigned bitSize)
 }
 
 void
-sha3_Init256(void *priv)
+sha3_init256(void *priv)
 {
-  sha3_Init(priv, 256);
+  sha3_init(priv, 256);
 }
 
 void
-sha3_Init384(void *priv)
+sha3_init384(void *priv)
 {
-  sha3_Init(priv, 384);
+  sha3_init(priv, 384);
 }
 
 void
-sha3_Init512(void *priv)
+sha3_init512(void *priv)
 {
-  sha3_Init(priv, 512);
+  sha3_init(priv, 512);
 }
 
 sha3_flags_t
-sha3_SetFlags(void *priv, sha3_flags_t flags)
+sha3_set_flags(void *priv, sha3_flags_t flags)
 {
-  sha3_context *ctx = (sha3_context *)priv;
+  sha3_context_t *ctx = (sha3_context_t *)priv;
 
   flags &= SHA3_FLAGS_KECCAK;
   ctx->capacityWords |= (flags == SHA3_FLAGS_KECCAK ? SHA3_USE_KECCAK_FLAG : 0);
@@ -157,9 +157,9 @@ sha3_SetFlags(void *priv, sha3_flags_t flags)
 }
 
 void
-sha3_Update(void *priv, void const *bufIn, size_t len)
+sha3_update(void *priv, void const *bufIn, size_t len)
 {
-  sha3_context *ctx = (sha3_context *)priv;
+  sha3_context_t *ctx = (sha3_context_t *)priv;
 
   /* 0...7 -- how much is needed to have a word. */
   unsigned old_tail = (8 - ctx->byteIndex) & 7;
@@ -263,9 +263,9 @@ sha3_Update(void *priv, void const *bufIn, size_t len)
  * bytes are always present, but they can be the same byte.
  */
 void const *
-sha3_Finalize(void *priv)
+sha3_finalize(void *priv)
 {
-  sha3_context *ctx = (sha3_context *)priv;
+  sha3_context_t *ctx = (sha3_context_t *)priv;
 
   SHA3_TRACE("called with %d bytes in the buffer", ctx->byteIndex);
 

@@ -253,10 +253,10 @@ cloak_mac_and_compose(const struct io_addr *addr)
   memcpy(input + config->secret_len, addr_ptr, addr_len);
 
   /* Compute SHA3 hash. */
-  sha3_context ctx_sha3;
-  sha3_Init512(&ctx_sha3);
-  sha3_Update(&ctx_sha3, input, config->secret_len + addr_len);
-  const uint8_t *digest_sha3 = sha3_Finalize(&ctx_sha3);
+  sha3_context_t ctx_sha3;
+  sha3_init512(&ctx_sha3);
+  sha3_update(&ctx_sha3, input, config->secret_len + addr_len);
+  const uint8_t *digest_sha3 = sha3_finalize(&ctx_sha3);
 
   /* Encode the hash in base32. */
   unsigned char digest_b32[BASE32_LEN(config->num_bytes) + 1];

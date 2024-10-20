@@ -24,7 +24,7 @@
 /* 'Words' here refers to uint64_t */
 #define SHA3_KECCAK_SPONGE_WORDS (((1600) / 8 /* Bits to byte. */ ) / sizeof(uint64_t))
 
-typedef struct sha3_context_
+typedef struct
 {
   uint64_t saved;  /* The portion of the input message that we didn't consume yet. */
 
@@ -38,7 +38,7 @@ typedef struct sha3_context_
   unsigned byteIndex;  /* 0..7--the next byte after the set one (starts from 0; 0--none are buffered). */
   unsigned wordIndex;  /* 0..24--the next word to integrate input (starts from 0). */
   unsigned capacityWords;  /* The double size of the hash output in words (e.g. 16 for Keccak 512). */
-} sha3_context;
+} sha3_context_t;
 
 typedef enum
 {
@@ -52,11 +52,11 @@ typedef enum
   SHA3_RESULT_BAD_PARAMS
 } sha3_result_t;
 
-extern void sha3_Init256(void *);
-extern void sha3_Init384(void *);
-extern void sha3_Init512(void *);
-extern void sha3_Update(void *, void const *, size_t);
-extern void const *sha3_Finalize(void *);
-extern sha3_flags_t sha3_SetFlags(void *, sha3_flags_t);
-extern sha3_result_t sha3_Init(void *, unsigned);
+extern void sha3_init256(void *);
+extern void sha3_init384(void *);
+extern void sha3_init512(void *);
+extern void sha3_update(void *, void const *, size_t);
+extern void const *sha3_finalize(void *);
+extern sha3_flags_t sha3_set_flags(void *, sha3_flags_t);
+extern sha3_result_t sha3_init(void *, unsigned);
 #endif  /* INCLUDED_sha3_h */

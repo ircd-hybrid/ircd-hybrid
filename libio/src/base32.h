@@ -50,7 +50,7 @@
  * This enumeration defines flags that can be used to configure the behavior of Base32 encoding and decoding.
  * Flags can be combined using bitwise OR operations to enable multiple options simultaneously.
  */
-enum BASE32_FLAGS
+typedef enum
 {
   /**
    * @def BASE32_NO_PADDING
@@ -69,7 +69,7 @@ enum BASE32_FLAGS
    * By default, upper-case characters ('A' to 'Z') are used.
    */
   BASE32_LOWER_CASE = 1 << 1,
-};
+} base32_flags_t;
 
 /**
  * @brief Configuration options for Base32 encoding and decoding.
@@ -81,7 +81,7 @@ typedef struct
 {
   bool no_padding;  /**< Specifies whether padding is disabled in Base32 encoding. Default is false. */
   bool lower_case;  /**< Specifies whether lower-case characters are used in Base32 encoding. Default is false. */
-} base32_config;
+} base32_config_t;
 
 /**
  * @brief Context structure for Base32 encoding and decoding.
@@ -90,14 +90,14 @@ typedef struct
  * It includes a base32_config structure for configuration options and a pointer
  * to the Base32 encoding table.
  */
-typedef struct base32_context
+typedef struct
 {
-  base32_config config;  /**< Configuration options for Base32 encoding and decoding. */
+  base32_config_t config;  /**< Configuration options for Base32 encoding and decoding. */
   const unsigned char *base32_table;  /**< Pointer to the Base32 encoding table. */
-} base32_context;
+} base32_context_t;
 
-extern void base32_init(base32_context *);
-extern void base32_set_config(base32_context *, unsigned int);
+extern void base32_init(base32_context_t *);
+extern void base32_set_config(base32_context_t *, unsigned int);
 
 /**
  * Encode the data pointed to by plain into base32 and store the
@@ -107,7 +107,7 @@ extern void base32_set_config(base32_context *, unsigned int);
  * contain characters from the [A-Z2-7=] set. The "len" arguments
  * define how many bytes will be read from the "plain" buffer.
  **/
-extern void base32_encode(base32_context *, const unsigned char *, size_t, unsigned char *);
+extern void base32_encode(base32_context_t *, const unsigned char *, size_t, unsigned char *);
 
 /**
  * Decode the null terminated string pointed to by coded and write
@@ -118,5 +118,5 @@ extern void base32_encode(base32_context *, const unsigned char *, size_t, unsig
  * expected due to padding. If an invalid base32 character is found
  * in the coded string, decoding will stop at that point.
  **/
-extern size_t base32_decode(base32_context *, const unsigned char *, unsigned char *);
+extern size_t base32_decode(base32_context_t *, const unsigned char *, unsigned char *);
 #endif  /* INCLUDED_base32_h */

@@ -33,7 +33,7 @@ static const unsigned char base32_lowercase[] = "abcdefghijklmnopqrstuvwxyz23456
 
 /* Initialize base32 context with default configuration. */
 void
-base32_init(base32_context *ctx)
+base32_init(base32_context_t *ctx)
 {
   ctx->config.no_padding = false;
   ctx->config.lower_case = false;
@@ -41,7 +41,7 @@ base32_init(base32_context *ctx)
 }
 
 void
-base32_set_config(base32_context *ctx, enum BASE32_FLAGS flags)
+base32_set_config(base32_context_t *ctx, base32_flags_t flags)
 {
   if (flags & BASE32_NO_PADDING)
     ctx->config.no_padding = true;
@@ -94,7 +94,7 @@ pad(unsigned char *buf, int len)
  * Only the 5 least significant bits are used.
  */
 static unsigned char
-encode_char(base32_context *ctx, unsigned char c)
+encode_char(base32_context_t *ctx, unsigned char c)
 {
   return ctx->base32_table[c & 0x1F];  // 0001 1111
 }
@@ -105,7 +105,7 @@ encode_char(base32_context *ctx, unsigned char c)
  * or a padding character.
  */
 static int
-decode_char(base32_context *ctx, unsigned char c)
+decode_char(base32_context_t *ctx, unsigned char c)
 {
   char retval = -1;
 
@@ -195,7 +195,7 @@ shift_left(unsigned char byte, signed char offset)
  * output as per the specification.
  */
 static void
-encode_sequence(base32_context *ctx, const unsigned char *plain, int len, unsigned char *coded)
+encode_sequence(base32_context_t *ctx, const unsigned char *plain, int len, unsigned char *coded)
 {
   assert(CHAR_BIT == 8);  // not sure this would work otherwise
   assert(len >= 0 && len <= 5);
@@ -227,7 +227,7 @@ encode_sequence(base32_context *ctx, const unsigned char *plain, int len, unsign
 }
 
 void
-base32_encode(base32_context *ctx, const unsigned char *plain, size_t len, unsigned char *coded)
+base32_encode(base32_context_t *ctx, const unsigned char *plain, size_t len, unsigned char *coded)
 {
   // All the hard work is done in encode_sequence(),
   // here we just need to feed it the data sequence by sequence.
@@ -236,7 +236,7 @@ base32_encode(base32_context *ctx, const unsigned char *plain, size_t len, unsig
 }
 
 static int
-decode_sequence(base32_context *ctx, const unsigned char *coded, unsigned char *plain)
+decode_sequence(base32_context_t *ctx, const unsigned char *coded, unsigned char *plain)
 {
   assert(CHAR_BIT == 8);
   assert(coded && plain);
@@ -265,7 +265,7 @@ decode_sequence(base32_context *ctx, const unsigned char *coded, unsigned char *
 }
 
 size_t
-base32_decode(base32_context *ctx, const unsigned char *coded, unsigned char *plain)
+base32_decode(base32_context_t *ctx, const unsigned char *coded, unsigned char *plain)
 {
   size_t written = 0;
 

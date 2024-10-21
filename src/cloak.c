@@ -262,7 +262,7 @@ cloak_mac_and_compose(const struct io_addr *addr)
   unsigned char digest_b32[BASE32_LEN(config->num_bytes) + 1];
   memset(digest_b32, 0, sizeof(digest_b32));
 
-  base32_context ctx_base32;
+  base32_context_t ctx_base32;
   base32_init(&ctx_base32);
   base32_set_config(&ctx_base32, BASE32_NO_PADDING | BASE32_LOWER_CASE);
   base32_encode(&ctx_base32, digest_sha3, config->num_bytes, digest_b32);

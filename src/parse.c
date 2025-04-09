@@ -131,7 +131,6 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int p
 
   const char *name = parv[1];
   const char *text = string_or_empty(parv[2]);
-  assert(name && text);
 
   /*
    * Who should receive this message ? Will we do something with it ?
@@ -254,76 +253,85 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
 }
 
 static bool
+parse_is_numeric(const char *token)
+{
+  return IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]) && token[3] == ' ';
+}
+
+static bool
+parse_identify_command(parse_context_t *ctx)
+{
+  char *token = ctx->buffer_cursor;
+  ctx->command_numeric_str = token;
+
+  size_t token_len = strcspn(token, " ");
+  char *token_end = token + token_len;
+
+  if (*token_end == ' ')
+  {
+    *token_end = '\0';
+    ctx->buffer_cursor = token_end + 1;
+  }
+  else
+    ctx->buffer_cursor = token_end;
+
+  ctx->command = command_find(ctx->command_numeric_str);
+  if (ctx->command == NULL)
+  {
+    /*
+     * Note: Give error message *only* to recognized
+     * persons. It's a nightmare situation to have
+     * two programs sending "Unknown command"'s or
+     * equivalent to each other at full blast....
+     * If it has got to person state, it at least
+     * seems to be well behaving. Perhaps this message
+     * should never be generated, though...  --msa
+     */
+    if (IsClient(ctx->source))
+      sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_numeric_str);
+
+    ++ServerStats.is_unco;
+    return false;
+  }
+
+  size_t bytes = (ctx->buffer_cursor < ctx->buffer_end) ? (ctx->buffer_end - ctx->buffer_cursor) : 0;
+  ctx->command->bytes += bytes;
+  ctx->parc_max = ctx->command->handlers[ctx->source->from->handler].args_max;
+
+  return true;
+}
+
+static bool
+parse_identify_numeric(parse_context_t *ctx)
+{
+  char *token = ctx->buffer_cursor;
+  ctx->command_numeric_str = token;
+
+  ctx->numeric = (token[0] - '0') * 100 +
+                 (token[1] - '0') * 10 +
+                 (token[2] - '0');
+  ctx->parc_max = 2;  /* Destination, and the rest of it */
+  ++ServerStats.is_num;
+
+  char *token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
+  *token_end = '\0';  /* Blow away the ' '. */
+  ctx->buffer_cursor = token_end + 1;
+  return true;
+}
+
+static bool
 parse_identify_command_or_numeric(parse_context_t *ctx)
 {
-  char *ch = ctx->buffer_cursor;
-  if (*ch == '\0')
+  if (*ctx->buffer_cursor == '\0')
   {
     ++ServerStats.is_empt;
     return false;
   }
 
-  /*
-   * Extract the command code from the packet. Point s to the end
-   * of the command code and calculate the length using pointer
-   * arithmetic. Note: only need length for numerics and *all*
-   * numerics must have parameters and thus a space after the command
-   * code. -avalon
-   */
+  if (parse_is_numeric(ctx->buffer_cursor))
+    return parse_identify_numeric(ctx);
 
-  /* EOB is 3 characters long but is not a numeric */
-  if ((ctx->buffer_end - ch) >= 4 && *(ch + 3) == ' ' && IsDigit(*ch) && IsDigit(*(ch + 1)) && IsDigit(*(ch + 2)))
-  {
-    ctx->command_numeric_str = ch;
-    ctx->numeric = (*ch - '0') * 100 + (*(ch + 1) - '0') * 10 + (*(ch + 2) - '0');
-    ctx->parc_max = 2;  /* Destination, and the rest of it */
-    ++ServerStats.is_num;
-
-    char *token_end = ch + 3;  /* I know this is ' ' from above if */
-    *token_end = '\0';  /* Blow away the ' '. */
-    ctx->buffer_cursor = token_end + 1;
-    return true;
-  }
-  else
-  {
-    ctx->command_numeric_str = ch;
-
-    size_t token_len = strcspn(ch, " ");
-    char *token_end = ch + token_len;
-
-    if (*token_end == ' ')
-    {
-      *token_end = '\0';
-      ctx->buffer_cursor = token_end + 1;
-    }
-    else
-      ctx->buffer_cursor = token_end;
-
-    ctx->command = command_find(ctx->command_numeric_str);
-    if (ctx->command == NULL)
-    {
-      /*
-       * Note: Give error message *only* to recognized
-       * persons. It's a nightmare situation to have
-       * two programs sending "Unknown command"'s or
-       * equivalent to each other at full blast....
-       * If it has got to person state, it at least
-       * seems to be well behaving. Perhaps this message
-       * should never be generated, though...  --msa
-       */
-      if (IsClient(ctx->source))
-        sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_numeric_str);
-
-      ++ServerStats.is_unco;
-      return false;
-    }
-
-    size_t bytes = (ctx->buffer_cursor < ctx->buffer_end) ? (ctx->buffer_end - ctx->buffer_cursor) : 0;
-    ctx->command->bytes += bytes;
-    ctx->parc_max = ctx->command->handlers[ctx->source->from->handler].args_max;
-
-    return true;
-  }
+  return parse_identify_command(ctx);
 }
 
 static void

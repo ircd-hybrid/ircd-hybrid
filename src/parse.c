@@ -40,10 +40,10 @@
 
 typedef struct parser_context
 {
-  char *buffer;
-  const char *buffer_end;
+  char *const buffer;
+  const char *const buffer_end;
   char *buffer_cursor;
-  struct Client *client;
+  struct Client *const client;
   struct Client *source;
   struct Command *command;
   unsigned int numeric;
@@ -199,11 +199,11 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
      * Copy the prefix to 'prefix' assuming it terminates
      * with SPACE (or NULL, which is an error, though).
      */
-    char *prefix = ++ch;
+    char *const prefix = ++ch;
     assert(prefix <= ctx->buffer_end);
 
     size_t prefix_len = strcspn(prefix, " ");
-    char *prefix_end = prefix + prefix_len;
+    char *const prefix_end = prefix + prefix_len;
     assert(prefix_end <= ctx->buffer_end);
 
     if (*prefix_end == ' ')
@@ -261,11 +261,11 @@ parse_is_numeric(const char *token)
 static bool
 parse_identify_command(parse_context_t *ctx)
 {
-  char *token = ctx->buffer_cursor;
+  char *const token = ctx->buffer_cursor;
   ctx->command_numeric_str = token;
 
   size_t token_len = strcspn(token, " ");
-  char *token_end = token + token_len;
+  char *const token_end = token + token_len;
 
   if (*token_end == ' ')
   {
@@ -304,7 +304,7 @@ parse_identify_command(parse_context_t *ctx)
 static bool
 parse_identify_numeric(parse_context_t *ctx)
 {
-  char *token = ctx->buffer_cursor;
+  char *const token = ctx->buffer_cursor;
   ctx->command_numeric_str = token;
 
   ctx->numeric = (token[0] - '0') * 100 +
@@ -313,7 +313,7 @@ parse_identify_numeric(parse_context_t *ctx)
   ctx->parc_max = 2;  /* Destination, and the rest of it */
   ++ServerStats.is_num;
 
-  char *token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
+  char *const token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
   *token_end = '\0';  /* Blow away the ' '. */
   ctx->buffer_cursor = token_end + 1;
   return true;

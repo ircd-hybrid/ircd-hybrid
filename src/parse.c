@@ -311,11 +311,12 @@ parse_identify_numeric(parse_context_t *ctx)
                  (token[1] - '0') * 10 +
                  (token[2] - '0');
   ctx->parc_max = 2;  /* Destination, and the rest of it */
-  ++ServerStats.is_num;
 
   char *const token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
   *token_end = '\0';  /* Blow away the ' '. */
   ctx->buffer_cursor = token_end + 1;
+
+  ++ServerStats.is_num;
   return true;
 }
 

@@ -178,7 +178,17 @@ parse_handle_command(struct Command *command, struct Client *source, unsigned in
   if (handler->args_min &&
       ((parc < handler->args_min) ||
        (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
-    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
+  {
+    if (IsServer(source->from))
+    {
+      log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
+                command->name, handler->args_min, parc, client_get_name(source->from, SHOW_IP));
+      client_exit_fmt(source->from, "Invalid arguments for command: %s (expected at least %u, got %u)",
+                      command->name, handler->args_min, parc);
+    }
+    else
+      sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
+  }
   else
     handler->handler(source, parc, parv);
 }

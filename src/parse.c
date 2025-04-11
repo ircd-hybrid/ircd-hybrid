@@ -289,6 +289,9 @@ parse_identify_command(parse_context_t *ctx)
      */
     if (IsClient(ctx->source))
       sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_numeric_str);
+    else if (IsServer(ctx->source))
+      log_write(LOG_TYPE_DEBUG, "Unknown command from server: %s via %s",
+                ctx->command_numeric_str, client_get_name(ctx->client, SHOW_IP));
 
     ++ServerStats.is_unco;
     return false;
@@ -311,7 +314,11 @@ parse_identify_numeric(parse_context_t *ctx)
                  (token[1] - '0') * 10 +
                  (token[2] - '0');
   if (ctx->numeric < 1 || ctx->numeric > 999)
+  {
+    log_write(LOG_TYPE_DEBUG, "Unknown numeric from server: %u via %s",
+              ctx->numeric, client_get_name(ctx->client, SHOW_IP));
     return false;
+  }
 
   ctx->parc_max = 2;  /* Destination, and the rest of it */
 

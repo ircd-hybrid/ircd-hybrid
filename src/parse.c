@@ -310,6 +310,9 @@ parse_identify_numeric(parse_context_t *ctx)
   ctx->numeric = (token[0] - '0') * 100 +
                  (token[1] - '0') * 10 +
                  (token[2] - '0');
+  if (ctx->numeric < 1 || ctx->numeric > 999)
+    return false;
+
   ctx->parc_max = 2;  /* Destination, and the rest of it */
 
   char *const token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */

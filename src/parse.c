@@ -217,16 +217,12 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
   assert(prefix <= ctx->buffer_end);
 
   size_t prefix_len = strcspn(prefix, " ");
-  char *const prefix_end = prefix + prefix_len;
+  char *prefix_end = prefix + prefix_len;
   assert(prefix_end <= ctx->buffer_end);
 
   if (*prefix_end == ' ')
-  {
-    *prefix_end = '\0';
-    ch = prefix_end + 1;
-  }
-  else
-    ch = prefix_end;
+    *prefix_end++ = '\0';
+  ch = prefix_end;
 
   if (*prefix && IsServer(ctx->client))
   {
@@ -278,15 +274,11 @@ parse_identify_command(parse_context_t *ctx)
   ctx->command_numeric_str = token;
 
   size_t token_len = strcspn(token, " ");
-  char *const token_end = token + token_len;
+  char *token_end = token + token_len;
 
   if (*token_end == ' ')
-  {
-    *token_end = '\0';
-    ctx->buffer_cursor = token_end + 1;
-  }
-  else
-    ctx->buffer_cursor = token_end;
+    *token_end++ = '\0';
+  ctx->buffer_cursor = token_end;
 
   ctx->command = command_find(ctx->command_numeric_str);
   if (ctx->command == NULL)
@@ -335,9 +327,9 @@ parse_identify_numeric(parse_context_t *ctx)
 
   ctx->parc_max = 2;  /* Destination, and the rest of it */
 
-  char *const token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
-  *token_end = '\0';  /* Blow away the ' '. */
-  ctx->buffer_cursor = token_end + 1;
+  char *token_end = token + 3;  /* I know this is ' ' from parse_is_numeric() */
+  *token_end++ = '\0';  /* Blow away the ' '. */
+  ctx->buffer_cursor = token_end;
 
   ++ServerStats.is_num;
   return true;

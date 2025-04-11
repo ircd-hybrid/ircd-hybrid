@@ -203,60 +203,63 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
     ++ch;
   assert(ch <= ctx->buffer_end);
 
-  if (*ch == ':')
+  if (*ch != ':')
   {
-    /*
-     * Copy the prefix to 'prefix' assuming it terminates
-     * with SPACE (or NULL, which is an error, though).
-     */
-    char *const prefix = ++ch;
-    assert(prefix <= ctx->buffer_end);
-
-    size_t prefix_len = strcspn(prefix, " ");
-    char *const prefix_end = prefix + prefix_len;
-    assert(prefix_end <= ctx->buffer_end);
-
-    if (*prefix_end == ' ')
-    {
-      *prefix_end = '\0';
-      ch = prefix_end + 1;
-    }
-    else
-      ch = prefix_end;
-
-    if (*prefix && IsServer(ctx->client))
-    {
-      struct Client *from = hash_find_id(prefix);
-      if (from == NULL)
-        from = hash_find_client(prefix);
-
-      /*
-       * Hmm! If the client corresponding to the prefix is not found--what is
-       * the correct action??? Now, I will ignore the message (old IRC just
-       * let it through as if the prefix just wasn't there...) --msa
-       */
-      if (from == NULL)
-      {
-        ++ServerStats.is_unpf;
-        parse_handle_unknown_prefix(ctx->client, prefix, ctx->buffer);
-        return false;
-      }
-
-      if (from->from != ctx->client)
-      {
-        ++ServerStats.is_wrdi;
-        log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-                  from->name, from->from->name, client_get_name(ctx->client, SHOW_IP));
-        return false;
-      }
-
-      ctx->source = from;
-    }
-
-    while (*ch == ' ')
-      ++ch;
-    assert(ch <= ctx->buffer_end);
+    ctx->buffer_cursor = ch;
+    return true;
   }
+
+  /*
+   * Copy the prefix to 'prefix' assuming it terminates
+   * with SPACE (or NULL, which is an error, though).
+   */
+  char *const prefix = ++ch;
+  assert(prefix <= ctx->buffer_end);
+
+  size_t prefix_len = strcspn(prefix, " ");
+  char *const prefix_end = prefix + prefix_len;
+  assert(prefix_end <= ctx->buffer_end);
+
+  if (*prefix_end == ' ')
+  {
+    *prefix_end = '\0';
+    ch = prefix_end + 1;
+  }
+  else
+    ch = prefix_end;
+
+  if (*prefix && IsServer(ctx->client))
+  {
+    struct Client *from = hash_find_id(prefix);
+    if (from == NULL)
+      from = hash_find_client(prefix);
+
+    /*
+     * Hmm! If the client corresponding to the prefix is not found--what is
+     * the correct action??? Now, I will ignore the message (old IRC just
+     * let it through as if the prefix just wasn't there...) --msa
+     */
+    if (from == NULL)
+    {
+      ++ServerStats.is_unpf;
+      parse_handle_unknown_prefix(ctx->client, prefix, ctx->buffer);
+      return false;
+    }
+
+    if (from->from != ctx->client)
+    {
+      ++ServerStats.is_wrdi;
+      log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
+                from->name, from->from->name, client_get_name(ctx->client, SHOW_IP));
+      return false;
+    }
+
+    ctx->source = from;
+  }
+
+  while (*ch == ' ')
+    ++ch;
+  assert(ch <= ctx->buffer_end);
 
   ctx->buffer_cursor = ch;
   return true;

@@ -34,6 +34,7 @@
 #include "list.h"
 #include "lookup.h"
 #include "ircd_defs.h"
+#include "command.h"
 
 
 /** Client connection states */

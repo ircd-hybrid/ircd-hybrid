@@ -25,10 +25,7 @@
 
 #ifndef INCLUDED_parse_h
 #define INCLUDED_parse_h
-#include "command.h"
-
-struct Client;
-
+#include "client.h"
 
 /** Maximum parameters a command can have. See 2.3 Messages in RFC 1459. */
 enum { PARSE_MAX_PARAMETERS = 15 };

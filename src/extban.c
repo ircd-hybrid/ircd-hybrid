@@ -135,48 +135,41 @@ extban_find_flag(unsigned int flag)
 enum extban_type
 extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset)
 {
-  *input_extbans = 0;
-  *offset = 0;
+  *input_extbans = *offset = 0;
 
-  if (*mask == '$' && IsAlpha(*(mask + 1)) && *(mask + 2) == ':')
-  {
-    struct Extban *extban = extban_find(*(mask + 1));
-    if (extban == NULL)
-      return EXTBAN_INVALID;
+  if (!(*mask == '$' && IsAlpha(*(mask + 1)) && *(mask + 2) == ':'))
+    return EXTBAN_NONE;
 
-    *input_extbans |= extban->flag;
-    *offset += 3;
-    mask += 3;
+  struct Extban *extban = extban_find(*(mask + 1));
+  if (extban == NULL)
+    return EXTBAN_INVALID;
 
-    /* Matching extbans take a special parameter, so stop reading */
-    if (extban->type == EXTBAN_MATCHING)
-      return EXTBAN_MATCHING;
+  *input_extbans |= extban->flag;
+  *offset += 3;
+  mask += 3;
 
-    if (IsAlpha(*mask) && *(mask + 1) == ':')
-    {
-      extban = extban_find(*mask);
-      if (extban == NULL)
-        return EXTBAN_INVALID;
+  /* Matching extbans take a special parameter, so stop reading */
+  if (extban->type == EXTBAN_MATCHING)
+    return EXTBAN_MATCHING;
 
-      /* Two acting extbans make no sense */
-      if (extban->type == EXTBAN_ACTING)
-        return EXTBAN_INVALID;
-
-      /* Check parameter */
-      if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
-        return EXTBAN_INVALID;
-
-      *input_extbans |= extban->flag;
-      *offset += 2;
-      mask += 2;
-
-      return EXTBAN_MATCHING;
-    }
-
+  if (!(IsAlpha(*mask) && *(mask + 1) == ':'))
     return EXTBAN_ACTING;
-  }
 
-  return EXTBAN_NONE;
+  extban = extban_find(*mask);
+  if (extban == NULL)
+    return EXTBAN_INVALID;
+
+  /* Two acting extbans make no sense */
+  if (extban->type == EXTBAN_ACTING)
+    return EXTBAN_INVALID;
+
+  /* Check parameter */
+  if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
+    return EXTBAN_INVALID;
+
+  *input_extbans |= extban->flag;
+  *offset += 2;
+  return EXTBAN_MATCHING;
 }
 
 size_t
@@ -188,45 +181,39 @@ extban_format(unsigned int e, char *buf)
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-    if (extban->type != EXTBAN_ACTING)
+    if (extban->type != EXTBAN_ACTING || !(extban->flag & e))
       continue;
 
-    if (extban->flag & e)
+    if (written == 0)
     {
-      if (written == 0)
-      {
-        written++;
-        *buf++ = '$';
-      }
-
-      *buf++ = extban->character;
-      *buf++ = ':';
-      written += 2;
-
-      break;
+      written++;
+      *buf++ = '$';
     }
+
+    *buf++ = extban->character;
+    *buf++ = ':';
+    written += 2;
+
+    break;
   }
 
   LIST_FOREACH(node, extban_list.head)
   {
     struct Extban *extban = node->data;
-    if (extban->type != EXTBAN_MATCHING)
+    if (extban->type != EXTBAN_MATCHING || !(extban->flag & e))
       continue;
 
-    if (extban->flag & e)
+    if (written == 0)
     {
-      if (written == 0)
-      {
-        written++;
-        *buf++ = '$';
-      }
-
-      *buf++ = extban->character;
-      *buf++ = ':';
-      written += 2;
-
-      break;
+      written++;
+      *buf++ = '$';
     }
+
+    *buf++ = extban->character;
+    *buf++ = ':';
+    written += 2;
+
+    break;
   }
 
   return written;

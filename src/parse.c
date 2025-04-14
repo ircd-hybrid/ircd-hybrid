@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #include "log.h"
+#include "misc.h"
 #include "io_string.h"
 #include "client.h"
 #include "channel.h"
@@ -363,8 +364,8 @@ parse_split_parameters(parse_context_t *ctx)
     ctx->parv[++ctx->parc] = ctx->command->extra;
 
   unsigned int parc_max = ctx->parc_max;
-  if (parc_max == 0 || parc_max > PARSE_MAX_PARAMETERS)
-    parc_max = PARSE_MAX_PARAMETERS;
+  if (parc_max == 0 || parc_max > IO_ARRAY_LENGTH(ctx->parv))
+    parc_max = IO_ARRAY_LENGTH(ctx->parv);
 
   /*
    * Must the following loop really be so devious? On surface it
@@ -372,7 +373,7 @@ parse_split_parameters(parse_context_t *ctx)
    * paramcount has been reached, the rest of the message goes into
    * this last parameter (about same effect as ":" has...) --msa
    */
-  while (ctx->parc < PARSE_MAX_PARAMETERS)
+  while (ctx->parc < IO_ARRAY_LENGTH(ctx->parv))
   {
     while (*s == ' ')
       *s++ = '\0';
@@ -381,7 +382,7 @@ parse_split_parameters(parse_context_t *ctx)
     if (*s == '\0')
       break;
 
-    assert(ctx->parc + 1 < PARSE_MAX_PARAMETERS + 2);
+    assert(ctx->parc + 1 < IO_ARRAY_LENGTH(ctx->parv));
     if (*s == ':')
     {
       /* The rest is single parameter--can include blanks also. */
@@ -399,7 +400,7 @@ parse_split_parameters(parse_context_t *ctx)
     assert(s <= ctx->buffer_end);
   }
 
-  assert(ctx->parc < PARSE_MAX_PARAMETERS + 2);
+  assert(ctx->parc < IO_ARRAY_LENGTH(ctx->parv));
   ctx->parv[++ctx->parc] = NULL;
 }
 

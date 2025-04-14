@@ -576,7 +576,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
       return;
   }
 
-  static char buf[MAXPARA][MODEBUFLEN];
+  static char buf[PARSE_MAX_PARAMETERS][MODEBUFLEN];
   mask = buf[(*parn) - 1];
   strlcpy(mask, ret, sizeof(buf[(*parn) - 1]));
 

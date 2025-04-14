@@ -31,7 +31,7 @@ struct Client;
 
 
 /** Maximum parameters a command can have. See 2.3 Messages in RFC 1459. */
-enum { MAXPARA = 15 };
+enum { PARSE_MAX_PARAMETERS = 15 };
 
 extern void parse_message(struct Client *, char *, const char *);
 

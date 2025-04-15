@@ -71,7 +71,7 @@ parse_handle_unknown_prefix(struct Client *client, const char *prefix, const cha
    * 'no.dot.at.start' is a server   (SQUIT)
    */
   const char *command_name;
-  if ((IsDigit(*prefix) && strlen(prefix) <= IRC_MAXSID ) || strchr(prefix, '.'))
+  if ((IsDigit(*prefix) && strlen(prefix) <= IRC_MAXSID) || strchr(prefix, '.'))
     command_name = "SQUIT";
   else
     command_name = "KILL";

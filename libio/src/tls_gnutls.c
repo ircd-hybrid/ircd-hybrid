@@ -200,7 +200,6 @@ ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   ssize_t ret = gnutls_record_recv(tls_data->session, buf, bufsize);
-
   if (ret <= 0)
   {
     switch (ret)
@@ -223,7 +222,6 @@ ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   ssize_t ret = gnutls_record_send(tls_data->session, buf, bufsize);
-
   if (ret <= 0)
   {
     switch (ret)
@@ -285,7 +283,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
   {
     /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
     log_write(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
-         cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
+              cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
     gnutls_priority_init(&tls_data->context->priorities, tls_default_priority_string, NULL);
     return false;
   }
@@ -297,7 +295,6 @@ tls_handshake_status_t
 tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 {
   int ret = gnutls_handshake(tls_data->session);
-
   if (ret >= 0)
     return TLS_HANDSHAKE_DONE;
 

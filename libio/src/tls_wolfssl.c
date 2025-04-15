@@ -213,11 +213,9 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
     switch (wolfSSL_get_error(ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
-      {
         /* wolfSSL wants to write, we signal this to the caller and do nothing about that here */
         *want_write = true;
         break;
-      }
       case SSL_ERROR_WANT_READ:
         errno = EWOULDBLOCK;
       case SSL_ERROR_SYSCALL:
@@ -269,20 +267,19 @@ void
 tls_shutdown(tls_data_t *tls_data)
 {
   WOLFSSL *ssl = *tls_data;
-  int ret = wolfSSL_shutdown(ssl);
 
+  int ret = wolfSSL_shutdown(ssl);
   if (ret == WOLFSSL_SHUTDOWN_NOT_DONE)
-     wolfSSL_shutdown(ssl);
+    wolfSSL_shutdown(ssl);
 }
 
 bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  WOLFSSL *ssl;
-
   if (TLS_initialized == false)
     return false;
 
+  WOLFSSL *ssl;
   if (role == TLS_ROLE_SERVER)
     ssl = wolfSSL_new(tls_ctx.server_ctx);
   else
@@ -291,7 +288,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   if (ssl == NULL)
   {
     log_write(LOG_TYPE_IRCD, "wolfSSL_new() ERROR! -- %s",
-         wolfSSL_ERR_error_string(wolfSSL_ERR_get_error(), NULL));
+              wolfSSL_ERR_error_string(wolfSSL_ERR_get_error(), NULL));
     return false;
   }
 

@@ -269,11 +269,9 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
     switch (SSL_get_error(ssl, ret))
     {
       case SSL_ERROR_WANT_WRITE:
-      {
         /* OpenSSL wants to write, we signal this to the caller and do nothing about that here */
         *want_write = true;
         break;
-      }
       case SSL_ERROR_WANT_READ:
         errno = EWOULDBLOCK;
       case SSL_ERROR_SYSCALL:
@@ -326,7 +324,6 @@ void
 tls_shutdown(tls_data_t *tls_data)
 {
   SSL *ssl = *tls_data;
-
   SSL_set_shutdown(ssl, SSL_RECEIVED_SHUTDOWN);
 
   if (SSL_shutdown(ssl) == 0)
@@ -336,11 +333,10 @@ tls_shutdown(tls_data_t *tls_data)
 bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  SSL *ssl;
-
   if (TLS_initialized == false)
     return false;
 
+  SSL *ssl;
   if (role == TLS_ROLE_SERVER)
     ssl = SSL_new(tls_ctx.server_ctx);
   else
@@ -349,7 +345,7 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   if (ssl == NULL)
   {
     log_write(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
-         ERR_error_string(ERR_get_error(), NULL));
+              ERR_error_string(ERR_get_error(), NULL));
     return false;
   }
 

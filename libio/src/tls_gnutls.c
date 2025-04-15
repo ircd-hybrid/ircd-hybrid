@@ -70,22 +70,19 @@ tls_free_credentials(tls_context_t cred)
 bool
 tls_new_credentials(void)
 {
-  struct gnutls_context *context;
-
   TLS_initialized = false;
 
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  context = io_calloc(sizeof(*context));
-
   int ret = gnutls_global_init();
   if (ret != GNUTLS_E_SUCCESS)
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
-    io_free(context);
     return false;
   }
+
+  struct gnutls_context *context = io_calloc(sizeof(*context));
 
   ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)

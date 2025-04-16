@@ -140,7 +140,7 @@ extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset
   if (!(*mask == '$' && IsAlpha(*(mask + 1)) && *(mask + 2) == ':'))
     return EXTBAN_NONE;
 
-  struct Extban *extban = extban_find(*(mask + 1));
+  const struct Extban *extban = extban_find(*(mask + 1));
   if (extban == NULL)
     return EXTBAN_INVALID;
 
@@ -180,7 +180,7 @@ extban_format(unsigned int e, char *buf)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    const struct Extban *extban = node->data;
     if (extban->type != EXTBAN_ACTING || !(extban->flag & e))
       continue;
 
@@ -199,7 +199,7 @@ extban_format(unsigned int e, char *buf)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    const struct Extban *extban = node->data;
     if (extban->type != EXTBAN_MATCHING || !(extban->flag & e))
       continue;
 
@@ -243,7 +243,7 @@ extban_get_isupport(void)
   list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    const struct Extban *extban = node->data;
     extban_chars[extban->character] = extban->character;
   }
 

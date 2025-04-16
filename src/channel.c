@@ -616,7 +616,7 @@ ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
   /* Is a matching extban, call custom match handler */
   if (ban->extban & extban_matching_mask())
   {
-    struct Extban *extban = extban_find_flag(ban->extban & extban_matching_mask());
+    const struct Extban *extban = extban_find_flag(ban->extban & extban_matching_mask());
     if (extban == NULL)
       return false;
 

@@ -49,31 +49,29 @@ sendhelpfile(struct Client *source, const char *path, const char *topic)
     return;
   }
 
+  bool first_line_sent = false;
   char line[HELPLEN];
-  if (fgets(line, sizeof(line), file) == NULL)
-  {
-    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
-    fclose(file);
-    return;
-  }
-
-  char *p = strpbrk(line, "\r\n");
-  if (p)
-    *p = '\0';
-
-  sendto_one_numeric(source, &me, RPL_HELPSTART, topic, line);
-
   while (fgets(line, sizeof(line), file))
   {
-    p = strpbrk(line, "\r\n");
+    char *p = strpbrk(line, "\r\n");
     if (p)
       *p = '\0';
 
-    sendto_one_numeric(source, &me, RPL_HELPTXT, topic, line);
+    if (first_line_sent == false)
+    {
+      first_line_sent = true;
+      sendto_one_numeric(source, &me, RPL_HELPSTART, topic, line);
+    }
+    else
+      sendto_one_numeric(source, &me, RPL_HELPTXT, topic, line);
   }
 
   fclose(file);
-  sendto_one_numeric(source, &me, RPL_ENDOFHELP, topic);
+
+  if (first_line_sent == false)
+    sendto_one_numeric(source, &me, ERR_HELPNOTFOUND, topic);
+  else
+    sendto_one_numeric(source, &me, RPL_ENDOFHELP, topic);
 }
 
 static void

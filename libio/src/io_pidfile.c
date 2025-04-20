@@ -53,7 +53,7 @@ static int pidfile_fd = -1;
 int
 io_pidfile_create(const char *path)
 {
-  pidfile_fd = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0644);
+  pidfile_fd = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0600);
   if (pidfile_fd == -1)
   {
     fprintf(stderr, "Failed to open PID file %s: %s\n", path, strerror(errno));

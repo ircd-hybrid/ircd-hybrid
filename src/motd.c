@@ -114,7 +114,7 @@ motd_cache(struct Motd *motd)
     }
   }
 
-  int fd = open(motd->path, O_RDONLY);
+  int fd = open(motd->path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
   if (fd == -1)
   {
     log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path, strerror(errno));
@@ -123,7 +123,7 @@ motd_cache(struct Motd *motd)
 
   /* Need the file's modification time */
   struct stat sb;
-  if (fstat(fd, &sb))
+  if (fstat(fd, &sb) || !S_ISREG(sb.st_mode))
   {
     log_write(LOG_TYPE_IRCD, "Couldn't fstat \"%s\": %s", motd->path, strerror(errno));
     close(fd);

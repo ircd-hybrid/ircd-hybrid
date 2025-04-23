@@ -459,7 +459,7 @@ motd_memory_count(struct Client *client)
   {
     const struct MotdCache *cache = node->data;
     ++motd_cache_count;
-    motd_cache_bytes += sizeof(struct MotdCache) + (MOTD_LINESIZE * (cache->count - 1));
+    motd_cache_bytes += sizeof(struct MotdCache) + (MOTD_LINESIZE * cache->count);
     motd_cache_bytes += cache->path ? strlen(cache->path) + 1 : 0;
   }
 

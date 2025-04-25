@@ -96,9 +96,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
                      (dbuf_length(&to->connection->buf_sendq) + buffer->size),
                      class_get_sendq(&to->connection->confs));
 
-    if (IsClient(to))
-      AddFlag(to, FLAGS_SENDQEX);
-
+    AddFlag(to, FLAGS_SENDQEX);
     dead_link_on_write(to, 0);
     return;
   }

@@ -123,9 +123,9 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
     else
     {
       queue->pos += count;
-
       queue->total_size -= count;
-      count -= count;
+
+      count = 0;
     }
   }
 }

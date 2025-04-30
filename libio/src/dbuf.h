@@ -34,21 +34,6 @@
 #include "list.h"
 
 /**
- * @def dbuf_length(x)
- * @brief Macro to get the total length of a dbuf queue.
- * @param x Pointer to the dbuf_queue.
- * @return Total length of the dbuf queue.
- */
-#define dbuf_length(x) ((x)->total_size)
-
-/**
- * @def dbuf_clear(x)
- * @brief Macro to clear a dbuf queue.
- * @param x Pointer to the dbuf_queue.
- */
-#define dbuf_clear(x) dbuf_delete(x, dbuf_length(x))
-
-/**
  * @var DBUF_BLOCK_SIZE
  * @brief Size of each data block within the dynamic buffer.
  */
@@ -83,4 +68,25 @@ extern void dbuf_put_fmt(struct dbuf_block *, const char *, ...);
 extern void dbuf_put_args(struct dbuf_block *, const char *, va_list);
 extern void dbuf_put(struct dbuf_queue *, const char *, size_t);
 extern struct dbuf_block *dbuf_alloc(void);
+
+/**
+ * @brief Get the total length of data available in the dbuf queue.
+ * @param queue Pointer to the dbuf_queue.
+ * @return Total number of bytes available for reading.
+ */
+static inline size_t
+dbuf_length(const struct dbuf_queue *queue)
+{
+  return queue->total_size;
+}
+
+/**
+ * @brief Remove all data from a dbuf queue.
+ * @param queue Pointer to the dbuf_queue.
+ */
+static inline void
+dbuf_clear(struct dbuf_queue *queue)
+{
+  dbuf_delete(queue, dbuf_length(queue));
+}
 #endif  /* INCLUDED_dbuf_h */

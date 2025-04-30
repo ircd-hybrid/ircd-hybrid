@@ -62,6 +62,9 @@ list_make_node(void)
 void
 list_free_node(list_node_t *node)
 {
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+
   io_free(node);
 }
 

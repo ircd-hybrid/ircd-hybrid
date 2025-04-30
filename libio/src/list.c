@@ -532,7 +532,6 @@ list_remove_at(unsigned int pos, list_t *list)
 
   void *data = current->data;
   list_remove(current, list);
-  list_free_node(current);
 
   return data;
 }

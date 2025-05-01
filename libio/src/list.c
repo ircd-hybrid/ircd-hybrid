@@ -96,6 +96,9 @@ list_is_empty(const list_t *list)
 void
 list_add(void *data, list_node_t *m, list_t *list)
 {
+  assert(m->prev == NULL);
+  assert(m->next == NULL);
+
   m->data = data;
   m->prev = NULL;
   m->next = list->head;
@@ -124,6 +127,9 @@ list_add(void *data, list_node_t *m, list_t *list)
 void
 list_add_after(void *data, list_node_t *m, list_node_t *n, list_t *list)
 {
+  assert(m->prev == NULL);
+  assert(m->next == NULL);
+
   m->data = data;
   m->prev = n;
   m->next = n->next;
@@ -154,6 +160,9 @@ list_add_after(void *data, list_node_t *m, list_node_t *n, list_t *list)
 void
 list_add_before(list_node_t *b, void *data, list_node_t *m, list_t *list)
 {
+  assert(m->prev == NULL);
+  assert(m->next == NULL);
+
   /* Shortcut - if it's the first one, call list_add only */
   if (b == list->head)
     list_add(data, m, list);
@@ -181,6 +190,9 @@ list_add_before(list_node_t *b, void *data, list_node_t *m, list_t *list)
 void
 list_add_tail(void *data, list_node_t *m, list_t *list)
 {
+  assert(m->prev == NULL);
+  assert(m->next == NULL);
+
   m->data = data;
   m->next = NULL;
   m->prev = list->tail;
@@ -210,6 +222,9 @@ list_add_tail(void *data, list_node_t *m, list_t *list)
 void
 list_add_sorted(void *data, list_node_t *m, list_t *list, int (*cmp)(const void *, const void *))
 {
+  assert(m->prev == NULL);
+  assert(m->next == NULL);
+
   /* If the list is empty, simply add the node to the list. */
   if (list_is_empty(list))
   {
@@ -244,6 +259,8 @@ list_add_sorted(void *data, list_node_t *m, list_t *list, int (*cmp)(const void 
 void
 list_remove(list_node_t *m, list_t *list)
 {
+  assert(list->head);
+  assert(list->tail);
   assert(list->length > 0);
 
   /* Assumption: If m->next == NULL, then list->tail == m
@@ -369,6 +386,8 @@ list_move_list(list_t *from, list_t *to)
 void
 list_move_node(list_node_t *m, list_t *list_del, list_t *list_add)
 {
+  assert(list_del->length > 0);
+
   /* Assumption: If m->next == NULL, then list_del->tail == m
    *      and:   If m->prev == NULL, then list_del->head == m
    */
@@ -494,6 +513,8 @@ list_find_remove(list_t *list, void *data)
 bool
 list_add_at(void *data, unsigned int pos, list_node_t *m, list_t *list)
 {
+  assert(pos <= list->length);
+
   if (pos > list->length)
     return false;
 
@@ -526,6 +547,8 @@ list_add_at(void *data, unsigned int pos, list_node_t *m, list_t *list)
 void *
 list_remove_at(unsigned int pos, list_t *list)
 {
+  assert(pos < list->length);
+
   if (pos >= list->length)
     return NULL;
 
@@ -551,6 +574,8 @@ list_remove_at(unsigned int pos, list_t *list)
 list_node_t *
 list_get_at(unsigned int pos, const list_t *list)
 {
+  assert(pos < list->length);
+
   if (pos >= list->length)
     return NULL;
 

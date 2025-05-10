@@ -92,67 +92,81 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, str
   return WHOIS_CHANNEL_VISIBILITY_NONE;
 }
 
-/* whois_person()
- *
- * inputs	- source client to report to
- *		- target client to report on
- * output	- NONE
- * side effects	- 
- */
-static void
-whois_send(struct Client *source, struct Client *target)
+static const char *
+whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
 {
-  list_node_t *node;
+  switch (vis)
+  {
+    case WHOIS_CHANNEL_VISIBILITY_LIMITED:
+      return "?";
+    case WHOIS_CHANNEL_VISIBILITY_HIDDEN:
+      return "!";
+    case WHOIS_CHANNEL_VISIBILITY_FULL:
+    case WHOIS_CHANNEL_VISIBILITY_NONE:
+    default:
+      return "";
+  }
+}
 
+static void
+whois_send_user_numeric(struct Client *source, struct Client *target)
+{
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
+}
 
+static void
+whois_send_host_numeric(struct Client *source, struct Client *target)
+{
   if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        target->name, target->username, target->realhost, target->sockhost);
+}
 
-  if (list_length(&target->channel))
+static void
+whois_send_channels_numeric(struct Client *source, struct Client *target)
+{
+  if (list_is_empty(&target->channel))
+    return;
+
+  /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
+  /* 1       23456            7            89                           0 1  */
+  size_t len = strlen(target->name) + 11;
+  if (MyConnect(source))
+    len += strlen(me.name) + strlen(source->name);
+  else
+    len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
+
+  char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
+
+  list_node_t *node;
+  LIST_FOREACH(node, target->channel.head)
   {
-    char buf[IRCD_BUFSIZE];
-    char *bufptr = buf;
+    const struct ChannelMember *member = node->data;
+    whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
 
-    /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
-    /* 1       23456            7            89                           0 1  */
-    size_t len = strlen(target->name) + 11;
+    if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
+      continue;
 
-    if (MyConnect(source))
-      len += strlen(me.name) + strlen(source->name);
-    else
-      len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
-
-    LIST_FOREACH(node, target->channel.head)
+    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + member_get_prefix_len(member, true) + len > sizeof(buf))
     {
-      const struct ChannelMember *member = node->data;
-      whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
-
-      if (vis != WHOIS_CHANNEL_VISIBILITY_NONE)
-      {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + member_get_prefix_len(member, true) + len > sizeof(buf))
-        {
-          sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
-          bufptr = buf;
-        }
-
-        const char *channel_prefix = "";
-        if (vis == WHOIS_CHANNEL_VISIBILITY_LIMITED)
-          channel_prefix = "?";
-        else if (vis == WHOIS_CHANNEL_VISIBILITY_HIDDEN)
-          channel_prefix = "!";
-
-        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
-                           channel_prefix, member_get_prefix(member, true), member->channel->name);
-      }
+      sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+      bufptr = buf;
     }
 
-    if (bufptr != buf)
-      sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+    const char *const channel_prefix = whois_channel_visibility_get_prefix(vis);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
+                       channel_prefix, member_get_prefix(member, true), member->channel->name);
   }
 
+  if (bufptr != buf)
+    sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+}
+
+static void
+whois_send_server_numeric(struct Client *source, struct Client *target)
+{
   if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
       !(user_mode_has_flag(source, UMODE_OPER) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
@@ -160,10 +174,18 @@ whois_send(struct Client *source, struct Client *target)
   else
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, target->servptr->name, target->servptr->info);
+}
 
+static void
+whois_send_away_numeric(struct Client *source, struct Client *target)
+{
   if (target->away)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
+}
 
+static void
+whois_send_operator_numeric(struct Client *source, struct Client *target)
+{
   if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
   {
     if (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))
@@ -183,6 +205,7 @@ whois_send(struct Client *source, struct Client *target)
     }
   }
 
+  list_node_t *node;
   LIST_FOREACH(node, target->svstags.head)
   {
     const struct ServicesTag *svstag = node->data;
@@ -194,17 +217,45 @@ whois_send(struct Client *source, struct Client *target)
       sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
                          target->name, svstag->tag);
   }
+}
 
+static void
+whois_send_modes_numeric(struct Client *source, struct Client *target)
+{
   if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
                        target->name, user_mode_to_str(target->umodes));
+}
 
-  hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
-
+static void
+whois_send_idle_numeric(struct Client *source, struct Client *target)
+{
   if (MyConnect(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);
+}
+
+static void
+whois_send(struct Client *source, struct Client *target)
+{
+  whois_send_user_numeric(source, target);
+
+  whois_send_host_numeric(source, target);
+
+  whois_send_channels_numeric(source, target);
+
+  whois_send_server_numeric(source, target);
+
+  whois_send_away_numeric(source, target);
+
+  whois_send_operator_numeric(source, target);
+
+  whois_send_modes_numeric(source, target);
+
+  hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
+
+  whois_send_idle_numeric(source, target);
 }
 
 /* do_whois()
@@ -216,7 +267,7 @@ whois_send(struct Client *source, struct Client *target)
  * side effects - Does whois
  */
 static void
-do_whois(struct Client *source, const char *name)
+whois_process(struct Client *source, const char *name)
 {
   struct Client *target = hash_find_client(name);
 
@@ -276,7 +327,7 @@ m_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  do_whois(source, parv[1]);
+  whois_process(source, parv[1]);
 }
 
 /*! \brief WHOIS command handler
@@ -308,7 +359,7 @@ mo_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  do_whois(source, parv[1]);
+  whois_process(source, parv[1]);
 }
 
 static struct Command command_table =

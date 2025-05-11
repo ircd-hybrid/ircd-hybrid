@@ -73,7 +73,7 @@ typedef enum
  * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
 */
 static whois_channel_visibility_t
-whois_channel_visibility_get(struct Channel *channel, struct Client *source, struct Client *target)
+whois_channel_visibility_get(struct Channel *channel, struct Client *source, const struct Client *target)
 {
   if (channel_is_public(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
     return WHOIS_CHANNEL_VISIBILITY_FULL;
@@ -109,14 +109,14 @@ whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
 }
 
 static void
-whois_send_user_numeric(struct Client *source, struct Client *target)
+whois_send_user_numeric(struct Client *source, const struct Client *target)
 {
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
 }
 
 static void
-whois_send_host_numeric(struct Client *source, struct Client *target)
+whois_send_host_numeric(struct Client *source, const struct Client *target)
 {
   if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
@@ -124,7 +124,7 @@ whois_send_host_numeric(struct Client *source, struct Client *target)
 }
 
 static void
-whois_send_channels_numeric(struct Client *source, struct Client *target)
+whois_send_channels_numeric(struct Client *source, const struct Client *target)
 {
   if (list_is_empty(&target->channel))
     return;
@@ -165,7 +165,7 @@ whois_send_channels_numeric(struct Client *source, struct Client *target)
 }
 
 static void
-whois_send_server_numeric(struct Client *source, struct Client *target)
+whois_send_server_numeric(struct Client *source, const struct Client *target)
 {
   if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
       !(user_mode_has_flag(source, UMODE_OPER) || source == target))
@@ -177,14 +177,14 @@ whois_send_server_numeric(struct Client *source, struct Client *target)
 }
 
 static void
-whois_send_away_numeric(struct Client *source, struct Client *target)
+whois_send_away_numeric(struct Client *source, const struct Client *target)
 {
   if (target->away)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
 }
 
 static void
-whois_send_operator_numeric(struct Client *source, struct Client *target)
+whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
   if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
   {
@@ -220,7 +220,7 @@ whois_send_operator_numeric(struct Client *source, struct Client *target)
 }
 
 static void
-whois_send_modes_numeric(struct Client *source, struct Client *target)
+whois_send_modes_numeric(struct Client *source, const struct Client *target)
 {
   if (user_mode_has_flag(source, UMODE_OPER) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
@@ -228,7 +228,7 @@ whois_send_modes_numeric(struct Client *source, struct Client *target)
 }
 
 static void
-whois_send_idle_numeric(struct Client *source, struct Client *target)
+whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
   if (MyConnect(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)

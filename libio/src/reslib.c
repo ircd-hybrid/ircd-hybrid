@@ -99,8 +99,6 @@
 struct io_addr reslib_nsaddr_list[RESLIB_MAXNS];
 unsigned int reslib_nscount = 0;
 
-static inline bool reslib_special(int);
-static inline bool reslib_printable(int);
 static int reslib_ns_name_compress(const char *, unsigned char *, size_t, const unsigned char **, const unsigned char **);
 static int reslib_dn_find(const unsigned char *, const unsigned char *, const unsigned char **, const unsigned char **);
 static int reslib_ns_name_uncompress(const unsigned char *, const unsigned char *, const unsigned char *, char *, size_t);
@@ -344,6 +342,36 @@ reslib_ns_name_unpack(const unsigned char *msg, const unsigned char *eom,
   return len;
 }
 
+/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
+   this character special ("in need of quoting")?  */
+static bool
+reslib_special(int ch)
+{
+  switch (ch)
+  {
+    case '"':
+    case '.':
+    case ';':
+    case '\\':
+    case '(':
+    case ')':
+      /* Special modifiers in zone files.  */
+    case '@':
+    case '$':
+      return true;
+    default:
+      return false;
+  }
+}
+
+/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
+   this character visible and not a space when printed?  */
+static bool
+reslib_printable(int ch)
+{
+  return ch > 0x20 && ch < 0x7f;
+}
+
 /* Converts an uncompressed, encoded domain name to printable ASCII as
    per RFC1035.  Returns the number of bytes written to buffer, or -1
    (with errno set).  The root is returned as "."  All other domains
@@ -515,36 +543,6 @@ reslib_ns_get32(const unsigned char *src)
 
   RESLIB_NS_GET32(dst, src);
   return dst;
-}
-
-/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
-   this character special ("in need of quoting")?  */
-static inline bool
-reslib_special(int ch)
-{
-  switch (ch)
-  {
-    case '"':
-    case '.':
-    case ';':
-    case '\\':
-    case '(':
-    case ')':
-      /* Special modifiers in zone files.  */
-    case '@':
-    case '$':
-      return true;
-    default:
-      return false;
-  }
-}
-
-/* Thinking in noninternationalized US-ASCII (per the DNS spec), is
-   this character visible and not a space when printed?  */
-static inline bool
-reslib_printable(int ch)
-{
-  return ch > 0x20 && ch < 0x7f;
 }
 
 /* Converts an ASCII string into an encoded domain name as per

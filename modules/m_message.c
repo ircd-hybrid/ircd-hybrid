@@ -232,17 +232,19 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 
   /* Chanops and voiced can flood their own channel with impunity */
   channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, rank, text, notice, &error);
-  if (perm != CHANNEL_SEND_PERM_FORBIDDEN)
+  if (perm == CHANNEL_SEND_PERM_FORBIDDEN)
   {
-    if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
-    {
-      const char *const prefix = channel_rank_to_prefix(rank);
-      sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
-                            command[notice], prefix, channel->name, text);
-    }
+    if (notice == false)
+      sendto_one_numeric(source, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
+    return;
   }
-  else if (notice == false)
-    sendto_one_numeric(source, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
+
+  if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
+  {
+    const char *const prefix = channel_rank_to_prefix(rank);
+    sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
+                          command[notice], prefix, channel->name, text);
+  }
 }
 
 /* msg_client()

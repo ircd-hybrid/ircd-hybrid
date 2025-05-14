@@ -150,7 +150,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, list_t *li
   int count = 0;
   size_t cur_len, mlen;
 
-  if (list_length(list) == 0)
+  if (list_is_empty(list))
     return;
 
   cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
@@ -421,7 +421,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, "%s", uid_buf);
 
-  if (list_length(&channel->members) == 0 && isnew)
+  if (list_is_empty(&channel->members) && isnew)
     channel_free(channel);
 }
 

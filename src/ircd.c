@@ -300,7 +300,7 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
  * @param pid Process ID of the ircd server.
  */
 static void
-print_startup(int pid)
+print_startup(pid_t pid)
 {
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
@@ -319,7 +319,7 @@ print_startup(int pid)
 static void
 make_daemon(void)
 {
-  int pid = fork();
+  pid_t pid = fork();
   if (pid == -1)
   {
     perror("fork");

@@ -89,10 +89,7 @@ io_pidfile_create(const char *path)
     return -1;
   }
 
-  char buf[16];
-  snprintf(buf, sizeof(buf), "%d\n", getpid());
-
-  if (write(pidfile_fd, buf, strlen(buf)) != (ssize_t)strlen(buf))
+  if (dprintf(pidfile_fd, "%d\n", getpid()) < 0)
   {
     fprintf(stderr, "Failed to write to PID file %s: %s\n", path, strerror(errno));
     io_pidfile_close();

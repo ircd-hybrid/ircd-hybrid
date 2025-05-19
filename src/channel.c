@@ -62,7 +62,7 @@ channel_get_list(void)
 static void
 channel_track_join_flood(struct Channel *channel, struct Client *client, bool flood_ctrl)
 {
-  if (GlobalSetOptions.joinfloodtime == 0)
+  if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;
 
   if (flood_ctrl)

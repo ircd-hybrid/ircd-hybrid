@@ -59,6 +59,39 @@ channel_get_list(void)
   return &channel_list;
 }
 
+static void
+channel_track_join_flood(struct Channel *channel, struct Client *client, bool flood_ctrl)
+{
+  if (GlobalSetOptions.joinfloodtime == 0)
+    return;
+
+  if (flood_ctrl)
+    ++channel->number_joined;
+
+  channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
+    (((float)GlobalSetOptions.joinfloodcount) /
+     (float)GlobalSetOptions.joinfloodtime);
+
+  if (channel->number_joined <= 0)
+  {
+    channel->number_joined = 0;
+    channel->sent_join_flood_notice = false;
+  }
+  else if (channel->number_joined >= GlobalSetOptions.joinfloodcount)
+  {
+    channel->number_joined = GlobalSetOptions.joinfloodcount;
+
+    if (channel->sent_join_flood_notice == false)
+    {
+      channel->sent_join_flood_notice = true;
+      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
+                     client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
+    }
+  }
+
+  channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+}
+
 /*! \brief Adds a user to a channel by adding another link to the
  *         channels member chain.
  * \param channel    Pointer to channel to add client to
@@ -71,34 +104,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
 {
   assert(IsClient(client));
 
-  if (GlobalSetOptions.joinfloodtime)
-  {
-    if (flood_ctrl)
-      ++channel->number_joined;
-
-    channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
-      (((float)GlobalSetOptions.joinfloodcount) /
-       (float)GlobalSetOptions.joinfloodtime);
-
-    if (channel->number_joined <= 0)
-    {
-      channel->number_joined = 0;
-      channel->sent_join_flood_notice = false;
-    }
-    else if (channel->number_joined >= GlobalSetOptions.joinfloodcount)
-    {
-      channel->number_joined = GlobalSetOptions.joinfloodcount;
-
-      if (channel->sent_join_flood_notice == false)
-      {
-        channel->sent_join_flood_notice = true;
-        sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
-                       client_get_name(client, HIDE_IP), client->servptr->name, channel->name);
-      }
-    }
-
-    channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-  }
+  channel_track_join_flood(channel, client, flood_ctrl);
 
   struct ChannelMember *member = io_calloc(sizeof(*member));
   member->client = client;

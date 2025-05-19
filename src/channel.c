@@ -66,15 +66,15 @@ channel_track_join_flood(struct Channel *channel, struct Client *client, bool fl
     return;
 
   if (flood_ctrl)
-    ++channel->number_joined;
+    channel->number_joined += 1.0f;
 
   channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
     (((float)GlobalSetOptions.joinfloodcount) /
      (float)GlobalSetOptions.joinfloodtime);
 
-  if (channel->number_joined <= 0)
+  if (channel->number_joined <= 0.0f)
   {
-    channel->number_joined = 0;
+    channel->number_joined = 0.0f;
     channel->sent_join_flood_notice = false;
   }
   else if (channel->number_joined >= GlobalSetOptions.joinfloodcount)

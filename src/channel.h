@@ -121,6 +121,7 @@ struct Ban
   int type;
 };
 
+extern void channel_member_clear_list(const list_t *);
 extern void channel_add_user(struct Channel *, struct Client *, unsigned int, bool);
 extern void channel_demote_members(struct Channel *, const struct Client *);
 extern void channel_free(struct Channel *);

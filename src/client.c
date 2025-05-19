@@ -689,9 +689,7 @@ exit_one_client(struct Client *client, const char *comment)
     sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
                                  client->name, client->username, client->host, comment);
 
-    list_node_t *node, *node_next;
-    LIST_FOREACH_SAFE(node, node_next, client->channel.head)
-      channel_remove_user(node->data);
+    channel_member_clear_list(&client->channel);
 
     svstag_clear_list(&client->svstags);
 

@@ -135,6 +135,15 @@ channel_remove_user(struct ChannelMember *member)
     channel_free(channel);
 }
 
+void
+channel_member_clear_list(const list_t *list)
+{
+  struct ChannelMember *member;
+
+  while ((member = list_peek_head(list)))
+    channel_remove_user(member);
+}
+
 /* remove_a_mode()
  *
  * inputs       -

@@ -60,12 +60,12 @@ channel_get_list(void)
 }
 
 static void
-channel_track_join_flood(struct Channel *channel, struct Client *client, bool flood_ctrl)
+channel_track_join_flood(struct Channel *channel, struct Client *client, bool track_join)
 {
   if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;
 
-  if (flood_ctrl)
+  if (track_join)
     channel->number_joined += 1.0f;
 
   channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
@@ -97,14 +97,14 @@ channel_track_join_flood(struct Channel *channel, struct Client *client, bool fl
  * \param channel    Pointer to channel to add client to
  * \param client     Pointer to client (who) to add
  * \param flags      Flags for chanops etc
- * \param flood_ctrl Whether to count this join in flood calculations
+ * \param track_join Whether to count this join in flood calculations
  */
 void
-channel_add_user(struct Channel *channel, struct Client *client, unsigned int flags, bool flood_ctrl)
+channel_add_user(struct Channel *channel, struct Client *client, unsigned int flags, bool track_join)
 {
   assert(IsClient(client));
 
-  channel_track_join_flood(channel, client, flood_ctrl);
+  channel_track_join_flood(channel, client, track_join);
 
   struct ChannelMember *member = io_calloc(sizeof(*member));
   member->client = client;

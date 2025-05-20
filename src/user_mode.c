@@ -54,6 +54,17 @@ user_mode_char_to_index(char mode_char)
   return -1;
 }
 
+static char
+user_mode_index_to_char(int index)
+{
+  if (index >= 0 && index < 26)
+    return 'a' + index;
+  if (index >= 26 && index < USER_MODE_CAPACITY)
+    return 'A' + index - 26;
+
+  return '\0';
+}
+
 const char *
 user_mode_get_string(void)
 {
@@ -446,7 +457,7 @@ user_mode_send(struct Client *client, uint64_t mode_flags_old, user_mode_send_t 
     const uint64_t mode_bit = 1ULL << i;
     if (changed_modes & mode_bit)
     {
-      const char mode_char = (i < 26) ? ('a' + i) : ('A' + (i - 26));
+      const char mode_char = user_mode_index_to_char(i);
 
       if (user_mode_has_flag(client, mode_bit))
       {
@@ -488,7 +499,7 @@ user_mode_to_str(uint64_t mode_flags)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flags & mode_bit)
-      *bufptr++ = (i < 26) ? ('a' + i) : ('A' + (i - 26));
+      *bufptr++ = user_mode_index_to_char(i);
   }
 
   *bufptr = '\0';

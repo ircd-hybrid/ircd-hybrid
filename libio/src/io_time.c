@@ -363,3 +363,33 @@ io_time_get(io_time_type_t type)
       abort();  /* Invalid type, abort the program. */
   }
 }
+
+/**
+ * @brief Retrieves the total monotonic time in milliseconds since its epoch.
+ *
+ * This function computes the total monotonic time in milliseconds by combining
+ * the cached seconds and milliseconds components stored in current_time_data.
+ * These cached values are updated by io_time_set().
+ *
+ * @return uintmax_t Total monotonic time in milliseconds, derived from cached data.
+ */
+uintmax_t
+io_time_get_monotonic_ms_total(void)
+{
+  return (current_time_data.sec_monotonic * 1000ULL) + current_time_data.msec_monotonic;
+}
+
+/**
+ * @brief Retrieves the total monotonic time in nanoseconds since its epoch.
+ *
+ * This function computes the total monotonic time in nanoseconds by combining
+ * the cached seconds and nanoseconds components stored in current_time_data.
+ * These cached values are updated by io_time_set().
+ *
+ * @return uintmax_t Total monotonic time in nanoseconds, derived from cached data.
+ */
+uintmax_t
+io_time_get_monotonic_ns_total(void)
+{
+  return (current_time_data.sec_monotonic * 1000000000ULL) + current_time_data.nsec_monotonic;
+}

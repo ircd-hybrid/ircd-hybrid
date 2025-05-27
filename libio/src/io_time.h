@@ -70,31 +70,36 @@ enum io_time_error_code
  * @brief Enumeration for specifying the type of time value to retrieve.
  *
  * This enumeration defines constants for selecting which part of the time data
- * to retrieve (seconds or nanoseconds, real-time or monotonic). These values
- * are used as parameters in the io_time_get function to specify the required
- * time component.
+ * to retrieve (seconds, milliseconds, or nanoseconds, real-time or monotonic).
+ * These values are used as parameters in the io_time_get function to specify the
+ * required time component.
  */
 typedef enum
 {
   IO_TIME_REALTIME_SEC,  /**< Real-time clock, seconds part. */
-  IO_TIME_REALTIME_NSEC,  /**< Real-time clock, nanoseconds part. */
+  IO_TIME_REALTIME_MSEC,  /**< Real-time clock, milliseconds part (0-999). */
+  IO_TIME_REALTIME_NSEC,  /**< Real-time clock, nanoseconds part (0-999,999,999). */
   IO_TIME_MONOTONIC_SEC,  /**< Monotonic clock, seconds part. */
-  IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part. */
+  IO_TIME_MONOTONIC_MSEC,  /**< Monotonic clock, milliseconds part (0-999). */
+  IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part (0-999,999,999). */
 } io_time_type_t;
 
 /**
  * @struct io_time_t
  * @brief Structure holding real-time and monotonic time values.
  *
- * This structure stores both real-time and monotonic time values in seconds and nanoseconds.
- * It is updated by the io_time_set function and accessed by the io_time_get function.
+ * This structure stores both real-time and monotonic time values in seconds,
+ * milliseconds, and nanoseconds. It is updated by the io_time_set function
+ * and accessed by the io_time_get function.
  */
 typedef struct
 {
   uintmax_t sec_real;  /**< Seconds part of the real-time clock. */
-  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock. */
+  uintmax_t msec_real;  /**< Milliseconds part of the real-time clock (0-999). */
+  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock (0-999,999,999). */
   uintmax_t sec_monotonic;  /**< Seconds part of the monotonic clock. */
-  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock. */
+  uintmax_t msec_monotonic;  /**< Milliseconds part of the monotonic clock (0-999). */
+  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock (0-999,999,999). */
 } io_time_t;
 
 extern void io_time_set_error_callback(void (*)(enum io_time_error_code, const char *));

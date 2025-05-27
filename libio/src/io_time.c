@@ -323,8 +323,10 @@ io_time_set(void)
 
   /* Update the public io_time_t structure. */
   current_time_data.sec_real = current_realtime.tv_sec;
+  current_time_data.msec_real = current_realtime.tv_nsec / 1000000;
   current_time_data.nsec_real = current_realtime.tv_nsec;
   current_time_data.sec_monotonic = current_monotonic.tv_sec;
+  current_time_data.msec_monotonic = current_monotonic.tv_nsec / 1000000;
   current_time_data.nsec_monotonic = current_monotonic.tv_nsec;
 
   initialized = true;
@@ -347,10 +349,14 @@ io_time_get(io_time_type_t type)
   {
     case IO_TIME_REALTIME_SEC:
       return current_time_data.sec_real;
+    case IO_TIME_REALTIME_MSEC:
+      return current_time_data.msec_real;
     case IO_TIME_REALTIME_NSEC:
       return current_time_data.nsec_real;
     case IO_TIME_MONOTONIC_SEC:
       return current_time_data.sec_monotonic;
+    case IO_TIME_MONOTONIC_MSEC:
+      return current_time_data.msec_monotonic;
     case IO_TIME_MONOTONIC_NSEC:
       return current_time_data.nsec_monotonic;
     default:

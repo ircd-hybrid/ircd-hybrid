@@ -610,7 +610,7 @@ resolver_init(void)
   {
     .name = "resolver_timeout",
     .handler = resolver_timeout,
-    .when = 1
+    .when = 1000
   };
 
   start_resolver();

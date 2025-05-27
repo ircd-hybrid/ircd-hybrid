@@ -898,7 +898,7 @@ conf_set_defaults(void)
   ConfigChannel.default_join_flood_time = 6;
 
   ConfigServerHide.flatten_links = 0;
-  ConfigServerHide.flatten_links_delay = 300;
+  ConfigServerHide.flatten_links_delay = 300000;
   ConfigServerHide.hidden = 0;
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.hide_services = 0;

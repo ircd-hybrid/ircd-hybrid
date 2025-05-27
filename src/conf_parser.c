@@ -6631,7 +6631,7 @@ yyreduce:
   {
     if ((yyvsp[-1].number) > 0)
     {
-      event_flatten_links_write_file.when = (yyvsp[-1].number);
+      event_flatten_links_write_file.when = (yyvsp[-1].number) * 1000;
       event_add(&event_flatten_links_write_file, NULL);
     }
     else

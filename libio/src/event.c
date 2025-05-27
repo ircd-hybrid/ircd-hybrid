@@ -57,7 +57,7 @@ event_add(struct event *ev, void *data)
   event_delete(ev);
 
   ev->data = data;
-  ev->next = io_time_get(IO_TIME_MONOTONIC_SEC) + ev->when;
+  ev->next = io_time_get_monotonic_ms_total() + ev->when;
   ev->active = true;
   list_add_sorted(ev, &ev->node, &event_list, event_cmp);
 }
@@ -65,7 +65,7 @@ event_add(struct event *ev, void *data)
 void
 event_addish(struct event *ev, void *data)
 {
-  if (ev->when >= 3)
+  if (ev->when >= 3000)
   {
     const uintmax_t two_third = (2 * ev->when) / 3;
 
@@ -88,18 +88,14 @@ event_delete(struct event *ev)
 void
 event_run(void)
 {
-  static uintmax_t last = 0;
-
-  if (last == io_time_get(IO_TIME_MONOTONIC_SEC))
-    return;
-  last = io_time_get(IO_TIME_MONOTONIC_SEC);
+  uintmax_t last = io_time_get_monotonic_ms_total();
 
   unsigned int len = list_length(&event_list);
   while (len-- && list_length(&event_list))
   {
     struct event *ev = event_list.head->data;
 
-    if (ev->next > io_time_get(IO_TIME_MONOTONIC_SEC))
+    if (ev->next > last)
       break;
 
     event_delete(ev);

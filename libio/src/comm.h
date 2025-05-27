@@ -46,7 +46,7 @@ enum
 };
 
 /** How long can comm_select() wait for network events [milliseconds] */
-enum { SELECT_DELAY = 500 };
+enum { SELECT_DELAY = 50 };  /* XXX: fixed timeout. */
 
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);

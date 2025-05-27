@@ -1075,7 +1075,7 @@ client_init(void)
   {
     .name = "check_pings",
     .handler = check_pings,
-    .when = 5
+    .when = 5000
   };
 
   event_add(&event_ping, NULL);

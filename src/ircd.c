@@ -173,28 +173,28 @@ static struct event event_cleanup_tklines =
 {
   .name = "cleanup_tklines",
   .handler = cleanup_tklines,
-  .when = 30
+  .when = 30000
 };
 
 static struct event event_server_connect_auto =
 {
   .name = "server_connect_auto",
   .handler = server_connect_auto,
-  .when = 15
+  .when = 15000
 };
 
 static struct event event_comm_checktimeouts =
 {
   .name = "comm_checktimeouts",
   .handler = comm_checktimeouts,
-  .when = 1
+  .when = 1000
 };
 
 static struct event event_save_all_databases =
 {
   .name = "save_all_databases",
   .handler = save_all_databases,
-  .when = 300
+  .when = 300000
 };
 
 /**
@@ -215,6 +215,7 @@ io_loop(void)
         safe_list_channels(node->data, false);
     }
 
+    io_time_set();
     /* Run pending events */
     event_run();
 

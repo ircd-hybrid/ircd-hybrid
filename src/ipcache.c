@@ -152,7 +152,7 @@ ipcache_init(void)
   {
     .name = "ipcache_remove_expired_records",
     .handler = ipcache_remove_expired_records,
-    .when = 123
+    .when = 123000
   };
 
   ipcache_trie_v6 = patricia_new(128);

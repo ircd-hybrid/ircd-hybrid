@@ -572,12 +572,17 @@ stats_events(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :---------------------------------------------");
 
+ const uintmax_t current_monotonic_ms = io_time_get_monotonic_ms_total();
+
   list_node_t *node;
   LIST_FOREACH(node, event_get_list()->head)
   {
     const struct event *ev = node->data;
-    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "E :%-30s %-4ju seconds",
-                       ev->name, ev->next - io_time_get(IO_TIME_MONOTONIC_SEC));
+    const intmax_t remaining_ms = (intmax_t)(ev->next - current_monotonic_ms);
+    const double remaining_seconds_fp = (double)remaining_ms / 1000.0;
+
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "E :%-30s %10.3f seconds",
+                       ev->name, remaining_seconds_fp);
   }
 }
 

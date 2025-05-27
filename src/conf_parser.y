@@ -2781,7 +2781,7 @@ serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
   {
     if ($3 > 0)
     {
-      event_flatten_links_write_file.when = $3;
+      event_flatten_links_write_file.when = $3 * 1000;
       event_add(&event_flatten_links_write_file, NULL);
     }
     else

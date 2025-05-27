@@ -47,7 +47,7 @@ flatten_links_init(void)
 
   if (ConfigServerHide.flatten_links_delay && event_flatten_links_write_file.active == false)
   {
-    event_flatten_links_write_file.when = ConfigServerHide.flatten_links_delay;
+    event_flatten_links_write_file.when = ConfigServerHide.flatten_links_delay * 1000;
     event_add(&event_flatten_links_write_file, NULL);
   }
 }

@@ -32,24 +32,31 @@
 #include "flatten_links.h"
 
 
-struct event event_flatten_links_write_file =
-{
-  .name = "flatten_links_write_file",
-  .handler = flatten_links_write_file,
-};
-
+static event_handle_t event_flatten_links_write_file;
 static list_t flatten_links;
+
+void
+flatten_links_handle_event_state(uintmax_t new_interval_seconds)
+{
+  uintmax_t interval_ms = new_interval_seconds * 1000ULL;
+  if (interval_ms > 0)
+  {
+    if (event_flatten_links_write_file == NULL)
+      event_flatten_links_write_file = event_create(ircd_event_manager, "flatten_links_write_file", flatten_links_write_file, interval_ms, false, NULL, NULL);
+    else
+      event_set_interval_ms(event_flatten_links_write_file, interval_ms);
+
+    event_schedule(event_flatten_links_write_file);
+  }
+  else if (event_flatten_links_write_file && event_is_scheduled(event_flatten_links_write_file))
+    event_unschedule(event_flatten_links_write_file);
+}
 
 void
 flatten_links_init(void)
 {
   flatten_links_read_file();
-
-  if (ConfigServerHide.flatten_links_delay && event_flatten_links_write_file.active == false)
-  {
-    event_flatten_links_write_file.when = ConfigServerHide.flatten_links_delay * 1000;
-    event_add(&event_flatten_links_write_file, NULL);
-  }
+  flatten_links_handle_event_state(ConfigServerHide.flatten_links_delay);
 }
 
 void

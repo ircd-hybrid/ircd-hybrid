@@ -152,4 +152,6 @@ extern struct Counter Count;
 extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
+extern event_manager_t ircd_event_manager;
+extern event_handle_t event_channel_list_pump;
 #endif  /* INCLUDED_ircd_h */

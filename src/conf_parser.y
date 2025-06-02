@@ -42,7 +42,6 @@
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "event.h"
 #include "id.h"
 #include "log.h"
 #include "memory.h"
@@ -2779,15 +2778,10 @@ serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if ($3 > 0)
-    {
-      event_flatten_links_write_file.when = $3 * 1000;
-      event_add(&event_flatten_links_write_file, NULL);
-    }
-    else
-     event_delete(&event_flatten_links_write_file);
+    uintmax_t interval_seconds = $3;
+    ConfigServerHide.flatten_links_delay = interval_seconds;
 
-    ConfigServerHide.flatten_links_delay = $3;
+    flatten_links_handle_event_state(interval_seconds);
   }
 };
 

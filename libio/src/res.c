@@ -55,6 +55,7 @@
 #include "reslib.h"
 #include "memory.h"
 #include "address.h"
+#include "ircd.h" /* XXX: decouple */
 
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets
@@ -606,13 +607,9 @@ resolver_timeout(void *unused)
 void
 resolver_init(void)
 {
-  static struct event resolver_timeout_event =
-  {
-    .name = "resolver_timeout",
-    .handler = resolver_timeout,
-    .when = 1000
-  };
-
   start_resolver();
-  event_add(&resolver_timeout_event, NULL);
+
+  event_handle_t event_resolver_timeout = event_create(ircd_event_manager, "resolver_timeout", resolver_timeout, 1000, false, NULL, NULL);
+  event_set_priority(event_resolver_timeout, 1);
+  event_schedule(event_resolver_timeout);
 }

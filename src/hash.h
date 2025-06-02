@@ -80,4 +80,5 @@ extern struct Channel *hash_find_channel(const char *);
 
 extern void free_list_task(struct Client *);
 extern void safe_list_channels(struct Client *, bool);
+extern void channel_list_pump(void *);
 #endif  /* INCLUDED_hash_h */

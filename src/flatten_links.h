@@ -22,14 +22,11 @@
 #ifndef INCLUDED_flatten_links_h
 #define INCLUDED_flatten_links_h
 
-#include "event.h"
-
-extern struct event event_flatten_links_write_file;
-
 extern void flatten_links_init(void);
 extern void flatten_links_clear(void);
 extern void flatten_links_add(const char *const);
 extern void flatten_links_send(struct Client *);
 extern void flatten_links_write_file(void *);
 extern void flatten_links_read_file(void);
+extern void flatten_links_handle_event_state(uintmax_t);
 #endif  /* INCLUDED_flatten_links_h */

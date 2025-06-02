@@ -1071,12 +1071,6 @@ client_get_idle_time(const struct Client *source,
 void
 client_init(void)
 {
-  static struct event event_ping =
-  {
-    .name = "check_pings",
-    .handler = check_pings,
-    .when = 5000
-  };
-
-  event_add(&event_ping, NULL);
+  event_handle_t event_check_pings = event_create(ircd_event_manager, "check_pings", check_pings, 5000, false, NULL, NULL);
+  event_schedule(event_check_pings);
 }

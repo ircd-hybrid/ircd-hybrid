@@ -623,3 +623,17 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
   free_list_task(client);
   sendto_one_numeric(client, &me, RPL_LISTEND);
 }
+
+void
+channel_list_pump(void *unused)
+{
+  if (list_is_empty(&listing_client_list))
+    return;
+
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, listing_client_list.head)
+  {
+    struct Client *const client = node->data;
+    safe_list_channels(client, false);
+  }
+}

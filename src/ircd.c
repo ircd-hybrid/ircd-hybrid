@@ -169,33 +169,13 @@ static struct io_getopt myopts[] =
   { NULL, 0, NULL, STRING, NULL }
 };
 
-static struct event event_cleanup_tklines =
-{
-  .name = "cleanup_tklines",
-  .handler = cleanup_tklines,
-  .when = 30000
-};
+static event_handle_t event_cleanup_tklines;
+static event_handle_t event_server_connect_auto;
+static event_handle_t event_comm_checktimeouts;
+static event_handle_t event_save_all_databases;
+event_handle_t event_channel_list_pump;
 
-static struct event event_server_connect_auto =
-{
-  .name = "server_connect_auto",
-  .handler = server_connect_auto,
-  .when = 15000
-};
-
-static struct event event_comm_checktimeouts =
-{
-  .name = "comm_checktimeouts",
-  .handler = comm_checktimeouts,
-  .when = 1000
-};
-
-static struct event event_save_all_databases =
-{
-  .name = "save_all_databases",
-  .handler = save_all_databases,
-  .when = 300000
-};
+event_manager_t ircd_event_manager;
 
 /**
  * @brief Main IO loop for processing events and managing server activities.
@@ -208,16 +188,9 @@ io_loop(void)
 {
   while (true)
   {
-    if (listing_client_list.head)
-    {
-      list_node_t *node, *node_next;
-      LIST_FOREACH_SAFE(node, node_next, listing_client_list.head)
-        safe_list_channels(node->data, false);
-    }
-
     io_time_set();
     /* Run pending events */
-    event_run();
+    event_run(ircd_event_manager);
 
     comm_select();
     exit_aborted_clients();
@@ -446,14 +419,21 @@ main(int argc, char *argv[])
   if (io_pidfile_create(pidFileName))
     exit(EXIT_FAILURE);
 
+  ircd_event_manager = event_manager_create(NULL);
+  if (ircd_event_manager == NULL)
+  {
+    exit(EXIT_FAILURE);
+  }
+
   ircd_hook_init();
-  ipcache_init();
-  client_init();
   class_init();
   cloak_init();
-  resolver_init();      /* Needs to be setup before the io loop */
   module_init();
   conf_read_files(true);   /* cold start init conf files */
+
+  resolver_init();
+  ipcache_init();
+  client_init();
   channel_mode_init();
   extban_init();
   capab_init();  /* Set up default_server_capabs */
@@ -508,16 +488,22 @@ main(int argc, char *argv[])
 
   module_load_all(NULL);
 
-  event_addish(&event_cleanup_tklines, NULL);
+  event_cleanup_tklines = event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
+  event_schedule_fuzzed(event_cleanup_tklines);
 
-  /* We want server_connect_auto to be called as soon as possible now! -- adrian */
-  /* No, 'cause after a restart it would cause all sorts of nick collides */
-  event_addish(&event_server_connect_auto, NULL);
+  event_server_connect_auto = event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
+  event_schedule_fuzzed(event_server_connect_auto);
 
-  /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  event_add(&event_comm_checktimeouts, NULL);
+  event_comm_checktimeouts = event_create(ircd_event_manager, "comm_checktimeouts", comm_checktimeouts, 1000, false, NULL, NULL);
+  event_set_priority(event_comm_checktimeouts, 3);
+  event_schedule(event_comm_checktimeouts);
 
-  event_addish(&event_save_all_databases, NULL);
+  event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
+  event_schedule_fuzzed(event_save_all_databases);
+
+  event_channel_list_pump = event_create(ircd_event_manager, "channel_list_pump", channel_list_pump, 100, false, NULL, NULL);
+  event_set_priority(event_channel_list_pump, 2);
+  event_schedule(event_channel_list_pump);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();

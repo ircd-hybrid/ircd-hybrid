@@ -46,6 +46,8 @@
 #ifndef INCLUDED_rng_mt_h
 #define INCLUDED_rng_mt_h
 
+#include <stdint.h>
+
 extern void init_genrand(uint32_t);
 extern void init_by_array(uint32_t[], int);
 extern uint32_t genrand_int32(void);

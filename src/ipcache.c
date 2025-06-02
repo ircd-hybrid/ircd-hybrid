@@ -28,6 +28,7 @@
 #include "memory.h"
 #include "io_time.h"
 #include "conf.h"
+#include "ircd.h"
 #include "ipcache.h"
 
 static list_t ipcache_list;
@@ -148,15 +149,9 @@ ipcache_get_stats(unsigned int *const number_ips_stored, size_t *const mem_ips_s
 void
 ipcache_init(void)
 {
-  static struct event event_expire_ipcache =
-  {
-    .name = "ipcache_remove_expired_records",
-    .handler = ipcache_remove_expired_records,
-    .when = 123000
-  };
-
   ipcache_trie_v6 = patricia_new(128);
   ipcache_trie_v4 = patricia_new( 32);
 
-  event_add(&event_expire_ipcache, NULL);
+  event_handle_t event_expire_ipcache = event_create(ircd_event_manager, "ipcache_remove_expired_records", ipcache_remove_expired_records, 123000, false, NULL, NULL);
+  event_schedule(event_expire_ipcache);
 }

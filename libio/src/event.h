@@ -27,26 +27,56 @@
 #define INCLUDED_event_h
 
 #include <stdbool.h>
-#include "list.h"
+#include <stdint.h>
 
-struct event
+struct event_manager_instance;
+typedef struct event_manager_instance *event_manager_t;
+
+struct event_instance;
+typedef struct event_instance *event_handle_t;
+
+typedef void (*event_handler_fn)(void *);
+typedef void (*event_cleanup_fn)(void *);
+
+typedef enum
 {
-  /* public */
-  const char *name;
-  void (*handler)(void *);
-  uintmax_t when;
-  bool oneshot;
+  EVENT_SUCCESS = 0,
+  EVENT_ERR_INVALID_ARG,
+  EVENT_ERR_NOT_FOUND,
+} event_status_t;
 
-  /* private */
-  uintmax_t next;
-  void *data;
-  bool active;
-  list_node_t node;
-};
+typedef struct
+{
+  size_t initial_capacity;
+} event_manager_config_t;
 
-extern const list_t *event_get_list(void);
-extern void event_add(struct event *, void *);
-extern void event_addish(struct event *, void *);
-extern void event_delete(struct event *);
-extern void event_run(void);
+extern void event_manager_destroy(event_manager_t);
+extern void event_manager_for_each_scheduled(event_manager_t, void (*callback)(event_handle_t, void *), void *);
+extern void event_run(event_manager_t);
+extern bool event_is_oneshot(event_handle_t);
+extern bool event_is_scheduled(event_handle_t);
+extern int event_get_priority(event_handle_t);
+extern size_t event_manager_get_active_count(event_manager_t);
+extern uintmax_t event_get_interval_ms(event_handle_t);
+extern uintmax_t event_get_next_fire_time(event_handle_t);
+extern uintmax_t event_get_time_until_fire(event_handle_t);
+extern uintmax_t event_manager_get_next_fire_time(event_manager_t);
+extern event_handle_t event_create(event_manager_t, const char *, event_handler_fn, uintmax_t, bool, void *, event_cleanup_fn);
+extern event_manager_t event_get_manager(event_handle_t);
+extern event_manager_t event_manager_create(event_manager_config_t *);
+extern event_status_t event_destroy(event_handle_t);
+extern event_status_t event_schedule(event_handle_t);
+extern event_status_t event_schedule_at(event_handle_t, uintmax_t);
+extern event_status_t event_schedule_fuzzed(event_handle_t);
+extern event_status_t event_set_cleanup_handler(event_handle_t, event_cleanup_fn);
+extern event_status_t event_set_data(event_handle_t, void *);
+extern event_status_t event_set_handler(event_handle_t, event_handler_fn);
+extern event_status_t event_set_interval_ms(event_handle_t, uintmax_t);
+extern event_status_t event_set_name(event_handle_t event, const char *);
+extern event_status_t event_set_oneshot(event_handle_t, bool);
+extern event_status_t event_set_priority(event_handle_t, int);
+extern event_status_t event_trigger_now(event_handle_t);
+extern event_status_t event_unschedule(event_handle_t);
+extern void *event_get_data(event_handle_t);
+extern const char *event_get_name(event_handle_t);
 #endif  /* INCLUDED_event_h */

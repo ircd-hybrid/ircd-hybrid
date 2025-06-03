@@ -45,7 +45,7 @@ struct event_instance
   void *data;
   event_cleanup_fn cleanup_handler;
   uintmax_t next_fire_time_ms;
-  int priority;
+  uint8_t priority;
   size_t heap_idx;
   struct event_manager_instance *manager;
 };
@@ -460,7 +460,7 @@ event_get_priority(event_handle_t event)
 }
 
 event_status_t
-event_set_priority(event_handle_t event, int new_priority)
+event_set_priority(event_handle_t event, uint8_t new_priority)
 {
   if (event->priority == new_priority)
     return EVENT_SUCCESS;

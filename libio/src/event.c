@@ -452,7 +452,7 @@ event_set_name(event_handle_t event, const char *new_name)
   return EVENT_SUCCESS;
 }
 
-int
+uint8_t
 event_get_priority(event_handle_t event)
 {
   return event->priority;

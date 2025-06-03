@@ -55,7 +55,7 @@ extern void event_manager_for_each_scheduled(event_manager_t, void (*callback)(e
 extern void event_run(event_manager_t);
 extern bool event_is_oneshot(event_handle_t);
 extern bool event_is_scheduled(event_handle_t);
-extern int event_get_priority(event_handle_t);
+extern uint8_t event_get_priority(event_handle_t);
 extern size_t event_manager_get_active_count(event_manager_t);
 extern uintmax_t event_get_interval_ms(event_handle_t);
 extern uintmax_t event_get_next_fire_time(event_handle_t);

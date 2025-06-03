@@ -301,7 +301,8 @@ event_destroy(event_handle_t event)
 
   if (event_is_scheduled(event))
     status = event_unschedule(event);
-  else if (event->cleanup_handler)
+
+  if (event->cleanup_handler)
     event->cleanup_handler(event->data);
 
   io_free(event->name);
@@ -319,12 +320,6 @@ event_unschedule(event_handle_t event)
 
   event_status_t status = _event_remove_from_heap(event->manager, event);
   assert(event->heap_idx == EVENT_HEAP_INVALID_IDX || status != EVENT_SUCCESS);
-
-  if (status == EVENT_SUCCESS)
-  {
-    if (event->cleanup_handler)
-      event->cleanup_handler(event->data);
-  }
 
   return status;
 }

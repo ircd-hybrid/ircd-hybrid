@@ -192,11 +192,15 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
 
   const size_t idx_to_remove = event->heap_idx;
   if (idx_to_remove == mgr->heap_size - 1)
+  {
     mgr->heap_size--;
+    mgr->heap_array[mgr->heap_size] = NULL;
+  }
   else
   {
     _event_heap_swap(mgr, idx_to_remove, mgr->heap_size - 1);
     mgr->heap_size--;
+    mgr->heap_array[mgr->heap_size] = NULL;
 
     if (mgr->heap_size > 0 && idx_to_remove < mgr->heap_size)
     {

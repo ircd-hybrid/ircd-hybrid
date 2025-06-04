@@ -19,11 +19,18 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+
 #include "comm.h"
+#include "fdlist.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "fdlist.h"
 #include "log.h"
 #include "memory.h"
 #include "ident.h"

@@ -24,8 +24,11 @@
  * @brief String manipulation functions.
  */
 
-#include "config.h"
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
 #include "io_string.h"
 
 /**

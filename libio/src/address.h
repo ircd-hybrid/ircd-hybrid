@@ -26,6 +26,8 @@
 #ifndef INCLUDED_address_h
 #define INCLUDED_address_h
 
+#include <stdbool.h>
+
 enum hostmask_type
 {
   HM_HOST,

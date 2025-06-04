@@ -48,6 +48,7 @@ struct event_instance
   uint8_t priority;
   size_t heap_idx;
   struct event_manager_instance *manager;
+  bool fired_and_cleaned;
 };
 
 struct event_manager_instance
@@ -306,7 +307,7 @@ event_destroy(event_handle_t event)
   if (event_is_scheduled(event))
     status = event_unschedule(event);
 
-  if (event->cleanup_handler)
+  if (event->cleanup_handler && event->fired_and_cleaned == false)
     event->cleanup_handler(event->data);
 
   io_free(event->name);
@@ -513,9 +514,10 @@ event_get_data(event_handle_t event)
 event_status_t
 event_set_data(event_handle_t event, void *new_data)
 {
-  if (event->cleanup_handler && event->data && (event->data != new_data))
+  if (event->cleanup_handler && event->data && (event->data != new_data) && event->fired_and_cleaned == false)
     event->cleanup_handler(event->data);
 
+  event->fired_and_cleaned = false;
   event->data = new_data;
   return EVENT_SUCCESS;
 }
@@ -561,12 +563,12 @@ event_trigger_now(event_handle_t event)
     return event_schedule(event);
   else
   {
-    if (event->cleanup_handler)
-      event->cleanup_handler(event->data);
 
-    io_free(event->name);
-    event->name = NULL;
-    io_free(event);
+    if (event->cleanup_handler && event->fired_and_cleaned == false)
+    {
+      event->cleanup_handler(event->data);
+      event->fired_and_cleaned = true;
+    }
 
     return EVENT_SUCCESS;
   }
@@ -602,12 +604,11 @@ event_run(event_manager_t mgr)
     }
     else
     {
-      if (event->cleanup_handler)
+      if (event->cleanup_handler && event->fired_and_cleaned == false)
+      {
         event->cleanup_handler(event->data);
-
-      io_free(event->name);
-      event->name = NULL;
-      io_free(event);
+        event->fired_and_cleaned = true;
+      }
     }
   }
 

@@ -26,6 +26,7 @@
 #ifndef INCLUDED_comm_h
 #define INCLUDED_comm_h
 
+#include "event.h"
 #include "fdlist.h"
 
 enum
@@ -45,9 +46,6 @@ enum
   COMM_SELECT_WRITE = 1 << 1
 };
 
-/** How long can comm_select() wait for network events [milliseconds] */
-enum { SELECT_DELAY = 50 };  /* XXX: fixed timeout. */
-
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(void);
@@ -57,6 +55,7 @@ extern void comm_checktimeouts(void *);
 extern void comm_connect_tcp(fde_t *, const struct io_addr *, uint16_t, const struct io_addr *, void (fde_t *, int, void *), void *, uintmax_t);
 extern bool comm_ignore_errno(int);
 extern int comm_get_sockerr(fde_t *);
+extern int comm_get_select_timeout(event_manager_t);
 extern int comm_socket(int, int, int);
 extern int comm_accept(fde_t *, struct io_addr *);
 extern const char *comm_errstr(int);

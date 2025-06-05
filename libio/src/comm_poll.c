@@ -31,6 +31,7 @@
 #include "memory.h"
 #include "comm.h"
 #include "log.h"
+#include "ircd.h" /* XXX: decouple */
 
 /* I hate linux -- adrian */
 #ifndef POLLRDNORM
@@ -150,7 +151,8 @@ comm_select(void)
   int num;
   void (*hdl)(fde_t *, void *);
 
-  num = poll(pollfds, pollnum, SELECT_DELAY);
+  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
+  num = poll(pollfds, pollnum, select_timeout_ms);
 
   io_time_set();
 

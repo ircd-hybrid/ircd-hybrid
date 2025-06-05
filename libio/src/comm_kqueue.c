@@ -30,6 +30,7 @@
 #include "fdlist.h"
 #include "comm.h"
 #include "log.h"
+#include "ircd.h" /* XXX: decouple */
 
 enum { KE_LENGTH = 128 };
 
@@ -141,13 +142,15 @@ comm_select(void)
   struct timespec poll_time;
   void (*hdl)(fde_t *, void *);
 
+  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
+
   /*
    * remember we are doing NANOseconds here, not micro/milli. God knows
    * why jlemon used a timespec, but hey, he wrote the interface, not I
    *   -- Adrian
    */
-  poll_time.tv_sec = 0;
-  poll_time.tv_nsec = SELECT_DELAY * 1000000;
+  poll_time.tv_sec = select_timeout_ms / 1000;
+  poll_time.tv_nsec = (select_timeout_ms % 1000) * 1000000L;
   num = kevent(kqueue_fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
   kqoff = 0;
 

@@ -30,6 +30,7 @@
 #include "comm.h"
 #include "log.h"
 #include "memory.h"
+#include "ircd.h" /* XXX: decouple */
 #include <sys/epoll.h>
 
 enum
@@ -146,7 +147,8 @@ comm_select(void)
   int num;
   void (*hdl)(fde_t *, void *);
 
-  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, SELECT_DELAY);
+  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
+  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, select_timeout_ms);
   assert(num <= epollop->nevents);
 
   io_time_set();

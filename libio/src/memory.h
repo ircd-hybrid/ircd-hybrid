@@ -31,6 +31,7 @@
 
 #ifndef INCLUDED_memory_h
 #define INCLUDED_memory_h
+#include <stddef.h>
 
 extern void io_free(void *);
 extern void io_set_oom_handler(void (*)(void));

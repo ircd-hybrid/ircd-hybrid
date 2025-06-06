@@ -27,7 +27,10 @@
  * storing historical information about IRC users.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <string.h>
+#include <stddef.h>
+
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"

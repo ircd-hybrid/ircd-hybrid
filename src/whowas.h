@@ -29,6 +29,11 @@
 #ifndef INCLUDED_whowas_h
 #define INCLUDED_whowas_h
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "list.h"
 #include "client.h"
 
 /**

@@ -21,6 +21,10 @@
 
 #ifndef INCLUDED_aline_h
 #define INCLUDED_aline_h
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "client.h"
 
 struct aline_ctx
 {

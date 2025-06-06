@@ -19,7 +19,10 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stdint.h>
+#include <stddef.h>
+
 #include "io_string.h"
 #include "nuh.h"
 #include "numeric.h"

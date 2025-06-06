@@ -25,11 +25,13 @@
 
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
-#include "config.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#include "address.h"
 #include "client.h"
 #include "conf_class.h"
-#include "address.h"
-
 
 enum maskitem_type
 {

@@ -32,6 +32,7 @@
 #ifndef INCLUDED_list_h
 #define INCLUDED_list_h
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * @def LIST_FOREACH

@@ -29,8 +29,6 @@
  * nodes by data value.
  */
 
-#include <stdint.h>
-#include <stddef.h>
 #include <assert.h>
 
 #include "list.h"

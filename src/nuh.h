@@ -21,6 +21,7 @@
 
 #ifndef INCLUDED_nuh_h
 #define INCLUDED_nuh_h
+#include <stddef.h>
 
 /**
  * @struct nuh_split

@@ -19,8 +19,9 @@
  *  USA
  */
 
-#include "config.h"
-#include "stdinc.h"
+#include <string.h>
+#include <stddef.h>
+
 #include "io_string.h"
 #include "nuh.h"
 

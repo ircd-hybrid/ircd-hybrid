@@ -19,7 +19,8 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "list.h"
 #include "memory.h"
 #include "io_string.h"

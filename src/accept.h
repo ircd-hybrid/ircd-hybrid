@@ -21,6 +21,11 @@
 
 #ifndef INCLUDED_accept_h
 #define INCLUDED_accept_h
+#include <stdbool.h>
+
+#include "list.h"
+#include "client.h"
+
 
 struct AcceptItem
 {

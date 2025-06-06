@@ -31,6 +31,9 @@
 
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "event.h"

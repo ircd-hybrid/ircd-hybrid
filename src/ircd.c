@@ -28,8 +28,16 @@
  * components, sets up event handlers, and manages server configurations.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <jansson.h>
-#include "stdinc.h"
+
 #include "io_getopt.h"
 #include "io_pidfile.h"
 #include "io_rlimit.h"

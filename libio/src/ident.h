@@ -21,6 +21,7 @@
 
 #ifndef INCLUDED_ident_h
 #define INCLUDED_ident_h
+#include <stdint.h>
 
 #include "address.h"
 

@@ -19,13 +19,12 @@
  *  USA
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <string.h>
+#include <stdio.h>
 #include <errno.h>
+#include <stddef.h>
 
 #include "comm.h"
 #include "fdlist.h"

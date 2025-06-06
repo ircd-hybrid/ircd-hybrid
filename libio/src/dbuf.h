@@ -30,6 +30,8 @@
 
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h
+#include <stddef.h>
+#include <stdarg.h>
 
 #include "list.h"
 

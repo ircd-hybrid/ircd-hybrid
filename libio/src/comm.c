@@ -23,9 +23,16 @@
  * \brief Network functions.
  */
 
-#include "stdinc.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <assert.h>
+#include <stddef.h>
+
 #include "io_time.h"
 #include "address.h"
 #include "fdlist.h"

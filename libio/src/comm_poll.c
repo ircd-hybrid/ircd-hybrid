@@ -23,10 +23,13 @@
  * \brief POSIX poll() compatible network routines.
  */
 
-#include "stdinc.h"
+#include "config.h"
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_POLL
+#include <poll.h>
+#include <assert.h>
+#include <time.h>
+
 #include "io_time.h"
-#include <sys/poll.h>
 #include "fdlist.h"
 #include "memory.h"
 #include "comm.h"

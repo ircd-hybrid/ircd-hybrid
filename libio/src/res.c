@@ -42,7 +42,17 @@
  * Apr 28, 2003 --cryogen and Dianora
  */
 
-#include "stdinc.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <limits.h>
+#include <stddef.h>
+#include <errno.h>
+
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"

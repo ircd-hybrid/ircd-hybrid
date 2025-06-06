@@ -28,8 +28,13 @@
  * necessary functionality to dynamically manage modules within the application.
  */
 
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <errno.h>
+
 #include "ltdl.h"
-#include "stdinc.h"
 #include "io.h"
 #include "io_string.h"
 #include "list.h"

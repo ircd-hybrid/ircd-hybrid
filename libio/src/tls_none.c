@@ -25,7 +25,10 @@
  * \brief Dummy file for no TLS support
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <sys/types.h>
+
 #include "tls.h"
 
 #ifndef HAVE_TLS

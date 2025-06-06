@@ -31,6 +31,9 @@
 #ifndef INCLUDED_fdlist_h
 #define INCLUDED_fdlist_h
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "io.h"
 #include "address.h"
 #include "tls.h"

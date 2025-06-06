@@ -89,7 +89,12 @@
  * special() - ns_name_ntop.c
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <stddef.h>
+#include <netinet/in.h>
+
 #include "io_string.h"
 #include "res.h"
 #include "reslib.h"

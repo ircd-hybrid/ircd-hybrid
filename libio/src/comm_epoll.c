@@ -23,15 +23,21 @@
  * \brief Linux epoll() compatible network routines.
  */
 
-#include "stdinc.h"
+#include "config.h"
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
+#include <sys/epoll.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <assert.h>
+#include <time.h>
+
 #include "io_time.h"
 #include "fdlist.h"
 #include "comm.h"
 #include "log.h"
 #include "memory.h"
 #include "ircd.h" /* XXX: decouple */
-#include <sys/epoll.h>
 
 enum
 {

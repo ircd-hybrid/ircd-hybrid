@@ -31,6 +31,7 @@
 #ifndef INCLUDED_module_h
 #define INCLUDED_module_h
 
+#include <stdbool.h>
 #include "list.h"
 
 /**

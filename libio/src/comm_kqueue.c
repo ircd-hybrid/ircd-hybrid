@@ -23,10 +23,18 @@
  * \brief kqueue() compatible network routines.
  */
 
-#include "stdinc.h"
+#include "config.h"
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_KQUEUE
-#include "io_time.h"
+#include <sys/types.h>
 #include <sys/event.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <assert.h>
+#include <stdint.h>
+
+#include "io_time.h"
 #include "fdlist.h"
 #include "comm.h"
 #include "log.h"

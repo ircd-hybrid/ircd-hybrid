@@ -25,7 +25,12 @@
  * \brief Includes all OpenSSL-specific TLS functions
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stddef.h>
+
 #include "tls.h"
 #include "conf.h"
 #include "log.h"

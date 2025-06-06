@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_res_h
 #define INCLUDED_res_h
+#include <stddef.h>
 #include "address.h"
 
 typedef void (*dns_callback_fnc)(void *, const struct io_addr *, const char *, size_t);

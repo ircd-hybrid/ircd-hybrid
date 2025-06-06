@@ -27,6 +27,10 @@
 #define INCLUDED_address_h
 
 #include <stdbool.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <stdint.h>
 
 enum hostmask_type
 {

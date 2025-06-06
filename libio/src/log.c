@@ -27,7 +27,13 @@
  * It provides flexibility through various log types, file rotation mechanisms, and configurable logging behaviors.
  */
 
-#include "stdinc.h"
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "list.h"
 #include "log.h"
 #include "io_string.h"

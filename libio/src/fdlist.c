@@ -23,7 +23,14 @@
  * \brief Maintains a list of file descriptors.
  */
 
-#include "stdinc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <stddef.h>
+#include <assert.h>
+
 #include "defaults.h"
 #include "io_rlimit.h"
 #include "io_string.h"

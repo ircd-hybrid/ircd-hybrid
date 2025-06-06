@@ -25,7 +25,11 @@
  * \brief Includes all GnuTLS-specific TLS functions
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stddef.h>
+
 #include "tls.h"
 #include "conf.h"
 #include "log.h"

@@ -32,6 +32,10 @@
 #ifndef INCLUDED_log_h
 #define INCLUDED_log_h
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+
 #include "io.h"
 #include "list.h"
 

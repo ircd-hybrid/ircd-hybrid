@@ -342,7 +342,7 @@ read_packet(fde_t *F, void *data_)
     /* Check to make sure we're not flooding */
     if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)))
     {
-      const unsigned int max_recvq = client_get_active_class(client)->max_recvq;
+      const unsigned int max_recvq = client_get_max_recvq(client);
       if (dbuf_length(&client->connection->buf_recvq) > max_recvq)
       {
         client_exit(client, "Excess Flood");

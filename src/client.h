@@ -35,7 +35,8 @@
 #include "lookup.h"
 #include "ircd_defs.h"
 #include "command.h"
-
+#include "conf.h"
+#include "conf_class.h"
 
 /** Client connection states */
 enum
@@ -407,9 +408,50 @@ extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern const struct ClassItem *client_get_active_class(const struct Client *);
 extern struct Client *client_make(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
+
+static inline struct ClassItem *
+client_get_active_class(const struct Client *client)
+{
+  if (client->connection->oper_class)
+    return client->connection->oper_class;
+  if (client->connection->base_class)
+    return client->connection->base_class;
+
+  return class_default;
+}
+
+static inline unsigned int
+client_get_max_sendq(const struct Client *client)
+{
+  return class_get_max_sendq(client_get_active_class(client));
+}
+
+static inline unsigned int
+client_get_max_recvq(const struct Client *client)
+{
+  return class_get_max_recvq(client_get_active_class(client));
+}
+
+static inline unsigned int
+client_get_ping_freq(const struct Client *client)
+{
+  return class_get_ping_freq(client_get_active_class(client));
+}
+
+static inline unsigned int
+client_get_max_channels(const struct Client *client)
+{
+  const unsigned int class_limit = class_get_max_channels(client_get_active_class(client));
+  return (class_limit > 0) ? class_limit : ConfigChannel.max_channels;
+}
+
+static inline const char *
+client_get_class_name(const struct Client *client)
+{
+  return class_get_name(client_get_active_class(client));
+}
 #endif  /* INCLUDED_client_h */

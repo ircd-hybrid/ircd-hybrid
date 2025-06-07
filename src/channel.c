@@ -1004,8 +1004,6 @@ void
 channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
   const struct ResvItem *resv = NULL;
-  const struct ClassItem *const class = client_get_active_class(client);
-
   assert(MyClient(client));
 
   char *p = NULL;
@@ -1039,8 +1037,8 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       continue;
     }
 
-    if (list_length(&client->channel) >=
-        ((class->max_channels) ? class->max_channels : ConfigChannel.max_channels))
+    unsigned int max_channels = client_get_max_channels(client);
+    if (list_length(&client->channel) >= max_channels)
     {
       sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);
       break;

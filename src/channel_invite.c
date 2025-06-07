@@ -29,6 +29,7 @@
 #include "list.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "client.h"
 #include "conf.h"
 
 /*! \brief Checks whether a client is invited to a certain channel. While walking the

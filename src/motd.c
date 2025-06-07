@@ -33,10 +33,11 @@
 #include "io_string.h"
 #include "defaults.h"
 #include "ircd.h"
-#include "conf.h"
-#include "send.h"
-#include "numeric.h"
 #include "client.h"
+#include "conf.h"
+#include "conf.h"
+#include "numeric.h"
+#include "send.h"
 #include "motd.h"
 
 /** Global list of messages of the day. */
@@ -239,8 +240,8 @@ motd_lookup(const struct Client *client)
     {
       case MOTD_CLASS:
       {
-        const struct ClassItem *class = client_get_active_class(client);
-        if (match(motd->mask, class->name) == 0)
+        const char *class_name = client_get_class_name(client);
+        if (match(motd->mask, class_name) == 0)
           return motd;
         break;
       }

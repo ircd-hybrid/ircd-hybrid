@@ -85,9 +85,39 @@ extern void class_init(void);
 extern void class_mark_for_deletion(void);
 extern void class_delete_marked(void);
 extern void class_ip_limit_rebuild(struct ClassItem *);
-extern bool class_ip_limit_add(struct ClassItem *, void *, bool);
-extern bool class_ip_limit_remove(struct ClassItem *, void *);
+extern bool class_ip_limit_add(struct ClassItem *, const void *, bool);
+extern bool class_ip_limit_remove(struct ClassItem *, const void *);
 extern struct ClassItem *class_make(void);
 extern struct ClassItem *class_find(const char *, bool);
 extern const list_t *class_get_list(void);
+
+static inline unsigned int
+class_get_max_channels(const struct ClassItem *class)
+{
+  return class->max_channels;
+}
+
+static inline unsigned int
+class_get_max_recvq(const struct ClassItem *class)
+{
+  return class->max_recvq;
+}
+
+static inline unsigned int
+class_get_max_sendq(const struct ClassItem *class)
+{
+  return class->max_sendq;
+}
+
+static inline const char *
+class_get_name(const struct ClassItem *class)
+{
+  return class->name;
+}
+
+static inline unsigned int
+class_get_ping_freq(const struct ClassItem *class)
+{
+  return class->ping_freq;
+}
 #endif  /* INCLUDED_conf_class_h */

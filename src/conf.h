@@ -30,8 +30,9 @@
 #include <stdio.h>
 
 #include "address.h"
-#include "client.h"
 #include "conf_class.h"
+
+struct Client;
 
 enum maskitem_type
 {

@@ -37,7 +37,7 @@
 #include "list.h"
 #include "log.h"
 #include "io_string.h"
-#include "conf.h"
+//#include "conf.h"         XXX: decouple
 #include "misc.h"
 #include "memory.h"
 
@@ -212,8 +212,8 @@ log_rotate_due(struct Log *log)
 void
 log_write(enum log_type type, const char *format, ...)
 {
-  if (ConfigLog.use_logging == 0)
-    return;
+ // if (ConfigLog.use_logging == 0)
+   // return;
 
   list_node_t *node;
   LIST_FOREACH(node, log_list.head)

@@ -29,7 +29,9 @@
 #include "io_string.h"
 #include "memory.h"
 #include "patricia.h"
+#include "client.h"
 #include "conf.h"
+#include "conf_class.h"
 
 static list_t class_list;
 
@@ -136,20 +138,20 @@ class_delete_marked(void)
 }
 
 static patricia_tree_t *
-class_ip_limit_trie(struct ClassItem *class, void *addr)
+class_ip_limit_trie(struct ClassItem *class, const void *addr)
 {
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
     return class->ip_tree_v6;
 
   return class->ip_tree_v4;
 }
 
 bool
-class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
+class_ip_limit_add(struct ClassItem *class, const void *addr, bool over_rule)
 {
   int bitlen;
 
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
     bitlen = class->cidr_bitlen_ipv6;
   else
     bitlen = class->cidr_bitlen_ipv4;
@@ -177,11 +179,11 @@ class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
 }
 
 bool
-class_ip_limit_remove(struct ClassItem *class, void *addr)
+class_ip_limit_remove(struct ClassItem *class, const void *addr)
 {
   int bitlen;
 
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
+  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
     bitlen = class->cidr_bitlen_ipv6;
   else
     bitlen = class->cidr_bitlen_ipv4;
@@ -213,7 +215,7 @@ class_ip_limit_rebuild(struct ClassItem *class)
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *client = node->data;
+    const struct Client *client = node->data;
     if (client->connection->base_class == class)
       class_ip_limit_add(class, &client->addr, true);
   }

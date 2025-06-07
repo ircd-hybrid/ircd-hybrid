@@ -94,19 +94,6 @@ list_t oper_list;
 static list_t dead_list, abort_list;
 static list_node_t *eac_next;  /* next aborted client to exit */
 
-const struct ClassItem *
-client_get_active_class(const struct Client *client)
-{
-  assert(client->connection);
-
-  if (client->connection->oper_class)
-    return client->connection->oper_class;
-  if (client->connection->base_class)
-    return client->connection->base_class;
-
-  return class_default;
-}
-
 void
 client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
 {
@@ -287,7 +274,7 @@ check_pings_list(list_t *list)
     if (IsDead(client))
       continue;  /* Ignore it, it's been exited already */
 
-    unsigned int ping = client_get_active_class(client)->ping_freq;
+    unsigned int ping = client_get_ping_freq(client);
     if (ping < io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping)
     {
       if (!HasFlag(client, FLAGS_PINGSENT))

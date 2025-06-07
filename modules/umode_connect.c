@@ -39,10 +39,11 @@ user_register_hook(void *ctx_)
 {
   ircd_hook_user_register_ctx *ctx = ctx_;
 
+  const struct ClassItem *const class = client_get_active_class(ctx->client);
   sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Client connecting: %s (%s@%s) [%s] {%s} [%s] <%s>",
                  ctx->client->name, ctx->client->username, ctx->client->realhost, ctx->client->sockhost,
-                 class_get_name(&ctx->client->connection->confs), ctx->client->info, ctx->client->id);
+                 class->name, ctx->client->info, ctx->client->id);
 
   return HOOK_FLOW_CONTINUE;
 }

@@ -1004,7 +1004,7 @@ void
 channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
   const struct ResvItem *resv = NULL;
-  const struct ClassItem *const class = class_get_ptr(&client->connection->confs);
+  const struct ClassItem *const class = client_get_active_class(client);
 
   assert(MyClient(client));
 

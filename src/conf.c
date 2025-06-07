@@ -367,11 +367,12 @@ clear_out_address_conf(void)
       if (IsConfDatabase(arec->conf))
         continue;
 
-      list_remove(&arec->node, &atable[i]);
       arec->conf->active = false;
+      list_remove(&arec->node, &atable[i]);
 
       if (arec->conf->ref_count == 0)
         conf_free(arec->conf);
+
       io_free(arec);
     }
   }
@@ -561,50 +562,11 @@ conf_free(struct MaskItem *conf)
   io_free(conf);
 }
 
-/* conf_attach_auth()
- *
- * inputs       - client pointer
- *              - conf pointer
- * output       -
- * side effects - do actual attach
- */
-static int
-conf_attach_auth(struct Client *client, struct MaskItem *conf)
-{
-  const struct ClassItem *const class = conf->class;
-  bool a_limit_reached = false;
-
-  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
-  ++ipcache->count_local;
-  AddFlag(client, FLAGS_IPHASH);
-
-  if (class->max_total && class->ref_count >= class->max_total)
-    a_limit_reached = true;
-  else if (class->max_perip_local && ipcache->count_local > class->max_perip_local)
-    a_limit_reached = true;
-  else if (class->max_perip_global &&
-           (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
-    a_limit_reached = true;
-  else if (class_ip_limit_add(conf->class, &client->addr, IsConfExemptLimits(conf)))
-    a_limit_reached = true;
-
-  if (a_limit_reached)
-    if (!IsConfExemptLimits(conf))
-      return TOO_MANY;   /* Already at maximum allowed */
-
-  return conf_attach(client, conf);
-}
-
-/* verify_access()
- *
- * inputs       - pointer to client to verify
- * output       - 0 if success -'ve if not
- * side effect  - find the first (best) I line to attach.
- */
-static int
-verify_access(struct Client *client)
+static struct MaskItem *
+conf_auth_verify_credentials(struct Client *client, const char **error_reason)
 {
   char username[USERLEN + 1] = "~";
+  *error_reason = "Invalid credentials or no matching auth {} block";
 
   if (HasFlag(client, FLAGS_GOTID))
     strlcpy(username, client->username, sizeof(username));
@@ -614,27 +576,41 @@ verify_access(struct Client *client)
   struct MaskItem *conf = find_address_conf(client->host, username, &client->addr,
                                             client->connection->password);
   if (conf == NULL)
-    return NOT_AUTHORIZED;
+    return NULL;
 
   assert(IsConfClient(conf) || IsConfKill(conf));
 
   if (IsConfKill(conf))
   {
-    sendto_one_notice(client, &me, ":*** Banned: %s", conf->reason);
-    return BANNED_CLIENT;
+    *error_reason = conf->reason;
+    return NULL;
   }
 
   if (IsConfRedir(conf))
   {
-    sendto_one_numeric(client, &me, RPL_REDIR,
-                       string_or_empty(conf->name), conf->port);
-    return NOT_AUTHORIZED;
+    sendto_one_numeric(client, &me, RPL_REDIR, string_or_empty(conf->name), conf->port);
+    *error_reason = "Redirected to another server";
+    return NULL;
+  }
+
+  if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
+  {
+    *error_reason = "Identd is required and was not found";
+    return NULL;
+  }
+
+  if (!string_is_empty(conf->passwd))
+  {
+    if (conf_match_password(client->connection->password, conf) == false)
+    {
+      *error_reason = "Bad Password";
+      return NULL;
+    }
   }
 
   if (!HasFlag(client, FLAGS_GOTID) && !IsNoTilde(conf))
     strlcpy(client->username, username, sizeof(client->username));
 
-  /* Preserve x->host in x->realhost before it gets overwritten. */
   strlcpy(client->realhost, client->host, sizeof(client->realhost));
 
   if (IsConfDoSpoofIp(conf))
@@ -643,145 +619,77 @@ verify_access(struct Client *client)
     AddFlag(client, FLAGS_SPOOF);
   }
 
-  return conf_attach_auth(client, conf);
+  *error_reason = NULL;
+  return conf;
 }
 
-/* check_client()
- *
- * inputs	- pointer to client
- * output	- 0 = Success
- * 		  NOT_AUTHORIZED    (-1) = Access denied (no I line match)
- * 		  IRCD_SOCKET_ERROR (-2) = Bad socket.
- * 		  I_LINE_FULL       (-3) = I-line is full
- *		  TOO_MANY          (-4) = Too many connections from hostname
- * 		  BANNED_CLIENT     (-5) = K-lined
- * side effects - Ordinary client access check.
- *		  Look for conf lines which have the same
- * 		  status as the flags passed.
- */
-bool
-conf_check_client(struct Client *client)
+static bool
+conf_admit_to_class(struct ClassItem *class, struct Client *client, bool exempt_limits, const char **error_reason)
 {
-  const char *error = NULL;
-  bool warn = true;
+  *error_reason = NULL;
 
-  switch (verify_access(client))
+  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
+  ++ipcache->count_local;
+  AddFlag(client, FLAGS_IPHASH);
+
+  if (exempt_limits)
+    return true;
+
+  if (class->max_total && class->ref_count >= class->max_total)
   {
-    case TOO_MANY:
-      error = "too many connections on IP";
-      break;
-    case I_LINE_FULL:
-      error = "connection class is full";
-      break;
-    case NOT_AUTHORIZED:
-      error = "not authorized";
-      break;
-    case BANNED_CLIENT:
-      error = "banned from server";
-      warn = false;
-      break;
+    *error_reason = "Connection class is full (total limit reached)";
+    return false;
   }
 
-  if (error)
+  if (class->max_perip_local && ipcache->count_local > class->max_perip_local)
   {
-    ++ServerStats.is_ref;
+    *error_reason = "Connection class is full (local per-IP limit reached)";
+    return false;
+  }
 
-    if (warn)
-      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Rejecting client connection from %s: %s",
-                     client_get_name(client, SHOW_IP), error);
+  if (class->max_perip_global && (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
+  {
+    *error_reason = "Connection class is full (global per-IP limit reached)";
+    return false;
+  }
 
-    log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
-         client_get_name(client, SHOW_IP), error);
-    client_exit_fmt(client, "Connection rejected - %s", error);
+  if (class_ip_limit_add(class, &client->addr, exempt_limits))
+  {
+    *error_reason = "Connection class is full (CIDR subnet limit reached)";
     return false;
   }
 
   return true;
 }
 
-/*! \brief Disassociate configuration from the client. Also removes a class
- *         from the list if marked for deleting.
- * \param client Client to operate on
- * \param type     Type of conf to detach
- */
-void
-conf_detach(struct Client *client, enum maskitem_type type)
-{
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, client->connection->confs.head)
-  {
-    struct MaskItem *conf = node->data;
-
-    assert(conf->type & (CONF_CLIENT | CONF_OPER | CONF_SERVER));
-    assert(conf->ref_count > 0);
-    assert(conf->class->ref_count > 0);
-
-    if (!(conf->type & type))
-      continue;
-
-    list_remove(node, &client->connection->confs);
-    list_free_node(node);
-
-    if (conf->type == CONF_CLIENT)
-      class_ip_limit_remove(conf->class, &client->addr);
-
-    if (--conf->class->ref_count == 0 && conf->class->active == false)
-    {
-      class_free(conf->class);
-      conf->class = NULL;
-    }
-
-    if (--conf->ref_count == 0 && conf->active == false)
-      conf_free(conf);
-  }
-}
-
-/*! \brief Associate a specific configuration entry to a *local* client (this
- *         is the one which used in accepting the connection). Note, that this
- *         automatically changes the attachment if there was an old one.
- * \param client Client to attach the conf to
- * \param conf Configuration record to attach
- */
-int
-conf_attach(struct Client *client, struct MaskItem *conf)
-{
-  if (list_find(&client->connection->confs, conf))
-    return 1;
-
-  conf->class->ref_count++;
-  conf->ref_count++;
-
-  list_add(conf, list_make_node(), &client->connection->confs);
-
-  return 0;
-}
-
-/* find_conf_name()
- *
- * inputs	- pointer to conf link list to search
- *		- pointer to name to find
- *		- int mask of type of conf to find
- * output	- NULL or pointer to conf found
- * side effects	- find a conf entry which matches the name
- *		  and has the given mask.
- */
 struct MaskItem *
-find_conf_name(list_t *list, const char *name, enum maskitem_type type)
+conf_authorize_client(struct Client *client)
 {
-  list_node_t *node;
+  const char *reason = NULL;
 
-  LIST_FOREACH(node, list->head)
-  {
-    struct MaskItem *conf = node->data;
+  struct MaskItem *conf = conf_auth_verify_credentials(client, &reason);
+  if (conf == NULL)
+    goto fail;
 
-    if (conf->type == type)
-    {
-      if (conf->name && !irccmp(conf->name, name))
-        return conf;
-    }
-  }
+  if (conf_admit_to_class(conf->class, client, IsConfExemptLimits(conf), &reason) == false)
+    goto fail;
 
+  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
+
+  io_free(client->connection->password);
+  client->connection->password = NULL;
+  return conf;
+
+fail:
+  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Rejecting client connection from %s: %s",
+                 client_get_name(client, SHOW_IP), reason);
+
+  log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
+            client_get_name(client, SHOW_IP), reason);
+
+  client_exit_fmt(client, "Connection rejected - %s", reason);
+  ++ServerStats.is_ref;
   return NULL;
 }
 
@@ -1096,25 +1004,15 @@ get_oper_name(const struct Client *client)
   if (IsServer(client))
     return client->name;
 
-  if (MyConnect(client))
+  if (MyConnect(client) && client->connection->oper_name)
   {
-    const struct MaskItem *conf = list_peek_head(&client->connection->confs);
-    if (conf && (conf->type == CONF_OPER))
-    {
-      snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
-               client->name, client->username, client->host, conf->name);
-      return buf;
-    }
-
-    /*
-     * Probably should assert here for now. If there is an oper out there
-     * with no operator {} conf attached, it would be good for us to know...
-     */
-    assert(0);  /* Oper without oper conf! */
+    snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
+             client->name, client->username, client->host, client->connection->oper_name);
+    return buf;
   }
 
-  snprintf(buf, sizeof(buf), "%s!%s@%s{%s}", client->name,
-           client->username, client->host, client->servptr->name);
+  snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
+           client->name, client->username, client->host, client->servptr->name);
   return buf;
 }
 
@@ -1143,7 +1041,7 @@ conf_clear(void)
       conf->active = false;
       list_remove(&conf->node, *iterator);
 
-      if (!conf->ref_count)
+      if (conf->ref_count == 0)
         conf_free(conf);
     }
   }

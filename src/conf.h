@@ -65,9 +65,6 @@ enum
 
 enum
 {
-  NOT_AUTHORIZED = -1,
-  I_LINE_FULL    = -2,
-  TOO_MANY       = -3,
   BANNED_CLIENT  = -4,
   TOO_FAST       = -5
 };
@@ -311,7 +308,6 @@ extern struct config_admin_entry ConfigAdminInfo;
 
 extern void cleanup_tklines(void *);
 extern void conf_assign_class(struct MaskItem *, const char *);
-extern void conf_detach(struct Client *, enum maskitem_type);
 extern void conf_dns_lookup(struct MaskItem *);
 extern void conf_error_report(const char *);
 extern void conf_free(struct MaskItem *);
@@ -319,16 +315,14 @@ extern void conf_read_files(bool);
 extern void conf_rehash(bool);
 extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void yyerror(const char *);
-extern bool conf_check_client(struct Client *);
 extern bool conf_match_password(const char *, const struct MaskItem *);
-extern int conf_attach(struct Client *, struct MaskItem *);
 extern int conf_connect_allowed(struct io_addr *);
 extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
+extern struct MaskItem *conf_authorize_client(struct Client *);
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern struct MaskItem *connect_find(const char *, int (*)(const char *, const char *));
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
-extern struct MaskItem *find_conf_name(list_t *, const char *, enum maskitem_type);
 extern struct MaskItem *find_dline_conf(const struct io_addr *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);
 extern const char *get_oper_name(const struct Client *);

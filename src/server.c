@@ -182,21 +182,21 @@ server_make(struct Client *client)
 static void
 server_finish_tls_handshake(struct Client *client)
 {
-  const struct MaskItem *conf = find_conf_name(&client->connection->confs,
-                                                client->name, CONF_SERVER);
-  if (conf == NULL)
+  const struct MaskItem *const conf = client->serv->conf;
+  if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Lost connect{} block for %s",
+                   "Error connecting to %s: connect{} block was removed",
                    client_get_name(client, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Lost connect{} block for %s",
+                   "Error connecting to %s: connect{} block was removed",
                    client_get_name(client, MASK_IP));
 
-    client_exit(client, "Lost connect{} block");
+    client_exit(client, "Configuration removed");
     return;
   }
 
+  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
   /* Next, send the initial handshake */
   SetHandshake(client);
 
@@ -322,16 +322,18 @@ server_connect_callback(fde_t *F, int status, void *data_)
 
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
-  const struct MaskItem *conf = find_conf_name(&client->connection->confs,
-                                                client->name, CONF_SERVER);
-  if (conf == NULL)
+
+  const struct MaskItem *const conf = client->serv->conf;
+  if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Lost connect{} block for %s", client_get_name(client, SHOW_IP));
+                   "Error connecting to %s: connect{} block was removed",
+                   client_get_name(client, SHOW_IP));
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Lost connect{} block for %s", client_get_name(client, MASK_IP));
+                   "Error connecting to %s: connect{} block was removed",
+                   client_get_name(client, MASK_IP));
 
-    client_exit(client, "Lost connect{} block");
+    client_exit(client, "Configuration removed");
     return;
   }
 
@@ -341,6 +343,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
     return;
   }
 
+  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
   /* Next, send the initial handshake */
   SetHandshake(client);
 
@@ -425,13 +428,8 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   /* Server names are always guaranteed under HOSTLEN chars */
   fd_note(client->connection->fd, "Server: %s", client->name);
 
-  /*
-   * Attach config entries to client here rather than in server_connect_callback().
-   * This to avoid null pointer references.
-   */
-  conf_attach(client, conf);
-
   server_make(client);
+  server_attach_conf(client, conf);
 
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";
   client->serv->initiator_name = io_strdup(initiator_name);
@@ -528,6 +526,38 @@ server_connect_auto(void *unused)
     server_connect(conf, NULL);
     return;  /* We connect only one at time... */
   }
+}
+
+void
+server_detach_conf(struct Client *client)
+{
+  if (client->serv == NULL || client->serv->conf == NULL)
+    return;
+
+  struct MaskItem *conf = client->serv->conf;
+  assert(conf->ref_count > 0);
+  conf->ref_count--;
+
+  if (conf->ref_count == 0 && conf->active == false)
+    conf_free(conf);
+
+  client->serv->conf = NULL;
+}
+
+void
+server_attach_conf(struct Client *client, struct MaskItem *conf)
+{
+  if (client->serv == NULL)
+    return;
+
+  if (client->serv->conf == conf)
+    return;
+
+  if (client->serv->conf)
+    server_detach_conf(client);
+
+  client->serv->conf = conf;
+  conf->ref_count++;
 }
 
 struct Client *

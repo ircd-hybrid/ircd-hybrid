@@ -52,9 +52,9 @@ trace_send_status(struct Client *source, const struct Client *target)
   if (target->status != STAT_CLIENT)
     return;
 
+  const struct ClassItem *const class = client_get_active_class(target);
   sendto_one_numeric(source, &me, RPL_ETRACE,
-                     user_mode_has_flag(target, UMODE_OPER) ? "Oper" : "User",
-                     class_get_name(&target->connection->confs),
+                     user_mode_has_flag(target, UMODE_OPER) ? "Oper" : "User", class->name,
                      target->name, target->username, target->host, target->sockhost, target->info);
 }
 

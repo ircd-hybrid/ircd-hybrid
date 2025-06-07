@@ -37,8 +37,11 @@ static enum extban_match
 extban_operclass_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER))
-    if (match(ban->host, class_get_name(&client->connection->confs)) == 0)
+  {
+    const struct ClassItem *class = client_get_active_class(client);
+    if (match(ban->host, class->name) == 0)
       return EXTBAN_MATCH;
+  }
 
   return EXTBAN_NO_MATCH;
 }

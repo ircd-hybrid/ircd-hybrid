@@ -24,19 +24,19 @@
  */
 
 #include "stdinc.h"
+#include "io_string.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "module.h"
 #include "client.h"
 #include "client_svstag.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
-#include "log.h"
 #include "user_mode.h"
 #include "send.h"
 #include "parse.h"
-#include "module.h"
-
 
 /*! \brief Blindly opers up given client, using conf info.
  *         All checks on passwords have already been done.
@@ -146,12 +146,11 @@ m_oper(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (conf_attach(source, conf))
-  {
-    sendto_one_notice(source, &me, ":Can't attach conf!");
-    failed_oper_notice(source, 0, opername, "can't attach conf!");
-    return;
-  }
+  client_set_class(source, conf->class, CLIENT_CLASS_OPER);
+
+  assert(source->connection->oper_name == NULL);
+  io_free(source->connection->oper_name);
+  source->connection->oper_name = io_strdup(conf->name);
 
   oper_up(source, conf);
 }

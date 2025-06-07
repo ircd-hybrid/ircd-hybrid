@@ -62,8 +62,9 @@ trace_get_dependent(unsigned int *const servers,
 static void
 trace_send_status(struct Client *source, const struct Client *target)
 {
+  const struct ClassItem *class = client_get_active_class(target);
+  const char *class_name = class->name;
   const char *name = client_get_name(target, HIDE_IP);
-  const char *class_name = class_get_name(&target->connection->confs);
 
   switch (target->status)
   {

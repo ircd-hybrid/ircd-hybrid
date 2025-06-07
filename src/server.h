@@ -70,6 +70,8 @@ typedef struct
   struct Client *target;  /**< Pointer to the target client or server. */
 } server_route_t;
 
+extern void server_attach_conf(struct Client *, struct MaskItem *);
+extern void server_detach_conf(struct Client *);
 extern void server_connect_auto(void *);
 extern bool server_connect(struct MaskItem *, struct Client *);
 extern bool server_valid_name(const char *);

@@ -340,12 +340,14 @@ read_packet(fde_t *F, void *data_)
       return;
 
     /* Check to make sure we're not flooding */
-    if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)) &&
-        (dbuf_length(&client->connection->buf_recvq) >
-         class_get_recvq(&client->connection->confs)))
+    if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)))
     {
-      client_exit(client, "Excess Flood");
-      return;
+      const unsigned int max_recvq = client_get_active_class(client)->max_recvq;
+      if (dbuf_length(&client->connection->buf_recvq) > max_recvq)
+      {
+        client_exit(client, "Excess Flood");
+        return;
+      }
     }
   }
 }

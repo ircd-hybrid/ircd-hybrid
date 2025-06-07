@@ -239,7 +239,7 @@ motd_lookup(const struct Client *client)
     {
       case MOTD_CLASS:
       {
-        const struct ClassItem *class = class_get_ptr(&client->connection->confs);
+        const struct ClassItem *class = client_get_active_class(client);
         if (match(motd->mask, class->name) == 0)
           return motd;
         break;

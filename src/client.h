@@ -202,6 +202,12 @@ enum
 #define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 
+enum client_class_type
+{
+  CLIENT_CLASS_BASE,
+  CLIENT_CLASS_OPER,
+};
+
 /** Server ban types */
 enum
 {
@@ -224,6 +230,7 @@ struct Server
   list_t server_list;  /**< Servers on this server */
   list_t client_list;  /**< Clients on this server */
   char *initiator_name;  /**< Who activated this connection */
+  struct MaskItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
 
 /** ListTask structure */
@@ -291,11 +298,12 @@ struct Connection
     uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued; monotonic time */
   } away, invite, knock, nick;
 
+  struct ClassItem *base_class;  /**< The class assigned on initial connection. */
+  struct ClassItem *oper_class;  /**< The class assigned on OPER. NULL if not an oper. */
   struct LookupRequest *lookup;
   struct Listener *listener;  /**< Listener accepted from */
   list_t acceptlist;  /**< Clients I'll allow to talk to me */
   list_t monitors;  /**< Chain of Monitor pointer blocks */
-  list_t confs;  /**< Configuration record associated */
   list_t invited;  /**< Chain of invite pointer blocks */
 
   fde_t *fd;  /**< Pointer to fdlist.c:fd_table[] */
@@ -308,6 +316,7 @@ struct Connection
   int sent_parsed;  /**< How many messages we've parsed in this second */
 
   char *password;  /**< Password supplied by the client/server */
+  char *oper_name;  /**< The name of the oper block, if opered up. */
 };
 
 /** Client structure */
@@ -387,6 +396,7 @@ extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
+extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void conf_try_ban(struct Client *, int, const char *);
@@ -397,6 +407,7 @@ extern void dead_link_on_read(struct Client *, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
+extern const struct ClassItem *client_get_active_class(const struct Client *);
 extern struct Client *client_make(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);

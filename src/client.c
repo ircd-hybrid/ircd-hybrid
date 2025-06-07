@@ -94,6 +94,50 @@ list_t oper_list;
 static list_t dead_list, abort_list;
 static list_node_t *eac_next;  /* next aborted client to exit */
 
+const struct ClassItem *
+client_get_active_class(const struct Client *client)
+{
+  assert(client->connection);
+
+  if (client->connection->oper_class)
+    return client->connection->oper_class;
+  if (client->connection->base_class)
+    return client->connection->base_class;
+
+  return class_default;
+}
+
+void
+client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
+{
+  assert(client->connection);
+
+  struct ClassItem **class_ptr_location = NULL;
+  struct ClassItem *old_class = NULL;
+
+  if (type == CLIENT_CLASS_BASE)
+    class_ptr_location = &client->connection->base_class;
+  else
+    class_ptr_location = &client->connection->oper_class;
+
+  old_class = *class_ptr_location;
+  if (old_class == new_class)
+    return;
+
+  if (old_class)
+  {
+    assert(old_class->ref_count > 0);
+    old_class->ref_count--;
+
+    if (old_class->ref_count == 0 && old_class->active == false)
+      class_free(old_class);
+  }
+
+  *class_ptr_location = new_class;
+  if (new_class)
+    new_class->ref_count++;
+}
+
 /**
  * @brief Create a new Client struct and set it to the initial state.
  *
@@ -194,10 +238,6 @@ client_free(struct Client *client)
     assert(client->connection->monitors.head == NULL);
     assert(client->connection->monitors.tail == NULL);
 
-    assert(list_length(&client->connection->confs) == 0);
-    assert(client->connection->confs.head == NULL);
-    assert(client->connection->confs.tail == NULL);
-
     assert(list_length(&client->connection->invited) == 0);
     assert(client->connection->invited.head == NULL);
     assert(client->connection->invited.tail == NULL);
@@ -217,6 +257,9 @@ client_free(struct Client *client)
 
     dbuf_clear(&client->connection->buf_recvq);
     dbuf_clear(&client->connection->buf_sendq);
+
+    io_free(client->connection->oper_name);
+    client->connection->oper_name = NULL;
 
     io_free(client->connection);
     client->connection = NULL;
@@ -244,7 +287,7 @@ check_pings_list(list_t *list)
     if (IsDead(client))
       continue;  /* Ignore it, it's been exited already */
 
-    unsigned int ping = class_get_ping_freq(&client->connection->confs);
+    unsigned int ping = client_get_active_class(client)->ping_freq;
     if (ping < io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping)
     {
       if (!HasFlag(client, FLAGS_PINGSENT))
@@ -624,18 +667,9 @@ client_close_connection(struct Client *client)
     ServerStats.is_sbr += client->connection->recv.bytes;
     ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 
-    list_node_t *node;
-    LIST_FOREACH(node, connect_items.head)
-    {
-      struct MaskItem *conf = node->data;
-
-      /*
-       * Reset next-connect cycle of all connect{} blocks that match
-       * this servername.
-       */
-      if (irccmp(conf->name, client->name) == 0)
-        conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
-    }
+    assert(client->serv->conf);
+    struct MaskItem *const conf = client->serv->conf;
+    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
   }
   else
     ++ServerStats.is_ni;
@@ -655,7 +689,10 @@ client_close_connection(struct Client *client)
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  conf_detach(client, CONF_CLIENT | CONF_OPER | CONF_SERVER);
+  server_detach_conf(client);
+
+  client_set_class(client, NULL, CLIENT_CLASS_BASE);
+  client_set_class(client, NULL, CLIENT_CLASS_OPER);
 }
 
 /*
@@ -1031,7 +1068,7 @@ client_get_idle_time(const struct Client *source,
                      const struct Client *target)
 {
   unsigned int idle = 0;
-  const struct ClassItem *const class = class_get_ptr(&target->connection->confs);
+  const struct ClassItem *const class = client_get_active_class(target);
 
   if (!(class->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
     return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;

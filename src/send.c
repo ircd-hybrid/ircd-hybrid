@@ -87,14 +87,14 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   assert(to != &me);
   assert(MyConnect(to));
 
-  if (dbuf_length(&to->connection->buf_sendq) + buffer->size > class_get_sendq(&to->connection->confs))
+  const unsigned int sendq_limit = client_get_active_class(to)->max_sendq;
+  const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
+  if (new_sendq_size > sendq_limit)
   {
     if (IsServer(to))
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Max SendQ limit exceeded for %s: %zu > %u",
-                     client_get_name(to, HIDE_IP),
-                     (dbuf_length(&to->connection->buf_sendq) + buffer->size),
-                     class_get_sendq(&to->connection->confs));
+                     client_get_name(to, HIDE_IP), new_sendq_size, sendq_limit);
 
     AddFlag(to, FLAGS_SENDQEX);
     dead_link_on_write(to, 0);

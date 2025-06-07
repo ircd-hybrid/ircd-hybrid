@@ -455,10 +455,11 @@ hash_get_bucket(int type, unsigned int hashv)
 static bool
 exceeding_sendq(const struct Client *to)
 {
-  if (dbuf_length(&to->connection->buf_sendq) > (class_get_sendq(&to->connection->confs) / 2))
-    return true;
-  else
+  const unsigned int max_sendq = client_get_active_class(to)->max_sendq;
+  if (max_sendq < 2)  /* Avoid division by zero. */
     return false;
+
+  return dbuf_length(&to->connection->buf_sendq) > (max_sendq / 2);
 }
 
 /**

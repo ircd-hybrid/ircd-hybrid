@@ -153,7 +153,7 @@ server_burst(struct Client *client_p)
  * side effects -
  */
 static void
-server_estab(struct Client *client_p)
+server_estab(struct Client *client_p, struct MaskItem *conf)
 {
   io_free(client_p->connection->password);
   client_p->connection->password = NULL;
@@ -167,7 +167,6 @@ server_estab(struct Client *client_p)
 
   if (IsUnknown(client_p))
   {
-    const struct MaskItem *const conf = list_peek_head(&client_p->connection->confs);
     sendto_one(client_p, "PASS %s", conf->spasswd);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
@@ -199,6 +198,8 @@ server_estab(struct Client *client_p)
 
   /* Doesn't duplicate client_p->serv if allocated this struct already */
   server_make(client_p);
+
+  server_attach_conf(client_p, conf);
 
   /* Fixing eob timings.. -gnp */
   client_p->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -291,49 +292,54 @@ server_estab(struct Client *client_p)
   }
 }
 
-enum
+static struct MaskItem *
+server_check(const char *name, struct Client *client_p, const char **error_reason, bool *warn_opers)
 {
-  SERVER_CHECK_OK                  =  0,
-  SERVER_CHECK_CONNECT_NOT_FOUND   = -1,
-  SERVER_CHECK_INVALID_PASSWORD    = -2,
-  SERVER_CHECK_INVALID_HOST        = -3,
-  SERVER_CHECK_INVALID_CERTIFICATE = -4,
-};
+  bool name_match_found = false;
 
-static int
-server_check(const char *name, struct Client *client_p)
-{
+  *warn_opers = true;
+  *error_reason = "No connect{} block found for server";
+
   list_node_t *node;
-  int error = SERVER_CHECK_CONNECT_NOT_FOUND;
-
-  assert(client_p);
-
-  /* Loop through looking for all possible connect items that might work */
   LIST_FOREACH(node, connect_items.head)
   {
-    struct MaskItem *conf = node->data;
+    struct MaskItem *const conf = node->data;
+    assert(conf->type == CONF_SERVER);
 
     if (irccmp(name, conf->name))
       continue;
 
-    error = SERVER_CHECK_INVALID_HOST;
+    name_match_found = true;
 
-    if (!irccmp(conf->host, client_p->host) ||
-        !irccmp(conf->host, client_p->sockhost))
+    if (irccmp(conf->host, client_p->host) && irccmp(conf->host, client_p->sockhost))
     {
-      if (conf_match_password(client_p->connection->password, conf) == false)
-        return SERVER_CHECK_INVALID_PASSWORD;
-
-      if (!string_is_empty(conf->certfp))
-        if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
-          return SERVER_CHECK_INVALID_CERTIFICATE;
-
-      conf_attach(client_p, conf);
-      return SERVER_CHECK_OK;
+      *error_reason = "Invalid host";
+      continue;
     }
+
+    if (conf_match_password(client_p->connection->password, conf) == false)
+    {
+      *error_reason = "Invalid password";
+      continue;
+    }
+
+    if (!string_is_empty(conf->certfp))
+    {
+      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
+      {
+        *error_reason = "Invalid certificate fingerprint";
+        continue;
+      }
+    }
+
+    *error_reason = NULL;
+    return conf;
   }
 
-  return error;
+  if (name_match_found == false)
+    *warn_opers = ConfigGeneral.warn_no_connect_block != 0;
+
+  return NULL;
 }
 
 /* mr_server()
@@ -349,8 +355,6 @@ mr_server(struct Client *source, int parc, char *parv[])
 {
   const char *name = parv[1];
   const char *sid = parv[3];
-  const char *error = NULL;
-  bool warn = true;
 
   if (listener_has_flag(source->connection->listener, LISTENER_CLIENT))
   {
@@ -394,30 +398,12 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  /*
-   * Now we just have to call server_check() and everything should
-   * be checked for us... -A1kmm.
-   */
-  switch (server_check(name, source))
+  const char *error;
+  bool warn_opers;
+  struct MaskItem *const conf = server_check(name, source, &error, &warn_opers);
+  if (conf == NULL)
   {
-    case SERVER_CHECK_CONNECT_NOT_FOUND:
-      error = "No connect {} block";
-      warn = ConfigGeneral.warn_no_connect_block != 0;
-      break;
-    case SERVER_CHECK_INVALID_PASSWORD:
-      error = "Invalid password";
-      break;
-    case SERVER_CHECK_INVALID_HOST:
-      error = "Invalid host";
-      break;
-    case SERVER_CHECK_INVALID_CERTIFICATE:
-      error = "Invalid certificate fingerprint";
-      break;
-  }
-
-  if (error)
-  {
-    if (warn)
+    if (warn_opers)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                      "Unauthorized server connection attempt from %s: %s for server %s",
@@ -503,7 +489,10 @@ mr_server(struct Client *source, int parc, char *parv[])
   server_set_flags(source, parv[4]);
 
   source->hopcount = atoi(parv[2]);
-  server_estab(source);
+
+  client_set_class(source, conf->class, CLIENT_CLASS_BASE);
+
+  server_estab(source, conf);
 }
 
 /* ms_sid()
@@ -592,7 +581,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct MaskItem *conf = list_peek_head(&source->from->connection->confs);
+  const struct MaskItem *const conf = source->serv->conf;
   bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
   bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
 

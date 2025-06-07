@@ -314,7 +314,7 @@ stats_resv(struct Client *client, int parc, char *parv[])
 static void
 stats_memory(struct Client *client, int parc, char *parv[])
 {
-  unsigned int local_client_conf_count = 0;      /* local client conf links */
+  unsigned int attached_class_count = 0;
   unsigned int channel_members = 0;
   unsigned int channel_invites = 0;
   unsigned int channel_bans = 0;
@@ -340,14 +340,21 @@ stats_memory(struct Client *client, int parc, char *parv[])
   list_node_t *node, *node2;
   LIST_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target = node->data;
-    local_client_conf_count += list_length(&target->connection->confs);
+    const struct Client *const target = node->data;
+    if (target->connection->base_class)
+      attached_class_count++;
+    if (target->connection->oper_class)
+      attached_class_count++;
   }
 
   LIST_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target = node->data;
-    local_client_conf_count += list_length(&target->connection->confs);
+    const struct Client *const target = node->data;
+    if (target->connection->base_class)
+      attached_class_count++;
+    if (target->connection->oper_class)
+      attached_class_count++;
+
     monitor_list_entries += list_length(&target->connection->monitors);
   }
 
@@ -404,10 +411,6 @@ stats_memory(struct Client *client, int parc, char *parv[])
                      list_length(&global_server_list) * sizeof(struct Client),
                      list_length(&global_server_list) * sizeof(struct Server));
 
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached confs %u(%zu)",
-                     local_client_conf_count,
-                     local_client_conf_count * sizeof(list_node_t));
-
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "z :Resv channels %u(%zu) nicks %u(%zu)",
                      list_length(resv_chan_get_list()),
@@ -422,6 +425,9 @@ stats_memory(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Classes %u(%zu)",
                      list_length(class_get_list()),
                      list_length(class_get_list()) * sizeof(struct ClassItem));
+
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached classes %u",
+                     attached_class_count);
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channels %u(%zu)",
                      list_length(channel_get_list()),

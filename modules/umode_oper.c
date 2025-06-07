@@ -20,6 +20,7 @@
  */
 
 #include "list.h"
+#include "memory.h"
 #include "module.h"
 #include "stdinc.h"
 #include "client.h"
@@ -61,9 +62,12 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (MyConnect(client))
   {
     client->handler = CLIENT_HANDLER;
-    svstag_detach(&client->svstags, RPL_WHOISOPERATOR);
-    conf_detach(client, CONF_OPER);
+    client_set_class(client, NULL, CLIENT_CLASS_OPER);
 
+    io_free(client->connection->oper_name);
+    client->connection->oper_name = NULL;
+
+    svstag_detach(&client->svstags, RPL_WHOISOPERATOR);
     ClrOFlag(client);
 
     list_node_t *node = list_find_remove(&oper_list, client);

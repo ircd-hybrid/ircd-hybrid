@@ -81,43 +81,6 @@ class_init(void)
   class_default->name = io_strdup("default");
 }
 
-const struct ClassItem *
-class_get_ptr(const list_t *const list)
-{
-  const struct MaskItem *conf = list_peek_head(list);
-  if (conf == NULL)
-    return class_default;
-
-  assert(conf->class);
-  assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-  return conf->class;
-}
-
-const char *
-class_get_name(const list_t *const list)
-{
-  return class_get_ptr(list)->name;
-}
-
-unsigned int
-class_get_ping_freq(const list_t *const list)
-{
-  return class_get_ptr(list)->ping_freq;
-}
-
-unsigned int
-class_get_sendq(const list_t *const list)
-{
-  return class_get_ptr(list)->max_sendq;
-}
-
-unsigned int
-class_get_recvq(const list_t *const list)
-{
-  return class_get_ptr(list)->max_recvq;
-}
-
 /*
  * inputs       - Integer (Number of class)
  * output       - Pointer to ClassItem struct. Non-NULL expected
@@ -251,10 +214,7 @@ class_ip_limit_rebuild(struct ClassItem *class)
   LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *client = node->data;
-    struct MaskItem *conf = list_peek_tail(&client->connection->confs);
-
-    if (conf->type == CONF_CLIENT)
-      if (conf->class == class)
-        class_ip_limit_add(class, &client->addr, true);
+    if (client->connection->base_class == class)
+      class_ip_limit_add(class, &client->addr, true);
   }
 }

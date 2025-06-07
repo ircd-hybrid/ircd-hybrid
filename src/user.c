@@ -244,17 +244,9 @@ user_register_local(struct Client *client)
       return;
   }
 
-  if (conf_check_client(client) == false)
+  const struct MaskItem *const conf = conf_authorize_client(client);
+  if (conf == NULL)
     return;
-
-  const struct MaskItem *const conf = list_peek_head(&client->connection->confs);
-  if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
-  {
-    sendto_one_notice(client, &me, ":*** Notice -- You need to install identd to use this server");
-    client_exit(client, "Install identd");
-    ++ServerStats.is_ref;
-    return;
-  }
 
   if (valid_username(client->username, true) == false)
   {
@@ -297,21 +289,6 @@ user_register_local(struct Client *client)
       return;
     }
   }
-
-  /* Password check */
-  if (!string_is_empty(conf->passwd))
-  {
-    if (conf_match_password(client->connection->password, conf) == false)
-    {
-      sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
-      client_exit(client, "Bad Password");
-      ++ServerStats.is_ref;
-      return;
-    }
-  }
-
-  io_free(client->connection->password);
-  client->connection->password = NULL;
 
   const char *id;
   while (hash_find_id((id = uid_get())))

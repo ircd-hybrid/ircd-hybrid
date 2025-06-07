@@ -655,7 +655,7 @@ client_close_connection(struct Client *client)
     ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 
     assert(client->serv->conf);
-    struct MaskItem *const conf = client->serv->conf;
+    struct MaskItem *const conf = server_conf_get(client);
     conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
   }
   else
@@ -676,7 +676,7 @@ client_close_connection(struct Client *client)
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  server_detach_conf(client);
+  server_conf_clear(client);
 
   client_set_class(client, NULL, CLIENT_CLASS_BASE);
   client_set_class(client, NULL, CLIENT_CLASS_OPER);

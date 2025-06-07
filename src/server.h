@@ -70,12 +70,13 @@ typedef struct
   struct Client *target;  /**< Pointer to the target client or server. */
 } server_route_t;
 
-extern void server_attach_conf(struct Client *, struct MaskItem *);
-extern void server_detach_conf(struct Client *);
+extern void server_conf_clear(struct Client *);
+extern void server_conf_set(struct Client *, struct MaskItem *);
 extern void server_connect_auto(void *);
 extern bool server_connect(struct MaskItem *, struct Client *);
 extern bool server_valid_name(const char *);
 extern struct Client *find_servconn_in_progress(const char *);
+extern struct MaskItem *server_conf_get(const struct Client *);
 extern struct Server *server_make(struct Client *);
 extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);
 #endif  /* INCLUDED_server_h */

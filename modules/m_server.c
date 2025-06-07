@@ -199,7 +199,7 @@ server_estab(struct Client *client_p, struct MaskItem *conf)
   /* Doesn't duplicate client_p->serv if allocated this struct already */
   server_make(client_p);
 
-  server_attach_conf(client_p, conf);
+  server_conf_set(client_p, conf);
 
   /* Fixing eob timings.. -gnp */
   client_p->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -581,7 +581,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct MaskItem *const conf = source->serv->conf;
+  const struct MaskItem *const conf = server_conf_get(source);
   bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
   bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
 

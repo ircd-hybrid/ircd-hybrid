@@ -182,7 +182,7 @@ server_make(struct Client *client)
 static void
 server_finish_tls_handshake(struct Client *client)
 {
-  const struct MaskItem *const conf = client->serv->conf;
+  const struct MaskItem *const conf = server_conf_get(client);
   if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
@@ -323,7 +323,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
 
-  const struct MaskItem *const conf = client->serv->conf;
+  const struct MaskItem *const conf = server_conf_get(client);
   if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
@@ -429,7 +429,7 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   fd_note(client->connection->fd, "Server: %s", client->name);
 
   server_make(client);
-  server_attach_conf(client, conf);
+  server_conf_set(client, conf);
 
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";
   client->serv->initiator_name = io_strdup(initiator_name);
@@ -528,13 +528,22 @@ server_connect_auto(void *unused)
   }
 }
 
-void
-server_detach_conf(struct Client *client)
+struct MaskItem *
+server_conf_get(const struct Client *client)
 {
-  if (client->serv == NULL || client->serv->conf == NULL)
+  if (client->serv)
+    return client->serv->conf;
+
+  return NULL;
+}
+
+void
+server_conf_clear(struct Client *client)
+{
+  struct MaskItem *conf = server_conf_get(client);
+  if (conf == NULL)
     return;
 
-  struct MaskItem *conf = client->serv->conf;
   assert(conf->ref_count > 0);
   conf->ref_count--;
 
@@ -545,19 +554,20 @@ server_detach_conf(struct Client *client)
 }
 
 void
-server_attach_conf(struct Client *client, struct MaskItem *conf)
+server_conf_set(struct Client *client, struct MaskItem *new_conf)
 {
-  if (client->serv == NULL)
+  assert(client->serv);
+  assert(new_conf);
+
+  struct MaskItem *old_conf = server_conf_get(client);
+  if (old_conf == new_conf)
     return;
 
-  if (client->serv->conf == conf)
-    return;
+  if (old_conf)
+    server_conf_clear(client);
 
-  if (client->serv->conf)
-    server_detach_conf(client);
-
-  client->serv->conf = conf;
-  conf->ref_count++;
+  client->serv->conf = new_conf;
+  new_conf->ref_count++;
 }
 
 struct Client *

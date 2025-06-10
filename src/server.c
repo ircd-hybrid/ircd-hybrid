@@ -182,7 +182,7 @@ server_make(struct Client *client)
 static void
 server_finish_tls_handshake(struct Client *client)
 {
-  const struct MaskItem *const conf = server_conf_get(client);
+  const struct ConnectItem *const conf = server_conf_get(client);
   if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
@@ -200,7 +200,7 @@ server_finish_tls_handshake(struct Client *client)
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->spasswd);
+  sendto_one(client, "PASS %s", conf->send_password);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
@@ -262,7 +262,7 @@ server_tls_handshake(fde_t *F, void *data_)
 }
 
 static void
-server_tls_connect_init(struct Client *client, const struct MaskItem *conf, fde_t *F)
+server_tls_connect_init(struct Client *client, const struct ConnectItem *conf, fde_t *F)
 {
   assert(client);
   assert(client->connection);
@@ -323,7 +323,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
 
-  const struct MaskItem *const conf = server_conf_get(client);
+  const struct ConnectItem *const conf = server_conf_get(client);
   if (conf->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
@@ -337,7 +337,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
     return;
   }
 
-  if (IsConfTLS(conf))
+  if (conf->flags & CONNECT_FLAG_USE_TLS)
   {
     server_tls_connect_init(client, conf, F);
     return;
@@ -347,7 +347,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->spasswd);
+  sendto_one(client, "PASS %s", conf->send_password);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
@@ -375,10 +375,9 @@ server_connect_callback(fde_t *F, int status, void *data_)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 bool
-server_connect(struct MaskItem *conf, struct Client *initiator)
+server_connect(struct ConnectItem *conf, struct Client *initiator)
 {
   assert(conf);
-  assert(conf->type == CONF_SERVER);
   assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
 
   /* Still processing a DNS lookup? -> exit */
@@ -399,11 +398,11 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   }
 
   char buf[HOSTIPLEN + 1];
-  address_to_string(conf->addr, buf, sizeof(buf));
+  address_to_string(&conf->remote_addr, buf, sizeof(buf));
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
 
   /* Create a socket for the server connection */
-  int fd = comm_socket(address_get_family(conf->addr), SOCK_STREAM, 0);
+  int fd = comm_socket(address_get_family(&conf->remote_addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     /* Eek, failure to create the socket */
@@ -422,7 +421,7 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client->sockhost, buf, sizeof(client->sockhost));
 
-  address_copy(&client->addr, conf->addr);
+  address_copy(&client->addr, &conf->remote_addr);
   client->connection->fd = fd_open(fd, true, NULL);
 
   /* Server names are always guaranteed under HOSTLEN chars */
@@ -437,7 +436,7 @@ server_connect(struct MaskItem *conf, struct Client *initiator)
   SetConnecting(client);
 
   /* Now, initiate the connection */
-  comm_connect_tcp(client->connection->fd, conf->addr, conf->port, conf->bind,
+  comm_connect_tcp(client->connection->fd, &conf->remote_addr, conf->port, &conf->bind_addr,
                    server_connect_callback, client, conf->timeout);
 
   /*
@@ -467,15 +466,14 @@ server_connect_auto(void *unused)
     return;
 
   list_node_t *node;
-  LIST_FOREACH(node, connect_items.head)
+  list_t *list = connect_get_list();
+  LIST_FOREACH(node, list->head)
   {
-    struct MaskItem *conf = node->data;
-
-    assert(conf->type == CONF_SERVER);
+    struct ConnectItem *conf = node->data;
     assert(conf->class);
 
     /* Also when already connecting! (update holdtimes) --SRB */
-    if (conf->port == 0 || !IsConfAllowAutoConn(conf))
+    if (conf->port == 0 || !(conf->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
       continue;
 
     /*
@@ -485,10 +483,10 @@ server_connect_auto(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (conf->until > io_time_get(IO_TIME_MONOTONIC_SEC))
+    if (conf->autoconnect_hold_until > io_time_get(IO_TIME_MONOTONIC_SEC))
       continue;
 
-    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
+    conf->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
 
     if (conf->class->ref_count >= conf->class->max_total)
       continue;
@@ -506,8 +504,8 @@ server_connect_auto(void *unused)
     /* Move this entry to the end of the list, if not already last */
     if (node->next)
     {
-      list_remove(node, &connect_items);
-      list_add_tail(conf, &conf->node, &connect_items);
+      list_remove(node, list);
+      list_add_tail(conf, &conf->node, list);
     }
 
     /*
@@ -528,7 +526,7 @@ server_connect_auto(void *unused)
   }
 }
 
-struct MaskItem *
+struct ConnectItem *
 server_conf_get(const struct Client *client)
 {
   if (client->serv)
@@ -540,26 +538,20 @@ server_conf_get(const struct Client *client)
 void
 server_conf_clear(struct Client *client)
 {
-  struct MaskItem *conf = server_conf_get(client);
-  if (conf == NULL)
-    return;
-
-  assert(conf->ref_count > 0);
-  conf->ref_count--;
-
-  if (conf->ref_count == 0 && conf->active == false)
-    conf_free(conf);
-
-  client->serv->conf = NULL;
+  if (client->serv && client->serv->conf)
+  {
+    connect_decref(client->serv->conf);
+    client->serv->conf = NULL;
+  }
 }
 
 void
-server_conf_set(struct Client *client, struct MaskItem *new_conf)
+server_conf_set(struct Client *client, struct ConnectItem *new_conf)
 {
   assert(client->serv);
   assert(new_conf);
 
-  struct MaskItem *old_conf = server_conf_get(client);
+  struct ConnectItem *old_conf = server_conf_get(client);
   if (old_conf == new_conf)
     return;
 
@@ -567,7 +559,7 @@ server_conf_set(struct Client *client, struct MaskItem *new_conf)
     server_conf_clear(client);
 
   client->serv->conf = new_conf;
-  new_conf->ref_count++;
+  connect_incref(new_conf);
 }
 
 struct Client *

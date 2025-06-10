@@ -38,6 +38,7 @@
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_connect.h"
 #include "conf_gecos.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
@@ -1902,40 +1903,32 @@ connect_entry: CONNECT
       has_wildcards(block_state.host.buf))
     break;
 
-  struct MaskItem *conf = conf_make(CONF_SERVER);
-  conf->addr = io_calloc(sizeof(*conf->addr));
+  struct ConnectItem *conf = connect_create();
+  conf->name = io_strdup(block_state.name.buf);
+  conf->host = io_strdup(block_state.host.buf);
+  conf->accept_password = io_strdup(block_state.rpass.buf);
+  conf->send_password = io_strdup(block_state.spass.buf);
+
   conf->port = block_state.port.value;
   conf->timeout = block_state.timeout.value;
+  conf->address_family = block_state.aftype.value;
   conf->flags = block_state.flags.value;
-  conf->aftype = block_state.aftype.value;
-  conf->host = io_strdup(block_state.host.buf);
-  conf->name = io_strdup(block_state.name.buf);
-  conf->passwd = io_strdup(block_state.rpass.buf);
-  conf->spasswd = io_strdup(block_state.spass.buf);
 
   if (block_state.cert.buf[0])
-    conf->certfp = io_strdup(block_state.cert.buf);
+    conf->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
 
   if (block_state.ciph.buf[0])
     conf->cipher_list = io_strdup(block_state.ciph.buf);
 
-  list_move_list(&block_state.leaf.list, &conf->leaf_list);
-  list_move_list(&block_state.hub.list, &conf->hub_list);
+  list_move_list(&block_state.hub.list, &conf->hub_masks);
+  list_move_list(&block_state.leaf.list, &conf->leaf_masks);
 
   if (block_state.bind.buf[0])
-  {
-    struct io_addr tmp;
-    if (address_from_string(block_state.bind.buf, &tmp) == false)
-      log_write(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
-    else
-    {
-      conf->bind = io_calloc(sizeof(*conf->bind));
-      address_copy(conf->bind, &tmp);
-    }
-  }
+    if (address_from_string(block_state.bind.buf, &conf->bind_addr) == false)
+      conf_error_report("Invalid IP address for bind address");
 
-  conf_assign_class(conf, block_state.class.buf);
-  conf_dns_lookup(conf);
+  connect_assign_class(conf, block_state.class.buf);
+  connect_dns_lookup(conf);
 };
 
 connect_items:  connect_items connect_item | connect_item;
@@ -2037,11 +2030,11 @@ connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_
 connect_flags_item: AUTOCONN
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_ALLOW_AUTO_CONN;
+    block_state.flags.value |= CONNECT_FLAG_ALLOW_AUTO_CONN;
 } | T_TLS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_TLS;
+    block_state.flags.value |= CONNECT_FLAG_USE_TLS;
 };
 
 connect_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -2049,9 +2042,9 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass == 2)
   {
     if (yylval.number)
-      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value |= CONNECT_FLAG_ENCRYPTED_PASSWORD;
     else
-      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value &= ~CONNECT_FLAG_ENCRYPTED_PASSWORD;
   }
 };
 

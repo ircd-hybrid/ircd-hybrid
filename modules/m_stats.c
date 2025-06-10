@@ -258,15 +258,15 @@ stats_connect(struct Client *client, int parc, char *parv[])
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_get_list()->head)
   {
     char buf[8];
     char *bufptr = buf;
-    const struct MaskItem *conf = node->data;
+    const struct ConnectItem *const conf = node->data;
 
-    if (IsConfAllowAutoConn(conf))
+    if (conf->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
       *bufptr++ = 'A';
-    if (IsConfTLS(conf))
+    if (conf->flags & CONNECT_FLAG_USE_TLS)
       *bufptr++ = 'T';
     if (bufptr == buf)
       *bufptr++ = '*';
@@ -617,22 +617,19 @@ stats_fdlist(struct Client *client, int parc, char *parv[])
 static void
 stats_hubleaf(struct Client *client, int parc, char *parv[])
 {
-  list_node_t *node, *node2;
-
-  LIST_FOREACH(node, connect_items.head)
+  list_node_t *node, *mask_node;
+  LIST_FOREACH(node, connect_get_list()->head)
   {
-    const struct MaskItem *conf = node->data;
-
-    LIST_FOREACH(node2, conf->hub_list.head)
-      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', node2->data, conf->name, 0, "*");
+    const struct ConnectItem *const conf = node->data;
+    LIST_FOREACH(mask_node, conf->hub_masks.head)
+      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', mask_node->data, conf->name, 0, "*");
   }
 
-  LIST_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_get_list()->head)
   {
-    const struct MaskItem *conf = node->data;
-
-    LIST_FOREACH(node2, conf->leaf_list.head)
-      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', node2->data, conf->name, 0, "*");
+    const struct ConnectItem *const conf = node->data;
+    LIST_FOREACH(mask_node, conf->leaf_masks.head)
+      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', mask_node->data, conf->name, 0, "*");
   }
 }
 

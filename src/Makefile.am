@@ -34,6 +34,8 @@ ircd_SOURCES = accept.c          \
                conf_class.h      \
                conf_cluster.c    \
                conf_cluster.h    \
+               conf_connect.c    \
+               conf_connect.h    \
                conf_db.c         \
                conf_db.h         \
                conf_gecos.c      \

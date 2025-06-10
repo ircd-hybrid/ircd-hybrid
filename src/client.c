@@ -41,6 +41,7 @@
 #include "numeric.h"
 #include "lookup.h"
 #include "conf.h"
+#include "conf_connect.h"
 #include "conf_gecos.h"
 #include "server.h"
 #include "send.h"
@@ -655,8 +656,8 @@ client_close_connection(struct Client *client)
     ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 
     assert(client->serv->conf);
-    struct MaskItem *const conf = server_conf_get(client);
-    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
+    struct ConnectItem *const conf = server_conf_get(client);
+    conf->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
   }
   else
     ++ServerStats.is_ni;

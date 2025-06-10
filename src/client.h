@@ -37,6 +37,7 @@
 #include "command.h"
 #include "conf.h"
 #include "conf_class.h"
+#include "conf_connect.h"
 
 /** Client connection states */
 enum
@@ -231,7 +232,7 @@ struct Server
   list_t server_list;  /**< Servers on this server */
   list_t client_list;  /**< Clients on this server */
   char *initiator_name;  /**< Who activated this connection */
-  struct MaskItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
+  struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
 
 /** ListTask structure */

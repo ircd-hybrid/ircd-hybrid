@@ -126,24 +126,25 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	channel_mode.$(OBJEXT) client.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
 	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
-	conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) conf_pseudo.$(OBJEXT) \
-	conf_resv.$(OBJEXT) conf_service.$(OBJEXT) \
-	conf_shared.$(OBJEXT) conf_parser.$(OBJEXT) \
-	conf_lexer.$(OBJEXT) extban.$(OBJEXT) extban_account.$(OBJEXT) \
-	extban_channel.$(OBJEXT) extban_fingerprint.$(OBJEXT) \
-	extban_gecos.$(OBJEXT) extban_join.$(OBJEXT) \
-	extban_knock.$(OBJEXT) extban_mute.$(OBJEXT) \
-	extban_nick.$(OBJEXT) extban_operclass.$(OBJEXT) \
-	extban_server.$(OBJEXT) extban_tlsinfo.$(OBJEXT) \
-	extban_usermode.$(OBJEXT) flatten_links.$(OBJEXT) \
-	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
-	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) listener.$(OBJEXT) \
-	lookup.$(OBJEXT) monitor.$(OBJEXT) motd.$(OBJEXT) \
-	nuh.$(OBJEXT) numeric.$(OBJEXT) packet.$(OBJEXT) \
-	parse.$(OBJEXT) stats.$(OBJEXT) send.$(OBJEXT) \
-	server.$(OBJEXT) server_capab.$(OBJEXT) user.$(OBJEXT) \
-	user_mode.$(OBJEXT) whowas.$(OBJEXT)
+	conf_connect.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
+	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
+	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
+	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
+	extban_fingerprint.$(OBJEXT) extban_gecos.$(OBJEXT) \
+	extban_join.$(OBJEXT) extban_knock.$(OBJEXT) \
+	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
+	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
+	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
+	flatten_links.$(OBJEXT) hash.$(OBJEXT) id.$(OBJEXT) \
+	info.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	isupport.$(OBJEXT) listener.$(OBJEXT) lookup.$(OBJEXT) \
+	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -173,12 +174,13 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_svstag.Po \
 	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
 	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
-	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_db.Po \
-	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
-	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
-	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
-	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/extban.Po \
-	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
+	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_connect.Po \
+	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
+	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
+	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
+	./$(DEPDIR)/extban.Po ./$(DEPDIR)/extban_account.Po \
+	./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
@@ -440,6 +442,8 @@ ircd_SOURCES = accept.c          \
                conf_class.h      \
                conf_cluster.c    \
                conf_cluster.h    \
+               conf_connect.c    \
+               conf_connect.h    \
                conf_db.c         \
                conf_db.h         \
                conf_gecos.c      \
@@ -626,6 +630,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_class.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_cluster.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_connect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_db.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_gecos.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_lexer.Po@am__quote@ # am--include-marker
@@ -857,6 +862,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/conf.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po
+	-rm -f ./$(DEPDIR)/conf_connect.Po
 	-rm -f ./$(DEPDIR)/conf_db.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po
@@ -962,6 +968,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/conf.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po
+	-rm -f ./$(DEPDIR)/conf_connect.Po
 	-rm -f ./$(DEPDIR)/conf_db.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po

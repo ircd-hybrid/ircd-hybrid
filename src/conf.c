@@ -44,6 +44,7 @@
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_connect.h"
 #include "conf_db.h"
 #include "conf_gecos.h"
 #include "conf_parser.h"
@@ -67,7 +68,6 @@
 list_t atable[ADDRESS_HASHSIZE];
 
 /* general conf items link list root, other than k lines etc. */
-list_t connect_items;
 list_t operator_items;
 
 struct config_channel_entry ConfigChannel;
@@ -334,9 +334,7 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
     {
       list_remove(&arec->node, &atable[hv]);
 
-      if (conf->ref_count == 0)
-        conf_free(conf);
-
+      conf_free(conf);
       io_free(arec);
       return;
     }
@@ -367,12 +365,9 @@ clear_out_address_conf(void)
       if (IsConfDatabase(arec->conf))
         continue;
 
-      arec->conf->active = false;
       list_remove(&arec->node, &atable[i]);
 
-      if (arec->conf->ref_count == 0)
-        conf_free(arec->conf);
-
+      conf_free(arec->conf);
       io_free(arec);
     }
   }
@@ -430,55 +425,6 @@ hostmask_expire_temporary(void)
   }
 }
 
-/* conf_dns_callback()
- *
- * inputs	- pointer to struct MaskItem
- *		- pointer to DNSReply reply
- * output	- none
- * side effects	- called when resolver query finishes
- * if the query resulted in a successful search, hp will contain
- * a non-null pointer, otherwise hp will be null.
- * if successful save hp in the conf item it was called with
- */
-static void
-conf_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
-{
-  struct MaskItem *const conf = vptr;
-
-  conf->dns_pending = false;
-
-  if (addr)
-    address_copy(conf->addr, addr);
-  else
-    conf->dns_failed = true;
-}
-
-/* conf_resolve_host()
- *
- * start DNS lookups of all hostnames in the conf
- * line and convert an IP addresses in a.b.c.d number for to IP#s.
- */
-void
-conf_dns_lookup(struct MaskItem *conf)
-{
-  if (address_from_string(conf->host, conf->addr))
-    return;
-
-  /*
-   * By this point conf->host possibly is not a numerical network address. Do a nameserver
-   * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
-   */
-  if (conf->dns_pending)
-    return;
-
-  conf->dns_pending = true;
-
-  if (conf->aftype == AF_INET)
-    gethost_byname_type(conf_dns_callback, conf, conf->host, T_A);
-  else
-    gethost_byname_type(conf_dns_callback, conf, conf->host, T_AAAA);
-}
-
 /* map_to_list()
  *
  * inputs       - ConfType conf
@@ -492,8 +438,6 @@ map_to_list(enum maskitem_type type)
   {
     case CONF_OPER:
       return &operator_items;
-    case CONF_SERVER:
-      return &connect_items;
     default:
       return NULL;
   }
@@ -506,8 +450,6 @@ conf_make(enum maskitem_type type)
   list_t *list = NULL;
 
   conf->type   = type;
-  conf->active = true;
-  conf->aftype = AF_INET;
 
   if ((list = map_to_list(type)))
     list_add(conf, &conf->node, list);
@@ -521,19 +463,13 @@ conf_free(struct MaskItem *conf)
   if (list)
     list_find_remove(list, conf);
 
-  if (conf->dns_pending)
-    delete_resolver_queries(conf);
-
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
-  if (conf->spasswd)
-    memset(conf->spasswd, 0, strlen(conf->spasswd));
 
   conf->class = NULL;
 
   io_free(conf->name);
   io_free(conf->passwd);
-  io_free(conf->spasswd);
   io_free(conf->reason);
   io_free(conf->certfp);
   io_free(conf->whois);
@@ -541,24 +477,6 @@ conf_free(struct MaskItem *conf)
   io_free(conf->user);
   io_free(conf->host);
   io_free(conf->addr);
-  io_free(conf->bind);
-  io_free(conf->cipher_list);
-
-  list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, conf->hub_list.head)
-  {
-    io_free(node->data);
-    list_remove(node, &conf->hub_list);
-    list_free_node(node);
-  }
-
-  LIST_FOREACH_SAFE(node, node_next, conf->leaf_list.head)
-  {
-    io_free(node->data);
-    list_remove(node, &conf->leaf_list);
-    list_free_node(node);
-  }
-
   io_free(conf);
 }
 
@@ -690,26 +608,6 @@ fail:
 
   client_exit_fmt(client, "Connection rejected - %s", reason);
   ++ServerStats.is_ref;
-  return NULL;
-}
-
-/*! \brief Find a connect {} conf that has a name that matches \a name.
- * \param name Name to match
- * \param compare Pointer to function to be used for string matching
- */
-struct MaskItem *
-connect_find(const char *name, int (*compare)(const char *, const char *))
-{
-  list_node_t *node;
-
-  LIST_FOREACH(node, connect_items.head)
-  {
-    struct MaskItem *conf = node->data;
-
-    if (compare(name, conf->name) == 0)
-      return conf;
-  }
-
   return NULL;
 }
 
@@ -910,6 +808,9 @@ conf_read(FILE *file)
   conf_validate();  /* Check to make sure some values are still okay. */
                     /* Some global values are also loaded here. */
   whowas_trim();  /* Attempt to trim whowas list if necessary */
+
+  connect_free_inactive();
+
   class_delete_marked();  /* Delete unused classes that are marked for deletion */
 }
 
@@ -1025,7 +926,7 @@ get_oper_name(const struct Client *client)
 static void
 conf_clear(void)
 {
-  list_t *free_items [] = { &connect_items, &operator_items, NULL };
+  list_t *free_items [] = { &operator_items, NULL };
 
   /* We only need to free anything allocated by yyparse() here.
    * Resetting structs, etc, is taken care of by conf_set_defaults().
@@ -1037,15 +938,12 @@ conf_clear(void)
     LIST_FOREACH_SAFE(node, node_next, (*iterator)->head)
     {
       struct MaskItem *conf = node->data;
-
-      conf->active = false;
       list_remove(&conf->node, *iterator);
-
-      if (conf->ref_count == 0)
-        conf_free(conf);
+      conf_free(conf);
     }
   }
 
+  connect_mark_all_inactive();
   /*
    * Don't delete the class table, rather mark all entries for deletion.
    * The table is cleaned up by class_delete_marked. - avalon
@@ -1216,14 +1114,10 @@ conf_assign_class(struct MaskItem *conf, const char *name)
   {
     conf->class = class_default;
 
-    if (conf->type == CONF_CLIENT || conf->type == CONF_OPER)
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Warning *** Defaulting to default class for %s@%s",
-                     conf->user, conf->host);
-    else
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Warning *** Defaulting to default class for %s",
-                     conf->name);
+    assert(conf->type == CONF_CLIENT || conf->type == CONF_OPER);
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                   "Warning *** Defaulting to default class for %s@%s",
+                   conf->user, conf->host);
   }
 }
 

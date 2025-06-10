@@ -252,11 +252,11 @@ server_burst(struct Client *client_p)
  * side effects -
  */
 static void
-server_estab(struct Client *client_p, struct MaskItem *conf)
+server_estab(struct Client *client_p, struct ConnectItem *conf)
 {
   if (IsUnknown(client_p))
   {
-    sendto_one(client_p, "PASS %s", conf->spasswd);
+    sendto_one(client_p, "PASS %s", conf->send_password);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
 
@@ -381,7 +381,7 @@ server_estab(struct Client *client_p, struct MaskItem *conf)
   }
 }
 
-static struct MaskItem *
+static struct ConnectItem *
 server_check(const char *name, struct Client *client_p, const char **error_reason, bool *warn_opers)
 {
   bool name_match_found = false;
@@ -390,11 +390,9 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
   *error_reason = "No configured connect block";
 
   list_node_t *node;
-  LIST_FOREACH(node, connect_items.head)
+  LIST_FOREACH(node, connect_get_list()->head)
   {
-    struct MaskItem *const conf = node->data;
-    assert(conf->type == CONF_SERVER);
-
+    struct ConnectItem *const conf = node->data;
     if (irccmp(name, conf->name))
       continue;
 
@@ -406,15 +404,15 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
       continue;
     }
 
-    if (conf_match_password(client_p->connection->password, conf) == false)
+    if (connect_match_password(client_p->connection->password, conf) == false)
     {
       *error_reason = "Invalid password";
       continue;
     }
 
-    if (!string_is_empty(conf->certfp))
+    if (!string_is_empty(conf->tls_cert_fingerprint))
     {
-      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
+      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->tls_cert_fingerprint))
       {
         *error_reason = "Invalid TLS certificate fingerprint";
         continue;
@@ -500,7 +498,7 @@ mr_server(struct Client *source, int parc, char *parv[])
 
   const char *error;
   bool warn_opers;
-  struct MaskItem *const conf = server_check(name, source, &error, &warn_opers);
+  struct ConnectItem *const conf = server_check(name, source, &error, &warn_opers);
   if (conf == NULL)
   {
     if (warn_opers)
@@ -613,9 +611,9 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct MaskItem *const conf = server_conf_get(source);
-  const bool hlined = list_find_cmp(&conf->hub_list , name, match) != NULL;
-  const bool llined = list_find_cmp(&conf->leaf_list, name, match) != NULL;
+  const struct ConnectItem *const conf = server_conf_get(source);
+  const bool hlined = list_find_cmp(&conf->hub_masks , name, match) != NULL;
+  const bool llined = list_find_cmp(&conf->leaf_masks, name, match) != NULL;
 
   /*
    * Ok, this way this works is

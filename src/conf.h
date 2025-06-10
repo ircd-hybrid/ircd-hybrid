@@ -37,7 +37,6 @@ struct Client;
 enum maskitem_type
 {
   CONF_CLIENT = 1,
-  CONF_SERVER,
   CONF_KLINE,
   CONF_DLINE,
   CONF_EXEMPT,
@@ -55,7 +54,6 @@ enum
   CONF_FLAGS_REDIR           = 1 <<  5,
   CONF_FLAGS_CAN_FLOOD       = 1 <<  6,
   CONF_FLAGS_NEED_PASSWORD   = 1 <<  7,
-  CONF_FLAGS_ALLOW_AUTO_CONN = 1 <<  8,
   CONF_FLAGS_ENCRYPTED       = 1 <<  9,
   CONF_FLAGS_IN_DATABASE     = 1 << 10,
   CONF_FLAGS_EXEMPTRESV      = 1 << 11,
@@ -83,7 +81,6 @@ enum
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfAllowAutoConn(x)    ((x)->flags & CONF_FLAGS_ALLOW_AUTO_CONN)
 #define IsConfRedir(x)            ((x)->flags & CONF_FLAGS_REDIR)
 #define IsConfTLS(x)              ((x)->flags & CONF_FLAGS_TLS)
 #define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
@@ -96,34 +93,25 @@ enum
 struct MaskItem
 {
   list_node_t         node;
-  list_t         leaf_list;
-  list_t         hub_list;
   enum maskitem_type type;
-  bool       active;
-  bool       dns_failed;
-  bool       dns_pending;
   unsigned int       flags;
   unsigned int       port;
   unsigned int       aftype;
   unsigned int       htype;
-  unsigned int       ref_count;  /* Number of *LOCAL* clients using this */
   int                bits;
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
   uintmax_t          timeout;
-  struct io_addr  *bind;  /* ip to bind to for outgoing connect */
   struct io_addr  *addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */
   char              *host;     /* host part of user@host */
   char              *passwd;
-  char              *spasswd;  /* Password to send. */
   char              *reason;
   char              *certfp;
   char              *whois;
   char              *modes;
-  char              *cipher_list;
 };
 
 struct conf_parser_context
@@ -297,7 +285,6 @@ struct AddressRec
 };
 
 extern list_t atable[ADDRESS_HASHSIZE];
-extern list_t connect_items;
 extern list_t operator_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
@@ -309,7 +296,6 @@ extern struct config_admin_entry ConfigAdminInfo;
 
 extern void cleanup_tklines(void *);
 extern void conf_assign_class(struct MaskItem *, const char *);
-extern void conf_dns_lookup(struct MaskItem *);
 extern void conf_error_report(const char *);
 extern void conf_free(struct MaskItem *);
 extern void conf_read_files(bool);
@@ -321,7 +307,6 @@ extern int conf_connect_allowed(struct io_addr *);
 extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
 extern struct MaskItem *conf_authorize_client(struct Client *);
 extern struct MaskItem *conf_make(enum maskitem_type);
-extern struct MaskItem *connect_find(const char *, int (*)(const char *, const char *));
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
 extern struct MaskItem *find_dline_conf(const struct io_addr *);

@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "conf.h"
+#include "conf_connect.h"
 #include "server.h"
 #include "send.h"
 #include "user_mode.h"
@@ -45,7 +46,7 @@ do_connect(struct Client *source, const char *name)
   /*
    * Try to find the name. If it fails, notify and bail.
    */
-  struct MaskItem *conf = connect_find(name, match);
+  struct ConnectItem *conf = connect_find(name);
   if (conf == NULL)
   {
     sendto_one_notice(source, &me, ":Connect: Server %s not listed in configuration file", name);

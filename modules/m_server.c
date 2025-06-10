@@ -48,6 +48,105 @@
 #include "fdlist.h"
 #include "channel.h"
 
+typedef enum
+{
+  SERVER_REJECT_INVALID_NAME,
+  SERVER_REJECT_INVALID_SID,
+  SERVER_REJECT_INVALID_HOPCOUNT,
+  SERVER_REJECT_HOPS_MISMATCH,
+  SERVER_REJECT_NAME_MISMATCH,
+  SERVER_REJECT_NAME_COLLISION,
+  SERVER_REJECT_SID_COLLISION,
+  SERVER_REJECT_CONFIG_MISMATCH,
+  SERVER_REJECT_HUB_POLICY,
+  SERVER_REJECT_LEAF_POLICY,
+  SERVER_REJECT_LEAF_LINK_POLICY,
+} server_rejection_reason_t;
+
+static const char *const server_rejection_reason_strings[] =
+{
+  [SERVER_REJECT_INVALID_NAME] = "Invalid server name",
+  [SERVER_REJECT_INVALID_SID] = "Invalid server ID",
+  [SERVER_REJECT_INVALID_HOPCOUNT] = "Invalid hopcount on connect",
+  [SERVER_REJECT_HOPS_MISMATCH] = "Hopcount mismatch in introduction",
+  [SERVER_REJECT_NAME_MISMATCH] = "Name mismatch with local configuration",
+  [SERVER_REJECT_NAME_COLLISION] = "Server name collision",
+  [SERVER_REJECT_SID_COLLISION] = "Server ID collision",
+  [SERVER_REJECT_CONFIG_MISMATCH] = "Credential or capability mismatch",
+  [SERVER_REJECT_HUB_POLICY] = "Hub policy violation",
+  [SERVER_REJECT_LEAF_POLICY] = "Leaf policy violation",
+  [SERVER_REJECT_LEAF_LINK_POLICY] = "Leaf link policy violation",
+};
+
+typedef struct server_rejection_context
+{
+  struct Client *exit_client;
+  const char *event_source_ip;
+  const char *event_source_name;
+  const char *reason_str;
+  const char *log_prefix;
+} server_rejection_context_t;
+
+static void
+server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list ap)
+{
+  char detail_buf[IRCD_BUFSIZE];
+  char oper_msg[IRCD_BUFSIZE];
+  char exit_msg[IRCD_BUFSIZE];
+
+  vsnprintf(detail_buf, sizeof(detail_buf), detail_fmt, ap);
+
+  snprintf(oper_msg, sizeof(oper_msg), "%s from %s: %s (%s)",
+           ctx->log_prefix, ctx->event_source_name, ctx->reason_str, detail_buf);
+
+  snprintf(exit_msg, sizeof(exit_msg), "%s: %s (%s)",
+           ctx->log_prefix, ctx->reason_str, detail_buf);
+
+  log_write(LOG_TYPE_IRCD, "%s", oper_msg);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", oper_msg);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
+                 "%s from %s: %s (%s)",
+                 ctx->log_prefix, ctx->event_source_ip, ctx->reason_str, detail_buf);
+
+  client_exit(ctx->exit_client, exit_msg);
+}
+
+static void
+server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...)
+{
+  server_rejection_context_t ctx =
+  {
+    .exit_client = source,
+    .event_source_ip = client_get_name(source, MASK_IP),
+    .event_source_name = client_get_name(source, SHOW_IP),
+    .reason_str = server_rejection_reason_strings[reason],
+    .log_prefix = "Rejecting server link"
+  };
+
+  va_list ap;
+  va_start(ap, detail_fmt);
+  server_reject_internal(&ctx, detail_fmt, ap);
+  va_end(ap);
+}
+
+static void
+server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...)
+{
+  server_rejection_context_t ctx =
+  {
+    .exit_client = introducer->from,
+    .event_source_ip = introducer->from->name,
+    .event_source_name = introducer->name,
+    .reason_str = server_rejection_reason_strings[reason],
+    .log_prefix = "Rejecting introduction"
+  };
+
+  va_list ap;
+  va_start(ap, detail_fmt);
+  server_reject_internal(&ctx, detail_fmt, ap);
+  va_end(ap);
+}
 
 /*! Parses server flags to be potentially set
  * \param client_p Pointer to server's Client structure
@@ -155,16 +254,6 @@ server_burst(struct Client *client_p)
 static void
 server_estab(struct Client *client_p, struct MaskItem *conf)
 {
-  io_free(client_p->connection->password);
-  client_p->connection->password = NULL;
-
-  if (ConfigServerInfo.hub == 0 && list_length(&local_server_list))
-  {
-    ++ServerStats.is_ref;
-    client_exit(client_p, "I'm a leaf not a hub");
-    return;
-  }
-
   if (IsUnknown(client_p))
   {
     sendto_one(client_p, "PASS %s", conf->spasswd);
@@ -298,7 +387,7 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
   bool name_match_found = false;
 
   *warn_opers = true;
-  *error_reason = "No connect{} block found for server";
+  *error_reason = "No configured connect block";
 
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
@@ -313,7 +402,7 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
 
     if (irccmp(conf->host, client_p->host) && irccmp(conf->host, client_p->sockhost))
     {
-      *error_reason = "Invalid host";
+      *error_reason = "Connecting host does not match configured host";
       continue;
     }
 
@@ -327,7 +416,7 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
     {
       if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->certfp))
       {
-        *error_reason = "Invalid certificate fingerprint";
+        *error_reason = "Invalid TLS certificate fingerprint";
         continue;
       }
     }
@@ -353,88 +442,40 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
 static void
 mr_server(struct Client *source, int parc, char *parv[])
 {
-  const char *name = parv[1];
-  const char *sid = parv[3];
-
   if (listener_has_flag(source->connection->listener, LISTENER_CLIENT))
   {
     client_exit(source, "Use a different port");
     return;
   }
 
+  const char *const name = parv[1];
   if (server_valid_name(name) == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Unauthorized server connection attempt from %s: Bogus server name for server %s",
-                   client_get_name(source, SHOW_IP), name);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Unauthorized server connection attempt from %s: Bogus server name for server %s",
-                   client_get_name(source, MASK_IP), name);
-    client_exit(source, "Bogus server name");
+    server_reject_connection(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
+  const char *const sid = parv[3];
   if (valid_sid(sid) == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server ID %s",
-                   client_get_name(source, SHOW_IP), sid);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server ID %s",
-                   client_get_name(source, MASK_IP), sid);
-    client_exit(source, "Bogus server ID introduced");
+    server_reject_connection(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
+    return;
+  }
+
+  const int hopcount = atoi(parv[2]);
+  if (hopcount != 1)
+  {
+    server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %d", hopcount);
     return;
   }
 
   if (IsHandshake(source) && irccmp(source->name, name))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with mismatching server name %s",
-                   client_get_name(source, SHOW_IP), name);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with mismatching server name %s",
-                   client_get_name(source, MASK_IP), name);
-    client_exit(source, "Mismatching server name introduced");
+    server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
     return;
   }
 
-  const char *error;
-  bool warn_opers;
-  struct MaskItem *const conf = server_check(name, source, &error, &warn_opers);
-  if (conf == NULL)
-  {
-    if (warn_opers)
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Unauthorized server connection attempt from %s: %s for server %s",
-                     client_get_name(source, SHOW_IP), error, name);
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                     "Unauthorized server connection attempt from %s: %s for server %s",
-                     client_get_name(source, MASK_IP), error, name);
-    }
-
-    client_exit(source, error);
-    return;
-  }
-
-  if (service_find(name, irccmp) == NULL)
-  {
-    if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
-        (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Link %s introduced server with mismatching AOP/QOP capabilities",
-                     client_get_name(source, SHOW_IP));
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                     "Link %s introduced server with mismatching AOP/QOP capabilities",
-                     client_get_name(source, MASK_IP));
-      client_exit(source, "Mismatching AOP/QOP capabilities");
-      return;
-    }
-  }
-
-  struct Client *target = hash_find_server(name);
-  if (target)
+  if (hash_find_server(name))
   {
     /*
      * This link is trying feed me a server that I already have
@@ -447,34 +488,49 @@ mr_server(struct Client *source, int parc, char *parv[])
      * Definitely don't do that here. This is from an unregistered
      * connect - A1kmm.
      */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Attempt to re-introduce server %s from %s",
-                   name, client_get_name(source, SHOW_IP));
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Attempt to re-introduce server %s from %s",
-                   name, client_get_name(source, MASK_IP));
-    client_exit(source, "Server already exists");
+    server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 
-  target = hash_find_id(sid);
-  if (target)
+  if (hash_find_id(sid))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Attempt to re-introduce server %s SID %s from %s",
-                   name, sid, client_get_name(source, SHOW_IP));
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Attempt to re-introduce server %s SID %s from %s",
-                   name, sid, client_get_name(source, MASK_IP));
-    client_exit(source, "Server ID already exists");
+    server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
+  }
+
+  const char *error;
+  bool warn_opers;
+  struct MaskItem *const conf = server_check(name, source, &error, &warn_opers);
+  if (conf == NULL)
+  {
+    if (warn_opers)
+      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", error, name);
+    else
+      client_exit(source, error);
+    return;
+  }
+
+  if (ConfigServerInfo.hub == 0 && !list_is_empty(&local_server_list))
+  {
+    server_reject_connection(source, SERVER_REJECT_LEAF_LINK_POLICY, "Server is configured as a non-hub leaf");
+    return;
+  }
+
+  if (service_find(name, irccmp) == NULL)
+  {
+    if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
+        (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
+    {
+      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "Mismatching AOP/QOP capabilities");
+      return;
+    }
   }
 
   /* XXX If somehow there is a connect in progress and
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  target = find_servconn_in_progress(name);
+  struct Client *target = find_servconn_in_progress(name);
   if (target && (target != source))
     client_exit(target, "Overridden");
 
@@ -485,24 +541,18 @@ mr_server(struct Client *source, int parc, char *parv[])
   strlcpy(source->name, name, sizeof(source->name));
   strlcpy(source->id, sid, sizeof(source->id));
   strlcpy(source->info, parv[parc - 1], sizeof(source->info));
+  source->hopcount = hopcount;
+
+  io_free(source->connection->password);
+  source->connection->password = NULL;
 
   server_set_flags(source, parv[4]);
-
-  source->hopcount = atoi(parv[2]);
-
   client_set_class(source, conf->class, CLIENT_CLASS_BASE);
 
   server_estab(source, conf);
 }
 
 /* ms_sid()
- *  parv[0] = command
- *  parv[1] = servername
- *  parv[2] = hopcount
- *  parv[3] = sid of new server
- *  parv[4] = serverinfo
- *
- * 8.3.x+:
  *  parv[0] = command
  *  parv[1] = servername
  *  parv[2] = hopcount
@@ -517,55 +567,37 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (!IsServer(source))
     return;
 
-  if (server_valid_name(parv[1]) == false)
+  const char *const name = parv[1];
+  if (server_valid_name(name) == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server name %s",
-                   client_get_name(source->from, SHOW_IP), parv[1]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server name %s",
-                   client_get_name(source->from, MASK_IP), parv[1]);
-    client_exit(source->from, "Bogus server name introduced");
+    server_reject_introduction(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
-  if (valid_sid(parv[3]) == false)
+  const char *const sid = parv[3];
+  if (valid_sid(sid) == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server ID %s",
-                   client_get_name(source->from, SHOW_IP), parv[3]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s introduced server with bogus server ID %s",
-                   client_get_name(source->from, MASK_IP), parv[3]);
-    client_exit(source->from, "Bogus server ID introduced");
+    server_reject_introduction(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;
   }
 
-  /* Collision on SID? */
-  struct Client *target = hash_find_id(parv[3]);
-  if (target)
+  const int hopcount = atoi(parv[2]);
+  if (hopcount != (int)source->hopcount + 1)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s cancelled, server ID %s already exists",
-                   client_get_name(source->from, SHOW_IP), parv[3]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s cancelled, server ID %s already exists",
-                   client_get_name(source->from, MASK_IP), parv[3]);
-    client_exit(source->from, "Link cancelled, server ID already exists");
+    server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Introducer hopcount: %d, New server hopcount: %d",
+                               source->hopcount, hopcount);
     return;
   }
 
-  /* Collision on name? */
-  target = hash_find_server(parv[1]);
-  if (target)
+  if (hash_find_id(sid))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s cancelled, server %s already exists",
-                   client_get_name(source->from, SHOW_IP), parv[1]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s cancelled, server %s already exists",
-                   client_get_name(source->from, MASK_IP), parv[1]);
-    client_exit(source->from, "Server exists");
+    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION,  "'%s'", sid);
+    return;
+  }
+
+  if (hash_find_server(name))
+  {
+    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION,  "'%s'", name);
     return;
   }
 
@@ -573,7 +605,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  target = find_servconn_in_progress(parv[1]);
+  struct Client *target = find_servconn_in_progress(name);
   if (target && (target != source->from))
     client_exit(target, "Overridden");
 
@@ -582,9 +614,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * leaf. If so, close the link.
    */
   const struct MaskItem *const conf = server_conf_get(source);
-  bool hlined = list_find_cmp(&conf->hub_list , parv[1], match) != NULL;
-  bool llined = list_find_cmp(&conf->leaf_list, parv[1], match) != NULL;
-
+  const bool hlined = list_find_cmp(&conf->hub_list , name, match) != NULL;
+  const bool llined = list_find_cmp(&conf->leaf_list, name, match) != NULL;
 
   /*
    * Ok, this way this works is
@@ -614,13 +645,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (hlined == false)
   {
     /* OOOPs nope can't HUB */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Non-Hub link %s introduced %s.",
-                   client_get_name(source->from, SHOW_IP), parv[1]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Non-Hub link %s introduced %s.",
-                   client_get_name(source->from, MASK_IP), parv[1]);
-    client_exit(source, "No matching hub_mask.");
+    server_reject_introduction(source, SERVER_REJECT_HUB_POLICY,
+                               "Introducer '%s' is not an authorized hub for '%s'", source->name, name);
     return;
   }
 
@@ -628,28 +654,21 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (llined)
   {
     /* OOOPs nope can't HUB this leaf */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Link %s introduced leafed server %s.",
-                   client_get_name(source->from, SHOW_IP), parv[1]);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Link %s introduced leafed server %s.",
-                   client_get_name(source->from, MASK_IP), parv[1]);
-    client_exit(source->from, "Leafed server.");
+    server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,
+                               "Introduction of '%s' by '%s' denied (server is designated as a leaf)", name, source->name);
     return;
   }
 
   target = client_make(source->from);
   server_make(target);
-  target->hopcount = atoi(parv[2]);
+  strlcpy(target->name, name, sizeof(target->name));
+  strlcpy(target->id, sid, sizeof(target->id));
+  strlcpy(target->info, parv[parc - 1], sizeof(target->info));
+  target->hopcount = hopcount;
   target->servptr = source;
 
-  strlcpy(target->name, parv[1], sizeof(target->name));
-  strlcpy(target->id, parv[3], sizeof(target->id));
-  strlcpy(target->info, parv[parc - 1], sizeof(target->info));
-
-  server_set_flags(target, parv[4]);
-
   SetServer(target);
+  server_set_flags(target, parv[4]);
 
   if (service_find(target->name, irccmp))
     AddFlag(target, FLAGS_SERVICE);

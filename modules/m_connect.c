@@ -46,14 +46,14 @@ do_connect(struct Client *source, const char *name)
   /*
    * Try to find the name. If it fails, notify and bail.
    */
-  struct ConnectItem *conf = connect_find(name);
-  if (conf == NULL)
+  struct ConnectItem *connect = connect_find(name);
+  if (connect == NULL)
   {
     sendto_one_notice(source, &me, ":Connect: Server %s not listed in configuration file", name);
     return;
   }
 
-  const struct Client *target = hash_find_server(conf->name);
+  const struct Client *target = hash_find_server(connect->name);
   if (target)
   {
     sendto_one_notice(source, &me, ":Connect: Server %s already exists from %s",
@@ -61,37 +61,37 @@ do_connect(struct Client *source, const char *name)
     return;
   }
 
-  if (find_servconn_in_progress(conf->name))
+  if (find_servconn_in_progress(connect->name))
   {
     sendto_one_notice(source, &me, ":Connect: a connection to %s is already in progress",
-                      conf->name);
+                      connect->name);
     return;
   }
 
   /* Notify all operators about connect requests. */
   const char *const type_p = MyConnect(source) ? "Local" : "Remote";
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                 me.name, type_p, name, conf->port, client_get_oper_name(source));
+                 me.name, type_p, name, connect->port, client_get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                 me.id, type_p, name, conf->port, client_get_oper_name(source));
+                 me.id, type_p, name, connect->port, client_get_oper_name(source));
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            type_p, name, conf->port, client_get_oper_name(source));
+            type_p, name, connect->port, client_get_oper_name(source));
 
   /*
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block.
    */
-  if (server_connect(conf, source) == false)
+  if (server_connect(connect, source) == false)
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
-                      conf->name, conf->port);
+                      connect->name, connect->port);
   else if (MyConnect(source) &&
            (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(source, UMODE_ADMIN)))
     sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
-                      conf->name, conf->host, conf->port);
+                      connect->name, connect->host, connect->port);
   else
     sendto_one_notice(source, &me, ":*** Connecting to %s.%u",
-                      conf->name, conf->port);
+                      connect->name, connect->port);
 
   /*
    * Client is either connecting with all the data it needs or has been

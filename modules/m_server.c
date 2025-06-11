@@ -252,11 +252,11 @@ server_burst(struct Client *client_p)
  * side effects -
  */
 static void
-server_estab(struct Client *client_p, struct ConnectItem *conf)
+server_estab(struct Client *client_p, struct ConnectItem *connect)
 {
   if (IsUnknown(client_p))
   {
-    sendto_one(client_p, "PASS %s", conf->send_password);
+    sendto_one(client_p, "PASS %s", connect->send_password);
 
     sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
 
@@ -288,7 +288,7 @@ server_estab(struct Client *client_p, struct ConnectItem *conf)
   /* Doesn't duplicate client_p->serv if allocated this struct already */
   server_make(client_p);
 
-  server_conf_set(client_p, conf);
+  server_conf_set(client_p, connect);
 
   /* Fixing eob timings.. -gnp */
   client_p->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -392,27 +392,27 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
   list_node_t *node;
   LIST_FOREACH(node, connect_get_list()->head)
   {
-    struct ConnectItem *const conf = node->data;
-    if (irccmp(name, conf->name))
+    struct ConnectItem *const connect = node->data;
+    if (irccmp(name, connect->name))
       continue;
 
     name_match_found = true;
 
-    if (irccmp(conf->host, client_p->host) && irccmp(conf->host, client_p->sockhost))
+    if (irccmp(connect->host, client_p->host) && irccmp(connect->host, client_p->sockhost))
     {
       *error_reason = "Connecting host does not match configured host";
       continue;
     }
 
-    if (connect_match_password(client_p->connection->password, conf) == false)
+    if (connect_match_password(client_p->connection->password, connect) == false)
     {
       *error_reason = "Invalid password";
       continue;
     }
 
-    if (!string_is_empty(conf->tls_cert_fingerprint))
+    if (!string_is_empty(connect->tls_cert_fingerprint))
     {
-      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, conf->tls_cert_fingerprint))
+      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, connect->tls_cert_fingerprint))
       {
         *error_reason = "Invalid TLS certificate fingerprint";
         continue;
@@ -420,7 +420,7 @@ server_check(const char *name, struct Client *client_p, const char **error_reaso
     }
 
     *error_reason = NULL;
-    return conf;
+    return connect;
   }
 
   if (name_match_found == false)
@@ -498,8 +498,8 @@ mr_server(struct Client *source, int parc, char *parv[])
 
   const char *error;
   bool warn_opers;
-  struct ConnectItem *const conf = server_check(name, source, &error, &warn_opers);
-  if (conf == NULL)
+  struct ConnectItem *const connect = server_check(name, source, &error, &warn_opers);
+  if (connect == NULL)
   {
     if (warn_opers)
       server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", error, name);
@@ -545,9 +545,9 @@ mr_server(struct Client *source, int parc, char *parv[])
   source->connection->password = NULL;
 
   server_set_flags(source, parv[4]);
-  client_set_class(source, conf->class, CLIENT_CLASS_BASE);
+  client_set_class(source, connect->class, CLIENT_CLASS_BASE);
 
-  server_estab(source, conf);
+  server_estab(source, connect);
 }
 
 /* ms_sid()
@@ -611,9 +611,9 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct ConnectItem *const conf = server_conf_get(source);
-  const bool hlined = list_find_cmp(&conf->hub_masks , name, match) != NULL;
-  const bool llined = list_find_cmp(&conf->leaf_masks, name, match) != NULL;
+  const struct ConnectItem *const connect = server_conf_get(source);
+  const bool hlined = list_find_cmp(&connect->hub_masks , name, match) != NULL;
+  const bool llined = list_find_cmp(&connect->leaf_masks, name, match) != NULL;
 
   /*
    * Ok, this way this works is

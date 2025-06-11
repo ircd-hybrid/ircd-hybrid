@@ -613,7 +613,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
  * Side effects: None.
  */
 const char *
-client_client_get_oper_name(const struct Client *client)
+client_get_oper_name(const struct Client *client)
 {
   static char buf[IRCD_BUFSIZE];
 
@@ -682,8 +682,8 @@ client_close_connection(struct Client *client)
     ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 
     assert(client->serv->conf);
-    struct ConnectItem *const conf = server_conf_get(client);
-    conf->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
+    struct ConnectItem *const connect = server_conf_get(client);
+    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
   }
   else
     ++ServerStats.is_ni;

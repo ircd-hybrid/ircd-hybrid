@@ -11,19 +11,19 @@
 static list_t connect_items;
 
 void
-connect_assign_class(struct ConnectItem *conf, const char *class_name)
+connect_assign_class(struct ConnectItem *connect, const char *class_name)
 {
-  assert(conf);
+  assert(connect);
 
   if (!string_is_empty(class_name))
-    conf->class = class_find(class_name, true);
+    connect->class = class_find(class_name, true);
 
-  if (conf->class == NULL)
+  if (connect->class == NULL)
   {
-    conf->class = class_default;
+    connect->class = class_default;
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
-                   string_or_empty(class_name), conf->name, conf->class->name);
+                   string_default(class_name, "<not specified>"), connect->name, connect->class->name);
   }
 }
 
@@ -33,8 +33,8 @@ connect_mark_all_inactive(void)
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
-    struct ConnectItem *const conf = node->data;
-    conf->active = false;
+    struct ConnectItem *const connect = node->data;
+    connect->active = false;
   }
 }
 
@@ -44,11 +44,11 @@ connect_free_inactive(void)
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, connect_items.head)
   {
-    struct ConnectItem *const conf = node->data;
-    if (conf->active == false && conf->ref_count == 0)
+    struct ConnectItem *const connect = node->data;
+    if (connect->active == false && connect->ref_count == 0)
     {
-      list_remove(&conf->node, &connect_items);
-      connect_free(conf);
+      list_remove(&connect->node, &connect_items);
+      connect_free(connect);
     }
   }
 }
@@ -56,83 +56,83 @@ connect_free_inactive(void)
 struct ConnectItem *
 connect_create(void)
 {
-  struct ConnectItem *const conf = io_calloc(sizeof(*conf));
-  conf->active = true;
-  conf->address_family = AF_INET;
+  struct ConnectItem *const connect = io_calloc(sizeof(*connect));
+  connect->active = true;
+  connect->address_family = AF_INET;
 
-  list_add(conf, &conf->node, &connect_items);
-  return conf;
+  list_add(connect, &connect->node, &connect_items);
+  return connect;
 }
 
 void
-connect_free(struct ConnectItem *conf)
+connect_free(struct ConnectItem *connect)
 {
-  assert(conf);
+  assert(connect);
 
-  if (conf->dns_pending)
-    delete_resolver_queries(conf);
+  if (connect->dns_pending)
+    delete_resolver_queries(connect);
 
-  if (conf->accept_password)
-    memset(conf->accept_password, 0, strlen(conf->accept_password));
-  if (conf->send_password)
-    memset(conf->send_password, 0, strlen(conf->send_password));
+  if (connect->accept_password)
+    memset(connect->accept_password, 0, strlen(connect->accept_password));
+  if (connect->send_password)
+    memset(connect->send_password, 0, strlen(connect->send_password));
 
-  io_free(conf->name);
-  io_free(conf->host);
-  io_free(conf->accept_password);
-  io_free(conf->send_password);
-  io_free(conf->tls_cert_fingerprint);
-  io_free(conf->cipher_list);
+  io_free(connect->name);
+  io_free(connect->host);
+  io_free(connect->accept_password);
+  io_free(connect->send_password);
+  io_free(connect->tls_cert_fingerprint);
+  io_free(connect->cipher_list);
 
   list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, conf->hub_masks.head)
+  LIST_FOREACH_SAFE(node, node_next, connect->hub_masks.head)
   {
     io_free(node->data);
-    list_remove(node, &conf->hub_masks);
+    list_remove(node, &connect->hub_masks);
     list_free_node(node);
   }
 
-  LIST_FOREACH_SAFE(node, node_next, conf->leaf_masks.head)
+  LIST_FOREACH_SAFE(node, node_next, connect->leaf_masks.head)
   {
     io_free(node->data);
-    list_remove(node, &conf->leaf_masks);
+    list_remove(node, &connect->leaf_masks);
     list_free_node(node);
   }
 
-  io_free(conf);
+  io_free(connect);
 }
 
 static void
-connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t namelength)
+connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
-  struct ConnectItem *const conf = vptr;
-  conf->dns_pending = false;
+  struct ConnectItem *const connect = vptr;
+  connect->dns_pending = false;
 
   if (addr)
-    address_copy(&conf->remote_addr, addr);
+    address_copy(&connect->remote_addr, addr);
   else
-    conf->dns_failed = true;
+    connect->dns_failed = true;
 }
 
 void
-connect_dns_lookup(struct ConnectItem *conf)
+connect_dns_lookup(struct ConnectItem *connect)
 {
-  if (address_from_string(conf->host, &conf->remote_addr))
+  if (address_from_string(connect->host, &connect->remote_addr))
     return;
 
   /*
-   * By this point conf->host possibly is not a numerical network address. Do a nameserver
-   * lookup of the conf host. If the conf entry is currently doing a ns lookup do nothing.
+   * By this point connect->host possibly is not a numerical network address. Do a nameserver
+   * lookup of the connect host. If the connect entry is currently doing a ns lookup do nothing.
    */
-  if (conf->dns_pending)
+  if (connect->dns_pending)
     return;
 
-  conf->dns_pending = true;
+  connect->dns_pending = true;
 
-  if (conf->address_family == AF_INET)
-    gethost_byname_type(connect_dns_callback, conf, conf->host, T_A);
+  if (connect->address_family == AF_INET)
+    gethost_byname_type(connect_dns_callback, connect, connect->host, T_A);
   else
-    gethost_byname_type(connect_dns_callback, conf, conf->host, T_AAAA);
+    gethost_byname_type(connect_dns_callback, connect, connect->host, T_AAAA);
 }
 
 struct ConnectItem *
@@ -141,30 +141,27 @@ connect_find(const char *name)
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
-    struct ConnectItem *const conf = node->data;
-    if (match(name, conf->name) == 0)
-    {
-      conf->active = true;
-      return conf;
-    }
+    struct ConnectItem *const connect = node->data;
+    if (match(name, connect->name) == 0)
+      return connect;
   }
 
   return NULL;
 }
 
 bool
-connect_match_password(const char *password, const struct ConnectItem *conf)
+connect_match_password(const char *password, const struct ConnectItem *connect)
 {
-  if (string_is_empty(password) || string_is_empty(conf->accept_password))
+  if (string_is_empty(password) || string_is_empty(connect->accept_password))
     return false;
 
   const char *encr;
-  if (conf->flags & CONNECT_FLAG_ENCRYPTED_PASSWORD)
-    encr = crypt(password, conf->accept_password);
+  if (connect->flags & CONNECT_FLAG_ENCRYPTED_PASSWORD)
+    encr = crypt(password, connect->accept_password);
   else
     encr = password;
 
-  return encr && strcmp(encr, conf->accept_password) == 0;
+  return encr && strcmp(encr, connect->accept_password) == 0;
 }
 
 list_t *
@@ -174,23 +171,23 @@ connect_get_list(void)
 }
 
 void
-connect_incref(struct ConnectItem *conf)
+connect_incref(struct ConnectItem *connect)
 {
-  if (conf)
-    conf->ref_count++;
+  if (connect)
+    connect->ref_count++;
 }
 
 void
-connect_decref(struct ConnectItem *conf)
+connect_decref(struct ConnectItem *connect)
 {
-  assert(conf);
-  assert(conf->ref_count > 0);
+  assert(connect);
+  assert(connect->ref_count > 0);
 
-  conf->ref_count--;
+  connect->ref_count--;
 
-  if (conf->ref_count == 0 && conf->active == false)
+  if (connect->ref_count == 0 && connect->active == false)
   {
-    list_find_remove(&connect_items, conf);
-    connect_free(conf);
+    list_remove(&connect->node, &connect_items);
+    connect_free(connect);
   }
 }

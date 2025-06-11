@@ -5586,32 +5586,32 @@ yyreduce:
       has_wildcards(block_state.host.buf))
     break;
 
-  struct ConnectItem *conf = connect_create();
-  conf->name = io_strdup(block_state.name.buf);
-  conf->host = io_strdup(block_state.host.buf);
-  conf->accept_password = io_strdup(block_state.rpass.buf);
-  conf->send_password = io_strdup(block_state.spass.buf);
+  struct ConnectItem *connect = connect_create();
+  connect->name = io_strdup(block_state.name.buf);
+  connect->host = io_strdup(block_state.host.buf);
+  connect->accept_password = io_strdup(block_state.rpass.buf);
+  connect->send_password = io_strdup(block_state.spass.buf);
 
-  conf->port = block_state.port.value;
-  conf->timeout = block_state.timeout.value;
-  conf->address_family = block_state.aftype.value;
-  conf->flags = block_state.flags.value;
+  connect->port = block_state.port.value;
+  connect->timeout = block_state.timeout.value;
+  connect->address_family = block_state.aftype.value;
+  connect->flags = block_state.flags.value;
 
   if (block_state.cert.buf[0])
-    conf->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
+    connect->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
 
   if (block_state.ciph.buf[0])
-    conf->cipher_list = io_strdup(block_state.ciph.buf);
+    connect->cipher_list = io_strdup(block_state.ciph.buf);
 
-  list_move_list(&block_state.hub.list, &conf->hub_masks);
-  list_move_list(&block_state.leaf.list, &conf->leaf_masks);
+  list_move_list(&block_state.hub.list, &connect->hub_masks);
+  list_move_list(&block_state.leaf.list, &connect->leaf_masks);
 
   if (block_state.bind.buf[0])
-    if (address_from_string(block_state.bind.buf, &conf->bind_addr) == false)
+    if (address_from_string(block_state.bind.buf, &connect->bind_addr) == false)
       conf_error_report("Invalid IP address for bind address");
 
-  connect_assign_class(conf, block_state.class.buf);
-  connect_dns_lookup(conf);
+  connect_assign_class(connect, block_state.class.buf);
+  connect_dns_lookup(connect);
 }
 #line 5617 "conf_parser.c"
     break;

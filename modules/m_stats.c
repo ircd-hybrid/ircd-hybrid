@@ -262,11 +262,11 @@ stats_connect(struct Client *client, int parc, char *parv[])
   {
     char buf[8];
     char *bufptr = buf;
-    const struct ConnectItem *const conf = node->data;
+    const struct ConnectItem *const connect = node->data;
 
-    if (conf->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
+    if (connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
       *bufptr++ = 'A';
-    if (conf->flags & CONNECT_FLAG_USE_TLS)
+    if (connect->flags & CONNECT_FLAG_USE_TLS)
       *bufptr++ = 'T';
     if (bufptr == buf)
       *bufptr++ = '*';
@@ -278,10 +278,10 @@ stats_connect(struct Client *client, int parc, char *parv[])
      */
     if (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(client, UMODE_ADMIN))
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', conf->host, buf, conf->name, conf->port, conf->class->name);
+                         'C', connect->host, buf, connect->name, connect->port, connect->class->name);
     else
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', "*@127.0.0.1", buf, conf->name, conf->port, conf->class->name);
+                         'C', "*@127.0.0.1", buf, connect->name, connect->port, connect->class->name);
   }
 }
 
@@ -620,16 +620,16 @@ stats_hubleaf(struct Client *client, int parc, char *parv[])
   list_node_t *node, *mask_node;
   LIST_FOREACH(node, connect_get_list()->head)
   {
-    const struct ConnectItem *const conf = node->data;
-    LIST_FOREACH(mask_node, conf->hub_masks.head)
-      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', mask_node->data, conf->name, 0, "*");
+    const struct ConnectItem *const connect = node->data;
+    LIST_FOREACH(mask_node, connect->hub_masks.head)
+      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', mask_node->data, connect->name, 0, "*");
   }
 
   LIST_FOREACH(node, connect_get_list()->head)
   {
-    const struct ConnectItem *const conf = node->data;
-    LIST_FOREACH(mask_node, conf->leaf_masks.head)
-      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', mask_node->data, conf->name, 0, "*");
+    const struct ConnectItem *const connect = node->data;
+    LIST_FOREACH(mask_node, connect->leaf_masks.head)
+      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', mask_node->data, connect->name, 0, "*");
   }
 }
 

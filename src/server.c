@@ -36,6 +36,7 @@
 #include "ircd_defs.h"
 #include "packet.h"
 #include "conf.h"
+#include "conf_connect.h"
 #include "server.h"
 #include "server_capab.h"
 #include "send.h"
@@ -182,8 +183,8 @@ server_make(struct Client *client)
 static void
 server_finish_tls_handshake(struct Client *client)
 {
-  const struct ConnectItem *const conf = server_conf_get(client);
-  if (conf->active == false)
+  const struct ConnectItem *const connect = server_conf_get(client);
+  if (connect->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Error connecting to %s: connect{} block was removed",
@@ -196,11 +197,11 @@ server_finish_tls_handshake(struct Client *client)
     return;
   }
 
-  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
+  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->send_password);
+  sendto_one(client, "PASS %s", connect->send_password);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
@@ -262,7 +263,7 @@ server_tls_handshake(fde_t *F, void *data_)
 }
 
 static void
-server_tls_connect_init(struct Client *client, const struct ConnectItem *conf, fde_t *F)
+server_tls_connect_init(struct Client *client, const struct ConnectItem *connect, fde_t *F)
 {
   assert(client);
   assert(client->connection);
@@ -276,8 +277,8 @@ server_tls_connect_init(struct Client *client, const struct ConnectItem *conf, f
     return;
   }
 
-  if (!string_is_empty(conf->cipher_list))
-    tls_set_ciphers(&F->tls, conf->cipher_list);
+  if (!string_is_empty(connect->cipher_list))
+    tls_set_ciphers(&F->tls, connect->cipher_list);
 
   server_tls_handshake(F, client);
 }
@@ -323,8 +324,8 @@ server_connect_callback(fde_t *F, int status, void *data_)
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
 
-  const struct ConnectItem *const conf = server_conf_get(client);
-  if (conf->active == false)
+  const struct ConnectItem *const connect = server_conf_get(client);
+  if (connect->active == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Error connecting to %s: connect{} block was removed",
@@ -337,17 +338,17 @@ server_connect_callback(fde_t *F, int status, void *data_)
     return;
   }
 
-  if (conf->flags & CONNECT_FLAG_USE_TLS)
+  if (connect->flags & CONNECT_FLAG_USE_TLS)
   {
-    server_tls_connect_init(client, conf, F);
+    server_tls_connect_init(client, connect, F);
     return;
   }
 
-  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
+  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
   /* Next, send the initial handshake */
   SetHandshake(client);
 
-  sendto_one(client, "PASS %s", conf->send_password);
+  sendto_one(client, "PASS %s", connect->send_password);
 
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
@@ -375,39 +376,39 @@ server_connect_callback(fde_t *F, int status, void *data_)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 bool
-server_connect(struct ConnectItem *conf, struct Client *initiator)
+server_connect(struct ConnectItem *connect, struct Client *initiator)
 {
-  assert(conf);
-  assert(hash_find_server(conf->name) == NULL);  /* This should have been checked by the caller */
+  assert(connect);
+  assert(hash_find_server(connect->name) == NULL);  /* This should have been checked by the caller */
 
   /* Still processing a DNS lookup? -> exit */
-  if (conf->dns_pending)
+  if (connect->dns_pending)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error connecting to %s: DNS lookup for connect{} in progress.",
-                   conf->name);
+                   connect->name);
     return false;
   }
 
-  if (conf->dns_failed)
+  if (connect->dns_failed)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error connecting to %s: DNS lookup for connect{} failed.",
-                   conf->name);
+                   connect->name);
     return false;
   }
 
   char buf[HOSTIPLEN + 1];
-  address_to_string(&conf->remote_addr, buf, sizeof(buf));
-  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", conf->name, conf->host, buf);
+  address_to_string(&connect->remote_addr, buf, sizeof(buf));
+  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, buf);
 
   /* Create a socket for the server connection */
-  int fd = comm_socket(address_get_family(&conf->remote_addr), SOCK_STREAM, 0);
+  int fd = comm_socket(address_get_family(&connect->remote_addr), SOCK_STREAM, 0);
   if (fd == -1)
   {
     /* Eek, failure to create the socket */
     log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
-              conf->name, strerror(errno));
+              connect->name, strerror(errno));
     return false;
   }
 
@@ -415,20 +416,20 @@ server_connect(struct ConnectItem *conf, struct Client *initiator)
   struct Client *client = client_make(NULL);
 
   /* Copy in the server, hostname, fd */
-  strlcpy(client->name, conf->name, sizeof(client->name));
-  strlcpy(client->host, conf->host, sizeof(client->host));
+  strlcpy(client->name, connect->name, sizeof(client->name));
+  strlcpy(client->host, connect->host, sizeof(client->host));
 
   /* We already converted the ip once, so lets use it - stu */
   strlcpy(client->sockhost, buf, sizeof(client->sockhost));
 
-  address_copy(&client->addr, &conf->remote_addr);
+  address_copy(&client->addr, &connect->remote_addr);
   client->connection->fd = fd_open(fd, true, NULL);
 
   /* Server names are always guaranteed under HOSTLEN chars */
   fd_note(client->connection->fd, "Server: %s", client->name);
 
   server_make(client);
-  server_conf_set(client, conf);
+  server_conf_set(client, connect);
 
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";
   client->serv->initiator_name = io_strdup(initiator_name);
@@ -436,8 +437,8 @@ server_connect(struct ConnectItem *conf, struct Client *initiator)
   SetConnecting(client);
 
   /* Now, initiate the connection */
-  comm_connect_tcp(client->connection->fd, &conf->remote_addr, conf->port, &conf->bind_addr,
-                   server_connect_callback, client, conf->timeout);
+  comm_connect_tcp(client->connection->fd, &connect->remote_addr, connect->port, &connect->bind_addr,
+                   server_connect_callback, client, connect->timeout);
 
   /*
    * At this point we have a connection in progress and a connect {} block
@@ -469,11 +470,11 @@ server_connect_auto(void *unused)
   list_t *list = connect_get_list();
   LIST_FOREACH(node, list->head)
   {
-    struct ConnectItem *conf = node->data;
-    assert(conf->class);
+    struct ConnectItem *connect = node->data;
+    assert(connect->class);
 
     /* Also when already connecting! (update holdtimes) --SRB */
-    if (conf->port == 0 || !(conf->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
+    if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
       continue;
 
     /*
@@ -483,29 +484,29 @@ server_connect_auto(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (conf->autoconnect_hold_until > io_time_get(IO_TIME_MONOTONIC_SEC))
+    if (connect->autoconnect_hold_until > io_time_get(IO_TIME_MONOTONIC_SEC))
       continue;
 
-    conf->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
+    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + connect->class->con_freq;
 
-    if (conf->class->ref_count >= conf->class->max_total)
+    if (connect->class->ref_count >= connect->class->max_total)
       continue;
 
     /*
      * Found a CONNECT config with port specified, scan clients
      * and see if this server is already connected?
      */
-    if (hash_find_server(conf->name))
+    if (hash_find_server(connect->name))
       continue;
 
-    if (find_servconn_in_progress(conf->name))
+    if (find_servconn_in_progress(connect->name))
       continue;
 
     /* Move this entry to the end of the list, if not already last */
     if (node->next)
     {
       list_remove(node, list);
-      list_add_tail(conf, &conf->node, list);
+      list_add_tail(connect, &connect->node, list);
     }
 
     /*
@@ -519,9 +520,9 @@ server_connect_auto(void *unused)
      */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    ConfigServerHide.hide_server_ips ? "Connection to %s activated." : "Connection to %s[%s] activated.",
-                   conf->name, conf->host);
+                   connect->name, connect->host);
 
-    server_connect(conf, NULL);
+    server_connect(connect, NULL);
     return;  /* We connect only one at time... */
   }
 }
@@ -546,20 +547,20 @@ server_conf_clear(struct Client *client)
 }
 
 void
-server_conf_set(struct Client *client, struct ConnectItem *new_conf)
+server_conf_set(struct Client *client, struct ConnectItem *new_connect)
 {
   assert(client->serv);
-  assert(new_conf);
+  assert(new_connect);
 
-  struct ConnectItem *old_conf = server_conf_get(client);
-  if (old_conf == new_conf)
+  struct ConnectItem *old_connect = server_conf_get(client);
+  if (old_connect == new_connect)
     return;
 
-  if (old_conf)
+  if (old_connect)
     server_conf_clear(client);
 
-  client->serv->conf = new_conf;
-  connect_incref(new_conf);
+  client->serv->conf = new_connect;
+  connect_incref(new_connect);
 }
 
 struct Client *

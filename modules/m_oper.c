@@ -72,9 +72,9 @@ oper_up(struct Client *client, const struct MaskItem *conf)
             conf->name, client_get_name(client, HIDE_IP));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
-                 get_oper_name(client));
+                 client_get_oper_name(client));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                 me.id, get_oper_name(client));
+                 me.id, client_get_oper_name(client));
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled

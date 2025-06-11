@@ -71,12 +71,12 @@ do_connect(struct Client *source, const char *name)
   /* Notify all operators about connect requests. */
   const char *const type_p = MyConnect(source) ? "Local" : "Remote";
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                 me.name, type_p, name, conf->port, get_oper_name(source));
+                 me.name, type_p, name, conf->port, client_get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                 me.id, type_p, name, conf->port, get_oper_name(source));
+                 me.id, type_p, name, conf->port, client_get_oper_name(source));
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            type_p, name, conf->port, get_oper_name(source));
+            type_p, name, conf->port, client_get_oper_name(source));
 
   /*
    * At this point we should be calling connect_server with a valid

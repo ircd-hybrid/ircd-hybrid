@@ -89,11 +89,11 @@ mo_opme(struct Client *source, int parc, char *parv[])
   }
 
   log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
-            get_oper_name(source), channel->name);
+            client_get_oper_name(source), channel->name);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
-                 me.name, get_oper_name(source), channel->name);
+                 me.name, client_get_oper_name(source), channel->name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
-                 me.id, get_oper_name(source), channel->name);
+                 me.id, client_get_oper_name(source), channel->name);
 
   member_set_flags(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",

@@ -311,5 +311,4 @@ extern struct MaskItem *find_address_conf(const char *, const char *, const stru
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
 extern struct MaskItem *find_dline_conf(const struct io_addr *);
 extern struct MaskItem *operator_find(const struct Client *, const char *);
-extern const char *get_oper_name(const struct Client *);
 #endif  /* INCLUDED_conf_h */

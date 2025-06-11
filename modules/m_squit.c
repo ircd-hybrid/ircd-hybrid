@@ -93,9 +93,9 @@ mo_squit(struct Client *source, int parc, char *parv[])
   if (MyConnect(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
-                   target->name, get_oper_name(source), REASONLEN, comment);
+                   target->name, client_get_oper_name(source), REASONLEN, comment);
     log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
-              target->name, get_oper_name(source), REASONLEN, comment);
+              target->name, client_get_oper_name(source), REASONLEN, comment);
 
     /* To them, we are exiting */
     sendto_one(target, ":%s SQUIT %s :%.*s", source->id, me.id, REASONLEN, comment);
@@ -143,11 +143,11 @@ ms_squit(struct Client *source, int parc, char *parv[])
   if (MyConnect(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
-                   me.name, target->name, get_oper_name(source), comment);
+                   me.name, target->name, client_get_oper_name(source), comment);
     sendto_servers(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
-                   me.id, target->name, get_oper_name(source), comment);
+                   me.id, target->name, client_get_oper_name(source), comment);
     log_write(LOG_TYPE_IRCD, "Remote SQUIT %s from %s (%s)",
-              target->name, get_oper_name(source), comment);
+              target->name, client_get_oper_name(source), comment);
 
     /* To them, we are exiting */
     sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, comment);

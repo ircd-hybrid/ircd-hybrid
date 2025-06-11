@@ -891,32 +891,6 @@ cleanup_tklines(void *unused)
   resv_expire();
 }
 
-/*
- * Input: A client to find the active operator {} name for.
- * Output: The nick!user@host{oper} of the oper.
- *         "oper" is server name for remote opers
- * Side effects: None.
- */
-const char *
-get_oper_name(const struct Client *client)
-{
-  static char buf[IRCD_BUFSIZE];
-
-  if (IsServer(client))
-    return client->name;
-
-  if (MyConnect(client) && client->connection->oper_name)
-  {
-    snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
-             client->name, client->username, client->host, client->connection->oper_name);
-    return buf;
-  }
-
-  snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
-           client->name, client->username, client->host, client->servptr->name);
-  return buf;
-}
-
 /* conf_clear()
  *
  * inputs       - none

@@ -413,6 +413,7 @@ extern struct Client *client_make(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
+extern const char *client_get_oper_name(const struct Client *);
 
 static inline struct ClassItem *
 client_get_active_class(const struct Client *client)

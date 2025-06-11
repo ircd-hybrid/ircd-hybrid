@@ -114,9 +114,9 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "%s added temporary %ju min. X-Line for [%s] [%s]",
-                   get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
+                   client_get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-              get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
+              client_get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
   }
   else
   {
@@ -125,9 +125,9 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
                         gecos->mask, gecos->reason);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added X-Line for [%s] [%s]",
-                   get_oper_name(source), gecos->mask, gecos->reason);
+                   client_get_oper_name(source), gecos->mask, gecos->reason);
     log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-              get_oper_name(source), gecos->mask, gecos->reason);
+              client_get_oper_name(source), gecos->mask, gecos->reason);
   }
 
   xline_check(gecos);

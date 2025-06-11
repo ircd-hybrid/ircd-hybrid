@@ -46,10 +46,7 @@ connect_free_inactive(void)
   {
     struct ConnectItem *const connect = node->data;
     if (connect->active == false && connect->ref_count == 0)
-    {
-      list_remove(&connect->node, &connect_items);
       connect_free(connect);
-    }
   }
 }
 
@@ -68,6 +65,8 @@ void
 connect_free(struct ConnectItem *connect)
 {
   assert(connect);
+
+  list_remove(&connect->node, &connect_items);
 
   if (connect->dns_pending)
     delete_resolver_queries(connect);
@@ -186,8 +185,5 @@ connect_decref(struct ConnectItem *connect)
   connect->ref_count--;
 
   if (connect->ref_count == 0 && connect->active == false)
-  {
-    list_remove(&connect->node, &connect_items);
     connect_free(connect);
-  }
 }

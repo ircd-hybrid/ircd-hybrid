@@ -521,6 +521,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
   {
     if (conf_match_password(client->connection->password, conf) == false)
     {
+      sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
       *error_reason = "Bad Password";
       return NULL;
     }

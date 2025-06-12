@@ -163,6 +163,58 @@ connect_match_password(const char *password, const struct ConnectItem *connect)
   return encr && strcmp(encr, connect->accept_password) == 0;
 }
 
+connect_auth_result_t
+connect_authenticate_server(const char *server_name, const struct Client *client, struct ConnectItem **connect_out)
+{
+  assert(connect_out);
+
+  *connect_out = NULL;
+  connect_auth_result_t result = CONNECT_AUTH_FAIL_NAME;
+
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    struct ConnectItem *const connect = node->data;
+    if (irccmp(server_name, connect->name))
+      continue;
+
+    if (result < CONNECT_AUTH_FAIL_HOST)
+      result = CONNECT_AUTH_FAIL_HOST;
+
+    if (irccmp(connect->host, client->host) && irccmp(connect->host, client->sockhost))
+      continue;
+
+    if ((connect->flags & CONNECT_FLAG_USE_TLS) && !HasFlag(client, FLAGS_TLS))
+    {
+      if (result < CONNECT_AUTH_FAIL_TLS)
+        result = CONNECT_AUTH_FAIL_TLS;
+      continue;
+    }
+
+    if (!string_is_empty(connect->tls_cert_fingerprint))
+    {
+      if (string_is_empty(client->tls_certfp) || strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint))
+      {
+        if (result < CONNECT_AUTH_FAIL_CERTFP)
+          result = CONNECT_AUTH_FAIL_CERTFP;
+        continue;
+      }
+    }
+
+    if (connect_match_password(client->connection->password, connect) == false)
+    {
+      if (result < CONNECT_AUTH_FAIL_PASSWORD)
+        result = CONNECT_AUTH_FAIL_PASSWORD;
+      continue;
+    }
+
+    *connect_out = connect;
+    return CONNECT_AUTH_SUCCESS;
+  }
+
+  return result;
+}
+
 list_t *
 connect_get_list(void)
 {
@@ -186,4 +238,20 @@ connect_decref(struct ConnectItem *connect)
 
   if (connect->ref_count == 0 && connect->active == false)
     connect_free(connect);
+}
+
+const char *
+connect_auth_result_to_string(connect_auth_result_t result)
+{
+  switch (result)
+  {
+    case CONNECT_AUTH_SUCCESS:        return "Success";
+    case CONNECT_AUTH_FAIL_NAME:      return "No configured connect block";
+    case CONNECT_AUTH_FAIL_HOST:      return "Connecting host does not match configured host";
+    case CONNECT_AUTH_FAIL_PASSWORD:  return "Invalid password";
+    case CONNECT_AUTH_FAIL_TLS:       return "TLS connection required";
+    case CONNECT_AUTH_FAIL_CERTFP:    return "Invalid TLS certificate fingerprint";
+  }
+
+  return "Unknown connect authentication result";
 }

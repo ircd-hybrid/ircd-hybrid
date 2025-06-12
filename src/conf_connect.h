@@ -12,6 +12,16 @@ typedef enum
   CONNECT_FLAG_ENCRYPTED_PASSWORD = 1 << 2,
 } connect_flags_t;
 
+typedef enum
+{
+  CONNECT_AUTH_FAIL_NAME = 1,
+  CONNECT_AUTH_FAIL_HOST,
+  CONNECT_AUTH_FAIL_TLS,
+  CONNECT_AUTH_FAIL_CERTFP,
+  CONNECT_AUTH_FAIL_PASSWORD,
+  CONNECT_AUTH_SUCCESS,
+} connect_auth_result_t;
+
 struct ConnectItem
 {
   char *name;
@@ -42,6 +52,8 @@ struct ConnectItem
   uintmax_t autoconnect_hold_until;
 };
 
+extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
+extern const char *connect_auth_result_to_string(connect_auth_result_t);
 extern struct ConnectItem *connect_create(void);
 extern void connect_free(struct ConnectItem *);
 extern void connect_dns_lookup(struct ConnectItem *);

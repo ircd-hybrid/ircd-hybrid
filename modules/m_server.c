@@ -381,54 +381,6 @@ server_estab(struct Client *client_p, struct ConnectItem *connect)
   }
 }
 
-static struct ConnectItem *
-server_check(const char *name, struct Client *client_p, const char **error_reason, bool *warn_opers)
-{
-  bool name_match_found = false;
-
-  *warn_opers = true;
-  *error_reason = "No configured connect block";
-
-  list_node_t *node;
-  LIST_FOREACH(node, connect_get_list()->head)
-  {
-    struct ConnectItem *const connect = node->data;
-    if (irccmp(name, connect->name))
-      continue;
-
-    name_match_found = true;
-
-    if (irccmp(connect->host, client_p->host) && irccmp(connect->host, client_p->sockhost))
-    {
-      *error_reason = "Connecting host does not match configured host";
-      continue;
-    }
-
-    if (connect_match_password(client_p->connection->password, connect) == false)
-    {
-      *error_reason = "Invalid password";
-      continue;
-    }
-
-    if (!string_is_empty(connect->tls_cert_fingerprint))
-    {
-      if (string_is_empty(client_p->tls_certfp) || strcasecmp(client_p->tls_certfp, connect->tls_cert_fingerprint))
-      {
-        *error_reason = "Invalid TLS certificate fingerprint";
-        continue;
-      }
-    }
-
-    *error_reason = NULL;
-    return connect;
-  }
-
-  if (name_match_found == false)
-    *warn_opers = ConfigGeneral.warn_no_connect_block != 0;
-
-  return NULL;
-}
-
 /* mr_server()
  *  parv[0] = command
  *  parv[1] = servername
@@ -496,15 +448,16 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *error;
-  bool warn_opers;
-  struct ConnectItem *const connect = server_check(name, source, &error, &warn_opers);
-  if (connect == NULL)
+  struct ConnectItem *connect = NULL;
+  connect_auth_result_t result = connect_authenticate_server(name, source, &connect);
+  if (result != CONNECT_AUTH_SUCCESS)
   {
-    if (warn_opers)
-      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", error, name);
+    const char *reason = connect_auth_result_to_string(result);
+
+    if (result == CONNECT_AUTH_FAIL_NAME && ConfigGeneral.warn_no_connect_block == 0)
+      client_exit(source, reason);
     else
-      client_exit(source, error);
+      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", reason, name);
     return;
   }
 

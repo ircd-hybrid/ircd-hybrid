@@ -23,14 +23,14 @@
  * \brief Includes required functions for processing the GLOBOPS command.
  */
 
+#include "module.h"
 #include "stdinc.h"
 #include "client.h"
+#include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
 
 /*! \brief GLOBOPS command handler
  *

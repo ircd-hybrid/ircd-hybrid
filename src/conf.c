@@ -47,6 +47,7 @@
 #include "conf_connect.h"
 #include "conf_db.h"
 #include "conf_gecos.h"
+#include "conf_oper.h"
 #include "conf_parser.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
@@ -66,9 +67,6 @@
 
 /* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
-
-/* general conf items link list root, other than k lines etc. */
-list_t operator_items;
 
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
@@ -425,44 +423,17 @@ hostmask_expire_temporary(void)
   }
 }
 
-/* map_to_list()
- *
- * inputs       - ConfType conf
- * output       - pointer to list_t to use
- * side effects - none
- */
-static list_t *
-map_to_list(enum maskitem_type type)
-{
-  switch (type)
-  {
-    case CONF_OPER:
-      return &operator_items;
-    default:
-      return NULL;
-  }
-}
-
 struct MaskItem *
 conf_make(enum maskitem_type type)
 {
   struct MaskItem *const conf = io_calloc(sizeof(*conf));
-  list_t *list = NULL;
-
-  conf->type   = type;
-
-  if ((list = map_to_list(type)))
-    list_add(conf, &conf->node, list);
+  conf->type = type;
   return conf;
 }
 
 void
 conf_free(struct MaskItem *conf)
 {
-  list_t *list = map_to_list(conf->type);
-  if (list)
-    list_find_remove(list, conf);
-
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
 
@@ -471,12 +442,8 @@ conf_free(struct MaskItem *conf)
   io_free(conf->name);
   io_free(conf->passwd);
   io_free(conf->reason);
-  io_free(conf->certfp);
-  io_free(conf->whois);
-  io_free(conf->modes);
   io_free(conf->user);
   io_free(conf->host);
-  io_free(conf->addr);
   io_free(conf);
 }
 
@@ -609,57 +576,6 @@ fail:
 
   client_exit_fmt(client, "Connection rejected - %s", reason);
   ++ServerStats.is_ref;
-  return NULL;
-}
-
-/* find_exact_name_conf()
- *
- * inputs       - type of link list to look in
- *		- pointer to name string to find
- *		- pointer to user
- *		- pointer to host
- * output       - NULL or pointer to found struct MaskItem
- * side effects - looks for an exact match on name field
- */
-struct MaskItem *
-operator_find(const struct Client *client, const char *name)
-{
-  list_node_t *node;
-
-  LIST_FOREACH(node, operator_items.head)
-  {
-    struct MaskItem *conf = node->data;
-
-    if (irccmp(conf->name, name) == 0)
-    {
-      if (client == NULL)
-        return conf;
-
-      if (conf->class->max_total &&
-          conf->class->max_total <= conf->class->ref_count)
-        continue;
-
-      if (match(conf->user, client->username) == 0)
-      {
-        switch (conf->htype)
-        {
-          case HM_HOST:
-            if (match(conf->host, client->realhost) == 0 ||
-                match(conf->host, client->sockhost) == 0 || match(conf->host, client->host) == 0)
-              return conf;
-            break;
-          case HM_IPV6:
-          case HM_IPV4:
-            if (address_match(&client->addr, conf->addr, false, false, conf->bits))
-              return conf;
-            break;
-          default:
-            assert(0);
-        }
-      }
-    }
-  }
-
   return NULL;
 }
 
@@ -901,24 +817,8 @@ cleanup_tklines(void *unused)
 static void
 conf_clear(void)
 {
-  list_t *free_items [] = { &operator_items, NULL };
-
-  /* We only need to free anything allocated by yyparse() here.
-   * Resetting structs, etc, is taken care of by conf_set_defaults().
-   */
-
-  for (list_t ** iterator = free_items; *iterator; iterator++)
-  {
-    list_node_t *node, *node_next;
-    LIST_FOREACH_SAFE(node, node_next, (*iterator)->head)
-    {
-      struct MaskItem *conf = node->data;
-      list_remove(&conf->node, *iterator);
-      conf_free(conf);
-    }
-  }
-
   connect_mark_all_inactive();
+
   /*
    * Don't delete the class table, rather mark all entries for deletion.
    * The table is cleaned up by class_delete_marked. - avalon
@@ -944,6 +844,8 @@ conf_clear(void)
   pseudo_clear();  /* Clear pseudo {} items */
 
   log_clear();
+
+  oper_free_all();
 
   /* Clean out ConfigServerInfo */
   io_free(ConfigServerInfo.description);
@@ -1089,7 +991,7 @@ conf_assign_class(struct MaskItem *conf, const char *name)
   {
     conf->class = class_default;
 
-    assert(conf->type == CONF_CLIENT || conf->type == CONF_OPER);
+    assert(conf->type == CONF_CLIENT);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning *** Defaulting to default class for %s@%s",
                    conf->user, conf->host);

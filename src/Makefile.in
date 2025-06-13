@@ -127,7 +127,7 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
 	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
 	conf_connect.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
-	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	conf_oper.$(OBJEXT) conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
 	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
 	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
@@ -176,11 +176,11 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
 	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_connect.Po \
 	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
-	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_parser.Po \
-	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
-	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
-	./$(DEPDIR)/extban.Po ./$(DEPDIR)/extban_account.Po \
-	./$(DEPDIR)/extban_channel.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_oper.Po \
+	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
+	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
+	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/extban.Po \
+	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
@@ -448,6 +448,8 @@ ircd_SOURCES = accept.c          \
                conf_db.h         \
                conf_gecos.c      \
                conf_gecos.h      \
+               conf_oper.c       \
+               conf_oper.h       \
                conf_pseudo.c     \
                conf_pseudo.h     \
                conf_resv.c       \
@@ -634,6 +636,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_db.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_gecos.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_lexer.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_oper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_parser.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_pseudo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_resv.Po@am__quote@ # am--include-marker
@@ -866,6 +869,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/conf_db.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po
+	-rm -f ./$(DEPDIR)/conf_oper.Po
 	-rm -f ./$(DEPDIR)/conf_parser.Po
 	-rm -f ./$(DEPDIR)/conf_pseudo.Po
 	-rm -f ./$(DEPDIR)/conf_resv.Po
@@ -972,6 +976,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/conf_db.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po
+	-rm -f ./$(DEPDIR)/conf_oper.Po
 	-rm -f ./$(DEPDIR)/conf_parser.Po
 	-rm -f ./$(DEPDIR)/conf_pseudo.Po
 	-rm -f ./$(DEPDIR)/conf_resv.Po

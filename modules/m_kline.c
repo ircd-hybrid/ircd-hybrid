@@ -23,26 +23,26 @@
  * \brief Includes required functions for processing the KLINE command.
  */
 
-#include "stdinc.h"
+#include "address.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+#include "stdinc.h"
 #include "client.h"
-#include "io_string.h"
-#include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
-#include "address.h"
+#include "ircd.h"
 #include "numeric.h"
-#include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
 #include "aline.h"
-
 
 static void
 kline_check(const struct AddressRec *arec)

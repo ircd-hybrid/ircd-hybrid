@@ -32,6 +32,7 @@
 #include "numeric.h"
 #include "conf.h"
 #include "conf_connect.h"
+#include "conf_oper.h"
 #include "server.h"
 #include "send.h"
 #include "user_mode.h"

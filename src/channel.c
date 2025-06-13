@@ -38,6 +38,7 @@
 #include "hash.h"
 #include "cap.h"
 #include "conf.h"
+#include "conf_oper.h"
 #include "conf_resv.h"
 #include "ircd.h"
 #include "numeric.h"

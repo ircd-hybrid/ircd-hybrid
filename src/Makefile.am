@@ -40,6 +40,8 @@ ircd_SOURCES = accept.c          \
                conf_db.h         \
                conf_gecos.c      \
                conf_gecos.h      \
+               conf_oper.c       \
+               conf_oper.h       \
                conf_pseudo.c     \
                conf_pseudo.h     \
                conf_resv.c       \

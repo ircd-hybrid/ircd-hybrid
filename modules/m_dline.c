@@ -30,6 +30,7 @@
 #include "io_string.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
 #include "address.h"

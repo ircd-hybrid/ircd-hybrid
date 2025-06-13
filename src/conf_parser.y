@@ -40,6 +40,7 @@
 #include "conf_cluster.h"
 #include "conf_connect.h"
 #include "conf_gecos.h"
+#include "conf_oper.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
@@ -919,7 +920,7 @@ oper_entry: OPERATOR
     break;
 
   reset_block_state();
-  block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+  block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 } '{' oper_items '}' ';'
 {
   list_node_t *node;
@@ -953,29 +954,25 @@ oper_entry: OPERATOR
 
     nuh_split(&nuh);
 
-    struct MaskItem *conf = conf_make(CONF_OPER);
-    conf->addr = io_calloc(sizeof(*conf->addr));
-    conf->name = io_strdup(block_state.name.buf);
-    conf->user = io_strdup(block_state.user.buf);
-    conf->host = io_strdup(block_state.host.buf);
+    struct OperItem *const oper = oper_create();
+    oper->name = io_strdup(block_state.name.buf);
+    oper->user = io_strdup(block_state.user.buf);
+    oper->host = io_strdup(block_state.host.buf);
 
     if (block_state.cert.buf[0])
-      conf->certfp = io_strdup(block_state.cert.buf);
-
+      oper->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
     if (block_state.rpass.buf[0])
-      conf->passwd = io_strdup(block_state.rpass.buf);
-
+      oper->password = io_strdup(block_state.rpass.buf);
     if (block_state.whois.buf[0])
-      conf->whois = io_strdup(block_state.whois.buf);
-
+      oper->whois = io_strdup(block_state.whois.buf);
     if (block_state.modes.buf[0])
-      conf->modes = io_strdup(block_state.modes.buf);
+      oper->modes = io_strdup(block_state.modes.buf);
 
-    conf->flags = block_state.flags.value;
-    conf->port  = block_state.port.value;
-    conf->htype = address_parse_netmask(conf->host, conf->addr, &conf->bits);
+    oper->flags = block_state.flags.value;
+    oper->oper_privs = block_state.port.value;
+    oper->htype = address_parse_netmask(oper->host, &oper->addr, &oper->bits);
 
-    conf_assign_class(conf, block_state.class.buf);
+    oper_assign_class(oper, block_state.class.buf);
   }
 };
 
@@ -1022,9 +1019,9 @@ oper_encrypted: ENCRYPTED '=' TBOOL ';'
     break;
 
   if (yylval.number)
-    block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
   else
-    block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value &= ~OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 };
 
 oper_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
@@ -1039,9 +1036,9 @@ oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
     break;
 
   if (yylval.number)
-    block_state.flags.value |= CONF_FLAGS_TLS;
+    block_state.flags.value |= OPER_CONF_FLAG_REQUIRE_TLS;
   else
-    block_state.flags.value &= ~CONF_FLAGS_TLS;
+    block_state.flags.value &= ~OPER_CONF_FLAG_REQUIRE_TLS;
 };
 
 oper_class: CLASS '=' QSTRING ';'

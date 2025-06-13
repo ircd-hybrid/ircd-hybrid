@@ -27,6 +27,7 @@
 #include "nuh.h"
 #include "numeric.h"
 #include "conf.h"
+#include "conf_oper.h"
 #include "client.h"
 #include "send.h"
 #include "aline.h"

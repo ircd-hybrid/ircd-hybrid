@@ -40,7 +40,6 @@ enum maskitem_type
   CONF_KLINE,
   CONF_DLINE,
   CONF_EXEMPT,
-  CONF_OPER
 };
 
 /* MaskItem->flags */
@@ -57,7 +56,6 @@ enum
   CONF_FLAGS_ENCRYPTED       = 1 <<  9,
   CONF_FLAGS_IN_DATABASE     = 1 << 10,
   CONF_FLAGS_EXEMPTRESV      = 1 << 11,
-  CONF_FLAGS_TLS             = 1 << 12,
   CONF_FLAGS_WEBIRC          = 1 << 13,
   CONF_FLAGS_EXEMPTXLINE     = 1 << 14
 };
@@ -82,7 +80,6 @@ enum
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
 #define IsConfRedir(x)            ((x)->flags & CONF_FLAGS_REDIR)
-#define IsConfTLS(x)              ((x)->flags & CONF_FLAGS_TLS)
 #define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
 #define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 
@@ -102,16 +99,12 @@ struct MaskItem
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
   uintmax_t          timeout;
-  struct io_addr  *addr;  /* ip to connect to */
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */
   char              *host;     /* host part of user@host */
   char              *passwd;
   char              *reason;
-  char              *certfp;
-  char              *whois;
-  char              *modes;
 };
 
 struct conf_parser_context
@@ -285,7 +278,6 @@ struct AddressRec
 };
 
 extern list_t atable[ADDRESS_HASHSIZE];
-extern list_t operator_items;
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;
@@ -310,5 +302,4 @@ extern struct MaskItem *conf_make(enum maskitem_type);
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
 extern struct MaskItem *find_dline_conf(const struct io_addr *);
-extern struct MaskItem *operator_find(const struct Client *, const char *);
 #endif  /* INCLUDED_conf_h */

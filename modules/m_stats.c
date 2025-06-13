@@ -238,18 +238,18 @@ stats_operator(struct Client *client, int parc, char *parv[])
   }
 
   list_node_t *node;
-  LIST_FOREACH(node, operator_items.head)
+  LIST_FOREACH(node, oper_get_list()->head)
   {
-    const struct MaskItem *conf = node->data;
+    const struct OperItem *oper = node->data;
 
     /* Don't allow non opers to see oper privs */
     if (user_mode_has_flag(client, UMODE_OPER))
-      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                         conf->name, oper_privs_as_string(conf->port),
-                         conf->class->name);
+      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
+                         oper->name, oper_privs_as_string(oper->oper_privs),
+                         oper->class->name);
     else
-      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', conf->user, conf->host,
-                         conf->name, "0", conf->class->name);
+      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
+                         oper->name, "0", oper->class->name);
   }
 }
 

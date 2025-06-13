@@ -23,22 +23,22 @@
  * \brief Includes required functions for processing the KILL command.
  */
 
-#include "stdinc.h"
+#include "io_string.h"
 #include "list.h"
+#include "log.h"
+#include "module.h"
+#include "stdinc.h"
 #include "client.h"
+#include "conf.h"
+#include "conf_oper.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "log.h"
-#include "server.h"
-#include "conf.h"
+#include "parse.h"
 #include "send.h"
+#include "server.h"
 #include "user_mode.h"
 #include "whowas.h"
-#include "io_string.h"
-#include "parse.h"
-#include "module.h"
-
 
 /*! \brief KILL command handler
  *

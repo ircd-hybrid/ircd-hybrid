@@ -38,6 +38,7 @@
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_connect.h"
+#include "conf_oper.h"
 
 /** Client connection states */
 enum
@@ -154,41 +155,6 @@ extern uint64_t UMODE_SERVNOTICE;
 extern uint64_t UMODE_WALLOP;
 extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
-
-/** irc-operator privilege flags */
-enum
-{
-  OPER_FLAG_ADMIN          = 1 <<  0,  /**< Oper can set user mode +a */
-  OPER_FLAG_CLOSE          = 1 <<  1,  /**< Oper can use CLOSE command */
-  OPER_FLAG_CONNECT        = 1 <<  2,  /**< Oper can do local CONNECT */
-  OPER_FLAG_CONNECT_REMOTE = 1 <<  3,  /**< Oper can do remote CONNECT */
-  OPER_FLAG_DIE            = 1 <<  4,  /**< Oper can use DIE command */
-  OPER_FLAG_DLINE          = 1 <<  5,  /**< Oper can use DLINE command */
-  OPER_FLAG_GLOBOPS        = 1 <<  6,  /**< Oper can use GLOBOPS command */
-  OPER_FLAG_JOIN_RESV      = 1 <<  7,  /**< Oper can use JOIN on resv {} channels */
-  OPER_FLAG_KILL           = 1 <<  8,  /**< Oper can KILL local users */
-  OPER_FLAG_KILL_REMOTE    = 1 <<  9,  /**< Oper can KILL remote users */
-  OPER_FLAG_KLINE          = 1 << 10,  /**< Oper can use KLINE command */
-  OPER_FLAG_LOCOPS         = 1 << 11,  /**< Oper can use LOCOPS command */
-  OPER_FLAG_MODULE         = 1 << 12,  /**< Oper can use MODULE command */
-  OPER_FLAG_NICK_RESV      = 1 << 13,  /**< Oper can use NICK on resv {} nicks */
-  OPER_FLAG_OPME           = 1 << 14,  /**< Oper can use OPME command */
-  OPER_FLAG_REHASH         = 1 << 15,  /**< Oper can use REHASH command */
-  OPER_FLAG_REHASH_REMOTE  = 1 << 16,  /**< Oper can do remote REHASH command */
-  OPER_FLAG_REMOTEBAN      = 1 << 17,  /**< Oper can set remote bans */
-  OPER_FLAG_RESTART        = 1 << 18,  /**< Oper can use RESTART command */
-  OPER_FLAG_RESV           = 1 << 19,  /**< Oper can use RESV command */
-  OPER_FLAG_SET            = 1 << 20,  /**< Oper can use SET command */
-  OPER_FLAG_SQUIT          = 1 << 21,  /**< Oper can do local SQUIT */
-  OPER_FLAG_SQUIT_REMOTE   = 1 << 22,  /**< Oper can do remote SQUIT */
-  OPER_FLAG_UNDLINE        = 1 << 23,  /**< Oper can use UNDLINE command */
-  OPER_FLAG_UNKLINE        = 1 << 24,  /**< Oper can use UNKLINE command */
-  OPER_FLAG_UNRESV         = 1 << 25,  /**< Oper can use UNRESV command */
-  OPER_FLAG_UNXLINE        = 1 << 26,  /**< Oper can use UNXLINE command */
-  OPER_FLAG_WALLOPS        = 1 << 27,  /**< Oper can use WALLOPS command */
-  OPER_FLAG_XLINE          = 1 << 28,  /**< Oper can use XLINE command */
-  OPER_FLAG_MESSAGE_MASS   = 1 << 29,  /**< Oper can send mass messages */
-};
 
 #define HasOFlag(x, y) ((x)->connection->operflags &   (y))
 #define AddOFlag(x, y) ((x)->connection->operflags |=  (y))

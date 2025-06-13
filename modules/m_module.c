@@ -23,16 +23,18 @@
  * \brief Includes required functions for processing the MODULE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
 #include "io_string.h"
+#include "list.h"
+#include "log.h"
+#include "module.h"
+
+#include "stdinc.h"
+#include "client.h"
+#include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "log.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 #include "user_mode.h"
 
 static void

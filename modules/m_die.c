@@ -27,6 +27,7 @@
 #include "module.h"
 #include "io_string.h"
 #include "client.h"
+#include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

@@ -44,15 +44,21 @@
  * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *client, const struct MaskItem *conf)
+oper_up(struct Client *client, const struct OperItem *oper)
 {
-  AddOFlag(client, conf->port);
+  client_set_class(client, oper->class, CLIENT_CLASS_OPER);
+
+  assert(client->connection->oper_name == NULL);
+  io_free(client->connection->oper_name);
+  client->connection->oper_name = io_strdup(oper->name);
+
+  AddOFlag(client, oper->oper_privs);
 
   uint64_t mode_flags_old = client->umodes;
   uint64_t mode_flags_add = UMODE_OPER | UMODE_ADMIN;
 
-  if (conf->modes)
-    mode_flags_add |= user_mode_string_to_flags(conf->modes);
+  if (oper->modes)
+    mode_flags_add |= user_mode_string_to_flags(oper->modes);
   else if (ConfigGeneral.oper_umodes)
     mode_flags_add |= user_mode_string_to_flags(ConfigGeneral.oper_umodes);
 
@@ -61,15 +67,15 @@ oper_up(struct Client *client, const struct MaskItem *conf)
 
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
-  if (!string_is_empty(conf->whois))
+  if (!string_is_empty(oper->whois))
   {
-    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
+    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", oper->whois);
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, conf->whois);
+                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, oper->whois);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-            conf->name, client_get_name(client, HIDE_IP));
+            oper->name, client_get_name(client, HIDE_IP));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
                  client_get_oper_name(client));
@@ -84,19 +90,17 @@ oper_up(struct Client *client, const struct MaskItem *conf)
  * \param reason   The reason why they have failed
  */
 static void
-failed_oper_notice(struct Client *source, enum irc_numerics numeric,
-                   const char *name, const char *reason)
+failed_oper_notice(struct Client *client, const char *name, oper_auth_result_t result)
 {
-  if (numeric)
-    sendto_one_numeric(source, &me, numeric);
+  const char *reason = oper_auth_result_to_string(result);
 
   if (ConfigGeneral.failed_oper_notice)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Failed OPER attempt as %s by %s - %s",
-                   name, client_get_name(source, HIDE_IP), reason);
+                   "Failed OPER attempt as [%s] by %s (%s)",
+                   name, client_get_name(client, HIDE_IP), reason);
 
-  log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
-            name, client_get_name(source, HIDE_IP), reason);
+  log_write(LOG_TYPE_OPER, "Failed OPER attempt as [%s] by %s (%s)",
+            name, client_get_name(client, HIDE_IP), reason);
 }
 
 /*! \brief OPER command handler
@@ -117,42 +121,27 @@ m_oper(struct Client *source, int parc, char *parv[])
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
-  struct MaskItem *conf = operator_find(source, opername);
-  if (conf == NULL)
+  struct OperItem *oper = NULL;
+  oper_auth_result_t result = oper_authenticate(source, opername, password, &oper);
+  if (result == OPER_AUTH_SUCCESS)
   {
-    conf = operator_find(NULL, opername);
-    failed_oper_notice(source, ERR_NOOPERHOST, opername, conf ? "host mismatch" : "no operator {} block");
+    assert(oper);
+
+    oper_up(source, oper);
     return;
   }
 
-  if (IsConfTLS(conf) && user_mode_has_flag(source, UMODE_SECURE) == false)
+  failed_oper_notice(source, opername, result);
+
+  switch (result)
   {
-    failed_oper_notice(source, ERR_NOOPERHOST, opername, "requires TLS");
-    return;
+    case OPER_AUTH_FAIL_PASSWORD:
+      sendto_one_numeric(source, &me, ERR_PASSWDMISMATCH);
+      break;
+    default:
+      sendto_one_numeric(source, &me, ERR_NOOPERHOST);
+      break;
   }
-
-  if (!string_is_empty(conf->certfp))
-  {
-    if (string_is_empty(source->tls_certfp) || strcasecmp(source->tls_certfp, conf->certfp))
-    {
-      failed_oper_notice(source, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
-      return;
-    }
-  }
-
-  if (conf_match_password(password, conf) == false)
-  {
-    failed_oper_notice(source, ERR_PASSWDMISMATCH, opername, "password mismatch");
-    return;
-  }
-
-  client_set_class(source, conf->class, CLIENT_CLASS_OPER);
-
-  assert(source->connection->oper_name == NULL);
-  io_free(source->connection->oper_name);
-  source->connection->oper_name = io_strdup(conf->name);
-
-  oper_up(source, conf);
 }
 
 /*! \brief OPER command handler

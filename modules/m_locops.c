@@ -23,18 +23,18 @@
  * \brief Includes required functions for processing the LOCOPS command.
  */
 
+#include "io_string.h"
+#include "module.h"
 #include "stdinc.h"
 #include "client.h"
 #include "ircd.h"
-#include "io_string.h"
-#include "numeric.h"
-#include "send.h"
 #include "conf_cluster.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
-#include "server_capab.h"
+#include "numeric.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
+#include "server_capab.h"
 
 /*! \brief LOCOPS command handler
  *

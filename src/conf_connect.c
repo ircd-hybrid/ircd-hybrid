@@ -1,8 +1,29 @@
-#include "stdinc.h"
-#include "memory.h"
+/*
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
+ *
+ *  Copyright (c) 1997-2025 ircd-hybrid development team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ *  USA
+ */
+
 #include "io_string.h"
+#include "memory.h"
 #include "res.h"
 #include "reslib.h"
+#include "stdinc.h"
 #include "client.h"
 #include "conf_connect.h"
 #include "conf_class.h"
@@ -76,6 +97,8 @@ connect_free(struct ConnectItem *connect)
   if (connect->send_password)
     memset(connect->send_password, 0, strlen(connect->send_password));
 
+  connect->class = NULL;
+
   io_free(connect->name);
   io_free(connect->host);
   io_free(connect->accept_password);
@@ -148,8 +171,8 @@ connect_find(const char *name)
   return NULL;
 }
 
-bool
-connect_match_password(const char *password, const struct ConnectItem *connect)
+static bool
+connect_match_password(const struct ConnectItem *connect, const char *password)
 {
   if (string_is_empty(password) || string_is_empty(connect->accept_password))
     return false;
@@ -178,11 +201,12 @@ connect_authenticate_server(const char *server_name, const struct Client *client
     if (irccmp(server_name, connect->name))
       continue;
 
-    if (result < CONNECT_AUTH_FAIL_HOST)
-      result = CONNECT_AUTH_FAIL_HOST;
-
     if (irccmp(connect->host, client->host) && irccmp(connect->host, client->sockhost))
+    {
+      if (result < CONNECT_AUTH_FAIL_HOST)
+        result = CONNECT_AUTH_FAIL_HOST;
       continue;
+    }
 
     if ((connect->flags & CONNECT_FLAG_USE_TLS) && !HasFlag(client, FLAGS_TLS))
     {
@@ -191,17 +215,15 @@ connect_authenticate_server(const char *server_name, const struct Client *client
       continue;
     }
 
-    if (!string_is_empty(connect->tls_cert_fingerprint))
+    if (!string_is_empty(connect->tls_cert_fingerprint) &&
+        (string_is_empty(client->tls_certfp) || strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint)))
     {
-      if (string_is_empty(client->tls_certfp) || strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint))
-      {
-        if (result < CONNECT_AUTH_FAIL_CERTFP)
-          result = CONNECT_AUTH_FAIL_CERTFP;
-        continue;
-      }
+      if (result < CONNECT_AUTH_FAIL_CERTFP)
+        result = CONNECT_AUTH_FAIL_CERTFP;
+      continue;
     }
 
-    if (connect_match_password(client->connection->password, connect) == false)
+    if (connect_match_password(connect, client->connection->password) == false)
     {
       if (result < CONNECT_AUTH_FAIL_PASSWORD)
         result = CONNECT_AUTH_FAIL_PASSWORD;
@@ -253,5 +275,5 @@ connect_auth_result_to_string(connect_auth_result_t result)
     case CONNECT_AUTH_FAIL_CERTFP:    return "Invalid TLS certificate fingerprint";
   }
 
-  return "Unknown connect authentication result";
+  return "Unknown authentication result";
 }

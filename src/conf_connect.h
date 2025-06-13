@@ -1,3 +1,24 @@
+/*
+ *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
+ *
+ *  Copyright (c) 1997-2025 ircd-hybrid development team
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+ *  USA
+ */
+
 #ifndef INCLUDED_conf_connect_h
 #define INCLUDED_conf_connect_h
 
@@ -52,17 +73,16 @@ struct ConnectItem
   uintmax_t autoconnect_hold_until;
 };
 
-extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
-extern const char *connect_auth_result_to_string(connect_auth_result_t);
-extern struct ConnectItem *connect_create(void);
-extern void connect_free(struct ConnectItem *);
-extern void connect_dns_lookup(struct ConnectItem *);
-extern void connect_mark_all_inactive(void);
-extern void connect_free_inactive(void);
 extern void connect_assign_class(struct ConnectItem *, const char *);
-extern bool connect_match_password(const char *, const struct ConnectItem *);
-extern struct ConnectItem *connect_find(const char *);
-extern list_t *connect_get_list(void);
-extern void connect_incref(struct ConnectItem *);
 extern void connect_decref(struct ConnectItem *);
+extern void connect_dns_lookup(struct ConnectItem *);
+extern void connect_free(struct ConnectItem *);
+extern void connect_free_inactive(void);
+extern void connect_incref(struct ConnectItem *);
+extern void connect_mark_all_inactive(void);
+extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
+extern list_t *connect_get_list(void);
+extern struct ConnectItem *connect_create(void);
+extern struct ConnectItem *connect_find(const char *);
+extern const char *connect_auth_result_to_string(connect_auth_result_t);
 #endif  /* INCLUDED_conf_connect_h */

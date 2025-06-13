@@ -19,9 +19,9 @@
  *  USA
  */
 
-#include "stdinc.h"
-#include "memory.h"
 #include "io_string.h"
+#include "memory.h"
+#include "stdinc.h"
 #include "client.h"
 #include "conf_class.h"
 #include "conf_oper.h"
@@ -73,6 +73,8 @@ oper_free(struct OperItem *oper)
   if (oper->password)
     memset(oper->password, 0, strlen(oper->password));
 
+  oper->class = NULL;
+
   io_free(oper->name);
   io_free(oper->user);
   io_free(oper->host);
@@ -106,7 +108,6 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
   assert(oper_out);
 
   *oper_out = NULL;
-
   oper_auth_result_t result = OPER_AUTH_FAIL_NAME;
 
   list_node_t *node;
@@ -115,9 +116,6 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
     struct OperItem *const oper = node->data;
     if (irccmp(oper->name, oper_name))
       continue;
-
-    if (result < OPER_AUTH_FAIL_HOST)
-      result = OPER_AUTH_FAIL_HOST;
 
     bool host_match = false;
     if (match(oper->user, client->username) == 0)
@@ -136,7 +134,11 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
     }
 
     if (host_match == false)
+    {
+      if (result < OPER_AUTH_FAIL_HOST)
+        result = OPER_AUTH_FAIL_HOST;
       continue;
+    }
 
     if ((oper->flags & OPER_CONF_FLAG_REQUIRE_TLS) && !user_mode_has_flag(client, UMODE_SECURE))
     {
@@ -181,7 +183,7 @@ oper_auth_result_to_string(oper_auth_result_t result)
     case OPER_AUTH_FAIL_CLASS_FULL:  return "Operator class limit reached";
   }
 
-  return "Unknown oper authentication result";
+  return "Unknown authentication result";
 }
 
 list_t *

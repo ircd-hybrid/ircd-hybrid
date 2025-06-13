@@ -89,7 +89,7 @@ struct OperItem
   char *host;
   char *password;
   char *tls_cert_fingerprint;
-  char *whois;
+  char *whois_text;
   char *modes;
   struct ClassItem *class;
   enum hostmask_type htype;

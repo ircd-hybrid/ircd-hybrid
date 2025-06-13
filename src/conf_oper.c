@@ -78,7 +78,7 @@ oper_free(struct OperItem *oper)
   io_free(oper->host);
   io_free(oper->password);
   io_free(oper->tls_cert_fingerprint);
-  io_free(oper->whois);
+  io_free(oper->whois_text);
   io_free(oper->modes);
   io_free(oper);
 }

@@ -4235,7 +4235,7 @@ yyreduce:
     if (block_state.rpass.buf[0])
       oper->password = io_strdup(block_state.rpass.buf);
     if (block_state.whois.buf[0])
-      oper->whois = io_strdup(block_state.whois.buf);
+      oper->whois_text = io_strdup(block_state.whois.buf);
     if (block_state.modes.buf[0])
       oper->modes = io_strdup(block_state.modes.buf);
 

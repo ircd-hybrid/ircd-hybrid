@@ -67,11 +67,11 @@ oper_up(struct Client *client, const struct OperItem *oper)
 
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
-  if (!string_is_empty(oper->whois))
+  if (!string_is_empty(oper->whois_text))
   {
-    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", oper->whois);
+    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", oper->whois_text);
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, oper->whois);
+                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, oper->whois_text);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",

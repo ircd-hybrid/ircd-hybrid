@@ -334,38 +334,38 @@ nick_change_remote(struct Client *source, char *parv[])
 static void
 uid_from_server(struct Client *source, int parc, char *parv[])
 {
-  struct Client *client_p = client_make(source->from);
-  client_p->servptr = source;
-  client_p->hopcount = atoi(parv[2]);
-  client_p->tsinfo = strtoumax(parv[3], NULL, 10);
+  struct Client *client = client_make(source->from);
+  client->servptr = source;
+  client->hopcount = atoi(parv[2]);
+  client->tsinfo = strtoumax(parv[3], NULL, 10);
 
-  strlcpy(client_p->name, parv[1], sizeof(client_p->name));
-  strlcpy(client_p->username, parv[5], sizeof(client_p->username));
-  strlcpy(client_p->host, parv[6], sizeof(client_p->host));
-  strlcpy(client_p->realhost, parv[7], sizeof(client_p->realhost));
-  strlcpy(client_p->sockhost, parv[8], sizeof(client_p->sockhost));
-  strlcpy(client_p->id, parv[9], sizeof(client_p->id));
-  strlcpy(client_p->account, parv[10], sizeof(client_p->account));
-  strlcpy(client_p->info, parv[11], sizeof(client_p->info));
+  strlcpy(client->name, parv[1], sizeof(client->name));
+  strlcpy(client->username, parv[5], sizeof(client->username));
+  strlcpy(client->host, parv[6], sizeof(client->host));
+  strlcpy(client->realhost, parv[7], sizeof(client->realhost));
+  strlcpy(client->sockhost, parv[8], sizeof(client->sockhost));
+  strlcpy(client->id, parv[9], sizeof(client->id));
+  strlcpy(client->account, parv[10], sizeof(client->account));
+  strlcpy(client->info, parv[11], sizeof(client->info));
 
-  if (address_from_string(client_p->sockhost, &client_p->addr))
+  if (address_from_string(client->sockhost, &client->addr))
   {
-    struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->addr);
+    struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
     ++ipcache->count_remote;
-    AddFlag(client_p, FLAGS_IPHASH);
+    AddFlag(client, FLAGS_IPHASH);
   }
 
-  hash_add_client(client_p);
-  hash_add_id(client_p);
+  hash_add_client(client);
+  hash_add_id(client);
 
   /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
     const struct UserMode *mode = user_mode_find(*m);
-    user_mode_set_mode_exec(client_p, mode, USER_MODE_SOURCE_REGULAR);
+    user_mode_set_mode_exec(client, mode, USER_MODE_SOURCE_REGULAR);
   }
 
-  user_register_remote(client_p);
+  user_register_remote(client);
 }
 
 /*!

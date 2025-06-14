@@ -156,12 +156,12 @@ ms_squit(struct Client *source, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, local_server_list.head)
     {
-      struct Client *client_p = node->data;
+      struct Client *client = node->data;
 
-      if (client_p == target || client_p == source->from)
+      if (client == target || client == source->from)
         continue;
 
-      sendto_one(client_p, ":%s SQUIT %s :%s",
+      sendto_one(client, ":%s SQUIT %s :%s",
                  source->id, target->id, comment);
     }
   }

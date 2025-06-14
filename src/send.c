@@ -244,12 +244,12 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
-  const char *dest = ID_or_name(to, to);
+  const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
     dest = "*";
 
   struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
+  dbuf_put_fmt(buffer, ":%s %03d %s ", client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_list args;
   va_start(args, numeric);
@@ -274,12 +274,12 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
   if (IsDead(to->from))
     return;  /* This socket has already been marked as dead */
 
-  const char *dest = ID_or_name(to, to);
+  const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
     dest = "*";
 
   struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
+  dbuf_put_fmt(buffer, ":%s NOTICE %s ", client_get_id_or_name(from, to), dest);
 
   va_list args;
   va_start(args, format);
@@ -312,7 +312,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
                  from->name, from->username, from->host, command, to->name);
   else
     dbuf_put_fmt(buffer, ":%s %s %s ",
-                 ID_or_name(from, to), command, ID_or_name(to, to));
+                 client_get_id_or_name(from, to), command, client_get_id_or_name(to, to));
 
   va_list args;
   va_start(args, format);

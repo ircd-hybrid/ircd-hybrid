@@ -287,7 +287,7 @@ check_pings_list(list_t *list)
          */
         AddFlag(client, FLAGS_PINGSENT);
         client->connection->last_ping = io_time_get(IO_TIME_MONOTONIC_SEC) - ping;
-        sendto_one(client, "PING :%s", ID_or_name(&me, client));
+        sendto_one(client, "PING :%s", client_get_id_or_name(&me, client));
       }
       else
       {

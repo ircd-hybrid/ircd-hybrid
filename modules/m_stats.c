@@ -1064,9 +1064,9 @@ parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, boo
   if (string_is_empty(name))
     return NULL;
 
-  if (irccmp(name, ID_or_name(&me, client)) == 0)
+  if (irccmp(name, client_get_id_or_name(&me, client)) == 0)
     *doall = true;
-  else if (match(name, ID_or_name(&me, client)) == 0)
+  else if (match(name, client_get_id_or_name(&me, client)) == 0)
     *doall = true;
 
   *wilds = has_wildcards(name);

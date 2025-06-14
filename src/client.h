@@ -59,8 +59,6 @@ enum
   REG_INIT      = REG_NEED_USER | REG_NEED_NICK
 };
 
-#define ID_or_name(x,client_p)  ((IsServer(client_p->from) && (x)->id[0]) ? (x)->id : (x)->name)
-
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
 #define IsHandshake(x)          ((x)->status == STAT_HANDSHAKE)
 #define IsMe(x)                 ((x)->status == STAT_ME)
@@ -380,6 +378,15 @@ extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
+
+static inline const char *
+client_get_id_or_name(const struct Client *subject_client, const struct Client *context_client)
+{
+  if (IsServer(context_client->from) && subject_client->id[0])
+    return subject_client->id;
+
+  return subject_client->name;
+}
 
 static inline struct ClassItem *
 client_get_active_class(const struct Client *client)

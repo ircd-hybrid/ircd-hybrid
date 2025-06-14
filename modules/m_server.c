@@ -149,11 +149,11 @@ server_reject_introduction(struct Client *introducer, server_rejection_reason_t 
 }
 
 /*! Parses server flags to be potentially set
- * \param client_p Pointer to server's Client structure
+ * \param client Pointer to server's Client structure
  * \param flags    Pointer to the flag string to be parsed
  */
 static void
-server_set_flags(struct Client *client_p, const char *flags)
+server_set_flags(struct Client *client, const char *flags)
 {
   const unsigned char *p = (const unsigned char *)flags;
 
@@ -165,7 +165,7 @@ server_set_flags(struct Client *client_p, const char *flags)
     switch (*p)
     {
       case 'h':
-        AddFlag(client_p, FLAGS_HIDDEN);
+        AddFlag(client, FLAGS_HIDDEN);
         break;
       default:
         break;
@@ -178,14 +178,14 @@ server_set_flags(struct Client *client_p, const char *flags)
  * inputs       - client (server) to send nick towards
  *          - client to send nick for
  * output       - NONE
- * side effects - NICK message is sent towards given client_p
+ * side effects - NICK message is sent towards given client
  */
 static void
-server_send_client(struct Client *client_p, struct Client *target)
+server_send_client(struct Client *client, struct Client *target)
 {
   assert(IsClient(target));
 
-  sendto_one(client_p, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
+  sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target->servptr->id,
              target->name, target->hopcount + 1,
              target->tsinfo, user_mode_to_str(target->umodes),
@@ -194,20 +194,20 @@ server_send_client(struct Client *client_p, struct Client *target)
              target->account, target->info);
 
   if (!string_is_empty(target->tls_certfp))
-    sendto_one(client_p, ":%s CERTFP %s", target->id, target->tls_certfp);
+    sendto_one(client, ":%s CERTFP %s", target->id, target->tls_certfp);
 
   if (!string_is_empty(target->tls_cipher))
-    sendto_one(client_p, ":%s METADATA client %s cipher :%s",
+    sendto_one(client, ":%s METADATA client %s cipher :%s",
                target->servptr->id, target->id, target->tls_cipher);
 
   if (target->away)
-    sendto_one(client_p, ":%s AWAY :%s", target->id, target->away);
+    sendto_one(client, ":%s AWAY :%s", target->id, target->away);
 
   list_node_t *node;
   LIST_FOREACH_PREV(node, target->svstags.tail)
   {
     const struct ServicesTag *svstag = node->data;
-    sendto_one(client_p, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
+    sendto_one(client, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
                target->id, target->tsinfo, svstag->numeric,
                user_mode_to_str(svstag->umodes), svstag->tag);
   }
@@ -217,10 +217,10 @@ server_send_client(struct Client *client_p, struct Client *target)
  *
  * inputs       - pointer to server to send burst to
  * output       - NONE
- * side effects - complete burst of channels/nicks is sent to client_p
+ * side effects - complete burst of channels/nicks is sent to client
  */
 static void
-server_burst(struct Client *client_p)
+server_burst(struct Client *client)
 {
   list_node_t *node;
 
@@ -228,8 +228,8 @@ server_burst(struct Client *client_p)
   {
     struct Client *target = node->data;
 
-    if (target->from != client_p)
-      server_send_client(client_p, target);
+    if (target->from != client)
+      server_send_client(client, target);
   }
 
   LIST_FOREACH(node, channel_get_list()->head)
@@ -238,11 +238,11 @@ server_burst(struct Client *client_p)
 
     assert(list_length(&channel->members) != 0);
     if (list_length(&channel->members))
-      channel_send_modes(client_p, channel);
+      channel_send_modes(client, channel);
   }
 
   /* Always send a PING after connect burst is done */
-  sendto_one(client_p, "PING :%s", me.id);
+  sendto_one(client, "PING :%s", me.id);
 }
 
 /* server_estab()
@@ -252,89 +252,89 @@ server_burst(struct Client *client_p)
  * side effects -
  */
 static void
-server_estab(struct Client *client_p, struct ConnectItem *connect)
+server_estab(struct Client *client, struct ConnectItem *connect)
 {
-  if (IsUnknown(client_p))
+  if (IsUnknown(client))
   {
-    sendto_one(client_p, "PASS %s", connect->send_password);
+    sendto_one(client, "PASS %s", connect->send_password);
 
-    sendto_one(client_p, "CAPAB :%s", capab_get(NULL, true));
+    sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
 
-    sendto_one(client_p, "SERVER %s 1 %s +%s :%s",
+    sendto_one(client, "SERVER %s 1 %s +%s :%s",
                me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
   }
 
-  sendto_one(client_p, ":%s SVINFO %u %u 0 :%ju",
+  sendto_one(client, ":%s SVINFO %u %u 0 :%ju",
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
-  SetServer(client_p);
-  client_p->servptr = &me;
+  SetServer(client);
+  client->servptr = &me;
 
-  list_add(client_p, &client_p->lnode, &me.serv->server_list);
+  list_add(client, &client->lnode, &me.serv->server_list);
 
-  assert(list_find(&unknown_list, client_p));
-  list_move_node(&client_p->connection->node, &unknown_list, &local_server_list);
+  assert(list_find(&unknown_list, client));
+  list_move_node(&client->connection->node, &unknown_list, &local_server_list);
 
-  list_add(client_p, &client_p->node, &global_server_list);
+  list_add(client, &client->node, &global_server_list);
 
   if ((list_length(&local_client_list) +
        list_length(&local_server_list)) > Count.max_loc_con)
     Count.max_loc_con = list_length(&local_client_list) +
                         list_length(&local_server_list);
 
-  hash_add_client(client_p);
-  hash_add_id(client_p);
+  hash_add_client(client);
+  hash_add_id(client);
 
-  /* Doesn't duplicate client_p->serv if allocated this struct already */
-  server_make(client_p);
+  /* Doesn't duplicate client->serv if allocated this struct already */
+  server_make(client);
 
-  server_conf_set(client_p, connect);
+  server_conf_set(client, connect);
 
   /* Fixing eob timings.. -gnp */
-  client_p->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-  client_p->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
 
-  if (service_find(client_p->name, irccmp))
-    AddFlag(client_p, FLAGS_SERVICE);
+  if (service_find(client->name, irccmp))
+    AddFlag(client, FLAGS_SERVICE);
 
   /* Show the real host/IP to admins */
-  if (tls_isusing(&client_p->connection->fd->tls))
+  if (tls_isusing(&client->connection->fd->tls))
   {
-    client_p->tls_cipher = io_strdup(tls_get_cipher(&client_p->connection->fd->tls));
+    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
 
     /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                   client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-                   capab_get(client_p, true));
+                   client_get_name(client, SHOW_IP), client->tls_cipher,
+                   capab_get(client, true));
 
     /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                   client_get_name(client_p, MASK_IP), client_p->tls_cipher,
-                   capab_get(client_p, true));
+                   client_get_name(client, MASK_IP), client->tls_cipher,
+                   capab_get(client, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
-              client_get_name(client_p, SHOW_IP), client_p->tls_cipher,
-              capab_get(client_p, true));
+              client_get_name(client, SHOW_IP), client->tls_cipher,
+              capab_get(client, true));
   }
   else
   {
     /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
-                   client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
+                   client_get_name(client, SHOW_IP), capab_get(client, true));
     /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
-                   client_get_name(client_p, MASK_IP), capab_get(client_p, true));
+                   client_get_name(client, MASK_IP), capab_get(client, true));
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
-              client_get_name(client_p, SHOW_IP), capab_get(client_p, true));
+              client_get_name(client, SHOW_IP), capab_get(client, true));
   }
 
-  fd_note(client_p->connection->fd, "Server: %s", client_p->name);
+  fd_note(client->connection->fd, "Server: %s", client->name);
 
-  sendto_servers(client_p, 0, 0, ":%s SID %s 2 %s +%s :%s",
-                 me.id, client_p->name, client_p->id, IsHidden(client_p) ? "h" : "", client_p->info);
+  sendto_servers(client, 0, 0, ":%s SID %s 2 %s +%s :%s",
+                 me.id, client->name, client->id, IsHidden(client) ? "h" : "", client->info);
 
   /*
    * Pass on my client information to the new server
@@ -355,28 +355,28 @@ server_estab(struct Client *client_p, struct ConnectItem *connect)
   {
     struct Client *target = node->data;
 
-    /* target->from == target for target == client_p */
-    if (IsMe(target) || target->from == client_p)
+    /* target->from == target for target == client */
+    if (IsMe(target) || target->from == client)
       continue;
 
-    sendto_one(client_p, ":%s SID %s %u %s +%s :%s",
+    sendto_one(client, ":%s SID %s %u %s +%s :%s",
                target->servptr->id, target->name, target->hopcount + 1,
                target->id, IsHidden(target) ? "h" : "", target->info);
   }
 
-  server_burst(client_p);
+  server_burst(client);
 
-  if (capab_has_flag(client_p, CAPAB_EOB))
+  if (capab_has_flag(client, CAPAB_EOB))
   {
     LIST_FOREACH_PREV(node, global_server_list.tail)
     {
       struct Client *target = node->data;
 
-      if (target->from == client_p)
+      if (target->from == client)
         continue;
 
       if (IsMe(target) || HasFlag(target, FLAGS_EOB))
-        sendto_one(client_p, ":%s EOB", target->id);
+        sendto_one(client, ":%s EOB", target->id);
     }
   }
 }

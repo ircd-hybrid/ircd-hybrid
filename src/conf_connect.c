@@ -20,6 +20,7 @@
  */
 
 #include "io_string.h"
+#include "log.h"
 #include "memory.h"
 #include "res.h"
 #include "reslib.h"
@@ -42,9 +43,12 @@ connect_assign_class(struct ConnectItem *connect, const char *class_name)
   if (connect->class == NULL)
   {
     connect->class = class_default;
+
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
                    string_default(class_name, "<not specified>"), connect->name, connect->class->name);
+    log_write(LOG_TYPE_IRCD, "Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
+              string_default(class_name, "<not specified>"), connect->name, connect->class->name);
   }
 }
 

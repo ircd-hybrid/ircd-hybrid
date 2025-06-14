@@ -20,6 +20,7 @@
  */
 
 #include "io_string.h"
+#include "log.h"
 #include "memory.h"
 #include "stdinc.h"
 #include "client.h"
@@ -96,9 +97,12 @@ oper_assign_class(struct OperItem *oper, const char *class_name)
   if (oper->class == NULL)
   {
     oper->class = class_default;
+
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",
                    string_default(class_name, "<not specified>"), oper->name, oper->class->name);
+    log_write(LOG_TYPE_IRCD, "Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",
+              string_default(class_name, "<not specified>"), oper->name, oper->class->name);
   }
 }
 

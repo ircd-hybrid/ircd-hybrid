@@ -728,7 +728,7 @@ conf_read(FILE *file)
 
   connect_free_inactive();
 
-  class_delete_marked();  /* Delete unused classes that are marked for deletion */
+  class_free_inactive();  /* Delete unused classes that are marked for deletion */
 }
 
 /* conf_rehash()
@@ -823,7 +823,7 @@ conf_clear(void)
    * Don't delete the class table, rather mark all entries for deletion.
    * The table is cleaned up by class_delete_marked. - avalon
    */
-  class_mark_for_deletion();
+  class_mark_all_inactive();
 
   clear_out_address_conf();
 

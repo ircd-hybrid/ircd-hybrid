@@ -113,7 +113,7 @@ class_find(const char *name, bool active)
  * The table is cleaned up by delete_marked_classes. - avalon
  */
 void
-class_mark_for_deletion(void)
+class_mark_all_inactive(void)
 {
   list_node_t *node;
 
@@ -125,7 +125,7 @@ class_mark_for_deletion(void)
 }
 
 void
-class_delete_marked(void)
+class_free_inactive(void)
 {
   list_node_t *node, *node_next;
 

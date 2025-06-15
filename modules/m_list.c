@@ -135,15 +135,15 @@ do_list(struct Client *source, char *arg)
         default:
           if (*opt == '!')
           {
-            list = &lt->hide_mask;
+            list = &lt->exclude_masks;
             opt++;
           }
           else
-            list = &lt->show_mask;
+            list = &lt->include_masks;
 
           if (has_wildcards(opt + !!IsChanPrefix(*opt)))
           {
-            if (list == &lt->show_mask)
+            if (list == &lt->include_masks)
               no_masked_channels = false;
           }
           else if (!IsChanPrefix(*opt))
@@ -163,7 +163,7 @@ do_list(struct Client *source, char *arg)
   }
 
   sendto_one_numeric(source, &me, RPL_LISTSTART);
-  safe_list_channels(source, no_masked_channels && lt->show_mask.head != NULL);
+  safe_list_channels(source, (no_masked_channels && !list_is_empty(&lt->include_masks)));
 }
 
 /*! \brief LIST command handler

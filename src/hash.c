@@ -477,18 +477,18 @@ free_list_task(struct Client *client)
 
   list_remove(&lt->node, &listing_client_list);
 
-  while (lt->show_mask.head)
+  while (lt->include_masks.head)
   {
-    list_node_t *node = lt->show_mask.head;
-    list_remove(node, &lt->show_mask);
+    list_node_t *node = lt->include_masks.head;
+    list_remove(node, &lt->include_masks);
     io_free(node->data);
     list_free_node(node);
   }
 
-  while (lt->hide_mask.head)
+  while (lt->exclude_masks.head)
   {
-    list_node_t *node = lt->hide_mask.head;
-    list_remove(node, &lt->hide_mask);
+    list_node_t *node = lt->exclude_masks.head;
+    list_remove(node, &lt->exclude_masks);
     io_free(node->data);
     list_free_node(node);
   }
@@ -510,12 +510,12 @@ free_list_task(struct Client *client)
 static bool
 list_allow_channel(const char *name, const struct ListTask *lt)
 {
-  if (list_is_empty(&lt->show_mask) == false)
-    if (list_find_cmp(&lt->show_mask, name, match) == NULL)
+  if (list_is_empty(&lt->include_masks) == false)
+    if (list_find_cmp(&lt->include_masks, name, match) == NULL)
       return false;
 
-  if (list_is_empty(&lt->hide_mask) == false)
-    if (list_find_cmp(&lt->hide_mask, name, match))
+  if (list_is_empty(&lt->exclude_masks) == false)
+    if (list_find_cmp(&lt->exclude_masks, name, match))
       return false;
 
   return true;
@@ -613,7 +613,7 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
   {
     list_node_t *node;
 
-    LIST_FOREACH(node, lt->show_mask.head)
+    LIST_FOREACH(node, lt->include_masks.head)
       if ((channel = hash_find_channel(node->data)))
         list_one_channel(client, channel);
   }

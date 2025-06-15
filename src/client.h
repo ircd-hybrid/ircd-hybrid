@@ -203,8 +203,8 @@ struct Server
 struct ListTask
 {
   list_node_t node;  /**< Embedded list node used to link into listing_client_list */
-  list_t show_mask;  /**< Channels to show */
-  list_t hide_mask;  /**< Channels to hide */
+  list_t include_masks;  /**< Channels to show */
+  list_t exclude_masks;  /**< Channels to hide */
 
   unsigned int hash_index;  /**< The hash bucket we are currently in */
   unsigned int users_min;

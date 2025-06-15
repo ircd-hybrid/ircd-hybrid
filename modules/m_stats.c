@@ -389,10 +389,10 @@ stats_memory(struct Client *client, int parc, char *parv[])
     {
       const struct Client *acptr = node->data;
 
-      LIST_FOREACH(node2, acptr->connection->list_task->show_mask.head)
+      LIST_FOREACH(node2, acptr->connection->list_task->include_masks.head)
         safelist_memory += strlen(node2->data);
 
-      LIST_FOREACH(node2, acptr->connection->list_task->hide_mask.head)
+      LIST_FOREACH(node2, acptr->connection->list_task->exclude_masks.head)
         safelist_memory += strlen(node2->data);
     }
   }

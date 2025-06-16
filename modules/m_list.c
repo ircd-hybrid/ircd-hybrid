@@ -23,20 +23,20 @@
  * \brief Includes required functions for processing the LIST command.
  */
 
-#include "stdinc.h"
+#include "event.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "memory.h"
+#include "module.h"
+#include "stdinc.h"
 #include "client.h"
 #include "hash.h"
-#include "io_string.h"
+#include "isupport.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "isupport.h"
-
+#include "send.h"
 
 static void
 do_list(struct Client *source, char *arg)
@@ -53,6 +53,18 @@ do_list(struct Client *source, char *arg)
   lt->created_max = UINT_MAX;
   lt->topicts_max = UINT_MAX;
   source->connection->list_task = lt;
+
+  if (list_is_empty(&listing_client_list))
+  {
+    if (event_channel_list_pump == NULL)
+    {
+      event_channel_list_pump = event_create(ircd_event_manager, "event_channel_list_pump", channel_list_pump, 125, false, NULL, NULL);
+      event_set_priority(event_channel_list_pump, 2);
+    }
+
+    event_schedule(event_channel_list_pump);
+  }
+
   list_add(source, &lt->node, &listing_client_list);
 
   bool no_masked_channels = true;

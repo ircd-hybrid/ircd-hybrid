@@ -181,7 +181,6 @@ static event_handle_t event_cleanup_tklines;
 static event_handle_t event_server_connect_auto;
 static event_handle_t event_comm_checktimeouts;
 static event_handle_t event_save_all_databases;
-event_handle_t event_channel_list_pump;
 
 event_manager_t ircd_event_manager;
 
@@ -508,10 +507,6 @@ main(int argc, char *argv[])
 
   event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
   event_schedule_fuzzed(event_save_all_databases);
-
-  event_channel_list_pump = event_create(ircd_event_manager, "channel_list_pump", channel_list_pump, 100, false, NULL, NULL);
-  event_set_priority(event_channel_list_pump, 2);
-  event_schedule(event_channel_list_pump);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   io_loop();

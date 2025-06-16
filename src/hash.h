@@ -30,6 +30,7 @@
 
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
+#include "event.h"
 
 /**
  * @def FNV1_32_INIT
@@ -64,6 +65,8 @@ enum
   HASH_TYPE_CLIENT,
   HASH_TYPE_CHANNEL
 };
+
+extern event_handle_t event_channel_list_pump;
 
 extern unsigned int hash_string(const char *);
 extern void *hash_get_bucket(int, unsigned int);

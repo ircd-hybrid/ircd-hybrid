@@ -68,6 +68,8 @@ static struct Client *idTable[HASHSIZE];
 static struct Client *clientTable[HASHSIZE];
 static struct Channel *channelTable[HASHSIZE];
 
+event_handle_t event_channel_list_pump;
+
 /**
  * @brief Generate a hash value for the given string using the FNV-1 algorithm with a random XOR key to mitigate hash table degeneration attacks.
  *
@@ -477,6 +479,12 @@ free_list_task(struct Client *client)
 
   list_remove(&lt->node, &listing_client_list);
 
+  if (list_is_empty(&listing_client_list) && event_channel_list_pump)
+  {
+    event_destroy(event_channel_list_pump);
+    event_channel_list_pump = NULL;
+  }
+
   while (lt->include_masks.head)
   {
     list_node_t *node = lt->include_masks.head;
@@ -625,8 +633,7 @@ safe_list_channels(struct Client *client, bool only_unmasked_channels)
 void
 channel_list_pump(void *unused)
 {
-  if (list_is_empty(&listing_client_list))
-    return;
+  assert(!list_is_empty(&listing_client_list));
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, listing_client_list.head)

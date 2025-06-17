@@ -181,6 +181,24 @@ server_make(struct Client *client)
 }
 
 static void
+server_start_irc_handshake(struct Client *client)
+{
+  const struct ConnectItem *connect = server_conf_get(client);
+  assert(connect);
+
+  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
+  SetHandshake(client);
+
+  sendto_one(client, "PASS %s", connect->send_password);
+  sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
+  sendto_one(client, "SERVER %s 1 %s +%s :%s",
+             me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
+
+  /* If we get here, we're ok, so lets start reading some data */
+  read_packet(client->connection->fd, client);
+}
+
+static void
 server_finish_tls_handshake(struct Client *client)
 {
   const struct ConnectItem *const connect = server_conf_get(client);
@@ -197,24 +215,11 @@ server_finish_tls_handshake(struct Client *client)
     return;
   }
 
-  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
-  /* Next, send the initial handshake */
-  SetHandshake(client);
-  AddFlag(client, FLAGS_TLS);
-
-  sendto_one(client, "PASS %s", connect->send_password);
-
-  sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
-
-  sendto_one(client, "SERVER %s 1 %s +%s :%s",
-             me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
-
-  /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client->connection->fd, client);
+  server_start_irc_handshake(client);
 }
 
 static void
-server_tls_handshake(fde_t *F, void *data_)
+server_start_tls_handshake(fde_t *F, void *data_)
 {
   struct Client *client = data_;
   const char *sslerr = NULL;
@@ -237,11 +242,11 @@ server_tls_handshake(fde_t *F, void *data_)
     {
       case TLS_HANDSHAKE_WANT_WRITE:
         comm_setselect(F, COMM_SELECT_WRITE,
-                       server_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
+                       server_start_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       case TLS_HANDSHAKE_WANT_READ:
         comm_setselect(F, COMM_SELECT_READ,
-                       server_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
+                       server_start_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
         return;
       default:
       {
@@ -281,7 +286,7 @@ server_tls_connect_init(struct Client *client, const struct ConnectItem *connect
   if (!string_is_empty(connect->cipher_list))
     tls_set_ciphers(&F->tls, connect->cipher_list);
 
-  server_tls_handshake(F, client);
+  server_start_tls_handshake(F, client);
 }
 
 /* server_connect_callback() - complete a server connection.
@@ -345,19 +350,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
     return;
   }
 
-  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
-  /* Next, send the initial handshake */
-  SetHandshake(client);
-
-  sendto_one(client, "PASS %s", connect->send_password);
-
-  sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
-
-  sendto_one(client, "SERVER %s 1 %s +%s :%s",
-             me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
-
-  /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client->connection->fd, client);
+  server_start_irc_handshake(client);
 }
 
 /* server_connect() - initiate a server connection

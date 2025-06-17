@@ -371,7 +371,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
  * it suceeded or not, and 0 if it fails in here somewhere.
  */
 bool
-server_connect(struct ConnectItem *connect, struct Client *initiator)
+server_connect(struct ConnectItem *connect, const struct Client *initiator)
 {
   assert(connect);
   assert(hash_find_server(connect->name) == NULL);  /* This should have been checked by the caller */

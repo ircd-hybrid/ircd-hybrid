@@ -200,6 +200,7 @@ server_finish_tls_handshake(struct Client *client)
   client_set_class(client, connect->class, CLIENT_CLASS_BASE);
   /* Next, send the initial handshake */
   SetHandshake(client);
+  AddFlag(client, FLAGS_TLS);
 
   sendto_one(client, "PASS %s", connect->send_password);
 

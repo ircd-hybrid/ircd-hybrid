@@ -215,6 +215,7 @@ server_finish_tls_handshake(struct Client *client)
     return;
   }
 
+  AddFlag(client, FLAGS_TLS);
   server_start_irc_handshake(client);
 }
 

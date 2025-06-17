@@ -257,18 +257,14 @@ comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const str
   F->connect.callback = callback;
   F->connect.data = data;
 
-  /* Note that we're using a passed sockaddr here. This is because
-   * generally you'll be bind()ing to a sockaddr grabbed from
-   * getsockname(), so this makes things easier.
-   * XXX If NULL is passed as local, we should later on bind() to the
-   * virtual host IP, for completeness.
-   *   -- adrian
-   */
-  if (baddr && bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) < 0)
+  if (baddr && address_is_specific(baddr))
   {
-    /* Failure, call the callback with COMM_ERR_BIND */
-    comm_connect_callback(F, COMM_ERR_BIND);
-    return;  /* ... and quit */
+    if (bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) < 0)
+    {
+      /* Failure, call the callback with COMM_ERR_BIND */
+      comm_connect_callback(F, COMM_ERR_BIND);
+      return;  /* ... and quit */
+    }
   }
 
   comm_settimeout(F, timeout, comm_connect_timeout, NULL);

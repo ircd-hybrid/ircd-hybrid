@@ -106,6 +106,12 @@ address_is_unspecified(const struct io_addr *addr)
   return false;
 }
 
+static inline bool
+address_is_specific(const struct io_addr *addr)
+{
+  return (address_is_ipv4(addr) || address_is_ipv6(addr)) && address_is_unspecified(addr) == false;
+}
+
 static inline int
 address_get_family(const struct io_addr *addr)
 {

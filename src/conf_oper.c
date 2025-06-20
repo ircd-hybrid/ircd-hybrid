@@ -49,8 +49,8 @@ oper_match_password(const struct OperItem *oper, const char *password)
 void
 oper_free_all(void)
 {
-  list_node_t *node, *next;
-  LIST_FOREACH_SAFE(node, next, operator_items.head)
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, operator_items.head)
   {
     struct OperItem *const oper = node->data;
     oper_free(oper);
@@ -89,7 +89,7 @@ oper_free(struct OperItem *oper)
 void
 oper_assign_class(struct OperItem *oper, const char *class_name)
 {
-  assert(oper);
+  assert(oper->class == NULL);
 
   if (!string_is_empty(class_name))
     oper->class = class_find(class_name, true);

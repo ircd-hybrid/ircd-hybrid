@@ -35,7 +35,7 @@ static list_t connect_items;
 void
 connect_assign_class(struct ConnectItem *connect, const char *class_name)
 {
-  assert(connect);
+  assert(connect->class == NULL);
 
   if (!string_is_empty(class_name))
     connect->class = class_find(class_name, true);
@@ -89,8 +89,6 @@ connect_create(void)
 void
 connect_free(struct ConnectItem *connect)
 {
-  assert(connect);
-
   list_remove(&connect->node, &connect_items);
 
   if (connect->dns_pending)
@@ -155,10 +153,8 @@ connect_dns_lookup(struct ConnectItem *connect)
 
   connect->dns_pending = true;
 
-  if (connect->address_family == AF_INET)
-    gethost_byname_type(connect_dns_callback, connect, connect->host, T_A);
-  else
-    gethost_byname_type(connect_dns_callback, connect, connect->host, T_AAAA);
+  int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
+  gethost_byname_type(connect_dns_callback, connect, connect->host, query_type);
 }
 
 struct ConnectItem *
@@ -257,7 +253,6 @@ connect_incref(struct ConnectItem *connect)
 void
 connect_decref(struct ConnectItem *connect)
 {
-  assert(connect);
   assert(connect->ref_count > 0);
 
   connect->ref_count--;

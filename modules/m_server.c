@@ -105,8 +105,7 @@ server_reject_internal(const server_rejection_context_t *ctx, const char *detail
   log_write(LOG_TYPE_IRCD, "%s", oper_msg);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", oper_msg);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                 "%s from %s: %s (%s)",
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "%s from %s: %s (%s)",
                  ctx->log_prefix, ctx->event_source_ip, ctx->reason_str, detail_buf);
 
   client_exit(ctx->exit_client, exit_msg);
@@ -181,7 +180,7 @@ server_set_flags(struct Client *client, const char *flags)
  * side effects - NICK message is sent towards given client
  */
 static void
-server_send_client(struct Client *client, struct Client *target)
+server_send_client(struct Client *client, const struct Client *target)
 {
   assert(IsClient(target));
 
@@ -207,8 +206,8 @@ server_send_client(struct Client *client, struct Client *target)
   LIST_FOREACH_PREV(node, target->svstags.tail)
   {
     const struct ServicesTag *svstag = node->data;
-    sendto_one(client, ":%s SVSTAG %s %ju %u +%s :%s", me.id,
-               target->id, target->tsinfo, svstag->numeric,
+    sendto_one(client, ":%s SVSTAG %s %ju %u +%s :%s",
+               me.id, target->id, target->tsinfo, svstag->numeric,
                user_mode_to_str(svstag->umodes), svstag->tag);
   }
 }
@@ -226,8 +225,7 @@ server_burst(struct Client *client)
 
   LIST_FOREACH(node, global_client_list.head)
   {
-    struct Client *target = node->data;
-
+    const struct Client *target = node->data;
     if (target->from != client)
       server_send_client(client, target);
   }
@@ -235,8 +233,7 @@ server_burst(struct Client *client)
   LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *channel = node->data;
-
-    assert(list_length(&channel->members) != 0);
+    assert(list_length(&channel->members));
     if (list_length(&channel->members))
       channel_send_modes(client, channel);
   }
@@ -290,6 +287,8 @@ server_estab(struct Client *client, struct ConnectItem *connect)
 
   server_conf_set(client, connect);
 
+  fd_note(client->connection->fd, "Server: %s", client->name);
+
   /* Fixing eob timings.. -gnp */
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
@@ -331,8 +330,6 @@ server_estab(struct Client *client, struct ConnectItem *connect)
               client_get_name(client, SHOW_IP), capab_get(client, true));
   }
 
-  fd_note(client->connection->fd, "Server: %s", client->name);
-
   sendto_servers(client, 0, 0, ":%s SID %s 2 %s +%s :%s",
                  me.id, client->name, client->id, IsHidden(client) ? "h" : "", client->info);
 
@@ -353,8 +350,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
-    struct Client *target = node->data;
-
+    const struct Client *target = node->data;
     /* target->from == target for target == client */
     if (IsMe(target) || target->from == client)
       continue;
@@ -370,8 +366,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   {
     LIST_FOREACH_PREV(node, global_server_list.tail)
     {
-      struct Client *target = node->data;
-
+      const struct Client *target = node->data;
       if (target->from == client)
         continue;
 
@@ -481,7 +476,7 @@ mr_server(struct Client *source, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  struct Client *target = find_servconn_in_progress(name);
+  struct Client *const target = find_servconn_in_progress(name);
   if (target && (target != source))
     client_exit(target, "Overridden");
 
@@ -542,13 +537,13 @@ ms_sid(struct Client *source, int parc, char *parv[])
 
   if (hash_find_id(sid))
   {
-    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION,  "'%s'", sid);
+    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
   if (hash_find_server(name))
   {
-    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION,  "'%s'", name);
+    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 

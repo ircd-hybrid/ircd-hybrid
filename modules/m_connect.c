@@ -50,22 +50,19 @@ do_connect(struct Client *source, const char *name)
   struct ConnectItem *connect = connect_find(name);
   if (connect == NULL)
   {
-    sendto_one_notice(source, &me, ":Connect: Server %s not listed in configuration file", name);
+    sendto_one_notice(source, &me, ":Connect: Server %s not found in configuration.", name);
     return;
   }
 
-  const struct Client *target = hash_find_server(connect->name);
+  const struct Client *target = hash_find_client(connect->name);
   if (target)
   {
-    sendto_one_notice(source, &me, ":Connect: Server %s already exists from %s",
-                      target->name, target->from->name);
-    return;
-  }
-
-  if (find_servconn_in_progress(connect->name))
-  {
-    sendto_one_notice(source, &me, ":Connect: a connection to %s is already in progress",
-                      connect->name);
+    if (IsServer(target) || IsMe(target))
+      sendto_one_notice(source, &me, ":Connect: Server %s is already connected (via %s).",
+                        target->name, target->from->name);
+    else if (IsConnecting(target) || IsHandshake(target))
+      sendto_one_notice(source, &me, ":Connect: Connection to %s is already in progress.",
+                        connect->name);
     return;
   }
 

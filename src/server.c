@@ -374,7 +374,7 @@ bool
 server_connect(struct ConnectItem *connect, const struct Client *initiator)
 {
   assert(connect);
-  assert(hash_find_server(connect->name) == NULL);  /* This should have been checked by the caller */
+  assert(hash_find_client(connect->name) == NULL);  /* This should have been checked by the caller */
 
   /* Still processing a DNS lookup? -> exit */
   if (connect->dns_pending)
@@ -430,6 +430,8 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   client->serv->initiator_name = io_strdup(initiator_name);
 
   SetConnecting(client);
+
+  hash_add_client(client);
 
   /* Now, initiate the connection */
   comm_connect_tcp(client->connection->fd, &connect->remote_addr, connect->port, &connect->bind_addr,
@@ -489,12 +491,9 @@ server_connect_auto(void *unused)
 
     /*
      * Found a CONNECT config with port specified, scan clients
-     * and see if this server is already connected?
+     * and see if this server is already connected, or a connection is in progress?
      */
-    if (hash_find_server(connect->name))
-      continue;
-
-    if (find_servconn_in_progress(connect->name))
+    if (hash_find_client(connect->name))
       continue;
 
     /* Move this entry to the end of the list, if not already last */
@@ -556,21 +555,4 @@ server_conf_set(struct Client *client, struct ConnectItem *new_connect)
 
   client->serv->conf = new_connect;
   connect_incref(new_connect);
-}
-
-struct Client *
-find_servconn_in_progress(const char *name)
-{
-  list_node_t *ptr;
-
-  LIST_FOREACH(ptr, unknown_list.head)
-  {
-    struct Client *cptr = ptr->data;
-
-    if (cptr->name[0])
-      if (!irccmp(name, cptr->name))
-        return cptr;
-  }
-
-  return NULL;
 }

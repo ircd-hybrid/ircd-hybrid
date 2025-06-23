@@ -279,7 +279,8 @@ server_estab(struct Client *client, struct ConnectItem *connect)
     Count.max_loc_con = list_length(&local_client_list) +
                         list_length(&local_server_list);
 
-  hash_add_client(client);
+  if (!IsHandshake(client))
+    hash_add_client(client);
   hash_add_id(client);
 
   /* Doesn't duplicate client->serv if allocated this struct already */
@@ -476,7 +477,7 @@ mr_server(struct Client *source, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  struct Client *const target = find_servconn_in_progress(name);
+  struct Client *const target = hash_find_client(name);
   if (target && (target != source))
     client_exit(target, "Overridden");
 
@@ -551,7 +552,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * a connect comes in with same name toss the pending one,
    * but only if it's not the same client! - Dianora
    */
-  struct Client *target = find_servconn_in_progress(name);
+  struct Client *target = hash_find_client(name);
   if (target && (target != source->from))
     client_exit(target, "Overridden");
 

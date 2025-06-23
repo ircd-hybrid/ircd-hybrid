@@ -75,7 +75,6 @@ extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);
 extern bool server_connect(struct ConnectItem *, const struct Client *);
 extern bool server_valid_name(const char *);
-extern struct Client *find_servconn_in_progress(const char *);
 extern struct ConnectItem *server_conf_get(const struct Client *);
 extern struct Server *server_make(struct Client *);
 extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);

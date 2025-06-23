@@ -183,7 +183,7 @@ server_make(struct Client *client)
 static void
 server_start_irc_handshake(struct Client *client)
 {
-  const struct ConnectItem *connect = server_conf_get(client);
+  const struct ConnectItem *const connect = server_conf_get(client);
   assert(connect);
 
   client_set_class(client, connect->class, CLIENT_CLASS_BASE);
@@ -222,7 +222,7 @@ server_finish_tls_handshake(struct Client *client)
 static void
 server_start_tls_handshake(fde_t *F, void *data_)
 {
-  struct Client *client = data_;
+  struct Client *const client = data_;
   const char *sslerr = NULL;
 
   assert(client);
@@ -547,7 +547,7 @@ server_conf_set(struct Client *client, struct ConnectItem *new_connect)
   assert(client->serv);
   assert(new_connect);
 
-  struct ConnectItem *old_connect = server_conf_get(client);
+  struct ConnectItem *const old_connect = server_conf_get(client);
   if (old_connect == new_connect)
     return;
 

@@ -101,14 +101,12 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
   assert(client->connection);
 
   struct ClassItem **class_ptr_location = NULL;
-  struct ClassItem *old_class = NULL;
-
   if (type == CLIENT_CLASS_BASE)
     class_ptr_location = &client->connection->base_class;
   else
     class_ptr_location = &client->connection->oper_class;
 
-  old_class = *class_ptr_location;
+  struct ClassItem *const old_class = *class_ptr_location;
   if (old_class == new_class)
     return;
 

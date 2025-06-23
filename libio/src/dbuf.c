@@ -47,9 +47,9 @@
 struct dbuf_block *
 dbuf_alloc(void)
 {
-  struct dbuf_block *block = io_calloc(sizeof(*block));
-
+  struct dbuf_block *const block = io_calloc(sizeof(*block));
   block->ref_count = 1;
+
   return block;
 }
 
@@ -101,10 +101,10 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 {
   while (count > 0 && dbuf_length(queue) > 0)
   {
-    list_node_t *node = queue->blocks.head;
-    struct dbuf_block *block = node->data;
-    size_t avail = block->size - queue->pos;
+    list_node_t *const node = queue->blocks.head;
+    struct dbuf_block *const block = node->data;
 
+    const size_t avail = block->size - queue->pos;
     if (count >= avail)
     {
       count -= avail;
@@ -141,10 +141,9 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
 void
 dbuf_put_fmt(struct dbuf_block *block, const char *format, ...)
 {
-  va_list args;
-
   assert(block->ref_count == 1);
 
+  va_list args;
   va_start(args, format);
   dbuf_put_args(block, format, args);
   va_end(args);
@@ -189,7 +188,6 @@ dbuf_put(struct dbuf_queue *queue, const char *buf, size_t length)
   while (length > 0)
   {
     struct dbuf_block *block = dbuf_length(queue) ? queue->blocks.tail->data : NULL;
-
     if (block == NULL || sizeof(block->data) - block->size == 0)
     {
       block = dbuf_alloc();

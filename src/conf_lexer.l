@@ -182,8 +182,8 @@ defer                       { return DEFER; }
 deny                        { return DENY; }
 description                 { return DESCRIPTION; }
 die                         { return DIE; }
-disable_auth                { return DISABLE_AUTH; }
 disable_dns                 { return DISABLE_DNS; }
+disable_ident               { return DISABLE_IDENT; }
 disable_fake_channels       { return DISABLE_FAKE_CHANNELS; }
 disable_remote_commands     { return DISABLE_REMOTE_COMMANDS; }
 dline                       { return T_DLINE; }

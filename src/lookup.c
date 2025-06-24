@@ -173,7 +173,7 @@ lookup_start(struct Client *client)
     gethost_byaddr(lookup_dns_callback, lookup, &client->addr);
   }
 
-  if (ConfigGeneral.disable_auth == 0)
+  if (ConfigGeneral.disable_ident == 0)
   {
     sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_START]);
     lookup->ident_request =

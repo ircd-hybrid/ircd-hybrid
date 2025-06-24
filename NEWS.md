@@ -1,3 +1,7 @@
+#### Noteworthy changes in version 8.2.48 (2025-??-??)
+* The `general::disable_auth` configuration directive has been renamed to `general::disable_ident`
+
+
 #### Noteworthy changes in version 8.2.47 (2025-04-04)
 * The `general::max_away_length` configuration directive has been added, allowing
   servers to specify the maximum length of a `AWAY` message that the server will

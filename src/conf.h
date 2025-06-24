@@ -169,7 +169,7 @@ struct config_general_entry
   unsigned int throttle_count;
   unsigned int throttle_time;
   unsigned int ping_cookie;
-  unsigned int disable_auth;
+  unsigned int disable_ident;
   unsigned int disable_dns;
   unsigned int cycle_on_host_change;
   unsigned int cloak_enabled;

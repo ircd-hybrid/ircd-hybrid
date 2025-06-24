@@ -92,8 +92,8 @@ extern int yydebug;
     DENY = 293,                    /* DENY  */
     DESCRIPTION = 294,             /* DESCRIPTION  */
     DIE = 295,                     /* DIE  */
-    DISABLE_AUTH = 296,            /* DISABLE_AUTH  */
-    DISABLE_DNS = 297,             /* DISABLE_DNS  */
+    DISABLE_DNS = 296,             /* DISABLE_DNS  */
+    DISABLE_IDENT = 297,           /* DISABLE_IDENT  */
     DISABLE_FAKE_CHANNELS = 298,   /* DISABLE_FAKE_CHANNELS  */
     DISABLE_REMOTE_COMMANDS = 299, /* DISABLE_REMOTE_COMMANDS  */
     DLINE_MIN_CIDR = 300,          /* DLINE_MIN_CIDR  */
@@ -328,8 +328,8 @@ extern int yydebug;
 #define DENY 293
 #define DESCRIPTION 294
 #define DIE 295
-#define DISABLE_AUTH 296
-#define DISABLE_DNS 297
+#define DISABLE_DNS 296
+#define DISABLE_IDENT 297
 #define DISABLE_FAKE_CHANNELS 298
 #define DISABLE_REMOTE_COMMANDS 299
 #define DLINE_MIN_CIDR 300

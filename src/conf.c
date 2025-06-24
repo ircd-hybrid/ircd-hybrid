@@ -639,7 +639,7 @@ conf_set_defaults(void)
   ConfigGeneral.kline_min_cidr = 16;
   ConfigGeneral.kline_min_cidr6 = 48;
   ConfigGeneral.invisible_on_connect = 1;
-  ConfigGeneral.disable_auth = 0;
+  ConfigGeneral.disable_ident = 0;
   ConfigGeneral.disable_dns = 0;
   ConfigGeneral.kill_chase_time_limit = 90;
   ConfigGeneral.default_floodcount = 8;

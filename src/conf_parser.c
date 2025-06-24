@@ -261,8 +261,8 @@ extern int yydebug;
     DENY = 293,                    /* DENY  */
     DESCRIPTION = 294,             /* DESCRIPTION  */
     DIE = 295,                     /* DIE  */
-    DISABLE_AUTH = 296,            /* DISABLE_AUTH  */
-    DISABLE_DNS = 297,             /* DISABLE_DNS  */
+    DISABLE_DNS = 296,             /* DISABLE_DNS  */
+    DISABLE_IDENT = 297,           /* DISABLE_IDENT  */
     DISABLE_FAKE_CHANNELS = 298,   /* DISABLE_FAKE_CHANNELS  */
     DISABLE_REMOTE_COMMANDS = 299, /* DISABLE_REMOTE_COMMANDS  */
     DLINE_MIN_CIDR = 300,          /* DLINE_MIN_CIDR  */
@@ -497,8 +497,8 @@ extern int yydebug;
 #define DENY 293
 #define DESCRIPTION 294
 #define DIE 295
-#define DISABLE_AUTH 296
-#define DISABLE_DNS 297
+#define DISABLE_DNS 296
+#define DISABLE_IDENT 297
 #define DISABLE_FAKE_CHANNELS 298
 #define DISABLE_REMOTE_COMMANDS 299
 #define DLINE_MIN_CIDR 300
@@ -758,8 +758,8 @@ enum yysymbol_kind_t
   YYSYMBOL_DENY = 38,                      /* DENY  */
   YYSYMBOL_DESCRIPTION = 39,               /* DESCRIPTION  */
   YYSYMBOL_DIE = 40,                       /* DIE  */
-  YYSYMBOL_DISABLE_AUTH = 41,              /* DISABLE_AUTH  */
-  YYSYMBOL_DISABLE_DNS = 42,               /* DISABLE_DNS  */
+  YYSYMBOL_DISABLE_DNS = 41,               /* DISABLE_DNS  */
+  YYSYMBOL_DISABLE_IDENT = 42,             /* DISABLE_IDENT  */
   YYSYMBOL_DISABLE_FAKE_CHANNELS = 43,     /* DISABLE_FAKE_CHANNELS  */
   YYSYMBOL_DISABLE_REMOTE_COMMANDS = 44,   /* DISABLE_REMOTE_COMMANDS  */
   YYSYMBOL_DLINE_MIN_CIDR = 45,            /* DLINE_MIN_CIDR  */
@@ -1201,7 +1201,7 @@ enum yysymbol_kind_t
   YYSYMBOL_general_specials_in_ident = 481, /* general_specials_in_ident  */
   YYSYMBOL_general_max_targets = 482,      /* general_max_targets  */
   YYSYMBOL_general_ping_cookie = 483,      /* general_ping_cookie  */
-  YYSYMBOL_general_disable_auth = 484,     /* general_disable_auth  */
+  YYSYMBOL_general_disable_ident = 484,    /* general_disable_ident  */
   YYSYMBOL_general_disable_dns = 485,      /* general_disable_dns  */
   YYSYMBOL_general_throttle_count = 486,   /* general_throttle_count  */
   YYSYMBOL_general_throttle_time = 487,    /* general_throttle_time  */
@@ -1745,7 +1745,7 @@ static const char *const yytname[] =
   "CORE", "CYCLE_ON_HOST_CHANGE", "DEFAULT_FLOODCOUNT",
   "DEFAULT_FLOODTIME", "DEFAULT_JOIN_FLOOD_COUNT",
   "DEFAULT_JOIN_FLOOD_TIME", "DEFAULT_MAX_CLIENTS", "DEFER", "DENY",
-  "DESCRIPTION", "DIE", "DISABLE_AUTH", "DISABLE_DNS",
+  "DESCRIPTION", "DIE", "DISABLE_DNS", "DISABLE_IDENT",
   "DISABLE_FAKE_CHANNELS", "DISABLE_REMOTE_COMMANDS", "DLINE_MIN_CIDR",
   "DLINE_MIN_CIDR6", "EMAIL", "ENABLE_ADMIN", "ENABLE_EXTBANS",
   "ENABLE_OWNER", "ENCRYPTED", "EXCEED_LIMIT", "EXEMPT",
@@ -1863,7 +1863,7 @@ static const char *const yytname[] =
   "general_caller_id_wait", "general_opers_bypass_callerid",
   "general_pace_wait_simple", "general_short_motd",
   "general_no_oper_flood", "general_specials_in_ident",
-  "general_max_targets", "general_ping_cookie", "general_disable_auth",
+  "general_max_targets", "general_ping_cookie", "general_disable_ident",
   "general_disable_dns", "general_throttle_count", "general_throttle_time",
   "general_oper_umodes", "general_min_nonwildcard",
   "general_min_nonwildcard_simple", "general_default_floodcount",
@@ -2139,7 +2139,7 @@ static const yytype_int16 yydefact[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,   371,     0,     0,   421,   434,     0,     0,   436,   512,
      517,   501,   502,   530,   547,   548,   549,   550,   551,   552,
-     505,   545,   546,   538,   539,   506,   507,   511,   553,   520,
+     505,   545,   546,   539,   538,   506,   507,   511,   553,   520,
      510,   508,   509,   515,   516,   503,   514,   513,   536,   543,
      544,   534,   542,   531,   529,   532,   537,   533,   535,   522,
      528,   527,   523,   524,   525,   526,   540,   541,   519,   518,
@@ -6276,10 +6276,10 @@ yyreduce:
 #line 6277 "conf_parser.c"
     break;
 
-  case 538: /* general_disable_auth: DISABLE_AUTH '=' TBOOL ';'  */
+  case 538: /* general_disable_ident: DISABLE_IDENT '=' TBOOL ';'  */
 #line 2492 "conf_parser.y"
 {
-  ConfigGeneral.disable_auth = yylval.number;
+  ConfigGeneral.disable_ident = yylval.number;
 }
 #line 6285 "conf_parser.c"
     break;

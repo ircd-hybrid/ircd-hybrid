@@ -26,7 +26,8 @@
  * This file contains the implementation of IRC numeric replies and their corresponding strings.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
 #include "numeric.h"
 
 /**

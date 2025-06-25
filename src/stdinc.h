@@ -40,32 +40,12 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <time.h>
-#include <fcntl.h>
-
 #include <stdarg.h>
-#include <ctype.h>
-
-#include <dirent.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/file.h>
-
 #include <limits.h>
 #include <inttypes.h>
 #include <stdbool.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-
-#include <sys/resource.h>
-#include <sys/stat.h>
-
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
 #endif
 #endif  /* INCLUDED_stdinc_h */

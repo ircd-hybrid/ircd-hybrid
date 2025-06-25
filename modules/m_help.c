@@ -23,18 +23,20 @@
  * \brief Includes required functions for processing the HELP command.
  */
 
-#include "stdinc.h"
+#include <sys/stat.h>
+
 #include "io.h"
+#include "io_string.h"
 #include "io_time.h"
-#include "defaults.h"
+#include "module.h"
+#include "stdinc.h"
 #include "client.h"
+#include "conf.h"
+#include "defaults.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
-#include "conf.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
+#include "send.h"
 
 
 enum { HELPLEN = 400 };

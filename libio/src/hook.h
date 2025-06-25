@@ -30,6 +30,7 @@
 
 #ifndef INCLUDED_hook_h
 #define INCLUDED_hook_h
+#include "list.h"
 
 /**
  * @enum hook_priority_t

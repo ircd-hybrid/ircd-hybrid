@@ -24,21 +24,23 @@
  * \brief Message-of-the-day manipulation implementation.
  */
 
-#include "stdinc.h"
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "address.h"
+#include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
 #include "misc.h"
-#include "io_string.h"
-#include "defaults.h"
-#include "ircd.h"
+#include "stdinc.h"
 #include "client.h"
 #include "conf.h"
-#include "conf.h"
+#include "defaults.h"
+#include "ircd.h"
+#include "motd.h"
 #include "numeric.h"
 #include "send.h"
-#include "motd.h"
 
 /** Global list of messages of the day. */
 static struct

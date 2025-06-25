@@ -26,6 +26,7 @@
 
 #ifndef INCLUDED_ircd_signal_h
 #define INCLUDED_ircd_signal_h
+#include <signal.h>
 
 /**
  * @var dorehash

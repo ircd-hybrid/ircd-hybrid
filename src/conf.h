@@ -93,12 +93,8 @@ struct MaskItem
   enum maskitem_type type;
   unsigned int       flags;
   unsigned int       port;
-  unsigned int       aftype;
-  unsigned int       htype;
-  int                bits;
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
-  uintmax_t          timeout;
   struct ClassItem  *class;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */

@@ -23,24 +23,25 @@
  * \brief Server related functions.
  */
 
-#include "stdinc.h"
 #include "comm.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
-#include "io_string.h"
-#include "io_time.h"
+
+#include "stdinc.h"
 #include "client.h"
+#include "conf.h"
+#include "conf_connect.h"
 #include "hash.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "packet.h"
-#include "conf.h"
-#include "conf_connect.h"
+#include "parse.h"
+#include "send.h"
 #include "server.h"
 #include "server_capab.h"
-#include "send.h"
-#include "parse.h"
 
 /**
  * @brief Routes a command to the appropriate server or client.

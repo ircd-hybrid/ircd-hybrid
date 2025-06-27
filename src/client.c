@@ -620,12 +620,12 @@ client_get_oper_name(const struct Client *client)
 
   if (MyConnect(client) && client->connection->oper_name)
   {
-    snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
+    snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
              client->name, client->username, client->host, client->connection->oper_name);
     return buf;
   }
 
-  snprintf(buf, sizeof(buf), "%s!%s@%s{%s}",
+  snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
            client->name, client->username, client->host, client->servptr->name);
   return buf;
 }

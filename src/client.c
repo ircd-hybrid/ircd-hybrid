@@ -613,20 +613,18 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
 const char *
 client_get_oper_name(const struct Client *client)
 {
-  static char buf[IRCD_BUFSIZE];
-
   if (IsServer(client))
     return client->name;
 
+  const char *oper_name;
   if (MyConnect(client) && client->connection->oper_name)
-  {
-    snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
-             client->name, client->username, client->host, client->connection->oper_name);
-    return buf;
-  }
+    oper_name = client->connection->oper_name;
+  else
+    oper_name = client->servptr->name;
 
+  static char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
-           client->name, client->username, client->host, client->servptr->name);
+           client->name, client->username, client->host, oper_name);
   return buf;
 }
 

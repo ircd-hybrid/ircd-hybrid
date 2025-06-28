@@ -561,7 +561,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct ConnectItem *const connect = server_conf_get(source);
+  const struct ConnectItem *const connect = server_conf_get(source->from);
   const bool hlined = list_find_cmp(&connect->hub_masks , name, match) != NULL;
   const bool llined = list_find_cmp(&connect->leaf_masks, name, match) != NULL;
 

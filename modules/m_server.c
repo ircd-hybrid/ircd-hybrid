@@ -561,10 +561,6 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * See if the newly found server is behind a guaranteed
    * leaf. If so, close the link.
    */
-  const struct ConnectItem *const connect = server_conf_get(source->from);
-  const bool hlined = list_find_cmp(&connect->hub_masks , name, match) != NULL;
-  const bool llined = list_find_cmp(&connect->leaf_masks, name, match) != NULL;
-
   /*
    * Ok, this way this works is
    *
@@ -589,8 +585,9 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * Would allow this server in finland to hub anything but .edu's
    */
 
+  const struct ConnectItem *const connect = server_conf_get(source->from);
   /* Ok, check source->from can hub the new server */
-  if (hlined == false)
+  if (list_find_cmp(&connect->hub_masks, name, match) == NULL)
   {
     /* OOOPs nope can't HUB */
     server_reject_introduction(source, SERVER_REJECT_HUB_POLICY,
@@ -599,7 +596,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   }
 
   /* Check for the new server being leafed behind this HUB */
-  if (llined)
+  if (list_find_cmp(&connect->leaf_masks, name, match))
   {
     /* OOOPs nope can't HUB this leaf */
     server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,

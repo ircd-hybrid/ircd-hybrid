@@ -186,7 +186,7 @@ server_send_client(struct Client *client, const struct Client *target)
   assert(IsClient(target));
 
   sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-             target->servptr->id,
+             target->origin->id,
              target->name, target->hopcount + 1,
              target->tsinfo, user_mode_to_str(target->umodes),
              target->username, target->host, target->realhost,
@@ -198,7 +198,7 @@ server_send_client(struct Client *client, const struct Client *target)
 
   if (!string_is_empty(target->tls_cipher))
     sendto_one(client, ":%s METADATA client %s cipher :%s",
-               target->servptr->id, target->id, target->tls_cipher);
+               target->origin->id, target->id, target->tls_cipher);
 
   if (target->away)
     sendto_one(client, ":%s AWAY :%s", target->id, target->away);
@@ -266,7 +266,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
   SetServer(client);
-  client->servptr = &me;
+  client->origin = &me;
 
   list_add(client, &client->lnode, &me.serv->server_list);
 
@@ -358,7 +358,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
       continue;
 
     sendto_one(client, ":%s SID %s %u %s +%s :%s",
-               target->servptr->id, target->name, target->hopcount + 1,
+               target->origin->id, target->name, target->hopcount + 1,
                target->id, IsHidden(target) ? "h" : "", target->info);
   }
 
@@ -613,7 +613,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   strlcpy(target->id, sid, sizeof(target->id));
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));
   target->hopcount = hopcount;
-  target->servptr = source;
+  target->origin = source;
 
   SetServer(target);
   server_set_flags(target, parv[4]);
@@ -622,7 +622,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
     AddFlag(target, FLAGS_SERVICE);
 
   list_add(target, &target->node, &global_server_list);
-  list_add(target, &target->lnode, &target->servptr->serv->server_list);
+  list_add(target, &target->lnode, &target->origin->serv->server_list);
 
   hash_add_client(target);
   hash_add_id(target);

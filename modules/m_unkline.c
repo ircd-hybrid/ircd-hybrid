@@ -160,7 +160,7 @@ ms_unkline(struct Client *source, int parc, char *parv[])
     return;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNKLINE, source->servptr->name, source->username, source->host))
+      shared_find(SHARED_UNKLINE, source->origin->name, source->username, source->host))
     kline_remove(source, &aline);
 }
 

@@ -171,7 +171,7 @@ ms_resv(struct Client *source, int parc, char *parv[])
     return;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_RESV, source->servptr->name, source->username, source->host))
+      shared_find(SHARED_RESV, source->origin->name, source->username, source->host))
     resv_handle(source, &aline);
 }
 

@@ -476,7 +476,7 @@ main(int argc, char *argv[])
   init_uid();
 
   me.from = &me;
-  me.servptr = &me;
+  me.origin = &me;
   me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 

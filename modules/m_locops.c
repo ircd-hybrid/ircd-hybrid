@@ -87,7 +87,7 @@ ms_locops(struct Client *source, int parc, char *parv[])
   if (match(targets, me.name))
     return;
 
-  if (shared_find(SHARED_LOCOPS, source->servptr->name, "*", "*"))
+  if (shared_find(SHARED_LOCOPS, source->origin->name, "*", "*"))
     sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                    source->name, message);
 }

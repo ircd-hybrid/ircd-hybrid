@@ -40,7 +40,7 @@ whois_send_hook(void *ctx_)
 
   if (user_mode_has_flag(ctx->target, UMODE_SPY) && ctx->source != ctx->target)
     sendto_one_notice(ctx->target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
-                      ctx->source->name, ctx->source->username, ctx->source->host, ctx->source->servptr->name);
+                      ctx->source->name, ctx->source->username, ctx->source->host, ctx->source->origin->name);
 
   return HOOK_FLOW_CONTINUE;
 }

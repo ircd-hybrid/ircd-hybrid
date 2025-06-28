@@ -247,7 +247,7 @@ ms_kline(struct Client *source, int parc, char *parv[])
     return;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_KLINE, source->servptr->name, source->username, source->host))
+      shared_find(SHARED_KLINE, source->origin->name, source->username, source->host))
     kline_handle(source, &aline);
 }
 

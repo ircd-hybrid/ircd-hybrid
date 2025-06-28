@@ -74,7 +74,7 @@ check_clean_nick(struct Client *source, const char *nick)
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
-                 nick, IsServer(source) ? source->name : source->servptr->name, source->from->name);
+                 nick, IsServer(source) ? source->name : source->origin->name, source->from->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
@@ -342,7 +342,7 @@ static void
 uid_from_server(struct Client *source, int parc, char *parv[])
 {
   struct Client *client = client_make(source->from);
-  client->servptr = source;
+  client->origin = source;
   client->hopcount = atoi(parv[2]);
   client->tsinfo = strtoumax(parv[3], NULL, 10);
 

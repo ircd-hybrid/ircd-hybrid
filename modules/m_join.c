@@ -205,8 +205,8 @@ ms_join(struct Client *source, int parc, char *parv[])
     channel->creation_time = newts;
   }
 
-  const struct Client *origin = source->servptr;
-  if (IsHidden(source->servptr) || ConfigServerHide.hide_servers)
+  const struct Client *origin = source->origin;
+  if (IsHidden(source->origin) || ConfigServerHide.hide_servers)
     origin = &me;
 
   /* Lost the TS, other side wins, so remove modes on this side */

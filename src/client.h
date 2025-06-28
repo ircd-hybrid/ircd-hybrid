@@ -295,7 +295,7 @@ struct Client
   struct Client *hnext;  /**< For client hash table lookups by name */
   struct Client *idhnext;  /**< For SID hash table lookups by sid */
   struct Server *serv;  /**< ...defined, if this is a server */
-  struct Client *servptr;  /**< Points to server this Client is on */
+  struct Client *origin;  /**< Points to server this Client is on */
   struct Client *from;  /**< == self, if Local Client, *NEVER* NULL! */
 
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */

@@ -185,7 +185,7 @@ ms_rehash(struct Client *source, int parc, char *parv[])
   if (match(server, me.name))
     return;
 
-  if (!shared_find(SHARED_REHASH, source->servptr->name, source->username, source->host))
+  if (!shared_find(SHARED_REHASH, source->origin->name, source->username, source->host))
     return;
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)

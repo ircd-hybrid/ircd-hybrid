@@ -105,7 +105,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
                  target->name, target->username, target->host,
-                 target->servptr->name, source->name, me.name, REASONLEN, reason);
+                 target->origin->name, source->name, me.name, REASONLEN, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
             source->name, target->name, me.name, REASONLEN, reason);
@@ -193,13 +193,13 @@ ms_kill(struct Client *source, int parc, char *parv[])
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
                    target->name, target->username, target->host,
-                   target->servptr->name, source->name,
-                   source->servptr->name, source->host, source->username, source->name, reason);
+                   target->origin->name, source->name,
+                   source->origin->name, source->host, source->username, source->name, reason);
   else
     sendto_clients(UMODE_SKILL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s %s",
                    target->name, target->username, target->host,
-                   target->servptr->name, source->name, reason);
+                   target->origin->name, source->name, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
             source->name, target->name, source->name, reason);

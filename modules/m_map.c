@@ -192,7 +192,7 @@ static void
 do_map(struct Client *source)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->servptr->name);
+                 source->name, source->username, source->host, source->origin->name);
 
   if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
     dump_map_flat(source);

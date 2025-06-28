@@ -458,7 +458,7 @@ sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_m
     return match(mask, one->realhost) == 0;
   }
 
-  return match(mask, one->servptr->name) == 0;
+  return match(mask, one->origin->name) == 0;
 }
 
 /* sendto_match_butone()

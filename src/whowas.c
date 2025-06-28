@@ -200,7 +200,7 @@ whowas_add_history(struct Client *client, bool online)
 
   struct Whowas *whowas = whowas_make();
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
-  whowas->server_hidden = IsHidden(client->servptr) != 0;
+  whowas->server_hidden = IsHidden(client->origin) != 0;
   whowas->name = io_strdup(client->name);
   whowas->username = io_strdup(client->username);
   whowas->hostname = io_strdup(client->host);
@@ -208,7 +208,7 @@ whowas_add_history(struct Client *client, bool online)
   whowas->sockhost = io_strdup(client->sockhost);
   whowas->realname = io_strdup(client->info);
   whowas->account = io_strdup(client->account);
-  whowas->servername = io_strdup(client->servptr->name);
+  whowas->servername = io_strdup(client->origin->name);
 
   whowas_add(whowas, client, online);
 }

@@ -620,7 +620,7 @@ client_get_oper_name(const struct Client *client)
   if (MyConnect(client) && client->connection->oper_name)
     oper_name = client->connection->oper_name;
   else
-    oper_name = client->servptr->name;
+    oper_name = client->origin->name;
 
   static char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
@@ -724,7 +724,7 @@ exit_one_client(struct Client *client, const char *comment)
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    list_remove(&client->lnode, &client->servptr->serv->client_list);
+    list_remove(&client->lnode, &client->origin->serv->client_list);
     list_remove(&client->node, &global_client_list);
 
     /*
@@ -748,9 +748,9 @@ exit_one_client(struct Client *client, const char *comment)
   else if (IsServer(client))
   {
     sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
-                   client->name, client->servptr->name);
+                   client->name, client->origin->name);
 
-    list_remove(&client->lnode, &client->servptr->serv->server_list);
+    list_remove(&client->lnode, &client->origin->serv->server_list);
     list_remove(&client->node, &global_server_list);
   }
 
@@ -894,7 +894,7 @@ client_exit(struct Client *client, const char *comment)
     char splitstr[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
 
     assert(client->serv);
-    assert(client->servptr);
+    assert(client->origin);
 
     if (ConfigServerHide.hide_servers)
       /*
@@ -904,7 +904,7 @@ client_exit(struct Client *client, const char *comment)
       strlcpy(splitstr, "*.net *.split", sizeof(splitstr));
     else
       snprintf(splitstr, sizeof(splitstr), "%s %s",
-               client->servptr->name, client->name);
+               client->origin->name, client->name);
 
     /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here */
     if (!HasFlag(client, FLAGS_SQUIT))

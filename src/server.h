@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_server_h
 #define INCLUDED_server_h
+#include <stdbool.h>
 
 struct Client;
 struct ConnectItem;

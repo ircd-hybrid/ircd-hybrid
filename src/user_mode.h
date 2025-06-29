@@ -21,6 +21,8 @@
 
 #ifndef INCLUDED_user_mode_h
 #define INCLUDED_user_mode_h
+#include <stdbool.h>
+#include <stdint.h>
 
 struct Client;
 

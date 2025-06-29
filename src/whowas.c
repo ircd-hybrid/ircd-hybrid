@@ -36,8 +36,8 @@
 #include "list.h"
 #include "memory.h"
 #include "client.h"
-#include "hash.h"
 #include "conf.h"
+#include "hash.h"
 #include "whowas.h"
 
 static list_t whowas_list;  /*!< Linked list of struct Whowas pointers. */

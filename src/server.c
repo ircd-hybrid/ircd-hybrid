@@ -23,6 +23,10 @@
  * \brief Server related functions.
  */
 
+#include <assert.h>
+#include <errno.h>
+#include <string.h>
+
 #include "comm.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -30,7 +34,6 @@
 #include "log.h"
 #include "memory.h"
 
-#include "stdinc.h"
 #include "client.h"
 #include "conf.h"
 #include "conf_connect.h"

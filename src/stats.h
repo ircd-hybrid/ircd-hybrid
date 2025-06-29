@@ -29,6 +29,9 @@
 
 #ifndef INCLUDED_stats_h
 #define INCLUDED_stats_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "client.h"
 

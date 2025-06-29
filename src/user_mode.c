@@ -19,8 +19,10 @@
  *  USA
  */
 
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "stdinc.h"
 #include "io_string.h"
 #include "memory.h"
 #include "client.h"

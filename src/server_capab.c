@@ -28,10 +28,10 @@
  * and these capabilities can be dynamically added or removed during runtime.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "memory.h"
+#include <stdio.h>
+
 #include "io_string.h"
+#include "memory.h"
 #include "client.h"
 #include "ircd_defs.h"
 #include "server_capab.h"

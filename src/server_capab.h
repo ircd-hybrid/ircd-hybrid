@@ -31,7 +31,8 @@
 
 #ifndef INCLUDED_server_capab_h
 #define INCLUDED_server_capab_h
-
+#include <stdbool.h>
+#include "list.h"
 #include "client.h"
 
 /**

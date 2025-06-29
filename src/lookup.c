@@ -19,7 +19,9 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
 #include "address.h"
 #include "comm.h"
 #include "ident.h"
@@ -27,6 +29,7 @@
 #include "io_time.h"
 #include "memory.h"
 #include "res.h"
+
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"

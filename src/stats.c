@@ -28,7 +28,6 @@
  * unregister them upon unloading.
  */
 
-#include "stdinc.h"
 #include "memory.h"
 #include "stats.h"
 

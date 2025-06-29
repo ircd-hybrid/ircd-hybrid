@@ -21,8 +21,8 @@
 
 #ifndef INCLUDED_lookup_h
 #define INCLUDED_lookup_h
+#include <stdbool.h>
 
-#include "address.h"
 #include "ident.h"
 #include "client.h"
 

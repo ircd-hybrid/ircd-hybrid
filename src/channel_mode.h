@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
+#include "channel.h"
 
 
 enum { CMEMBER_STATUS_FLAGS_LEN = 5 };

@@ -32,6 +32,9 @@
 
 #ifndef INCLUDED_info_h
 #define INCLUDED_info_h
+#include <stddef.h>
+
+#include "client.h"
 
 /**
  * @def INFO_ENTRY_INIT

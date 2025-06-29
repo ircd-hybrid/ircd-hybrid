@@ -23,37 +23,43 @@
  * \brief Controls clients.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "comm.h"
 #include "event.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
 #include "misc.h"
 #include "rng_mt.h"
-#include "io_string.h"
-#include "io_time.h"
+
+#include "accept.h"
+#include "channel.h"
+#include "channel_invite.h"
 #include "client.h"
 #include "client_svstag.h"
-#include "hash.h"
-#include "ircd.h"
-#include "ircd_hook.h"
-#include "numeric.h"
-#include "lookup.h"
 #include "conf.h"
 #include "conf_connect.h"
 #include "conf_gecos.h"
-#include "server.h"
-#include "send.h"
-#include "whowas.h"
-#include "user_mode.h"
-#include "listener.h"
-#include "monitor.h"
-#include "parse.h"
+#include "hash.h"
 #include "ipcache.h"
-#include "channel.h"
-#include "channel_invite.h"
-#include "accept.h"
+#include "ircd.h"
+#include "ircd_hook.h"
+#include "listener.h"
+#include "lookup.h"
+#include "monitor.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
+#include "user_mode.h"
+#include "whowas.h"
 
 uint64_t UMODE_BOT;
 uint64_t UMODE_DEAF;

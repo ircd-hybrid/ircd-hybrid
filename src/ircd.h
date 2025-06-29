@@ -31,11 +31,11 @@
 
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated PACKAGE_NAME & PACKAGE_VERSION. */
 #include "event.h"
 
 /**

@@ -26,6 +26,9 @@
 
 #ifndef INCLUDED_extban_h
 #define INCLUDED_extban_h
+#include <stddef.h>
+
+#include "list.h"
 
 struct Channel;
 struct Client;

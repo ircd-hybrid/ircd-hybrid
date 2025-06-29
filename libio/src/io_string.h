@@ -33,7 +33,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "config.h"
+
+#include "config.h"  /**< Autotools-generated HAVE_STRLCPY & HAVE_STRLCAT. */
 
 /**
  * @brief Enumeration of character attributes used for classification.

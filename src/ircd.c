@@ -28,15 +28,15 @@
  * components, sets up event handlers, and manages server configurations.
  */
 
+#include <jansson.h>  /**< Jansson JSON library. */
+
+#include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <jansson.h>
+#include <sys/types.h>
 
 #include "comm.h"
 #include "event.h"
@@ -52,7 +52,7 @@
 #include "module.h"
 #include "res.h"
 #include "rng_mt.h"
-#include "channel.h"
+
 #include "channel_mode.h"
 #include "client.h"
 #include "cloak.h"
@@ -70,11 +70,9 @@
 #include "ircd_hook.h"
 #include "ircd_signal.h"
 #include "motd.h"
-#include "parse.h"
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
-#include "user.h"
 
 /**
  * @struct SetOptions

@@ -32,6 +32,7 @@
 
 #ifndef INCLUDED_cloak_h
 #define INCLUDED_cloak_h
+#include "address.h"
 
 extern void cloak_set_enabled(void);
 extern void cloak_set_disabled(void);

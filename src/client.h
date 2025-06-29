@@ -26,19 +26,21 @@
 
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
+#include <stdint.h>
 
 #include "address.h"
 #include "dbuf.h"
 #include "fdlist.h"
 #include "io.h"
 #include "list.h"
-#include "lookup.h"
-#include "ircd_defs.h"
+
 #include "command.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_connect.h"
 #include "conf_oper.h"
+#include "ircd_defs.h"
+#include "lookup.h"
 
 /** Client connection states */
 enum

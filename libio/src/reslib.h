@@ -6,7 +6,7 @@
 #define INCLUDED_reslib_h
 #include <stdint.h>
 
-#include "config.h"  /* WORDS_BIGENDIAN */
+#include "config.h"  /**< Autotools-generated WORDS_BIGENDIAN. */
 #include "address.h"
 
 

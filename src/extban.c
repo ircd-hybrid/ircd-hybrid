@@ -24,12 +24,12 @@
  * \brief Implements extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <string.h>
+
 #include "io_string.h"
 #include "client.h"
-#include "isupport.h"
 #include "extban.h"
+#include "isupport.h"
 
 static list_t extban_list;
 static unsigned int matching_mask, acting_mask;

@@ -33,14 +33,16 @@
  * followed by appending a configurable suffix to the cloaked hostname.
  */
 
-#include "stdinc.h"
-#include "address.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "base32.h"
+#include "io_string.h"
 #include "memory.h"
 #include "sha3.h"
-#include "io_string.h"
-#include "ircd_defs.h"
 #include "cloak.h"
+#include "ircd_defs.h"
 
 /**
  * @struct cloak_config

@@ -30,12 +30,11 @@
  * namespace support.
  */
 
-#include "stdinc.h"
 #include "list.h"
 #include "memory.h"
-#include "send.h"
-#include "client.h"
+
 #include "info.h"
+#include "send.h"
 
 /**
  * @brief List to hold dynamically registered info entries.

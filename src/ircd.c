@@ -74,6 +74,8 @@
 #include "server.h"
 #include "server_capab.h"
 
+event_manager_t ircd_event_manager;
+
 /**
  * @struct SetOptions
  * @brief Structure for server configuration options.
@@ -174,13 +176,6 @@ static struct io_getopt myopts[] =
   { "help", 'h', NULL, USAGE, "Print this text" },
   { NULL, 0, NULL, STRING, NULL }
 };
-
-static event_handle_t event_cleanup_tklines;
-static event_handle_t event_server_connect_auto;
-static event_handle_t event_comm_checktimeouts;
-static event_handle_t event_save_all_databases;
-
-event_manager_t ircd_event_manager;
 
 /**
  * @brief Main IO loop for processing events and managing server activities.
@@ -493,17 +488,17 @@ main(int argc, char *argv[])
 
   module_load_all(NULL);
 
-  event_cleanup_tklines = event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
+  event_handle_t event_cleanup_tklines = event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
   event_schedule_fuzzed(event_cleanup_tklines);
 
-  event_server_connect_auto = event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
+  event_handle_t event_server_connect_auto = event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
   event_schedule_fuzzed(event_server_connect_auto);
 
-  event_comm_checktimeouts = event_create(ircd_event_manager, "comm_checktimeouts", comm_checktimeouts, 1000, false, NULL, NULL);
+  event_handle_t event_comm_checktimeouts = event_create(ircd_event_manager, "comm_checktimeouts", comm_checktimeouts, 1000, false, NULL, NULL);
   event_set_priority(event_comm_checktimeouts, 3);
   event_schedule(event_comm_checktimeouts);
 
-  event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
+  event_handle_t event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
   event_schedule_fuzzed(event_save_all_databases);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);

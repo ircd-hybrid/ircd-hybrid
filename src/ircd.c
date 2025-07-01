@@ -312,19 +312,23 @@ make_daemon(void)
   }
 
   /* Connect stdin, stdout, and stderr to /dev/null */
-  int fd = open("/dev/null", O_RDWR);
-  if (fd == -1)
+  int null_fd = open("/dev/null", O_RDWR);
+  if (null_fd == -1)
   {
-    perror("open");
+    perror("failed to open /dev/null");
     exit(EXIT_FAILURE);
   }
 
-  dup2(fd, STDIN_FILENO);
-  dup2(fd, STDOUT_FILENO);
-  dup2(fd, STDERR_FILENO);
+  if (dup2(null_fd, STDIN_FILENO ) == -1 ||
+      dup2(null_fd, STDOUT_FILENO) == -1 ||
+      dup2(null_fd, STDERR_FILENO) == -1)
+  {
+    perror("failed to redirect standard fds");
+    exit(EXIT_FAILURE);
+  }
 
-  if (fd > STDERR_FILENO)
-    close(fd);
+  if (null_fd > STDERR_FILENO)
+    close(null_fd);
 }
 
 /**

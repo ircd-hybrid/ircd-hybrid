@@ -312,7 +312,7 @@ make_daemon(void)
   }
 
   /* Connect stdin, stdout, and stderr to /dev/null */
-  int null_fd = open("/dev/null", O_RDWR);
+  const int null_fd = open("/dev/null", O_RDWR);
   if (null_fd == -1)
   {
     perror("failed to open /dev/null");

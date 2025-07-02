@@ -92,32 +92,32 @@ extern struct ClassItem *class_find(const char *, bool);
 extern const list_t *class_get_list(void);
 
 static inline unsigned int
-class_get_max_channels(const struct ClassItem *class)
+class_get_max_channels(const struct ClassItem *klass)
 {
-  return class->max_channels;
+  return klass->max_channels;
 }
 
 static inline unsigned int
-class_get_max_recvq(const struct ClassItem *class)
+class_get_max_recvq(const struct ClassItem *klass)
 {
-  return class->max_recvq;
+  return klass->max_recvq;
 }
 
 static inline unsigned int
-class_get_max_sendq(const struct ClassItem *class)
+class_get_max_sendq(const struct ClassItem *klass)
 {
-  return class->max_sendq;
+  return klass->max_sendq;
 }
 
 static inline const char *
-class_get_name(const struct ClassItem *class)
+class_get_name(const struct ClassItem *klass)
 {
-  return class->name;
+  return klass->name;
 }
 
 static inline unsigned int
-class_get_ping_freq(const struct ClassItem *class)
+class_get_ping_freq(const struct ClassItem *klass)
 {
-  return class->ping_freq;
+  return klass->ping_freq;
 }
 #endif  /* INCLUDED_conf_class_h */

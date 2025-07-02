@@ -86,7 +86,7 @@ static struct
     spass,
     whois,
     modes,
-    class,
+    klass,
     target,
     prepend,
     command;
@@ -972,7 +972,7 @@ oper_entry: OPERATOR
     oper->oper_privs = block_state.port.value;
     oper->htype = address_parse_netmask(oper->host, &oper->addr, &oper->bits);
 
-    oper_assign_class(oper, block_state.class.buf);
+    oper_assign_class(oper, block_state.klass.buf);
   }
 };
 
@@ -1044,7 +1044,7 @@ oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
 oper_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 oper_umodes: T_UMODES '=' QSTRING ';'
@@ -1198,24 +1198,24 @@ class_entry: CLASS
   if (conf_parser_ctx.pass != 1)
     break;
 
-  if (!block_state.class.buf[0])
+  if (!block_state.klass.buf[0])
     break;
 
-  struct ClassItem *class = class_find(block_state.class.buf, false);
-  if (class == NULL)
-    class = class_make();
+  struct ClassItem *klass = class_find(block_state.klass.buf, false);
+  if (klass == NULL)
+    klass = class_make();
 
-  class->active = true;
-  io_free(class->name);
-  class->name = io_strdup(block_state.class.buf);
-  class->ping_freq = block_state.ping_freq.value;
-  class->max_perip_local = block_state.max_perip_local.value;
-  class->max_perip_global = block_state.max_perip_global.value;
-  class->con_freq = block_state.con_freq.value;
-  class->max_total = block_state.max_total.value;
-  class->max_sendq = block_state.max_sendq.value;
-  class->max_recvq = block_state.max_recvq.value;
-  class->max_channels = block_state.max_channels.value;
+  klass->active = true;
+  io_free(klass->name);
+  klass->name = io_strdup(block_state.klass.buf);
+  klass->ping_freq = block_state.ping_freq.value;
+  klass->max_perip_local = block_state.max_perip_local.value;
+  klass->max_perip_global = block_state.max_perip_global.value;
+  klass->con_freq = block_state.con_freq.value;
+  klass->max_total = block_state.max_total.value;
+  klass->max_sendq = block_state.max_sendq.value;
+  klass->max_recvq = block_state.max_recvq.value;
+  klass->max_channels = block_state.max_channels.value;
 
   if (block_state.min_idle.value > block_state.max_idle.value)
   {
@@ -1224,18 +1224,18 @@ class_entry: CLASS
     block_state.flags.value &= ~CLASS_FLAGS_FAKE_IDLE;
   }
 
-  class->flags = block_state.flags.value;
-  class->min_idle = block_state.min_idle.value;
-  class->max_idle = block_state.max_idle.value;
+  klass->flags = block_state.flags.value;
+  klass->min_idle = block_state.min_idle.value;
+  klass->max_idle = block_state.max_idle.value;
 
-  bool diff = (class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
-               class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
-  class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
-  class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
-  class->number_per_cidr = block_state.number_per_cidr.value;
+  bool diff = (klass->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
+               klass->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
+  klass->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
+  klass->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
+  klass->number_per_cidr = block_state.number_per_cidr.value;
 
   if (diff)
-    class_ip_limit_rebuild(class);
+    class_ip_limit_rebuild(klass);
 };
 
 class_items:    class_items class_item | class_item;
@@ -1259,7 +1259,7 @@ class_item:     class_name |
 class_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 1)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 class_ping_time: PING_TIME '=' timespec ';'
@@ -1498,7 +1498,7 @@ auth_entry: IRCD_AUTH
     conf->flags = block_state.flags.value;
     conf->port = block_state.port.value;
 
-    conf_assign_class(conf, block_state.class.buf);
+    conf_assign_class(conf, block_state.klass.buf);
     add_conf_by_address(CONF_CLIENT, conf);
   }
 };
@@ -1529,7 +1529,7 @@ auth_passwd: PASSWORD '=' QSTRING ';'
 auth_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 auth_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -1924,7 +1924,7 @@ connect_entry: CONNECT
     if (address_from_string(block_state.bind.buf, &connect->bind_addr) == false)
       conf_error_report("Invalid IP address for bind address");
 
-  connect_assign_class(connect, block_state.class.buf);
+  connect_assign_class(connect, block_state.klass.buf);
   connect_dns_lookup(connect);
 };
 
@@ -2060,7 +2060,7 @@ connect_leaf_mask: LEAF_MASK '=' QSTRING ';'
 connect_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 connect_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'

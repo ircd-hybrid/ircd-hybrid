@@ -151,10 +151,9 @@ do_trace(struct Client *source, const char *name)
   {
     LIST_FOREACH(node, class_get_list()->head)
     {
-      const struct ClassItem *class = node->data;
-
-      if (class->ref_count)
-        sendto_one_numeric(source, &me, RPL_TRACECLASS, class->name, class->ref_count);
+      const struct ClassItem *const klass = node->data;
+      if (klass->ref_count)
+        sendto_one_numeric(source, &me, RPL_TRACECLASS, klass->name, klass->ref_count);
     }
   }
 

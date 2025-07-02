@@ -495,7 +495,7 @@ mr_server(struct Client *source, int parc, char *parv[])
   source->connection->password = NULL;
 
   server_set_flags(source, parv[4]);
-  client_set_class(source, connect->class, CLIENT_CLASS_BASE);
+  client_set_class(source, connect->klass, CLIENT_CLASS_BASE);
 
   server_estab(source, connect);
 }

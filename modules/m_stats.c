@@ -246,10 +246,10 @@ stats_operator(struct Client *client, int parc, char *parv[])
     if (user_mode_has_flag(client, UMODE_OPER))
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
                          oper->name, oper_privs_as_string(oper->oper_privs),
-                         oper->class->name);
+                         oper->klass->name);
     else
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
-                         oper->name, "0", oper->class->name);
+                         oper->name, "0", oper->klass->name);
   }
 }
 
@@ -278,10 +278,10 @@ stats_connect(struct Client *client, int parc, char *parv[])
      */
     if (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(client, UMODE_ADMIN))
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', connect->host, buf, connect->name, connect->port, connect->class->name);
+                         'C', connect->host, buf, connect->name, connect->port, connect->klass->name);
     else
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', "*@127.0.0.1", buf, connect->name, connect->port, connect->class->name);
+                         'C', "*@127.0.0.1", buf, connect->name, connect->port, connect->klass->name);
   }
 }
 
@@ -704,7 +704,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
                          string_default(conf->name, "*"),
                          show_iline_prefix(client, conf),
                          conf->host, conf->port,
-                         conf->class->name);
+                         conf->klass->name);
     }
   }
 }
@@ -986,16 +986,16 @@ stats_class(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, class_get_list()->head)
   {
-    const struct ClassItem *class = node->data;
+    const struct ClassItem *const klass = node->data;
     sendto_one_numeric(client, &me, RPL_STATSYLINE, 'Y',
-                       class->name, class->ping_freq,
-                       class->con_freq,
-                       class->max_total, class->max_sendq,
-                       class->max_recvq,
-                       class->ref_count,
-                       class->number_per_cidr, class->cidr_bitlen_ipv4,
-                       class->number_per_cidr, class->cidr_bitlen_ipv6,
-                       class->active ? "active" : "disabled");
+                       klass->name, klass->ping_freq,
+                       klass->con_freq,
+                       klass->max_total, klass->max_sendq,
+                       klass->max_recvq,
+                       klass->ref_count,
+                       klass->number_per_cidr, klass->cidr_bitlen_ipv4,
+                       klass->number_per_cidr, klass->cidr_bitlen_ipv6,
+                       klass->active ? "active" : "disabled");
   }
 }
 

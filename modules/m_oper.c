@@ -46,7 +46,7 @@
 static void
 oper_up(struct Client *client, const struct OperItem *oper)
 {
-  client_set_class(client, oper->class, CLIENT_CLASS_OPER);
+  client_set_class(client, oper->klass, CLIENT_CLASS_OPER);
 
   assert(client->connection->oper_name == NULL);
   io_free(client->connection->oper_name);

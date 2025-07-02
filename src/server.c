@@ -190,7 +190,7 @@ server_start_irc_handshake(struct Client *client)
   const struct ConnectItem *const connect = server_conf_get(client);
   assert(connect);
 
-  client_set_class(client, connect->class, CLIENT_CLASS_BASE);
+  client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
   SetHandshake(client);
 
   sendto_one(client, "PASS %s", connect->send_password);
@@ -472,7 +472,7 @@ server_connect_auto(void *unused)
   LIST_FOREACH(node, list->head)
   {
     struct ConnectItem *connect = node->data;
-    assert(connect->class);
+    assert(connect->klass);
 
     /* Also when already connecting! (update holdtimes) --SRB */
     if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
@@ -488,9 +488,9 @@ server_connect_auto(void *unused)
     if (connect->autoconnect_hold_until > io_time_get(IO_TIME_MONOTONIC_SEC))
       continue;
 
-    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + connect->class->con_freq;
+    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + connect->klass->con_freq;
 
-    if (connect->class->ref_count >= connect->class->max_total)
+    if (connect->klass->ref_count >= connect->klass->max_total)
       continue;
 
     /*

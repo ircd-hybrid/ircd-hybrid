@@ -430,7 +430,7 @@ conf_free(struct MaskItem *conf)
   if (conf->passwd)
     memset(conf->passwd, 0, strlen(conf->passwd));
 
-  conf->class = NULL;
+  conf->klass = NULL;
 
   io_free(conf->name);
   io_free(conf->passwd);
@@ -503,7 +503,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
 }
 
 static bool
-conf_admit_to_class(struct ClassItem *class, struct Client *client, bool exempt_limits, const char **error_reason)
+conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_limits, const char **error_reason)
 {
   *error_reason = NULL;
 
@@ -514,25 +514,25 @@ conf_admit_to_class(struct ClassItem *class, struct Client *client, bool exempt_
   if (exempt_limits)
     return true;
 
-  if (class->max_total && class->ref_count >= class->max_total)
+  if (klass->max_total && klass->ref_count >= klass->max_total)
   {
     *error_reason = "Connection class is full (total limit reached)";
     return false;
   }
 
-  if (class->max_perip_local && ipcache->count_local > class->max_perip_local)
+  if (klass->max_perip_local && ipcache->count_local > klass->max_perip_local)
   {
     *error_reason = "Connection class is full (local per-IP limit reached)";
     return false;
   }
 
-  if (class->max_perip_global && (ipcache->count_local + ipcache->count_remote) > class->max_perip_global)
+  if (klass->max_perip_global && (ipcache->count_local + ipcache->count_remote) > klass->max_perip_global)
   {
     *error_reason = "Connection class is full (global per-IP limit reached)";
     return false;
   }
 
-  if (class_ip_limit_add(class, &client->addr, exempt_limits))
+  if (class_ip_limit_add(klass, &client->addr, exempt_limits))
   {
     *error_reason = "Connection class is full (CIDR subnet limit reached)";
     return false;
@@ -550,10 +550,10 @@ conf_authorize_client(struct Client *client)
   if (conf == NULL)
     goto fail;
 
-  if (conf_admit_to_class(conf->class, client, IsConfExemptLimits(conf), &reason) == false)
+  if (conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), &reason) == false)
     goto fail;
 
-  client_set_class(client, conf->class, CLIENT_CLASS_BASE);
+  client_set_class(client, conf->klass, CLIENT_CLASS_BASE);
 
   io_free(client->connection->password);
   client->connection->password = NULL;
@@ -980,9 +980,9 @@ conf_read_files(bool cold)
 void
 conf_assign_class(struct MaskItem *conf, const char *name)
 {
-  if (string_is_empty(name) || (conf->class = class_find(name, true)) == NULL)
+  if (string_is_empty(name) || (conf->klass = class_find(name, true)) == NULL)
   {
-    conf->class = class_default;
+    conf->klass = class_default;
 
     assert(conf->type == CONF_CLIENT);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,

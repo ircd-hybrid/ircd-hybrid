@@ -91,7 +91,7 @@ struct OperItem
   char *tls_cert_fingerprint;
   char *whois_text;
   char *modes;
-  struct ClassItem *class;
+  struct ClassItem *klass;
   enum hostmask_type htype;
   struct io_addr addr;
   int bits;

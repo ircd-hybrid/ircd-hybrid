@@ -58,7 +58,7 @@ struct ConnectItem
   list_t hub_masks;
   list_t leaf_masks;
 
-  struct ClassItem *class;
+  struct ClassItem *klass;
 
   int port;
   int address_family;

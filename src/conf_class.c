@@ -48,34 +48,34 @@ class_get_list(void)
 struct ClassItem *
 class_make(void)
 {
-  struct ClassItem *class = io_calloc(sizeof(*class));
-  class->active = true;
-  class->con_freq = DEFAULT_CONNECTFREQUENCY;
-  class->ping_freq = DEFAULT_PINGFREQUENCY;
-  class->max_sendq = DEFAULT_SENDQ;
-  class->max_recvq = DEFAULT_RECVQ;
-  class->ip_tree_v6 = patricia_new(128);
-  class->ip_tree_v4 = patricia_new( 32);
-  list_add(class, &class->node, &class_list);
+  struct ClassItem *klass = io_calloc(sizeof(*klass));
+  klass->active = true;
+  klass->con_freq = DEFAULT_CONNECTFREQUENCY;
+  klass->ping_freq = DEFAULT_PINGFREQUENCY;
+  klass->max_sendq = DEFAULT_SENDQ;
+  klass->max_recvq = DEFAULT_RECVQ;
+  klass->ip_tree_v6 = patricia_new(128);
+  klass->ip_tree_v4 = patricia_new( 32);
+  list_add(klass, &klass->node, &class_list);
 
-  return class;
+  return klass;
 }
 
 void
-class_free(struct ClassItem *const class)
+class_free(struct ClassItem *const klass)
 {
-  assert(class != class_default);
-  assert(class->active == false);
-  assert(class->ref_count == 0);
+  assert(klass != class_default);
+  assert(klass->active == false);
+  assert(klass->ref_count == 0);
 
-  if (class->ip_tree_v6)
-    patricia_destroy(class->ip_tree_v6, NULL);
-  if (class->ip_tree_v4)
-    patricia_destroy(class->ip_tree_v4, NULL);
+  if (klass->ip_tree_v6)
+    patricia_destroy(klass->ip_tree_v6, NULL);
+  if (klass->ip_tree_v4)
+    patricia_destroy(klass->ip_tree_v4, NULL);
 
-  list_remove(&class->node, &class_list);
-  io_free(class->name);
-  io_free(class);
+  list_remove(&klass->node, &class_list);
+  io_free(klass->name);
+  io_free(klass);
 }
 
 void
@@ -97,13 +97,13 @@ class_find(const char *name, bool active)
 
   LIST_FOREACH(node, class_list.head)
   {
-    struct ClassItem *class = node->data;
-    if (irccmp(class->name, name) == 0)
+    struct ClassItem *klass = node->data;
+    if (irccmp(klass->name, name) == 0)
     {
-      if (active && class->active == false)
+      if (active && klass->active == false)
         return NULL;
 
-      return class;
+      return klass;
     }
   }
 
@@ -121,8 +121,8 @@ class_mark_all_inactive(void)
 
   LIST_FOREACH_PREV(node, class_list.tail->prev)
   {
-    struct ClassItem *class = node->data;
-    class->active = false;
+    struct ClassItem *klass = node->data;
+    klass->active = false;
   }
 }
 
@@ -133,36 +133,36 @@ class_free_inactive(void)
 
   LIST_FOREACH_SAFE(node, node_next, class_list.head)
   {
-    struct ClassItem *class = node->data;
-    if (class->active == false && class->ref_count == 0)
-      class_free(class);
+    struct ClassItem *klass = node->data;
+    if (klass->active == false && klass->ref_count == 0)
+      class_free(klass);
   }
 }
 
 static patricia_tree_t *
-class_ip_limit_trie(struct ClassItem *class, const void *addr)
+class_ip_limit_trie(struct ClassItem *klass, const void *addr)
 {
   if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    return class->ip_tree_v6;
+    return klass->ip_tree_v6;
 
-  return class->ip_tree_v4;
+  return klass->ip_tree_v4;
 }
 
 bool
-class_ip_limit_add(struct ClassItem *class, const void *addr, bool over_rule)
+class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
 {
   int bitlen;
 
   if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = class->cidr_bitlen_ipv6;
+    bitlen = klass->cidr_bitlen_ipv6;
   else
-    bitlen = class->cidr_bitlen_ipv4;
+    bitlen = klass->cidr_bitlen_ipv4;
 
-  if (class->number_per_cidr == 0 || bitlen == 0)
+  if (klass->number_per_cidr == 0 || bitlen == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
-  if (((uintptr_t)pnode->data) >= class->number_per_cidr)
+  patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(klass, addr), addr, bitlen);
+  if (((uintptr_t)pnode->data) >= klass->number_per_cidr)
   {
     if (over_rule)
       /*
@@ -181,19 +181,19 @@ class_ip_limit_add(struct ClassItem *class, const void *addr, bool over_rule)
 }
 
 bool
-class_ip_limit_remove(struct ClassItem *class, const void *addr)
+class_ip_limit_remove(struct ClassItem *klass, const void *addr)
 {
   int bitlen;
 
   if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = class->cidr_bitlen_ipv6;
+    bitlen = klass->cidr_bitlen_ipv6;
   else
-    bitlen = class->cidr_bitlen_ipv4;
+    bitlen = klass->cidr_bitlen_ipv4;
 
-  if (class->number_per_cidr == 0 || bitlen == 0)
+  if (klass->number_per_cidr == 0 || bitlen == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(class, addr), addr, 0);
+  patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(klass, addr), addr, 0);
   if (pnode == NULL)
     return false;
 
@@ -201,7 +201,7 @@ class_ip_limit_remove(struct ClassItem *class, const void *addr)
 
   if (((uintptr_t)pnode->data) == 0)
   {
-    patricia_remove(class_ip_limit_trie(class, addr), pnode);
+    patricia_remove(class_ip_limit_trie(klass, addr), pnode);
     return true;
   }
 
@@ -209,16 +209,16 @@ class_ip_limit_remove(struct ClassItem *class, const void *addr)
 }
 
 void
-class_ip_limit_rebuild(struct ClassItem *class)
+class_ip_limit_rebuild(struct ClassItem *klass)
 {
-  patricia_clear(class->ip_tree_v6, NULL);
-  patricia_clear(class->ip_tree_v4, NULL);
+  patricia_clear(klass->ip_tree_v6, NULL);
+  patricia_clear(klass->ip_tree_v4, NULL);
 
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
     const struct Client *client = node->data;
-    if (client->connection->base_class == class)
-      class_ip_limit_add(class, &client->addr, true);
+    if (client->connection->base_class == klass)
+      class_ip_limit_add(klass, &client->addr, true);
   }
 }

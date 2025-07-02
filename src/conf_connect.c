@@ -36,20 +36,20 @@ static list_t connect_items;
 void
 connect_assign_class(struct ConnectItem *connect, const char *class_name)
 {
-  assert(connect->class == NULL);
+  assert(connect->klass == NULL);
 
   if (!string_is_empty(class_name))
-    connect->class = class_find(class_name, true);
+    connect->klass = class_find(class_name, true);
 
-  if (connect->class == NULL)
+  if (connect->klass == NULL)
   {
-    connect->class = class_default;
+    connect->klass = class_default;
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
-                   string_default(class_name, "<not specified>"), connect->name, connect->class->name);
+                   string_default(class_name, "<not specified>"), connect->name, connect->klass->name);
     log_write(LOG_TYPE_IRCD, "Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
-              string_default(class_name, "<not specified>"), connect->name, connect->class->name);
+              string_default(class_name, "<not specified>"), connect->name, connect->klass->name);
   }
 }
 
@@ -100,7 +100,7 @@ connect_free(struct ConnectItem *connect)
   if (connect->send_password)
     memset(connect->send_password, 0, strlen(connect->send_password));
 
-  connect->class = NULL;
+  connect->klass = NULL;
 
   io_free(connect->name);
   io_free(connect->host);

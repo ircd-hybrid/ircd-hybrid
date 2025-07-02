@@ -75,7 +75,7 @@ oper_free(struct OperItem *oper)
   if (oper->password)
     memset(oper->password, 0, strlen(oper->password));
 
-  oper->class = NULL;
+  oper->klass = NULL;
 
   io_free(oper->name);
   io_free(oper->user);
@@ -90,20 +90,20 @@ oper_free(struct OperItem *oper)
 void
 oper_assign_class(struct OperItem *oper, const char *class_name)
 {
-  assert(oper->class == NULL);
+  assert(oper->klass == NULL);
 
   if (!string_is_empty(class_name))
-    oper->class = class_find(class_name, true);
+    oper->klass = class_find(class_name, true);
 
-  if (oper->class == NULL)
+  if (oper->klass == NULL)
   {
-    oper->class = class_default;
+    oper->klass = class_default;
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",
-                   string_default(class_name, "<not specified>"), oper->name, oper->class->name);
+                   string_default(class_name, "<not specified>"), oper->name, oper->klass->name);
     log_write(LOG_TYPE_IRCD, "Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",
-              string_default(class_name, "<not specified>"), oper->name, oper->class->name);
+              string_default(class_name, "<not specified>"), oper->name, oper->klass->name);
   }
 }
 

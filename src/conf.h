@@ -95,7 +95,7 @@ struct MaskItem
   unsigned int       port;
   uintmax_t          until;     /* Hold action until this time (calendar time) */
   uintmax_t          setat;
-  struct ClassItem  *class;  /* Class of connection */
+  struct ClassItem  *klass;  /* Class of connection */
   char              *name;
   char              *user;     /* user part of user@host */
   char              *host;     /* host part of user@host */

@@ -23,30 +23,32 @@
  * \brief Responsible for managing channels, members, bans and topics
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
 #include "address.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "misc.h"
-#include "io_string.h"
-#include "io_time.h"
-#include "defaults.h"
+
+#include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
-#include "cap.h"
 #include "conf.h"
 #include "conf_oper.h"
 #include "conf_resv.h"
+#include "defaults.h"
+#include "extban.h"
+#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "send.h"
 #include "server.h"
 #include "server_capab.h"
-#include "send.h"
 #include "user_mode.h"
-#include "extban.h"
 
 /** Doubly linked list containing a list of all channels. */
 static list_t channel_list;

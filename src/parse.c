@@ -23,21 +23,23 @@
  * \brief The message parser.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
+#include "io_string.h"
 #include "log.h"
 #include "misc.h"
-#include "io_string.h"
-#include "client.h"
+
 #include "channel.h"
+#include "client.h"
+#include "conf.h"
 #include "hash.h"
 #include "id.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
-#include "user_mode.h"
-#include "conf.h"
 #include "packet.h"
 #include "parse.h"
+#include "send.h"
+#include "user_mode.h"
 
 typedef struct parser_context
 {

@@ -21,14 +21,15 @@
 
 #include <stddef.h>
 
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "io_string.h"
+
+#include "accept.h"
 #include "channel.h"
 #include "client.h"
 #include "conf.h"
 #include "user_mode.h"
-#include "accept.h"
 
 /*
  * accept processing, this adds a form of "caller ID" to ircd

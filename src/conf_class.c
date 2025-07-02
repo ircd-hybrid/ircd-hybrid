@@ -23,15 +23,17 @@
  * \brief Configuration managment for class{} blocks
  */
 
-#include "stdinc.h"
-#include "defaults.h"
-#include "list.h"
+#include <assert.h>
+
 #include "io_string.h"
+#include "list.h"
 #include "memory.h"
 #include "patricia.h"
+
 #include "client.h"
 #include "conf.h"
 #include "conf_class.h"
+#include "defaults.h"
 
 static list_t class_list;
 

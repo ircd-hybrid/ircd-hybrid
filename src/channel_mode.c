@@ -23,26 +23,28 @@
  * \brief Controls modes on channels.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
 #include "address.h"
-#include "list.h"
-#include "memory.h"
 #include "io_string.h"
 #include "io_time.h"
+#include "list.h"
+#include "memory.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
+#include "extban.h"
 #include "ircd.h"
+#include "isupport.h"
 #include "nuh.h"
 #include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "parse.h"
-#include "extban.h"
-#include "isupport.h"
+#include "send.h"
+#include "server.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 /** Buffer holding a list of channel modes to be used for RPL_MYINFO */
 char cmode_rpl04[2][256];

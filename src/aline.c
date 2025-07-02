@@ -20,17 +20,17 @@
  */
 
 #include <stdarg.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "io_string.h"
-#include "nuh.h"
-#include "numeric.h"
+#include "aline.h"
+#include "client.h"
 #include "conf.h"
 #include "conf_oper.h"
-#include "client.h"
+#include "nuh.h"
+#include "numeric.h"
 #include "send.h"
-#include "aline.h"
 
 /* valid_wild_card_simple()
  *

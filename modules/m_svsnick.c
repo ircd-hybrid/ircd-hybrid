@@ -61,10 +61,6 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
-  const char *new_nick = parv[3];
-  if (valid_nickname(new_nick, true) == false)
-    return;
-
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
     return;
@@ -73,7 +69,9 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   if (ts && (ts != target->tsinfo))
     return;
 
-  uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
+  const char *const new_nick = parv[3];
+  if (valid_nickname(new_nick, true) == false)
+    return;
 
   if (!MyConnect(target))
   {
@@ -85,6 +83,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
       return;
     }
 
+    uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
     sendto_one(target, ":%s SVSNICK %s %ju %s %ju",
                source->id, target->id, ts, new_nick, new_ts);
     return;
@@ -107,9 +106,11 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     }
   }
 
-  target->tsinfo = new_ts;
-  clear_ban_cache_list(&target->channel);
+  whowas_add_history(target, true);
+
   monitor_signoff(target);
+
+  clear_ban_cache_list(&target->channel);
 
   if (user_mode_has_flag(target, UMODE_REGISTERED))
   {
@@ -121,13 +122,14 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
                                target->name, target->username, target->host, new_nick);
 
-  whowas_add_history(target, true);
 
+  uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
   sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
-                 target->id, new_nick, target->tsinfo);
+                 target->id, new_nick, new_ts);
 
   hash_del_client(target);
   strlcpy(target->name, new_nick, sizeof(target->name));
+  target->tsinfo = new_ts;
   hash_add_client(target);
 
   monitor_signon(target);

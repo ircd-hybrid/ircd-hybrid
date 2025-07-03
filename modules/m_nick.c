@@ -241,18 +241,12 @@ nick_change_local(struct Client *source, const char *nick)
   ircd_hook_nick_change_ctx ctx = { .client = source, .nick = nick };
   hook_dispatch(ircd_hook_nick_change_local, &ctx);
 
-  /*
-   * Client just changing their nick. If they are on a channel, send
-   * note of change to all clients on that channel. Propagate notice
-   * to other servers.
-   */
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, nick);
-
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
                  source->id, nick, source->tsinfo);
+  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               source->name, source->username, source->host, nick);
 
   hash_del_client(source);
   strlcpy(source->name, nick, sizeof(source->name));
@@ -289,24 +283,23 @@ nick_change_remote(struct Client *source, char *parv[])
   bool samenick = irccmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
+    source->tsinfo = strtoumax(parv[2], NULL, 10);
+    assert(source->tsinfo);
+
     user_mode_unset_flag(source, UMODE_REGISTERED);
 
     monitor_signoff(source);
-
-    source->tsinfo = strtoumax(parv[2], NULL, 10);
-    assert(source->tsinfo);
   }
 
   ircd_hook_nick_change_ctx ctx = { .client = source, .nick = new_nick };
   hook_dispatch(ircd_hook_nick_change_remote, &ctx);
 
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, new_nick);
-
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
                  source->id, new_nick, source->tsinfo);
+  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               source->name, source->username, source->host, new_nick);
 
   /* Set the new nick name */
   hash_del_client(source);

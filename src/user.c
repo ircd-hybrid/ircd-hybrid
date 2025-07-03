@@ -153,7 +153,7 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 static void
 user_introduce(struct Client *client)
 {
-  monitor_signon(client);
+  AddFlag(client, FLAGS_INTRODUCED);
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->origin->id, client->name, client->hopcount + 1,
@@ -167,7 +167,8 @@ user_introduce(struct Client *client)
   if (!string_is_empty(client->tls_cipher))
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
                    client->origin->id, client->id, client->tls_cipher);
-  AddFlag(client, FLAGS_INTRODUCED);
+
+  monitor_signon(client);
 }
 
 /* user_welcome()

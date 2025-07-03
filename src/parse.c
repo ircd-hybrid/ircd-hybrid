@@ -78,10 +78,10 @@ parse_handle_unknown_prefix(struct Client *client, const char *prefix, const cha
   else
     command_name = "KILL";
 
-  log_write(LOG_TYPE_DEBUG, "Unknown prefix ('%s') from %s, sending %s %s",
-            prefix, client_get_name(client, SHOW_IP), command_name, prefix);
   sendto_one(client, ":%s %s %s :Unknown prefix from %s",
              me.id, command_name, prefix, client_get_name(client, SHOW_IP));
+  log_write(LOG_TYPE_DEBUG, "Unknown prefix ('%s') from %s, sending %s %s",
+            prefix, client_get_name(client, SHOW_IP), command_name, prefix);
 }
 
 /*

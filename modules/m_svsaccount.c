@@ -61,10 +61,11 @@ ms_svsaccount(struct Client *source, int parc, char *parv[])
     return;
 
   strlcpy(target->account, parv[3], sizeof(target->account));
-  sendto_common_channels_local(target, true, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
-                               target->name, target->username, target->host, target->account);
+
   sendto_servers(source, 0, 0, ":%s SVSACCOUNT %s %ju %s",
                  source->id, target->id, target->tsinfo, target->account);
+  sendto_common_channels_local(target, true, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
+                               target->name, target->username, target->host, target->account);
 }
 
 static struct Command command_table =

@@ -114,11 +114,11 @@ m_knock(struct Client *source, int parc, char *parv[])
 
   channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
+  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
+                 source->id, channel->name);
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, channel->name, channel->name, source->name, source->username, source->host);
-  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                 source->id, channel->name);
 }
 
 static struct Command command_table =

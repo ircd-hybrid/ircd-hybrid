@@ -98,11 +98,11 @@ m_kick(struct Client *source, int parc, char *parv[])
   }
 
   const char *reason = string_default(parv[3], source->name);
+  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
+                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                        source->name, source->username, source->host, channel->name,
                        target->name, ConfigChannel.max_kick_length, reason);
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
 
   channel_remove_user(member_target);
 }
@@ -136,6 +136,9 @@ ms_kick(struct Client *source, int parc, char *parv[])
     return;
 
   const char *reason = string_default(parv[3], source->name);
+  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
+                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
+
   if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                          source->name, source->username, source->host, channel->name,
@@ -144,9 +147,6 @@ ms_kick(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
                          IsHidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
-
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
 
   channel_remove_user(member_target);
 }

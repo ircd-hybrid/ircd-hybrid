@@ -88,10 +88,10 @@ do_away(struct Client *source, const char *message)
   io_free(source->away);
   source->away = io_strndup(message, ConfigGeneral.max_away_length);
 
-  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source->name, source->username, source->host, source->away);
   sendto_servers(source, 0, 0, ":%s AWAY :%s",
                  source->id, source->away);
+  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                               source->name, source->username, source->host, source->away);
 }
 
 /*! \brief AWAY command handler

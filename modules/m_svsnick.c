@@ -119,22 +119,20 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     user_mode_send(source, mode_flags_old, USER_MODE_SEND_CLIENT);
   }
 
-  sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               target->name, target->username, target->host, new_nick);
-
-
   uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
   sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
                  target->id, new_nick, new_ts);
+  sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               target->name, target->username, target->host, new_nick);
 
   hash_del_client(target);
   strlcpy(target->name, new_nick, sizeof(target->name));
   target->tsinfo = new_ts;
   hash_add_client(target);
 
-  monitor_signon(target);
-
   fd_note(target->connection->fd, "Nick: %s", target->name);
+
+  monitor_signon(target);
 }
 
 static struct Command command_table =

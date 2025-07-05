@@ -28,6 +28,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "config.h"
 #include "io_time.h"
 #include "misc.h"
 
@@ -53,7 +54,13 @@ date(uintmax_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
-    strftime(buf, sizeof(buf), "%A %B %-e %Y -- %T %z", localtime((time_t *)&lclock));
+
+#if defined(HAVE_STRFTIME_MINUS_E) && HAVE_STRFTIME_MINUS_E
+    const char *date_format = "%A %B %-e %Y -- %T %z";
+#else
+    const char *date_format = "%A %B %e %Y -- %T %z";
+#endif
+    strftime(buf, sizeof(buf), date_format, localtime((time_t *)&lclock));
   }
 
   return buf;
@@ -141,7 +148,13 @@ date_ctime(uintmax_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
-    strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime((time_t *)&lclock));
+
+#if defined(HAVE_STRFTIME_MINUS_E) && HAVE_STRFTIME_MINUS_E
+    const char *const date_format = "%a %b %-e %T %Y";
+#else
+    const char *const date_format = "%a %b %e %T %Y";
+#endif
+    strftime(buf, sizeof(buf), date_format, localtime((time_t *)&lclock));
   }
 
   return buf;

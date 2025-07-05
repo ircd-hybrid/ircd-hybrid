@@ -65,6 +65,8 @@ AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 
 AX_DEFINE_BUILD_DATE
 
+AX_CHECK_STRFTIME_MINUS_E
+
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile

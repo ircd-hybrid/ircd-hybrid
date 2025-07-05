@@ -595,6 +595,7 @@ conf_set_defaults(void)
   ConfigServerInfo.hub = 0;
 
   ConfigLog.use_logging = 1;
+  log_set_enabled(ConfigLog.use_logging);
 
   ConfigChannel.enable_extbans = 0;
   ConfigChannel.disable_fake_channels = 0;

@@ -37,7 +37,6 @@
 #include "list.h"
 #include "log.h"
 #include "io_string.h"
-//#include "conf.h"         XXX: decouple
 #include "misc.h"
 #include "memory.h"
 
@@ -79,6 +78,8 @@ enum { LOG_ROTATION_ATTEMPTS = 1000 };
  * type of log (e.g., ircd log, kill log, etc.).
  */
 static list_t log_list;
+
+static bool log_enabled = true;
 
 /**
  * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
@@ -212,10 +213,8 @@ log_rotate_due(struct Log *log)
 void
 log_write(enum log_type type, const char *format, ...)
 {
- // if (ConfigLog.use_logging == 0)
-   // return;
-
   list_node_t *node;
+
   LIST_FOREACH(node, log_list.head)
   {
     struct Log *log = node->data;
@@ -286,4 +285,10 @@ log_clear(void)
     if (log->main == false)
       log_destroy(log);
   }
+}
+
+void
+log_set_enabled(bool enabled)
+{
+  log_enabled = enabled;
 }

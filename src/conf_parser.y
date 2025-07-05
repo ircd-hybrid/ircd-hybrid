@@ -831,7 +831,10 @@ logging_item:           logging_use_logging | logging_file_entry |
 logging_use_logging: USE_LOGGING '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
+  {
     ConfigLog.use_logging = yylval.number;
+    log_set_enabled(ConfigLog.use_logging);
+  }
 };
 
 logging_file_entry:

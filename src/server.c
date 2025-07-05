@@ -397,9 +397,10 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
     return false;
   }
 
-  char buf[HOSTIPLEN + 1];
-  address_to_string(&connect->remote_addr, buf, sizeof(buf));
-  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, buf);
+  char addr_str[HOSTIPLEN + 1];
+  address_to_string(&connect->remote_addr, addr_str, sizeof(addr_str));
+
+  log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
   /* Create a socket for the server connection */
   int fd = comm_socket(address_get_family(&connect->remote_addr), SOCK_STREAM, 0);
@@ -419,7 +420,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   strlcpy(client->host, connect->host, sizeof(client->host));
 
   /* We already converted the ip once, so lets use it - stu */
-  strlcpy(client->sockhost, buf, sizeof(client->sockhost));
+  strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
 
   address_copy(&client->addr, &connect->remote_addr);
   client->connection->fd = fd_open(fd, true, NULL);

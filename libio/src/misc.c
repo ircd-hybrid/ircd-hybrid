@@ -28,7 +28,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated HAVE_STRFTIME_MINUS_E. */
 #include "io_time.h"
 #include "misc.h"
 
@@ -56,9 +56,9 @@ date(uintmax_t lclock)
     lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
 
 #if defined(HAVE_STRFTIME_MINUS_E) && HAVE_STRFTIME_MINUS_E
-    const char *date_format = "%A %B %-e %Y -- %T %z";
+    const char *const date_format = "%A %B %-e %Y -- %T %z";
 #else
-    const char *date_format = "%A %B %e %Y -- %T %z";
+    const char *const date_format = "%A %B %e %Y -- %T %z";
 #endif
     strftime(buf, sizeof(buf), date_format, localtime((time_t *)&lclock));
   }

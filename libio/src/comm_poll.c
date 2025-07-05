@@ -23,18 +23,17 @@
  * \brief POSIX poll() compatible network routines.
  */
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated USE_IOPOLL_MECHANISM & AX_IOPOLL_MECHANISM_POLL. */
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_POLL
-#include <poll.h>
 #include <assert.h>
+#include <poll.h>
 #include <time.h>
 
-#include "io_time.h"
-#include "fdlist.h"
-#include "memory.h"
 #include "comm.h"
+#include "fdlist.h"
+#include "io_time.h"
 #include "log.h"
-#include "ircd.h" /* XXX: decouple */
+#include "memory.h"
 
 /* I hate linux -- adrian */
 #ifndef POLLRDNORM
@@ -149,13 +148,12 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
  * events.
  */
 void
-comm_select(void)
+comm_select(int timeout_ms)
 {
   int num;
   void (*hdl)(fde_t *, void *);
 
-  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
-  num = poll(pollfds, pollnum, select_timeout_ms);
+  num = poll(pollfds, pollnum, timeout_ms);
 
   io_time_set();
 

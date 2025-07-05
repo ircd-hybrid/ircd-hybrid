@@ -51,7 +51,7 @@ enum
 
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
-extern void comm_select(void);
+extern void comm_select(int);
 extern void comm_settimeout(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_setflush(fde_t *, uintmax_t, void (*)(fde_t *, void *), void *);
 extern void comm_checktimeouts(void *);

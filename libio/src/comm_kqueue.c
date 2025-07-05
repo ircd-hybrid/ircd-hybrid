@@ -23,22 +23,21 @@
  * \brief kqueue() compatible network routines.
  */
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated USE_IOPOLL_MECHANISM & AX_IOPOLL_MECHANISM_POLL. */
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_KQUEUE
-#include <sys/types.h>
-#include <sys/event.h>
-#include <time.h>
+#include <assert.h>
+#include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <assert.h>
-#include <stdint.h>
+#include <time.h>
+#include <sys/event.h>
+#include <sys/types.h>
 
-#include "io_time.h"
-#include "fdlist.h"
 #include "comm.h"
+#include "fdlist.h"
+#include "io_time.h"
 #include "log.h"
-#include "ircd.h" /* XXX: decouple */
 
 enum { KE_LENGTH = 128 };
 
@@ -143,22 +142,20 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
  * events.
  */
 void
-comm_select(void)
+comm_select(int timeout_ms)
 {
   int num;
   static struct kevent ke[KE_LENGTH];
   struct timespec poll_time;
   void (*hdl)(fde_t *, void *);
 
-  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
-
   /*
    * remember we are doing NANOseconds here, not micro/milli. God knows
    * why jlemon used a timespec, but hey, he wrote the interface, not I
    *   -- Adrian
    */
-  poll_time.tv_sec = select_timeout_ms / 1000;
-  poll_time.tv_nsec = (select_timeout_ms % 1000) * 1000000L;
+  poll_time.tv_sec = timeout_ms / 1000;
+  poll_time.tv_nsec = (timeout_ms % 1000) * 1000000L;
   num = kevent(kqueue_fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
   kqoff = 0;
 

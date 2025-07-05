@@ -192,7 +192,7 @@ io_loop(void)
     /* Run pending events */
     event_run(ircd_event_manager);
 
-    comm_select();
+    comm_select(comm_get_select_timeout(ircd_event_manager));
     exit_aborted_clients();
     free_exited_clients();
 

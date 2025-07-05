@@ -23,21 +23,20 @@
  * \brief Linux epoll() compatible network routines.
  */
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated USE_IOPOLL_MECHANISM & AX_IOPOLL_MECHANISM_POLL. */
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
-#include <sys/epoll.h>
+#include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <assert.h>
 #include <time.h>
+#include <sys/epoll.h>
 
-#include "io_time.h"
-#include "fdlist.h"
 #include "comm.h"
+#include "fdlist.h"
+#include "io_time.h"
 #include "log.h"
 #include "memory.h"
-#include "ircd.h" /* XXX: decouple */
 
 enum
 {
@@ -148,13 +147,12 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
  * events.
  */
 void
-comm_select(void)
+comm_select(int timeout_ms)
 {
   int num;
   void (*hdl)(fde_t *, void *);
 
-  int select_timeout_ms = comm_get_select_timeout(ircd_event_manager);
-  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, select_timeout_ms);
+  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, timeout_ms);
   assert(num <= epollop->nevents);
 
   io_time_set();

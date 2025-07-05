@@ -207,8 +207,10 @@ io_internal_gettime(clockid_t clock_id, struct timespec *ts)
         return IO_TIME_ERR_GET_REAL;
       case CLOCK_MONOTONIC:
         return IO_TIME_ERR_GET_MONO;
+#ifdef CLOCK_MONOTONIC_RAW
       case CLOCK_MONOTONIC_RAW:
         return IO_TIME_ERR_GET_MONO_RAW;
+#endif
       default:
         abort();  /* Invalid clock_id, abort the program. */
     }

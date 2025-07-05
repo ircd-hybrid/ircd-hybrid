@@ -42,30 +42,28 @@
  * Apr 28, 2003 --cryogen and Dianora
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <assert.h>
-#include <limits.h>
-#include <stddef.h>
 #include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
+#include "address.h"
+#include "comm.h"
+#include "fdlist.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "event.h"
-#include "rng_mt.h"
-#include "fdlist.h"
-#include "comm.h"
+#include "memory.h"
 #include "misc.h"
 #include "res.h"
 #include "reslib.h"
-#include "memory.h"
-#include "address.h"
-#include "ircd.h" /* XXX: decouple */
+#include "rng_mt.h"
 
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets
@@ -615,11 +613,11 @@ resolver_timeout(void *unused)
  * resolver_init - initialize resolver and resolver library
  */
 void
-resolver_init(void)
+resolver_init(event_manager_t mgr)
 {
   start_resolver();
 
-  event_handle_t event_resolver_timeout = event_create(ircd_event_manager, "resolver_timeout", resolver_timeout, 1000, false, NULL, NULL);
+  event_handle_t event_resolver_timeout = event_create(mgr, "resolver_timeout", resolver_timeout, 1000, false, NULL, NULL);
   event_set_priority(event_resolver_timeout, 1);
   event_schedule(event_resolver_timeout);
 }

@@ -435,7 +435,7 @@ main(int argc, char *argv[])
   module_init();
   conf_read_files(true);   /* cold start init conf files */
 
-  resolver_init();
+  resolver_init(ircd_event_manager);
   ipcache_init();
   client_init();
   channel_mode_init();

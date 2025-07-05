@@ -26,11 +26,13 @@
 #ifndef INCLUDED_res_h
 #define INCLUDED_res_h
 #include <stddef.h>
+
 #include "address.h"
+#include "event.h"
 
 typedef void (*dns_callback_fnc)(void *, const struct io_addr *, const char *, size_t);
 
-extern void resolver_init(void);
+extern void resolver_init(event_manager_t);
 extern void restart_resolver(void);
 extern void delete_resolver_queries(const void *);
 extern void gethost_byname_type(dns_callback_fnc , void *, const char *, int);

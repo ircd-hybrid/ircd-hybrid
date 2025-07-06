@@ -86,32 +86,32 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
 
   const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);
   const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);
-  const intmax_t delta_ts = imaxabs(remote_ts - local_ts);
+  const uintmax_t abs_delta_ts = (remote_ts > local_ts) ? (remote_ts - local_ts) : (local_ts - remote_ts);
 
-  if (delta_ts > ConfigGeneral.ts_max_delta)
+  if (abs_delta_ts > ConfigGeneral.ts_max_delta)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+              client_get_name(source, MASK_IP), local_ts, remote_ts, abs_delta_ts);
     log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
+              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
 
     client_exit(source, "Excessive TS delta");
     return;
   }
 
-  if (delta_ts > ConfigGeneral.ts_warn_delta)
+  if (abs_delta_ts > ConfigGeneral.ts_warn_delta)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
+              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
+              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+              client_get_name(source, MASK_IP), local_ts, remote_ts, abs_delta_ts);
   }
 }
 

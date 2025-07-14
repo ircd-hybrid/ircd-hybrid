@@ -412,22 +412,22 @@ main(int argc, char *argv[])
 
   ircd_signal_init();
 
-  /* We need this to initialise the fd array before anything else */
-  fdlist_init();
-  log_add(LOG_TYPE_IRCD, true, 0, logFileName);
-
-  comm_select_init();  /* This needs to be setup early ! -- adrian */
-  tls_init();
-
-  /* Check if there is pidfile and daemon already running */
-  if (io_pidfile_create(pidFileName))
-    exit(EXIT_FAILURE);
-
   ircd_event_manager = event_manager_create(NULL);
   if (ircd_event_manager == NULL)
   {
     exit(EXIT_FAILURE);
   }
+
+  /* We need this to initialise the fd array before anything else */
+  fdlist_init();
+  log_add(LOG_TYPE_IRCD, true, 0, logFileName);
+
+  comm_init(ircd_event_manager);  /* This needs to be setup early ! -- adrian */
+  tls_init();
+
+  /* Check if there is pidfile and daemon already running */
+  if (io_pidfile_create(pidFileName))
+    exit(EXIT_FAILURE);
 
   ircd_hook_init();
   class_init();

@@ -74,6 +74,10 @@ typedef struct _fde
   void (*flush_handler)(struct _fde *, void *);  /**< Flush event handler. */
   void *flush_data;  /**< Data for the flush event handler. */
   uintmax_t flush_timeout;  /**< Flush timeout duration. */
+
+  void (*cleanup_handler)(void *data);
+  void *cleanup_data;
+
   /**@}*/
 
   /** @name Flags */
@@ -83,17 +87,6 @@ typedef struct _fde
     bool open;  /**< Flag indicating if the file descriptor is open. */
     bool is_socket;  /**< Flag indicating if the file descriptor is a socket. */
   } flags;
-  /**@}*/
-
-  /** @name Connection Information */
-  /**@{*/
-  struct
-  {
-    struct io_addr addr;  /**< Host address information. */
-    void (*callback)(struct _fde *, int, void *);  /**< Callback function for connection events. */
-    void *data;  /**< Data for the connection callback. */
-    /* Retry count could be added here in the future -- adrian */
-  } connect;
   /**@}*/
 
   tls_data_t tls;  /**< TLS-related data. */

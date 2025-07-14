@@ -32,6 +32,8 @@
 #include "event.h"
 #include "fdlist.h"
 
+typedef struct comm_op_st comm_op_t;
+
 enum
 {
   COMM_OK,
@@ -49,6 +51,7 @@ enum
   COMM_SELECT_WRITE = 1 << 1
 };
 
+extern void comm_init(event_manager_t);
 extern void comm_select_init(void);
 extern void comm_setselect(fde_t *, unsigned int, void (*)(fde_t *, void *), void *, uintmax_t);
 extern void comm_select(int);

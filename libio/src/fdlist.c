@@ -121,6 +121,9 @@ fd_close(fde_t *F)
   assert(F->fd >= 0);
   assert(F->flags.open == true);
 
+  if (F->cleanup_handler)
+    F->cleanup_handler(F->cleanup_data);
+
   if (F->flags.is_socket)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 

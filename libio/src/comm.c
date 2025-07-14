@@ -23,20 +23,24 @@
  * \brief Network functions.
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <fcntl.h>
+#include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <stddef.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <assert.h>
-#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
-#include "io_time.h"
 #include "address.h"
-#include "fdlist.h"
 #include "comm.h"
+#include "event.h"
+#include "fdlist.h"
+#include "io_time.h"
+#include "memory.h"
+
+static event_manager_t comm_event_manager;
 
 static const char *const comm_err_str[] =
 {
@@ -47,10 +51,23 @@ static const char *const comm_err_str[] =
   [COMM_ERROR] = "Comm Error"
 };
 
-static void comm_connect_callback(fde_t *, int);
-static void comm_connect_timeout(fde_t *, void *);
-static void comm_connect_tryconnect(fde_t *, void *);
+struct comm_op_st
+{
+  fde_t *fde;
+  struct io_addr remote_addr;
+  void (*completion_handler)(fde_t *, int, void *);
+  void *completion_handler_data;
+  event_handle_t timeout_event;
+};
 
+void
+comm_init(event_manager_t mgr)
+{
+  assert(comm_event_manager == NULL);
+  comm_event_manager = mgr;
+
+  comm_select_init();
+}
 
 /* comm_get_sockerr - get the error value from the socket or the current errno
  *
@@ -232,6 +249,91 @@ comm_checktimeouts(void *unused)
   }
 }
 
+static void
+comm_connect_complete(comm_op_t *op, int status)
+{
+  assert(op);
+
+  fde_t *F = op->fde;
+  assert(F && F->flags.open == true);
+
+  void (*hdl)(fde_t *, int, void *) = op->completion_handler;
+  void *hdl_data = op->completion_handler_data;
+
+  if (F->cleanup_data == op)
+  {
+    F->cleanup_handler = NULL;
+    F->cleanup_data = NULL;
+  }
+
+  if (op->timeout_event)
+  {
+    event_destroy(op->timeout_event);
+    op->timeout_event = NULL;
+  }
+
+  comm_setselect(F, COMM_SELECT_WRITE, NULL, NULL, 0);
+
+  io_free(op);
+
+  /* Call the handler */
+  hdl(F, status, hdl_data);
+}
+
+static void
+comm_connect_cleanup(void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  comm_connect_complete(op, COMM_ERROR);
+}
+
+static void
+comm_connect_timeout(void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  op->timeout_event = NULL;
+  comm_connect_complete(op, COMM_ERR_TIMEOUT);
+}
+
+/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
+ * Input: The fd, the handler data(unused).
+ * Output: None.
+ * Side-effects: Try and connect with pending connect data for the FD. If
+ *               we succeed or get a fatal error, call the callback.
+ *               Otherwise, it is still blocking or something, so register
+ *               to select for a write event on this FD.
+ */
+static void
+comm_connect_handler(fde_t *F, void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  /* This check is needed or re-entrant s_bsd_* like sigio break it. */
+  if (F->cleanup_handler != comm_connect_cleanup || F->cleanup_data != op)
+    return;
+
+  int sock_err = 0;
+  socklen_t len = sizeof(sock_err);
+  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len) == -1)
+  {
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+    return;
+  }
+
+  if (sock_err == 0)
+    comm_connect_complete(op, COMM_OK);
+  else
+  {
+    errno = sock_err;
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+  }
+}
+
 /*
  * void comm_connect_tcp(int fd, const char *host, unsigned short port,
  *                       struct sockaddr *clocal, int socklen,
@@ -247,104 +349,50 @@ comm_checktimeouts(void *unused)
  */
 void
 comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
-                 void (*callback)(fde_t *, int, void *), void *data, uintmax_t timeout)
+                 void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout)
 {
-  assert(callback);
+  assert(handler);
 
-  address_copy(&F->connect.addr, caddr);
-  address_set_port(&F->connect.addr, port);
+  comm_op_t *op = io_calloc(sizeof(*op));
+  op->fde = F;
+  op->completion_handler = handler;
+  op->completion_handler_data = data;
+  address_copy(&op->remote_addr, caddr);
+  address_set_port(&op->remote_addr, port);
 
-  F->connect.callback = callback;
-  F->connect.data = data;
+  F->cleanup_handler = comm_connect_cleanup;
+  F->cleanup_data = op;
 
   if (baddr && address_is_specific(baddr))
   {
-    if (bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) < 0)
+    if (bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) == -1)
     {
       /* Failure, call the callback with COMM_ERR_BIND */
-      comm_connect_callback(F, COMM_ERR_BIND);
+      comm_connect_complete(op, COMM_ERR_BIND);
       return;  /* ... and quit */
     }
   }
 
-  comm_settimeout(F, timeout, comm_connect_timeout, NULL);
-  comm_connect_tryconnect(F, NULL);
-}
-
-/*
- * comm_connect_callback() - call the callback, and continue with life
- */
-static void
-comm_connect_callback(fde_t *F, int status)
-{
-  void (*hdl)(fde_t *, int, void *);
-
-  /* This check is gross..but probably necessary */
-  if (F->connect.callback == NULL)
-    return;
-
-  /* Clear the connect flag + handler */
-  hdl = F->connect.callback;
-  F->connect.callback = NULL;
-
-  /* Clear the timeout handler */
-  comm_settimeout(F, 0, NULL, NULL);
-
-  /* Call the handler */
-  hdl(F, status, F->connect.data);
-}
-
-/*
- * comm_connect_timeout() - this gets called when the socket connection
- * times out. This *only* can be called once connect() is initially
- * called ..
- */
-static void
-comm_connect_timeout(fde_t *F, void *unused)
-{
-  /* error! */
-  comm_connect_callback(F, COMM_ERR_TIMEOUT);
-}
-
-/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
- * Input: The fd, the handler data(unused).
- * Output: None.
- * Side-effects: Try and connect with pending connect data for the FD. If
- *               we succeed or get a fatal error, call the callback.
- *               Otherwise, it is still blocking or something, so register
- *               to select for a write event on this FD.
- */
-static void
-comm_connect_tryconnect(fde_t *F, void *unused)
-{
-  /* This check is needed or re-entrant s_bsd_* like sigio break it. */
-  if (F->connect.callback == NULL)
-    return;
-
   /* Try the connect() */
-  int retval = connect(F->fd, (struct sockaddr *)&F->connect.addr, address_length(&F->connect.addr));
-
-  /* Error? */
-  if (retval < 0)
+  if (connect(F->fd, (struct sockaddr *)&op->remote_addr, address_length(&op->remote_addr)) == 0)
   {
-    /*
-     * If we get EISCONN, then we've already connect()ed the socket,
-     * which is a good thing.
-     *   -- adrian
-     */
-    if (errno == EISCONN)
-      comm_connect_callback(F, COMM_OK);
-    else if (comm_ignore_errno(errno))
-      /* Ignore error? Reschedule */
-      comm_setselect(F, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
-    else
-      /* Error? Fail with COMM_ERR_CONNECT */
-      comm_connect_callback(F, COMM_ERR_CONNECT);
+    comm_connect_complete(op, COMM_OK);
     return;
   }
 
-  /* If we get here, we've suceeded, so call with COMM_OK */
-  comm_connect_callback(F, COMM_OK);
+  if (comm_ignore_errno(errno) == false)
+  {
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+    return;
+  }
+
+  if (timeout > 0)
+  {
+    op->timeout_event = event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout * 1000, true, op, NULL);
+    event_schedule(op->timeout_event);
+  }
+
+  comm_setselect(F, COMM_SELECT_WRITE, comm_connect_handler, op, 0);
 }
 
 /*

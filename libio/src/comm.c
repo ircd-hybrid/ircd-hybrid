@@ -38,6 +38,7 @@
 #include "event.h"
 #include "fdlist.h"
 #include "io_time.h"
+#include "log.h"
 #include "memory.h"
 
 static event_manager_t comm_event_manager;
@@ -78,23 +79,21 @@ comm_init(event_manager_t mgr)
 int
 comm_get_sockerr(fde_t *F)
 {
-  int errtmp = errno;
-#ifdef SO_ERROR
-  int err = 0;
-  socklen_t len = sizeof(err);
-
   assert(F);
   assert(F->flags.open == true);
 
-  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0)
+  int sock_err = 0;
+  socklen_t len = sizeof(sock_err);
+  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len))
   {
-    if (err)
-      errtmp = err;
+    log_write(LOG_TYPE_DEBUG, "comm_get_sockerr: getsockopt(SO_ERROR) failed for FD %d: %s",
+              F->fd, strerror(errno));
+    return errno;
   }
 
-  errno = errtmp;
-#endif
-  return errtmp;
+  if (sock_err)
+    return sock_err;
+  return errno;
 }
 
 /*
@@ -317,21 +316,11 @@ comm_connect_handler(fde_t *F, void *cbdata)
   if (F->cleanup_handler != comm_connect_cleanup || F->cleanup_data != op)
     return;
 
-  int sock_err = 0;
-  socklen_t len = sizeof(sock_err);
-  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len) == -1)
-  {
-    comm_connect_complete(op, COMM_ERR_CONNECT);
-    return;
-  }
-
+  int sock_err = comm_get_sockerr(F);
   if (sock_err == 0)
     comm_connect_complete(op, COMM_OK);
   else
-  {
-    errno = sock_err;
     comm_connect_complete(op, COMM_ERR_CONNECT);
-  }
 }
 
 /*

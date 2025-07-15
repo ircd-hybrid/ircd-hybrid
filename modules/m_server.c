@@ -265,38 +265,26 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   sendto_one(client, ":%s SVINFO %u %u 0 :%ju",
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
-  SetServer(client);
-  client->origin = &me;
+  if (!IsHandshake(client))
+    hash_add_client(client);
+  hash_add_id(client);
 
-  list_add(client, &client->lnode, &me.serv->server_list);
+  SetServer(client);
+
+  server_make(client);
+  server_conf_set(client, connect);
+
+  if (service_find(client->name, irccmp))
+    AddFlag(client, FLAGS_SERVICE);
 
   assert(list_find(&unknown_list, client));
   list_move_node(&client->connection->node, &unknown_list, &local_server_list);
 
   list_add(client, &client->node, &global_server_list);
+  list_add(client, &client->lnode, &me.serv->server_list);
 
-  if ((list_length(&local_client_list) +
-       list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = list_length(&local_client_list) +
-                        list_length(&local_server_list);
-
-  if (!IsHandshake(client))
-    hash_add_client(client);
-  hash_add_id(client);
-
-  /* Doesn't duplicate client->serv if allocated this struct already */
-  server_make(client);
-
-  server_conf_set(client, connect);
-
-  fd_note(client->connection->fd, "Server: %s", client->name);
-
-  /* Fixing eob timings.. -gnp */
-  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-  client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-
-  if (service_find(client->name, irccmp))
-    AddFlag(client, FLAGS_SERVICE);
+  if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
+    Count.max_loc_con = list_length(&local_client_list) + list_length(&local_server_list);
 
   /* Show the real host/IP to admins */
   if (tls_isusing(&client->connection->fd->tls))
@@ -490,9 +478,16 @@ mr_server(struct Client *source, int parc, char *parv[])
   strlcpy(source->id, sid, sizeof(source->id));
   strlcpy(source->info, parv[parc - 1], sizeof(source->info));
   source->hopcount = hopcount;
+  source->origin = &me;
+
+  /* Fixing eob timings.. -gnp */
+  source->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
 
   io_free(source->connection->password);
   source->connection->password = NULL;
+
+  fd_note(source->connection->fd, "Server: %s", source->name);
 
   server_set_flags(source, parv[4]);
   client_set_class(source, connect->klass, CLIENT_CLASS_BASE);

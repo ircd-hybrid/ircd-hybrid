@@ -84,16 +84,14 @@ comm_get_sockerr(fde_t *F)
 
   int sock_err = 0;
   socklen_t len = sizeof(sock_err);
-  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len))
+  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len) == 0)
+    return sock_err;
+  else
   {
     log_write(LOG_TYPE_DEBUG, "comm_get_sockerr: getsockopt(SO_ERROR) failed for FD %d: %s",
               F->fd, strerror(errno));
     return errno;
   }
-
-  if (sock_err)
-    return sock_err;
-  return errno;
 }
 
 /*

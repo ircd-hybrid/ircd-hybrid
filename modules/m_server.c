@@ -404,7 +404,7 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (IsHandshake(source) && irccmp(source->name, name))
+  if (IsHandshake(source) && strcmp(source->name, name))
   {
     server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
     return;

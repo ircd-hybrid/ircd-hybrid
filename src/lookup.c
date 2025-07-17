@@ -156,7 +156,10 @@ void
 lookup_delete(struct LookupRequest *lookup)
 {
   if (lookup->ident_request)
+  {
     ident_delete(lookup->ident_request);
+    lookup->ident_request = NULL;
+  }
 
   delete_resolver_queries(lookup);
   io_free(lookup);

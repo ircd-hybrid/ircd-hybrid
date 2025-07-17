@@ -172,7 +172,10 @@ void
 ident_delete(ident_request_t *request)
 {
   if (request->fd)
+  {
     fd_close(request->fd);
+    request->fd = NULL;
+  }
 
   io_free(request);
 }

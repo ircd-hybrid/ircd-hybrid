@@ -443,11 +443,7 @@ event_set_name(event_handle_t event, const char *new_name)
 {
   io_free(event->name);
 
-  if (new_name)
-    event->name = io_strdup(new_name);
-  else
-    event->name = NULL;
-
+  event->name = new_name ? io_strdup(new_name) : NULL;
   return EVENT_SUCCESS;
 }
 

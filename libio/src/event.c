@@ -216,6 +216,21 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
   return EVENT_SUCCESS;
 }
 
+static event_status_t
+_event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
+{
+  assert(event);
+  assert(event->manager);
+  assert(event->handler);
+
+  event->next_fire_time_ms = absolute_time_ms;
+
+  if (event_is_scheduled(event))
+    _event_remove_from_heap(event->manager, event);
+
+  return _event_add_to_heap(event->manager, event);
+}
+
 event_manager_t
 event_manager_create(event_manager_config_t *config)
 {
@@ -337,13 +352,10 @@ event_schedule(event_handle_t event)
   if (event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  uintmax_t current_time = io_time_get_monotonic_ms_total();
-  event->next_fire_time_ms = current_time + event->interval_ms;
+  const uintmax_t current_time = io_time_get_monotonic_ms_total();
+  const uintmax_t absolute_time_ms = current_time + event->interval_ms;
 
-  if (event_is_scheduled(event))
-    _event_remove_from_heap(event->manager, event);
-
-  return _event_add_to_heap(event->manager, event);
+  return _event_schedule_at_internal(event, absolute_time_ms);
 }
 
 event_status_t
@@ -354,12 +366,7 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
   if (event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  event->next_fire_time_ms = absolute_time_ms;
-
-  if (event_is_scheduled(event))
-    _event_remove_from_heap(event->manager, event);
-
-  return _event_add_to_heap(event->manager, event);
+  return _event_schedule_at_internal(event, absolute_time_ms);;
 }
 
 event_status_t
@@ -370,7 +377,6 @@ event_schedule_fuzzed(event_handle_t event)
   if (event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  uintmax_t current_time = io_time_get_monotonic_ms_total();
   uintmax_t fuzzed_delay = event->interval_ms;
 
   if (event->interval_ms >= 3000)
@@ -383,12 +389,10 @@ event_schedule_fuzzed(event_handle_t event)
       fuzzed_delay = 1;
   }
 
-  event->next_fire_time_ms = current_time + fuzzed_delay;
+  const uintmax_t current_time = io_time_get_monotonic_ms_total();
+  const uintmax_t absolute_time_ms = current_time + fuzzed_delay;
 
-  if (event_is_scheduled(event))
-    _event_remove_from_heap(event->manager, event);
-
-  return _event_add_to_heap(event->manager, event);
+  return _event_schedule_at_internal(event, absolute_time_ms);
 }
 
 uintmax_t

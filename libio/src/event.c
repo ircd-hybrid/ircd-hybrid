@@ -347,9 +347,7 @@ event_unschedule(event_handle_t event)
 event_status_t
 event_schedule(event_handle_t event)
 {
-  if (event->manager == NULL)
-    return EVENT_ERR_INVALID_ARG;
-  if (event->handler == NULL)
+  if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
   const uintmax_t current_time = io_time_get_monotonic_ms_total();
@@ -361,9 +359,7 @@ event_schedule(event_handle_t event)
 event_status_t
 event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 {
-  if (event->manager == NULL)
-    return EVENT_ERR_INVALID_ARG;
-  if (event->handler == NULL)
+  if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
   return _event_schedule_at_internal(event, absolute_time_ms);;
@@ -372,9 +368,7 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 event_status_t
 event_schedule_fuzzed(event_handle_t event)
 {
-  if (event->manager == NULL)
-    return EVENT_ERR_INVALID_ARG;
-  if (event->handler == NULL)
+  if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
   uintmax_t fuzzed_delay = event->interval_ms;
@@ -541,9 +535,7 @@ event_set_cleanup_handler(event_handle_t event, event_cleanup_fn new_cleanup_han
 event_status_t
 event_trigger_now(event_handle_t event)
 {
-  if (event->manager == NULL)
-    return EVENT_ERR_INVALID_ARG;
-  if (event->handler == NULL)
+  if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
   if (event_is_scheduled(event))

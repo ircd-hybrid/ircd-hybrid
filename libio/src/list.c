@@ -310,6 +310,26 @@ list_find(list_t *list, const void *data)
 }
 
 /**
+ * @brief Finds and deletes a node with a specific data value in a double-linked list.
+ *
+ * This function searches for a node with the specified data value in the
+ * double-linked list, deletes it, and returns a pointer to it.
+ *
+ * @param list Pointer to the double-linked list.
+ * @param data Pointer to the data value to search for and delete.
+ * @return Pointer to the deleted node, or NULL if not found.
+ */
+list_node_t *
+list_find_remove(list_t *list, void *data)
+{
+  list_node_t *node = list_find(list, data);
+  if (node)
+    list_remove(node, list);
+
+  return node;
+}
+
+/**
  * @brief Finds a node with a specific data value using a custom comparison function.
  *
  * This function searches for a node with the specified data value in the double-linked list
@@ -467,33 +487,6 @@ list_iterate_safe(list_t *list, list_iterate_callback callback, void *user_ptr)
 
     node = node_next;
   }
-}
-
-/**
- * @brief Finds and deletes a node with a specific data value in a double-linked list.
- *
- * This function searches for a node with the specified data value in the
- * double-linked list, deletes it, and returns a pointer to it.
- *
- * @param list Pointer to the double-linked list.
- * @param data Pointer to the data value to search for and delete.
- * @return Pointer to the deleted node, or NULL if not found.
- */
-list_node_t *
-list_find_remove(list_t *list, void *data)
-{
-  list_node_t *m;
-
-  LIST_FOREACH(m, list->head)
-  {
-    if (m->data == data)
-    {
-      list_remove(m, list);
-      return m;
-    }
-  }
-
-  return NULL;
 }
 
 /**

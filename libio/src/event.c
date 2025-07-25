@@ -472,19 +472,7 @@ event_set_priority(event_handle_t event, uint8_t new_priority)
   event->priority = new_priority;
 
   if (event_is_scheduled(event))
-  {
-    uintmax_t current_next_fire_time = event->next_fire_time_ms;
-
-    event_status_t status = _event_remove_from_heap(event->manager, event);
-    if (status != EVENT_SUCCESS)
-    {
-      assert(0);
-      return status;
-    }
-
-    event->next_fire_time_ms = current_next_fire_time;
-    return _event_add_to_heap(event->manager, event);
-  }
+    return event_schedule_at(event, event->next_fire_time_ms);
 
   return EVENT_SUCCESS;
 }

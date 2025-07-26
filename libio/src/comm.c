@@ -335,7 +335,7 @@ comm_connect_handler(fde_t *F, void *cbdata)
  */
 void
 comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
-                 void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout)
+                 void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout_ms)
 {
   assert(handler);
 
@@ -372,9 +372,9 @@ comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const str
     return;
   }
 
-  if (timeout > 0)
+  if (timeout_ms > 0)
   {
-    op->timeout_event = event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout * 1000, true, op, NULL);
+    op->timeout_event = event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout_ms, true, op, NULL);
     event_schedule(op->timeout_event);
   }
 

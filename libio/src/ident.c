@@ -227,7 +227,7 @@ ident_connect_callback(fde_t *F, int error, void *data)
 }
 
 ident_request_t *
-ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, void *user_data, uintmax_t timeout)
+ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, void *user_data, uintmax_t timeout_ms)
 {
   ident_request_t *request = io_calloc(sizeof(*request));
   request->callback = callback;
@@ -268,6 +268,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   address_strip_ipv4(&bind_addr);
   address_set_port(&bind_addr, 0);
 
-  comm_connect_tcp(request->fd, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout);
+  comm_connect_tcp(request->fd, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout_ms);
   return request;
 }

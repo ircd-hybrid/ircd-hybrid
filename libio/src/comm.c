@@ -146,21 +146,20 @@ comm_ignore_errno(int ierrno)
   }
 }
 
-#define COMM_DEFAULT_SELECT_TIMEOUT_MS 500
+#define COMM_DEFAULT_SELECT_TIMEOUT_MS 100
 
 int
 comm_get_select_timeout(event_manager_t mgr)
 {
-  if (event_manager_get_active_count(mgr) == 0)
+  const uintmax_t next_fire_time_ms = event_manager_get_next_fire_time(mgr);
+  if (next_fire_time_ms == UINTMAX_MAX)
     return COMM_DEFAULT_SELECT_TIMEOUT_MS;
 
-  uintmax_t next_fire_time_ms = event_manager_get_next_fire_time(mgr);
-  uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
-
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
   if (next_fire_time_ms <= current_time_ms)
     return 0;
 
-  uintmax_t delta_ms = next_fire_time_ms - current_time_ms;
+  const uintmax_t delta_ms = next_fire_time_ms - current_time_ms;
   if (delta_ms > COMM_DEFAULT_SELECT_TIMEOUT_MS)
     return COMM_DEFAULT_SELECT_TIMEOUT_MS;
 

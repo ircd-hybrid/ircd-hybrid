@@ -190,24 +190,22 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
     return EVENT_ERR_NOT_FOUND;
 
   const size_t original_heap_size = mgr->heap_size;
-
   const size_t idx_to_remove = event->heap_idx;
-  if (idx_to_remove == mgr->heap_size - 1)
-  {
-    mgr->heap_size--;
-    mgr->heap_array[mgr->heap_size] = NULL;
-  }
-  else
-  {
-    _event_heap_swap(mgr, idx_to_remove, mgr->heap_size - 1);
-    mgr->heap_size--;
-    mgr->heap_array[mgr->heap_size] = NULL;
+  const size_t last_idx = mgr->heap_size - 1;
 
-    if (mgr->heap_size > 0 && idx_to_remove < mgr->heap_size)
-    {
-      _event_heap_heapify_down(mgr, idx_to_remove);
+  if (idx_to_remove < last_idx)
+    _event_heap_swap(mgr, idx_to_remove, last_idx);
+
+  mgr->heap_size--;
+  mgr->heap_array[mgr->heap_size] = NULL;
+
+  if (mgr->heap_size > 0 && idx_to_remove < mgr->heap_size)
+  {
+    const size_t parent_idx = (idx_to_remove - 1) / 2;
+    if (idx_to_remove > 0 && _event_is_higher_priority_or_earlier(mgr->heap_array[idx_to_remove], mgr->heap_array[parent_idx]))
       _event_heap_heapify_up(mgr, idx_to_remove);
-    }
+    else
+      _event_heap_heapify_down(mgr, idx_to_remove);
   }
 
   event->heap_idx = EVENT_HEAP_INVALID_IDX;
@@ -362,7 +360,7 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
   if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  return _event_schedule_at_internal(event, absolute_time_ms);;
+  return _event_schedule_at_internal(event, absolute_time_ms);
 }
 
 event_status_t

@@ -35,6 +35,22 @@
 #include "memory.h"
 
 /**
+ * @brief Initializes a list structure to a safe, empty state.
+ *
+ * This function prepares a `list_t` structure for use by setting its head and
+ * tail pointers to NULL and its length to 0.
+ *
+ * @param list Pointer to the list to initialize.
+ */
+void
+list_init(list_t *list)
+{
+  list->head = NULL;
+  list->tail = NULL;
+  list->length = 0;
+}
+
+/**
  * @brief Creates a new double-linked list node.
  *
  * This function allocates memory for a new double-linked list node and returns
@@ -353,43 +369,37 @@ list_find_cmp(const list_t *list, const void *data, int (*cmp)(const char *, con
 }
 
 /**
- * @brief Moves the contents of one double-linked list to another.
+ * @brief Appends all nodes from a source list to the end of a destination list.
  *
- * This function moves the contents of the specified source double-linked list
- * to the destination double-linked list.
+ * This function moves all nodes from the `source` list to the end of the `dest`
+ * list in a single, efficient O(1) operation. The pointers of the lists are
+ * relinked, and the `source` list is re-initialized to an empty state, as its
+ * nodes are now owned by the `dest` list.
  *
- * @param from Pointer to the source double-linked list.
- * @param to Pointer to the destination double-linked list.
+ * @param dest Pointer to the destination list.
+ * @param source Pointer to the source list.
  */
 void
-list_move_list(list_t *from, list_t *to)
+list_concat(list_t *dest, list_t *source)
 {
-  /* There are three cases */
-  /* case one, nothing in from list */
-  if (from->head == NULL)
+  if (list_is_empty(source))
     return;
 
-  /* case two, nothing in to list */
-  /* actually if to->head is NULL and to->tail isn't, that's a bug */
-  if (to->head == NULL)
+  if (list_is_empty(dest))
   {
-    to->head = from->head;
-    to->tail = from->tail;
-    from->head = from->tail = NULL;
-    to->length = from->length;
-    from->length = 0;
-    return;
+    dest->head = source->head;
+    dest->tail = source->tail;
+    dest->length = source->length;
+  }
+  else
+  {
+    dest->tail->next = source->head;
+    source->head->prev = dest->tail;
+    dest->tail = source->tail;
+    dest->length += source->length;
   }
 
-  /* third case play with the links */
-  from->tail->next = to->head;
-  from->head->prev = to->head->prev;
-  to->head->prev = from->tail;
-  to->head = from->head;
-  from->head = from->tail = NULL;
-  to->length += from->length;
-  from->length = 0;
-  /* I think I got that right */
+  list_init(source);
 }
 
 /**

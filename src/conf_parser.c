@@ -5603,8 +5603,8 @@ yyreduce:
   if (block_state.ciph.buf[0])
     connect->cipher_list = io_strdup(block_state.ciph.buf);
 
-  list_move_list(&block_state.hub.list, &connect->hub_masks);
-  list_move_list(&block_state.leaf.list, &connect->leaf_masks);
+  list_concat(&connect->hub_masks, &block_state.hub.list);
+  list_concat(&connect->leaf_masks, &block_state.leaf.list);
 
   if (block_state.bind.buf[0])
     if (address_from_string(block_state.bind.buf, &connect->bind_addr) == false)

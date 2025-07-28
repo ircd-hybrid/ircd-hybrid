@@ -143,6 +143,7 @@ list_add_after(void *data, list_node_t *node, list_node_t *ref_node, list_t *lis
 {
   assert(node->prev == NULL);
   assert(node->next == NULL);
+  assert(ref_node->prev || ref_node->next || list->head == ref_node);
   assert((list->head == NULL) == (list->tail == NULL));
 
   node->data = data;
@@ -179,6 +180,7 @@ list_add_before(void *data, list_node_t *node, list_node_t *ref_node, list_t *li
 {
   assert(node->prev == NULL);
   assert(node->next == NULL);
+  assert(ref_node->prev || ref_node->next || list->head == ref_node);
   assert((list->head == NULL) == (list->tail == NULL));
 
   node->data = data;
@@ -288,7 +290,8 @@ list_add_sorted(void *data, list_node_t *node, list_t *list, int (*cmp)(const vo
 void
 list_remove(list_node_t *node, list_t *list)
 {
-  assert(node->prev || node->next || list->head == node);
+  assert(node->prev || list->head == node);
+  assert(node->next || list->tail == node);
 
   if (node->prev)
     node->prev->next = node->next;
@@ -392,6 +395,8 @@ list_find_cmp(const list_t *list, const void *data, int (*cmp)(const char *, con
 void
 list_concat(list_t *dest_list, list_t *src_list)
 {
+  assert(dest_list != src_list);
+
   /* If the lists are the same, or the source is empty, there is nothing to do. */
   if (dest_list == src_list || list_is_empty(src_list))
     return;
@@ -708,6 +713,7 @@ list_to_array(const list_t *list)
     node = node->next;
   }
 
+  assert(index == list->length);
   return array;
 }
 

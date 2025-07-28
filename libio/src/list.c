@@ -104,26 +104,25 @@ list_is_empty(const list_t *list)
  * the double-linked list.
  *
  * @param data Pointer to the data to be stored in the new node.
- * @param m Pointer to the node to be added.
+ * @param node Pointer to the node to be added.
  * @param list Pointer to the double-linked list.
  */
 void
-list_add(void *data, list_node_t *m, list_t *list)
+list_add(void *data, list_node_t *node, list_t *list)
 {
-  assert(m->prev == NULL);
-  assert(m->next == NULL);
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
 
-  m->data = data;
-  m->prev = NULL;
-  m->next = list->head;
+  node->data = data;
+  node->next = list->head;
 
-  /* Assumption: If list->tail != NULL, list->head != NULL */
   if (list->head)
-    list->head->prev = m;
-  else if (list->tail == NULL)
-    list->tail = m;
+    list->head->prev = node;
+  else
+    list->tail = node;
 
-  list->head = m;
+  list->head = node;
   list->length++;
 }
 
@@ -271,36 +270,31 @@ list_add_sorted(void *data, list_node_t *m, list_t *list, int (*cmp)(const void 
  * @param list Pointer to the double-linked list.
  */
 void
-list_remove(list_node_t *m, list_t *list)
+list_remove(list_node_t *node, list_t *list)
 {
-  assert(list->head);
-  assert(list->tail);
+  assert(node->prev || node->next || list->head == node);
+
+  if (node->prev)
+    node->prev->next = node->next;
+  else
+  {
+    assert(list->head == node);
+    list->head = node->next;
+  }
+
+  if (node->next)
+    node->next->prev = node->prev;
+  else
+  {
+    assert(list->tail == node);
+    list->tail = node->prev;
+  }
+
   assert(list->length > 0);
-
-  /* Assumption: If m->next == NULL, then list->tail == m
-   *      and:   If m->prev == NULL, then list->head == m
-   */
-  if (m->next)
-    m->next->prev = m->prev;
-  else
-  {
-    assert(list->tail == m);
-    list->tail = m->prev;
-  }
-
-  if (m->prev)
-    m->prev->next = m->next;
-  else
-  {
-    assert(list->head == m);
-    list->head = m->next;
-  }
-
-  /* Set this to NULL does matter */
-  m->next = NULL;
-  m->prev = NULL;
-
   list->length--;
+
+  node->prev = NULL;
+  node->next = NULL;
 }
 
 /**

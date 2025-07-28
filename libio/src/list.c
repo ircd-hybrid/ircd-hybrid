@@ -407,47 +407,20 @@ list_concat(list_t *dest, list_t *source)
  *
  * This function moves the specified node from one double-linked list to another.
  *
- * @param m Pointer to the node to be moved.
- * @param list_del Pointer to the source double-linked list.
- * @param list_add Pointer to the destination double-linked list.
+ * @param node Pointer to the node to be moved.
+ * @param dest Pointer to the destination double-linked list.
+ * @param source Pointer to the source double-linked list.
  */
 void
-list_move_node(list_node_t *m, list_t *list_del, list_t *list_add)
+list_move_node(list_node_t *node, list_t *dest, list_t *source)
 {
-  assert(list_del->length > 0);
+  assert(source->length > 0);
 
-  /* Assumption: If m->next == NULL, then list_del->tail == m
-   *      and:   If m->prev == NULL, then list_del->head == m
-   */
-  if (m->next)
-    m->next->prev = m->prev;
-  else
-  {
-    assert(list_del->tail == m);
-    list_del->tail = m->prev;
-  }
+  if (source == dest)
+    return;
 
-  if (m->prev)
-    m->prev->next = m->next;
-  else
-  {
-    assert(list_del->head == m);
-    list_del->head = m->next;
-  }
-
-  /* Set this to NULL does matter */
-  m->prev = NULL;
-  m->next = list_add->head;
-
-  /* Assumption: If list_add->tail != NULL, list_add->head != NULL */
-  if (list_add->head)
-    list_add->head->prev = m;
-  else if (list_add->tail == NULL)
-    list_add->tail = m;
-
-  list_add->head = m;
-  list_add->length++;
-  list_del->length--;
+  list_remove(node, source);
+  list_add(node->data, node, dest);
 }
 
 /**

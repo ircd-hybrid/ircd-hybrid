@@ -278,7 +278,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
     AddFlag(client, FLAGS_SERVICE);
 
   assert(list_find(&unknown_list, client));
-  list_move_node(&client->connection->node, &unknown_list, &local_server_list);
+  list_move_node(&client->connection->node, &local_server_list, &unknown_list);
 
   list_add(client, &client->node, &global_server_list);
   list_add(client, &client->lnode, &me.serv->server_list);

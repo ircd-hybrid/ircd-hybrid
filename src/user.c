@@ -306,7 +306,7 @@ user_register_local(struct Client *client)
 
   list_add(client, &client->lnode, &client->origin->serv->client_list);
   list_add(client, &client->node, &global_client_list);
-  list_move_node(&client->connection->node, &unknown_list, &local_client_list);
+  list_move_node(&client->connection->node, &local_client_list, &unknown_list);
 
   if (list_length(&local_client_list) > Count.max_loc)
   {

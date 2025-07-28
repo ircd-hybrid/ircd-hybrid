@@ -127,78 +127,87 @@ list_add(void *data, list_node_t *node, list_t *list)
 }
 
 /**
- * @brief Adds a node after a specified node in a double-linked list.
+ * @brief Adds a node after a specified reference node in a list.
  *
- * This function adds a node containing the specified data after the specified
- * node in the double-linked list.
+ * This function links the given `node` immediately after the `ref_node` and
+ * associates it with the provided `data` pointer. The list's tail and length
+ * are correctly updated if necessary. This is an O(1) operation.
  *
- * @param data Pointer to the data to be stored in the new node.
- * @param m Pointer to the node to be added after.
- * @param n Pointer to the node after which the new node will be added.
- * @param list Pointer to the double-linked list.
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be unlinked.
+ * @param ref_node The node already in the list after which to insert.
+ * @param list The list being operated on.
  */
 void
-list_add_after(void *data, list_node_t *m, list_node_t *n, list_t *list)
+list_add_after(void *data, list_node_t *node, list_node_t *ref_node, list_t *list)
 {
-  assert(m->prev == NULL);
-  assert(m->next == NULL);
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
 
-  m->data = data;
-  m->prev = n;
-  m->next = n->next;
+  node->data = data;
+  node->next = ref_node->next;
+  node->prev = ref_node;
 
-  if (n->next)
-    n->next->prev = m;
+  if (ref_node->next)
+    ref_node->next->prev = node;
   else
   {
-    assert(list->tail == n);
-    list->tail = m;
+    assert(list->tail == ref_node);
+    list->tail = node;
   }
 
-  n->next = m;
+  ref_node->next = node;
+
   list->length++;
 }
 
 /**
- * @brief Adds a node before a specified node in a double-linked list.
+ * @brief Adds a node before a specified reference node in a list.
  *
- * This function adds a node containing the specified data before the specified
- * node in the double-linked list.
+ * This function links the given `node` immediately before the `ref_node` and
+ * associates it with the provided `data` pointer. The list's head and length
+ * are correctly updated if necessary. This is an O(1) operation.
  *
- * @param b Pointer to the node before which the new node will be added.
- * @param data Pointer to the data to be stored in the new node.
- * @param m Pointer to the node to be added.
- * @param list Pointer to the double-linked list.
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be unlinked.
+ * @param ref_node The node already in the list before which to insert.
+ * @param list The list being operated on.
  */
 void
-list_add_before(list_node_t *b, void *data, list_node_t *m, list_t *list)
+list_add_before(void *data, list_node_t *node, list_node_t *ref_node, list_t *list)
 {
-  assert(m->prev == NULL);
-  assert(m->next == NULL);
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
 
-  /* Shortcut - if it's the first one, call list_add only */
-  if (b == list->head)
-    list_add(data, m, list);
+  node->data = data;
+  node->next = ref_node;
+  node->prev = ref_node->prev;
+
+  if (ref_node->prev)
+    ref_node->prev->next = node;
   else
   {
-    m->data = data;
-    b->prev->next = m;
-    m->prev = b->prev;
-    b->prev = m;
-    m->next = b;
-    list->length++;
+    assert(list->head == ref_node);
+    list->head = node;
   }
+
+  ref_node->prev = node;
+
+  list->length++;
 }
 
 /**
- * @brief Adds a node to the end of a double-linked list.
+ * @brief Adds a node to the end (tail) of a list.
  *
- * This function adds a node containing the specified data to the end of the
- * double-linked list.
+ * This function links the given node at the end of the list and associates
+ * it with the provided data pointer. The list's tail and length are
+ * correctly updated. This is an O(1) operation.
  *
- * @param data Pointer to the data to be stored in the new node.
- * @param node Pointer to the node to be added.
- * @param list Pointer to the double-linked list.
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be a fresh, unlinked node.
+ * @param list The list to which the node will be added.
  */
 void
 list_add_tail(void *data, list_node_t *node, list_t *list)
@@ -220,44 +229,52 @@ list_add_tail(void *data, list_node_t *node, list_t *list)
 }
 
 /**
- * @brief Adds a node to the double-linked list in sorted order.
+ * @brief Adds a node to a list while maintaining sorted order.
  *
- * This function adds a node containing the specified data to the double-linked list
- * in a position that maintains the list in sorted order. The comparison function `cmp`
- * determines the order.
+ * This function finds the correct position for the new node in the list
+ * based on the provided comparison function `cmp`, and inserts it there. The
+ * list is assumed to be already sorted according to the same comparison logic.
+ * This is an O(n) operation due to the linear scan required to find the
+ * insertion point.
  *
- * @param data Pointer to the data to be stored in the new node.
- * @param m Pointer to the node to be added.
- * @param list Pointer to the double-linked list.
- * @param cmp Function pointer to the comparison function.
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be a fresh, unlinked node.
+ * @param list The sorted list to which the node will be added.
+ * @param cmp The comparison function. It should return < 0 if a < b, 0 if a == b,
+ *            and > 0 if a > b.
  */
 void
-list_add_sorted(void *data, list_node_t *m, list_t *list, int (*cmp)(const void *, const void *))
+list_add_sorted(void *data, list_node_t *node, list_t *list, int (*cmp)(const void *, const void *))
 {
-  assert(m->prev == NULL);
-  assert(m->next == NULL);
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
 
   /* If the list is empty, simply add the node to the list. */
   if (list_is_empty(list))
   {
-    list_add(data, m, list);
+    list_add(data, node, list);
     return;
   }
 
-  /* Iterate through the list to find the appropriate position. */
-  list_node_t *current = list->head;
-  while (current && cmp(current->data, data) < 0)
-    current = current->next;
+  /*
+   * Find the insertion point. We are looking for the first node in the list
+   * that is "greater than or equal to" the new node's data.
+   */
+  list_node_t *insertion_point = list->head;
+  while (insertion_point && cmp(insertion_point->data, data) < 0)
+    insertion_point = insertion_point->next;
 
-  /* If we've reached the end of the list, add to the tail. */
-  if (current == NULL)
-    list_add_tail(data, m, list);
-  else if (current == list->head)
-    /* If the new node should be the new head. */
-    list_add(data, m, list);
+  /* Perform the insertion based on the found insertion point. */
+  if (insertion_point == NULL)
+    /* We traversed the entire list, so the new node is the largest. */
+    list_add_tail(data, node, list);
   else
-    /* Add the new node before the current node. */
-    list_add_before(current, data, m, list);
+    /*
+     * We found the correct spot. The list_add_before function correctly
+     * handles all cases, including insertion at the head of the list.
+     */
+    list_add_before(data, node, insertion_point, list);
 }
 
 /**
@@ -364,35 +381,39 @@ list_find_cmp(const list_t *list, const void *data, int (*cmp)(const char *, con
 /**
  * @brief Appends all nodes from a source list to the end of a destination list.
  *
- * This function moves all nodes from the `source` list to the end of the `dest`
+ * This function moves all nodes from the `src_list` list to the end of the `dest_list`
  * list in a single, efficient O(1) operation. The pointers of the lists are
- * relinked, and the `source` list is re-initialized to an empty state, as its
- * nodes are now owned by the `dest` list.
+ * relinked, and the `src_list` list is re-initialized to an empty state, as its
+ * nodes are now owned by the `dest_list` list.
  *
- * @param dest Pointer to the destination list.
- * @param source Pointer to the source list.
+ * @param dest_list The list to which nodes will be appended.
+ * @param src_list The list from which nodes will be moved.
  */
 void
-list_concat(list_t *dest, list_t *source)
+list_concat(list_t *dest_list, list_t *src_list)
 {
-  if (list_is_empty(source))
+  /* If the lists are the same, or the source is empty, there is nothing to do. */
+  if (dest_list == src_list || list_is_empty(src_list))
     return;
 
-  if (list_is_empty(dest))
+  if (list_is_empty(dest_list))
   {
-    dest->head = source->head;
-    dest->tail = source->tail;
-    dest->length = source->length;
+    /* If destination is empty, it simply becomes the source list. */
+    dest_list->head = src_list->head;
+    dest_list->tail = src_list->tail;
+    dest_list->length = src_list->length;
   }
   else
   {
-    dest->tail->next = source->head;
-    source->head->prev = dest->tail;
-    dest->tail = source->tail;
-    dest->length += source->length;
+    /* Append the source list to the tail of the destination list. */
+    dest_list->tail->next = src_list->head;
+    src_list->head->prev = dest_list->tail;
+    dest_list->tail = src_list->tail;
+    dest_list->length += src_list->length;
   }
 
-  list_init(source);
+  /* The source list is now conceptually empty. Re-initialize it. */
+  list_init(src_list);
 }
 
 /**
@@ -400,20 +421,20 @@ list_concat(list_t *dest, list_t *source)
  *
  * This function moves the specified node from one double-linked list to another.
  *
- * @param node Pointer to the node to be moved.
- * @param dest Pointer to the destination double-linked list.
- * @param source Pointer to the source double-linked list.
+ * @param node The node to move.
+ * @param dest_list The list to add the node to.
+ * @param src_list The list to remove the node from.
  */
 void
-list_move_node(list_node_t *node, list_t *dest, list_t *source)
+list_move_node(list_node_t *node, list_t *dest_list, list_t *src_list)
 {
-  assert(source->length > 0);
+  assert(src_list->length > 0);
 
-  if (source == dest)
+  if (src_list == dest_list)
     return;
 
-  list_remove(node, source);
-  list_add(node->data, node, dest);
+  list_remove(node, src_list);
+  list_add(node->data, node, dest_list);
 }
 
 /**
@@ -466,91 +487,161 @@ list_iterate_safe(list_t *list, list_iterate_callback callback, void *user_ptr)
 }
 
 /**
- * @brief Adds a node at a specific position in a double-linked list.
+ * @brief Adds a node at a specific position (index) in a list.
  *
- * This function adds a node containing the specified data at the specified
- * position in the double-linked list.
+ * This function inserts the given node at the zero-based `pos`. To be
+ * efficient, it traverses from the head or the tail, whichever is closer.
+ * This is an O(n) operation due to the linear scan required to find the
+ * insertion point in the worst case.
  *
- * @param data Pointer to the data to be stored in the new node.
- * @param pos Position at which to add the new node (0-based index).
- * @param m Pointer to the node to be added.
- * @param list Pointer to the double-linked list.
- * @return true if the node was added successfully, false if the position is invalid.
+ * @param list The list to which the node will be added.
+ * @param pos The zero-based index at which to insert the node. Must be <= list->length.
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be a fresh, unlinked node.
+ * @return true on success, false if `pos` is out of bounds.
  */
 bool
-list_add_at(void *data, unsigned int pos, list_node_t *m, list_t *list)
+list_add_at(list_t *list, unsigned int pos, void *data, list_node_t *node)
 {
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
   assert(pos <= list->length);
 
+  /* Check for out-of-bounds position. */
   if (pos > list->length)
     return false;
 
+  /* Handle simple, O(1) edge cases first. */
   if (pos == 0)
-    list_add(data, m, list);
+    list_add(data, node, list);
   else if (pos == list->length)
-    list_add_tail(data, m, list);
+    list_add_tail(data, node, list);
   else
   {
-    list_node_t *current = list->head;
-    for (unsigned int i = 0; i < pos; ++i)
-      current = current->next;
+    /*
+     * For insertion in the middle, find the reference node to insert before.
+     * This is optimized by traversing from the closest end of the list.
+     */
+    list_node_t *ref_node;
+    if (pos < (list->length / 2))
+    {
+      /* Position is in the first half, traverse from the head. */
+      ref_node = list->head;
+      for (unsigned int i = 0; i < pos; ++i)
+        ref_node = ref_node->next;
+    }
+    else
+    {
+      /* Position is in the second half, traverse backwards from the tail. */
+      ref_node = list->tail;
+      for (unsigned int i = list->length - 1; i > pos; --i)
+        ref_node = ref_node->prev;
+    }
 
-    list_add_before(current, data, m, list);
+    list_add_before(data, node, ref_node, list);
   }
 
   return true;
 }
 
 /**
- * @brief Removes a node at a specific position in a double-linked list.
+ * @brief Removes and returns the node from a specific position (index) in a list.
  *
- * This function removes a node at the specified position in the double-linked list
- * and frees the memory associated with it.
+ * This function finds and unlinks the node at the zero-based `pos`. To be
+ * efficient, it traverses from the head or the tail, whichever is closer.
+ * This is an O(n) operation due to the linear scan required to find the
+ * node in the worst case.
  *
- * @param pos Position of the node to be removed (0-based index).
- * @param list Pointer to the double-linked list.
- * @return Pointer to the data of the removed node, or NULL if the position is invalid.
+ * @param list The list from which to remove the node.
+ * @param pos The zero--based index of the node to remove. Must be < list->length.
+ * @return A pointer to the unlinked node, or NULL if `pos` is out of bounds.
  */
-void *
-list_remove_at(unsigned int pos, list_t *list)
+list_node_t *
+list_remove_at(list_t *list, unsigned int pos)
 {
   assert(pos < list->length);
 
+  /* Check for out-of-bounds position. */
   if (pos >= list->length)
     return NULL;
 
-  list_node_t *current = list->head;
-  for (unsigned int i = 0; i < pos; ++i)
-    current = current->next;
+  list_node_t *node_to_remove;
 
-  void *data = current->data;
-  list_remove(current, list);
+  /* Handle O(1) edge cases first for direct access. */
+  if (pos == 0)
+    node_to_remove = list->head;
+  else if (pos == list->length - 1)
+    node_to_remove = list->tail;
+  else
+  {
+    /*
+     * For removal from the middle, find the target node.
+     * This is optimized by traversing from the closest end of the list.
+     */
+    if (pos < (list->length / 2))
+    {
+      /* Position is in the first half, traverse from the head. */
+      node_to_remove = list->head;
+      for (unsigned int i = 0; i < pos; ++i)
+        node_to_remove = node_to_remove->next;
+    }
+    else
+    {
+      /* Position is in the second half, traverse backwards from the tail. */
+      node_to_remove = list->tail;
+      for (unsigned int i = list->length - 1; i > pos; --i)
+        node_to_remove = node_to_remove->prev;
+    }
+  }
 
-  return data;
+  assert(node_to_remove);
+  list_remove(node_to_remove, list);
+
+  return node_to_remove;
 }
 
 /**
- * @brief Retrieves a node at a specific position in a double-linked list.
+ * @brief Retrieves the node at a specific position (index) in a list.
  *
- * This function retrieves the node at the specified position in the double-linked list.
+ * This function finds and returns the node at the zero-based `pos`. To be
+ * efficient, it traverses from the head or the tail, whichever is closer.
+ * This is an O(n) operation due to the linear scan required to find the
+ * node in the worst case.
  *
- * @param pos Position of the node to be retrieved (0-based index).
- * @param list Pointer to the double-linked list.
- * @return Pointer to the node at the specified position, or NULL if the position is invalid.
+ * @param list The list to search within.
+ * @param pos The zero-based index of the node to retrieve. Must be < list->length.
+ * @return A pointer to the node at the specified position, or NULL if `pos` is out of bounds.
  */
 list_node_t *
-list_get_at(unsigned int pos, const list_t *list)
+list_get_at(const list_t *list, unsigned int pos)
 {
   assert(pos < list->length);
 
+  /* Check for out-of-bounds position. */
   if (pos >= list->length)
     return NULL;
 
-  list_node_t *current = list->head;
-  for (unsigned int i = 0; i < pos; ++i)
-    current = current->next;
+  list_node_t *found_node;
 
-  return current;
+  /* Optimize by traversing from the closest end of the list. */
+  if (pos < (list->length / 2))
+  {
+    /* Position is in the first half, traverse from the head. */
+    found_node = list->head;
+    for (unsigned int i = 0; i < pos; ++i)
+      found_node = found_node->next;
+  }
+  else
+  {
+    /* Position is in the second half, traverse backwards from the tail. */
+    found_node = list->tail;
+    for (unsigned int i = list->length - 1; i > pos; --i)
+      found_node = found_node->prev;
+  }
+
+  assert(found_node);
+  return found_node;
 }
 
 /**

@@ -222,7 +222,7 @@ hook_install(struct HookContainer *container, hook_function_t function, hook_pri
   }
 
   list_node_t *node = io_calloc(sizeof(*node));
-  list_add_at(function, insert_position, node, &container->chain);
+  list_add_at(&container->chain, insert_position, function, node);
 
   return node;
 }

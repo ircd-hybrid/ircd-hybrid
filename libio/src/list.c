@@ -197,26 +197,25 @@ list_add_before(list_node_t *b, void *data, list_node_t *m, list_t *list)
  * double-linked list.
  *
  * @param data Pointer to the data to be stored in the new node.
- * @param m Pointer to the node to be added.
+ * @param node Pointer to the node to be added.
  * @param list Pointer to the double-linked list.
  */
 void
-list_add_tail(void *data, list_node_t *m, list_t *list)
+list_add_tail(void *data, list_node_t *node, list_t *list)
 {
-  assert(m->prev == NULL);
-  assert(m->next == NULL);
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
 
-  m->data = data;
-  m->next = NULL;
-  m->prev = list->tail;
+  node->data = data;
+  node->prev = list->tail;
 
-  /* Assumption: If list->tail != NULL, list->head != NULL */
   if (list->tail)
-    list->tail->next = m;
-  else if (list->head == NULL)
-    list->head = m;
+    list->tail->next = node;
+  else
+    list->head = node;
 
-  list->tail = m;
+  list->tail = node;
   list->length++;
 }
 

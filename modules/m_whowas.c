@@ -83,21 +83,21 @@ whowas_send_reply_cb(const struct Whowas *whowas, void *user_data)
 }
 
 static void
-whowas_do(struct Client *source, char *parv[])
+whowas_do(struct Client *source, const char *name, const char *limit_str)
 {
-  int max = -1;
+  int reply_limit = -1;
 
-  if (!string_is_empty(parv[2]))
-    max = atoi(parv[2]);
+  if (!string_is_empty(limit_str))
+    reply_limit = atoi(limit_str);
 
-  if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
-    max = WHOWAS_MAX_REPLIES;
+  if (!MyConnect(source) && (reply_limit <= 0 || reply_limit > WHOWAS_MAX_REPLIES))
+    reply_limit = WHOWAS_MAX_REPLIES;
 
-  int count = whowas_query(parv[1], max, whowas_send_reply_cb, source);
-  if (count == 0)
-    sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, parv[1]);
+  int records_found = whowas_query(name, reply_limit, whowas_send_reply_cb, source);
+  if (records_found == 0)
+    sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, name);
 
-  sendto_one_numeric(source, &me, RPL_ENDOFWHOWAS, parv[1]);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOWAS, name);
 }
 
 /*! \brief WHOWAS command handler
@@ -136,7 +136,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  whowas_do(source, parv);
+  whowas_do(source, parv[1], parv[2]);
 }
 
 /*! \brief WHOWAS command handler
@@ -164,7 +164,7 @@ ms_whowas(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  whowas_do(source, parv);
+  whowas_do(source, parv[1], parv[2]);
 }
 
 static struct Command command_table =

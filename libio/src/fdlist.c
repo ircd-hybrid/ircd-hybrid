@@ -23,22 +23,21 @@
  * \brief Maintains a list of file descriptors.
  */
 
+#include <assert.h>
+#include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <unistd.h>
-#include <stddef.h>
-#include <assert.h>
 
+#include "comm.h"
 #include "defaults.h"
 #include "io_rlimit.h"
 #include "io_string.h"
-#include "fdlist.h"
-#include "comm.h"   /* comm_setselect */
 #include "memory.h"
 #include "misc.h"
-
+#include "fdlist.h"
 
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;

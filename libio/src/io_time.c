@@ -27,11 +27,11 @@
  * monotonic time values, perform sanity checks, and handle errors.
  */
 
-#include <time.h>
 #include <errno.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "io_time.h"
 

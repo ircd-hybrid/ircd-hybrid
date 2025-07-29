@@ -127,6 +127,36 @@ list_add(void *data, list_node_t *node, list_t *list)
 }
 
 /**
+ * @brief Adds a node to the end (tail) of a list.
+ *
+ * This function links the given node at the end of the list and associates
+ * it with the provided data pointer. The list's tail and length are
+ * correctly updated. This is an O(1) operation.
+ *
+ * @param data The application-specific data pointer to store in the node.
+ * @param node The node to add. Must be a fresh, unlinked node.
+ * @param list The list to which the node will be added.
+ */
+void
+list_add_tail(void *data, list_node_t *node, list_t *list)
+{
+  assert(node->prev == NULL);
+  assert(node->next == NULL);
+  assert((list->head == NULL) == (list->tail == NULL));
+
+  node->data = data;
+  node->prev = list->tail;
+
+  if (list->tail)
+    list->tail->next = node;
+  else
+    list->head = node;
+
+  list->tail = node;
+  list->length++;
+}
+
+/**
  * @brief Adds a node after a specified reference node in a list.
  *
  * This function links the given `node` immediately after the `ref_node` and
@@ -197,36 +227,6 @@ list_add_before(void *data, list_node_t *node, list_node_t *ref_node, list_t *li
 
   ref_node->prev = node;
 
-  list->length++;
-}
-
-/**
- * @brief Adds a node to the end (tail) of a list.
- *
- * This function links the given node at the end of the list and associates
- * it with the provided data pointer. The list's tail and length are
- * correctly updated. This is an O(1) operation.
- *
- * @param data The application-specific data pointer to store in the node.
- * @param node The node to add. Must be a fresh, unlinked node.
- * @param list The list to which the node will be added.
- */
-void
-list_add_tail(void *data, list_node_t *node, list_t *list)
-{
-  assert(node->prev == NULL);
-  assert(node->next == NULL);
-  assert((list->head == NULL) == (list->tail == NULL));
-
-  node->data = data;
-  node->prev = list->tail;
-
-  if (list->tail)
-    list->tail->next = node;
-  else
-    list->head = node;
-
-  list->tail = node;
   list->length++;
 }
 
@@ -662,10 +662,7 @@ list_get_at(const list_t *list, unsigned int pos)
 list_t *
 list_get_longer(list_t *list1, list_t *list2)
 {
-  if (list1->length >= list2->length)
-    return list1;
-
-  return list2;
+  return (list1->length >= list2->length) ? list1 : list2;
 }
 
 /**
@@ -681,10 +678,7 @@ list_get_longer(list_t *list1, list_t *list2)
 list_t *
 list_get_shorter(list_t *list1, list_t *list2)
 {
-  if (list1->length <= list2->length)
-    return list1;
-
-  return list2;
+  return (list1->length <= list2->length) ? list1 : list2;
 }
 
 /**
@@ -729,10 +723,7 @@ list_to_array(const list_t *list)
 void *
 list_peek_head(const list_t *list)
 {
-  if (list_is_empty(list))
-    return NULL;
-
-  return list->head->data;
+  return list_is_empty(list) ? NULL : list->head->data;
 }
 
 /**
@@ -747,8 +738,5 @@ list_peek_head(const list_t *list)
 void *
 list_peek_tail(const list_t *list)
 {
-  if (list_is_empty(list))
-    return NULL;
-
-  return list->tail->data;
+  return list_is_empty(list) ? NULL : list->tail->data;
 }

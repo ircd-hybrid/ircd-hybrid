@@ -27,11 +27,12 @@
  * signal handlers using sigaction and unblocking the specified signals.
  */
 
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-#include <signal.h>
+
 #include "io_signal.h"
 
 /**

@@ -28,7 +28,7 @@
 #ifndef INCLUDED_tls_h
 #define INCLUDED_tls_h
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated HAVE_LIBCRYPTO & HAVE_LIBGNUTLS & HAVE_LIBWOLFSSL. */
 #ifdef HAVE_LIBCRYPTO
 #include "tls_openssl.h"
 #elif defined(HAVE_LIBGNUTLS)

@@ -32,15 +32,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h> /* assert */
-#include <stddef.h> /* NULL */
-#include <stdio.h> /* sprintf, fprintf, stderr */
-#include <stdlib.h> /* free, atol, calloc */
-#include <string.h> /* memcpy, strchr, strlen */
-#include <sys/types.h> /* BSD: for inet_addr */
-#include <sys/socket.h> /* BSD, Linux: for inet_addr */
-#include <netinet/in.h> /* BSD, Linux: for inet_addr */
-#include <arpa/inet.h> /* BSD, Linux, Solaris: for inet_addr */
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "memory.h"
 #include "patricia.h"

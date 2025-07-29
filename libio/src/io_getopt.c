@@ -28,14 +28,14 @@
  * simple interface for specifying valid options along with their types and descriptions.
  */
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
 
-#include "memory.h"
 #include "io_getopt.h"
+#include "memory.h"
 
 /**
  * @brief Display usage information for the program.

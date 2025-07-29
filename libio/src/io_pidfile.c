@@ -27,12 +27,13 @@
  * to ensure that only one instance of a process is running at a time.
  */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <string.h>
-#include <limits.h>
+
 #include "io_pidfile.h"
 
 /**

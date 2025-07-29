@@ -25,16 +25,16 @@
  * \brief Includes all GnuTLS-specific TLS functions
  */
 
-#include <stdbool.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
-#include "tls.h"
-#include "conf.h"
+#include "conf.h"  /* XXX: decouple */
 #include "log.h"
-#include "misc.h"
 #include "memory.h"
+#include "misc.h"
+#include "tls.h"
 
 #ifdef HAVE_TLS_GNUTLS
 static bool TLS_initialized;

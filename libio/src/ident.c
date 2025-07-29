@@ -19,20 +19,20 @@
  *  USA
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <string.h>
-#include <stdio.h>
 #include <errno.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include "comm.h"
 #include "fdlist.h"
+#include "ident.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "log.h"
 #include "memory.h"
-#include "ident.h"
 
 /**
  * @var IDENT_BUFSIZE

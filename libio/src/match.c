@@ -31,8 +31,8 @@
  */
 
 #include <assert.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "io_string.h"
 

@@ -76,9 +76,16 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
 }
 
 static void
+whowas_send_reply_cb(const struct Whowas *whowas, void *user_data)
+{
+  struct Client *source = user_data;
+  whowas_send(source, whowas);
+}
+
+static void
 whowas_do(struct Client *source, char *parv[])
 {
-  int count = 0, max = -1;
+  int max = -1;
 
   if (!string_is_empty(parv[2]))
     max = atoi(parv[2]);
@@ -86,20 +93,7 @@ whowas_do(struct Client *source, char *parv[])
   if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
     max = WHOWAS_MAX_REPLIES;
 
-  const struct WhowasGroup *group = whowas_group_find(parv[1]);
-  if (group)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, group->whowas_records.head)
-    {
-      const struct Whowas *whowas = node->data;
-      whowas_send(source, whowas);
-
-      if (++count == max)
-        break;
-    }
-  }
-
+  int count = whowas_query(parv[1], max, whowas_send_reply_cb, source);
   if (count == 0)
     sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, parv[1]);
 

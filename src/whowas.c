@@ -264,6 +264,27 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   return NULL;
 }
 
+int
+whowas_query(const char *name, int max_results, whowas_callback_t callback, void *user_data)
+{
+  struct WhowasGroup *group = whowas_group_find(name);
+  if (group == NULL)
+    return 0;
+
+  int count = 0;
+  list_node_t *node;
+  LIST_FOREACH(node, group->whowas_records.head)
+  {
+    if (max_results != -1 && count >= max_results)
+      break;
+
+    callback(node->data, user_data);
+    ++count;
+  }
+
+  return count;
+}
+
 /**
  * @brief Counts the allocated WhowasGroup and Whowas structures for debugging purposes.
  *

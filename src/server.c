@@ -312,6 +312,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
   assert(client->connection);
   assert(client->connection->fd);
   assert(client->connection->fd == F);
+  assert(IsConnecting(client));
 
   /* Check the status */
   if (status != COMM_OK)

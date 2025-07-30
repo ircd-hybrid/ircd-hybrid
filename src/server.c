@@ -317,18 +317,15 @@ server_connect_callback(fde_t *F, int status, void *data_)
   if (status != COMM_OK)
   {
     /* We have an error, so report it and quit */
+    const char *const err_str = comm_errstr(status);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Error connecting to %s: %s",
-                   client_get_name(client, SHOW_IP), comm_errstr(status));
+                   client_get_name(client, SHOW_IP), err_str);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Error connecting to %s: %s",
-                   client_get_name(client, MASK_IP), comm_errstr(status));
+                   client_get_name(client, MASK_IP), err_str);
 
-    /*
-     * If a fd goes bad, call dead_link() the socket is no
-     * longer valid for reading or writing.
-     */
-    dead_link_on_write(client, 0);
+    client_exit_fmt(client, "Connection failed: %s", err_str);
     return;
   }
 

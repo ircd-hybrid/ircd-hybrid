@@ -251,16 +251,8 @@ comm_connect_complete(comm_op_t *op, int status)
   assert(op);
 
   fde_t *F = op->fde;
-  assert(F && F->flags.open == true);
-
   void (*hdl)(fde_t *, int, void *) = op->completion_handler;
   void *hdl_data = op->completion_handler_data;
-
-  if (F->cleanup_data == op)
-  {
-    F->cleanup_handler = NULL;
-    F->cleanup_data = NULL;
-  }
 
   if (op->timeout_event)
   {
@@ -268,12 +260,24 @@ comm_connect_complete(comm_op_t *op, int status)
     op->timeout_event = NULL;
   }
 
+  if (F == NULL || F->flags.open == false)
+  {
+    hdl(F, COMM_ERROR, hdl_data);
+
+    io_free(op);
+    return;
+  }
+
+  if (F->cleanup_data == op)
+  {
+    F->cleanup_handler = NULL;
+    F->cleanup_data = NULL;
+  }
+
   comm_setselect(F, COMM_SELECT_WRITE, NULL, NULL, 0);
 
-  io_free(op);
-
-  /* Call the handler */
   hdl(F, status, hdl_data);
+  io_free(op);
 }
 
 static void

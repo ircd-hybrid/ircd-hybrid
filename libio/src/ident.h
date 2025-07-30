@@ -24,10 +24,19 @@
 #include <stdint.h>
 
 #include "address.h"
+#include "fdlist.h"
 
 typedef void (*IdentCallback)(void *, const char *);
 
-struct IdentRequest;
+struct IdentRequest
+{
+  fde_t *fd;
+  IdentCallback callback;
+  void *user_data;
+  uint16_t local_port;
+  uint16_t remote_port;
+};
+
 typedef struct IdentRequest ident_request_t;
 
 extern void ident_delete(ident_request_t *);

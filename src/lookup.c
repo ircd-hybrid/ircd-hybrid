@@ -132,8 +132,11 @@ static void
 lookup_ident_callback(void *user_data, const char *username)
 {
   struct LookupRequest *lookup = user_data;
-  lookup->ident_pending = false;
+
+  ident_delete(lookup->ident_request);
+
   lookup->ident_request = NULL;
+  lookup->ident_pending = false;
 
   if (string_is_empty(username))
   {
@@ -157,6 +160,9 @@ lookup_delete(struct LookupRequest *lookup)
 {
   if (lookup->ident_request)
   {
+    lookup->ident_request->callback = NULL;
+    lookup->ident_request->user_data = NULL;
+
     ident_delete(lookup->ident_request);
     lookup->ident_request = NULL;
   }
@@ -186,6 +192,11 @@ lookup_start(struct Client *client)
       ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, ConfigGeneral.ident_timeout * 1000);
     if (lookup->ident_request)
       lookup->ident_pending = true;
+    else
+    {
+      ++ServerStats.is_abad;
+      sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_FAIL]);
+    }
   }
 
   lookup_check_complete(lookup);

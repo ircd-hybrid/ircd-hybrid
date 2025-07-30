@@ -27,7 +27,6 @@
 #include <sys/types.h>
 
 #include "comm.h"
-#include "fdlist.h"
 #include "ident.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -159,15 +158,6 @@ ident_check_reply(char *const reply)
   return token;
 }
 
-struct IdentRequest
-{
-  fde_t *fd;
-  IdentCallback callback;
-  void *user_data;
-  uint16_t local_port;
-  uint16_t remote_port;
-};
-
 void
 ident_delete(ident_request_t *request)
 {
@@ -187,6 +177,10 @@ ident_read_reply(fde_t *F, void *data)
   char buf[IDENT_BUFSIZE + 1];
   ssize_t len = 0;
 
+  /* If callback is NULL, the owner is tearing down the request. Abort. */
+  if (request->callback == NULL)
+    return;
+
   if (F->read_handler == NULL && (len = recv(F->fd, buf, sizeof(buf) - 1, 0)) > 0)
   {
     buf[len] = '\0';
@@ -195,8 +189,6 @@ ident_read_reply(fde_t *F, void *data)
   }
   else
     request->callback(request->user_data, NULL);
-
-  ident_delete(request);
 }
 
 static void
@@ -204,10 +196,13 @@ ident_connect_callback(fde_t *F, int error, void *data)
 {
   ident_request_t *request = data;
 
+  /* If callback is NULL, the owner is tearing down the request. Abort. */
+  if (request->callback == NULL)
+    return;
+
   if (error != COMM_OK)
   {
     request->callback(request->user_data, NULL);
-    ident_delete(request);
     return;
   }
 
@@ -219,7 +214,6 @@ ident_connect_callback(fde_t *F, int error, void *data)
     log_write(LOG_TYPE_IRCD, "Failed to send Ident query: %s",
               strerror(errno));
     request->callback(request->user_data, NULL);
-    ident_delete(request);
     return;
   }
 
@@ -238,7 +232,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   {
     log_write(LOG_TYPE_IRCD, "Failed to create Ident socket: %s",
               strerror(errno));
-    request->callback(request->user_data, NULL);
     ident_delete(request);
     return NULL;
   }
@@ -255,7 +248,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   {
     log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
               strerror(errno));
-    request->callback(request->user_data, NULL);
     ident_delete(request);
     return NULL;
   }

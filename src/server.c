@@ -401,17 +401,13 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
   /* Create a socket for the server connection */
-  int fd = comm_socket(address_get_family(&connect->remote_addr), SOCK_STREAM, 0);
-  if (fd == -1)
-  {
-    /* Eek, failure to create the socket */
-    log_write(LOG_TYPE_IRCD, "opening stream socket to %s: %s",
-              connect->name, strerror(errno));
+  fde_t *new_fde = comm_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
+  if (new_fde == NULL)
     return false;
-  }
 
   /* Create a local client */
   struct Client *client = client_make(NULL);
+  client->connection->fd = new_fde;
 
   /* Copy in the server, hostname, fd */
   strlcpy(client->name, connect->name, sizeof(client->name));
@@ -421,10 +417,8 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
 
   address_copy(&client->addr, &connect->remote_addr);
-  client->connection->fd = fd_open(fd, true, NULL);
 
-  /* Server names are always guaranteed under HOSTLEN chars */
-  fd_note(client->connection->fd, "Server: %s", client->name);
+  comm_socket_note(client->connection->fd, "Server: %s", client->name);
 
   server_make(client);
   server_conf_set(client, connect);

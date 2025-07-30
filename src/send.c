@@ -196,7 +196,7 @@ send_queued_write(struct Client *to)
 
     if (retlen <= 0)
     {
-      if (retlen < 0 && comm_ignore_errno(errno))
+      if (retlen < 0 && comm_errno_is_recoverable(errno))
       {
         AddFlag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */

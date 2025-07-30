@@ -165,11 +165,10 @@ start_resolver(void)
 
   if (ResolverFileDescriptor == NULL)
   {
-    int fd = comm_socket(address_get_family(&reslib_nsaddr_list[0]), SOCK_DGRAM, 0);
-    if (fd == -1)
+    ResolverFileDescriptor = comm_socket_create(address_get_family(&reslib_nsaddr_list[0]),
+                                                SOCK_DGRAM, 0, "UDP resolver socket");
+    if (ResolverFileDescriptor == NULL)
       return;
-
-    ResolverFileDescriptor = fd_open(fd, true, "UDP resolver socket");
 
     /* At the moment, the resolver FD data is global .. */
     comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
@@ -184,7 +183,7 @@ restart_resolver(void)
 {
   if (ResolverFileDescriptor)
   {
-    fd_close(ResolverFileDescriptor);
+    comm_socket_close(ResolverFileDescriptor);
     ResolverFileDescriptor = NULL;
   }
 

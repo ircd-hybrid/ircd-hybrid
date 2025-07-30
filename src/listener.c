@@ -41,10 +41,6 @@
 #include "send.h"
 #include "memory.h"
 
-#define TOOFAST_WARNING "ERROR :Your host is trying to (re)connect too fast -- throttled.\r\n"
-#define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
-#define ALLINUSE_WARNING "ERROR :All connections in use\r\n"
-
 static list_t listener_list;
 
 const list_t *
@@ -142,19 +138,14 @@ ssl_handshake(fde_t *F, void *data_)
  * any client list yet.
  */
 static void
-add_connection(struct Listener *listener, const struct io_addr *addr, int fd)
+add_connection(fde_t *client_fde, struct Listener *listener, const struct io_addr *remote_addr, const char *remote_addr_str)
 {
   struct Client *client = client_make(NULL);
+  client->connection->fd = client_fde;
 
-  client->connection->fd = fd_open(fd, true, listener_has_flag(listener, LISTENER_TLS) ?
-                                   "Incoming TLS connection" : "Incoming connection");
+  address_copy(&client->addr, remote_addr);
 
-  /*
-   * copy address to 'sockhost' as a string, copy it to host too
-   * so we have something valid to put into error messages...
-   */
-  address_copy(&client->addr, addr);
-  address_to_string(&client->addr, client->sockhost, sizeof(client->sockhost));
+  strlcpy(client->sockhost, remote_addr_str, sizeof(client->sockhost));
 
   if (client->sockhost[0] == ':' &&
       client->sockhost[1] == ':')
@@ -170,7 +161,7 @@ add_connection(struct Listener *listener, const struct io_addr *addr, int fd)
 
   if (listener_has_flag(listener, LISTENER_TLS))
   {
-    if (tls_new(&client->connection->fd->tls, fd, TLS_ROLE_SERVER) == false)
+    if (tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER) == false)
     {
       SetDead(client);
       client_exit(client, "TLS context initialization failed");
@@ -184,12 +175,14 @@ add_connection(struct Listener *listener, const struct io_addr *addr, int fd)
     lookup_start(client);
 }
 
+enum { LISTENER_ACCEPT_BUDGET = 128 };
+
 static void
 listener_accept_connection(fde_t *F, void *data_)
 {
   struct Listener *const listener = data_;
-  struct io_addr addr;
-  int fd;
+  struct io_addr remote_addr;
+  unsigned int accepted_count = 0;
 
   assert(listener);
   assert(listener->fd == F);
@@ -206,23 +199,34 @@ listener_accept_connection(fde_t *F, void *data_)
    * point, just assume that connections cannot
    * be accepted until some old is closed first.
    */
-  while ((fd = comm_accept(listener->fd, &addr)) != -1)
+  const char *desc = listener_has_flag(listener, LISTENER_TLS) ?
+                       "Incoming TLS connection" : "Incoming connection";
+
+  fde_t *client_fde;
+  while (accepted_count < LISTENER_ACCEPT_BUDGET &&
+         (client_fde = comm_accept(listener->fd, &remote_addr, desc)))
   {
+    ++accepted_count;
+
+    char remote_addr_str[HOSTIPLEN + 1];
+    if (address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)) == false)
+    {
+      log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
+      comm_socket_close(client_fde);
+      continue;
+    }
+
     /*
      * check for connection limit
      */
     if (number_fd > hard_fdlimit - 10)
     {
-      ++ServerStats.is_ref;
-
       static uintmax_t rate = 0;
-      sendto_clients_ratelimited(&rate, "All connections in use. (%s/%hu)",
-                                 listener_get_name(listener), listener_get_port(listener));
+      sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
+                                 remote_addr_str, listener_get_name(listener), listener_get_port(listener));
 
-      if (!(listener->flags & LISTENER_TLS))
-        send(fd, ALLINUSE_WARNING, sizeof(ALLINUSE_WARNING) - 1, 0);
-
-      close(fd);
+      ++ServerStats.is_ref;
+      comm_socket_close(client_fde);
       continue;  /* drop the one and keep on clearing the queue */
     }
 
@@ -230,30 +234,20 @@ listener_accept_connection(fde_t *F, void *data_)
      * Do an initial check we aren't connecting too fast or with too many
      * from this IP...
      */
-    int pe = conf_connect_allowed(&addr);
+    int pe = conf_connect_allowed(&remote_addr);
     if (pe)
     {
+      log_write(LOG_TYPE_DEBUG, "Refused connection from %s on listener [%s/%hu]: %s",
+                remote_addr_str, listener_get_name(listener), listener_get_port(listener),
+                pe == BANNED_CLIENT ? "D-lined" : "Throttled");
+
       ++ServerStats.is_ref;
-
-      if (!(listener->flags & LISTENER_TLS))
-      {
-        switch (pe)
-        {
-          case BANNED_CLIENT:
-            send(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1, 0);
-            break;
-          case TOO_FAST:
-            send(fd, TOOFAST_WARNING, sizeof(TOOFAST_WARNING) - 1, 0);
-            break;
-        }
-      }
-
-      close(fd);
+      comm_socket_close(client_fde);
       continue;    /* drop the one and keep on clearing the queue */
     }
 
     ++ServerStats.is_ac;
-    add_connection(listener, &addr, fd);
+    add_connection(client_fde, listener, &remote_addr, remote_addr_str);
   }
 
   /* Re-register a new IO request for the next accept .. */
@@ -269,7 +263,7 @@ listener_accept_connection(fde_t *F, void *data_)
  * and the queue is full, the request may be refused, depending on the system's
  * behavior.
  */
-enum { LISTEN_BACKLOG = 128 };
+enum { LISTEN_BACKLOG = 511 };
 
 static bool
 listener_finalize(struct Listener *listener)
@@ -285,56 +279,11 @@ listener_finalize(struct Listener *listener)
 
   listener->name = io_strdup(buf);
 
-  /*
-   * At first, open a new socket
-   */
-  int fd = comm_socket(address_get_family(&listener->addr), SOCK_STREAM, 0);
-  if (fd == -1)
+  fde_t *new_fde = comm_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
+  if (new_fde == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "opening listener socket %s/%hu: %s",
-              listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    return false;
-  }
-
-  const socklen_t opt = 1;
-#ifdef IPV6_V6ONLY
-  if (address_is_ipv6(&listener->addr) && address_is_unspecified(&listener->addr))
-  {
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)))
-    {
-      log_write(LOG_TYPE_IRCD, "setting IPV6_V6ONLY for listener %s/%hu: %s",
-                listener_get_name(listener), listener_get_port(listener), strerror(errno));
-      close(fd);
-      return false;
-    }
-  }
-#endif
-
-  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
-  {
-    log_write(LOG_TYPE_IRCD, "setting SO_REUSEADDR for listener %s/%hu: %s",
-              listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    close(fd);
-    return false;
-  }
-
-  /*
-   * Bind a port to listen for new connections if port is non-null,
-   * else assume it is already open and try get something from it.
-   */
-  if (bind(fd, (const struct sockaddr *)&listener->addr, address_length(&listener->addr)))
-  {
-    log_write(LOG_TYPE_IRCD, "binding listener socket %s/%hu: %s",
-              listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    close(fd);
-    return false;
-  }
-
-  if (listen(fd, LISTEN_BACKLOG))
-  {
-    log_write(LOG_TYPE_IRCD, "listen failed for %s/%hu: %s",
-              listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    close(fd);
+    log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu",
+              listener_get_name(listener), listener_get_port(listener));
     return false;
   }
 
@@ -342,7 +291,7 @@ listener_finalize(struct Listener *listener)
   if (listener_has_flag(listener, LISTENER_DEFER))
   {
     int timeout = 1;
-    setsockopt(fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
+    setsockopt(new_fde->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
   }
 #endif
 
@@ -350,15 +299,14 @@ listener_finalize(struct Listener *listener)
   if (listener_has_flag(listener, LISTENER_DEFER))
   {
     struct accept_filter_arg afa;
-
     memset(&afa, 0, sizeof(afa));
+
     strlcpy(afa.af_name, "dataready", sizeof(afa.af_name));
-    setsockopt(fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa));
+    setsockopt(new_fde->fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa));
   }
 #endif
 
-  listener->fd = fd_open(fd, true, "Listener socket");
-
+  listener->fd = new_fde;
   /* Listen completion events are READ events .. */
   listener_accept_connection(listener->fd, listener);
   return true;
@@ -396,7 +344,7 @@ listener_close(struct Listener *listener)
   {
     assert(listener->fd->flags.open);
 
-    fd_close(listener->fd);
+    comm_socket_close(listener->fd);
     listener->fd = NULL;
   }
 

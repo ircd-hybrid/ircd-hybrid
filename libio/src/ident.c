@@ -163,7 +163,7 @@ ident_delete(ident_request_t *request)
 {
   if (request->fd)
   {
-    fd_close(request->fd);
+    comm_socket_close(request->fd);
     request->fd = NULL;
   }
 
@@ -227,16 +227,14 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   request->callback = callback;
   request->user_data = user_data;
 
-  int fd = comm_socket(address_get_family(addr), SOCK_STREAM, 0);
-  if (fd == -1)
+  fde_t *new_fde = comm_socket_create(address_get_family(addr), SOCK_STREAM, 0, "ident");
+  if (new_fde == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Failed to create Ident socket: %s",
-              strerror(errno));
     ident_delete(request);
     return NULL;
   }
 
-  request->fd = fd_open(fd, true, "ident");
+  request->fd = new_fde;
 
   struct io_addr local_addr;
   struct io_addr remote_addr;

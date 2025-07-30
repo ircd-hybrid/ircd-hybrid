@@ -39,6 +39,7 @@
 #include "hash.h"
 #include "monitor.h"
 #include "whowas.h"
+#include "comm.h"
 
 
 /*! \brief SVSNICK command handler
@@ -130,7 +131,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   target->tsinfo = new_ts;
   hash_add_client(target);
 
-  fd_note(target->connection->fd, "Nick: %s", target->name);
+  comm_socket_note(target->connection->fd, "Nick: %s", target->name);
 
   monitor_signon(target);
 }

@@ -695,7 +695,7 @@ client_close_connection(struct Client *client)
     if (tls_isusing(&client->connection->fd->tls))
       tls_shutdown(&client->connection->fd->tls);
 
-    fd_close(client->connection->fd);
+    comm_socket_close(client->connection->fd);
     client->connection->fd = NULL;
   }
 

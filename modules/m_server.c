@@ -23,7 +23,7 @@
  * \brief Includes required functions for processing the SERVER/SID command.
  */
 
-#include "fdlist.h"
+#include "comm.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -487,7 +487,7 @@ mr_server(struct Client *source, int parc, char *parv[])
   io_free(source->connection->password);
   source->connection->password = NULL;
 
-  fd_note(source->connection->fd, "Server: %s", source->name);
+  comm_socket_note(source->connection->fd, "Server: %s", source->name);
 
   server_set_flags(source, parv[4]);
   client_set_class(source, connect->klass, CLIENT_CLASS_BASE);

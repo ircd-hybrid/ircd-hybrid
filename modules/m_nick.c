@@ -27,7 +27,6 @@
 #include "io_time.h"
 #include "list.h"
 #include "hash.h"
-#include "fdlist.h"
 #include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -47,6 +46,7 @@
 #include "ipcache.h"
 #include "extban.h"
 #include "ircd_hook.h"
+#include "comm.h"
 
 
 /* check_clean_nick()
@@ -186,7 +186,7 @@ set_initial_nick(struct Client *source, const char *nick)
   strlcpy(source->name, nick, sizeof(source->name));
   hash_add_client(source);
 
-  fd_note(source->connection->fd, "Nick: %s", source->name);
+  comm_socket_note(source->connection->fd, "Nick: %s", source->name);
 
   source->connection->registration &= ~REG_NEED_NICK;
   if (source->connection->registration == 0)
@@ -252,7 +252,7 @@ nick_change_local(struct Client *source, const char *nick)
   strlcpy(source->name, nick, sizeof(source->name));
   hash_add_client(source);
 
-  fd_note(source->connection->fd, "Nick: %s", source->name);
+  comm_socket_note(source->connection->fd, "Nick: %s", source->name);
 
   if (samenick == false)
     monitor_signon(source);

@@ -319,7 +319,7 @@ read_packet(fde_t *F, void *data_)
        * If true, then we can recover from this error. Stop here and register for
        * another COMM_SELECT_READ io-request.
        */
-      if (length < 0 && comm_ignore_errno(errno))
+      if (length < 0 && comm_errno_is_recoverable(errno))
         comm_setselect(F, COMM_SELECT_READ, read_packet, client, 0);
       else
         dead_link_on_read(client, length, errno);

@@ -322,7 +322,7 @@ read_packet(fde_t *F, void *data_)
       if (length < 0 && comm_ignore_errno(errno))
         comm_setselect(F, COMM_SELECT_READ, read_packet, client, 0);
       else
-        dead_link_on_read(client, length);
+        dead_link_on_read(client, length, errno);
       return;
     }
 

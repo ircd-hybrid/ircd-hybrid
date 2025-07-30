@@ -988,21 +988,17 @@ dead_link_on_write(struct Client *client, int ierrno)
  *			mark it as dead then exit it
  */
 void
-dead_link_on_read(struct Client *client, int error)
+dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
 {
-  int current_error;
-
   if (IsDefunct(client))
     return;
 
   dbuf_clear(&client->connection->buf_recvq);
   dbuf_clear(&client->connection->buf_sendq);
 
-  current_error = comm_get_sockerr(client->connection->fd);
-
   if (IsServer(client) || IsHandshake(client))
   {
-    if (error == 0)
+    if (recv_return_val == 0)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                      "Server %s closed the connection",
@@ -1017,22 +1013,22 @@ dead_link_on_read(struct Client *client, int error)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                      "Lost connection to %s: %s",
-                     client_get_name(client, SHOW_IP), strerror(current_error));
+                     client_get_name(client, SHOW_IP), strerror(error_code));
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                      "Lost connection to %s: %s",
-                     client_get_name(client, MASK_IP), strerror(current_error));
+                     client_get_name(client, MASK_IP), strerror(error_code));
       log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
-                client_get_name(client, SHOW_IP), strerror(current_error));
+                client_get_name(client, SHOW_IP), strerror(error_code));
     }
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s was connected for %s",
                    client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
   }
 
-  if (error == 0)
+  if (recv_return_val == 0)
     client_exit(client, "Remote host closed the connection");
   else
-    client_exit_fmt(client, "Read error: %s", strerror(current_error));
+    client_exit_fmt(client, "Read error: %s", strerror(error_code));
 }
 
 void

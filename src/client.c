@@ -705,7 +705,7 @@ client_close_connection(struct Client *client)
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  server_conf_clear(client);
+  server_conf_set(client, NULL);
 
   client_set_class(client, NULL, CLIENT_CLASS_BASE);
   client_set_class(client, NULL, CLIENT_CLASS_OPER);

@@ -521,35 +521,24 @@ server_connect_auto(void *unused)
 struct ConnectItem *
 server_conf_get(const struct Client *client)
 {
-  if (client->serv)
-    return client->serv->conf;
-
-  return NULL;
-}
-
-void
-server_conf_clear(struct Client *client)
-{
-  if (client->serv && client->serv->conf)
-  {
-    connect_decref(client->serv->conf);
-    client->serv->conf = NULL;
-  }
+  return client->serv ? client->serv->conf : NULL;
 }
 
 void
 server_conf_set(struct Client *client, struct ConnectItem *new_connect)
 {
-  assert(client->serv);
-  assert(new_connect);
+  if (client->serv == NULL)
+    return;
 
   struct ConnectItem *const old_connect = server_conf_get(client);
   if (old_connect == new_connect)
     return;
 
+  if (new_connect)
+    connect_incref(new_connect);
+
   if (old_connect)
-    server_conf_clear(client);
+    connect_decref(old_connect);
 
   client->serv->conf = new_connect;
-  connect_incref(new_connect);
 }

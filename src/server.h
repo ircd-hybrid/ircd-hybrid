@@ -71,7 +71,6 @@ typedef struct
   struct Client *target;  /**< Pointer to the target client or server. */
 } server_route_t;
 
-extern void server_conf_clear(struct Client *);
 extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);
 extern bool server_connect(struct ConnectItem *, const struct Client *);

@@ -185,7 +185,7 @@ server_make(struct Client *client)
 }
 
 static void
-server_start_irc_handshake(struct Client *client)
+_server_handshake_irc_start(struct Client *client)
 {
   const struct ConnectItem *const connect = server_conf_get(client);
   assert(connect);
@@ -203,8 +203,17 @@ server_start_irc_handshake(struct Client *client)
 }
 
 static void
-server_finish_tls_handshake(struct Client *client)
+_server_handshake_tls_finish(struct Client *client)
 {
+  fde_t *fde = client->connection->fd;
+
+  comm_settimeout(fde, 0, NULL, NULL);
+  comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+
+  if (tls_verify_certificate(&fde->tls, &client->tls_certfp) == false)
+    log_write(LOG_TYPE_IRCD, "Link %s presented an invalid TLS certificate.",
+              client_get_name(client, MASK_IP));
+
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
   {
@@ -220,68 +229,60 @@ server_finish_tls_handshake(struct Client *client)
   }
 
   AddFlag(client, FLAGS_TLS);
-  server_start_irc_handshake(client);
+  _server_handshake_irc_start(client);
 }
 
 static void
-server_start_tls_handshake(fde_t *F, void *data_)
+_server_handshake_tls_start(fde_t *fde, void *data_)
 {
   struct Client *const client = data_;
-  const char *sslerr = NULL;
-
   assert(client);
   assert(client->connection);
   assert(client->connection->fd);
-  assert(client->connection->fd == F);
+  assert(client->connection->fd == fde);
 
-  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_CLIENT, &sslerr);
-  if (ret != TLS_HANDSHAKE_DONE)
+  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
   {
-    if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
-    {
-      client_exit(client, "Timeout during TLS handshake");
-      return;
-    }
-
-    switch (ret)
-    {
-      case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(F, COMM_SELECT_WRITE,
-                       server_start_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
-        return;
-      case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(F, COMM_SELECT_READ,
-                       server_start_tls_handshake, client, TLS_HANDSHAKE_TIMEOUT);
-        return;
-      default:
-      {
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Error connecting to %s: %s",
-                       client->name, sslerr ? sslerr : "unknown TLS error");
-        client_exit(client, "Error during TLS handshake");
-        return;
-      }
-    }
+    client_exit(client, "Timeout during TLS handshake");
+    return;
   }
 
-  comm_settimeout(F, 0, NULL, NULL);
-  comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+  const char *tls_error = NULL;
+  tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, &tls_error);
+  if (ret == TLS_HANDSHAKE_DONE)
+  {
+    _server_handshake_tls_finish(client);
+    return;
+  }
 
-  if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
-    log_write(LOG_TYPE_IRCD, "Server %s gave bad TLS client certificate",
-              client_get_name(client, MASK_IP));
+  switch (ret)
+  {
+    case TLS_HANDSHAKE_WANT_WRITE:
+      comm_setselect(fde, COMM_SELECT_WRITE, _server_handshake_tls_start, client, 0);
+      break;
+    case TLS_HANDSHAKE_WANT_READ:
+      comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client, 0);
+      break;
+    default:
+      comm_settimeout(fde, 0, NULL, NULL);
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Error connecting to %s: %s",
+                     client->name, tls_error ? tls_error : "unknown TLS error");
+      client_exit(client, "Error during TLS handshake");
+      break;
+  }
 
-  server_finish_tls_handshake(client);
+  _server_handshake_tls_finish(client);
 }
 
 static void
-server_tls_connect_init(struct Client *client, const struct ConnectItem *connect, fde_t *F)
+_server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
 {
   assert(client);
   assert(client->connection);
   assert(client->connection->fd);
-  assert(client->connection->fd == F);
+  assert(client->connection->fd == fde);
 
-  if (tls_new(&F->tls, F->fd, TLS_ROLE_CLIENT) == false)
+  if (tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT) == false)
   {
     SetDead(client);
     client_exit(client, "TLS context initialization failed");
@@ -289,9 +290,9 @@ server_tls_connect_init(struct Client *client, const struct ConnectItem *connect
   }
 
   if (!string_is_empty(connect->cipher_list))
-    tls_set_ciphers(&F->tls, connect->cipher_list);
+    tls_set_ciphers(&fde->tls, connect->cipher_list);
 
-  server_start_tls_handshake(F, client);
+  _server_handshake_tls_start(fde, client);
 }
 
 /* server_connect_callback() - complete a server connection.
@@ -303,7 +304,7 @@ server_tls_connect_init(struct Client *client, const struct ConnectItem *connect
  * marked for reading.
  */
 static void
-server_connect_callback(fde_t *F, int status, void *data_)
+_server_connect_callback(fde_t *fde, int status, void *data_)
 {
   struct Client *const client = data_;
 
@@ -311,7 +312,7 @@ server_connect_callback(fde_t *F, int status, void *data_)
   assert(client);
   assert(client->connection);
   assert(client->connection->fd);
-  assert(client->connection->fd == F);
+  assert(client->connection->fd == fde);
   assert(IsConnecting(client));
 
   /* Check the status */
@@ -348,12 +349,9 @@ server_connect_callback(fde_t *F, int status, void *data_)
   }
 
   if (connect->flags & CONNECT_FLAG_USE_TLS)
-  {
-    server_tls_connect_init(client, connect, F);
-    return;
-  }
-
-  server_start_irc_handshake(client);
+    _server_tls_init(client, connect, fde);
+  else
+    _server_handshake_irc_start(client);
 }
 
 /* server_connect() - initiate a server connection
@@ -432,7 +430,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   /* Now, initiate the connection */
   comm_connect_tcp(client->connection->fd, &connect->remote_addr, connect->port, &connect->bind_addr,
-                   server_connect_callback, client, connect->timeout * 1000);
+                   _server_connect_callback, client, connect->timeout * 1000);
 
   /*
    * At this point we have a connection in progress and a connect {} block
@@ -505,7 +503,7 @@ server_connect_auto(void *unused)
      * succeeded, but since comm_tcp_connect() can call the callback
      * immediately if there is an error, we were getting error messages
      * in the wrong order. SO, we just print out the activated line,
-     * and let server_connect() / server_connect_callback() print an
+     * and let server_connect() / _server_connect_callback() print an
      * error afterwards if it fails.
      *   -- adrian
      */

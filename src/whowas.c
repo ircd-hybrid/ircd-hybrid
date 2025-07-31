@@ -267,7 +267,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 int
 whowas_query(const char *name, int max_results, whowas_callback_t callback, void *user_data)
 {
-  struct WhowasGroup *group = whowas_group_find(name);
+  const struct WhowasGroup *group = whowas_group_find(name);
   if (group == NULL)
     return 0;
 
@@ -278,7 +278,8 @@ whowas_query(const char *name, int max_results, whowas_callback_t callback, void
     if (max_results != -1 && count >= max_results)
       break;
 
-    callback(node->data, user_data);
+    const struct Whowas *const whowas = node->data;
+    callback(whowas, user_data);
     ++count;
   }
 

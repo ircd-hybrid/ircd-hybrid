@@ -103,12 +103,12 @@ static list_node_t *eac_next;  /* next aborted client to exit */
 
 static void _client_exit_teardown_connection(struct Client *client);
 static void _client_exit_log_session(const struct Client *client, const char *reason);
-static void _client_exit_cleanup_client_connection(struct Client *client, const char *comment);
-static void _client_exit_cleanup_server_connection(struct Client *client, const char *comment);
-static void _client_exit_cleanup_unregistered_connection(struct Client *client, const char *comment);
-static void _client_exit_notify_channel_members(struct Client *client, const char *comment);
-static void _client_exit_unwind_tree(struct Client *client, const char *comment);
-static void _client_exit_notify_network(struct Client *client, const char *comment);
+static void _client_exit_cleanup_client_connection(struct Client *client, const char *reason);
+static void _client_exit_cleanup_server_connection(struct Client *client, const char *reason);
+static void _client_exit_cleanup_unregistered_connection(struct Client *client, const char *reason);
+static void _client_exit_notify_channel_members(struct Client *client, const char *reason);
+static void _client_exit_unwind_tree(struct Client *client, const char *reason);
+static void _client_exit_notify_network(struct Client *client, const char *reason);
 static void _client_exit_detach(struct Client *client);
 
 void
@@ -663,22 +663,24 @@ _client_exit_notify_channel_members(struct Client *client, const char *reason)
 }
 
 static void
-_client_exit_unwind_tree(struct Client *server_link, const char *reason)
+_client_exit_unwind_tree(struct Client *split_root, const char *reason)
 {
-  list_node_t *node, *node_next;
+  assert(split_root && IsServer(split_root));
+  assert(split_root->serv);
 
-  LIST_FOREACH_SAFE(node, node_next, server_link->serv->client_list.head)
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, split_root->serv->client_list.head)
   {
-    struct Client *departing_client = node->data;
-    _client_exit_notify_channel_members(departing_client, reason);
-    _client_exit_detach(departing_client);
+    struct Client *child_client = node->data;
+    _client_exit_notify_channel_members(child_client, reason);
+    _client_exit_detach(child_client);
   }
 
-  LIST_FOREACH_SAFE(node, node_next, server_link->serv->server_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->serv->server_list.head)
   {
-    struct Client *next_server = node->data;
-    _client_exit_unwind_tree(next_server, reason);
-    _client_exit_detach(next_server);
+    struct Client *child_server = node->data;
+    _client_exit_unwind_tree(child_server, reason);
+    _client_exit_detach(child_server);
   }
 }
 
@@ -905,6 +907,7 @@ void
 client_exit(struct Client *client, const char *reason)
 {
   assert(client && client != &me && !IsMe(client));
+  assert(reason);
 
   if (HasFlag(client, FLAGS_CLOSING))
     return;
@@ -913,6 +916,8 @@ client_exit(struct Client *client, const char *reason)
   /* For local clients, tear down the physical connection immediately. */
   if (MyConnect(client))
   {
+    assert(client == client->from);
+
     if (IsServer(client))
       server_schedule_reconnect(client);
 
@@ -986,8 +991,8 @@ _client_abort(struct Client *client, const char *reason)
 
   SetDead(client);
 
-  if (client->connection->abort_reason == NULL)
-    client->connection->abort_reason = io_strdup(reason);
+  io_free(client->connection->abort_reason);
+  client->connection->abort_reason = io_strdup(reason);
 
   dbuf_clear(&client->connection->buf_recvq);
   dbuf_clear(&client->connection->buf_sendq);

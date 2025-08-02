@@ -275,7 +275,7 @@ whowas_query(const char *name, int max_results, whowas_callback_t callback, void
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
-    if (max_results != -1 && count >= max_results)
+    if (max_results > 0 && count >= max_results)
       break;
 
     const struct Whowas *const whowas = node->data;

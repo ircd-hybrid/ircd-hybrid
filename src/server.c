@@ -217,13 +217,6 @@ _server_handshake_tls_finish(struct Client *client)
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: connect{} block was removed",
-                   client_get_name(client, SHOW_IP));
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: connect{} block was removed",
-                   client_get_name(client, MASK_IP));
-
     client_exit(client, "Configuration removed");
     return;
   }
@@ -330,13 +323,6 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: connect{} block was removed",
-                   client_get_name(client, SHOW_IP));
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: connect{} block was removed",
-                   client_get_name(client, MASK_IP));
-
     client_exit(client, "Configuration removed");
     return;
   }

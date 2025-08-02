@@ -101,6 +101,16 @@ list_t oper_list;
 static list_t dead_list, abort_list;
 static list_node_t *eac_next;  /* next aborted client to exit */
 
+static void _client_exit_teardown_connection(struct Client *client);
+static void _client_exit_log_session(const struct Client *client, const char *reason);
+static void _client_exit_cleanup_client_connection(struct Client *client, const char *comment);
+static void _client_exit_cleanup_server_connection(struct Client *client, const char *comment);
+static void _client_exit_cleanup_unregistered_connection(struct Client *client, const char *comment);
+static void _client_exit_notify_channel_members(struct Client *client, const char *comment);
+static void _client_exit_unwind_tree(struct Client *client, const char *comment);
+static void _client_exit_notify_network(struct Client *client, const char *comment);
+static void _client_exit_detach(struct Client *client);
+
 void
 client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
 {
@@ -173,85 +183,56 @@ client_make(struct Client *from)
   return client;
 }
 
-/*
- * client_free
- *
- * inputs	- pointer to client
- * output	- NONE
- * side effects	- client pointed to has its memory freed
- */
 static void
 client_free(struct Client *client)
 {
-  assert(!IsMe(client));
-  assert(client != &me);
+  assert(client && client != &me && !IsMe(client));
   assert(client->hnext == client);
   assert(client->idhnext == client);
-
-  assert(client->node.prev == NULL);
-  assert(client->node.next == NULL);
-
-  assert(client->lnode.prev == NULL);
-  assert(client->lnode.next == NULL);
-
-  assert(list_length(&client->whowas_list) == 0);
-  assert(client->whowas_list.head == NULL);
-  assert(client->whowas_list.tail == NULL);
-
-  assert(list_length(&client->channel) == 0);
-  assert(client->channel.head == NULL);
-  assert(client->channel.tail == NULL);
-
-  assert(list_length(&client->svstags) == 0);
-  assert(client->svstags.head == NULL);
-  assert(client->svstags.tail == NULL);
+  assert(client->node.prev == NULL && client->node.next == NULL);
+  assert(client->lnode.prev == NULL && client->lnode.next == NULL);
+  assert(list_is_empty(&client->whowas_list));
+  assert(list_is_empty(&client->channel));
+  assert(list_is_empty(&client->svstags));
 
   if (client->serv)
+  {
     io_free(client->serv->initiator_name);
-  io_free(client->serv);
+    client->serv->initiator_name = NULL;
+    io_free(client->serv);
+    client->serv = NULL;
+  }
+
   io_free(client->tls_certfp);
+  client->tls_certfp = NULL;
   io_free(client->tls_cipher);
+  client->tls_cipher = NULL;
   io_free(client->away);
+  client->away = NULL;
 
   if (MyConnect(client))
   {
-    assert(client->connection->node.prev == NULL);
-    assert(client->connection->node.next == NULL);
-
+    assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
     assert(client->connection->list_task == NULL);
     assert(client->connection->lookup == NULL);
-
-    assert(list_length(&client->connection->acceptlist) == 0);
-    assert(client->connection->acceptlist.head == NULL);
-    assert(client->connection->acceptlist.tail == NULL);
-
-
-    assert(list_length(&client->connection->monitors) == 0);
-    assert(client->connection->monitors.head == NULL);
-    assert(client->connection->monitors.tail == NULL);
-
-    assert(list_length(&client->connection->invited) == 0);
-    assert(client->connection->invited.head == NULL);
-    assert(client->connection->invited.tail == NULL);
-
     assert(client->connection->fd == NULL);
-
+    assert(client->connection->listener == NULL);
+    assert(list_is_empty(&client->connection->acceptlist));
+    assert(list_is_empty(&client->connection->monitors));
+    assert(list_is_empty(&client->connection->invited));
+    assert(dbuf_length(&client->connection->buf_recvq) == 0);
+    assert(dbuf_length(&client->connection->buf_sendq) == 0);
+    assert(client->connection->base_class == NULL);
+    assert(client->connection->oper_class == NULL);
+    assert(server_conf_get(client) == NULL);
     assert(HasFlag(client, FLAGS_CLOSING) && IsDead(client));
 
-    /*
-     * Clean up extra sockets from listen {} blocks which have been discarded.
-     */
-    if (client->connection->listener)
-    {
-      listener_release(client->connection->listener);
-      client->connection->listener = NULL;
-    }
-
-    dbuf_clear(&client->connection->buf_recvq);
-    dbuf_clear(&client->connection->buf_sendq);
-
+    io_free(client->connection->password);
+    client->connection->password = NULL;
     io_free(client->connection->oper_name);
     client->connection->oper_name = NULL;
+    io_free(client->connection->abort_reason);
+    client->connection->abort_reason = NULL;
 
     io_free(client->connection);
     client->connection = NULL;
@@ -647,81 +628,110 @@ free_exited_clients(void)
   }
 }
 
-/*
- * client_close_connection
- *        Close the physical connection. This function must make
- *        MyConnect(client) == FALSE, and set client->from == NULL.
- */
 static void
-client_close_connection(struct Client *client)
+_client_exit_teardown_connection(struct Client *client)
 {
-  assert(client);
+  assert(client && MyConnect(client));
 
-  if (!IsDead(client))
-  {
-    /* Attempt to flush any pending dbufs. Evil, but .. -- adrian */
-    /*
-     * There is still a chance that we might send data to this socket
-     * even if it is marked as blocked (COMM_SELECT_READ handler is called
-     * before COMM_SELECT_WRITE). Let's try, nothing to lose.. -adx
-     */
-    DelFlag(client, FLAGS_BLOCKED);
-    send_queued_write(client);
-  }
-
-  if (IsClient(client))
-  {
-    ++ServerStats.is_cl;
-    ServerStats.is_cbs += client->connection->send.bytes;
-    ServerStats.is_cbr += client->connection->recv.bytes;
-    ServerStats.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
-  }
-  else if (IsServer(client))
-  {
-    ++ServerStats.is_sv;
-    ServerStats.is_sbs += client->connection->send.bytes;
-    ServerStats.is_sbr += client->connection->recv.bytes;
-    ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
-
-    assert(client->serv->conf);
-    struct ConnectItem *const connect = server_conf_get(client);
-    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
-  }
-  else
-    ++ServerStats.is_ni;
+   /*
+   * Attempt a final, best-effort flush of any pending data in the send queue.
+   * We deliberately clear the BLOCKED flag to force one last write attempt,
+   * giving our final ERROR message the best possible chance of being delivered.
+   * This is safe because even if this write re-blocks, the very next step
+   * is to close the socket anyway.
+   */
+  DelFlag(client, FLAGS_BLOCKED);
+  send_queued_write(client);
 
   if (client->connection->fd)
   {
-    if (tls_isusing(&client->connection->fd->tls))
-      tls_shutdown(&client->connection->fd->tls);
-
     comm_socket_close(client->connection->fd);
     client->connection->fd = NULL;
   }
 
+  /* Free transport-level buffer memory now that the socket is gone. */
   dbuf_clear(&client->connection->buf_sendq);
   dbuf_clear(&client->connection->buf_recvq);
-
-  io_free(client->connection->password);
-  client->connection->password = NULL;
-
-  server_conf_set(client, NULL);
-
-  client_set_class(client, NULL, CLIENT_CLASS_BASE);
-  client_set_class(client, NULL, CLIENT_CLASS_OPER);
 }
 
-/*
- * Exit one client, local or remote. Assuming all dependents have
- * been already removed, and socket closed for local client.
- *
- * The only messages generated are QUITs on channels.
- */
 static void
-exit_one_client(struct Client *client, const char *comment)
+_client_exit_notify_channel_members(struct Client *client, const char *reason)
 {
-  assert(!IsMe(client));
-  assert(client != &me);
+  assert(client && IsClient(client));
+  sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
+                               client->name, client->username, client->host, reason);
+}
+
+static void
+_client_exit_unwind_tree(struct Client *server_link, const char *reason)
+{
+  list_node_t *node, *node_next;
+
+  LIST_FOREACH_SAFE(node, node_next, server_link->serv->client_list.head)
+  {
+    struct Client *departing_client = node->data;
+    _client_exit_notify_channel_members(departing_client, reason);
+    _client_exit_detach(departing_client);
+  }
+
+  LIST_FOREACH_SAFE(node, node_next, server_link->serv->server_list.head)
+  {
+    struct Client *next_server = node->data;
+    _client_exit_unwind_tree(next_server, reason);
+    _client_exit_detach(next_server);
+  }
+}
+
+static void
+_client_exit_notify_network(struct Client *client, const char *reason)
+{
+  if (IsServer(client))
+  {
+    assert(client->serv);
+    assert(client->origin);
+
+    char split_reason[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
+    if (ConfigServerHide.hide_servers)
+      /*
+       * Set netsplit message to "*.net *.split" to still show that it's a split,
+       * but hide the servers splitting.
+       */
+      strlcpy(split_reason, "*.net *.split", sizeof(split_reason));
+    else
+      snprintf(split_reason, sizeof(split_reason), "%s %s",
+               client->origin->name, client->name);
+
+    sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
+                   client->name, client->origin->name);
+
+    /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here. */
+    if (!HasFlag(client, FLAGS_SQUIT))
+      sendto_servers(NULL, 0, 0, "SQUIT %s :%s", client->id, reason);
+
+    /* Recursively handle the departure of all entities behind this server. */
+    _client_exit_unwind_tree(client, split_reason);
+  }
+  else if (IsClient(client))
+  {
+    assert(client->from);
+
+    if (!HasFlag(client, FLAGS_KILLED))
+      sendto_servers(client->from, 0, 0, ":%s QUIT :%s", client->id, reason);
+
+     /* Notify local clients in common channels that this user has quit. */
+    _client_exit_notify_channel_members(client, reason);
+  }
+}
+
+static void
+_client_exit_detach(struct Client *client)
+{
+  assert(list_find(&local_client_list, client) == NULL);
+  assert(list_find(&local_server_list, client) == NULL);
+  assert(list_find(&unknown_list, client) == NULL);
+  assert(list_find(&listing_client_list, client) == NULL);
+  assert(list_find(&oper_list, client) == NULL);
+  assert(list_find(&abort_list, client) == NULL);
 
   if (IsClient(client))
   {
@@ -729,18 +739,6 @@ exit_one_client(struct Client *client, const char *comment)
       --Count.oper;
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
-
-    list_remove(&client->lnode, &client->origin->serv->client_list);
-    list_remove(&client->node, &global_client_list);
-
-    /*
-     * If a person is on a channel, send a QUIT notice
-     * to every client (person) on the same channel (so
-     * that the client can show the "**signoff" message).
-     * (Note: The notice is to the local clients *only*)
-     */
-    sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
-                                 client->name, client->username, client->host, comment);
 
     channel_member_clear_list(&client->channel);
 
@@ -751,10 +749,17 @@ exit_one_client(struct Client *client, const char *comment)
 
     monitor_signoff(client);
   }
+
+  if (IsClient(client))
+  {
+    assert(client->origin && client->origin->serv);
+
+    list_remove(&client->lnode, &client->origin->serv->client_list);
+    list_remove(&client->node, &global_client_list);
+  }
   else if (IsServer(client))
   {
-    sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
-                   client->name, client->origin->name);
+    assert(client->origin && client->origin->serv);
 
     list_remove(&client->lnode, &client->origin->serv->server_list);
     list_remove(&client->node, &global_server_list);
@@ -762,7 +767,6 @@ exit_one_client(struct Client *client, const char *comment)
 
   if (client->id[0])
     hash_del_id(client);
-
   if (client->name[0])
     hash_del_client(client);
 
@@ -772,178 +776,193 @@ exit_one_client(struct Client *client, const char *comment)
     ipcache_record_remove(&client->addr, MyConnect(client));
   }
 
-  /* Check to see if the client isn't already on the dead list */
   assert(list_find(&dead_list, client) == NULL);
-
-  /* Add to dead client dlist */
-  SetDead(client);
+  /* Schedule the final memory deallocation. */
   list_add(client, list_make_node(), &dead_list);
 }
 
-/*
- * Remove all clients that depend on 'client'; assumes all (S)QUITs have
- * already been sent.  we make sure to exit a server's dependent clients
- * and servers before the server itself; exit_one_client takes care of
- * actually removing things off llists.   tweaked from +CSr31  -orabidoo
- */
 static void
-recurse_remove_clients(struct Client *client, const char *comment)
+_client_exit_log_session(const struct Client *client, const char *reason)
 {
-  list_node_t *node, *node_next;
+  assert(client && MyConnect(client));
 
-  LIST_FOREACH_SAFE(node, node_next, client->serv->client_list.head)
-    exit_one_client(node->data, comment);
-
-  LIST_FOREACH_SAFE(node, node_next, client->serv->server_list.head)
+  if (IsClient(client))
   {
-    recurse_remove_clients(node->data, comment);
-    exit_one_client(node->data, comment);
+    log_write(LOG_TYPE_USER,
+              "SESSION END: nick=\"%s\" user=\"%s\" host=\"%s\" ip=\"%s\" "
+              "realhost=\"%s\" acct=\"%s\" duration=\"%s\" "
+              "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
+              "class=\"%s\" oper=\"%s\" reason=\"%s\"",
+              client->name, client->username, client->host, client->sockhost, client->realhost, client->account,
+              time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+              (uintmax_t)(client->connection->send.bytes >> 10),
+              (uintmax_t)(client->connection->recv.bytes >> 10),
+              client->connection->send.messages,
+              client->connection->recv.messages,
+              client_get_class_name(client),
+              client->connection->oper_name ? client->connection->oper_name : "-", reason);
+  }
+  else if (IsServer(client))
+  {
+    log_write(LOG_TYPE_IRCD,
+              "LINK END: name=\"%s\" ip=\"%s\" duration=\"%s\" "
+              "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
+              "class=\"%s\" reason=\"%s\"",
+              client->name, client->sockhost,
+              time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+              (uintmax_t)(client->connection->send.bytes >> 10),
+              (uintmax_t)(client->connection->recv.bytes >> 10),
+              client->connection->send.messages,
+              client->connection->recv.messages,
+              client_get_class_name(client), reason);
   }
 }
 
-/*
- * exit_client - exit a client of any type. Generally, you can use
- * this on any struct Client, regardless of its state.
- *
- * Note, you shouldn't exit remote _users_ without first doing
- * AddFlag(x, FLAGS_KILLED) and propagating a kill or similar message.
- *
- * However, it is perfectly correct to call exit_client to force a _server_
- * quit (either local or remote one).
- *
- *
- * inputs:       - a client pointer that is going to be exited
- * output:       none
- * side effects: the client is delinked from all lists, disconnected,
- *               and the rest of IRC network is notified of the exit.
- *               Client memory is scheduled to be freed
- */
-void
-client_exit(struct Client *client, const char *comment)
+static void
+_client_exit_cleanup_server_connection(struct Client *client, const char *reason)
 {
-  assert(!IsMe(client));
-  assert(client != &me);
+  assert(client && MyConnect(client));
+  assert(IsServer(client));
 
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Link Closed: %s [ip=%s class=%s uptime=\"%s\" sent=%juKiB recv=%juKiB] (Reason: %s)",
+                 client->name, client->sockhost, client_get_class_name(client),
+                 time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+                 (uintmax_t)(client->connection->send.bytes >> 10),
+                 (uintmax_t)(client->connection->recv.bytes >> 10), reason);
+
+  _client_exit_log_session(client, reason);
+
+  ++ServerStats.is_sv;
+  ServerStats.is_sbs += client->connection->send.bytes;
+  ServerStats.is_sbr += client->connection->recv.bytes;
+  ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
+
+  assert(list_find(&local_server_list, client));
+  list_remove(&client->connection->node, &local_server_list);
+
+  server_conf_set(client, NULL);
+  client_set_class(client, NULL, CLIENT_CLASS_BASE);
+}
+
+static void
+_client_exit_cleanup_client_connection(struct Client *client, const char *reason)
+{
+  assert(client && MyConnect(client));
+  assert(IsClient(client));
+
+  _client_exit_log_session(client, reason);
+
+  ++ServerStats.is_cl;
+  ServerStats.is_cbs += client->connection->send.bytes;
+  ServerStats.is_cbr += client->connection->recv.bytes;
+  ServerStats.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
+
+  assert(list_find(&local_client_list, client));
+  list_remove(&client->connection->node, &local_client_list);
+
+  if (user_mode_has_flag(client, UMODE_OPER))
+  {
+    list_node_t *node = list_find_remove(&oper_list, client);
+    if (node)
+      list_free_node(node);
+  }
+
+  if (client->connection->list_task)
+    free_list_task(client);
+
+  invite_clear_list(&client->connection->invited);
+  accept_clear_list(&client->connection->acceptlist);
+  monitor_clear_list(client);
+
+  client_set_class(client, NULL, CLIENT_CLASS_BASE);
+  client_set_class(client, NULL, CLIENT_CLASS_OPER);
+}
+
+static void
+_client_exit_cleanup_unregistered_connection(struct Client *client, const char *reason)
+{
+  assert(client && MyConnect(client));
+  assert(IsUnknown(client) || IsConnecting(client) || IsHandshake(client));
+
+  if (IsConnecting(client) || IsHandshake(client))
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Link Failed: %s [ip=%s] (Reason: %s)",
+                   client->name, client->sockhost, reason);
+
+  ++ServerStats.is_ni;
+
+  assert(list_find(&unknown_list, client));
+  list_remove(&client->connection->node, &unknown_list);
+
+  if (IsConnecting(client) || IsHandshake(client))
+    server_conf_set(client, NULL);
+
+  client_set_class(client, NULL, CLIENT_CLASS_BASE);
+}
+
+void
+client_exit(struct Client *client, const char *reason)
+{
+  assert(client && client != &me && !IsMe(client));
+
+  if (HasFlag(client, FLAGS_CLOSING))
+    return;
+  AddFlag(client, FLAGS_CLOSING);
+
+  /* For local clients, tear down the physical connection immediately. */
   if (MyConnect(client))
   {
-    assert(client == client->from);
+    if (IsServer(client))
+      server_schedule_reconnect(client);
 
-    /*
-     * DO NOT REMOVE. exit_client can be called twice after a failed read/write.
-     */
-    if (HasFlag(client, FLAGS_CLOSING))
-      return;
-
-    AddFlag(client, FLAGS_CLOSING);
-
-    hook_dispatch(ircd_hook_client_exit_local, &(ircd_hook_client_exit_ctx){ .client = client, .comment = comment });
-
+    /* Clean up pending async operations to prevent their callbacks from firing. */
     if (client->connection->lookup)
     {
       lookup_delete(client->connection->lookup);
       client->connection->lookup = NULL;
     }
 
-    if (IsClient(client))
+    if (client->connection->listener)
     {
-      if (user_mode_has_flag(client, UMODE_OPER))
-      {
-        list_node_t *node = list_find_remove(&oper_list, client);
-        if (node)
-          list_free_node(node);
-      }
-
-      assert(list_find(&local_client_list, client));
-      list_remove(&client->connection->node, &local_client_list);
-
-      if (client->connection->list_task)
-        free_list_task(client);
-
-      invite_clear_list(&client->connection->invited);
-
-      accept_clear_list(&client->connection->acceptlist);
-
-      monitor_clear_list(client);
-
-      log_write(LOG_TYPE_USER, "%s (%ju): %s!%s@%s %s %s %ju/%ju :%s",
-                date_ctime(client->connection->created_real),
-                io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic,
-                client->name, client->username, client->host,
-                client->sockhost, client->account,
-                client->connection->send.bytes >> 10,
-                client->connection->recv.bytes >> 10, client->info);
-    }
-    else if (IsServer(client))
-    {
-      assert(list_find(&local_server_list, client));
-      list_remove(&client->connection->node, &local_server_list);
-
-      if (!HasFlag(client, FLAGS_SQUIT))
-        /* For them, we are exiting the network */
-        sendto_one(client, ":%s SQUIT %s :%s", me.id, me.id, comment);
-    }
-    else
-    {
-      assert(list_find(&unknown_list, client));
-      list_remove(&client->connection->node, &unknown_list);
+      listener_release(client->connection->listener);
+      client->connection->listener = NULL;
     }
 
-    sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, comment);
+    /* Queue final "dying gasp" messages before closing the socket. */
+    if (IsServer(client) && !HasFlag(client, FLAGS_SQUIT))
+      /* For them, we are exiting the network */
+      sendto_one(client, ":%s SQUIT %s :%s", me.id, me.id, reason);
 
-    client_close_connection(client);
+    sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, reason);
+
+    _client_exit_teardown_connection(client);
   }
-  else
-    hook_dispatch(ircd_hook_client_exit_remote, &(ircd_hook_client_exit_ctx){ .client = client, .comment = comment });
 
-  if (IsServer(client))
+  SetDead(client);
+  hook_dispatch(MyConnect(client) ? ircd_hook_client_exit_local : ircd_hook_client_exit_remote,
+                &(ircd_hook_client_exit_ctx){ .client = client, .comment = reason });
+
+  /*
+   * Clean up high-level application state for local clients. This MUST be done before network
+   * propagation to ensure that broadcast lists like `local_server_list` are correct before
+   * they are used by sendto_servers().
+   */
+  if (MyConnect(client))
   {
-    char splitstr[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
-
-    assert(client->serv);
-    assert(client->origin);
-
-    if (ConfigServerHide.hide_servers)
-      /*
-       * Set netsplit message to "*.net *.split" to still show that it's a split,
-       * but hide the servers splitting.
-       */
-      strlcpy(splitstr, "*.net *.split", sizeof(splitstr));
+    if (IsClient(client))
+      _client_exit_cleanup_client_connection(client, reason);
+    else if (IsServer(client))
+      _client_exit_cleanup_server_connection(client, reason);
     else
-      snprintf(splitstr, sizeof(splitstr), "%s %s",
-               client->origin->name, client->name);
-
-    /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here */
-    if (!HasFlag(client, FLAGS_SQUIT))
-      sendto_servers(NULL, 0, 0, "SQUIT %s :%s", client->id, comment);
-
-    /* Now exit the clients internally */
-    recurse_remove_clients(client, splitstr);
-
-    if (MyConnect(client))
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "%s was connected for %s. %ju/%ju sendK/recvK.",
-                     client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
-                     client->connection->send.bytes >> 10,
-                     client->connection->recv.bytes >> 10);
-      log_write(LOG_TYPE_IRCD, "%s was connected for %s. %ju/%ju sendK/recvK.",
-                client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
-                client->connection->send.bytes >> 10,
-                client->connection->recv.bytes >> 10);
-    }
+      _client_exit_cleanup_unregistered_connection(client, reason);
   }
-  else if (IsClient(client) && !HasFlag(client, FLAGS_KILLED))
-    sendto_servers(client->from, 0, 0, ":%s QUIT :%s", client->id, comment);
 
-  /* The client *better* be off all of the lists */
-  assert(list_find(&unknown_list, client) == NULL);
-  assert(list_find(&local_client_list, client) == NULL);
-  assert(list_find(&local_server_list, client) == NULL);
-  assert(list_find(&oper_list, client) == NULL);
-  assert(list_find(&listing_client_list, client) == NULL);
-  assert(list_find(&abort_list, client) == NULL);
+  /* Propagate the departure news across the IRC network. */
+  _client_exit_notify_network(client, reason);
 
-  exit_one_client(client, comment);
+  /* Perform the final, irreversible detachment from all data structures and schedule the memory for deallocation. */
+  _client_exit_detach(client);
 }
 
 void
@@ -959,105 +978,75 @@ client_exit_fmt(struct Client *client, const char *format, ...)
   client_exit(client, buf);
 }
 
-/*
- * dead_link_on_write - report a write error if not already dead,
- *			mark it as dead then exit it
- */
-void
-dead_link_on_write(struct Client *client, int ierrno)
+static void
+_client_abort(struct Client *client, const char *reason)
 {
   if (IsDefunct(client))
     return;
+
+  SetDead(client);
+
+  if (client->connection->abort_reason == NULL)
+    client->connection->abort_reason = io_strdup(reason);
 
   dbuf_clear(&client->connection->buf_recvq);
   dbuf_clear(&client->connection->buf_sendq);
 
   assert(list_find(&abort_list, client) == NULL);
   list_node_t *node = list_make_node();
-  /* don't let exit_aborted_clients() finish yet */
   list_add_tail(client, node, &abort_list);
 
   if (eac_next == NULL)
     eac_next = node;
-
-  SetDead(client); /* You are dead my friend */
 }
 
-/*
- * dead_link_on_read -  report a read error if not already dead,
- *			mark it as dead then exit it
- */
+void
+dead_link_on_write(struct Client *client, const char *format, ...)
+{
+  if (IsDefunct(client))
+    return;
+
+  char err_str[IRCD_BUFSIZE];
+  va_list args;
+
+  va_start(args, format);
+  vsnprintf(err_str, sizeof(err_str), format, args);
+  va_end(args);
+
+  _client_abort(client, err_str);
+}
+
 void
 dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
 {
   if (IsDefunct(client))
     return;
 
-  dbuf_clear(&client->connection->buf_recvq);
-  dbuf_clear(&client->connection->buf_sendq);
-
-  if (IsServer(client) || IsHandshake(client))
-  {
-    if (recv_return_val == 0)
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Server %s closed the connection",
-                     client_get_name(client, SHOW_IP));
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                     "Server %s closed the connection",
-                     client_get_name(client, MASK_IP));
-      log_write(LOG_TYPE_IRCD, "Server %s closed the connection",
-                client_get_name(client, SHOW_IP));
-    }
-    else
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Lost connection to %s: %s",
-                     client_get_name(client, SHOW_IP), strerror(error_code));
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                     "Lost connection to %s: %s",
-                     client_get_name(client, MASK_IP), strerror(error_code));
-      log_write(LOG_TYPE_IRCD, "Lost connection to %s: %s",
-                client_get_name(client, SHOW_IP), strerror(error_code));
-    }
-
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s was connected for %s",
-                   client->name, time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic));
-  }
-
   if (recv_return_val == 0)
-    client_exit(client, "Remote host closed the connection");
+    _client_abort(client, "Remote host closed the connection");
   else
-    client_exit_fmt(client, "Read error: %s", strerror(error_code));
+  {
+    char reason_buf[IRCD_BUFSIZE];
+    snprintf(reason_buf, sizeof(reason_buf), "Read error: %s", strerror(error_code));
+    _client_abort(client, reason_buf);
+  }
 }
 
 void
 exit_aborted_clients(void)
 {
-  list_node_t *ptr;
-  const char *notice;
+  list_node_t *node;
 
-  LIST_FOREACH_SAFE(ptr, eac_next, abort_list.head)
+  LIST_FOREACH_SAFE(node, eac_next, abort_list.head)
   {
-    struct Client *client = ptr->data;
-    eac_next = ptr->next;
+    struct Client *client = node->data;
+    eac_next = node->next;
 
-    list_remove(ptr, &abort_list);
-    list_free_node(ptr);
+    list_remove(node, &abort_list);
+    list_free_node(node);
 
-    if (client == NULL)
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Warning: null client on abort_list!");
-      continue;
-    }
-
-    if (HasFlag(client, FLAGS_SENDQEX))
-      notice = "Max SendQ exceeded";
-    else
-      notice = "Write error: connection closed";
-
-    client_exit(client, notice);
+    const char *reason = client->connection->abort_reason;
+    client_exit(client, reason);
   }
 }
 

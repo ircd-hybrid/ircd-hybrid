@@ -93,13 +93,18 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
   if (new_sendq_size > max_sendq)
   {
-    if (IsServer(to))
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Max SendQ limit exceeded for %s: %zu > %u",
-                     client_get_name(to, HIDE_IP), new_sendq_size, max_sendq);
+    if (!HasFlag(to, FLAGS_SENDQEX))
+    {
+      AddFlag(to, FLAGS_SENDQEX);
 
-    AddFlag(to, FLAGS_SENDQEX);
-    dead_link_on_write(to, 0);
+      if (IsServer(to))
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                       "Max SendQ limit exceeded for %s: %zu > %u",
+                       client_get_name(to, HIDE_IP), new_sendq_size, max_sendq);
+      dead_link_on_write(to, "Max SendQ exceeded (%zu > %u)",
+                         new_sendq_size, max_sendq);
+    }
+
     return;
   }
 
@@ -154,6 +159,7 @@ sendq_unblocked(fde_t *F, void *data)
   assert(client->connection);
   assert(client->connection->fd);
   assert(client->connection->fd == F);
+  assert(HasFlag(client, FLAGS_BLOCKED));
 
   DelFlag(client, FLAGS_BLOCKED);
   send_queued_write(client);
@@ -203,7 +209,11 @@ send_queued_write(struct Client *to)
         comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
       }
       else
-        dead_link_on_write(to, errno);
+      {
+        const char *err_str = (retlen < 0) ? strerror(errno) : "Connection closed by peer";
+        dead_link_on_write(to, "Write error: %s", err_str);
+      }
+
       return;
     }
 

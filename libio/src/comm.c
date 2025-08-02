@@ -491,6 +491,11 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
 void
 comm_socket_close(fde_t *fde)
 {
+  assert(fde && fde->flags.open == true);
+
+  if (tls_isusing(&fde->tls))
+    tls_shutdown(&fde->tls);
+
   fd_close(fde);
 }
 

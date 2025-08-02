@@ -320,13 +320,6 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   {
     /* We have an error, so report it and quit */
     const char *const err_str = comm_errstr(status);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: %s",
-                   client_get_name(client, SHOW_IP), err_str);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                   "Error connecting to %s: %s",
-                   client_get_name(client, MASK_IP), err_str);
-
     client_exit_fmt(client, "Connection failed: %s", err_str);
     return;
   }
@@ -514,6 +507,21 @@ server_connect_auto(void *unused)
     server_connect(connect, NULL);
     return;  /* We connect only one at time... */
   }
+}
+
+void
+server_schedule_reconnect(struct Client *client)
+{
+  assert(client);
+  assert(IsServer(client));
+  assert(MyConnect(client));
+
+  struct ConnectItem *const connect = server_conf_get(client);
+  if (connect == NULL)
+    return;
+
+  connect->autoconnect_hold_until =
+    io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
 }
 
 struct ConnectItem *

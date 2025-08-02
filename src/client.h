@@ -285,6 +285,7 @@ struct Connection
 
   char *password;  /**< Password supplied by the client/server */
   char *oper_name;  /**< The name of the oper block, if opered up. */
+  char *abort_reason;
 };
 
 /** Client structure */
@@ -370,7 +371,7 @@ extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
 extern void client_init(void);
-extern void dead_link_on_write(struct Client *, int);
+extern void dead_link_on_write(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void dead_link_on_read(struct Client *, int, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);

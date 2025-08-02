@@ -73,6 +73,7 @@ typedef struct
 
 extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);
+extern void server_schedule_reconnect(struct Client *);
 extern bool server_connect(struct ConnectItem *, const struct Client *);
 extern bool server_valid_name(const char *);
 extern struct ConnectItem *server_conf_get(const struct Client *);

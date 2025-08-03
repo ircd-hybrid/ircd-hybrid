@@ -386,14 +386,10 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   struct Client *client = client_make(NULL);
   client->connection->fd = new_fde;
 
-  /* Copy in the server, hostname, fd */
+  address_copy(&client->addr, &connect->remote_addr);
   strlcpy(client->name, connect->name, sizeof(client->name));
   strlcpy(client->host, connect->host, sizeof(client->host));
-
-  /* We already converted the ip once, so lets use it - stu */
   strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
-
-  address_copy(&client->addr, &connect->remote_addr);
 
   comm_socket_note(client->connection->fd, "Server: %s", client->name);
 

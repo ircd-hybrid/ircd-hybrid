@@ -186,9 +186,6 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
 
   assert(event_is_scheduled(event));
 
-  if (!event_is_scheduled(event))
-    return EVENT_ERR_NOT_FOUND;
-
   const size_t original_heap_size = mgr->heap_size;
   const size_t idx_to_remove = event->heap_idx;
   const size_t last_idx = mgr->heap_size - 1;
@@ -224,7 +221,11 @@ _event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
   event->next_fire_time_ms = absolute_time_ms;
 
   if (event_is_scheduled(event))
-    _event_remove_from_heap(event->manager, event);
+  {
+    event_status_t status = _event_remove_from_heap(event->manager, event);
+    if (status != EVENT_SUCCESS)
+      return status;
+  }
 
   return _event_add_to_heap(event->manager, event);
 }
@@ -254,7 +255,8 @@ event_manager_destroy(event_manager_t mgr)
   while (mgr->heap_size > 0)
   {
     event_handle_t event_to_destroy = mgr->heap_array[0];
-    event_destroy(event_to_destroy);
+    event_status_t status = event_destroy(event_to_destroy);
+    assert(status == EVENT_SUCCESS);
   }
 
   io_free(mgr->heap_array);
@@ -335,6 +337,9 @@ event_unschedule(event_handle_t event)
 {
   if (event->manager == NULL)
     return EVENT_ERR_INVALID_ARG;
+
+  if (!event_is_scheduled(event))
+    return EVENT_ERR_NOT_FOUND;
 
   event_status_t status = _event_remove_from_heap(event->manager, event);
   assert(event->heap_idx == EVENT_HEAP_INVALID_IDX || status != EVENT_SUCCESS);
@@ -551,7 +556,11 @@ event_trigger_now(event_handle_t event)
     return EVENT_ERR_INVALID_ARG;
 
   if (event_is_scheduled(event))
-    _event_remove_from_heap(event->manager, event);
+  {
+    event_status_t status = _event_remove_from_heap(event->manager, event);
+    if (status != EVENT_SUCCESS)
+      return status;
+  }
 
   event->handler(event->data);
 
@@ -588,7 +597,8 @@ event_run(event_manager_t mgr)
     assert(event->manager == mgr);
     assert(event->heap_idx == 0);
 
-    _event_remove_from_heap(mgr, event);
+    event_status_t status = _event_remove_from_heap(mgr, event);
+    assert(status == EVENT_SUCCESS);
     assert(event->heap_idx == EVENT_HEAP_INVALID_IDX);
 
     event->handler(event->data);
@@ -596,7 +606,8 @@ event_run(event_manager_t mgr)
     if (event->oneshot == false)
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
-      _event_add_to_heap(mgr, event);
+      status =_event_add_to_heap(mgr, event);
+      assert(status == EVENT_SUCCESS);
     }
     else
     {

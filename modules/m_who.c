@@ -147,10 +147,10 @@ who_send(struct Client *source, const struct Client *target,
   if (who->fields == 0 || (who->fields & WHO_FIELD_SER))
   {
     if (user_mode_has_flag(source, UMODE_OPER) == false &&
-        (ConfigServerHide.hide_servers || IsHidden(target->origin)))
+        (ConfigServerHide.hide_servers || IsHidden(target->uplink)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", ConfigServerHide.hidden_name);
     else
-      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->origin->name);
+      p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->uplink->name);
   }
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_NIC))
@@ -182,7 +182,7 @@ who_send(struct Client *source, const struct Client *target,
   if (who->fields == 0 || (who->fields & WHO_FIELD_DIS))
   {
     if (user_mode_has_flag(source, UMODE_OPER) == false &&
-        (ConfigServerHide.hide_servers || IsHidden(target->origin)))
+        (ConfigServerHide.hide_servers || IsHidden(target->uplink)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", 0);
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", target->hopcount);
@@ -270,8 +270,8 @@ who_matches(struct Client *source, const struct Client *target,
 
   if ((who->matchsel & WHO_FIELD_SER))
     if (user_mode_has_flag(source, UMODE_OPER) ||
-        (ConfigServerHide.hide_servers == 0 && !IsHidden(target->origin)))
-      if (match(mask, target->origin->name) == 0)
+        (ConfigServerHide.hide_servers == 0 && !IsHidden(target->uplink)))
+      if (match(mask, target->uplink->name) == 0)
         return true;
 
   return false;

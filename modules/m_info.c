@@ -231,7 +231,7 @@ static void
 send_info_text(struct Client *client)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
-                 client->name, client->username, client->host, client->origin->name);
+                 client->name, client->username, client->host, client->uplink->name);
 
   for (const char *const *text = infotext; *text; ++text)
   {

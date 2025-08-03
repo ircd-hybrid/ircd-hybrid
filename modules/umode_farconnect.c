@@ -38,10 +38,10 @@ user_register_hook(void *ctx_)
 {
   ircd_hook_user_register_ctx *ctx = ctx_;
 
-  if (HasFlag(ctx->client->origin, FLAGS_EOB))
+  if (HasFlag(ctx->client->uplink, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
-                   ctx->client->origin->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
+                   ctx->client->uplink->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
                    ctx->client->sockhost, ctx->client->info, ctx->client->id);
 
   return HOOK_FLOW_CONTINUE;
@@ -52,10 +52,10 @@ client_exit_hook(void *ctx_)
 {
   ircd_hook_client_exit_ctx *ctx = ctx_;
 
-  if (IsClient(ctx->client) && HasFlag(ctx->client->origin, FLAGS_EOB))
+  if (IsClient(ctx->client) && HasFlag(ctx->client->uplink, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting at %s: %s (%s@%s) [%s] [%s]",
-                   ctx->client->origin->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
+                   ctx->client->uplink->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
                    ctx->client->sockhost, ctx->reason);
 
   return HOOK_FLOW_CONTINUE;

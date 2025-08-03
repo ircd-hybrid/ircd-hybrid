@@ -47,7 +47,7 @@ static void
 do_links(struct Client *source, char *parv[])
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->origin->name);
+                 source->name, source->username, source->host, source->uplink->name);
 
   if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
   {
@@ -78,7 +78,7 @@ do_links(struct Client *source, char *parv[])
      * or they're an oper.
      */
     sendto_one_numeric(source, &me, RPL_LINKS,
-                       target->name, target->origin->name, target->hopcount, target->info);
+                       target->name, target->uplink->name, target->hopcount, target->info);
   }
 
   sendto_one_numeric(source, &me, RPL_ENDOFLINKS,

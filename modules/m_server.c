@@ -186,7 +186,7 @@ server_send_client(struct Client *client, const struct Client *target)
   assert(IsClient(target));
 
   sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-             target->origin->id,
+             target->uplink->id,
              target->name, target->hopcount + 1,
              target->tsinfo, user_mode_to_str(target->umodes),
              target->username, target->host, target->realhost,
@@ -198,7 +198,7 @@ server_send_client(struct Client *client, const struct Client *target)
 
   if (!string_is_empty(target->tls_cipher))
     sendto_one(client, ":%s METADATA client %s cipher :%s",
-               target->origin->id, target->id, target->tls_cipher);
+               target->uplink->id, target->id, target->tls_cipher);
 
   if (target->away)
     sendto_one(client, ":%s AWAY :%s", target->id, target->away);
@@ -280,8 +280,8 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   assert(list_find(&unknown_list, client));
   list_move_node(&client->connection->node, &local_server_list, &unknown_list);
 
-  list_add(client, &client->node, &global_server_list);
-  list_add(client, &client->lnode, &me.serv->server_list);
+  list_add(client, &client->global_node, &global_server_list);
+  list_add(client, &client->uplink_node, &me.serv->child_server_list);
 
   if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
     Count.max_loc_con = list_length(&local_client_list) + list_length(&local_server_list);
@@ -346,7 +346,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
       continue;
 
     sendto_one(client, ":%s SID %s %u %s +%s :%s",
-               target->origin->id, target->name, target->hopcount + 1,
+               target->uplink->id, target->name, target->hopcount + 1,
                target->id, IsHidden(target) ? "h" : "", target->info);
   }
 
@@ -478,7 +478,7 @@ mr_server(struct Client *source, int parc, char *parv[])
   strlcpy(source->id, sid, sizeof(source->id));
   strlcpy(source->info, parv[parc - 1], sizeof(source->info));
   source->hopcount = hopcount;
-  source->origin = &me;
+  source->uplink = &me;
 
   /* Fixing eob timings.. -gnp */
   source->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -599,13 +599,13 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  target = client_make(source->from);
+  target = client_create(source->from);
   server_make(target);
   strlcpy(target->name, name, sizeof(target->name));
   strlcpy(target->id, sid, sizeof(target->id));
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));
   target->hopcount = hopcount;
-  target->origin = source;
+  target->uplink = source;
 
   SetServer(target);
   server_set_flags(target, parv[4]);
@@ -613,8 +613,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
   if (service_find(target->name, irccmp))
     AddFlag(target, FLAGS_SERVICE);
 
-  list_add(target, &target->node, &global_server_list);
-  list_add(target, &target->lnode, &target->origin->serv->server_list);
+  list_add(target, &target->global_node, &global_server_list);
+  list_add(target, &target->uplink_node, &target->uplink->serv->child_server_list);
 
   hash_add_client(target);
   hash_add_id(target);

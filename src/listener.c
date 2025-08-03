@@ -140,7 +140,7 @@ ssl_handshake(fde_t *F, void *data_)
 static void
 add_connection(fde_t *client_fde, struct Listener *listener, const struct io_addr *remote_addr, const char *remote_addr_str)
 {
-  struct Client *client = client_make(NULL);
+  struct Client *client = client_create(NULL);
   client->connection->fd = client_fde;
 
   address_copy(&client->addr, remote_addr);

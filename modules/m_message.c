@@ -149,7 +149,7 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
     if (!HasFlag(target, FLAGS_FLOOD_NOTICED))
     {
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->origin->name, target->name);
+                     client_get_name(source, HIDE_IP), source->uplink->name, target->name);
       AddFlag(target, FLAGS_FLOOD_NOTICED);
     }
 
@@ -198,7 +198,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
     if (channel->sent_message_flood_notice == false)
     {
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->origin->name, channel->name);
+                     client_get_name(source, HIDE_IP), source->uplink->name, channel->name);
       channel->sent_message_flood_notice = true;
     }
 

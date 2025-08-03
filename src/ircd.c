@@ -472,7 +472,7 @@ main(int argc, char *argv[])
   init_uid();
 
   me.from = &me;
-  me.origin = &me;
+  me.uplink = &me;
   me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 
@@ -482,7 +482,7 @@ main(int argc, char *argv[])
   hash_add_id(&me);
   hash_add_client(&me);
 
-  list_add(&me, &me.node, &global_server_list);
+  list_add(&me, &me.global_node, &global_server_list);
 
   load_kline_database(ConfigGeneral.klinefile);
   load_dline_database(ConfigGeneral.dlinefile);

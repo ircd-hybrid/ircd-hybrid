@@ -158,7 +158,7 @@ ms_undline(struct Client *source, int parc, char *parv[])
     return;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNDLINE, source->origin->name, source->username, source->host))
+      shared_find(SHARED_UNDLINE, source->uplink->name, source->username, source->host))
     dline_remove(source, &aline);
 }
 

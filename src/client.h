@@ -195,9 +195,9 @@ enum addr_mask_type
 /** Server structure */
 struct Server
 {
-  list_t server_list;  /**< Servers on this server */
-  list_t client_list;  /**< Clients on this server */
-  char *initiator_name;  /**< Who activated this connection */
+  list_t child_server_list;  /**< List of servers that are directly connected to this server. */
+  list_t child_client_list;  /**< List of clients that are directly connected to this server. */
+  char *initiator_name;  /**< The name of the oper who initiated an outbound link, or "AutoConn." */
   struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
 
@@ -227,13 +227,13 @@ struct Connection
   list_node_t node;
 
   unsigned int registration;
-  unsigned int cap;  /**< Client CAP bit-field */
-  unsigned int capab;  /**< Server CAPAB bit field */
+  unsigned int cap;  /**< Bitmask of client-announced CAP features. */
+  unsigned int capab;  /**< Bitmask of server-announced CAPAB features. */
 
-  unsigned int operflags;  /**< IRC Operator privilege flags */
-  unsigned int random_ping;  /**< Holding a 32bit value used for PING cookies */
+  unsigned int operflags;  /**< Bitmask of IRC Operator privilege flags. */
+  unsigned int random_ping;  /**< A random value for PING cookie authentication. */
 
-  uintmax_t send_marker;  /**< Used to enforce one send per user */
+  uintmax_t send_marker;  /**< A per-broadcast marker to prevent duplicate message sends. */
   uintmax_t last_data;  /**< Last time data read from socket; monotonic time */
   uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_data
                              which can be modified by check_pings_list; monotonic time */
@@ -249,10 +249,10 @@ struct Connection
   unsigned int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
   unsigned int received_number_of_privmsgs;
 
-  struct ListTask  *list_task;
+  struct ListTask  *list_task;  /**< State for an in-progress /LIST command. */
 
-  struct dbuf_queue buf_sendq;
-  struct dbuf_queue buf_recvq;
+  struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
+  struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
 
   struct
   {
@@ -268,13 +268,13 @@ struct Connection
 
   struct ClassItem *base_class;  /**< The class assigned on initial connection. */
   struct ClassItem *oper_class;  /**< The class assigned on OPER. NULL if not an oper. */
-  struct LookupRequest *lookup;
-  struct Listener *listener;  /**< Listener accepted from */
+  struct LookupRequest *lookup;  /**< State for the initial async DNS/ident lookup. */
+  struct Listener *listener;  /**< The listener this connection was accepted from. */
   list_t acceptlist;  /**< Clients I'll allow to talk to me */
   list_t monitors;  /**< Chain of Monitor pointer blocks */
   list_t invited;  /**< Chain of invite pointer blocks */
 
-  fde_t *fd;  /**< Pointer to fdlist.c:fd_table[] */
+  fde_t *fd;  /**< Pointer to the file descriptor entry for the underlying socket. */
 
   /* Anti-flood stuff. We track how many messages were parsed and how
    * many we were allowed in the current second, and apply a simple
@@ -283,29 +283,29 @@ struct Connection
    */
   int sent_parsed;  /**< How many messages we've parsed in this second */
 
-  char *password;  /**< Password supplied by the client/server */
+  char *password;  /**< Password supplied by the client/server during handshake. */
   char *oper_name;  /**< The name of the oper block, if opered up. */
-  char *abort_reason;
+  char *abort_reason;  /**< The reason for an ungraceful connection termination. */
 };
 
 /** Client structure */
 struct Client
 {
-  list_node_t node;
-  list_node_t lnode;  /**< Used for Server->servers/users */
+  list_node_t global_node;  /**< Node for membership in global_client_list or global_server_list. */
+  list_node_t uplink_node;  /**< Node for membership in an uplink's child_*_list. */
 
   struct Connection *connection;  /**< Connection structure associated with this client */
   struct Client *hnext;  /**< For client hash table lookups by name */
   struct Client *idhnext;  /**< For SID hash table lookups by sid */
-  struct Server *serv;  /**< ...defined, if this is a server */
-  struct Client *origin;  /**< Points to server this Client is on */
-  struct Client *from;  /**< == self, if Local Client, *NEVER* NULL! */
+  struct Server *serv;  /**< If non-NULL, points to server-specific data. */
+  struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
+  struct Client *from;   /**< The directly-connected server through which traffic for this entity flows. */
 
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
 
   unsigned int flags;  /**< Client flags */
   uint64_t umodes;  /**< User modes this client has set */
-  unsigned int hopcount;  /**< Number of servers to this 0 = local */
+  unsigned int hopcount;  /**< The number of server hops from here to the entity. */
   unsigned int status;  /**< Client type */
   unsigned int handler;  /**< Handler index */
 
@@ -313,15 +313,15 @@ struct Client
   list_t channel;  /**< Chain of channel pointer blocks */
   list_t svstags;  /**< List of ServicesTag items */
 
-  struct io_addr addr;  /**< Real IP address */
+  struct io_addr addr;  /**< The binary IP address of the remote end of the connection. */
 
   char *tls_certfp;  /**< TLS certificate fingerprint */
   char *tls_cipher;  /**< Exact copy of tls_get_cipher() */
-  char *away;  /**< Client's AWAY message. Can be set/unset via AWAY command */
+  char *away;  /**< The AWAY message set by this client, or NULL if not away. */
 
-  char name[HOSTLEN + 1];  /**< Unique name for a client nick or host */
-  char id[IDLEN + 1];  /**< Client ID, unique ID per client */
-  char account[ACCOUNTLEN + 1];  /**< Services account */
+  char name[HOSTLEN + 1];  /**< The entity's nickname (for clients) or server name. */
+  char id[IDLEN + 1];  /**< The entity's unique ID (UID for clients, SID for servers). */
+  char account[ACCOUNTLEN + 1];  /**< The services account name this client is logged into. */
 
   /** client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
@@ -331,17 +331,13 @@ struct Client
    */
   char username[USERLEN + 1];  /**< client's username */
 
-  /** client->host contains the resolved name or ip address as a string
-   * for the user, it may be fiddled with for oper spoofing etc.
-   * once it's changed the *real* address goes away.
-   */
-  char host[HOSTLEN + 1];  /**< Client's hostname. Can be faked/spoofed */
+  char host[HOSTLEN + 1];  /**< The publicly visible hostname, which may be cloaked or spoofed. */
 
   /** client->realhost contains the resolved name or ip address as a string
    * for the user. Once a client has registered, this field should be
    * considered read-only.
    */
-  char realhost[HOSTLEN + 1];  /**< Client's real hostname */
+  char realhost[HOSTLEN + 1];  /**< The forward-confirmed reverse DNS hostname of the connection. */
 
 
   /** client->info for unix clients will normally contain the info from the
@@ -376,7 +372,7 @@ extern void dead_link_on_read(struct Client *, int, int);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
-extern struct Client *client_make(struct Client *);
+extern struct Client *client_create(struct Client *);
 extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);

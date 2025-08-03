@@ -151,10 +151,10 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
  * @return A pointer to the newly created Client struct.
  *
  * @warning If 'from' is NULL, the client is in a dangerous state with fd == -1.
- * The first thing after calling client_make(NULL) should be setting fd to a valid value.
+ * The first thing after calling client_create(NULL) should be setting fd to a valid value.
  */
 struct Client *
-client_make(struct Client *from)
+client_create(struct Client *from)
 {
   struct Client *client = io_calloc(sizeof(*client));
 
@@ -184,13 +184,13 @@ client_make(struct Client *from)
 }
 
 static void
-client_free(struct Client *client)
+_client_destroy(struct Client *client)
 {
   assert(client && client != &me && !IsMe(client));
   assert(client->hnext == client);
   assert(client->idhnext == client);
-  assert(client->node.prev == NULL && client->node.next == NULL);
-  assert(client->lnode.prev == NULL && client->lnode.next == NULL);
+  assert(client->global_node.prev == NULL && client->global_node.next == NULL);
+  assert(client->uplink_node.prev == NULL && client->uplink_node.next == NULL);
   assert(list_is_empty(&client->whowas_list));
   assert(list_is_empty(&client->channel));
   assert(list_is_empty(&client->svstags));
@@ -587,7 +587,7 @@ client_get_oper_name(const struct Client *client)
   if (MyConnect(client) && client->connection->oper_name)
     oper_name = client->connection->oper_name;
   else
-    oper_name = client->origin->name;
+    oper_name = client->uplink->name;
 
   static char buf[IRCD_BUFSIZE];
   snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
@@ -602,7 +602,7 @@ free_exited_clients(void)
 
   LIST_FOREACH_SAFE(node, node_next, dead_list.head)
   {
-    client_free(node->data);
+    _client_destroy(node->data);
     list_remove(node, &dead_list);
     list_free_node(node);
   }
@@ -649,14 +649,14 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
   assert(split_root->serv);
 
   list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, split_root->serv->client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_client_list.head)
   {
     struct Client *child_client = node->data;
     _client_exit_notify_channel_members(child_client, reason);
     _client_exit_detach(child_client);
   }
 
-  LIST_FOREACH_SAFE(node, node_next, split_root->serv->server_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_server_list.head)
   {
     struct Client *child_server = node->data;
     _client_exit_unwind_tree(child_server, reason);
@@ -670,7 +670,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
   if (IsServer(client))
   {
     assert(client->serv);
-    assert(client->origin);
+    assert(client->uplink);
 
     char split_reason[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
     if (ConfigServerHide.hide_servers)
@@ -681,10 +681,10 @@ _client_exit_notify_network(struct Client *client, const char *reason)
       strlcpy(split_reason, "*.net *.split", sizeof(split_reason));
     else
       snprintf(split_reason, sizeof(split_reason), "%s %s",
-               client->origin->name, client->name);
+               client->uplink->name, client->name);
 
     sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
-                   client->name, client->origin->name);
+                   client->name, client->uplink->name);
 
     /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here. */
     if (!HasFlag(client, FLAGS_SQUIT))
@@ -734,17 +734,17 @@ _client_exit_detach(struct Client *client)
 
   if (IsClient(client))
   {
-    assert(client->origin && client->origin->serv);
+    assert(client->uplink && client->uplink->serv);
 
-    list_remove(&client->lnode, &client->origin->serv->client_list);
-    list_remove(&client->node, &global_client_list);
+    list_remove(&client->global_node, &global_client_list);
+    list_remove(&client->uplink_node, &client->uplink->serv->child_client_list);
   }
   else if (IsServer(client))
   {
-    assert(client->origin && client->origin->serv);
+    assert(client->uplink && client->uplink->serv);
 
-    list_remove(&client->lnode, &client->origin->serv->server_list);
-    list_remove(&client->node, &global_server_list);
+    list_remove(&client->global_node, &global_server_list);
+    list_remove(&client->uplink_node, &client->uplink->serv->child_server_list);
   }
 
   if (client->id[0])

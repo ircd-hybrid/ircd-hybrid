@@ -85,8 +85,8 @@ dump_map_flat(struct Client *client)
     buf[bufpos++] = '|';
 
     bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
-                       list_length(&server->serv->client_list), 100 *
-                       (float)list_length(&server->serv->client_list) /
+                       list_length(&server->serv->child_client_list), 100 *
+                       (float)list_length(&server->serv->child_client_list) /
                        (float)list_length(&global_client_list));
 
     if (current_server == 0)
@@ -127,8 +127,8 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
     buf[bufpos++] = '|';
 
     bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
-                       list_length(&server->serv->client_list), 100 *
-                       (float)list_length(&server->serv->client_list) /
+                       list_length(&server->serv->child_client_list), 100 *
+                       (float)list_length(&server->serv->child_client_list) /
                        (float)list_length(&global_client_list));
     sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
   }
@@ -147,7 +147,7 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
 
   unsigned int count = 0;
   list_node_t *node;
-  LIST_FOREACH(node, server->serv->server_list.head)
+  LIST_FOREACH(node, server->serv->child_server_list.head)
   {
     const struct Client *target = node->data;
 
@@ -162,7 +162,7 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
     ++count;
   }
 
-  LIST_FOREACH(node, server->serv->server_list.head)
+  LIST_FOREACH(node, server->serv->child_server_list.head)
   {
     const struct Client *target = node->data;
 
@@ -192,7 +192,7 @@ static void
 do_map(struct Client *source)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->origin->name);
+                 source->name, source->username, source->host, source->uplink->name);
 
   if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
     dump_map_flat(source);

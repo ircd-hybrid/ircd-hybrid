@@ -233,7 +233,7 @@ ms_dline(struct Client *source, int parc, char *parv[])
     return;
 
   if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_DLINE, source->origin->name, source->username, source->host))
+      shared_find(SHARED_DLINE, source->uplink->name, source->username, source->host))
     dline_handle(source, &aline);
 }
 

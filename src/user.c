@@ -156,7 +156,7 @@ user_introduce(struct Client *client)
   AddFlag(client, FLAGS_INTRODUCED);
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
-                 client->origin->id, client->name, client->hopcount + 1,
+                 client->uplink->id, client->name, client->hopcount + 1,
                  client->tsinfo, user_mode_to_str(client->umodes),
                  client->username, client->host, client->realhost,
                  client->sockhost, client->id, client->account, client->info);
@@ -166,7 +166,7 @@ user_introduce(struct Client *client)
 
   if (!string_is_empty(client->tls_cipher))
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
-                   client->origin->id, client->id, client->tls_cipher);
+                   client->uplink->id, client->id, client->tls_cipher);
 
   monitor_signon(client);
 }
@@ -301,11 +301,11 @@ user_register_local(struct Client *client)
 
   SetClient(client);
 
-  client->origin = &me;
+  client->uplink = &me;
   client->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  list_add(client, &client->lnode, &client->origin->serv->client_list);
-  list_add(client, &client->node, &global_client_list);
+  list_add(client, &client->global_node, &global_client_list);
+  list_add(client, &client->uplink_node, &client->uplink->serv->child_client_list);
   list_move_node(&client->connection->node, &local_client_list, &unknown_list);
 
   if (list_length(&local_client_list) > Count.max_loc)
@@ -355,18 +355,18 @@ user_register_local(struct Client *client)
 void
 user_register_remote(struct Client *client)
 {
-  assert(client->origin->from == client->from);
+  assert(client->uplink->from == client->from);
 
   /*
    * If the nick has been introduced by a services server,
    * make it a service as well.
    */
-  if (HasFlag(client->origin, FLAGS_SERVICE))
+  if (HasFlag(client->uplink, FLAGS_SERVICE))
     AddFlag(client, FLAGS_SERVICE);
 
   SetClient(client);
-  list_add(client, &client->lnode, &client->origin->serv->client_list);
-  list_add(client, &client->node, &global_client_list);
+  list_add(client, &client->global_node, &global_client_list);
+  list_add(client, &client->uplink_node, &client->uplink->serv->child_client_list);
 
   if (list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = list_length(&global_client_list);
@@ -502,7 +502,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 
   if (svshost)
     sendto_servers(client, 0, 0, ":%s SVSHOST %s %ju %s",
-                   client->origin->id, client->id, client->tsinfo, client->host);
+                   client->uplink->id, client->id, client->tsinfo, client->host);
 
   if (MyConnect(client))
   {
@@ -541,7 +541,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 
     if (nickbuf[0])
       sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                           client->origin->name, member->channel->name, modebuf, nickbuf);
+                           client->uplink->name, member->channel->name, modebuf, nickbuf);
   }
 
   if (client->away)

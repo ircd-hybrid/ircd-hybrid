@@ -88,7 +88,7 @@ channel_track_join_flood(struct Channel *channel, struct Client *client, bool tr
     {
       channel->sent_join_flood_notice = true;
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
-                     client_get_name(client, HIDE_IP), client->origin->name, channel->name);
+                     client_get_name(client, HIDE_IP), client->uplink->name, channel->name);
     }
   }
 

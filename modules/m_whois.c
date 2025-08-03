@@ -167,13 +167,13 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_server_numeric(struct Client *source, const struct Client *target)
 {
-  if ((ConfigServerHide.hide_servers || IsHidden(target->origin)) &&
+  if ((ConfigServerHide.hide_servers || IsHidden(target->uplink)) &&
       !(user_mode_has_flag(source, UMODE_OPER) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);
   else
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       target->name, target->origin->name, target->origin->info);
+                       target->name, target->uplink->name, target->uplink->info);
 }
 
 static void

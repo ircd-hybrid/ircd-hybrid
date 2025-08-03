@@ -387,6 +387,24 @@ event_schedule_fuzzed(event_handle_t event)
   return _event_schedule_at_internal(event, absolute_time_ms);
 }
 
+event_status_t
+event_reset(event_handle_t event)
+{
+  return event_reschedule(event, event->interval_ms);
+}
+
+event_status_t
+event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
+{
+  if (event->manager == NULL || event->handler == NULL || new_delay_ms == 0)
+    return EVENT_ERR_INVALID_ARG;
+
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t new_absolute_fire_time_ms = current_time_ms + new_delay_ms;
+
+  return _event_schedule_at_internal(event, new_absolute_fire_time_ms);
+}
+
 uintmax_t
 event_get_next_fire_time(event_handle_t event)
 {

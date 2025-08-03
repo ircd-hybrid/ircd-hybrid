@@ -47,7 +47,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = server name
- *      - parv[2] = comment
+ *      - parv[2] = reason
  */
 static void
 mo_squit(struct Client *source, int parc, char *parv[])
@@ -89,29 +89,29 @@ mo_squit(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *comment = string_default(parv[2], CONF_NOREASON);
+  const char *reason = string_default(parv[2], CONF_NOREASON);
   if (MyConnect(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
-                   target->name, client_get_oper_name(source), REASONLEN, comment);
+                   target->name, client_get_oper_name(source), REASONLEN, reason);
     log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
-              target->name, client_get_oper_name(source), REASONLEN, comment);
+              target->name, client_get_oper_name(source), REASONLEN, reason);
 
     /* To them, we are exiting */
-    sendto_one(target, ":%s SQUIT %s :%.*s", source->id, me.id, REASONLEN, comment);
+    sendto_one(target, ":%s SQUIT %s :%.*s", source->id, me.id, REASONLEN, reason);
 
     /* Send to everything but target */
     sendto_servers(target, 0, 0, ":%s SQUIT %s :%.*s",
-                   source->id, target->id, REASONLEN, comment);
+                   source->id, target->id, REASONLEN, reason);
   }
   else
     /* Send to everything */
     sendto_servers(NULL, 0, 0, ":%s SQUIT %s :%.*s",
-                   source->id, target->id, REASONLEN, comment);
+                   source->id, target->id, REASONLEN, reason);
 
   AddFlag(target, FLAGS_SQUIT);
 
-  client_exit_fmt(target, "%.*s", REASONLEN, comment);
+  client_exit_fmt(target, "%.*s", REASONLEN, reason);
 }
 
 /*! \brief SQUIT command handler
@@ -124,7 +124,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = server name
- *      - parv[2] = comment
+ *      - parv[2] = reason
  */
 static void
 ms_squit(struct Client *source, int parc, char *parv[])
@@ -139,18 +139,18 @@ ms_squit(struct Client *source, int parc, char *parv[])
   if (IsMe(target))
     target = source->from;
 
-  const char *comment = string_default(parv[2], source->name);
+  const char *reason = string_default(parv[2], source->name);
   if (MyConnect(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
-                   me.name, target->name, client_get_oper_name(source), comment);
+                   me.name, target->name, client_get_oper_name(source), reason);
     sendto_servers(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
-                   me.id, target->name, client_get_oper_name(source), comment);
+                   me.id, target->name, client_get_oper_name(source), reason);
     log_write(LOG_TYPE_IRCD, "Remote SQUIT %s from %s (%s)",
-              target->name, client_get_oper_name(source), comment);
+              target->name, client_get_oper_name(source), reason);
 
     /* To them, we are exiting */
-    sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, comment);
+    sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, reason);
 
     /* Send to everything but target and source */
     list_node_t *node;
@@ -162,17 +162,17 @@ ms_squit(struct Client *source, int parc, char *parv[])
         continue;
 
       sendto_one(client, ":%s SQUIT %s :%s",
-                 source->id, target->id, comment);
+                 source->id, target->id, reason);
     }
   }
   else
     /* Send to everything but source */
     sendto_servers(source, 0, 0, ":%s SQUIT %s :%s",
-                   source->id, target->id, comment);
+                   source->id, target->id, reason);
 
   AddFlag(target, FLAGS_SQUIT);
 
-  client_exit(target, comment);
+  client_exit(target, reason);
 }
 
 static struct Command command_table =

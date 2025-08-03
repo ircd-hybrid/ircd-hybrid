@@ -29,7 +29,7 @@
 typedef struct
 {
   struct Client *client;
-  const char *comment;
+  const char *reason;
 } ircd_hook_client_exit_ctx;
 
 typedef struct

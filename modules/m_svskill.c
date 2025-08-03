@@ -60,10 +60,10 @@ ms_svskill(struct Client *source, int parc, char *parv[])
   if (ts && (ts != target->tsinfo))
     return;
 
-  const char *const comment = parv[3];
+  const char *const reason = parv[3];
   if (MyConnect(target))
   {
-    client_exit_fmt(target, "SVSKilled: %.*s", REASONLEN, comment);
+    client_exit_fmt(target, "SVSKilled: %.*s", REASONLEN, reason);
     return;
   }
 
@@ -76,7 +76,7 @@ ms_svskill(struct Client *source, int parc, char *parv[])
   }
 
   sendto_one(target, ":%s SVSKILL %s %ju :%s",
-             source->id, target->id, ts, comment);
+             source->id, target->id, ts, reason);
 }
 
 static struct Command command_table =

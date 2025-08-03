@@ -946,7 +946,7 @@ client_exit(struct Client *client, const char *reason)
 
   SetDead(client);
   hook_dispatch(MyConnect(client) ? ircd_hook_client_exit_local : ircd_hook_client_exit_remote,
-                &(ircd_hook_client_exit_ctx){ .client = client, .comment = reason });
+                &(ircd_hook_client_exit_ctx){ .client = client, .reason = reason });
 
   /*
    * Clean up high-level application state for local clients. This MUST be done before network

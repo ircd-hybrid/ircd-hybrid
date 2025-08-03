@@ -56,7 +56,7 @@ client_exit_hook(void *ctx_)
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                    ctx->client->origin->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
-                   ctx->client->sockhost, ctx->comment);
+                   ctx->client->sockhost, ctx->reason);
 
   return HOOK_FLOW_CONTINUE;
 }

@@ -57,7 +57,7 @@ client_exit_hook(void *ctx_)
     sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting: %s (%s@%s) [%s] [%s]",
                    ctx->client->name, ctx->client->username, ctx->client->realhost, ctx->client->sockhost,
-                   ctx->comment);
+                   ctx->reason);
 
   return HOOK_FLOW_CONTINUE;
 }

@@ -279,21 +279,9 @@ check_pings_list(list_t *list)
         if (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping >= 2 * ping)
         {
           /*
-           * If the client/server hasn't talked to us in 2*ping seconds
-           * and it has a ping time, then close its connection.
+           * If the client/server hasn't talked to us in 2*ping seconds and it has a ping time,
+           * then close its connection.
            */
-          if (IsServer(client))
-          {
-            sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                           "No response from %s, closing link",
-                           client_get_name(client, SHOW_IP));
-            sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                           "No response from %s, closing link",
-                           client_get_name(client, MASK_IP));
-            log_write(LOG_TYPE_IRCD, "No response from %s, closing link",
-                      client_get_name(client, SHOW_IP));
-          }
-
           client_exit_fmt(client, "Ping timeout: %ju seconds",
                           (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
         }
@@ -316,7 +304,8 @@ check_unknowns_list(void)
   LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client = node->data;
-    bool exit = false;
+    if (IsDead(client))
+      continue;  /* Ignore it, it's been exited already */
 
     /*
      * Check UNKNOWN connections - if they have been in this state
@@ -325,23 +314,14 @@ check_unknowns_list(void)
     if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) <= 30)
       continue;
 
+    const char *reason = NULL;
     if (IsHandshake(client))
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "No response from %s during handshake, closing link",
-                     client_get_name(client, SHOW_IP));
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                     "No response from %s during handshake, closing link",
-                     client_get_name(client, MASK_IP));
-      log_write(LOG_TYPE_IRCD, "No response from %s during handshake, closing link",
-                client_get_name(client, SHOW_IP));
-      exit = true;
-    }
+      reason = "Timeout during server handshake";
     else if (HasFlag(client, FLAGS_LOOKUP_DONE))
-      exit = true;
+      reason = "Registration timed out";
 
-    if (exit)
-      client_exit(client, "Registration timed out");
+    if (reason)
+      client_exit(client, reason);
   }
 }
 

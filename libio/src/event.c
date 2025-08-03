@@ -463,8 +463,8 @@ event_status_t
 event_set_name(event_handle_t event, const char *new_name)
 {
   io_free(event->name);
-
   event->name = new_name ? io_strdup(new_name) : NULL;
+
   return EVENT_SUCCESS;
 }
 
@@ -606,7 +606,7 @@ event_run(event_manager_t mgr)
     if (event->oneshot == false)
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
-      status =_event_add_to_heap(mgr, event);
+      status = _event_add_to_heap(mgr, event);
       assert(status == EVENT_SUCCESS);
     }
     else

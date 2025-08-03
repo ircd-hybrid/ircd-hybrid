@@ -348,8 +348,8 @@ event_schedule(event_handle_t event)
   if (event->manager == NULL || event->handler == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  const uintmax_t current_time = io_time_get_monotonic_ms_total();
-  const uintmax_t absolute_time_ms = current_time + event->interval_ms;
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t absolute_time_ms = current_time_ms + event->interval_ms;
 
   return _event_schedule_at_internal(event, absolute_time_ms);
 }
@@ -381,8 +381,8 @@ event_schedule_fuzzed(event_handle_t event)
       fuzzed_delay = 1;
   }
 
-  const uintmax_t current_time = io_time_get_monotonic_ms_total();
-  const uintmax_t absolute_time_ms = current_time + fuzzed_delay;
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t absolute_time_ms = current_time_ms + fuzzed_delay;
 
   return _event_schedule_at_internal(event, absolute_time_ms);
 }
@@ -417,13 +417,13 @@ event_get_time_until_fire(event_handle_t event)
   if (!event_is_scheduled(event))
     return UINTMAX_MAX;
 
-  const uintmax_t current_time = io_time_get_monotonic_ms_total();
-  const uintmax_t next_fire_time = event->next_fire_time_ms;
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t next_fire_time_ms = event->next_fire_time_ms;
 
-  if (next_fire_time <= current_time)
+  if (next_fire_time_ms <= current_time_ms)
     return 0;
 
-  return next_fire_time - current_time;
+  return next_fire_time_ms - current_time_ms;
 }
 
 bool
@@ -574,7 +574,7 @@ void
 event_run(event_manager_t mgr)
 {
   assert(mgr->heap_array || mgr->heap_size == 0);
-  uintmax_t current_time = io_time_get_monotonic_ms_total();
+  uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
 
   while (mgr->heap_size > 0)
   {
@@ -582,7 +582,7 @@ event_run(event_manager_t mgr)
     struct event_instance *event = mgr->heap_array[0];
     assert(event->manager == mgr);
 
-    if (event->next_fire_time_ms > current_time)
+    if (event->next_fire_time_ms > current_time_ms)
       break;
 
     assert(event->manager == mgr);
@@ -595,7 +595,7 @@ event_run(event_manager_t mgr)
 
     if (event->oneshot == false)
     {
-      event->next_fire_time_ms = current_time + event->interval_ms;
+      event->next_fire_time_ms = current_time_ms + event->interval_ms;
       _event_add_to_heap(mgr, event);
     }
     else

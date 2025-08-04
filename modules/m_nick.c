@@ -334,8 +334,7 @@ nick_change_remote(struct Client *source, char *parv[])
 static void
 uid_from_server(struct Client *source, int parc, char *parv[])
 {
-  struct Client *client = client_create(source->from);
-  client->uplink = source;
+  struct Client *client = client_create_remote(source);
   client->hopcount = atoi(parv[2]);
   client->tsinfo = strtoumax(parv[3], NULL, 10);
 

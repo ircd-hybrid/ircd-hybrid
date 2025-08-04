@@ -383,7 +383,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
     return false;
 
   /* Create a local client */
-  struct Client *client = client_create(NULL);
+  struct Client *client = client_create_local();
   client->connection->fd = new_fde;
 
   address_copy(&client->addr, &connect->remote_addr);

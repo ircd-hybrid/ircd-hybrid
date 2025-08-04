@@ -301,7 +301,6 @@ user_register_local(struct Client *client)
 
   SetClient(client);
 
-  client->uplink = &me;
   client->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   list_add(client, &client->global_node, &global_client_list);

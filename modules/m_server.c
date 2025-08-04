@@ -478,7 +478,6 @@ mr_server(struct Client *source, int parc, char *parv[])
   strlcpy(source->id, sid, sizeof(source->id));
   strlcpy(source->info, parv[parc - 1], sizeof(source->info));
   source->hopcount = hopcount;
-  source->uplink = &me;
 
   /* Fixing eob timings.. -gnp */
   source->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -599,13 +598,12 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  target = client_create(source->from);
+  target = client_create_remote(source);
   server_make(target);
   strlcpy(target->name, name, sizeof(target->name));
   strlcpy(target->id, sid, sizeof(target->id));
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));
   target->hopcount = hopcount;
-  target->uplink = source;
 
   SetServer(target);
   server_set_flags(target, parv[4]);

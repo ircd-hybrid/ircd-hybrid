@@ -140,46 +140,53 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
     new_class->ref_count++;
 }
 
-/**
- * @brief Create a new Client struct and set it to the initial state.
- *
- * If 'from' is NULL, it creates a local client (a client connected to a socket).
- * If 'from' is provided, it creates a remote client (behind a socket associated
- * with the local client defined by 'from').
- *
- * @param from The local client associated with the new remote client.
- * @return A pointer to the newly created Client struct.
- *
- * @warning If 'from' is NULL, the client is in a dangerous state with fd == -1.
- * The first thing after calling client_create(NULL) should be setting fd to a valid value.
- */
-struct Client *
-client_create(struct Client *from)
+static void
+_client_init_base(struct Client *client)
 {
-  struct Client *client = io_calloc(sizeof(*client));
-
-  if (from)
-    client->from = from;
-  else
-  {
-    client->from = client;  /* 'from' of local client is self! */
-    client->connection = io_calloc(sizeof(*client->connection));
-    client->connection->last_data = \
-    client->connection->last_ping = \
-    client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-    client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-    client->connection->registration = REG_INIT;
-
-    /* as good a place as any... */
-    list_add(client, &client->connection->node, &unknown_list);
-  }
+  SetUnknown(client);
 
   client->idhnext = client;
   client->hnext = client;
-  SetUnknown(client);
   strcpy(client->username, "unknown");
   strcpy(client->account, "*");
+}
 
+struct Client *
+client_create_local(void)
+{
+  struct Client *client = io_calloc(sizeof(*client));
+  client->connection = io_calloc(sizeof(*client->connection));
+  client->connection->last_data = \
+  client->connection->last_ping = \
+  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+  client->connection->registration = REG_INIT;
+
+  /* For a local client, 'from' points to itself and 'uplink' points to &me. */
+  client->from = client;
+  client->uplink = &me;
+
+  list_add(client, &client->connection->node, &unknown_list);
+
+  _client_init_base(client);
+  return client;
+}
+
+struct Client *
+client_create_remote(struct Client *uplink)
+{
+  assert(uplink);
+  assert(IsServer(uplink));
+
+  struct Client *client = io_calloc(sizeof(*client));
+  /*
+   * For a remote client, the uplink is the server introducing it, and 'from'
+   * is that server's 'from' (our direct connection to that part of the net).
+   */
+  client->uplink = uplink;
+  client->from = uplink->from;
+
+  _client_init_base(client);
   return client;
 }
 

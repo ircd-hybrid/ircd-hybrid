@@ -159,6 +159,8 @@ add_connection(fde_t *client_fde, struct Listener *listener, const struct io_add
   client->connection->listener = listener;
   ++listener->ref_count;
 
+  list_add(client, &client->connection->node, &unknown_list);
+
   if (listener_has_flag(listener, LISTENER_TLS))
   {
     if (tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER) == false)

@@ -166,8 +166,6 @@ client_create_local(void)
   client->from = client;
   client->uplink = &me;
 
-  list_add(client, &client->connection->node, &unknown_list);
-
   _client_init_base(client);
   return client;
 }

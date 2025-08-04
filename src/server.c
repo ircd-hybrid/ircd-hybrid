@@ -401,6 +401,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   SetConnecting(client);
 
+  list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
   /* Now, initiate the connection */

@@ -159,7 +159,7 @@ comm_select(int timeout_ms)
   num = kevent(kqueue_fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
   kqoff = 0;
 
-  io_time_set();
+  io_time_update_cache();
 
   if (num < 0)
   {

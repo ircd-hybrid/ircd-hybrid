@@ -82,7 +82,7 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   /*
    * Since we're here, might as well set event_base->time.sec_real while we're at it
    */
-  io_time_set();
+  io_time_update_cache();
 
   const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);
   const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);

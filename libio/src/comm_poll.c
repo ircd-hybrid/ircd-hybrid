@@ -155,7 +155,7 @@ comm_select(int timeout_ms)
 
   num = poll(pollfds, pollnum, timeout_ms);
 
-  io_time_set();
+  io_time_update_cache();
 
   if (num < 0)
   {

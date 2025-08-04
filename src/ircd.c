@@ -192,7 +192,7 @@ io_loop(void)
     exit_aborted_clients();
     free_exited_clients();
 
-    io_time_set();
+    io_time_update_cache();
     event_run(ircd_event_manager);
 
     /* Check to see whether we have to rehash the configuration. */

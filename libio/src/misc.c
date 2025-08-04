@@ -108,7 +108,7 @@ const char *
 date_iso8601_usec(uintmax_t unused)
 {
   static char buf[64];
-  const io_time_t *const iotime = io_time_set();
+  const io_time_t *const iotime = io_time_update_cache();
   uintmax_t current_time = iotime->sec_real;
 
   /* Convert to local time. */

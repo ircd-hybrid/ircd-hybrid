@@ -58,7 +58,7 @@ static struct timespec previous_monotonic;
  * @brief Stores the current real-time and monotonic time values.
  *
  * This variable maintains the current real-time and monotonic time values, updated by
- * the io_time_set function. It provides the latest time values to the io_time_get function.
+ * the io_time_update_cache function. It provides the latest time values to the io_time_get function.
  */
 static io_time_t current_time_data;
 
@@ -165,7 +165,7 @@ io_time_get_error(void)
 /**
  * @brief Initializes the time provider API.
  *
- * This function initializes the time provider API by calling io_time_set to retrieve the current
+ * This function initializes the time provider API by calling io_time_update_cache to retrieve the current
  * time data. If the initialization fails, it calls the error callback with an appropriate error code
  * and message.
  *
@@ -174,7 +174,7 @@ io_time_get_error(void)
 int
 io_time_init(void)
 {
-  const io_time_t *const iotime = io_time_set();
+  const io_time_t *const iotime = io_time_update_cache();
   if (iotime == NULL)
   {
     if (io_time_error_callback)
@@ -266,7 +266,7 @@ io_time_sanity_check(const struct timespec *new_time, const struct timespec *old
  *                        Returns NULL on failure.
  */
 const io_time_t *
-io_time_set(void)
+io_time_update_cache(void)
 {
   struct timespec current_realtime, current_monotonic;
 
@@ -371,7 +371,7 @@ io_time_get(io_time_type_t type)
  *
  * This function computes the total monotonic time in milliseconds by combining
  * the cached seconds and milliseconds components stored in current_time_data.
- * These cached values are updated by io_time_set().
+ * These cached values are updated by io_time_update_cache().
  *
  * @return uintmax_t Total monotonic time in milliseconds, derived from cached data.
  */
@@ -386,7 +386,7 @@ io_time_get_monotonic_ms_total(void)
  *
  * This function computes the total monotonic time in nanoseconds by combining
  * the cached seconds and nanoseconds components stored in current_time_data.
- * These cached values are updated by io_time_set().
+ * These cached values are updated by io_time_update_cache().
  *
  * @return uintmax_t Total monotonic time in nanoseconds, derived from cached data.
  */

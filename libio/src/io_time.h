@@ -105,7 +105,7 @@ typedef struct
 extern void io_time_set_error_callback(void (*)(enum io_time_error_code, const char *));
 extern const char *io_time_get_error(void);
 extern int io_time_init(void);
-extern const io_time_t *io_time_set(void);
+extern const io_time_t *io_time_update_cache(void);
 extern uintmax_t io_time_get(io_time_type_t);
 extern uintmax_t io_time_get_monotonic_ms_total(void);
 extern uintmax_t io_time_get_monotonic_ns_total(void);

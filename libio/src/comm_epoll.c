@@ -155,7 +155,7 @@ comm_select(int timeout_ms)
   num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, timeout_ms);
   assert(num <= epollop->nevents);
 
-  io_time_set();
+  io_time_update_cache();
 
   if (num < 0)
   {

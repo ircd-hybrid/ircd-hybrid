@@ -820,10 +820,10 @@ channel_send_perm_t
 channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
                        unsigned int statusmsg, const char *message, bool notice, const char **error)
 {
-  if (IsServer(client) || HasFlag(client, FLAGS_SERVICE))
+  if (IsServer(client) || client_has_flag(client, FLAGS_SERVICE))
     return CHANNEL_SEND_PERM_ELEVATED;
 
-  if (MyConnect(client) && !HasFlag(client, FLAGS_EXEMPTRESV))
+  if (MyConnect(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
   {
     if (!(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
     {
@@ -1030,7 +1030,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       continue;
     }
 
-    if (!HasFlag(client, FLAGS_EXEMPTRESV) &&
+    if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
         !(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
         ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
     {

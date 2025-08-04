@@ -112,32 +112,32 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
   /* If this user is in the exception class, set it "E lined" */
   if (IsConfExemptKline(conf))
   {
-    AddFlag(client, FLAGS_EXEMPTKLINE);
+    client_set_flag(client, FLAGS_EXEMPTKLINE);
     sendto_one_notice(client, &me, ":*** You are exempt from K/D lines");
   }
 
   if (IsConfExemptXline(conf))
   {
-    AddFlag(client, FLAGS_EXEMPTXLINE);
+    client_set_flag(client, FLAGS_EXEMPTXLINE);
     sendto_one_notice(client, &me, ":*** You are exempt from X lines");
   }
 
   if (IsConfExemptResv(conf))
   {
-    AddFlag(client, FLAGS_EXEMPTRESV);
+    client_set_flag(client, FLAGS_EXEMPTRESV);
     sendto_one_notice(client, &me, ":*** You are exempt from resvs");
   }
 
   /* If this user is exempt from user limits set it "F lined" */
   if (IsConfExemptLimits(conf))
   {
-    AddFlag(client, FLAGS_NOLIMIT);
+    client_set_flag(client, FLAGS_NOLIMIT);
     sendto_one_notice(client, &me, ":*** You are exempt from user limits");
   }
 
   if (IsConfCanFlood(conf))
   {
-    AddFlag(client, FLAGS_CANFLOOD);
+    client_set_flag(client, FLAGS_CANFLOOD);
     sendto_one_notice(client, &me, ":*** You are exempt from flood protection");
   }
 }
@@ -153,7 +153,7 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 static void
 user_introduce(struct Client *client)
 {
-  AddFlag(client, FLAGS_INTRODUCED);
+  client_set_flag(client, FLAGS_INTRODUCED);
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->uplink->id, client->name, client->hopcount + 1,
@@ -186,7 +186,7 @@ user_welcome(struct Client *client)
   static const char built_date[] = __DATE__ " at " __TIME__;
 #endif
 
-  if (HasFlag(client, FLAGS_TLS))
+  if (client_has_flag(client, FLAGS_TLS))
   {
     user_mode_set_flag(client, UMODE_SECURE);
 
@@ -229,18 +229,18 @@ user_register_local(struct Client *client)
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (!HasFlag(client, FLAGS_PINGSENT) && client->connection->random_ping == 0)
+    if (!client_has_flag(client, FLAGS_PINGSENT) && client->connection->random_ping == 0)
     {
       do
         client->connection->random_ping = genrand_int32();
       while (client->connection->random_ping == 0);
 
       sendto_one(client, "PING :%u", client->connection->random_ping);
-      AddFlag(client, FLAGS_PINGSENT);
+      client_set_flag(client, FLAGS_PINGSENT);
       return;
     }
 
-    if (!HasFlag(client, FLAGS_PING_COOKIE))
+    if (!client_has_flag(client, FLAGS_PING_COOKIE))
       return;
   }
 
@@ -360,8 +360,8 @@ user_register_remote(struct Client *client)
    * If the nick has been introduced by a services server,
    * make it a service as well.
    */
-  if (HasFlag(client->uplink, FLAGS_SERVICE))
-    AddFlag(client, FLAGS_SERVICE);
+  if (client_has_flag(client->uplink, FLAGS_SERVICE))
+    client_set_flag(client, FLAGS_SERVICE);
 
   SetClient(client);
   list_add(client, &client->global_node, &global_client_list);

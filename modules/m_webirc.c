@@ -66,7 +66,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
   }
 
   const struct MaskItem *conf =
-    find_address_conf(source->host, HasFlag(source, FLAGS_GOTID) ?
+    find_address_conf(source->host, client_has_flag(source, FLAGS_GOTID) ?
                       source->username : "webirc", &source->addr, pass);
   if (conf == NULL)
     return;

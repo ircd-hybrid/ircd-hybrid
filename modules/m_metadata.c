@@ -47,7 +47,7 @@
 static void
 ms_metadata(struct Client *source, int parc, char *parv[])
 {
-  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
+  if (!client_has_flag(source, FLAGS_SERVICE) && !IsServer(source))
     return;
 
   if (irccmp(parv[1], "client") == 0)

@@ -209,7 +209,7 @@ connect_authenticate_server(const char *server_name, const struct Client *client
       continue;
     }
 
-    if ((connect->flags & CONNECT_FLAG_USE_TLS) && !HasFlag(client, FLAGS_TLS))
+    if ((connect->flags & CONNECT_FLAG_USE_TLS) && !client_has_flag(client, FLAGS_TLS))
     {
       if (result < CONNECT_AUTH_FAIL_TLS)
         result = CONNECT_AUTH_FAIL_TLS;

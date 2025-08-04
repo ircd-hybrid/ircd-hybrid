@@ -165,7 +165,7 @@ server_set_flags(struct Client *client, const char *flags)
     switch (*p)
     {
       case 'h':
-        AddFlag(client, FLAGS_HIDDEN);
+        client_set_flag(client, FLAGS_HIDDEN);
         break;
       default:
         break;
@@ -275,7 +275,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   server_conf_set(client, connect);
 
   if (service_find(client->name, irccmp))
-    AddFlag(client, FLAGS_SERVICE);
+    client_set_flag(client, FLAGS_SERVICE);
 
   assert(list_find(&unknown_list, client));
   list_move_node(&client->connection->node, &local_server_list, &unknown_list);
@@ -360,7 +360,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
       if (target->from == client)
         continue;
 
-      if (IsMe(target) || HasFlag(target, FLAGS_EOB))
+      if (IsMe(target) || client_has_flag(target, FLAGS_EOB))
         sendto_one(client, ":%s EOB", target->id);
     }
   }
@@ -609,7 +609,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   server_set_flags(target, parv[4]);
 
   if (service_find(target->name, irccmp))
-    AddFlag(target, FLAGS_SERVICE);
+    client_set_flag(target, FLAGS_SERVICE);
 
   list_add(target, &target->global_node, &global_server_list);
   list_add(target, &target->uplink_node, &target->uplink->serv->child_server_list);

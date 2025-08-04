@@ -124,7 +124,7 @@ flatten_links_write_file(void *unused)
     if (IsHidden(client) || IsMe(client))
       continue;
 
-    if (HasFlag(client, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(client, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       continue;
 
     /*

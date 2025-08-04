@@ -66,7 +66,7 @@ do_links(struct Client *source, char *parv[])
       if (user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 
-    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (user_mode_has_flag(source, UMODE_OPER) == false)
         continue;
 

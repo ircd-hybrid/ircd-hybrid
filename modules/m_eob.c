@@ -47,7 +47,7 @@ ms_eob(struct Client *source, int parc, char *parv[])
 {
   assert(IsServer(source));
 
-  AddFlag(source, FLAGS_EOB);
+  client_set_flag(source, FLAGS_EOB);
   sendto_servers(source, 0, 0, ":%s EOB", source->id);
 
   if (MyConnect(source))

@@ -294,10 +294,10 @@ who_on_common_channel(struct Client *source, struct Channel *channel,
     struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
-    if (user_mode_has_flag(target, UMODE_INVISIBLE) == false || HasFlag(target, FLAGS_MARK))
+    if (user_mode_has_flag(target, UMODE_INVISIBLE) == false || client_has_flag(target, FLAGS_MARK))
       continue;
 
-    AddFlag(target, FLAGS_MARK);
+    client_set_flag(target, FLAGS_MARK);
 
     if (who->maxmatches)
     {
@@ -348,7 +348,7 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 
     if (user_mode_has_flag(target, UMODE_INVISIBLE))
     {
-      DelFlag(target, FLAGS_MARK);
+      client_unset_flag(target, FLAGS_MARK);
       continue;
     }
 

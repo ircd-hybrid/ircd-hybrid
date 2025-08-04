@@ -122,11 +122,6 @@ enum
   FLAGS_INTRODUCED    = 1 << 26,
 };
 
-#define HasFlag(x, y) ((x)->flags &   (y))
-#define AddFlag(x, y) ((x)->flags |=  (y))
-#define DelFlag(x, y) ((x)->flags &= ~(y))
-
-
 extern uint64_t UMODE_BOT;
 extern uint64_t UMODE_DEAF;
 extern uint64_t UMODE_FARCONNECT;
@@ -378,6 +373,24 @@ extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
+
+static inline bool
+client_has_flag(const struct Client *client, unsigned int flag)
+{
+  return (client->flags & flag) != 0;
+}
+
+static inline void
+client_set_flag(struct Client *client, unsigned int flags)
+{
+  client->flags |= flags;
+}
+
+static inline void
+client_unset_flag(struct Client *client, unsigned int flags)
+{
+  client->flags &= ~flags;
+}
 
 static inline const char *
 client_get_id_or_name(const struct Client *subject_client, const struct Client *context_client)

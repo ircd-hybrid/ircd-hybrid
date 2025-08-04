@@ -377,7 +377,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     if (member_find_link(target, channel) == NULL)
     {
-      bool synced = HasFlag(source, FLAGS_EOB) != 0;
+      bool synced = client_has_flag(source, FLAGS_EOB);
       channel_add_user(channel, target, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",

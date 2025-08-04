@@ -144,7 +144,7 @@ ms_unresv(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
+  if (client_has_flag(source, FLAGS_SERVICE) ||
       shared_find(SHARED_UNRESV, source->uplink->name, source->username, source->host))
     resv_remove(source, &aline);
 }

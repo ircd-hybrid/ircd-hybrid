@@ -170,7 +170,7 @@ add_connection(fde_t *client_fde, struct Listener *listener, const struct io_add
       return;
     }
 
-    AddFlag(client, FLAGS_TLS);
+    client_set_flag(client, FLAGS_TLS);
     ssl_handshake(client->connection->fd, client);
   }
   else

@@ -184,7 +184,7 @@ parse_client_queued(struct Client *client)
 
     if (ConfigGeneral.no_oper_flood && user_mode_has_flag(client, UMODE_OPER))
       checkflood = false;
-    else if (HasFlag(client, FLAGS_CANFLOOD))
+    else if (client_has_flag(client, FLAGS_CANFLOOD))
       checkflood = false;
 
     /*
@@ -213,7 +213,7 @@ parse_client_queued(struct Client *client)
        */
       if (checkflood)
         if (client->connection->sent_parsed >=
-            (HasFlag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
+            (client_has_flag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
       const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
@@ -233,10 +233,10 @@ parse_client_queued(struct Client *client)
 void
 flood_endgrace(struct Client *client)
 {
-  if (HasFlag(client, FLAGS_FLOODDONE))
+  if (client_has_flag(client, FLAGS_FLOODDONE))
     return;  /* Grace period has already ended */
 
-  AddFlag(client, FLAGS_FLOODDONE);
+  client_set_flag(client, FLAGS_FLOODDONE);
 
   /*
    * sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
@@ -260,7 +260,7 @@ flood_recalc(fde_t *F, void *data_)
    * Allow a bursting client their allocation per second, allow
    * a client who is flooding an extra 2 per second
    */
-  if (HasFlag(client, FLAGS_FLOODDONE))
+  if (client_has_flag(client, FLAGS_FLOODDONE))
     client->connection->sent_parsed -= 2;
   else
     client->connection->sent_parsed = 0;
@@ -331,7 +331,7 @@ read_packet(fde_t *F, void *data_)
     client->connection->last_ping =
     client->connection->last_data = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-    DelFlag(client, FLAGS_PINGSENT);
+    client_unset_flag(client, FLAGS_PINGSENT);
 
     /* Attempt to parse what we have */
     parse_client_queued(client);

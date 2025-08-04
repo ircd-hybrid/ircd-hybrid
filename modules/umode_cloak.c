@@ -37,14 +37,14 @@ set_callback(struct Client *client, user_mode_source_t source)
 
   if (MyConnect(client))
   {
-    if (HasFlag(client, FLAGS_SPOOF))
+    if (client_has_flag(client, FLAGS_SPOOF))
       return false;
 
     const char *const cloak = cloak_compute(&client->addr);
     if (cloak == NULL)
       return false;
 
-    bool svshost = HasFlag(client, FLAGS_INTRODUCED) != 0;
+    bool svshost = client_has_flag(client, FLAGS_INTRODUCED);
     user_set_hostmask(client, cloak, svshost);
   }
 

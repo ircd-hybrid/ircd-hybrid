@@ -405,7 +405,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 
   if (mode->only_servers)
   {
-    if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
+    if (!IsServer(client) && !client_has_flag(client, FLAGS_SERVICE))
     {
       if (!(*errors & SM_ERR_ONLYSERVER))
         sendto_one_numeric(client, &me,

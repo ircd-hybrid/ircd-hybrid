@@ -148,7 +148,7 @@ cap_ls(struct Client *source, const char *arg)
   if (arg && atoi(arg) >= 302)
   {
     source->connection->cap |= CAP_CAP_NOTIFY;
-    AddFlag(source, FLAGS_CAP302);
+    client_set_flag(source, FLAGS_CAP302);
   }
 
   send_caplist(source, NULL, NULL, "LS");  /* Send list of capabilities */
@@ -173,7 +173,7 @@ cap_req(struct Client *source, const char *arg)
 
     if (cap == NULL)
       error = true;
-    else if (negate && (cap->flag & CAP_CAP_NOTIFY) && HasFlag(source, FLAGS_CAP302))
+    else if (negate && (cap->flag & CAP_CAP_NOTIFY) && client_has_flag(source, FLAGS_CAP302))
       error = true;
 
     if (error)

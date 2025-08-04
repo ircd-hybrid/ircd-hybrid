@@ -113,7 +113,7 @@ accept_message(struct Client *source, struct Client *target)
 {
   list_node_t *node;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
+  if (client_has_flag(source, FLAGS_SERVICE) ||
       (user_mode_has_flag(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
     return true;
 

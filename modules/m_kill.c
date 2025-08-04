@@ -125,7 +125,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
      * the unnecessary QUIT for this. (This flag should never be
      * set in any other place)
      */
-    AddFlag(target, FLAGS_KILLED);
+    client_set_flag(target, FLAGS_KILLED);
   }
 
   client_exit_fmt(target, "Killed (%s (%.*s))", source->name, REASONLEN, reason);
@@ -206,7 +206,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s KILL %s :%s %s",
                  source->id, target->id, parv[2], reason);
-  AddFlag(target, FLAGS_KILLED);
+  client_set_flag(target, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */
   if (IsServer(source) && (IsHidden(source) || ConfigServerHide.hide_servers))

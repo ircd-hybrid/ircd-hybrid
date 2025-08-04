@@ -109,7 +109,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
     sendto_servers(NULL, 0, 0, ":%s SQUIT %s :%.*s",
                    source->id, target->id, REASONLEN, reason);
 
-  AddFlag(target, FLAGS_SQUIT);
+  client_set_flag(target, FLAGS_SQUIT);
 
   client_exit_fmt(target, "%.*s", REASONLEN, reason);
 }
@@ -170,7 +170,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
     sendto_servers(source, 0, 0, ":%s SQUIT %s :%s",
                    source->id, target->id, reason);
 
-  AddFlag(target, FLAGS_SQUIT);
+  client_set_flag(target, FLAGS_SQUIT);
 
   client_exit(target, reason);
 }

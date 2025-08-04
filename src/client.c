@@ -230,7 +230,7 @@ _client_destroy(struct Client *client)
     assert(client->connection->base_class == NULL);
     assert(client->connection->oper_class == NULL);
     assert(server_conf_get(client) == NULL);
-    assert(HasFlag(client, FLAGS_CLOSING) && IsDead(client));
+    assert(client_has_flag(client, FLAGS_CLOSING) && IsDead(client));
 
     io_free(client->connection->password);
     client->connection->password = NULL;
@@ -268,14 +268,14 @@ check_pings_list(list_t *list)
     unsigned int ping = client_get_ping_freq(client);
     if (ping < io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping)
     {
-      if (!HasFlag(client, FLAGS_PINGSENT))
+      if (!client_has_flag(client, FLAGS_PINGSENT))
       {
         /*
          * If we haven't PINGed the connection and we haven't
          * heard from it in a while, PING it to make sure
          * it is still alive.
          */
-        AddFlag(client, FLAGS_PINGSENT);
+        client_set_flag(client, FLAGS_PINGSENT);
         client->connection->last_ping = io_time_get(IO_TIME_MONOTONIC_SEC) - ping;
         sendto_one(client, "PING :%s", client_get_id_or_name(&me, client));
       }
@@ -322,7 +322,7 @@ check_unknowns_list(void)
     const char *reason = NULL;
     if (IsHandshake(client))
       reason = "Timeout during server handshake";
-    else if (HasFlag(client, FLAGS_LOOKUP_DONE))
+    else if (client_has_flag(client, FLAGS_LOOKUP_DONE))
       reason = "Registration timed out";
 
     if (reason)
@@ -441,7 +441,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
   switch (type)
   {
     case CLIENT_BAN_KLINE:
-      if (HasFlag(client, FLAGS_EXEMPTKLINE))
+      if (client_has_flag(client, FLAGS_EXEMPTKLINE))
       {
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "KLINE over-ruled for %s, client is kline_exempt",
@@ -457,7 +457,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
       ban_type = 'D';
       break;
     case CLIENT_BAN_XLINE:
-      if (HasFlag(client, FLAGS_EXEMPTXLINE))
+      if (client_has_flag(client, FLAGS_EXEMPTXLINE))
       {
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "XLINE over-ruled for %s, client is xline_exempt",
@@ -625,7 +625,7 @@ _client_exit_teardown_connection(struct Client *client)
    * This is safe because even if this write re-blocks, the very next step
    * is to close the socket anyway.
    */
-  DelFlag(client, FLAGS_BLOCKED);
+  client_unset_flag(client, FLAGS_BLOCKED);
   send_queued_write(client);
 
   if (client->connection->fd)
@@ -692,7 +692,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
                    client->name, client->uplink->name);
 
     /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here. */
-    if (!HasFlag(client, FLAGS_SQUIT))
+    if (!client_has_flag(client, FLAGS_SQUIT))
       sendto_servers(NULL, 0, 0, "SQUIT %s :%s", client->id, reason);
 
     /* Recursively handle the departure of all entities behind this server. */
@@ -702,7 +702,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
   {
     assert(client->from);
 
-    if (!HasFlag(client, FLAGS_KILLED))
+    if (!client_has_flag(client, FLAGS_KILLED))
       sendto_servers(client->from, 0, 0, ":%s QUIT :%s", client->id, reason);
 
      /* Notify local clients in common channels that this user has quit. */
@@ -757,9 +757,9 @@ _client_exit_detach(struct Client *client)
   if (client->name[0])
     hash_del_client(client);
 
-  if (HasFlag(client, FLAGS_IPHASH))
+  if (client_has_flag(client, FLAGS_IPHASH))
   {
-    DelFlag(client, FLAGS_IPHASH);
+    client_unset_flag(client, FLAGS_IPHASH);
     ipcache_record_remove(&client->addr, MyConnect(client));
   }
 
@@ -894,9 +894,9 @@ client_exit(struct Client *client, const char *reason)
   assert(client && client != &me && !IsMe(client));
   assert(reason);
 
-  if (HasFlag(client, FLAGS_CLOSING))
+  if (client_has_flag(client, FLAGS_CLOSING))
     return;
-  AddFlag(client, FLAGS_CLOSING);
+  client_set_flag(client, FLAGS_CLOSING);
 
   /* For local clients, tear down the physical connection immediately. */
   if (MyConnect(client))
@@ -920,7 +920,7 @@ client_exit(struct Client *client, const char *reason)
     }
 
     /* Queue final "dying gasp" messages before closing the socket. */
-    if (IsServer(client) && !HasFlag(client, FLAGS_SQUIT))
+    if (IsServer(client) && !client_has_flag(client, FLAGS_SQUIT))
       /* For them, we are exiting the network */
       sendto_one(client, ":%s SQUIT %s :%s", me.id, me.id, reason);
 

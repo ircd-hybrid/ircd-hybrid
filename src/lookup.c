@@ -78,7 +78,7 @@ lookup_check_complete(struct LookupRequest *lookup)
   client->connection->last_data = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  AddFlag(client, FLAGS_LOOKUP_DONE);
+  client_set_flag(client, FLAGS_LOOKUP_DONE);
 
   /*
    * When a client has auth'ed, we want to start reading what it sends
@@ -146,7 +146,7 @@ lookup_ident_callback(void *user_data, const char *username)
   else
   {
     strlcpy(lookup->client->username, username, sizeof(lookup->client->username));
-    AddFlag(lookup->client, FLAGS_GOTID);
+    client_set_flag(lookup->client, FLAGS_GOTID);
 
     ++ServerStats.is_asuc;
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_SUCCESS]);

@@ -446,7 +446,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
   char username[USERLEN + 1] = "~";
   *error_reason = "Invalid credentials or no matching auth {} block";
 
-  if (HasFlag(client, FLAGS_GOTID))
+  if (client_has_flag(client, FLAGS_GOTID))
     strlcpy(username, client->username, sizeof(username));
   else
     strlcpy(username + 1, client->username, sizeof(username) - 1);
@@ -471,7 +471,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
     return NULL;
   }
 
-  if (IsNeedIdentd(conf) && !HasFlag(client, FLAGS_GOTID))
+  if (IsNeedIdentd(conf) && !client_has_flag(client, FLAGS_GOTID))
   {
     *error_reason = "Identd is required and was not found";
     return NULL;
@@ -487,7 +487,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
     }
   }
 
-  if (!HasFlag(client, FLAGS_GOTID) && !IsNoTilde(conf))
+  if (!client_has_flag(client, FLAGS_GOTID) && !IsNoTilde(conf))
     strlcpy(client->username, username, sizeof(client->username));
 
   strlcpy(client->realhost, client->host, sizeof(client->realhost));
@@ -495,7 +495,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
   if (IsConfDoSpoofIp(conf))
   {
     strlcpy(client->host, conf->name, sizeof(client->host));
-    AddFlag(client, FLAGS_SPOOF);
+    client_set_flag(client, FLAGS_SPOOF);
   }
 
   *error_reason = NULL;
@@ -509,7 +509,7 @@ conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_
 
   struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
   ++ipcache->count_local;
-  AddFlag(client, FLAGS_IPHASH);
+  client_set_flag(client, FLAGS_IPHASH);
 
   if (exempt_limits)
     return true;

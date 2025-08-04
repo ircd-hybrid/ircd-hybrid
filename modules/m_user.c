@@ -62,7 +62,7 @@ mr_user(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!HasFlag(source, FLAGS_GOTID))
+  if (!client_has_flag(source, FLAGS_GOTID))
   {
     char *p = strchr(username, '@');
     if (p)

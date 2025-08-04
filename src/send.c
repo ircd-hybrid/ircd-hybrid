@@ -93,9 +93,9 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
   if (new_sendq_size > max_sendq)
   {
-    if (!HasFlag(to, FLAGS_SENDQEX))
+    if (!client_has_flag(to, FLAGS_SENDQEX))
     {
-      AddFlag(to, FLAGS_SENDQEX);
+      client_set_flag(to, FLAGS_SENDQEX);
 
       if (IsServer(to))
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -159,9 +159,9 @@ sendq_unblocked(fde_t *F, void *data)
   assert(client->connection);
   assert(client->connection->fd);
   assert(client->connection->fd == F);
-  assert(HasFlag(client, FLAGS_BLOCKED));
+  assert(client_has_flag(client, FLAGS_BLOCKED));
 
-  DelFlag(client, FLAGS_BLOCKED);
+  client_unset_flag(client, FLAGS_BLOCKED);
   send_queued_write(client);
 }
 
@@ -178,7 +178,7 @@ send_queued_write(struct Client *to)
    * Once socket is marked dead, we cannot start writing to it,
    * even if the error is removed...
    */
-  if (IsDead(to) || HasFlag(to, FLAGS_BLOCKED))
+  if (IsDead(to) || client_has_flag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
@@ -204,7 +204,7 @@ send_queued_write(struct Client *to)
     {
       if (retlen < 0 && comm_errno_is_recoverable(errno))
       {
-        AddFlag(to, FLAGS_BLOCKED);
+        client_set_flag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
         comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
       }

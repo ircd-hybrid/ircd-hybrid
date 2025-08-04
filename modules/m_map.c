@@ -49,7 +49,7 @@ dump_map_flat(struct Client *client)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
-    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
@@ -65,7 +65,7 @@ dump_map_flat(struct Client *client)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
-    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
@@ -155,7 +155,7 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
-    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
@@ -170,7 +170,7 @@ dump_map(struct Client *client, const struct Client *server, unsigned int prompt
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 
-    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_has_flag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
       if (user_mode_has_flag(client, UMODE_OPER) == false)
         continue;
 

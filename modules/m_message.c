@@ -131,7 +131,7 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   if (user_mode_has_flag(source, UMODE_OPER))
     return false;
 
-  if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
+  if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
   if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
@@ -139,18 +139,18 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
     if (target->connection->received_number_of_privmsgs)
       target->connection->received_number_of_privmsgs = 0;
     else
-      DelFlag(target, FLAGS_FLOOD_NOTICED);
+      client_unset_flag(target, FLAGS_FLOOD_NOTICED);
 
     target->connection->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
   if (target->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
   {
-    if (!HasFlag(target, FLAGS_FLOOD_NOTICED))
+    if (!client_has_flag(target, FLAGS_FLOOD_NOTICED))
     {
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
                      client_get_name(source, HIDE_IP), source->uplink->name, target->name);
-      AddFlag(target, FLAGS_FLOOD_NOTICED);
+      client_set_flag(target, FLAGS_FLOOD_NOTICED);
     }
 
     if (notice == false)
@@ -180,7 +180,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   if (user_mode_has_flag(source, UMODE_OPER))
     return false;
 
-  if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
+  if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
   if (channel->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))

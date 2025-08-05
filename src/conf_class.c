@@ -222,3 +222,24 @@ class_ip_limit_rebuild(struct ClassItem *klass)
       class_ip_limit_add(klass, &client->addr, true);
   }
 }
+
+void
+class_incref(struct ClassItem *klass)
+{
+  if (klass == NULL)
+    return;
+  klass->ref_count++;
+}
+
+void
+class_decref(struct ClassItem *klass)
+{
+  if (klass == NULL)
+    return;
+
+  assert(klass->ref_count > 0);
+  klass->ref_count--;
+
+  if (klass->ref_count == 0 && klass->active == false)
+    class_free(klass);
+}

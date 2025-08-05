@@ -126,18 +126,10 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
   if (old_class == new_class)
     return;
 
-  if (old_class)
-  {
-    assert(old_class->ref_count > 0);
-    old_class->ref_count--;
-
-    if (old_class->ref_count == 0 && old_class->active == false)
-      class_free(old_class);
-  }
+  class_incref(new_class);
+  class_decref(old_class);
 
   *class_ptr_location = new_class;
-  if (new_class)
-    new_class->ref_count++;
 }
 
 static void

@@ -523,11 +523,8 @@ server_conf_set(struct Client *client, struct ConnectItem *new_connect)
   if (old_connect == new_connect)
     return;
 
-  if (new_connect)
-    connect_incref(new_connect);
-
-  if (old_connect)
-    connect_decref(old_connect);
+  connect_incref(new_connect);
+  connect_decref(old_connect);
 
   client->serv->conf = new_connect;
 }

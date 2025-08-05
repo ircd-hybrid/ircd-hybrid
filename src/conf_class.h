@@ -80,6 +80,8 @@ struct ClassItem
  */
 extern struct ClassItem *class_default;
 
+extern void class_incref(struct ClassItem *);
+extern void class_decref(struct ClassItem *);
 extern void class_free(struct ClassItem *const);
 extern void class_init(void);
 extern void class_mark_all_inactive(void);

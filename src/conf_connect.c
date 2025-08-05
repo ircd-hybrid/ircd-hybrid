@@ -247,15 +247,18 @@ connect_get_list(void)
 void
 connect_incref(struct ConnectItem *connect)
 {
-  if (connect)
-    connect->ref_count++;
+  if (connect == NULL)
+    return;
+  connect->ref_count++;
 }
 
 void
 connect_decref(struct ConnectItem *connect)
 {
-  assert(connect->ref_count > 0);
+  if (connect == NULL)
+    return;
 
+  assert(connect->ref_count > 0);
   connect->ref_count--;
 
   if (connect->ref_count == 0 && connect->active == false)

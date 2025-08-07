@@ -847,9 +847,7 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
       list_free_node(node);
   }
 
-  if (client->connection->list_task)
-    free_list_task(client);
-
+  free_list_task(client);
   invite_clear_list(&client->connection->invited);
   accept_clear_list(&client->connection->acceptlist);
   monitor_clear_list(client);

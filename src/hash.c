@@ -476,6 +476,8 @@ void
 free_list_task(struct Client *client)
 {
   struct ListTask *const lt = client->connection->list_task;
+  if (lt == NULL)
+    return;
 
   list_remove(&lt->node, &listing_client_list);
 

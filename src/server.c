@@ -434,8 +434,8 @@ server_connect_auto(void *unused)
   if (GlobalSetOptions.autoconnect == false)
     return;
 
+  list_t *const list = connect_get_list();
   list_node_t *node;
-  list_t *list = connect_get_list();
   LIST_FOREACH(node, list->head)
   {
     struct ConnectItem *connect = node->data;
@@ -460,18 +460,18 @@ server_connect_auto(void *unused)
     if (connect->klass->ref_count >= connect->klass->max_total)
       continue;
 
-    /*
-     * Found a CONNECT config with port specified, scan clients
-     * and see if this server is already connected, or a connection is in progress?
-     */
+    /* Skip if a server with this name is already connected or connecting. */
     if (hash_find_client(connect->name))
       continue;
 
-    /* Move this entry to the end of the list, if not already last */
-    if (node->next)
+    /*
+     * Move this connect block to the end of the list so the next attempt
+     * starts with a different server.
+     */
+    if (list->tail != node)
     {
       list_remove(node, list);
-      list_add_tail(connect, &connect->node, list);
+      list_add_tail(connect, node, list);
     }
 
     /*

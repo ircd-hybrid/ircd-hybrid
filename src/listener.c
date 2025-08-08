@@ -214,6 +214,7 @@ listener_accept_connection(fde_t *F, void *data_)
     if (address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)) == false)
     {
       log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
+      ++ServerStats.is_ref;
       comm_socket_close(client_fde);
       continue;
     }

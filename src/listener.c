@@ -183,32 +183,30 @@ static void
 listener_accept_connection(fde_t *F, void *data_)
 {
   struct Listener *const listener = data_;
-  struct io_addr remote_addr;
-  unsigned int accepted_count = 0;
-
   assert(listener);
   assert(listener->fd == F);
   assert(listener->fd);
   assert(listener->fd->flags.open);
 
-  /* There may be many reasons for error return, but
-   * in otherwise correctly working environment the
-   * probable cause is running out of file descriptors
-   * (EMFILE, ENFILE or others?). The man pages for
-   * accept don't seem to list these as possible,
-   * although it's obvious that it may happen here.
-   * Thus no specific errors are tested at this
-   * point, just assume that connections cannot
-   * be accepted until some old is closed first.
-   */
   const char *desc = listener_has_flag(listener, LISTENER_TLS) ?
                        "Incoming TLS connection" : "Incoming connection";
 
-  fde_t *client_fde;
-  while (accepted_count < LISTENER_ACCEPT_BUDGET &&
-         (client_fde = comm_accept(listener->fd, &remote_addr, desc)))
+  for (unsigned int accepted_count = 0; accepted_count < LISTENER_ACCEPT_BUDGET; ++accepted_count)
   {
-    ++accepted_count;
+    struct io_addr remote_addr;
+    fde_t *client_fde = comm_accept(listener->fd, &remote_addr, desc);
+    if (client_fde == NULL)
+    {
+      /*
+       * A recoverable error indicates the listen queue is now empty. For any
+       * other error (e.g., a single connection failing setup), we continue
+       * trying to accept other pending connections.
+       */
+      if (comm_errno_is_recoverable(errno))
+        break;
+
+      continue;
+    }
 
     char remote_addr_str[HOSTIPLEN + 1];
     if (address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)) == false)

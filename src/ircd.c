@@ -61,7 +61,6 @@
 #include "conf_db.h"
 #include "defaults.h"
 #include "extban.h"
-#include "flatten_links.h"
 #include "hash.h"
 #include "id.h"
 #include "ipcache.h"
@@ -69,6 +68,7 @@
 #include "ircd_exit.h"
 #include "ircd_hook.h"
 #include "ircd_signal.h"
+#include "links_cache.h"
 #include "motd.h"
 #include "send.h"
 #include "server.h"
@@ -441,7 +441,7 @@ main(int argc, char *argv[])
   extban_init();
   capab_init();  /* Set up default_server_capabs */
   initialize_global_set_options();  /* Has to be called after conf_read_files() */
-  flatten_links_init();
+  links_cache_init();
 
   if (string_is_empty(ConfigServerInfo.name))
   {

@@ -67,8 +67,6 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
-               flatten_links.c   \
-               flatten_links.h   \
                hash.c            \
                hash.h            \
                id.c              \
@@ -88,6 +86,8 @@ ircd_SOURCES = accept.c          \
                ircd_signal.h     \
                isupport.c        \
                isupport.h        \
+               links_cache.c     \
+               links_cache.h     \
                listener.c        \
                listener.h        \
                lookup.c          \

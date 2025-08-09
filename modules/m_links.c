@@ -23,20 +23,63 @@
  * \brief Includes required functions for processing the LINKS command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
 #include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "server.h"
-#include "user_mode.h"
-#include "send.h"
-#include "conf.h"
-#include "parse.h"
+#include "io_time.h"
+#include "misc.h"
 #include "module.h"
-#include "flatten_links.h"
 
+#include "stdinc.h"
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "links_cache.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "user_mode.h"
+
+static void
+_links_send_flat(struct Client *client)
+{
+  /* Print our own info first to mimic a standard /LINKS reply. */
+  sendto_one_numeric(client, &me, RPL_LINKS, me.name, me.name, 0, me.info);
+
+  const list_t *const cache = links_cache_get();
+  list_node_t *node;
+  LIST_FOREACH(node, cache->head)
+  {
+    const links_cache_entry_t *const entry = node->data;
+    sendto_one_numeric(client, &me, RPL_LINKS,
+                       entry->name, entry->uplink_name, 1, entry->description);
+  }
+
+  sendto_one_numeric(client, &me, RPL_ENDOFLINKS, "*");
+}
+
+static void
+_links_send_live(struct Client *client, const char *mask)
+{
+  list_node_t *node;
+  LIST_FOREACH(node, global_server_list.head)
+  {
+    const struct Client *const server = node->data;
+    if (!user_mode_has_flag(client, UMODE_OPER))
+    {
+      if (IsHidden(server))
+        continue;
+      if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+        continue;
+    }
+
+    if (!string_is_empty(mask) && match(mask, server->name))
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_LINKS,
+                       server->name, server->uplink->name, server->hopcount, server->info);
+  }
+
+  sendto_one_numeric(client, &me, RPL_ENDOFLINKS, string_default(mask, "*"));
+}
 
 /*! \brief Shows a list of linked servers and notifies irc-operators
  *         about the LINKS request
@@ -51,38 +94,12 @@ do_links(struct Client *source, char *parv[])
 
   if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
   {
-    flatten_links_send(source);
+    _links_send_flat(source);
     return;
   }
 
   const char *mask = string_default(parv[2], parv[1]);
-  list_node_t *node;
-  LIST_FOREACH(node, global_server_list.head)
-  {
-    const struct Client *target = node->data;
-
-    /* Skip hidden servers */
-    if (IsHidden(target))
-      if (user_mode_has_flag(source, UMODE_OPER) == false)
-        continue;
-
-    if (client_has_flag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (user_mode_has_flag(source, UMODE_OPER) == false)
-        continue;
-
-    if (!string_is_empty(mask) && match(mask, target->name))
-      continue;
-
-    /*
-     * We just send the reply, as if they are here there's either no SHIDE,
-     * or they're an oper.
-     */
-    sendto_one_numeric(source, &me, RPL_LINKS,
-                       target->name, target->uplink->name, target->hopcount, target->info);
-  }
-
-  sendto_one_numeric(source, &me, RPL_ENDOFLINKS,
-                     string_default(mask, "*"));
+  _links_send_live(source, mask);
 }
 
 static void

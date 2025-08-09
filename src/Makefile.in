@@ -137,15 +137,14 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
 	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
 	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	flatten_links.$(OBJEXT) hash.$(OBJEXT) id.$(OBJEXT) \
-	info.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	isupport.$(OBJEXT) listener.$(OBJEXT) lookup.$(OBJEXT) \
-	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
+	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
+	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) links_cache.$(OBJEXT) \
+	listener.$(OBJEXT) lookup.$(OBJEXT) monitor.$(OBJEXT) \
+	motd.$(OBJEXT) nuh.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) user_mode.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -187,11 +186,11 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/flatten_links.Po ./$(DEPDIR)/hash.Po \
-	./$(DEPDIR)/id.Po ./$(DEPDIR)/info.Po ./$(DEPDIR)/ipcache.Po \
-	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
-	./$(DEPDIR)/ircd_hook.Po ./$(DEPDIR)/ircd_signal.Po \
-	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/listener.Po \
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/id.Po ./$(DEPDIR)/info.Po \
+	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
+	./$(DEPDIR)/ircd_exit.Po ./$(DEPDIR)/ircd_hook.Po \
+	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
+	./$(DEPDIR)/links_cache.Po ./$(DEPDIR)/listener.Po \
 	./$(DEPDIR)/lookup.Po ./$(DEPDIR)/monitor.Po \
 	./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po ./$(DEPDIR)/numeric.Po \
 	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
@@ -476,8 +475,6 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
-               flatten_links.c   \
-               flatten_links.h   \
                hash.c            \
                hash.h            \
                id.c              \
@@ -497,6 +494,8 @@ ircd_SOURCES = accept.c          \
                ircd_signal.h     \
                isupport.c        \
                isupport.h        \
+               links_cache.c     \
+               links_cache.h     \
                listener.c        \
                listener.h        \
                lookup.c          \
@@ -656,7 +655,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flatten_links.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/info.Po@am__quote@ # am--include-marker
@@ -666,6 +664,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_hook.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_cache.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lookup.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
@@ -889,7 +888,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_server.Po
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
-	-rm -f ./$(DEPDIR)/flatten_links.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/info.Po
@@ -899,6 +897,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ircd_hook.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
+	-rm -f ./$(DEPDIR)/links_cache.Po
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
@@ -996,7 +995,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_server.Po
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
-	-rm -f ./$(DEPDIR)/flatten_links.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/info.Po
@@ -1006,6 +1004,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ircd_hook.Po
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
+	-rm -f ./$(DEPDIR)/links_cache.Po
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po

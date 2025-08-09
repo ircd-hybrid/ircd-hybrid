@@ -19,14 +19,29 @@
  *  USA
  */
 
-#ifndef INCLUDED_flatten_links_h
-#define INCLUDED_flatten_links_h
+#ifndef INCLUDED_links_cache_h
+#define INCLUDED_links_cache_h
 
-extern void flatten_links_init(void);
-extern void flatten_links_clear(void);
-extern void flatten_links_add(const char *const);
-extern void flatten_links_send(struct Client *);
-extern void flatten_links_write_file(void *);
-extern void flatten_links_read_file(void);
-extern void flatten_links_handle_event_state(uintmax_t);
-#endif  /* INCLUDED_flatten_links_h */
+#include <stdint.h>
+#include "list.h"
+
+typedef struct
+{
+  uintmax_t generated_at_unix;
+  unsigned int network_users_total;
+} links_cache_metadata_t;
+
+typedef struct
+{
+  char *name;
+  char *uplink_name;
+  char *description;
+  unsigned int user_count;
+  list_node_t node;
+} links_cache_entry_t;
+
+extern void links_cache_init(void);
+extern void links_cache_set_timer(uintmax_t);
+extern const list_t *links_cache_get(void);
+extern const links_cache_metadata_t *links_cache_get_metadata(void);
+#endif  /* INCLUDED_links_cache_h */

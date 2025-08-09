@@ -151,21 +151,38 @@ server_route_command(struct Client *client, const char *command, const int serve
 }
 
 bool
-server_valid_name(const char *name)
+server_is_valid_name(const char *name)
 {
-  unsigned int dots = 0;
   const char *p = name;
+  if (string_is_empty(name))
+    return false;
 
-  for (; *p; ++p)
+  if (*p == '.')
+    return false;
+
+  unsigned int dot_count = 0;
+  while (*p)
   {
     if (!IsServChar(*p))
       return false;
 
     if (*p == '.')
-      ++dots;
+    {
+      ++dot_count;
+      if (*(p + 1) == '.')
+        return false;
+    }
+
+    ++p;
   }
 
-  return dots && (p - name) <= HOSTLEN;
+  if ((size_t)(p - name) > HOSTLEN)
+    return false;
+
+  if (*(p - 1) == '.')
+    return false;
+
+  return dot_count > 0;
 }
 
 /* server_make()

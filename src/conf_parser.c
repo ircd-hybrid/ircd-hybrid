@@ -3728,7 +3728,7 @@ yyreduce:
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
   {
-    if (server_valid_name(yylval.string))
+    if (server_is_valid_name(yylval.string))
       ConfigServerInfo.name = io_strdup(yylval.string);
     else
     {
@@ -5245,7 +5245,7 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (server_valid_name(yylval.string))
+  if (server_is_valid_name(yylval.string))
   {
     struct ServiceItem *service = service_make();
     service->name = io_strdup(yylval.string);
@@ -5579,7 +5579,7 @@ yyreduce:
       !block_state.spass.buf[0])
     break;
 
-  if (server_valid_name(block_state.name.buf) == false)
+  if (server_is_valid_name(block_state.name.buf) == false)
     break;
 
   if (has_wildcards(block_state.name.buf) ||

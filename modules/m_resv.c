@@ -53,7 +53,7 @@
 static void
 resv_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!client_has_flag(source, FLAGS_SERVICE))
+  if (!client_is_service(source))
   {
     if (aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)) == false)
     {
@@ -170,7 +170,7 @@ ms_resv(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (client_has_flag(source, FLAGS_SERVICE) ||
+  if (client_is_service(source) ||
       shared_find(SHARED_RESV, source->uplink->name, source->username, source->host))
     resv_handle(source, &aline);
 }

@@ -360,7 +360,7 @@ user_register_remote(struct Client *client)
    * If the nick has been introduced by a services server,
    * make it a service as well.
    */
-  if (client_has_flag(client->uplink, FLAGS_SERVICE))
+  if (client_is_service(client->uplink))
     client_set_flag(client, FLAGS_SERVICE);
 
   SetClient(client);

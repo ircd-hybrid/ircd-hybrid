@@ -67,7 +67,7 @@ _links_send_live(struct Client *client, const char *mask)
     {
       if (IsHidden(server))
         continue;
-      if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+      if (client_is_service(server) && ConfigServerHide.hide_services)
         continue;
     }
 

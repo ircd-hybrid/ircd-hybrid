@@ -85,7 +85,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
    *        the TS of the remote topic is newer than ours
    */
   bool accept_remote = false;
-  if (client_has_flag(source, FLAGS_SERVICE))
+  if (client_is_service(source))
     accept_remote = true;
   else if (remote_channel_ts < channel->creation_time)
     accept_remote = true;

@@ -150,7 +150,7 @@ ms_unxline(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (client_has_flag(source, FLAGS_SERVICE) ||
+  if (client_is_service(source) ||
       shared_find(SHARED_UNXLINE, source->uplink->name, source->username, source->host))
     xline_remove(source, &aline);
 }

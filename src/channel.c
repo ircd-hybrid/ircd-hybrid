@@ -820,7 +820,7 @@ channel_send_perm_t
 channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
                        unsigned int statusmsg, const char *message, bool notice, const char **error)
 {
-  if (IsServer(client) || client_has_flag(client, FLAGS_SERVICE))
+  if (IsServer(client) || client_is_service(client))
     return CHANNEL_SEND_PERM_ELEVATED;
 
   if (MyConnect(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))

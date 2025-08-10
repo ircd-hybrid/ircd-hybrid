@@ -154,7 +154,7 @@ _links_cache_update(void *unused)
     const struct Client *server = node->data;
     if (IsHidden(server) || IsMe(server))
       continue;
-    if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+    if (client_is_service(server) && ConfigServerHide.hide_services)
       continue;
 
     links_cache_entry_t *entry = io_calloc(sizeof(*entry));

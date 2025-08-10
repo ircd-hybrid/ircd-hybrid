@@ -50,7 +50,7 @@
 static void
 ms_svspart(struct Client *source, int parc, char *parv[])
 {
-  if (!client_has_flag(source, FLAGS_SERVICE) && !IsServer(source))
+  if (!client_is_service(source) && !IsServer(source))
     return;
 
   struct Client *target = find_person(source, parv[1]);

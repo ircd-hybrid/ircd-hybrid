@@ -186,7 +186,7 @@ whois_send_away_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
-  if (client_is_oper(target) || client_has_flag(target, FLAGS_SERVICE))
+  if (client_is_oper(target) || client_is_service(target))
   {
     if (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))
     {
@@ -194,7 +194,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
       {
         const char *text;
-        if (client_has_flag(target, FLAGS_SERVICE))
+        if (client_is_service(target))
           text = "is a Network Service";
         else if (user_mode_has_flag(target, UMODE_ADMIN))
           text = "is a Server Administrator";

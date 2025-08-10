@@ -113,8 +113,7 @@ accept_message(struct Client *source, struct Client *target)
 {
   list_node_t *node;
 
-  if (client_has_flag(source, FLAGS_SERVICE) ||
-      (client_is_oper(source) && ConfigGeneral.opers_bypass_callerid))
+  if (client_is_service(source) || (client_is_oper(source) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
   if (source == target || accept_find(source->name, source->username, source->host,

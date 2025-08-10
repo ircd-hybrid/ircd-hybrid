@@ -72,7 +72,7 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   char buf[IRCD_BUFSIZE];
 
-  if (!client_has_flag(source, FLAGS_SERVICE))
+  if (!client_is_service(source))
   {
     if (aline_valid_mask_simple(aline->mask) == false)
     {
@@ -206,7 +206,7 @@ ms_xline(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (client_has_flag(source, FLAGS_SERVICE) ||
+  if (client_is_service(source) ||
       shared_find(SHARED_XLINE, source->uplink->name, source->username, source->host))
     xline_handle(source, &aline);
 }

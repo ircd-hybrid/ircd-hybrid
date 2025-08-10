@@ -86,7 +86,7 @@ _map_should_hide_server(const struct Client *server, const struct Client *client
   if (IsHidden(server))
     return true;
 
-  if (client_has_flag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
+  if (client_is_service(server) && ConfigServerHide.hide_services)
     return true;
 
   return false;

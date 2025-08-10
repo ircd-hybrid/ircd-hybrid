@@ -91,7 +91,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   unsigned int min_cidr = 0;
   struct io_addr iphost, *piphost = NULL;
 
-  if (!client_has_flag(source, FLAGS_SERVICE) && aline_valid_mask(2, aline->user, aline->host) == false)
+  if (!client_is_service(source) && aline_valid_mask(2, aline->user, aline->host) == false)
   {
     if (IsClient(source))
       sendto_one_notice(source, &me,
@@ -114,7 +114,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
       break;
   }
 
-  if (min_cidr > 0 && !client_has_flag(source, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
+  if (min_cidr > 0 && !client_is_service(source) && (unsigned int)bits < min_cidr)
   {
     if (IsClient(source))
       sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
@@ -246,7 +246,7 @@ ms_kline(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (client_has_flag(source, FLAGS_SERVICE) ||
+  if (client_is_service(source) ||
       shared_find(SHARED_KLINE, source->uplink->name, source->username, source->host))
     kline_handle(source, &aline);
 }

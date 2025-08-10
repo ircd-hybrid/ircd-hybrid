@@ -376,12 +376,6 @@ extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
 
 static inline bool
-client_is_oper(const struct Client *client)
-{
-  return user_mode_has_flag(client, UMODE_OPER);
-}
-
-static inline bool
 client_has_flag(const struct Client *client, unsigned int flag)
 {
   return (client->flags & flag) != 0;
@@ -397,6 +391,18 @@ static inline void
 client_unset_flag(struct Client *client, unsigned int flags)
 {
   client->flags &= ~flags;
+}
+
+static inline bool
+client_is_oper(const struct Client *client)
+{
+  return user_mode_has_flag(client, UMODE_OPER);
+}
+
+static inline bool
+client_is_service(const struct Client *client)
+{
+  return client_has_flag(client, FLAGS_SERVICE);
 }
 
 static inline const char *

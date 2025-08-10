@@ -114,7 +114,7 @@ accept_message(struct Client *source, struct Client *target)
   list_node_t *node;
 
   if (client_has_flag(source, FLAGS_SERVICE) ||
-      (user_mode_has_flag(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
+      (client_is_oper(source) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
   if (source == target || accept_find(source->name, source->username, source->host,

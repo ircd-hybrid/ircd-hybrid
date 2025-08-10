@@ -128,7 +128,7 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     return false;
 
   if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
@@ -177,7 +177,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     return false;
 
   if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
@@ -302,7 +302,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 static void
 target_handle_masked(struct Client *source, const char *nick, const char *text, bool notice)
 {
-  if (user_mode_has_flag(source, UMODE_OPER) == false)
+  if (!client_is_oper(source))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
     return;

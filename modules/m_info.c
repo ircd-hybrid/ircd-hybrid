@@ -242,7 +242,7 @@ send_info_text(struct Client *client)
     sendto_one_numeric(client, &me, RPL_INFO, line);
   }
 
-  if (user_mode_has_flag(client, UMODE_OPER))
+  if (client_is_oper(client))
   {
     info_send(client);
 

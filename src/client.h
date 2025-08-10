@@ -41,6 +41,7 @@
 #include "conf_oper.h"
 #include "ircd_defs.h"
 #include "lookup.h"
+#include "user_mode.h"
 
 /** Client connection states */
 enum
@@ -373,6 +374,12 @@ extern struct Client *find_chasing(struct Client *, const char *);
 extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
+
+static inline bool
+client_is_oper(const struct Client *client)
+{
+  return user_mode_has_flag(client, UMODE_OPER);
+}
 
 static inline bool
 client_has_flag(const struct Client *client, unsigned int flag)

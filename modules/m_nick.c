@@ -210,7 +210,7 @@ nick_change_local(struct Client *source, const char *nick)
   if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
     source->connection->nick.count = 0;
 
-  if (ConfigGeneral.anti_nick_flood && user_mode_has_flag(source, UMODE_OPER) == false &&
+  if (ConfigGeneral.anti_nick_flood && !client_is_oper(source) &&
       (source->connection->nick.count > ConfigGeneral.max_nick_changes))
   {
     sendto_one_numeric(source, &me, ERR_NICKTOOFAST,
@@ -641,7 +641,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   }
 
   if (!client_has_flag(source, FLAGS_EXEMPTRESV) &&
-      !(user_mode_has_flag(source, UMODE_OPER) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
+      !(client_is_oper(source) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
       (resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);

@@ -60,7 +60,7 @@ m_ping(struct Client *source, int parc, char *parv[])
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (ConfigServerHide.disable_remote_commands && user_mode_has_flag(source, UMODE_OPER) == false)
+  if (ConfigServerHide.disable_remote_commands && !client_is_oper(source))
   {
     sendto_one(source, ":%s PONG %s :%s",
                me.name, (destination) ? destination : me.name, parv[1]);

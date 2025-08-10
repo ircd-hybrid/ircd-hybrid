@@ -81,7 +81,7 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, con
   if (source == target || member_find_link(source, channel))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
   {
     if (!channel_is_public(channel))
       return WHOIS_CHANNEL_VISIBILITY_LIMITED;
@@ -118,7 +118,7 @@ whois_send_user_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_host_numeric(struct Client *source, const struct Client *target)
 {
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
+  if (client_is_oper(source) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        target->name, target->username, target->realhost, target->sockhost);
 }
@@ -168,7 +168,7 @@ static void
 whois_send_server_numeric(struct Client *source, const struct Client *target)
 {
   if ((ConfigServerHide.hide_servers || IsHidden(target->uplink)) &&
-      !(user_mode_has_flag(source, UMODE_OPER) || source == target))
+      !(client_is_oper(source) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);
   else
@@ -186,9 +186,9 @@ whois_send_away_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
-  if (user_mode_has_flag(target, UMODE_OPER) || client_has_flag(target, FLAGS_SERVICE))
+  if (client_is_oper(target) || client_has_flag(target, FLAGS_SERVICE))
   {
-    if (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))
+    if (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))
     {
       const struct ServicesTag *svstag = list_peek_head(&target->svstags);
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
@@ -198,7 +198,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
           text = "is a Network Service";
         else if (user_mode_has_flag(target, UMODE_ADMIN))
           text = "is a Server Administrator";
-        else  /* user_mode_has_flag(target, UMODE_OPER) == true */
+        else  /* client_is_oper(target) == true */
           text = "is an IRC Operator";
         sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
       }
@@ -210,7 +210,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
   {
     const struct ServicesTag *svstag = node->data;
     if (svstag->numeric == RPL_WHOISOPERATOR)
-      if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false)
+      if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
         continue;
 
     if (svstag->umodes == 0 || user_mode_has_flag(source, svstag->umodes))
@@ -222,7 +222,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_modes_numeric(struct Client *source, const struct Client *target)
 {
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
+  if (client_is_oper(source) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
                        target->name, user_mode_to_str(target->umodes));
 }
@@ -231,7 +231,7 @@ static void
 whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
   if (MyConnect(target))
-    if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)
+    if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || client_is_oper(source) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);
 }

@@ -50,7 +50,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
   sendto_one_numeric(source, &me, RPL_WHOWASUSER,
                      whowas->name, whowas->username, whowas->hostname, whowas->realname);
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
@@ -59,7 +59,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
                        whowas->name, whowas->account, "was");
 
   bool server_hidden = false;
-  if (user_mode_has_flag(source, UMODE_OPER) == false)
+  if (!client_is_oper(source))
   {
     if (whowas->server_hidden || ConfigServerHide.hide_servers)
       server_hidden = true;

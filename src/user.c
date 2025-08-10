@@ -63,7 +63,7 @@
 void
 show_lusers(struct Client *client)
 {
-  if (ConfigServerHide.hide_servers == 0 || user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || client_is_oper(client))
     sendto_one_numeric(client, &me, RPL_LUSERCLIENT, (list_length(&global_client_list) - Count.invisi),
                        Count.invisi, list_length(&global_server_list));
   else
@@ -79,7 +79,7 @@ show_lusers(struct Client *client)
   if (list_length(channel_get_list()))
     sendto_one_numeric(client, &me, RPL_LUSERCHANNELS, list_length(channel_get_list()));
 
-  if (ConfigServerHide.hide_servers == 0 || user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigServerHide.hide_servers == 0 || client_is_oper(client))
   {
     sendto_one_numeric(client, &me, RPL_LUSERME, list_length(&local_client_list), list_length(&local_server_list));
     sendto_one_numeric(client, &me, RPL_LOCALUSERS, list_length(&local_client_list), Count.max_loc);

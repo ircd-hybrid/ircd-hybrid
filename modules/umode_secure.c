@@ -62,7 +62,7 @@ whois_send_hook(void *ctx_)
   sendto_one_numeric(ctx->source, &me, RPL_WHOISSECURE, ctx->target->name, buf);
 
   if (!string_is_empty(ctx->target->tls_certfp))
-    if (user_mode_has_flag(ctx->source, UMODE_OPER) || ctx->source == ctx->target)
+    if (client_is_oper(ctx->source) || ctx->source == ctx->target)
       sendto_one_numeric(ctx->source, &me, RPL_WHOISCERTFP, ctx->target->name, ctx->target->tls_certfp);
 
   return HOOK_FLOW_CONTINUE;

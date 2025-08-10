@@ -63,7 +63,7 @@ _links_send_live(struct Client *client, const char *mask)
   LIST_FOREACH(node, global_server_list.head)
   {
     const struct Client *const server = node->data;
-    if (!user_mode_has_flag(client, UMODE_OPER))
+    if (!client_is_oper(client))
     {
       if (IsHidden(server))
         continue;
@@ -92,7 +92,7 @@ do_links(struct Client *source, char *parv[])
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
 
-  if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
+  if (ConfigServerHide.flatten_links && !client_is_oper(source))
   {
     _links_send_flat(source);
     return;

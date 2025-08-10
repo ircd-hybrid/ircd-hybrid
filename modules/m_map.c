@@ -80,7 +80,7 @@ _map_format_line(char *buffer, size_t buffer_size, const char *server_name, cons
 static bool
 _map_should_hide_server(const struct Client *server, const struct Client *client)
 {
-  if (user_mode_has_flag(client, UMODE_OPER))
+  if (client_is_oper(client))
     return false;
 
   if (IsHidden(server))
@@ -137,7 +137,7 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
   else
   {
     char line_buffer[IRCD_BUFSIZE];
-    const char *const server_id = user_mode_has_flag(client, UMODE_OPER) ? current_server->id : NULL;
+    const char *const server_id = client_is_oper(client) ? current_server->id : NULL;
     const unsigned int server_users = list_length(&current_server->serv->child_client_list);
     const unsigned int global_users = list_length(&global_client_list);
 
@@ -207,7 +207,7 @@ m_map(struct Client *source, int parc, char *parv[])
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
 
-  if (ConfigServerHide.flatten_links && !user_mode_has_flag(source, UMODE_OPER))
+  if (ConfigServerHide.flatten_links && !client_is_oper(source))
     _map_send_flat(source);
   else
     _map_send_live(source, &me, (char[64]){0}, 0);

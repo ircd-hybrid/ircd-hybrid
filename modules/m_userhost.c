@@ -76,15 +76,15 @@ m_userhost(struct Client *source, int parc, char *parv[])
     if (target == source)
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target->name,
-                         user_mode_has_flag(target, UMODE_OPER) ? "*" : "",
+                         client_is_oper(target) ? "*" : "",
                          target->away ? '-' : '+',
                          target->username,
                          target->sockhost);
     else
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
-                         target->name, (user_mode_has_flag(target, UMODE_OPER) &&
+                         target->name, (client_is_oper(target) &&
                                         (user_mode_has_flag(target, UMODE_HIDDEN) == false ||
-                                         user_mode_has_flag(source, UMODE_OPER))) ? "*" : "",
+                                         client_is_oper(source))) ? "*" : "",
                          target->away ? '-' : '+',
                          target->username,
                          target->host);

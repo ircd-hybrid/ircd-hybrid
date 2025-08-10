@@ -54,7 +54,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 
   const char *class_name = client_get_class_name(target);
   sendto_one_numeric(source, &me, RPL_ETRACE,
-                     user_mode_has_flag(target, UMODE_OPER) ? "Oper" : "User", class_name,
+                     client_is_oper(target) ? "Oper" : "User", class_name,
                      target->name, target->username, target->host, target->sockhost, target->info);
 }
 

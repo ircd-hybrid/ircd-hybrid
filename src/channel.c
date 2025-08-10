@@ -730,7 +730,7 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel_has_mode(channel, MODE_REGONLY) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
     return ERR_NEEDREGGEDNICK;
 
-  if (channel_has_mode(channel, MODE_OPERONLY) && user_mode_has_flag(client, UMODE_OPER) == false)
+  if (channel_has_mode(channel, MODE_OPERONLY) && !client_is_oper(client))
     return ERR_OPERONLYCHAN;
 
   if (channel_has_mode(channel, MODE_INVITEONLY))
@@ -825,7 +825,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
   if (MyConnect(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
   {
-    if (!(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
+    if (!(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
     {
       const struct ResvItem *const resv = resv_find(channel->name, match);
       if (resv && resv_exempt_find(client, resv) == false)
@@ -1031,7 +1031,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     }
 
     if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
-        !(user_mode_has_flag(client, UMODE_OPER) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
+        !(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
         ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
     {
       sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
@@ -1067,7 +1067,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
       channel = channel_make(name);
     }
 
-    if (user_mode_has_flag(client, UMODE_OPER) == false)
+    if (!client_is_oper(client))
       channel_check_spambot_warning(client, channel->name);
 
     channel_add_user(channel, client, flags, true);
@@ -1145,7 +1145,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     return;
   }
 
-  if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
+  if (MyConnect(client) && !client_is_oper(client))
     channel_check_spambot_warning(client, NULL);
 
   /*

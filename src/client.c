@@ -717,7 +717,7 @@ _client_exit_detach(struct Client *client)
 
   if (IsClient(client))
   {
-    if (user_mode_has_flag(client, UMODE_OPER))
+    if (client_is_oper(client))
       --Count.oper;
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
@@ -843,7 +843,7 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
   assert(list_find(&local_client_list, client));
   list_remove(&client->connection->node, &local_client_list);
 
-  if (user_mode_has_flag(client, UMODE_OPER))
+  if (client_is_oper(client))
   {
     list_node_t *node = list_find_remove(&oper_list, client);
     if (node)
@@ -1057,8 +1057,7 @@ client_get_idle_time(const struct Client *source,
   if (!(klass->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
     return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
-  if (user_mode_has_flag(source, UMODE_OPER) &&
-      !(klass->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
+  if (client_is_oper(source) && !(klass->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
     return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
 
   const unsigned int min_idle = klass->min_idle;

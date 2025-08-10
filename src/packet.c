@@ -182,7 +182,7 @@ parse_client_queued(struct Client *client)
   {
     bool checkflood = true;
 
-    if (ConfigGeneral.no_oper_flood && user_mode_has_flag(client, UMODE_OPER))
+    if (ConfigGeneral.no_oper_flood && client_is_oper(client))
       checkflood = false;
     else if (client_has_flag(client, FLAGS_CANFLOOD))
       checkflood = false;

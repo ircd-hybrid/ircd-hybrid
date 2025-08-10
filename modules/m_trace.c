@@ -83,7 +83,7 @@ trace_send_status(struct Client *source, const struct Client *target)
                          io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic);
       break;
     case STAT_CLIENT:
-      if (user_mode_has_flag(target, UMODE_OPER))
+      if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, name, target->sockhost,
                            io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
@@ -120,7 +120,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 static void
 do_trace(struct Client *source, const char *name)
 {
-  assert(user_mode_has_flag(source, UMODE_OPER));
+  assert(client_is_oper(source));
 
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "TRACE requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);

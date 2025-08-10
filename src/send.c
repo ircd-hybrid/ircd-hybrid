@@ -350,9 +350,9 @@ sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recip
     case SEND_RECIPIENT_ADMIN:
       return user_mode_has_flag(client, UMODE_ADMIN);
     case SEND_RECIPIENT_OPER:
-      return user_mode_has_flag(client, UMODE_OPER) && user_mode_has_flag(client, UMODE_ADMIN) == false;
+      return client_is_oper(client) && user_mode_has_flag(client, UMODE_ADMIN) == false;
     case SEND_RECIPIENT_OPER_ALL:
-      return user_mode_has_flag(client, UMODE_OPER);
+      return client_is_oper(client);
     case SEND_RECIPIENT_CLIENT:
       return true;
     default:

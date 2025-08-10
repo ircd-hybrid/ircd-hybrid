@@ -393,7 +393,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 
   if (mode->only_opers)
   {
-    if (user_mode_has_flag(client, UMODE_OPER) == false)
+    if (!client_is_oper(client))
     {
       if (!(*errors & SM_ERR_NOTOPER))
         sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);

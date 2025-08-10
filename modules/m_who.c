@@ -135,7 +135,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if ((who->fields & WHO_FIELD_NIP))
   {
-    if (user_mode_has_flag(source, UMODE_OPER) || source == target)
+    if (client_is_oper(source) || source == target)
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->sockhost);
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", "255.255.255.255");
@@ -146,7 +146,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_SER))
   {
-    if (user_mode_has_flag(source, UMODE_OPER) == false &&
+    if (!client_is_oper(source) &&
         (ConfigServerHide.hide_servers || IsHidden(target->uplink)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", ConfigServerHide.hidden_name);
     else
@@ -181,7 +181,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_DIS))
   {
-    if (user_mode_has_flag(source, UMODE_OPER) == false &&
+    if (!client_is_oper(source) &&
         (ConfigServerHide.hide_servers || IsHidden(target->uplink)))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s%u", who->fields == 0 ? ":" : "", 0);
     else
@@ -190,8 +190,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if ((who->fields & WHO_FIELD_IDL))
   {
-    if (MyClient(target) &&
-        (user_mode_has_flag(source, UMODE_OPER) || target == source))
+    if (MyClient(target) && (client_is_oper(source) || target == source))
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source, target));
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", 0);
@@ -227,8 +226,8 @@ who_matches(struct Client *source, const struct Client *target,
             const char *mask, const struct WhoQuery *who)
 {
   if ((who->bitsel & WHOSELECT_OPER))
-    if (user_mode_has_flag(target, UMODE_OPER) == false ||
-        (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false))
+    if (!client_is_oper(target) ||
+        (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
       return false;
 
   if (mask == NULL)
@@ -244,7 +243,7 @@ who_matches(struct Client *source, const struct Client *target,
   {
     if (match(mask, target->host) == 0)
       return true;
-    if (user_mode_has_flag(source, UMODE_OPER) && match(mask, target->realhost) == 0)
+    if (client_is_oper(source) && match(mask, target->realhost) == 0)
       return true;
   }
 
@@ -254,7 +253,7 @@ who_matches(struct Client *source, const struct Client *target,
   if ((who->matchsel & WHO_FIELD_ACC) && match(mask, target->account) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_NIP) && user_mode_has_flag(source, UMODE_OPER))
+  if ((who->matchsel & WHO_FIELD_NIP) && client_is_oper(source))
   {
     struct io_addr addr;
     int bits = 0;
@@ -269,8 +268,7 @@ who_matches(struct Client *source, const struct Client *target,
   }
 
   if ((who->matchsel & WHO_FIELD_SER))
-    if (user_mode_has_flag(source, UMODE_OPER) ||
-        (ConfigServerHide.hide_servers == 0 && !IsHidden(target->uplink)))
+    if (client_is_oper(source) || (ConfigServerHide.hide_servers == 0 && !IsHidden(target->uplink)))
       if (match(mask, target->uplink->name) == 0)
         return true;
 
@@ -320,7 +318,7 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 {
   static uintmax_t last_used = 0;
 
-  if (user_mode_has_flag(source, UMODE_OPER) == false)
+  if (!client_is_oper(source))
   {
     if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {
@@ -387,8 +385,8 @@ who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQ
     if (is_member || user_mode_has_flag(target, UMODE_INVISIBLE) == false)
     {
       if ((who->bitsel & WHOSELECT_OPER))
-        if (user_mode_has_flag(target, UMODE_OPER) == false ||
-            (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false))
+        if (!client_is_oper(target) ||
+            (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
           continue;
 
       who_send(source, target, member, who);
@@ -564,8 +562,8 @@ m_who(struct Client *source, int parc, char *parv[])
     if (target)
     {
       if (!(who->bitsel & WHOSELECT_OPER) ||
-          (user_mode_has_flag(target, UMODE_OPER) &&
-           (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))))
+          (client_is_oper(target) &&
+           (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))))
         who_send(source, target, NULL, who);
 
       sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);

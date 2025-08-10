@@ -231,7 +231,7 @@ stats_gecos(struct Client *client, int parc, char *parv[])
 static void
 stats_operator(struct Client *client, int parc, char *parv[])
 {
-  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_o_oper_only)
+  if (!client_is_oper(client) && ConfigGeneral.stats_o_oper_only)
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -241,9 +241,7 @@ stats_operator(struct Client *client, int parc, char *parv[])
   LIST_FOREACH(node, oper_get_list()->head)
   {
     const struct OperItem *oper = node->data;
-
-    /* Don't allow non opers to see oper privs */
-    if (user_mode_has_flag(client, UMODE_OPER))
+    if (client_is_oper(client))  /* Don't allow non opers to see oper privs */
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
                          oper->name, oper_privs_as_string(oper->oper_privs),
                          oper->klass->name);
@@ -662,7 +660,7 @@ show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
     *bufptr++ = '=';
   if (IsConfCanFlood(conf))
     *bufptr++ = '|';
-  if (user_mode_has_flag(client, UMODE_OPER))
+  if (client_is_oper(client))
   {
     if (IsConfExemptKline(conf))
       *bufptr++ = '^';
@@ -680,7 +678,7 @@ static void
 stats_auth(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_i_oper_only && !user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigGeneral.stats_i_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -697,7 +695,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
         continue;
 
       const struct MaskItem *conf = arec->conf;
-      if (IsConfDoSpoofIp(conf) && user_mode_has_flag(client, UMODE_OPER) == false)
+      if (IsConfDoSpoofIp(conf) && !client_is_oper(client))
         continue;
 
       sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
@@ -720,7 +718,7 @@ static void
 stats_kill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -751,7 +749,7 @@ static void
 stats_tkill(struct Client *client, int parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
-  if (ConfigGeneral.stats_k_oper_only && !user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -780,7 +778,7 @@ stats_tkill(struct Client *client, int parc, char *parv[])
 static void
 stats_messages(struct Client *client, int parc, char *parv[])
 {
-  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_m_oper_only)
+  if (!client_is_oper(client) && ConfigGeneral.stats_m_oper_only)
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
     command_report(client);
@@ -815,14 +813,14 @@ stats_operedup(struct Client *client, int parc, char *parv[])
   {
     const struct Client *target = node->data;
 
-    if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(client, UMODE_OPER) == false)
+    if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(client))
       continue;
 
     const char *duration = "n/a";
-    if (user_mode_has_flag(client, UMODE_OPER) || user_mode_has_flag(target, UMODE_HIDEIDLE) == false)
+    if (client_is_oper(client) || user_mode_has_flag(target, UMODE_HIDEIDLE) == false)
       duration = time_format_duration(client_get_idle_time(client, target));
 
-    if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER))
+    if (MyConnect(client) && client_is_oper(client))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
                          user_mode_has_flag(target, UMODE_ADMIN) ? 'A' : 'O',
                          oper_privs_as_string(target->connection->operflags),
@@ -846,7 +844,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 static void
 stats_ports(struct Client *client, int parc, char *parv[])
 {
-  if (ConfigGeneral.stats_P_oper_only && !user_mode_has_flag(client, UMODE_OPER))
+  if (ConfigGeneral.stats_P_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
     return;
@@ -937,13 +935,13 @@ stats_tstats(struct Client *client, int parc, char *parv[])
 static void
 stats_uptime(struct Client *client, int parc, char *parv[])
 {
-  if (!user_mode_has_flag(client, UMODE_OPER) && ConfigGeneral.stats_u_oper_only)
+  if (!client_is_oper(client) && ConfigGeneral.stats_u_oper_only)
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
   else
   {
     sendto_one_numeric(client, &me, RPL_STATSUPTIME,
                        time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic));
-    if (ConfigServerHide.disable_remote_commands == 0 || user_mode_has_flag(client, UMODE_OPER))
+    if (ConfigServerHide.disable_remote_commands == 0 || client_is_oper(client))
        sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
   }

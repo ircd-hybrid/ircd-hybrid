@@ -50,7 +50,7 @@ m_quit(struct Client *source, int parc, char *parv[])
 {
   const char *reason = "";
 
-  if (!string_is_empty(parv[1]) && (user_mode_has_flag(source, UMODE_OPER) ||
+  if (!string_is_empty(parv[1]) && (client_is_oper(source) ||
       (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
       < io_time_get(IO_TIME_MONOTONIC_SEC)))
     reason = parv[1];

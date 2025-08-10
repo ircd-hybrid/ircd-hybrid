@@ -35,7 +35,7 @@
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
 {
-  if (user_mode_has_flag(client, UMODE_OPER))
+  if (client_is_oper(client))
     return false;
 
   ++Count.oper;
@@ -53,7 +53,7 @@ set_callback(struct Client *client, user_mode_source_t source)
 static bool
 unset_callback(struct Client *client, user_mode_source_t source)
 {
-  if (user_mode_has_flag(client, UMODE_OPER) == false)
+  if (!client_is_oper(client))
     return false;
 
   --Count.oper;
@@ -83,9 +83,8 @@ who_send_hook(void *ctx_)
 {
   ircd_hook_who_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_OPER))
-    if (user_mode_has_flag(ctx->source, UMODE_OPER) ||
-        user_mode_has_flag(ctx->target, UMODE_HIDDEN) == false)
+  if (client_is_oper(ctx->target))
+    if (client_is_oper(ctx->source) || user_mode_has_flag(ctx->target, UMODE_HIDDEN) == false)
       if (ctx->modes_len < sizeof(ctx->modes) - 1)
         ctx->modes[ctx->modes_len++] = '*';
 

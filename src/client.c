@@ -962,7 +962,7 @@ client_exit_fmt(struct Client *client, const char *format, ...)
 }
 
 static void
-_client_abort(struct Client *client, const char *reason)
+_client_exit_schedule(struct Client *client, const char *reason)
 {
   if (IsDefunct(client))
     return;
@@ -996,7 +996,7 @@ dead_link_on_write(struct Client *client, const char *format, ...)
   vsnprintf(err_str, sizeof(err_str), format, args);
   va_end(args);
 
-  _client_abort(client, err_str);
+  _client_exit_schedule(client, err_str);
 }
 
 void
@@ -1006,12 +1006,12 @@ dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
     return;
 
   if (recv_return_val == 0)
-    _client_abort(client, "Remote host closed the connection");
+    _client_exit_schedule(client, "Remote host closed the connection");
   else
   {
     char reason_buf[IRCD_BUFSIZE];
     snprintf(reason_buf, sizeof(reason_buf), "Read error: %s", strerror(error_code));
-    _client_abort(client, reason_buf);
+    _client_exit_schedule(client, reason_buf);
   }
 }
 

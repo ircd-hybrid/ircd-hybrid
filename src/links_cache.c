@@ -42,7 +42,7 @@ static const char *const LINKS_CACHE_KEY_SERVERS = "servers";
 static const char *const LINKS_CACHE_KEY_GENERATED_AT = "generated_at_unix";
 static const char *const LINKS_CACHE_KEY_NETWORK_USERS = "network_users_total";
 static const char *const LINKS_CACHE_KEY_NAME = "name";
-static const char *const LINKS_CACHE_KEY_UPLINK = "uplink";
+static const char *const LINKS_CACHE_KEY_UPLINK_NAME = "uplink_name";
 static const char *const LINKS_CACHE_KEY_DESCRIPTION = "description";
 static const char *const LINKS_CACHE_KEY_USER_COUNT = "user_count";
 
@@ -199,7 +199,7 @@ _links_cache_write_file(void)
     json_error_t error;
     json_t *json_entry = json_pack_ex(&error, 0, "{s:s, s:s, s:s, s:i}",
                                       LINKS_CACHE_KEY_NAME, entry->name,
-                                      LINKS_CACHE_KEY_UPLINK, entry->uplink_name,
+                                      LINKS_CACHE_KEY_UPLINK_NAME, entry->uplink_name,
                                       LINKS_CACHE_KEY_DESCRIPTION, entry->description,
                                       LINKS_CACHE_KEY_USER_COUNT, entry->user_count);
     if (json_entry == NULL)
@@ -252,12 +252,12 @@ _links_cache_read_file(void)
   json_t *json_entry;
   json_array_foreach(servers_array, index, json_entry)
   {
-    const char *name, *uplink, *description;
+    const char *name, *uplink_name, *description;
     int user_count;
 
     if (json_unpack_ex(json_entry, &error, 0, "{s:s, s:s, s:s, s:i}",
                        LINKS_CACHE_KEY_NAME, &name,
-                       LINKS_CACHE_KEY_UPLINK, &uplink,
+                       LINKS_CACHE_KEY_UPLINK_NAME, &uplink_name,
                        LINKS_CACHE_KEY_DESCRIPTION, &description,
                        LINKS_CACHE_KEY_USER_COUNT, &user_count))
     {
@@ -267,7 +267,7 @@ _links_cache_read_file(void)
 
     links_cache_entry_t *entry = io_calloc(sizeof(*entry));
     entry->name = io_strdup(name);
-    entry->uplink_name = io_strdup(uplink);
+    entry->uplink_name = io_strdup(uplink_name);
     entry->description = io_strdup(description);
     entry->user_count = user_count;
 

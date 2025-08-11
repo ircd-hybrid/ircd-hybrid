@@ -223,7 +223,7 @@ user_register_local(struct Client *client)
 {
   assert(client == client->from);
   assert(client->connection->registration == 0);
-  assert(MyConnect(client));
+  assert(client_is_local(client));
   assert(IsUnknown(client));
   assert(list_find(&unknown_list, client));
 
@@ -503,7 +503,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     sendto_servers(client, 0, 0, ":%s SVSHOST %s %ju %s",
                    client->uplink->id, client->id, client->tsinfo, client->host);
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     sendto_one_numeric(client, &me, RPL_VISIBLEHOST, client->host);
     clear_ban_cache_list(&client->channel);

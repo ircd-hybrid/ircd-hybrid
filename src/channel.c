@@ -115,7 +115,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
   member->flags = flags;
   list_add(member, &member->channode, &channel->members);
 
-  if (MyConnect(client))
+  if (client_is_local(client))
     list_add(member, &member->locchannode, &channel->members_local);
 
   list_add(member, &member->usernode, &client->channel);
@@ -133,7 +133,7 @@ channel_remove_user(struct ChannelMember *member)
 
   list_remove(&member->channode, &channel->members);
 
-  if (MyConnect(client))
+  if (client_is_local(client))
     list_remove(&member->locchannode, &channel->members_local);
 
   list_remove(&member->usernode, &client->channel);
@@ -823,7 +823,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   if (IsServer(client) || client_is_service(client))
     return CHANNEL_SEND_PERM_ELEVATED;
 
-  if (MyConnect(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
+  if (client_is_local(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
   {
     if (!(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
     {
@@ -887,7 +887,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
   *error = "you are banned (+b)";
   /* Cache can send if banned */
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     if (member)
     {
@@ -1145,7 +1145,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     return;
   }
 
-  if (MyConnect(client) && !client_is_oper(client))
+  if (client_is_local(client) && !client_is_oper(client))
     channel_check_spambot_warning(client, NULL);
 
   /*
@@ -1154,7 +1154,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
   bool show_reason = true;
   if (string_is_empty(reason))
     show_reason = false;
-  else if (MyConnect(client))
+  else if (client_is_local(client))
   {
     const char *error;
     if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)

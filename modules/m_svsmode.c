@@ -88,7 +88,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   sendto_servers(source, 0, 0, ":%s SVSMODE %s %ju %s",
                  source->id, target->id, target->tsinfo, modes);
 
-  if (MyConnect(target))
+  if (client_is_local(target))
     user_mode_send(target, mode_flags_old, USER_MODE_SEND_CLIENT);
 }
 

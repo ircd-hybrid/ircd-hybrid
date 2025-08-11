@@ -74,13 +74,13 @@ mo_kill(struct Client *source, int parc, char *parv[])
                       parv[1], target->name);
   }
 
-  if (!MyConnect(target) && !HasOFlag(source, OPER_FLAG_KILL_REMOTE))
+  if (!client_is_local(target) && !HasOFlag(source, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill:remote");
     return;
   }
 
-  if (MyConnect(target) && !HasOFlag(source, OPER_FLAG_KILL))
+  if (client_is_local(target) && !HasOFlag(source, OPER_FLAG_KILL))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill");
     return;
@@ -93,7 +93,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
   }
 
   const char *reason = string_default(parv[2], CONF_NOREASON);
-  if (MyConnect(target))
+  if (client_is_local(target))
     sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
                source->name, source->username, source->host,
                target->name, REASONLEN, reason);
@@ -114,7 +114,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
    * And pass on the message to other servers. Note, that if KILL was changed,
    * the message has to be sent to all links, also back.
    */
-  if (!MyConnect(target))
+  if (!client_is_local(target))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%.*s)",
                    source->id, target->id, me.name, source->host,
@@ -164,7 +164,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (MyConnect(target))
+  if (client_is_local(target))
   {
     if (IsServer(source))
     {

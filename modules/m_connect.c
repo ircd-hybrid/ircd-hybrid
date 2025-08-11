@@ -67,7 +67,7 @@ do_connect(struct Client *source, const char *name)
   }
 
   /* Notify all operators about connect requests. */
-  const char *const type_p = MyConnect(source) ? "Local" : "Remote";
+  const char *const type_p = client_is_local(source) ? "Local" : "Remote";
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
                  me.name, type_p, name, connect->port, client_get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
@@ -83,7 +83,7 @@ do_connect(struct Client *source, const char *name)
   if (server_connect(connect, source) == false)
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
                       connect->name, connect->port);
-  else if (MyConnect(source) &&
+  else if (client_is_local(source) &&
            (ConfigServerHide.hide_server_ips == 0 && client_is_admin(source)))
     sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
                       connect->name, connect->host, connect->port);

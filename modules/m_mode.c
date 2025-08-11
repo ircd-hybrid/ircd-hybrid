@@ -54,7 +54,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
   const struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
   {
-    if (MyConnect(source))
+    if (client_is_local(source))
       sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
@@ -89,7 +89,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
         break;
       default:
         if (user_mode_change(source, *m, USER_MODE_SOURCE_REGULAR, action) == USER_MODE_RESULT_MODE_NOT_FOUND)
-          if (MyConnect(source))
+          if (client_is_local(source))
             badmode = true;
         break;
     }
@@ -103,7 +103,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
    * servers to update correctly.
    */
   user_mode_send(source, mode_flags_old,
-                 (MyConnect(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
+                 (client_is_local(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
 }
 
 /*! \brief MODE command handler

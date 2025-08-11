@@ -210,7 +210,7 @@ user_mode_check_policy(const struct UserMode *mode, const struct Client *client,
 
   if (action == USER_MODE_ACTION_ADD)
     if ((mode->policy & USER_MODE_POLICY_OPER_ONLY) && source != USER_MODE_SOURCE_SVSMODE)
-      if (MyConnect(client) && user_mode_has_flag(client, UMODE_OPER) == false)
+      if (client_is_local(client) && user_mode_has_flag(client, UMODE_OPER) == false)
         return false;
 
   if ((mode->policy & USER_MODE_POLICY_SERVICE_ONLY) && source != USER_MODE_SOURCE_SVSMODE)

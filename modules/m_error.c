@@ -47,7 +47,7 @@
 static void
 mr_error(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source));
+  assert(client_is_local(source));
 
   if (!IsHandshake(source) && !IsConnecting(source))
     return;
@@ -80,7 +80,7 @@ ms_error(struct Client *source, int parc, char *parv[])
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
             client_get_name(source, SHOW_IP), message);
 
-  if (MyConnect(source))
+  if (client_is_local(source))
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
                    client_get_name(source->from, MASK_IP), message);
   else

@@ -562,7 +562,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   char *mask = parv[*parn];
   ++(*parn);
 
-  if (*mask == ':' || (!MyConnect(client) && strchr(mask, ' ')))
+  if (*mask == ':' || (!client_is_local(client) && strchr(mask, ' ')))
     return;
 
   if (dir == MODE_ADD)  /* setting + */

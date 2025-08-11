@@ -87,7 +87,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
 static void
 mr_pong(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source));
+  assert(client_is_local(source));
 
   if (parc == 2 && !string_is_empty(parv[1]))
   {

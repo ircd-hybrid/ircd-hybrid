@@ -74,7 +74,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   if (valid_nickname(new_nick, true) == false)
     return;
 
-  if (!MyConnect(target))
+  if (!client_is_local(target))
   {
     if (target->from == source->from)
     {

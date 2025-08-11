@@ -77,20 +77,20 @@ mo_squit(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!MyConnect(target) && !HasOFlag(source, OPER_FLAG_SQUIT_REMOTE))
+  if (!client_is_local(target) && !HasOFlag(source, OPER_FLAG_SQUIT_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "squit:remote");
     return;
   }
 
-  if (MyConnect(target) && !HasOFlag(source, OPER_FLAG_SQUIT))
+  if (client_is_local(target) && !HasOFlag(source, OPER_FLAG_SQUIT))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "squit");
     return;
   }
 
   const char *reason = string_default(parv[2], CONF_NOREASON);
-  if (MyConnect(target))
+  if (client_is_local(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
                    target->name, client_get_oper_name(source), REASONLEN, reason);
@@ -140,7 +140,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
     target = source->from;
 
   const char *reason = string_default(parv[2], source->name);
-  if (MyConnect(target))
+  if (client_is_local(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
                    me.name, target->name, client_get_oper_name(source), reason);

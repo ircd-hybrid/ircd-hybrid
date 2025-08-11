@@ -57,7 +57,7 @@ mr_webirc(struct Client *source, int parc, char *parv[])
   const char *const host = parv[3];
   const char *const addr = parv[4];
 
-  assert(MyConnect(source));
+  assert(client_is_local(source));
 
   if (!valid_hostname(host))
   {

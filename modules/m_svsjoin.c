@@ -57,7 +57,7 @@ ms_svsjoin(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  if (MyConnect(target))
+  if (client_is_local(target))
   {
     channel_join_list(target, parv[2], parv[3]);
     return;

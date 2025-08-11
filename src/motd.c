@@ -229,7 +229,7 @@ motd_lookup(const struct Client *client)
 {
   assert(client);
 
-  if (!MyConnect(client))  /* Not my user, always return remote motd */
+  if (!client_is_local(client))  /* Not my user, always return remote motd */
     return MotdList.remote;
 
   /* Check the motd blocks first */

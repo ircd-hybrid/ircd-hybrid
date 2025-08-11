@@ -90,7 +90,7 @@ whowas_do(struct Client *source, const char *name, const char *limit_str)
   if (!string_is_empty(limit_str))
     reply_limit = atoi(limit_str);
 
-  if (!MyConnect(source) && (reply_limit <= 0 || reply_limit > WHOWAS_MAX_REPLIES))
+  if (!client_is_local(source) && (reply_limit <= 0 || reply_limit > WHOWAS_MAX_REPLIES))
     reply_limit = WHOWAS_MAX_REPLIES;
 
   int records_found = whowas_query(name, reply_limit, whowas_send_reply_cb, source);

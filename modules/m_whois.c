@@ -132,7 +132,7 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
   /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
   /* 1       23456            7            89                           0 1  */
   size_t len = strlen(target->name) + 11;
-  if (MyConnect(source))
+  if (client_is_local(source))
     len += strlen(me.name) + strlen(source->name);
   else
     len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
@@ -230,7 +230,7 @@ whois_send_modes_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
-  if (MyConnect(target))
+  if (client_is_local(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || client_is_oper(source) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);

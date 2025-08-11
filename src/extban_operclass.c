@@ -36,7 +36,7 @@
 static enum extban_match
 extban_operclass_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
-  if (MyConnect(client) && client_is_oper(client))
+  if (client_is_local(client) && client_is_oper(client))
   {
     const char *class_name = client_get_class_name(client);
     if (match(ban->host, class_name) == 0)

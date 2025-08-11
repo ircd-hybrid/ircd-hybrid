@@ -210,7 +210,7 @@ _client_destroy(struct Client *client)
   io_free(client->away);
   client->away = NULL;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
     assert(client->connection->list_task == NULL);
@@ -537,7 +537,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
 {
   static char buf[HOSTLEN * 2 + USERLEN + 4];  /* +4 for [,@,],\0 */
 
-  if (!MyConnect(client))
+  if (!client_is_local(client))
     return client->name;
 
   if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
@@ -584,7 +584,7 @@ client_get_oper_name(const struct Client *client)
     return client->name;
 
   const char *oper_name;
-  if (MyConnect(client) && client->connection->oper_name)
+  if (client_is_local(client) && client->connection->oper_name)
     oper_name = client->connection->oper_name;
   else
     oper_name = client->uplink->name;
@@ -611,7 +611,7 @@ free_exited_clients(void)
 static void
 _client_exit_teardown_connection(struct Client *client)
 {
-  assert(client && MyConnect(client));
+  assert(client && client_is_local(client));
 
    /*
    * Attempt a final, best-effort flush of any pending data in the send queue.
@@ -755,7 +755,7 @@ _client_exit_detach(struct Client *client)
   if (client_has_flag(client, FLAGS_IPHASH))
   {
     client_unset_flag(client, FLAGS_IPHASH);
-    ipcache_record_remove(&client->addr, MyConnect(client));
+    ipcache_record_remove(&client->addr, client_is_local(client));
   }
 
   assert(list_find(&dead_list, client) == NULL);
@@ -766,7 +766,7 @@ _client_exit_detach(struct Client *client)
 static void
 _client_exit_log_session(const struct Client *client, const char *reason)
 {
-  assert(client && MyConnect(client));
+  assert(client && client_is_local(client));
 
   if (IsClient(client))
   {
@@ -803,7 +803,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
 static void
 _client_exit_cleanup_server_connection(struct Client *client, const char *reason)
 {
-  assert(client && MyConnect(client));
+  assert(client && client_is_local(client));
   assert(IsServer(client));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -830,7 +830,7 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
 static void
 _client_exit_cleanup_client_connection(struct Client *client, const char *reason)
 {
-  assert(client && MyConnect(client));
+  assert(client && client_is_local(client));
   assert(IsClient(client));
 
   _client_exit_log_session(client, reason);
@@ -862,7 +862,7 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
 static void
 _client_exit_cleanup_unregistered_connection(struct Client *client, const char *reason)
 {
-  assert(client && MyConnect(client));
+  assert(client && client_is_local(client));
   assert(IsUnknown(client) || IsConnecting(client) || IsHandshake(client));
 
   if (IsConnecting(client) || IsHandshake(client))
@@ -892,7 +892,7 @@ client_exit(struct Client *client, const char *reason)
   client_set_flag(client, FLAGS_CLOSING);
 
   /* For local clients, tear down the physical connection immediately. */
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     assert(client == client->from);
 
@@ -923,7 +923,7 @@ client_exit(struct Client *client, const char *reason)
   }
 
   SetDead(client);
-  hook_dispatch(MyConnect(client) ? ircd_hook_client_exit_local : ircd_hook_client_exit_remote,
+  hook_dispatch(client_is_local(client) ? ircd_hook_client_exit_local : ircd_hook_client_exit_remote,
                 &(ircd_hook_client_exit_ctx){ .client = client, .reason = reason });
 
   /*
@@ -931,7 +931,7 @@ client_exit(struct Client *client, const char *reason)
    * propagation to ensure that broadcast lists like `local_server_list` are correct before
    * they are used by sendto_servers().
    */
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     if (IsClient(client))
       _client_exit_cleanup_client_connection(client, reason);

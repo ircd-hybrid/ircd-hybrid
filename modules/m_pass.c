@@ -48,7 +48,7 @@ static void
 mr_pass(struct Client *source, int parc, char *parv[])
 {
   const char *const password = parv[1];
-  assert(MyConnect(source));
+  assert(client_is_local(source));
 
   if (source->connection->password == NULL)
     source->connection->password = io_strndup(password, PASSWDLEN);

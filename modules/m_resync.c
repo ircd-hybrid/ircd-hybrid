@@ -47,10 +47,10 @@
 static void
 ms_resync(struct Client *source, int parc, char *parv[])
 {
-  assert(MyConnect(source));
+  assert(client_is_local(source));
   assert(IsServer(source));
 
-  if (!MyConnect(source) || !IsServer(source))
+  if (!client_is_local(source) || !IsServer(source))
     return;
 
   struct Channel *channel = hash_find_channel(parv[1]);

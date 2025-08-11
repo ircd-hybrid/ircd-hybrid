@@ -35,7 +35,7 @@ set_callback(struct Client *client, user_mode_source_t source)
   if (user_mode_has_flag(client, UMODE_CLOAK))
     return false;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     if (client_has_flag(client, FLAGS_SPOOF))
       return false;
@@ -60,7 +60,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (user_mode_has_flag(client, UMODE_CLOAK) == false)
     return false;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
     user_set_hostmask(client, client->realhost, true);
   return true;
 }

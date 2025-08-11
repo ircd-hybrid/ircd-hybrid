@@ -50,7 +50,7 @@ ms_eob(struct Client *source, int parc, char *parv[])
   client_set_flag(source, FLAGS_EOB);
   sendto_servers(source, 0, 0, ":%s EOB", source->id);
 
-  if (MyConnect(source))
+  if (client_is_local(source))
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "End of burst from %s (%ju seconds)", source->name,
                    (io_time_get(IO_TIME_MONOTONIC_SEC) - source->connection->created_monotonic));

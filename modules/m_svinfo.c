@@ -52,7 +52,7 @@
 static void
 ms_svinfo(struct Client *source, int parc, char *parv[])
 {
-  if (!IsServer(source) || !MyConnect(source))
+  if (!IsServer(source) || !client_is_local(source))
     return;
 
   server_ts_protocol_version_t current_version = atoi(parv[1]);

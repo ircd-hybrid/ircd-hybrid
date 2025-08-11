@@ -61,12 +61,12 @@ do_away(struct Client *source, const char *message)
                                    source->name, source->username, source->host);
     }
 
-    if (MyConnect(source))
+    if (client_is_local(source))
       sendto_one_numeric(source, &me, RPL_UNAWAY);
     return;
   }
 
-  if (MyConnect(source))
+  if (client_is_local(source))
   {
     if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
       source->connection->away.count = 0;

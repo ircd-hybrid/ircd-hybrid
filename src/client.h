@@ -394,6 +394,12 @@ client_unset_flag(struct Client *client, unsigned int flags)
 }
 
 static inline bool
+client_is_local(const struct Client *client)
+{
+  return client->connection != NULL;
+}
+
+static inline bool
 client_is_oper(const struct Client *client)
 {
   return user_mode_has_flag(client, UMODE_OPER);

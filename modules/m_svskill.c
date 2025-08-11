@@ -61,7 +61,7 @@ ms_svskill(struct Client *source, int parc, char *parv[])
     return;
 
   const char *const reason = parv[3];
-  if (MyConnect(target))
+  if (client_is_local(target))
   {
     client_exit_fmt(target, "SVSKilled: %.*s", REASONLEN, reason);
     return;

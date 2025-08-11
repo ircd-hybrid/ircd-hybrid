@@ -87,7 +87,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 {
   assert(!IsMe(to));
   assert(to != &me);
-  assert(MyConnect(to));
+  assert(client_is_local(to));
 
   const unsigned int max_sendq = client_get_max_sendq(to);
   const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
@@ -134,7 +134,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 static void
 sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
 {
-  assert(MyConnect(to));
+  assert(client_is_local(to));
   assert(IsServer(to));
   assert(!IsMe(to));
   assert(to->from == to);
@@ -331,7 +331,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
   send_format(buffer, format, args);
   va_end(args);
 
-  if (MyConnect(to))
+  if (client_is_local(to))
     sendto_one_buffer(to, buffer);
   else
     sendto_one_buffer_remote(to->from, from, buffer);
@@ -717,7 +717,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
     }
   }
 
-  if (touser && MyConnect(user) && !IsDead(user))
+  if (touser && client_is_local(user) && !IsDead(user))
     if (HasCap(user, poscap) == poscap)
       sendto_one_buffer(user, buffer);
 
@@ -825,7 +825,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
     if (user_mode_has_flag(target, UMODE_DEAF))
       continue;
 
-    if (MyConnect(target))
+    if (client_is_local(target))
       sendto_one_buffer(target, buffer_l);
     else if (target->from->connection->send_marker != send_marker)
       sendto_one_buffer_remote(target->from, from, buffer_r);

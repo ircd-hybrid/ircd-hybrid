@@ -64,7 +64,7 @@
 static bool
 check_clean_nick(struct Client *source, const char *nick)
 {
-  assert(IsServer(source) || (IsClient(source) && !MyConnect(source)));
+  assert(IsServer(source) || (IsClient(source) && !client_is_local(source)));
 
   /*
    * The old code did some wacky stuff here, if the nick is invalid, kill it

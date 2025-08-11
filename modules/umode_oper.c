@@ -40,7 +40,7 @@ set_callback(struct Client *client, user_mode_source_t source)
 
   ++Count.oper;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     client->handler = OPER_HANDLER;
     assert(list_find(&oper_list, client) == NULL);
@@ -59,7 +59,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
   --Count.oper;
   user_mode_unset_flag(client, user_mode_get_oper_only());
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
     client->handler = CLIENT_HANDLER;
     client_set_class(client, NULL, CLIENT_CLASS_OPER);

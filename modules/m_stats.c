@@ -820,7 +820,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
     if (client_is_oper(client) || user_mode_has_flag(target, UMODE_HIDEIDLE) == false)
       duration = time_format_duration(client_get_idle_time(client, target));
 
-    if (MyConnect(client) && client_is_oper(client))
+    if (client_is_local(client) && client_is_oper(client))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
                          client_is_admin(target) ? 'A' : 'O',
                          oper_privs_as_string(target->connection->operflags),

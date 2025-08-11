@@ -196,7 +196,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
         const char *text;
         if (client_is_service(target))
           text = "is a Network Service";
-        else if (user_mode_has_flag(target, UMODE_ADMIN))
+        else if (client_is_admin(target))
           text = "is a Server Administrator";
         else  /* client_is_oper(target) == true */
           text = "is an IRC Operator";

@@ -69,11 +69,11 @@ trace_send_status(struct Client *source, const struct Client *target)
   {
     case STAT_CONNECTING:
       sendto_one_numeric(source, &me, RPL_TRACECONNECTING,
-                         class_name, user_mode_has_flag(source, UMODE_ADMIN) ? name : target->name);
+                         class_name, client_is_admin(source) ? name : target->name);
       break;
     case STAT_HANDSHAKE:
       sendto_one_numeric(source, &me, RPL_TRACEHANDSHAKE,
-                         class_name, user_mode_has_flag(source, UMODE_ADMIN) ? name : target->name);
+                         class_name, client_is_admin(source) ? name : target->name);
       break;
     case STAT_ME:
       break;
@@ -101,7 +101,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 
       trace_get_dependent(&servers, &clients, target);
 
-      if (user_mode_has_flag(source, UMODE_ADMIN) == false)
+      if (!client_is_admin(source))
         name = client_get_name(target, MASK_IP);
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,

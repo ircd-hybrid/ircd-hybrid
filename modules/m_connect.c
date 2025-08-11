@@ -84,7 +84,7 @@ do_connect(struct Client *source, const char *name)
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
                       connect->name, connect->port);
   else if (MyConnect(source) &&
-           (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(source, UMODE_ADMIN)))
+           (ConfigServerHide.hide_server_ips == 0 && client_is_admin(source)))
     sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
                       connect->name, connect->host, connect->port);
   else

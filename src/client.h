@@ -400,6 +400,12 @@ client_is_oper(const struct Client *client)
 }
 
 static inline bool
+client_is_admin(const struct Client *client)
+{
+  return user_mode_has_flag(client, UMODE_ADMIN);
+}
+
+static inline bool
 client_is_service(const struct Client *client)
 {
   return client_has_flag(client, FLAGS_SERVICE);

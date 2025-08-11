@@ -274,7 +274,7 @@ stats_connect(struct Client *client, int parc, char *parv[])
     /*
      * Allow admins to see actual ips unless 'hide_server_ips' is enabled
      */
-    if (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(client, UMODE_ADMIN))
+    if (ConfigServerHide.hide_server_ips == 0 && client_is_admin(client))
       sendto_one_numeric(client, &me, RPL_STATSCLINE,
                          'C', connect->host, buf, connect->name, connect->port, connect->klass->name);
     else
@@ -822,12 +822,12 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 
     if (MyConnect(client) && client_is_oper(client))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
-                         user_mode_has_flag(target, UMODE_ADMIN) ? 'A' : 'O',
+                         client_is_admin(target) ? 'A' : 'O',
                          oper_privs_as_string(target->connection->operflags),
                          target->name, target->username, target->host, duration);
     else
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
-                         user_mode_has_flag(target, UMODE_ADMIN) ? 'A' : 'O',
+                         client_is_admin(target) ? 'A' : 'O',
                          target->name, target->username, target->host, duration);
     ++count;
   }
@@ -859,7 +859,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
 
     if (listener_has_flag(listener, LISTENER_HIDDEN))
     {
-      if (user_mode_has_flag(client, UMODE_ADMIN) == false)
+      if (!client_is_admin(client))
         continue;
       *bufptr++ = 'H';
     }
@@ -874,7 +874,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
       *bufptr++ = 'D';
     *bufptr = '\0';
 
-    if (user_mode_has_flag(client, UMODE_ADMIN) && ConfigServerHide.hide_server_ips == 0)
+    if (client_is_admin(client) && ConfigServerHide.hide_server_ips == 0)
       sendto_one_numeric(client, &me, RPL_STATSPLINE,
                          'P', listener_get_port(listener), listener_get_name(listener), listener->ref_count, buf,
                          listener_is_active(listener) ? "active" : "disabled");
@@ -1011,7 +1011,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
 
     /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
-                       client_get_name(target, user_mode_has_flag(client, UMODE_ADMIN) ? SHOW_IP : MASK_IP),
+                       client_get_name(target, client_is_admin(client) ? SHOW_IP : MASK_IP),
                        dbuf_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,
@@ -1098,7 +1098,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
       type = HIDE_IP;
 
     if (IsServer(target) || IsConnecting(target) || IsHandshake(target))
-      if (user_mode_has_flag(client, UMODE_ADMIN) == false)
+      if (!client_is_admin(client))
         type = MASK_IP;
 
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,

@@ -371,7 +371,7 @@ who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQ
 {
   bool is_member = false;
 
-  if (user_mode_has_flag(source, UMODE_ADMIN) || member_find_link(source, channel))
+  if (client_is_admin(source) || member_find_link(source, channel))
     is_member = true;
   else if (channel_has_mode(channel, MODE_SECRET))
     return;

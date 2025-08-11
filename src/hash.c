@@ -546,7 +546,7 @@ static void
 list_one_channel(struct Client *client, struct Channel *channel)
 {
   if (channel_has_mode(channel, MODE_SECRET) &&
-      !(user_mode_has_flag(client, UMODE_ADMIN) || member_find_link(client, channel)))
+      !(client_is_admin(client) || member_find_link(client, channel)))
     return;
 
   const struct ListTask *const lt = client->connection->list_task;

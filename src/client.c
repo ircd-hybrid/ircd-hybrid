@@ -311,7 +311,7 @@ check_unknowns_list(void)
      * Check UNKNOWN connections - if they have been in this state
      * for > 30s, close them.
      */
-    if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) <= 30)
+    if (client_get_session_duration(client) <= 30)
       continue;
 
     const char *reason = NULL;
@@ -776,7 +776,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
               "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
               "class=\"%s\" oper=\"%s\" reason=\"%s\"",
               client->name, client->username, client->host, client->sockhost, client->realhost, client->account,
-              time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+              time_format_duration(client_get_session_duration(client)),
               (uintmax_t)(client->connection->send.bytes >> 10),
               (uintmax_t)(client->connection->recv.bytes >> 10),
               client->connection->send.messages,
@@ -791,7 +791,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
               "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
               "class=\"%s\" reason=\"%s\"",
               client->name, client->sockhost,
-              time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+              time_format_duration(client_get_session_duration(client)),
               (uintmax_t)(client->connection->send.bytes >> 10),
               (uintmax_t)(client->connection->recv.bytes >> 10),
               client->connection->send.messages,
@@ -809,7 +809,7 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Link Closed: %s [ip=%s class=%s uptime=\"%s\" sent=%juKiB recv=%juKiB] (Reason: %s)",
                  client->name, client->sockhost, client_get_class_name(client),
-                 time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic),
+                 time_format_duration(client_get_session_duration(client)),
                  (uintmax_t)(client->connection->send.bytes >> 10),
                  (uintmax_t)(client->connection->recv.bytes >> 10), reason);
 
@@ -818,7 +818,7 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
   ++ServerStats.is_sv;
   ServerStats.is_sbs += client->connection->send.bytes;
   ServerStats.is_sbr += client->connection->recv.bytes;
-  ServerStats.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
+  ServerStats.is_sti += client_get_session_duration(client);
 
   assert(list_find(&local_server_list, client));
   list_remove(&client->connection->node, &local_server_list);
@@ -838,7 +838,7 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
   ++ServerStats.is_cl;
   ServerStats.is_cbs += client->connection->send.bytes;
   ServerStats.is_cbr += client->connection->recv.bytes;
-  ServerStats.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
+  ServerStats.is_cti += client_get_session_duration(client);
 
   assert(list_find(&local_client_list, client));
   list_remove(&client->connection->node, &local_client_list);

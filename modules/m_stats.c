@@ -896,7 +896,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sp.is_sbs += target->connection->send.bytes;
     sp.is_sbr += target->connection->recv.bytes;
-    sp.is_sti += io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic;
+    sp.is_sti += client_get_session_duration(target);
     sp.is_sv++;
   }
 
@@ -905,7 +905,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sp.is_cbs += target->connection->send.bytes;
     sp.is_cbr += target->connection->recv.bytes;
-    sp.is_cti += io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic;
+    sp.is_cti += client_get_session_duration(target);
     sp.is_cl++;
   }
 
@@ -940,7 +940,7 @@ stats_uptime(struct Client *client, int parc, char *parv[])
   else
   {
     sendto_one_numeric(client, &me, RPL_STATSUPTIME,
-                       time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic));
+                       time_format_duration(client_get_session_duration(&me)));
     if (ConfigServerHide.disable_remote_commands == 0 || client_is_oper(client))
        sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
                           Count.max_loc, Count.totalrestartcount);
@@ -1017,7 +1017,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
-                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic),
+                       client_get_session_duration(target),
                        (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
                        capab_get(target, true));
   }
@@ -1032,7 +1032,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
                      _GMKv(recv_bytes), _GMKs(recv_bytes));
 
-  const uintmax_t uptime = (io_time_get(IO_TIME_MONOTONIC_SEC) - me.connection->created_monotonic);
+  const uintmax_t uptime = client_get_session_duration(&me);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Server send: %7.2f %s (%4.1f KiB/s)",
                      _GMKv((me.connection->send.bytes >> 10)),
                      _GMKs((me.connection->send.bytes >> 10)),
@@ -1108,7 +1108,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
-                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic),
+                       client_get_session_duration(target),
                        (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
                        IsServer(target) ? capab_get(target, true) : "-");
   }

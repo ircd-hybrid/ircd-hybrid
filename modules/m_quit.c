@@ -50,10 +50,10 @@ m_quit(struct Client *source, int parc, char *parv[])
 {
   const char *reason = "";
 
-  if (!string_is_empty(parv[1]) && (client_is_oper(source) ||
-      (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
-      < io_time_get(IO_TIME_MONOTONIC_SEC)))
-    reason = parv[1];
+  if (!string_is_empty(parv[1]))
+    if (client_is_oper(source) ||
+        (client_get_session_duration(source) > ConfigGeneral.anti_spam_exit_message_time))
+      reason = parv[1];
 
   client_exit_fmt(source, "Quit: %.*s", KICKLEN, reason);
 }

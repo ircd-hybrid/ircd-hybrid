@@ -1157,8 +1157,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
   else if (client_is_local(client))
   {
     const char *error;
-    if ((client->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
-          >= io_time_get(IO_TIME_MONOTONIC_SEC))
+    if (client_get_session_duration(client) <= ConfigGeneral.anti_spam_exit_message_time)
       show_reason = false;
     else if (channel_send_qualifies(channel, client, member, 0, reason, false, &error) == CHANNEL_SEND_PERM_FORBIDDEN)
       show_reason = false;

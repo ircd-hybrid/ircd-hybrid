@@ -32,6 +32,7 @@
 #include "dbuf.h"
 #include "fdlist.h"
 #include "io.h"
+#include "io_time.h"
 #include "list.h"
 
 #include "command.h"
@@ -460,6 +461,12 @@ client_get_max_channels(const struct Client *client)
 {
   const unsigned int class_limit = class_get_max_channels(client_get_active_class(client));
   return (class_limit > 0) ? class_limit : ConfigChannel.max_channels;
+}
+
+static inline uintmax_t
+client_get_session_duration(const struct Client *client)
+{
+  return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 }
 
 static inline const char *

@@ -79,8 +79,7 @@ trace_send_status(struct Client *source, const struct Client *target)
       break;
     case STAT_UNKNOWN:
       sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
-                         class_name, name, target->sockhost,
-                         io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->created_monotonic);
+                         class_name, name, target->sockhost, client_get_session_duration(target));
       break;
     case STAT_CLIENT:
       if (client_is_oper(target))

@@ -251,7 +251,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   assert(client->connection->fd);
   assert(client->connection->fd == fde);
 
-  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic) > TLS_HANDSHAKE_TIMEOUT)
+  if (client_get_session_duration(client) > TLS_HANDSHAKE_TIMEOUT)
   {
     client_exit(client, "Timeout during TLS handshake");
     return;

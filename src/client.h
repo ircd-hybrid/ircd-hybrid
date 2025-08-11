@@ -231,8 +231,8 @@ struct Connection
   unsigned int random_ping;  /**< A random value for PING cookie authentication. */
 
   uintmax_t send_marker;  /**< A per-broadcast marker to prevent duplicate message sends. */
-  uintmax_t last_data;  /**< Last time data read from socket; monotonic time */
-  uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_data
+  uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */
+  uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_receive_time
                              which can be modified by check_pings_list; monotonic time */
   uintmax_t created_real;  /**< Time client was created; real time */
   uintmax_t created_monotonic;  /**< Time client was created; monotonic time */
@@ -467,6 +467,12 @@ static inline uintmax_t
 client_get_session_duration(const struct Client *client)
 {
   return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
+}
+
+static inline uintmax_t
+client_get_socket_idle_duration(const struct Client *client)
+{
+  return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_receive_time;
 }
 
 static inline const char *

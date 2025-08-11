@@ -148,7 +148,7 @@ client_create_local(void)
 {
   struct Client *client = io_calloc(sizeof(*client));
   client->connection = io_calloc(sizeof(*client->connection));
-  client->connection->last_data = \
+  client->connection->last_receive_time = \
   client->connection->last_ping = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);

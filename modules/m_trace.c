@@ -84,13 +84,11 @@ trace_send_status(struct Client *source, const struct Client *target)
     case STAT_CLIENT:
       if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
-                           class_name, name, target->sockhost,
-                           io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
+                           class_name, name, target->sockhost, client_get_socket_idle_duration(target),
                            client_get_idle_time(source, target));
       else
         sendto_one_numeric(source, &me, RPL_TRACEUSER,
-                           class_name, name, target->sockhost,
-                           io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data,
+                           class_name, name, target->sockhost, client_get_socket_idle_duration(target),
                            client_get_idle_time(source, target));
       break;
     case STAT_SERVER:
@@ -106,7 +104,7 @@ trace_send_status(struct Client *source, const struct Client *target)
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
                          class_name, servers, clients, name,
                          target->serv->initiator_name ? target->serv->initiator_name : "*", "*",
-                         me.name, io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data);
+                         me.name, client_get_socket_idle_duration(target));
       break;
     }
 

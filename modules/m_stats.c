@@ -970,7 +970,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
     const struct Client *target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
                        target->name, target->serv->initiator_name ? target->serv->initiator_name : "Remote.",
-                       "*", "*", time_format_duration(io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data));
+                       "*", "*", time_format_duration(client_get_socket_idle_duration(target)));
   }
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%u Server(s)",
@@ -1018,7 +1018,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
                        client_get_session_duration(target),
-                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
+                       client_get_socket_idle_duration(target),
                        capab_get(target, true));
   }
 
@@ -1109,7 +1109,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
                        target->connection->recv.messages,
                        target->connection->recv.bytes >> 10,
                        client_get_session_duration(target),
-                       (io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_data),
+                       client_get_socket_idle_duration(target),
                        IsServer(target) ? capab_get(target, true) : "-");
   }
 }

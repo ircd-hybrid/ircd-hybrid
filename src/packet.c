@@ -328,10 +328,8 @@ read_packet(fde_t *F, void *data_)
 
     dbuf_put(&client->connection->buf_recvq, readBuf, length);
 
-    client->connection->last_ping =
     client->connection->last_receive_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-    client_unset_flag(client, FLAGS_PINGSENT);
+    client->connection->ping_sent_time = 0;
 
     /* Attempt to parse what we have */
     parse_client_queued(client);

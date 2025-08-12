@@ -149,7 +149,6 @@ client_create_local(void)
   struct Client *client = io_calloc(sizeof(*client));
   client->connection = io_calloc(sizeof(*client->connection));
   client->connection->last_receive_time = \
-  client->connection->last_ping = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   client->connection->registration = REG_INIT;
@@ -260,31 +259,24 @@ check_pings_list(list_t *list)
     if (IsDead(client))
       continue;  /* Ignore it, it's been exited already */
 
-    unsigned int ping = client_get_ping_freq(client);
-    if (ping < io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping)
+    const unsigned int ping_frequency = client_get_ping_freq(client);
+    const uintmax_t current_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+    if (client->connection->ping_sent_time > 0)
     {
-      if (!client_has_flag(client, FLAGS_PINGSENT))
+      /* A PING is currently pending a reply. Check for a timeout. */
+      const uintmax_t time_since_ping_sent = current_time - client->connection->ping_sent_time;
+      if (time_since_ping_sent >= ping_frequency)
+        client_exit_fmt(client, "Ping timeout: %ju seconds", time_since_ping_sent);
+    }
+    else
+    {
+      /* No PING is pending. Check if the connection has been idle. */
+      if ((current_time - client->connection->last_receive_time) >= ping_frequency)
       {
-        /*
-         * If we haven't PINGed the connection and we haven't
-         * heard from it in a while, PING it to make sure
-         * it is still alive.
-         */
-        client_set_flag(client, FLAGS_PINGSENT);
-        client->connection->last_ping = io_time_get(IO_TIME_MONOTONIC_SEC) - ping;
+        /* Connection is idle. Send a PING and record the time. */
+        client->connection->ping_sent_time = current_time;
         sendto_one(client, "PING :%s", client_get_id_or_name(&me, client));
-      }
-      else
-      {
-        if (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping >= 2 * ping)
-        {
-          /*
-           * If the client/server hasn't talked to us in 2*ping seconds and it has a ping time,
-           * then close its connection.
-           */
-          client_exit_fmt(client, "Ping timeout: %ju seconds",
-                          (io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_ping));
-        }
       }
     }
   }

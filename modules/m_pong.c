@@ -89,26 +89,27 @@ mr_pong(struct Client *source, int parc, char *parv[])
 {
   assert(client_is_local(source));
 
-  if (parc == 2 && !string_is_empty(parv[1]))
+  if (string_is_empty(parv[1]))
   {
-    if (ConfigGeneral.ping_cookie && source->connection->random_ping)
-    {
-      unsigned int incoming_ping = strtoul(parv[1], NULL, 10);
-
-      if (source->connection->random_ping == incoming_ping)
-      {
-        client_set_flag(source, FLAGS_PING_COOKIE);
-
-        if (source->connection->registration == 0)
-          user_register_local(source);
-      }
-      else
-        sendto_one_numeric(source, &me, ERR_WRONGPONG,
-                           source->connection->random_ping);
-    }
-  }
-  else
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
+    return;
+  }
+
+  if (ConfigGeneral.ping_cookie == 0 || source->connection->random_ping == 0)
+    return;
+
+  unsigned int received_cookie = strtoul(parv[1], NULL, 10);
+  if (source->connection->random_ping != received_cookie)
+  {
+    sendto_one_numeric(source, &me, ERR_WRONGPONG,
+                       source->connection->random_ping);
+    return;
+  }
+
+  client_set_flag(source, FLAGS_PING_COOKIE);
+
+  if (source->connection->registration == 0)
+    user_register_local(source);
 }
 
 static struct Command command_table =

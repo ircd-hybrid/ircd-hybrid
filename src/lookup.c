@@ -74,7 +74,6 @@ lookup_check_complete(struct LookupRequest *lookup)
   client->connection->lookup = NULL;
   io_free(lookup);
 
-  client->connection->last_ping = \
   client->connection->last_receive_time = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);

@@ -95,7 +95,7 @@ enum
 /** Client flags */
 enum
 {
-  FLAGS_PINGSENT      = 1 <<  0,  /**< Unreplied ping sent */
+/*FLAGS_*             = 1 <<  0,*/
   FLAGS_DEADSOCKET    = 1 <<  1,  /**< Local socket is dead--Exiting soon */
   FLAGS_KILLED        = 1 <<  2,  /**< Prevents "QUIT" from being sent for this */
   FLAGS_CLOSING       = 1 <<  3,  /**< Set when closing to suppress errors */
@@ -232,8 +232,7 @@ struct Connection
 
   uintmax_t send_marker;  /**< A per-broadcast marker to prevent duplicate message sends. */
   uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */
-  uintmax_t last_ping;  /**< Last time data read from socket; currently this is a copy of last_receive_time
-                             which can be modified by check_pings_list; monotonic time */
+  uintmax_t ping_sent_time;  /**< Monotonic time the last PING was sent, or 0 if none is pending. */
   uintmax_t created_real;  /**< Time client was created; real time */
   uintmax_t created_monotonic;  /**< Time client was created; monotonic time */
   uintmax_t last_caller_id_time;  /**< Monotonic time */

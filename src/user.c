@@ -229,15 +229,14 @@ user_register_local(struct Client *client)
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (!client_has_flag(client, FLAGS_PINGSENT) && client->connection->random_ping == 0)
+    if (client->connection->random_ping == 0)
     {
       do
         client->connection->random_ping = genrand_int32();
       while (client->connection->random_ping == 0);
 
       sendto_one(client, "PING :%u", client->connection->random_ping);
-      client_set_flag(client, FLAGS_PINGSENT);
-      return;
+      return;  /* Wait for the PONG reply. */
     }
 
     if (!client_has_flag(client, FLAGS_PING_COOKIE))

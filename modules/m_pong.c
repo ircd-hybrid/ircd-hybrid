@@ -95,14 +95,14 @@ mr_pong(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (ConfigGeneral.ping_cookie == 0 || source->connection->random_ping == 0)
+  if (ConfigGeneral.ping_cookie == 0 || source->connection->ping_cookie_token == 0)
     return;
 
   unsigned int received_cookie = strtoul(parv[1], NULL, 10);
-  if (source->connection->random_ping != received_cookie)
+  if (source->connection->ping_cookie_token != received_cookie)
   {
     sendto_one_numeric(source, &me, ERR_WRONGPONG,
-                       source->connection->random_ping);
+                       source->connection->ping_cookie_token);
     return;
   }
 

@@ -229,13 +229,13 @@ user_register_local(struct Client *client)
 
   if (ConfigGeneral.ping_cookie)
   {
-    if (client->connection->random_ping == 0)
+    if (client->connection->ping_cookie_token == 0)
     {
       do
-        client->connection->random_ping = genrand_int32();
-      while (client->connection->random_ping == 0);
+        client->connection->ping_cookie_token = genrand_int32();
+      while (client->connection->ping_cookie_token == 0);
 
-      sendto_one(client, "PING :%u", client->connection->random_ping);
+      sendto_one(client, "PING :%u", client->connection->ping_cookie_token);
       return;  /* Wait for the PONG reply. */
     }
 

@@ -228,7 +228,7 @@ struct Connection
   unsigned int capab;  /**< Bitmask of server-announced CAPAB features. */
 
   unsigned int operflags;  /**< Bitmask of IRC Operator privilege flags. */
-  unsigned int random_ping;  /**< A random value for PING cookie authentication. */
+  unsigned int ping_cookie_token; /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
 
   uintmax_t send_marker;  /**< A per-broadcast marker to prevent duplicate message sends. */
   uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */

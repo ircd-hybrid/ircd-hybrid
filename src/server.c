@@ -225,6 +225,8 @@ _server_handshake_irc_start(struct Client *client)
 static void
 _server_handshake_tls_finish(struct Client *client)
 {
+  assert(client_has_flag(client, FLAGS_TLS_HANDSHAKING));
+
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
 
   fde_t *fde = client->connection->fd;

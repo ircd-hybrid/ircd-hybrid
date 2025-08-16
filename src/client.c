@@ -646,6 +646,7 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
   LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_client_list.head)
   {
     struct Client *child_client = node->data;
+    assert(!client_is_local(child_client));
     _client_exit_notify_channel_members(child_client, reason);
     _client_exit_detach(child_client);
   }

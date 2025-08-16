@@ -228,6 +228,7 @@ user_register_local(struct Client *client)
   assert(client_is_local(client));
   assert(IsUnknown(client));
   assert(list_find(&unknown_list, client));
+  assert(list_find(&local_client_list, client) == NULL);
 
   if (ConfigGeneral.ping_cookie)
   {

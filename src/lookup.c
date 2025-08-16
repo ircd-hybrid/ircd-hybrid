@@ -171,6 +171,7 @@ lookup_delete(struct LookupRequest *lookup)
 void
 lookup_start(struct Client *client)
 {
+  assert(client->connection->lookup == NULL);
   struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
   lookup->client = client;
   client->connection->lookup = lookup;

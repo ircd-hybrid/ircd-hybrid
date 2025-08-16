@@ -99,27 +99,30 @@ comm_socket_get_error(const fde_t *fde, int *const sock_err_out)
  * Set the socket non-blocking, and other wonderful bits.
  */
 static bool
-setup_socket(int fd)
+setup_socket(int fd, int sock_type)
 {
-  int opt = 1;
-
-  if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
-    log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_NODELAY) failed for FD %d: %s",
-              fd, strerror(errno));
+  if (sock_type == SOCK_STREAM)
+  {
+    int opt = 1;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
+      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_NODELAY) failed for FD %d: %s",
+                fd, strerror(errno));
 
 #ifdef IPTOS_LOWDELAY
-  opt = IPTOS_LOWDELAY;
-  if (setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt)) == -1)
-    log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IP_TOS) failed for FD %d: %s",
-              fd, strerror(errno));
+    opt = IPTOS_LOWDELAY;
+    if (setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt)) == -1)
+      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IP_TOS) failed for FD %d: %s",
+                fd, strerror(errno));
 #endif
 
 #ifdef TCP_QUICKACK
-  opt = 1;
-  if (setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, &opt, sizeof(opt)) == -1)
-    log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_QUICKACK) failed for FD %d: %s",
-              fd, strerror(errno));
+    opt = 1;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, &opt, sizeof(opt)) == -1)
+      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_QUICKACK) failed for FD %d: %s",
+                fd, strerror(errno));
 #endif
+  }
+
   int flags = fcntl(fd, F_GETFL, 0);
   if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
   {
@@ -346,7 +349,7 @@ comm_socket_create(int family, int sock_type, int proto, const char *desc)
     return NULL;
   }
 
-  if (setup_socket(fd) == false)
+  if (setup_socket(fd, sock_type) == false)
   {
     close(fd);
     return NULL;
@@ -449,7 +452,7 @@ comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
 
   address_strip_ipv4(addr);
 
-  if (setup_socket(fd) == false)
+  if (setup_socket(fd, SOCK_STREAM) == false)
   {
     close(fd);
     return NULL;

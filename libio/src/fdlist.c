@@ -124,7 +124,7 @@ fd_close(fde_t *F)
     F->cleanup_handler(F->cleanup_data);
 
   if (F->flags.is_socket)
-    comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+    comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
   if (tls_isusing(&F->tls))
     tls_free(&F->tls);

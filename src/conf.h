@@ -173,6 +173,7 @@ struct config_general_entry
   unsigned int cloak_cidr_len_ipv6;
   unsigned int cloak_num_bits;
   unsigned int ident_timeout;
+  unsigned int registration_timeout;
 };
 
 struct config_channel_entry

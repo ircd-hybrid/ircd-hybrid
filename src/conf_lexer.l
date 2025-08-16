@@ -294,6 +294,7 @@ reason                      { return REASON; }
 recvq                       { return T_RECVQ; }
 redirport                   { return REDIRPORT; }
 redirserv                   { return REDIRSERV; }
+registration_timeout        { return REGISTRATION_TIMEOUT; }
 rehash                      { return REHASH; }
 remote                      { return REMOTE; }
 remoteban                   { return REMOTEBAN; }

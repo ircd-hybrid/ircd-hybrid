@@ -112,6 +112,88 @@ static void _client_exit_notify_network(struct Client *client, const char *reaso
 static void _client_exit_detach(struct Client *client);
 
 void
+client_reset_activity_timeout(struct Client *client)
+{
+  assert(client_is_local(client));
+  assert(client->connection->activity_timeout_event);
+
+  uintmax_t timeout_duration_ms;
+  if (IsUnknown(client) || IsConnecting(client) || IsHandshake(client))
+    timeout_duration_ms = ConfigGeneral.registration_timeout * 1000ULL;
+  else
+  {
+    assert(IsClient(client) || IsServer(client));
+    timeout_duration_ms = client_get_ping_freq(client) * 1000ULL;
+  }
+
+  if (timeout_duration_ms > 0)
+    event_reschedule(client->connection->activity_timeout_event, timeout_duration_ms);
+  else
+    event_unschedule(client->connection->activity_timeout_event);
+}
+
+static void
+client_activity_timeout_handler(void *data)
+{
+  struct Client *const client = data;
+  assert(client_is_local(client));
+
+  /*
+   * It is possible for this event to fire for a client that has already been
+   * marked for termination (e.g., in the same main loop iteration). Do not
+   * proceed if the client is already dead.
+   */
+  if (IsDead(client))
+    return;
+
+  /*
+   * The event is a one-shot timer. It has now fired and is no longer scheduled.
+   * The event handle itself remains valid for the next call to
+   * client_reset_activity_timeout().
+   */
+
+  if (client_has_flag(client, FLAGS_TLS_HANDSHAKING))
+  {
+    /* The client failed to complete the TLS handshake within the allowed time. */
+    client_exit(client, "Timeout during TLS handshake");
+    return;
+  }
+
+  /* Handle timeouts for any connection that is not yet fully registered or linked. */
+  if (IsUnknown(client) || IsConnecting(client) || IsHandshake(client))
+  {
+    const char *reason = IsUnknown(client) ? "Registration timed out" : "Timeout during server handshake";
+    client_exit(client, reason);
+    return;
+  }
+
+  /*
+   * At this point, we are dealing with a fully registered client (a user or server).
+   * The timeout indicates either a period of idle activity or a failure to
+   * respond to a previously sent PING.
+   */
+  if (client->connection->ping_sent_time > 0)
+  {
+    /* A PING was previously sent, and the client has not responded in time. */
+    const uintmax_t time_since_ping_sent = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->ping_sent_time;
+    client_exit_fmt(client, "Ping timeout: %ju seconds", time_since_ping_sent);
+  }
+  else
+  {
+    /* The client has been idle. Send a PING to verify the connection is still alive. */
+    client->connection->ping_sent_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    sendto_one(client, "PING :%s", client_get_id_or_name(&me, client));
+
+    /*
+     * Reschedule the activity timer. It now serves as the timeout for the
+     * PING reply. If the client remains silent, this handler will be called
+     * again, but the `ping_sent_time > 0` condition will then be true.
+     */
+    client_reset_activity_timeout(client);
+  }
+}
+
+void
 client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
 {
   assert(client->connection);
@@ -152,6 +234,8 @@ client_create_local(void)
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   client->connection->registration = REG_INIT;
+  client->connection->activity_timeout_event =
+    event_create(ircd_event_manager, "client_activity_timeout", client_activity_timeout_handler, 1, true, client, NULL);
 
   /* For a local client, 'from' points to itself and 'uplink' points to &me. */
   client->from = client;
@@ -216,6 +300,8 @@ _client_destroy(struct Client *client)
     assert(client->connection->lookup == NULL);
     assert(client->connection->fd == NULL);
     assert(client->connection->listener == NULL);
+    assert(client->connection->activity_timeout_event == NULL);
+    assert(client->connection->flood_recalc_event == NULL);
     assert(list_is_empty(&client->connection->acceptlist));
     assert(list_is_empty(&client->connection->monitors));
     assert(list_is_empty(&client->connection->invited));
@@ -238,116 +324,6 @@ _client_destroy(struct Client *client)
   }
 
   io_free(client);
-}
-
-/* check_pings_list()
- *
- * inputs	- pointer to list to check
- * output	- NONE
- * side effects	-
- */
-static void
-check_pings_list(list_t *list)
-{
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, list->head)
-  {
-    struct Client *client = node->data;
-    assert(IsClient(client) || IsServer(client));
-
-    if (IsDead(client))
-      continue;  /* Ignore it, it's been exited already */
-
-    const unsigned int ping_frequency = client_get_ping_freq(client);
-    const uintmax_t current_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-    if (client->connection->ping_sent_time > 0)
-    {
-      /* A PING is currently pending a reply. Check for a timeout. */
-      const uintmax_t time_since_ping_sent = current_time - client->connection->ping_sent_time;
-      if (time_since_ping_sent >= ping_frequency)
-        client_exit_fmt(client, "Ping timeout: %ju seconds", time_since_ping_sent);
-    }
-    else
-    {
-      /* No PING is pending. Check if the connection has been idle. */
-      if ((current_time - client->connection->last_receive_time) >= ping_frequency)
-      {
-        /* Connection is idle. Send a PING and record the time. */
-        client->connection->ping_sent_time = current_time;
-        sendto_one(client, "PING :%s", client_get_id_or_name(&me, client));
-      }
-    }
-  }
-}
-
-/* check_unknowns_list()
- *
- * inputs       - pointer to list of unknown clients
- * output       - NONE
- * side effects - unknown clients get marked for termination after n seconds
- */
-static void
-check_unknowns_list(void)
-{
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
-  {
-    struct Client *client = node->data;
-    if (IsDead(client))
-      continue;  /* Ignore it, it's been exited already */
-
-    /*
-     * Check UNKNOWN connections - if they have been in this state
-     * for > 30s, close them.
-     */
-    if (client_get_session_duration(client) <= 30)
-      continue;
-
-    const char *reason = NULL;
-    if (IsHandshake(client))
-      reason = "Timeout during server handshake";
-    else if (client_has_flag(client, FLAGS_LOOKUP_DONE))
-      reason = "Registration timed out";
-
-    if (reason)
-      client_exit(client, reason);
-  }
-}
-
-/*
- * check_pings - go through the local client list and check activity
- * kill off stuff that should die
- *
- * inputs       - NOT USED (from event)
- * side effects -
- *
- *
- * A PING can be sent to clients as necessary.
- *
- * Client/Server ping outs are handled.
- */
-
-/*
- * Addon from adrian. We used to call this after nextping seconds,
- * however I've changed it to run once a second. This is only for
- * PING timeouts, not K/etc-line checks (thanks dianora!). Having it
- * run once a second makes life a lot easier - when a new client connects
- * and they need a ping in 4 seconds, if nextping was set to 20 seconds
- * we end up waiting 20 seconds. This is stupid. :-)
- * I will optimise (hah!) check_pings() once I've finished working on
- * tidying up other network IO evilnesses.
- *     -- adrian
- */
-
-static void
-check_pings(void *unused)
-{
-  check_pings_list(&local_client_list);
-  check_pings_list(&local_server_list);
-  check_unknowns_list();
 }
 
 /* check_conf_klines()
@@ -605,7 +581,33 @@ _client_exit_teardown_connection(struct Client *client)
 {
   assert(client && client_is_local(client));
 
-   /*
+  if (client->connection->activity_timeout_event)
+  {
+    event_destroy(client->connection->activity_timeout_event);
+    client->connection->activity_timeout_event = NULL;
+  }
+
+  if (client->connection->flood_recalc_event)
+  {
+    event_destroy(client->connection->flood_recalc_event);
+    client->connection->flood_recalc_event = NULL;
+  }
+
+  /* Clean up pending async operations to prevent their callbacks from firing. */
+  if (client->connection->lookup)
+  {
+    lookup_delete(client->connection->lookup);
+    client->connection->lookup = NULL;
+  }
+
+  /* Release our reference to the listener this client connected to. */
+  if (client->connection->listener)
+  {
+    listener_release(client->connection->listener);
+    client->connection->listener = NULL;
+  }
+
+  /*
    * Attempt a final, best-effort flush of any pending data in the send queue.
    * We deliberately clear the BLOCKED flag to force one last write attempt,
    * giving our final ERROR message the best possible chance of being delivered.
@@ -883,34 +885,25 @@ client_exit(struct Client *client, const char *reason)
     return;
   client_set_flag(client, FLAGS_CLOSING);
 
-  /* For local clients, tear down the physical connection immediately. */
+  /* For local clients, tear down the physical connection and its resources. */
   if (client_is_local(client))
   {
     assert(client == client->from);
 
     if (IsServer(client))
+    {
       server_schedule_reconnect(client);
 
-    /* Clean up pending async operations to prevent their callbacks from firing. */
-    if (client->connection->lookup)
-    {
-      lookup_delete(client->connection->lookup);
-      client->connection->lookup = NULL;
+      /*
+       * Queue a final "dying gasp" SQUIT message to inform the remote server that we
+       * are the ones initiating the split. This is not sent if the exit was triggered
+       * by a remote SQUIT for this link.
+       */
+      if (!client_has_flag(client, FLAGS_SQUIT))
+        sendto_one(client, ":%s SQUIT %s :%s", me.id, me.id, reason);
     }
-
-    if (client->connection->listener)
-    {
-      listener_release(client->connection->listener);
-      client->connection->listener = NULL;
-    }
-
-    /* Queue final "dying gasp" messages before closing the socket. */
-    if (IsServer(client) && !client_has_flag(client, FLAGS_SQUIT))
-      /* For them, we are exiting the network */
-      sendto_one(client, ":%s SQUIT %s :%s", me.id, me.id, reason);
 
     sendto_one(client, "ERROR :Closing Link: %s (%s)", client->host, reason);
-
     _client_exit_teardown_connection(client);
   }
 
@@ -1072,17 +1065,4 @@ client_get_idle_time(const struct Client *source,
     idle = min_idle + (idle % (max_idle - min_idle));
 
   return idle;
-}
-
-/* client_init()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - initialize client free memory
- */
-void
-client_init(void)
-{
-  event_handle_t event_check_pings = event_create(ircd_event_manager, "check_pings", check_pings, 5000, false, NULL, NULL);
-  event_schedule(event_check_pings);
 }

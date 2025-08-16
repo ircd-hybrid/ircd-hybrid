@@ -97,37 +97,33 @@ ssl_handshake(fde_t *F, void *data_)
   assert(client->connection->fd);
   assert(client->connection->fd == F);
 
-  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, NULL);
-  if (ret != TLS_HANDSHAKE_DONE)
+  const char *tls_error = NULL;
+  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, &tls_error);
+  if (ret == TLS_HANDSHAKE_DONE)
   {
-    if (client_get_session_duration(client) > TLS_HANDSHAKE_TIMEOUT)
-    {
-      client_exit(client, "Timeout during TLS handshake");
-      return;
-    }
+    client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
+    comm_setselect(F, 0, NULL, NULL);
 
-    switch (ret)
-    {
-      case TLS_HANDSHAKE_WANT_WRITE:
-        comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
-        return;
-      case TLS_HANDSHAKE_WANT_READ:
-        comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client, TLS_HANDSHAKE_TIMEOUT);
-        return;
-      default:
-        client_exit(client, "Error during TLS handshake");
-        return;
-    }
+    if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
+      log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+                client_get_name(client, MASK_IP));
+
+    lookup_start(client);
+    return;
   }
 
-  comm_settimeout(F, 0, NULL, NULL);
-  comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
-
-  if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
-    log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
-              client_get_name(client, MASK_IP));
-
-  lookup_start(client);
+  switch (ret)
+  {
+    case TLS_HANDSHAKE_WANT_WRITE:
+      comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client);
+      return;
+    case TLS_HANDSHAKE_WANT_READ:
+      comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client);
+      return;
+    default:
+      client_exit(client, tls_error ? tls_error : "Error during TLS handshake");
+      return;
+  }
 }
 
 /*
@@ -170,7 +166,10 @@ add_connection(fde_t *client_fde, struct Listener *listener, const struct io_add
       return;
     }
 
-    client_set_flag(client, FLAGS_TLS);
+    client_set_flag(client, FLAGS_TLS_ACTIVE);
+    client_set_flag(client, FLAGS_TLS_HANDSHAKING);
+    client_reset_activity_timeout(client);
+
     ssl_handshake(client->connection->fd, client);
   }
   else
@@ -252,7 +251,7 @@ listener_accept_connection(fde_t *F, void *data_)
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection, listener, 0);
+  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection, listener);
 }
 
 /**

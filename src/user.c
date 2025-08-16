@@ -23,6 +23,7 @@
  * \brief User related functions.
  */
 
+#include "event.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -49,6 +50,7 @@
 #include "monitor.h"
 #include "motd.h"
 #include "numeric.h"
+#include "packet.h"
 #include "parse.h"
 #include "send.h"
 #include "user.h"
@@ -186,7 +188,7 @@ user_welcome(struct Client *client)
   static const char built_date[] = __DATE__ " at " __TIME__;
 #endif
 
-  if (client_has_flag(client, FLAGS_TLS))
+  if (client_has_flag(client, FLAGS_TLS_ACTIVE))
   {
     user_mode_set_flag(client, UMODE_SECURE);
 
@@ -301,6 +303,12 @@ user_register_local(struct Client *client)
   SetClient(client);
 
   client->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  assert(client->connection->flood_recalc_event == NULL);
+  client->connection->flood_recalc_event =
+    event_create(ircd_event_manager, "flood_recalc", flood_recalc, 1000, false, client, NULL);
+  event_set_priority(client->connection->flood_recalc_event, 2);
+  event_schedule(client->connection->flood_recalc_event);
 
   list_add(client, &client->global_node, &global_client_list);
   list_add(client, &client->uplink_node, &client->uplink->serv->child_client_list);

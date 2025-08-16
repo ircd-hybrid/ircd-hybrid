@@ -67,17 +67,8 @@ typedef struct _fde
   void (*write_handler)(struct _fde *, void *);  /**< Write event handler. */
   void *write_data;  /**< Data for the write event handler. */
 
-  void (*timeout_handler)(struct _fde *, void *);  /**< Timeout event handler. */
-  void *timeout_data;  /**< Data for the timeout event handler. */
-  uintmax_t timeout;  /**< Timeout duration. */
-
-  void (*flush_handler)(struct _fde *, void *);  /**< Flush event handler. */
-  void *flush_data;  /**< Data for the flush event handler. */
-  uintmax_t flush_timeout;  /**< Flush timeout duration. */
-
   void (*cleanup_handler)(void *data);
   void *cleanup_data;
-
   /**@}*/
 
   /** @name Flags */

@@ -86,8 +86,7 @@ comm_select_init(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
-               void *client_data, uintmax_t timeout)
+comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *), void *client_data)
 {
   int new_events, op;
   struct epoll_event ep_event;
@@ -107,16 +106,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     F->write_data = client_data;
   }
 
-  new_events = (F->read_handler ? EPOLLIN : 0) |
-    (F->write_handler ? EPOLLOUT : 0);
-
-  if (timeout)
-  {
-    F->timeout = io_time_get(IO_TIME_MONOTONIC_SEC) + timeout;
-    F->timeout_handler = handler;
-    F->timeout_data = client_data;
-  }
-
+  new_events = (F->read_handler ? EPOLLIN : 0) | (F->write_handler ? EPOLLOUT : 0);
   if (new_events != F->evcache)
   {
     if (new_events == 0)
@@ -195,7 +185,7 @@ comm_select(int timeout_ms)
       }
     }
 
-    comm_setselect(F, 0, NULL, NULL, 0);
+    comm_setselect(F, 0, NULL, NULL);
   }
 
   if (num == epollop->nevents && epollop->nevents < MAXIMUM_NEVENT)

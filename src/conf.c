@@ -672,7 +672,8 @@ conf_set_defaults(void)
   ConfigGeneral.oper_umodes = io_strdup("+flsw");
   ConfigGeneral.throttle_count = 1;
   ConfigGeneral.throttle_time = 1;
-  ConfigGeneral.ident_timeout = 4;
+  ConfigGeneral.ident_timeout = 3;
+  ConfigGeneral.registration_timeout = 30;
 
   ConfigGeneral.cloak_enabled = false;
   cloak_set_disabled();

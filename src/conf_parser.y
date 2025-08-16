@@ -282,6 +282,7 @@ reset_block_state(void)
 %token  REASON
 %token  REDIRPORT
 %token  REDIRSERV
+%token  REGISTRATION_TIMEOUT
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
@@ -2300,6 +2301,7 @@ general_item:       general_away_count |
                     general_cloak_secret |
                     general_cloak_suffix |
                     general_ident_timeout |
+                    general_registration_timeout |
                     error;
 
 
@@ -2607,6 +2609,11 @@ general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
     break;
 
   ConfigGeneral.ident_timeout = $3;
+};
+
+general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'
+{
+  ConfigGeneral.registration_timeout = $3;
 };
 
 /***************************************************************************

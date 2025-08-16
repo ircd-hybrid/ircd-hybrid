@@ -30,6 +30,7 @@
 
 #include "address.h"
 #include "dbuf.h"
+#include "event.h"
 #include "fdlist.h"
 #include "io.h"
 #include "io_time.h"
@@ -95,33 +96,32 @@ enum
 /** Client flags */
 enum
 {
-/*FLAGS_*             = 1 <<  0,*/
-  FLAGS_DEADSOCKET    = 1 <<  1,  /**< Local socket is dead--Exiting soon */
-  FLAGS_KILLED        = 1 <<  2,  /**< Prevents "QUIT" from being sent for this */
-  FLAGS_CLOSING       = 1 <<  3,  /**< Set when closing to suppress errors */
-  FLAGS_GOTID         = 1 <<  4,  /**< Successful ident lookup achieved */
-  FLAGS_SENDQEX       = 1 <<  5,  /**< Sendq exceeded */
-  FLAGS_IPHASH        = 1 <<  6,  /**< Iphashed this client */
-  FLAGS_MARK          = 1 <<  7,  /**< Marked client */
-  FLAGS_CANFLOOD      = 1 <<  8,  /**< Client has the ability to flood */
-  FLAGS_EXEMPTKLINE   = 1 <<  9,  /**< Client is exempt from k-lines */
-  FLAGS_NOLIMIT       = 1 << 10,  /**< Client is exempt from limits */
-  FLAGS_PING_COOKIE   = 1 << 11,  /**< PING Cookie */
-  FLAGS_FLOODDONE     = 1 << 12,  /**< Flood grace period has been ended. */
-  FLAGS_EOB           = 1 << 13,  /**< Server has sent us an EOB */
-  FLAGS_HIDDEN        = 1 << 14,  /**< A hidden server. Not shown in /links */
-  FLAGS_BLOCKED       = 1 << 15,  /**< Must wait for COMM_SELECT_WRITE */
-  FLAGS_EXEMPTRESV    = 1 << 16,  /**< Client is exempt from RESV */
-  FLAGS_GOTUSER       = 1 << 17,  /**< If we received a USER command */
-  FLAGS_LOOKUP_DONE   = 1 << 18,  /**< Client has completed the lookup process */
-  FLAGS_FLOOD_NOTICED = 1 << 19,  /**< Notice to opers about this flooder has been sent */
-  FLAGS_SERVICE       = 1 << 20,  /**< Client/server is a network service */
-  FLAGS_TLS           = 1 << 21,  /**< User is connected via TLS (Transport Layer Security) */
-  FLAGS_SQUIT         = 1 << 22,
-  FLAGS_EXEMPTXLINE   = 1 << 23,  /**< Client is exempt from x-lines */
-  FLAGS_CAP302        = 1 << 24,  /**< Client supports the IRCv3 CAP 302 extension */
-  FLAGS_SPOOF         = 1 << 25,
-  FLAGS_INTRODUCED    = 1 << 26,
+  FLAGS_DEADSOCKET      = 1 <<  0,  /**< Local socket is dead--Exiting soon */
+  FLAGS_KILLED          = 1 <<  1,  /**< Prevents "QUIT" from being sent for this */
+  FLAGS_CLOSING         = 1 <<  2,  /**< Set when closing to suppress errors */
+  FLAGS_GOTID           = 1 <<  3,  /**< Successful ident lookup achieved */
+  FLAGS_SENDQEX         = 1 <<  4,  /**< Sendq exceeded */
+  FLAGS_IPHASH          = 1 <<  5,  /**< Iphashed this client */
+  FLAGS_MARK            = 1 <<  6,  /**< Marked client */
+  FLAGS_CANFLOOD        = 1 <<  7,  /**< Client has the ability to flood */
+  FLAGS_EXEMPTKLINE     = 1 <<  8,  /**< Client is exempt from k-lines */
+  FLAGS_NOLIMIT         = 1 <<  9,  /**< Client is exempt from limits */
+  FLAGS_PING_COOKIE     = 1 << 10,  /**< PING Cookie */
+  FLAGS_FLOODDONE       = 1 << 11,  /**< Flood grace period has been ended. */
+  FLAGS_EOB             = 1 << 12,  /**< Server has sent us an EOB */
+  FLAGS_HIDDEN          = 1 << 13,  /**< A hidden server. Not shown in /links */
+  FLAGS_BLOCKED         = 1 << 14,  /**< Must wait for COMM_SELECT_WRITE */
+  FLAGS_EXEMPTRESV      = 1 << 15,  /**< Client is exempt from RESV */
+  FLAGS_GOTUSER         = 1 << 16,  /**< If we received a USER command */
+  FLAGS_FLOOD_NOTICED   = 1 << 17,  /**< Notice to opers about this flooder has been sent */
+  FLAGS_SERVICE         = 1 << 18,  /**< Client/server is a network service */
+  FLAGS_TLS_HANDSHAKING = 1 << 19,/**< The connection is actively negotiating a TLS handshake. */
+  FLAGS_TLS_ACTIVE      = 1 << 20,  /**< The connection is secured with an active TLS session. */
+  FLAGS_SQUIT           = 1 << 21,
+  FLAGS_EXEMPTXLINE     = 1 << 22,  /**< Client is exempt from x-lines */
+  FLAGS_CAP302          = 1 << 23,  /**< Client supports the IRCv3 CAP 302 extension */
+  FLAGS_SPOOF           = 1 << 24,
+  FLAGS_INTRODUCED      = 1 << 25,
 };
 
 extern uint64_t UMODE_BOT;
@@ -282,6 +282,8 @@ struct Connection
   char *password;  /**< Password supplied by the client/server during handshake. */
   char *oper_name;  /**< The name of the oper block, if opered up. */
   char *abort_reason;  /**< The reason for an ungraceful connection termination. */
+  event_handle_t activity_timeout_event;  /**< Event handle for the client's activity (idle/ping) timeout. */
+  event_handle_t flood_recalc_event;  /**< Repeating event handle for the client's anti-flood timer. */
 };
 
 /** Client structure */
@@ -357,6 +359,7 @@ extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
+extern void client_reset_activity_timeout(struct Client *);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);

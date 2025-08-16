@@ -210,6 +210,9 @@ _server_handshake_irc_start(struct Client *client)
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
   SetHandshake(client);
 
+  /* Start the activity timer now that the link is ready for IRC traffic. */
+  client_reset_activity_timeout(client);
+
   sendto_one(client, "PASS %s", connect->send_password);
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
   sendto_one(client, "SERVER %s 1 %s +%s :%s",
@@ -222,10 +225,10 @@ _server_handshake_irc_start(struct Client *client)
 static void
 _server_handshake_tls_finish(struct Client *client)
 {
-  fde_t *fde = client->connection->fd;
+  client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
 
-  comm_settimeout(fde, 0, NULL, NULL);
-  comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+  fde_t *fde = client->connection->fd;
+  comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
   if (tls_verify_certificate(&fde->tls, &client->tls_certfp) == false)
     log_write(LOG_TYPE_IRCD, "Link %s presented an invalid TLS certificate.",
@@ -238,7 +241,7 @@ _server_handshake_tls_finish(struct Client *client)
     return;
   }
 
-  client_set_flag(client, FLAGS_TLS);
+  client_set_flag(client, FLAGS_TLS_ACTIVE);
   _server_handshake_irc_start(client);
 }
 
@@ -251,12 +254,6 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   assert(client->connection->fd);
   assert(client->connection->fd == fde);
 
-  if (client_get_session_duration(client) > TLS_HANDSHAKE_TIMEOUT)
-  {
-    client_exit(client, "Timeout during TLS handshake");
-    return;
-  }
-
   const char *tls_error = NULL;
   tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, &tls_error);
   if (ret == TLS_HANDSHAKE_DONE)
@@ -268,20 +265,17 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(fde, COMM_SELECT_WRITE, _server_handshake_tls_start, client, 0);
+      comm_setselect(fde, COMM_SELECT_WRITE, _server_handshake_tls_start, client);
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client, 0);
+      comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client);
       break;
     default:
-      comm_settimeout(fde, 0, NULL, NULL);
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Error connecting to %s: %s",
                      client->name, tls_error ? tls_error : "unknown TLS error");
       client_exit(client, "Error during TLS handshake");
       break;
   }
-
-  _server_handshake_tls_finish(client);
 }
 
 static void
@@ -301,6 +295,9 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 
   if (!string_is_empty(connect->cipher_list))
     tls_set_ciphers(&fde->tls, connect->cipher_list);
+
+  client_set_flag(client, FLAGS_TLS_HANDSHAKING);
+  client_reset_activity_timeout(client);
 
   _server_handshake_tls_start(fde, client);
 }

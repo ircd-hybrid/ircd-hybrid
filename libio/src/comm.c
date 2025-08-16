@@ -42,7 +42,7 @@
 #include "log.h"
 #include "memory.h"
 
-static event_manager_t comm_event_manager;
+event_manager_t comm_event_manager;
 
 static const char *const comm_err_str[] =
 {
@@ -178,85 +178,6 @@ comm_get_select_timeout(event_manager_t mgr)
   return (int)delta_ms;
 }
 
-/*
- * comm_settimeout() - set the socket timeout
- *
- * Set the timeout for the fd
- */
-void
-comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
-{
-  assert(F);
-  assert(F->flags.open == true);
-
-  F->timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
-  F->timeout_handler = callback;
-  F->timeout_data = cbdata;
-}
-
-/*
- * comm_setflush() - set a flush function
- *
- * A flush function is simply a function called if found during
- * comm_timeouts(). Its basically a second timeout, except in this case
- * I'm too lazy to implement multiple timeout functions! :-)
- * its kinda nice to have it separate, since this is designed for
- * flush functions, and when comm_close() is implemented correctly
- * with close functions, we _actually_ don't call comm_close() here ..
- * -- originally Adrian's notes
- * comm_close() is replaced with fd_close() in fdlist.c
- */
-void
-comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
-{
-  assert(F);
-  assert(F->flags.open == true);
-
-  F->flush_timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
-  F->flush_handler = callback;
-  F->flush_data = cbdata;
-}
-
-/*
- * comm_checktimeouts() - check the socket timeouts
- *
- * All this routine does is call the given callback/cbdata, without closing
- * down the file descriptor. When close handlers have been implemented,
- * this will happen.
- */
-void
-comm_checktimeouts(void *unused)
-{
-  for (int fd = 0; fd <= highest_fd; ++fd)
-  {
-    fde_t *F = &fd_table[fd];
-
-    if (F->flags.open == false)
-      continue;
-
-    /* check flush functions */
-    if (F->flush_timeout && F->flush_timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      void (*hdl)(fde_t *, void *) = F->flush_handler;
-      void *data = F->flush_data;
-
-      comm_setflush(F, 0, NULL, NULL);
-      hdl(F, data);
-    }
-
-    /* check timeouts */
-    if (F->timeout && F->timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      /* Call timeout handler */
-      void (*hdl)(fde_t *, void *) = F->timeout_handler;
-      void *data = F->timeout_data;
-
-      comm_settimeout(F, 0, NULL, NULL);
-      hdl(F, data);
-    }
-  }
-}
-
 static void
 comm_connect_complete(comm_op_t *op, int status)
 {
@@ -286,7 +207,7 @@ comm_connect_complete(comm_op_t *op, int status)
     fde->cleanup_data = NULL;
   }
 
-  comm_setselect(fde, COMM_SELECT_WRITE, NULL, NULL, 0);
+  comm_setselect(fde, COMM_SELECT_WRITE, NULL, NULL);
 
   hdl(fde, status, hdl_data);
   io_free(op);
@@ -394,7 +315,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
     event_schedule(op->timeout_event);
   }
 
-  comm_setselect(fde, COMM_SELECT_WRITE, comm_connect_handler, op, 0);
+  comm_setselect(fde, COMM_SELECT_WRITE, comm_connect_handler, op);
 }
 
 /*

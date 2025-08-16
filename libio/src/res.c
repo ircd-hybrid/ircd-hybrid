@@ -171,7 +171,7 @@ start_resolver(void)
       return;
 
     /* At the moment, the resolver FD data is global .. */
-    comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
+    comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL);
   }
 }
 
@@ -574,7 +574,7 @@ res_readreply(fde_t *F, void *data)
     }
   }
 
-  comm_setselect(F, COMM_SELECT_READ, res_readreply, NULL, 0);
+  comm_setselect(F, COMM_SELECT_READ, res_readreply, NULL);
 }
 
 /*

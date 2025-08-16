@@ -252,7 +252,7 @@ flood_endgrace(struct Client *client)
  * once a second on any given client. We then attempt to flush some data.
  */
 void
-flood_recalc(fde_t *F, void *data_)
+flood_recalc(void *data_)
 {
   struct Client *const client = data_;
 
@@ -269,13 +269,6 @@ flood_recalc(fde_t *F, void *data_)
     client->connection->sent_parsed = 0;
 
   parse_client_queued(client);
-
-  /* And now, try flushing .. */
-  if (!IsDead(client))
-  {
-    /* and finally, reset the flood check */
-    comm_setflush(F, 1, flood_recalc, client);
-  }
 }
 
 /*
@@ -308,7 +301,7 @@ read_packet(fde_t *F, void *data_)
       length = tls_read(&F->tls, readBuf, sizeof(readBuf), &want_write);
 
       if (want_write)
-        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client, 0);
+        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client);
     }
     else
       length = recv(F->fd, readBuf, sizeof(readBuf), 0);
@@ -320,7 +313,7 @@ read_packet(fde_t *F, void *data_)
        * another COMM_SELECT_READ io-request.
        */
       if (length < 0 && comm_errno_is_recoverable(errno))
-        comm_setselect(F, COMM_SELECT_READ, read_packet, client, 0);
+        comm_setselect(F, COMM_SELECT_READ, read_packet, client);
       else
         dead_link_on_read(client, length, errno);
       return;
@@ -330,6 +323,7 @@ read_packet(fde_t *F, void *data_)
 
     client->connection->last_receive_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     client->connection->ping_sent_time = 0;
+    client_reset_activity_timeout(client);
 
     /* Attempt to parse what we have */
     parse_client_queued(client);
@@ -341,9 +335,10 @@ read_packet(fde_t *F, void *data_)
     if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)))
     {
       const unsigned int max_recvq = client_get_max_recvq(client);
-      if (dbuf_length(&client->connection->buf_recvq) > max_recvq)
+      const size_t current_recvq = dbuf_length(&client->connection->buf_recvq);
+      if (current_recvq > max_recvq)
       {
-        client_exit(client, "Excess Flood");
+        client_exit_fmt(client, "Max RecvQ exceeded (%zu > %u)", current_recvq, max_recvq);
         return;
       }
     }

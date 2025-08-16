@@ -436,7 +436,6 @@ main(int argc, char *argv[])
 
   resolver_init(ircd_event_manager);
   ipcache_init();
-  client_init();
   channel_mode_init();
   extban_init();
   capab_init();  /* Set up default_server_capabs */
@@ -496,10 +495,6 @@ main(int argc, char *argv[])
 
   event_handle_t event_server_connect_auto = event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
   event_schedule_fuzzed(event_server_connect_auto);
-
-  event_handle_t event_comm_checktimeouts = event_create(ircd_event_manager, "comm_checktimeouts", comm_checktimeouts, 1000, false, NULL, NULL);
-  event_set_priority(event_comm_checktimeouts, 3);
-  event_schedule(event_comm_checktimeouts);
 
   event_handle_t event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
   event_schedule_fuzzed(event_save_all_databases);

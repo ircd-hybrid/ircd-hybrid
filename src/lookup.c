@@ -66,7 +66,7 @@ static const char *const lookup_report_headers[] =
 static void
 lookup_check_complete(struct LookupRequest *lookup)
 {
-  /* Check if DNS or ident queries are still pending; if yes, do not release the client yet. */
+  /* Do not proceed if other asynchronous lookups are still in flight. */
   if (lookup->dns_pending || lookup->ident_pending)
     return;
 
@@ -74,17 +74,15 @@ lookup_check_complete(struct LookupRequest *lookup)
   client->connection->lookup = NULL;
   io_free(lookup);
 
+  /* The pre-registration phase is complete; update the client's state and timers. */
   client->connection->last_receive_time = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  client_set_flag(client, FLAGS_LOOKUP_DONE);
 
-  /*
-   * When a client has auth'ed, we want to start reading what it sends
-   * us. This is what read_packet() does.
-   *     -- adrian
-   */
-  comm_setflush(client->connection->fd, 1, flood_recalc, client);
+  /* Start the registration timer; the client must now send NICK/USER. */
+  client_reset_activity_timeout(client);
+
+  /* Hand the connection over to the main packet reader to begin processing IRC protocol commands. */
   read_packet(client->connection->fd, client);
 }
 
@@ -187,8 +185,10 @@ lookup_start(struct Client *client)
   if (ConfigGeneral.disable_ident == 0)
   {
     sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_START]);
+
+    const uintmax_t timeout_ms = ConfigGeneral.ident_timeout * 1000ULL;
     lookup->ident_request =
-      ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, ConfigGeneral.ident_timeout * 1000);
+      ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, timeout_ms);
     if (lookup->ident_request)
       lookup->ident_pending = true;
     else

@@ -107,6 +107,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "pace_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait, "Minimum delay between uses of certain commands"),
   INFO_ENTRY_INIT("general", "pace_wait_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait_simple, "Minimum delay between less intensive commands"),
   INFO_ENTRY_INIT("general", "ping_cookie", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.ping_cookie, "Require ping cookies to connect"),
+  INFO_ENTRY_INIT("general", "registration_timeout", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.registration_timeout, "Maximum time an unauthenticated client has to register before being disconnected"),
   INFO_ENTRY_INIT("general", "short_motd", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.short_motd, "Do not show MOTD; only tell clients they should read it"),
   INFO_ENTRY_INIT("general", "specials_in_ident", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.specials_in_ident, "Number of permissable '-', '_', or '.' characters in an ident"),
   INFO_ENTRY_INIT("general", "stats_P_oper_only", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.stats_P_oper_only, "STATS P output is only shown to operators"),

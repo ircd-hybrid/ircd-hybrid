@@ -19,6 +19,7 @@
  *  USA
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -161,6 +162,12 @@ ident_check_reply(char *const reply)
 void
 ident_delete(ident_request_t *request)
 {
+  if (request->reply_timeout_event)
+  {
+    event_destroy(request->reply_timeout_event);
+    request->reply_timeout_event = NULL;
+  }
+
   if (request->fd)
   {
     comm_socket_close(request->fd);
@@ -174,14 +181,23 @@ static void
 ident_read_reply(fde_t *F, void *data)
 {
   ident_request_t *request = data;
-  char buf[IDENT_BUFSIZE + 1];
-  ssize_t len = 0;
 
   /* If callback is NULL, the owner is tearing down the request. Abort. */
   if (request->callback == NULL)
     return;
 
-  if (F->read_handler == NULL && (len = recv(F->fd, buf, sizeof(buf) - 1, 0)) > 0)
+  assert(F->read_handler);
+
+  /* The event is no longer needed as we have received a reply. */
+  if (request->reply_timeout_event)
+  {
+    event_destroy(request->reply_timeout_event);
+    request->reply_timeout_event = NULL;
+  }
+
+  char buf[IDENT_BUFSIZE + 1];
+  ssize_t len = recv(F->fd, buf, sizeof(buf) - 1, 0);
+  if (len > 0)
   {
     buf[len] = '\0';
     const char *username = ident_check_reply(buf);
@@ -217,7 +233,28 @@ ident_connect_callback(fde_t *F, int error, void *data)
     return;
   }
 
-  comm_setselect(F, COMM_SELECT_READ, ident_read_reply, request, 4);
+  /*
+   * The query has been sent. Now, schedule the reply timeout and set the
+   * read handler to wait for the response.
+   */
+  event_schedule(request->reply_timeout_event);
+  comm_setselect(F, COMM_SELECT_READ, ident_read_reply, request);
+}
+
+static void
+_ident_reply_timeout_handler(void *data)
+{
+  ident_request_t *request = data;
+  assert(request);
+
+  /* The event has fired, so clear the handle. */
+  request->reply_timeout_event = NULL;
+
+  /* If callback is NULL, the owner is tearing down the request. Abort. */
+  if (request->callback == NULL)
+    return;
+
+  request->callback(request->user_data, NULL);
 }
 
 ident_request_t *
@@ -226,6 +263,13 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   ident_request_t *request = io_calloc(sizeof(*request));
   request->callback = callback;
   request->user_data = user_data;
+
+  /*
+   * Create the persistent timeout event for this request's lifetime.
+   * It is created here but remains unscheduled until the TCP connection succeeds.
+   */
+  request->reply_timeout_event = event_create(comm_event_manager, "ident_reply_timeout", _ident_reply_timeout_handler,
+                                              timeout_ms, true, request, NULL);
 
   fde_t *new_fde = comm_socket_create(address_get_family(addr), SOCK_STREAM, 0, "ident");
   if (new_fde == NULL)

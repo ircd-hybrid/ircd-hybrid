@@ -144,8 +144,8 @@ parse_client_queued(struct Client *client)
       if (IsDefunct(client))
         return;
 
-      /* Rate unknown clients at MAX_FLOOD per loop */
-      if (i >= MAX_FLOOD)
+      /* Rate unknown clients at MAX_FLOOD_HANDSHAKE per loop */
+      if (i >= MAX_FLOOD_HANDSHAKE)
         return;
 
       const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);

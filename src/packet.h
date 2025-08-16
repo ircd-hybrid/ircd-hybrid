@@ -46,6 +46,7 @@
  */
 enum
 {
+  MAX_FLOOD_HANDSHAKE = 10,
   MAX_FLOOD = 5,
   MAX_FLOOD_BURST = MAX_FLOOD * 8
 };

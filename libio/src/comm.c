@@ -367,7 +367,7 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
   if (fde == NULL)
     return NULL;
 
-  const socklen_t opt = 1;
+  const int opt = 1;
   if (setsockopt(fde->fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
   {
     log_write(LOG_TYPE_IRCD, "comm_socket_listen: setsockopt(SO_REUSEADDR) failed for FD %d: %s",
@@ -379,7 +379,7 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
 #ifdef IPV6_V6ONLY
   if (address_is_ipv6(addr) && address_is_unspecified(addr))
   {
-    const socklen_t v6only_opt = 0;
+    const int v6only_opt = 0;
     if (setsockopt(fde->fd, IPPROTO_IPV6, IPV6_V6ONLY, &v6only_opt, sizeof(v6only_opt)) == -1)
     {
       log_write(LOG_TYPE_DEBUG, "comm_socket_listen: setsockopt(IPV6_V6ONLY=0) failed for FD %d: %s",

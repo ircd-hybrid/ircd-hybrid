@@ -501,10 +501,6 @@ event_set_interval_ms(event_handle_t event, uintmax_t new_interval_ms)
     return EVENT_ERR_INVALID_ARG;
 
   event->interval_ms = new_interval_ms;
-
-  if (event_is_scheduled(event))
-    return event_schedule(event);
-
   return EVENT_SUCCESS;
 }
 

@@ -133,10 +133,10 @@ ms_squit(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  if (!IsServer(target) && !IsMe(target))
+  if (!IsServer(target) && !client_is_me(target))
     return;
 
-  if (IsMe(target))
+  if (client_is_me(target))
     target = source->from;
 
   const char *reason = string_default(parv[2], source->name);

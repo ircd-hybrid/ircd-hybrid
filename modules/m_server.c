@@ -342,7 +342,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   {
     const struct Client *target = node->data;
     /* target->from == target for target == client */
-    if (IsMe(target) || target->from == client)
+    if (client_is_me(target) || target->from == client)
       continue;
 
     sendto_one(client, ":%s SID %s %u %s +%s :%s",
@@ -360,7 +360,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
       if (target->from == client)
         continue;
 
-      if (IsMe(target) || client_has_flag(target, FLAGS_EOB))
+      if (client_is_me(target) || client_has_flag(target, FLAGS_EOB))
         sendto_one(client, ":%s EOB", target->id);
     }
   }

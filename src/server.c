@@ -96,7 +96,7 @@ server_route_command(struct Client *client, const char *command, const int serve
     {
       struct Client *tmp = node->data;
 
-      assert(IsMe(tmp) || IsServer(tmp));
+      assert(client_is_me(tmp) || IsServer(tmp));
       if (match(mask, tmp->name) == 0)
       {
         if (tmp->from == client->from && !client_is_local(tmp))
@@ -129,8 +129,8 @@ server_route_command(struct Client *client, const char *command, const int serve
   /* Determine the result of the routing attempt. */
   if (route->target)
   {
-    assert(IsMe(route->target) || IsServer(route->target) || IsClient(route->target));
-    if (IsMe(route->target) || MyClient(route->target))
+    assert(client_is_me(route->target) || IsServer(route->target) || IsClient(route->target));
+    if (client_is_me(route->target) || MyClient(route->target))
     {
       route->result = SERVER_ROUTE_ISME;
       return route;

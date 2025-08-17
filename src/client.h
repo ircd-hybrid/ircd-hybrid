@@ -66,7 +66,6 @@ enum
 
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
 #define IsHandshake(x)          ((x)->status == STAT_HANDSHAKE)
-#define IsMe(x)                 ((x)->status == STAT_ME)
 #define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
 #define IsServer(x)             ((x)->status == STAT_SERVER)
 #define IsClient(x)             ((x)->status == STAT_CLIENT)
@@ -394,6 +393,12 @@ static inline void
 client_unset_flag(struct Client *client, unsigned int flags)
 {
   client->flags &= ~flags;
+}
+
+static inline bool
+client_is_me(const struct Client *client)
+{
+  return client == &me;
 }
 
 static inline bool

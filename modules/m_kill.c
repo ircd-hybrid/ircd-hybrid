@@ -86,7 +86,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (IsServer(target) || IsMe(target))
+  if (IsServer(target) || client_is_me(target))
   {
     sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
     return;
@@ -158,7 +158,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
   else
     reason = def_reason;
 
-  if (IsServer(target) || IsMe(target))
+  if (IsServer(target) || client_is_me(target))
   {
     sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
     return;

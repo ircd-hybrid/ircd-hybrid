@@ -351,14 +351,14 @@ hash_find_server(const char *name)
 
   if ((client = clientTable[hashv]))
   {
-    if ((!IsServer(client) && !IsMe(client)) ||
+    if ((!IsServer(client) && !client_is_me(client)) ||
         irccmp(name, client->name))
     {
       struct Client *prev;
 
       while (prev = client, (client = client->hnext))
       {
-        if ((IsServer(client) || IsMe(client)) &&
+        if ((IsServer(client) || client_is_me(client)) &&
             irccmp(name, client->name) == 0)
         {
           prev->hnext = client->hnext;

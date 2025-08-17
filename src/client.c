@@ -266,7 +266,7 @@ client_create_remote(struct Client *uplink)
 static void
 _client_destroy(struct Client *client)
 {
-  assert(client && client != &me && !IsMe(client));
+  assert(client && !client_is_me(client));
   assert(client->hnext == client);
   assert(client->idhnext == client);
   assert(client->global_node.prev == NULL && client->global_node.next == NULL);
@@ -879,7 +879,7 @@ _client_exit_cleanup_unregistered_connection(struct Client *client, const char *
 void
 client_exit(struct Client *client, const char *reason)
 {
-  assert(client && client != &me && !IsMe(client));
+  assert(client && !client_is_me(client));
   assert(reason);
 
   if (client_has_flag(client, FLAGS_CLOSING))

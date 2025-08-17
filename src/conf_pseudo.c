@@ -86,7 +86,7 @@ pseudo_message_handler(struct Client *source, int parc, char *parv[])
   if (target)
   {
     const struct Client *server = hash_find_server(pseudo->server);
-    if (server == NULL || target->uplink != server || IsMe(server))
+    if (server == NULL || target->uplink != server || client_is_me(server))
       target = NULL;
   }
 

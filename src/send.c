@@ -85,8 +85,7 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
 static void
 sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 {
-  assert(!IsMe(to));
-  assert(to != &me);
+  assert(!client_is_me(to));
   assert(client_is_local(to));
 
   const unsigned int max_sendq = client_get_max_sendq(to);
@@ -136,7 +135,7 @@ sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct db
 {
   assert(client_is_local(to));
   assert(IsServer(to));
-  assert(!IsMe(to));
+  assert(!client_is_me(to));
   assert(to->from == to);
 
   if (to == from->from)
@@ -641,7 +640,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
       continue;
 
     /* Do not attempt to send to ourselves ... */
-    if (IsMe(target))
+    if (client_is_me(target))
       continue;
 
     /* ... or the source */

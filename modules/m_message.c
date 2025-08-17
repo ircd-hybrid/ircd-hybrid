@@ -341,7 +341,7 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
     return;
   }
 
-  if (!IsMe(target))
+  if (!client_is_me(target))
   {
     sendto_one(target, ":%s %s %s :%s", source->id, command[notice], nick, text);
     return;

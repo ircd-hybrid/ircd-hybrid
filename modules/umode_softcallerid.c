@@ -49,7 +49,7 @@ msg_client_target_local_hook(void *ctx_)
 
   if (ctx->notice == false)
     sendto_one_numeric(ctx->source, &me, RPL_TARGUMODEG,
-                       ctx->target->name, "+G", "server side ignore with the exception of common channels");
+                       ctx->target->name, softcallerid_mode.mode_char, "server side ignore with the exception of common channels");
 
   if ((ctx->target->connection->last_caller_id_time +
        ConfigGeneral.caller_id_wait) < io_time_get(IO_TIME_MONOTONIC_SEC))
@@ -58,7 +58,7 @@ msg_client_target_local_hook(void *ctx_)
       sendto_one_numeric(ctx->source, &me, RPL_TARGNOTIFY, ctx->target->name);
 
     sendto_one_numeric(ctx->target, &me, RPL_UMODEGMSG,
-                       ctx->source->name, ctx->source->username, ctx->source->host, "+G");
+                       ctx->source->name, ctx->source->username, ctx->source->host, softcallerid_mode.mode_char);
     ctx->target->connection->last_caller_id_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
@@ -77,7 +77,7 @@ whois_send_hook(void *ctx_)
     return HOOK_FLOW_CONTINUE;
 
   sendto_one_numeric(ctx->source, &me, RPL_TARGUMODEG,
-                     ctx->target->name, "+G", "server side ignore with the exception of common channels");
+                     ctx->target->name, softcallerid_mode.mode_char, "server side ignore with the exception of common channels");
   return HOOK_FLOW_CONTINUE;
 }
 

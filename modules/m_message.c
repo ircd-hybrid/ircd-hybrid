@@ -51,6 +51,33 @@ static const char *const command[] =
   [true] = "NOTICE"
 };
 
+typedef struct
+{
+  const char *mask;
+} target_mask_ctx_t;
+
+static bool
+target_filter_host(const struct Client *client, void *context)
+{
+  const target_mask_ctx_t *ctx = context;
+  const char *const mask = ctx->mask;
+  struct io_addr addr;
+  int bits = 0;
+
+  const int result = address_parse_netmask(mask, &addr, &bits);
+  if (result == HM_IPV4 || result == HM_IPV6)
+    return address_match(&client->addr, &addr, false, false, bits);
+
+  return match(mask, client->realhost) == 0;
+}
+
+static bool
+target_filter_server(const struct Client *client, void *context)
+{
+  const target_mask_ctx_t *ctx = context;
+  return match(ctx->mask, client->uplink->name) == 0;
+}
+
 typedef enum
 {
   TARGET_ENTITY_NONE,
@@ -314,17 +341,32 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
     return;
   }
 
-  if (*(nick + 1) == '$' || *(nick + 1) == '#')
-    ++nick;
-  else if (MyClient(source))
+  send_filter_fn filter_to_use = NULL;
+  const char *mask = NULL;
+
+  if (*(nick + 1) == '#')  /* $#host.mask */
   {
-    sendto_one_notice(source, &me, ":The command %s %s is no longer supported, please use $%s",
-                      command[notice], nick, nick);
+    filter_to_use = target_filter_host;
+    mask = nick + 2;
+  }
+  else if (*(nick + 1) == '$')  /* $$server.mask */
+  {
+    filter_to_use = target_filter_server;
+    mask = nick + 2;
+  }
+  else  /* Deprecated $server.mask */
+  {
+    if (MyClient(source))
+      sendto_one_notice(source, &me, ":Invalid syntax for mass-message target '%s'. Use $$<servermask> for servers or $#<hostmask> for hosts.",
+                        nick);
+    /* Silently ignore for remote opers. */
     return;
   }
 
-  sendto_match_butone(IsServer(source->from) ? source->from : NULL, source, nick + 1,
-                      (*nick == '#') ? SEND_MATCH_HOST : SEND_MATCH_SERVER, "%s $%s :%s", command[notice], nick, text);
+  const struct Client *exclude_uplink = IsServer(source->from) ? source->from : NULL;
+  target_mask_ctx_t ctx = { .mask = mask };
+
+  sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);
 }
 
 static void

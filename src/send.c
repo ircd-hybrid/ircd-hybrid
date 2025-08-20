@@ -437,119 +437,59 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
   log_write(LOG_TYPE_IRCD, "%s", buffer);
 }
 
-/*
- ** match_it() and sendto_match_butone() ARE only used
- ** to send a msg to all ppl on servers/hosts that match a specified mask
- ** (used for enhanced PRIVMSGs) for opers
- **
- ** addition -- Armin, 8jun90 (gruner@informatik.tu-muenchen.de)
- **
- */
-
-/* match_it()
- *
- * inputs	- client pointer to match on
- *		- actual mask to match
- *		- what to match on, HOST or SERVER
- * output	- 1 or 0 if match or not
- * side effects	- NONE
- */
-static bool
-sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_match_type_t type)
-{
-  if (type == SEND_MATCH_HOST)
-  {
-    struct io_addr addr;
-    int bits = 0;
-    const int ret = address_parse_netmask(mask, &addr, &bits);
-
-    if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_match(&one->addr, &addr, false, false, bits))
-        return true;
-    return match(mask, one->realhost) == 0;
-  }
-
-  return match(mask, one->uplink->name) == 0;
-}
-
-/* sendto_match_butone()
- *
- * Send to all clients which match the mask in a way defined on 'what';
- * either by user hostname or user servername.
- *
- * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
- */
 void
-sendto_match_butone(const struct Client *one, const struct Client *from, const char *mask,
-                    send_match_type_t type, const char *format, ...)
+sendto_filtered_butone(const struct Client *exclude_uplink, const struct Client *source,
+                       send_filter_fn filter_fn, void *filter_ctx, const char *format, ...)
 {
-  struct dbuf_block *buffer_l = dbuf_alloc();
-  struct dbuf_block *buffer_r = dbuf_alloc();
+  assert(source);
+  assert(filter_fn);
 
-  dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put_fmt(buffer_r, ":%s ", from->id);
+  struct dbuf_block *buffer_local = dbuf_alloc();
+  struct dbuf_block *buffer_remote = dbuf_alloc();
 
-  va_list args_l, args_r;
-  va_start(args_l, format);
-  va_start(args_r, format);
-  send_format(buffer_l, format, args_l);
-  send_format(buffer_r, format, args_r);
-  va_end(args_l);
-  va_end(args_r);
+  if (IsClient(source))
+    dbuf_put_fmt(buffer_local, ":%s!%s@%s ", source->name, source->username, source->host);
+  else
+    dbuf_put_fmt(buffer_local, ":%s ", source->name);
 
-  /* Scan the local clients */
+  dbuf_put_fmt(buffer_remote, ":%s ", source->id);
+
+  va_list args;
+  va_start(args, format);
+  va_list args_copy;
+  va_copy(args_copy, args);
+
+  send_format(buffer_local, format, args);
+  send_format(buffer_remote, format, args_copy);
+
+  va_end(args_copy);
+  va_end(args);
+
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *client = node->data;
-
-    if (IsDead(client))
+    struct Client *target = node->data;
+    if (IsDead(target))
       continue;
 
-    if (one && (client == one->from))
-      continue;
-
-    if (sendto_match_butone_qualifies(client, mask, type) == false)
-      continue;
-
-    sendto_one_buffer(client, buffer_l);
+    if (filter_fn(target, filter_ctx))
+      sendto_one_buffer(target, buffer_local);
   }
 
-  /* Now scan servers */
   LIST_FOREACH(node, local_server_list.head)
   {
-    struct Client *client = node->data;
-
-    /*
-     * The old code looped through every client on the network for each
-     * server to check if the server (client) has at least 1 client
-     * matching the mask, using something like:
-     *
-     * for (target = GlobalClientList; target; target = target->next)
-     *        if (IsRegisteredUser(target) &&
-     *                        match_it(target, mask, what) &&
-     *                        (target->from == client))
-     *   vsendto_prefix_one(client, from, format, args);
-     *
-     * That way, we wouldn't send the message to a server who didn't have
-     * a matching client. However, on a network such as EFNet, that code
-     * would have looped through about 50 servers, and in each loop, loop
-     * through about 50k clients as well, calling match() in each nested
-     * loop. That is a very bad thing cpu wise - just send the message to
-     * every connected server and let that server deal with it.
-     * -wnder
-     */
-    if (IsDead(client))
+    struct Client *target = node->data;
+    if (IsDead(target))
       continue;
 
-    if (one && (client == one->from))
+    if (target == exclude_uplink)
       continue;
 
-    sendto_one_buffer_remote(client, from, buffer_r);
+    sendto_one_buffer_remote(target, source, buffer_remote);
   }
 
-  dbuf_ref_free(buffer_l);
-  dbuf_ref_free(buffer_r);
+  dbuf_ref_free(buffer_local);
+  dbuf_ref_free(buffer_remote);
 }
 
 /* sendto_servers()

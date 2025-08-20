@@ -59,19 +59,6 @@ typedef enum
   SEND_TYPE_LOCOPS,  /**< A notice message sent to local operators. Prefix: "LocOps". */
 } send_type_t;
 
-/**
- * @enum send_match_type_t
- * @brief Enum for representing the type of match to perform.
- *
- * This enum lists the possible types of matches for sending messages using the sendto_match_butone function.
- * Each type specifies whether to match based on the client's hostname or server name.
- */
-typedef enum
-{
-  SEND_MATCH_HOST,  /**< Match based on the client's hostname. */
-  SEND_MATCH_SERVER,  /**< Match based on the client's server name. */
-} send_match_type_t;
-
 /*
  * struct decls
  */

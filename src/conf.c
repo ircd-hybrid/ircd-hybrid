@@ -586,9 +586,6 @@ fail:
 static void
 conf_set_defaults(void)
 {
-  /* Verify class_init() ran. */
-  assert(class_default == list_peek_tail(class_get_list()));
-
   ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;

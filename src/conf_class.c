@@ -119,9 +119,12 @@ class_mark_all_inactive(void)
 {
   list_node_t *node;
 
-  LIST_FOREACH_PREV(node, class_list.tail->prev)
+  LIST_FOREACH(node, class_list.head)
   {
     struct ClassItem *klass = node->data;
+    if (klass == class_default)
+      continue;
+
     klass->active = false;
   }
 }

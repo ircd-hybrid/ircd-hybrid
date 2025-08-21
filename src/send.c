@@ -724,23 +724,26 @@ void
 sendto_channel_butone(struct Client *one, const struct Client *from, struct Channel *channel,
                       int rank, const char *format, ...)
 {
-  struct dbuf_block *buffer_l = dbuf_alloc();
-  struct dbuf_block *buffer_r = dbuf_alloc();
+  struct dbuf_block *buffer_local = dbuf_alloc();
+  struct dbuf_block *buffer_remote = dbuf_alloc();
 
   if (IsClient(from))
-    dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
+    dbuf_put_fmt(buffer_local, ":%s!%s@%s ", from->name, from->username, from->host);
   else
-    dbuf_put_fmt(buffer_l, ":%s ", from->name);
+    dbuf_put_fmt(buffer_local, ":%s ", from->name);
 
-  dbuf_put_fmt(buffer_r, ":%s ", from->id);
+  dbuf_put_fmt(buffer_remote, ":%s ", from->id);
 
-  va_list args_l, args_r;
-  va_start(args_l, format);
-  va_start(args_r, format);
-  send_format(buffer_l, format, args_l);
-  send_format(buffer_r, format, args_r);
-  va_end(args_l);
-  va_end(args_r);
+  va_list args;
+  va_start(args, format);
+  va_list args_copy;
+  va_copy(args_copy, args);
+
+  send_format(buffer_local, format, args);
+  send_format(buffer_remote, format, args_copy);
+
+  va_end(args_copy);
+  va_end(args);
 
   ++send_marker;
 
@@ -765,13 +768,13 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
       continue;
 
     if (client_is_local(target))
-      sendto_one_buffer(target, buffer_l);
+      sendto_one_buffer(target, buffer_local);
     else if (target->from->connection->send_marker != send_marker)
-      sendto_one_buffer_remote(target->from, from, buffer_r);
+      sendto_one_buffer_remote(target->from, from, buffer_remote);
 
     target->from->connection->send_marker = send_marker;
   }
 
-  dbuf_ref_free(buffer_l);
-  dbuf_ref_free(buffer_r);
+  dbuf_ref_free(buffer_local);
+  dbuf_ref_free(buffer_remote);
 }

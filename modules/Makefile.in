@@ -200,6 +200,14 @@ cap_multi_prefix_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(cap_multi_prefix_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
+cap_standard_replies_la_LIBADD =
+am_cap_standard_replies_la_OBJECTS = cap_standard_replies.lo
+cap_standard_replies_la_OBJECTS =  \
+	$(am_cap_standard_replies_la_OBJECTS)
+cap_standard_replies_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(cap_standard_replies_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 cap_userhost_in_names_la_LIBADD =
 am_cap_userhost_in_names_la_OBJECTS = cap_userhost_in_names.lo
 cap_userhost_in_names_la_OBJECTS =  \
@@ -919,6 +927,7 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/cap_chghost.Plo ./$(DEPDIR)/cap_extended_join.Plo \
 	./$(DEPDIR)/cap_invite_notify.Plo \
 	./$(DEPDIR)/cap_multi_prefix.Plo \
+	./$(DEPDIR)/cap_standard_replies.Plo \
 	./$(DEPDIR)/cap_userhost_in_names.Plo ./$(DEPDIR)/m_accept.Plo \
 	./$(DEPDIR)/m_admin.Plo ./$(DEPDIR)/m_away.Plo \
 	./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_cap.Plo \
@@ -999,6 +1008,7 @@ SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
 	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
 	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
+	$(cap_standard_replies_la_SOURCES) \
 	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
 	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
 	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
@@ -1058,6 +1068,7 @@ DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
 	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
 	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
+	$(cap_standard_replies_la_SOURCES) \
 	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
 	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
 	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
@@ -1296,6 +1307,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_extended_join.la     \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
+                      cap_standard_replies.la  \
                       cap_userhost_in_names.la \
                       umode_admin.la           \
                       umode_bot.la             \
@@ -1416,6 +1428,7 @@ cap_chghost_la_LDFLAGS = $(MODULE_FLAGS)
 cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
 cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
 cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
+cap_standard_replies_la_LDFLAGS = $(MODULE_FLAGS)
 cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
 umode_admin_la_LDFLAGS = $(MODULE_FLAGS)
 umode_bot_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1535,6 +1548,7 @@ cap_chghost_la_SOURCES = cap_chghost.c
 cap_extended_join_la_SOURCES = cap_extended_join.c
 cap_invite_notify_la_SOURCES = cap_invite_notify.c
 cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
+cap_standard_replies_la_SOURCES = cap_standard_replies.c
 cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
 umode_admin_la_SOURCES = umode_admin.c
 umode_bot_la_SOURCES = umode_bot.c
@@ -1734,6 +1748,9 @@ cap_invite_notify.la: $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_DEP
 
 cap_multi_prefix.la: $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_DEPENDENCIES) $(EXTRA_cap_multi_prefix_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(cap_multi_prefix_la_LINK) -rpath $(modulesdir) $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_LIBADD) $(LIBS)
+
+cap_standard_replies.la: $(cap_standard_replies_la_OBJECTS) $(cap_standard_replies_la_DEPENDENCIES) $(EXTRA_cap_standard_replies_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(cap_standard_replies_la_LINK) -rpath $(modulesdir) $(cap_standard_replies_la_OBJECTS) $(cap_standard_replies_la_LIBADD) $(LIBS)
 
 cap_userhost_in_names.la: $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_DEPENDENCIES) $(EXTRA_cap_userhost_in_names_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(cap_userhost_in_names_la_LINK) -rpath $(modulesdir) $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_LIBADD) $(LIBS)
@@ -2084,6 +2101,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_extended_join.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_invite_notify.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_multi_prefix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_standard_replies.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_userhost_in_names.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_accept.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_admin.Plo@am__quote@ # am--include-marker
@@ -2367,6 +2385,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
 	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
+	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo
 	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
 	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
@@ -2531,6 +2550,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
 	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
+	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo
 	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
 	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo

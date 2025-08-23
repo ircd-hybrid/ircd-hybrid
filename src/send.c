@@ -224,6 +224,73 @@ send_queued_write(struct Client *to)
   }
 }
 
+static void
+_sendto_one_stdreply(struct Client *to, const struct Client *from, const char *type,
+                     const char *command, const char *code,
+                     const char *context[], size_t context_len,
+                     const char *format, va_list args)
+{
+  assert(to);
+  assert(from);
+  assert(type);
+  assert(command);
+  assert(code);
+  assert(format);
+  assert((context_len > 0) == (context != NULL));
+
+  if (IsDead(to->from))
+    return;
+
+  if (!HasCap(to, CAP_STANDARD_REPLIES))
+    return;
+
+  struct dbuf_block *buffer = dbuf_alloc();
+  dbuf_put_fmt(buffer, ":%s %s %s %s",
+               client_get_id_or_name(from, to), type, command, code);
+
+  for (size_t i = 0; i < context_len; ++i)
+  {
+    assert(context[i] != NULL && strchr(context[i], ' ') == NULL);
+    dbuf_put_fmt(buffer, " %s", context[i]);
+  }
+
+  dbuf_put_fmt(buffer, " :");
+  send_format(buffer, format, args);
+
+  sendto_one_buffer(to->from, buffer);
+  dbuf_ref_free(buffer);
+}
+
+void
+sendto_one_fail(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "FAIL", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
+void
+sendto_one_warn(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "WARN", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
+void
+sendto_one_note(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "NOTE", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
 /* sendto_one()
  *
  * inputs	- pointer to destination client

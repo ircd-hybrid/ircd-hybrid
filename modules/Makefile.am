@@ -11,6 +11,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_extended_join.la     \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
+                      cap_standard_replies.la  \
                       cap_userhost_in_names.la \
                       umode_admin.la           \
                       umode_bot.la             \
@@ -132,6 +133,7 @@ cap_chghost_la_LDFLAGS = $(MODULE_FLAGS)
 cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
 cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
 cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
+cap_standard_replies_la_LDFLAGS = $(MODULE_FLAGS)
 cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
 
 umode_admin_la_LDFLAGS = $(MODULE_FLAGS)
@@ -254,6 +256,7 @@ cap_chghost_la_SOURCES = cap_chghost.c
 cap_extended_join_la_SOURCES = cap_extended_join.c
 cap_invite_notify_la_SOURCES = cap_invite_notify.c
 cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
+cap_standard_replies_la_SOURCES = cap_standard_replies.c
 cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
 
 umode_admin_la_SOURCES = umode_admin.c

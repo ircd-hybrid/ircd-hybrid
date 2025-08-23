@@ -71,6 +71,9 @@ typedef bool (*send_filter_fn)(const struct Client *client, void *context);
 extern void sendq_unblocked(fde_t *, void *);
 extern void send_queued_write(struct Client *);
 
+extern void sendto_one_fail(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
+extern void sendto_one_warn(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
+extern void sendto_one_note(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
 extern void sendto_one(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void sendto_one_numeric(struct Client *, const struct Client *, enum irc_numerics, ...);
 extern void sendto_one_notice(struct Client *, const struct Client *, const char *, ...) IO_AFP(3,4);

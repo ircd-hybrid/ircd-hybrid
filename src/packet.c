@@ -53,19 +53,19 @@ enum { READBUF_SIZE = 16384 };
  *      necessary fields (buffer etc..)
  */
 static void
-client_dopacket(struct Client *client, char *buffer, size_t length)
+client_dopacket(struct Client *client, char *line_buffer, size_t line_length)
 {
-  assert(length < IRCD_BUFSIZE);
+  assert(line_length < IRCD_BUFSIZE);
 
   /* Update messages received */
   ++me.connection->recv.messages;
   ++client->connection->recv.messages;
 
   /* Update bytes received */
-  client->connection->recv.bytes += length;
-  me.connection->recv.bytes += length;
+  client->connection->recv.bytes += line_length;
+  me.connection->recv.bytes += line_length;
 
-  parse_message(client, buffer, buffer + length);
+  parse_message(client, line_buffer, line_buffer + line_length);
 }
 
 /* extract_one_line()
@@ -76,7 +76,7 @@ client_dopacket(struct Client *client, char *buffer, size_t length)
  * side effects - one line is copied and removed from the dbuf
  */
 static size_t
-extract_one_line(struct dbuf_queue *queue, char *buffer)
+extract_one_line(struct dbuf_queue *queue, char *dest_buffer)
 {
   size_t line_bytes = 0, eol_bytes = 0;
   list_node_t *node;
@@ -106,7 +106,7 @@ extract_one_line(struct dbuf_queue *queue, char *buffer)
       else if (eol_bytes)
         goto out;
       else if (line_bytes++ < IRCD_BUFSIZE - 2)
-        *buffer++ = c;
+        *dest_buffer++ = c;
     }
   }
 
@@ -119,7 +119,7 @@ out:
    * that we have read, since this is a partial line case.
    */
   if (eol_bytes)
-    *buffer = '\0';
+    *dest_buffer = '\0';
   else
     line_bytes = 0;
 

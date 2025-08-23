@@ -38,11 +38,7 @@
 #include "send.h"
 #include "user_mode.h"
 
-
 enum { READBUF_SIZE = 16384 };
-
-static char readBuf[READBUF_SIZE];
-
 
 /*
  * client_dopacket - copy packet to client buf and parse it
@@ -59,6 +55,8 @@ static char readBuf[READBUF_SIZE];
 static void
 client_dopacket(struct Client *client, char *buffer, size_t length)
 {
+  assert(length < IRCD_BUFSIZE);
+
   /* Update messages received */
   ++me.connection->recv.messages;
   ++client->connection->recv.messages;
@@ -114,6 +112,8 @@ extract_one_line(struct dbuf_queue *queue, char *buffer)
 
 out:
 
+  assert(line_bytes <= IRCD_BUFSIZE - 2);
+
   /*
    * Now, if we haven't found an EOL, ignore all line bytes
    * that we have read, since this is a partial line case.
@@ -135,6 +135,8 @@ out:
 static void
 parse_client_queued(struct Client *client)
 {
+  char line_buffer[IRCD_BUFSIZE];
+
   if (IsUnknown(client))
   {
     unsigned int i = 0;
@@ -148,11 +150,11 @@ parse_client_queued(struct Client *client)
       if (i >= MAX_FLOOD_HANDSHAKE)
         return;
 
-      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
-      if (dolen == 0)
+      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      if (line_length == 0)
         return;
 
-      client_dopacket(client, readBuf, dolen);
+      client_dopacket(client, line_buffer, line_length);
       ++i;
 
       /*
@@ -171,11 +173,11 @@ parse_client_queued(struct Client *client)
       if (IsDefunct(client))
         return;
 
-      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
-      if (dolen == 0)
+      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      if (line_length == 0)
         return;
 
-      client_dopacket(client, readBuf, dolen);
+      client_dopacket(client, line_buffer, line_length);
     }
   }
   else if (IsClient(client))
@@ -216,11 +218,11 @@ parse_client_queued(struct Client *client)
             (client_has_flag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
-      const size_t dolen = extract_one_line(&client->connection->buf_recvq, readBuf);
-      if (dolen == 0)
+      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      if (line_length == 0)
         return;
 
-      client_dopacket(client, readBuf, dolen);
+      client_dopacket(client, line_buffer, line_length);
       ++client->connection->sent_parsed;
     }
   }
@@ -279,6 +281,7 @@ read_packet(fde_t *F, void *data_)
 {
   struct Client *const client = data_;
   ssize_t length = 0;
+  char raw_receive_buffer[READBUF_SIZE];
 
   assert(client);
   assert(client->connection);
@@ -298,13 +301,13 @@ read_packet(fde_t *F, void *data_)
     if (tls_isusing(&F->tls))
     {
       bool want_write = false;
-      length = tls_read(&F->tls, readBuf, sizeof(readBuf), &want_write);
+      length = tls_read(&F->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
 
       if (want_write)
         comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client);
     }
     else
-      length = recv(F->fd, readBuf, sizeof(readBuf), 0);
+      length = recv(F->fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
     if (length <= 0)
     {
@@ -319,7 +322,7 @@ read_packet(fde_t *F, void *data_)
       return;
     }
 
-    dbuf_put(&client->connection->buf_recvq, readBuf, length);
+    dbuf_put(&client->connection->buf_recvq, raw_receive_buffer, length);
 
     client->connection->last_receive_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     client->connection->ping_sent_time = 0;

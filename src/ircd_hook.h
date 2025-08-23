@@ -22,8 +22,8 @@
 #ifndef INCLUDED_ircd_hook_h
 #define INCLUDED_ircd_hook_h
 
-#include "stdinc.h"
 #include "hook.h"
+
 #include "client.h"
 
 typedef struct

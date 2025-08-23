@@ -23,6 +23,11 @@
  * \brief User related functions.
  */
 
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "event.h"
 #include "io_string.h"
 #include "io_time.h"

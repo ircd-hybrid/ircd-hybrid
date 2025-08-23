@@ -22,13 +22,14 @@
 #ifndef INCLUDED_conf_oper_h
 #define INCLUDED_conf_oper_h
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "address.h"
+#include "list.h"
+
 #include "client.h"
 #include "conf_class.h"
-#include "list.h"
 
 typedef enum
 {

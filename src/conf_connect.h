@@ -22,6 +22,9 @@
 #ifndef INCLUDED_conf_connect_h
 #define INCLUDED_conf_connect_h
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "address.h"
 #include "list.h"
 #include "conf_class.h"

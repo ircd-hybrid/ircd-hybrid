@@ -26,6 +26,8 @@
 #ifndef INCLUDED_user_h
 #define INCLUDED_user_h
 
+#include <stdbool.h>
+
 struct Client;
 
 extern void show_lusers(struct Client *);

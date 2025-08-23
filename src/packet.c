@@ -23,20 +23,26 @@
  * \brief Packet handlers.
  */
 
-#include "stdinc.h"
-#include "fdlist.h"
+#include <assert.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
 #include "comm.h"
-#include "list.h"
-#include "misc.h"
+#include "fdlist.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "conf.h"
+#include "list.h"
+#include "misc.h"
+
 #include "client.h"
+#include "conf.h"
 #include "ircd.h"
-#include "parse.h"
 #include "packet.h"
+#include "parse.h"
 #include "send.h"
-#include "user_mode.h"
 
 enum { READBUF_SIZE = 16384 };
 

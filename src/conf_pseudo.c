@@ -27,16 +27,19 @@
  * commands and service aliases within the IRC daemon.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "memory.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
+
 #include "io_string.h"
+#include "memory.h"
+
 #include "client.h"
-#include "parse.h"
+#include "conf_pseudo.h"
 #include "hash.h"
 #include "numeric.h"
+#include "parse.h"
 #include "send.h"
-#include "conf_pseudo.h"
 
 static list_t pseudo_list;  /**< List to manage pseudo items. */
 

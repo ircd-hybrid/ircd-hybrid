@@ -26,6 +26,8 @@
 
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "address.h"

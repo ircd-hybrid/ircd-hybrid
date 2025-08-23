@@ -23,23 +23,25 @@
  * \brief Implementation for handling listening sockets.
  */
 
-#include "stdinc.h"
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
+#include <assert.h>
+#include <errno.h>
+#include <string.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <sys/socket.h>
+
+#include "comm.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "log.h"
-#include "listener.h"
+#include "memory.h"
+
 #include "client.h"
-#include "fdlist.h"
+#include "conf.h"
 #include "ircd.h"
 #include "ircd_defs.h"
-#include "comm.h"
-#include "conf.h"
+#include "listener.h"
 #include "send.h"
-#include "memory.h"
 
 static list_t listener_list;
 

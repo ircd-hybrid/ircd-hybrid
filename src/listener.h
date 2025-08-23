@@ -25,9 +25,13 @@
 
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "fdlist.h"
 #include "address.h"
+#include "fdlist.h"
+#include "list.h"
 
 /** Listener flags */
 typedef enum

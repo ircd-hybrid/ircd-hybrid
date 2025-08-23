@@ -25,15 +25,11 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "comm.h"
-#include "event.h"
 #include "io_string.h"
-#include "io_time.h"
-#include "list.h"
 #include "log.h"
 #include "memory.h"
 #include "misc.h"
@@ -44,21 +40,17 @@
 #include "channel_invite.h"
 #include "client.h"
 #include "client_svstag.h"
-#include "conf.h"
-#include "conf_connect.h"
 #include "conf_gecos.h"
 #include "hash.h"
 #include "ipcache.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "listener.h"
-#include "lookup.h"
 #include "monitor.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
 #include "server.h"
-#include "user_mode.h"
 #include "whowas.h"
 
 uint64_t UMODE_BOT;

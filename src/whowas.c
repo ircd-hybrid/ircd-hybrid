@@ -33,7 +33,6 @@
 
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "memory.h"
 
 #include "client.h"

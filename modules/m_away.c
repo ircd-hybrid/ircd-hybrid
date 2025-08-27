@@ -50,10 +50,10 @@ do_away(struct Client *source, const char *message)
   if (string_is_empty(message))
   {
     /* Marking as not away */
-    if (source->away)
+    if (source->away_message)
     {
-      io_free(source->away);
-      source->away = NULL;
+      io_free(source->away_message);
+      source->away_message = NULL;
 
       /* We now send this only if they were away before --is */
       sendto_servers(source, 0, 0, ":%s AWAY", source->id);
@@ -81,17 +81,17 @@ do_away(struct Client *source, const char *message)
     source->connection->away.count++;
     sendto_one_numeric(source, &me, RPL_NOWAWAY);
 
-    if (source->away && strncmp(source->away, message, ConfigGeneral.max_away_length) == 0)
+    if (source->away_message && strncmp(source->away_message, message, ConfigGeneral.max_away_length) == 0)
       return;
   }
 
-  io_free(source->away);
-  source->away = io_strndup(message, ConfigGeneral.max_away_length);
+  io_free(source->away_message);
+  source->away_message = io_strndup(message, ConfigGeneral.max_away_length);
 
   sendto_servers(source, 0, 0, ":%s AWAY :%s",
-                 source->id, source->away);
+                 source->id, source->away_message);
   sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source->name, source->username, source->host, source->away);
+                               source->name, source->username, source->host, source->away_message);
 }
 
 /*! \brief AWAY command handler

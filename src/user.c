@@ -519,14 +519,14 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   if (client_is_local(client))
   {
     sendto_one_numeric(client, &me, RPL_VISIBLEHOST, client->host);
-    clear_ban_cache_list(&client->channel);
+    clear_ban_cache_list(&client->channel_list);
   }
 
   if (ConfigGeneral.cycle_on_host_change == 0)
     return;
 
   list_node_t *node;
-  LIST_FOREACH(node, client->channel.head)
+  LIST_FOREACH(node, client->channel_list.head)
   {
     char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
     char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
@@ -556,7 +556,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
                            client->uplink->name, member->channel->name, modebuf, nickbuf);
   }
 
-  if (client->away)
+  if (client->away_message)
     sendto_common_channels_local(client, false, CAP_AWAY_NOTIFY, CAP_CHGHOST, ":%s!%s@%s AWAY :%s",
-                                 client->name, client->username, client->host, client->away);
+                                 client->name, client->username, client->host, client->away_message);
 }

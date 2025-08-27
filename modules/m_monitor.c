@@ -56,7 +56,7 @@ monitor_add(struct Client *source, char *list)
     if (valid_nickname(name, true) == false)
       continue;
 
-    if (list_length(&source->connection->monitors) >= ConfigGeneral.max_monitor)
+    if (list_length(&source->connection->monitor_list) >= ConfigGeneral.max_monitor)
     {
       char buf[IRCD_BUFSIZE];
 
@@ -116,7 +116,7 @@ monitor_add(struct Client *source, char *list)
 static void
 monitor_del(struct Client *source, char *list)
 {
-  if (list_is_empty(&source->connection->monitors))
+  if (list_is_empty(&source->connection->monitor_list))
     return;
 
   char *p = NULL;
@@ -137,7 +137,7 @@ monitor_list(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitor_list.head)
   {
     const struct Monitor *monitor = node->data;
 
@@ -169,7 +169,7 @@ monitor_status(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitor_list.head)
   {
     const struct Monitor *monitor = node->data;
 

@@ -353,7 +353,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
     if (target->connection->oper_class)
       attached_class_count++;
 
-    monitor_list_entries += list_length(&target->connection->monitors);
+    monitor_list_entries += list_length(&target->connection->monitor_list);
   }
 
   local_client_count = list_length(&local_server_list) +

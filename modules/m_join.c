@@ -254,9 +254,9 @@ ms_join(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                          source->name, source->username, source->host, channel->name);
 
-    if (source->away)
+    if (source->away_message)
       sendto_channel_local(source, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           source->name, source->username, source->host, source->away);
+                           source->name, source->username, source->host, source->away_message);
   }
 
   sendto_servers(source, 0, 0, ":%s JOIN %ju %s +",

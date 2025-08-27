@@ -200,11 +200,11 @@ server_send_client(struct Client *client, const struct Client *target)
     sendto_one(client, ":%s METADATA client %s cipher :%s",
                target->uplink->id, target->id, target->tls_cipher);
 
-  if (target->away)
-    sendto_one(client, ":%s AWAY :%s", target->id, target->away);
+  if (target->away_message)
+    sendto_one(client, ":%s AWAY :%s", target->id, target->away_message);
 
   list_node_t *node;
-  LIST_FOREACH_PREV(node, target->svstags.tail)
+  LIST_FOREACH_PREV(node, target->svstag_list.tail)
   {
     const struct ServicesTag *svstag = node->data;
     sendto_one(client, ":%s SVSTAG %s %ju %u +%s :%s",

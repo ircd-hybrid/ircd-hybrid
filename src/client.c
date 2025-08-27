@@ -264,8 +264,8 @@ _client_destroy(struct Client *client)
   assert(client->global_node.prev == NULL && client->global_node.next == NULL);
   assert(client->uplink_node.prev == NULL && client->uplink_node.next == NULL);
   assert(list_is_empty(&client->whowas_list));
-  assert(list_is_empty(&client->channel));
-  assert(list_is_empty(&client->svstags));
+  assert(list_is_empty(&client->channel_list));
+  assert(list_is_empty(&client->svstag_list));
 
   if (client->serv)
   {
@@ -282,21 +282,21 @@ _client_destroy(struct Client *client)
   client->tls_certfp = NULL;
   io_free(client->tls_cipher);
   client->tls_cipher = NULL;
-  io_free(client->away);
-  client->away = NULL;
+  io_free(client->away_message);
+  client->away_message = NULL;
 
   if (client_is_local(client))
   {
     assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
     assert(client->connection->list_task == NULL);
-    assert(client->connection->lookup == NULL);
+    assert(client->connection->lookup_request == NULL);
     assert(client->connection->fd == NULL);
     assert(client->connection->listener == NULL);
     assert(client->connection->activity_timeout_event == NULL);
     assert(client->connection->flood_recalc_event == NULL);
-    assert(list_is_empty(&client->connection->acceptlist));
-    assert(list_is_empty(&client->connection->monitors));
-    assert(list_is_empty(&client->connection->invited));
+    assert(list_is_empty(&client->connection->accept_list));
+    assert(list_is_empty(&client->connection->monitor_list));
+    assert(list_is_empty(&client->connection->invite_list));
     assert(dbuf_length(&client->connection->buf_recvq) == 0);
     assert(dbuf_length(&client->connection->buf_sendq) == 0);
     assert(client->connection->base_class == NULL);
@@ -586,10 +586,10 @@ _client_exit_teardown_connection(struct Client *client)
   }
 
   /* Clean up pending async operations to prevent their callbacks from firing. */
-  if (client->connection->lookup)
+  if (client->connection->lookup_request)
   {
-    lookup_delete(client->connection->lookup);
-    client->connection->lookup = NULL;
+    lookup_delete(client->connection->lookup_request);
+    client->connection->lookup_request = NULL;
   }
 
   /* Release our reference to the listener this client connected to. */
@@ -709,9 +709,9 @@ _client_exit_detach(struct Client *client)
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    channel_member_clear_list(&client->channel);
+    channel_member_clear_list(&client->channel_list);
 
-    svstag_clear_list(&client->svstags);
+    svstag_clear_list(&client->svstag_list);
 
     whowas_add_history(client, false);
     whowas_off_history(client);
@@ -838,8 +838,8 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
   }
 
   free_list_task(client);
-  invite_clear_list(&client->connection->invited);
-  accept_clear_list(&client->connection->acceptlist);
+  invite_clear_list(&client->connection->invite_list);
+  accept_clear_list(&client->connection->accept_list);
   monitor_clear_list(client);
 
   client_set_class(client, NULL, CLIENT_CLASS_BASE);

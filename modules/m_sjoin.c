@@ -386,9 +386,9 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
       sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                            target->name, target->username, target->host, channel->name);
 
-      if (target->away)
+      if (target->away_message)
         sendto_channel_local(target, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                             target->name, target->username, target->host, target->away);
+                             target->name, target->username, target->host, target->away_message);
     }
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)

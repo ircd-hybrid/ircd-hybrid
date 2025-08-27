@@ -111,7 +111,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   monitor_signoff(target);
 
-  clear_ban_cache_list(&target->channel);
+  clear_ban_cache_list(&target->channel_list);
 
   if (user_mode_has_flag(target, UMODE_REGISTERED))
   {

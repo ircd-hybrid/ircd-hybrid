@@ -108,7 +108,7 @@ who_send(struct Client *source, const struct Client *target,
     if (who->fields == 0 || (who->fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
     {
       list_node_t *node;
-      LIST_FOREACH(node, target->channel.head)
+      LIST_FOREACH(node, target->channel_list.head)
       {
         member = node->data;
 
@@ -158,7 +158,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_FLA))
   {
-    char status[32] = { [0] = target->away ? 'G' : 'H' };
+    char status[32] = { [0] = target->away_message ? 'G' : 'H' };
 
     ircd_hook_who_send_ctx ctx = { .source = source, .target = target };
     hook_dispatch(ircd_hook_who_send, &ctx);
@@ -331,7 +331,7 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 
   /* First, list all matching invisible clients on common channels */
   list_node_t *node;
-  LIST_FOREACH(node, source->channel.head)
+  LIST_FOREACH(node, source->channel_list.head)
   {
     struct ChannelMember *member = node->data;
     who_on_common_channel(source, member->channel, mask, who);

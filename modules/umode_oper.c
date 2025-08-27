@@ -67,7 +67,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
     io_free(client->connection->oper_name);
     client->connection->oper_name = NULL;
 
-    svstag_detach(&client->svstags, RPL_WHOISOPERATOR);
+    svstag_detach(&client->svstag_list, RPL_WHOISOPERATOR);
     ClrOFlag(client);
 
     list_node_t *node = list_find_remove(&oper_list, client);

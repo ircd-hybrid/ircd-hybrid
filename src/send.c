@@ -693,7 +693,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
   ++send_marker;
 
   list_node_t *node, *node2;
-  LIST_FOREACH(node, user->channel.head)
+  LIST_FOREACH(node, user->channel_list.head)
   {
     struct ChannelMember *member = node->data;
     struct Channel *channel = member->channel;

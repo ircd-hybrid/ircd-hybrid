@@ -292,8 +292,8 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 
   if (MyClient(source))
   {
-    if (target->away && notice == false)
-      sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
+    if (target->away_message && notice == false)
+      sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 
     if (hook_dispatch(ircd_hook_msg_client_source_local, &ctx) == HOOK_FLOW_STOP)
       return;

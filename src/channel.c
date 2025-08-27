@@ -118,7 +118,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
   if (client_is_local(client))
     list_add(member, &member->locchannode, &channel->members_local);
 
-  list_add(member, &member->usernode, &client->channel);
+  list_add(member, &member->usernode, &client->channel_list);
 }
 
 /*! \brief Deletes an user from a channel by removing a link in the
@@ -136,7 +136,7 @@ channel_remove_user(struct ChannelMember *member)
   if (client_is_local(client))
     list_remove(&member->locchannode, &channel->members_local);
 
-  list_remove(&member->usernode, &client->channel);
+  list_remove(&member->usernode, &client->channel_list);
 
   io_free(member);
 
@@ -758,7 +758,7 @@ member_find_link(const struct Client *client, const struct Channel *channel)
     return NULL;
 
   /* Take the shortest of the two lists */
-  if (list_length(&channel->members) < list_length(&client->channel))
+  if (list_length(&channel->members) < list_length(&client->channel_list))
   {
     list_node_t *node;
     LIST_FOREACH(node, channel->members.head)
@@ -768,7 +768,7 @@ member_find_link(const struct Client *client, const struct Channel *channel)
   else
   {
     list_node_t *node;
-    LIST_FOREACH(node, client->channel.head)
+    LIST_FOREACH(node, client->channel_list.head)
       if (((struct ChannelMember *)node->data)->channel == channel)
         return node->data;
   }
@@ -1041,7 +1041,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     }
 
     unsigned int max_channels = client_get_max_channels(client);
-    if (list_length(&client->channel) >= max_channels)
+    if (list_length(&client->channel_list) >= max_channels)
     {
       sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);
       break;
@@ -1104,9 +1104,9 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
                            client->name, client->username, client->host, channel->name);
     }
 
-    if (client->away)
+    if (client->away_message)
       sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           client->name, client->username, client->host, client->away);
+                           client->name, client->username, client->host, client->away_message);
 
     struct Invite *invite = invite_find(channel, client);
     if (invite)

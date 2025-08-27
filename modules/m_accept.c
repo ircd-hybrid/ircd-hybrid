@@ -54,7 +54,7 @@ accept_list(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->acceptlist.head)
+  LIST_FOREACH(node, source->connection->accept_list.head)
   {
     const struct AcceptItem *const accept = node->data;
     size_t masklen = strlen(accept->nick) +
@@ -122,18 +122,18 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, irccmp);
       if (accept == NULL)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTNOT, nick, user, host);
         continue;
       }
 
-      accept_del(accept, &source->connection->acceptlist);
+      accept_del(accept, &source->connection->accept_list);
     }
     else if (*mask)
     {
-      if (list_length(&source->connection->acceptlist) >= ConfigGeneral.max_accept)
+      if (list_length(&source->connection->accept_list) >= ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTFULL);
         return;
@@ -143,14 +143,14 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, irccmp);
       if (accept)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;
       }
 
-      accept_add(nick, user, host, &source->connection->acceptlist);
+      accept_add(nick, user, host, &source->connection->accept_list);
       accept_list(source);
     }
   }

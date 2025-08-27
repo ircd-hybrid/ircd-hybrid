@@ -71,7 +71,7 @@ lookup_check_complete(struct LookupRequest *lookup)
     return;
 
   struct Client *client = lookup->client;
-  client->connection->lookup = NULL;
+  client->connection->lookup_request = NULL;
   io_free(lookup);
 
   /* The pre-registration phase is complete; update the client's state and timers. */
@@ -171,10 +171,10 @@ lookup_delete(struct LookupRequest *lookup)
 void
 lookup_start(struct Client *client)
 {
-  assert(client->connection->lookup == NULL);
+  assert(client->connection->lookup_request == NULL);
   struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
   lookup->client = client;
-  client->connection->lookup = lookup;
+  client->connection->lookup_request = lookup;
 
   if (ConfigGeneral.disable_dns == 0)
   {

@@ -117,11 +117,11 @@ accept_message(struct Client *source, struct Client *target)
     return true;
 
   if (source == target || accept_find(source->name, source->username, source->host,
-                                      &target->connection->acceptlist, match))
+                                      &target->connection->accept_list, match))
     return true;
 
   if (user_mode_has_flag(target, UMODE_CALLERID) == false && user_mode_has_flag(target, UMODE_SOFTCALLERID))
-    LIST_FOREACH(node, target->channel.head)
+    LIST_FOREACH(node, target->channel_list.head)
       if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
         return true;
 

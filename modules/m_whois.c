@@ -126,7 +126,7 @@ whois_send_host_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_channels_numeric(struct Client *source, const struct Client *target)
 {
-  if (list_is_empty(&target->channel))
+  if (list_is_empty(&target->channel_list))
     return;
 
   /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
@@ -141,7 +141,7 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
   char *bufptr = buf;
 
   list_node_t *node;
-  LIST_FOREACH(node, target->channel.head)
+  LIST_FOREACH(node, target->channel_list.head)
   {
     const struct ChannelMember *member = node->data;
     whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
@@ -179,8 +179,8 @@ whois_send_server_numeric(struct Client *source, const struct Client *target)
 static void
 whois_send_away_numeric(struct Client *source, const struct Client *target)
 {
-  if (target->away)
-    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
+  if (target->away_message)
+    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 }
 
 static void
@@ -190,7 +190,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
   {
     if (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))
     {
-      const struct ServicesTag *svstag = list_peek_head(&target->svstags);
+      const struct ServicesTag *svstag = list_peek_head(&target->svstag_list);
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
       {
         const char *text;
@@ -206,7 +206,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
   }
 
   list_node_t *node;
-  LIST_FOREACH(node, target->svstags.head)
+  LIST_FOREACH(node, target->svstag_list.head)
   {
     const struct ServicesTag *svstag = node->data;
     if (svstag->numeric == RPL_WHOISOPERATOR)

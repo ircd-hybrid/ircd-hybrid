@@ -173,7 +173,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
   {
     /* No it isn't, so add it in the bucket and client adding it */
     list_add(client, list_make_node(), &monitor->monitored_by);
-    list_add(monitor, list_make_node(), &client->connection->monitors);
+    list_add(monitor, list_make_node(), &client->connection->monitor_list);
     return true;
   }
 
@@ -197,7 +197,7 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 
   list_free_node(node);
 
-  node = list_find_remove(&client->connection->monitors, monitor);
+  node = list_find_remove(&client->connection->monitor_list, monitor);
   if (node)
     list_free_node(node);
 
@@ -213,9 +213,9 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 void
 monitor_clear_list(struct Client *client)
 {
-  while (client->connection->monitors.head)
+  while (client->connection->monitor_list.head)
   {
-    list_node_t *node = client->connection->monitors.head;
+    list_node_t *node = client->connection->monitor_list.head;
     struct Monitor *monitor = node->data;
 
     assert(list_find(&monitor->monitored_by, client));
@@ -228,10 +228,10 @@ monitor_clear_list(struct Client *client)
     if (list_is_empty(&monitor->monitored_by))
       monitor_free(monitor);
 
-    list_remove(node, &client->connection->monitors);
+    list_remove(node, &client->connection->monitor_list);
     list_free_node(node);
   }
 
-  assert(client->connection->monitors.head == NULL);
-  assert(client->connection->monitors.tail == NULL);
+  assert(client->connection->monitor_list.head == NULL);
+  assert(client->connection->monitor_list.tail == NULL);
 }

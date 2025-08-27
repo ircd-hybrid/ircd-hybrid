@@ -84,7 +84,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   if (parc < 2)
   {
     list_node_t *node;
-    LIST_FOREACH(node, source->connection->invited.head)
+    LIST_FOREACH(node, source->connection->invite_list.head)
     {
       const struct Invite *const invite = node->data;
       sendto_one_numeric(source, &me, RPL_INVITELIST, invite->channel->name);
@@ -159,8 +159,8 @@ m_invite(struct Client *source, int parc, char *parv[])
 
   sendto_one_numeric(source, &me, RPL_INVITING, target->name, channel->name);
 
-  if (target->away)
-    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
+  if (target->away_message)
+    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 
   send_invite(source, target, channel);
 }

@@ -65,7 +65,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
 
   if (strcmp(parv[3], "-") == 0)
   {
-    svstag_clear_list(&target->svstags);
+    svstag_clear_list(&target->svstag_list);
     sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju -",
                    source->id, target->id, target->tsinfo);
     return;
@@ -74,7 +74,7 @@ ms_svstag(struct Client *source, int parc, char *parv[])
   if (string_is_empty(parv[5]))
     return;
 
-  svstag_attach(&target->svstags, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
+  svstag_attach(&target->svstag_list, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
   sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
                  source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);

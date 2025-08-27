@@ -265,11 +265,11 @@ struct Connection
 
   struct ClassItem *base_class;  /**< The class assigned on initial connection. */
   struct ClassItem *oper_class;  /**< The class assigned on OPER. NULL if not an oper. */
-  struct LookupRequest *lookup;  /**< State for the initial async DNS/ident lookup. */
+  struct LookupRequest *lookup_request;  /**< State for the initial async DNS/ident lookup. */
   struct Listener *listener;  /**< The listener this connection was accepted from. */
-  list_t acceptlist;  /**< Clients I'll allow to talk to me */
-  list_t monitors;  /**< Chain of Monitor pointer blocks */
-  list_t invited;  /**< Chain of invite pointer blocks */
+  list_t accept_list;  /**< Clients I'll allow to talk to me */
+  list_t monitor_list;  /**< Chain of Monitor pointer blocks */
+  list_t invite_list;  /**< Chain of invite pointer blocks */
 
   fde_t *fd;  /**< Pointer to the file descriptor entry for the underlying socket. */
 
@@ -309,14 +309,14 @@ struct Client
   unsigned int handler;  /**< Handler index */
 
   list_t whowas_list;
-  list_t channel;  /**< Chain of channel pointer blocks */
-  list_t svstags;  /**< List of ServicesTag items */
+  list_t channel_list;  /**< Chain of channel pointer blocks */
+  list_t svstag_list;  /**< List of ServicesTag items */
 
   struct io_addr addr;  /**< The binary IP address of the remote end of the connection. */
 
   char *tls_certfp;  /**< TLS certificate fingerprint */
   char *tls_cipher;  /**< Exact copy of tls_get_cipher() */
-  char *away;  /**< The AWAY message set by this client, or NULL if not away. */
+  char *away_message;  /**< The AWAY message set by this client, or NULL if not away. */
 
   char name[HOSTLEN + 1];  /**< The entity's nickname (for clients) or server name. */
   char id[IDLEN + 1];  /**< The entity's unique ID (UID for clients, SID for servers). */

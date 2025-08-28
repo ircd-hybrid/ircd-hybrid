@@ -111,7 +111,7 @@ mo_etrace(struct Client *source, int parc, char *parv[])
   {
     case SERVER_ROUTE_PASS:
       sendto_one_numeric(source, &me, RPL_TRACELINK,
-                         IRCD_VERSION, route->target->name, route->target->from->name);
+                         IRCD_VERSION, route->target->name, route->target->nexthop->name);
       break;
     case SERVER_ROUTE_ISME:
       do_etrace(source, parv[1]);

@@ -67,11 +67,11 @@ ms_svskill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (target->from == source->from)
+  if (target->nexthop == source->nexthop)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received wrong-direction SVSKILL for %s (behind %s) from %s",
-                   target->name, source->from->name, client_get_name(source, HIDE_IP));
+                   target->name, source->nexthop->name, client_get_name(source, HIDE_IP));
     return;
   }
 

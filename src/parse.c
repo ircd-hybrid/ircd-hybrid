@@ -153,7 +153,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int p
   else
   {
     struct Client *target = find_person(source, name);
-    if (target == NULL || target->from == source->from)
+    if (target == NULL || target->nexthop == source->nexthop)
       return;
 
     /* Fake it for server hiding, if it's our client */
@@ -171,10 +171,10 @@ parse_handle_command(struct Command *command, struct Client *source, unsigned in
   assert(parc <= PARSE_MAX_PARAMETERS + 2);
 
   ++command->count;
-  if (IsServer(source->from))
+  if (IsServer(source->nexthop))
     ++command->rcount;
 
-  const struct CommandHandler *const handler = &command->handlers[source->from->handler];
+  const struct CommandHandler *const handler = &command->handlers[source->nexthop->handler];
   if (handler->end_grace_period && MyClient(source))
     flood_endgrace(source);
 
@@ -182,11 +182,11 @@ parse_handle_command(struct Command *command, struct Client *source, unsigned in
       ((parc < handler->args_min) ||
        (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
   {
-    if (IsServer(source->from))
+    if (IsServer(source->nexthop))
     {
       log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
-                command->name, handler->args_min, parc, client_get_name(source->from, SHOW_IP));
-      client_exit_fmt(source->from, "Invalid arguments for command: %s (expected at least %u, got %u)",
+                command->name, handler->args_min, parc, client_get_name(source->nexthop, SHOW_IP));
+      client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %u, got %u)",
                       command->name, handler->args_min, parc);
     }
     else
@@ -245,11 +245,11 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
       return false;
     }
 
-    if (from->from != ctx->client)
+    if (from->nexthop != ctx->client)
     {
       ++ServerStats.is_wrdi;
       log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-                from->name, from->from->name, client_get_name(ctx->client, SHOW_IP));
+                from->name, from->nexthop->name, client_get_name(ctx->client, SHOW_IP));
       return false;
     }
 
@@ -307,7 +307,7 @@ parse_identify_command(parse_context_t *ctx)
 
   size_t bytes = (ctx->buffer_cursor < ctx->buffer_end) ? (ctx->buffer_end - ctx->buffer_cursor) : 0;
   ctx->command->bytes += bytes;
-  ctx->parc_max = ctx->command->handlers[ctx->source->from->handler].args_max;
+  ctx->parc_max = ctx->command->handlers[ctx->source->nexthop->handler].args_max;
 
   return true;
 }

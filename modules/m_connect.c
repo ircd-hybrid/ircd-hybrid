@@ -59,7 +59,7 @@ do_connect(struct Client *source, const char *name)
   {
     if (IsServer(target) || client_is_me(target))
       sendto_one_notice(source, &me, ":Connect: Server %s is already connected (via %s).",
-                        target->name, target->from->name);
+                        target->name, target->nexthop->name);
     else if (IsConnecting(target) || IsHandshake(target))
       sendto_one_notice(source, &me, ":Connect: Connection to %s is already in progress.",
                         connect->name);

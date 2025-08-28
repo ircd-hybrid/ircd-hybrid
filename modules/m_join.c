@@ -179,7 +179,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
-                   source->name, source->from->name, parv[2]);
+                   source->name, source->nexthop->name, parv[2]);
     return;
   }
 
@@ -189,7 +189,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
-    if (capab_has_flag(source->from, CAPAB_RESYNC))
+    if (capab_has_flag(source->nexthop, CAPAB_RESYNC))
     {
       sendto_one(source, ":%s RESYNC %s", me.id, parv[2]);
       return;
@@ -230,7 +230,7 @@ ms_join(struct Client *source, int parc, char *parv[])
 
     invite_clear_list(&channel->invites);
 
-    channel_set_mode_lock(source->from, channel, NULL);
+    channel_set_mode_lock(source->nexthop, channel, NULL);
 
     if (modebuf[0])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",

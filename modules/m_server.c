@@ -135,8 +135,8 @@ server_reject_introduction(struct Client *introducer, server_rejection_reason_t 
 {
   server_rejection_context_t ctx =
   {
-    .exit_client = introducer->from,
-    .event_source_ip = introducer->from->name,
+    .exit_client = introducer->nexthop,
+    .event_source_ip = introducer->nexthop->name,
     .event_source_name = introducer->name,
     .reason_str = server_rejection_reason_strings[reason],
     .log_prefix = "Rejecting introduction"
@@ -227,7 +227,7 @@ server_burst(struct Client *client)
   LIST_FOREACH(node, global_client_list.head)
   {
     const struct Client *target = node->data;
-    if (target->from != client)
+    if (target->nexthop != client)
       server_send_client(client, target);
   }
 
@@ -341,8 +341,8 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
     const struct Client *target = node->data;
-    /* target->from == target for target == client */
-    if (client_is_me(target) || target->from == client)
+    /* target->nexthop == target for target == client */
+    if (client_is_me(target) || target->nexthop == client)
       continue;
 
     sendto_one(client, ":%s SID %s %u %s +%s :%s",
@@ -357,7 +357,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
     LIST_FOREACH_PREV(node, global_server_list.tail)
     {
       const struct Client *target = node->data;
-      if (target->from == client)
+      if (target->nexthop == client)
         continue;
 
       if (client_is_me(target) || client_has_flag(target, FLAGS_EOB))
@@ -548,7 +548,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * but only if it's not the same client! - Dianora
    */
   struct Client *target = hash_find_client(name);
-  if (target && (target != source->from))
+  if (target && (target != source->nexthop))
     client_exit(target, "Overridden");
 
   /*
@@ -579,8 +579,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * Would allow this server in finland to hub anything but .edu's
    */
 
-  const struct ConnectItem *const connect = server_conf_get(source->from);
-  /* Ok, check source->from can hub the new server */
+  const struct ConnectItem *const connect = server_conf_get(source->nexthop);
+  /* Ok, check source->nexthop can hub the new server */
   if (list_find_cmp(&connect->hub_masks, name, match) == NULL)
   {
     /* OOOPs nope can't HUB */
@@ -617,7 +617,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   hash_add_client(target);
   hash_add_id(target);
 
-  sendto_servers(source->from, 0, 0, ":%s SID %s %u %s +%s :%s",
+  sendto_servers(source->nexthop, 0, 0, ":%s SID %s %u %s +%s :%s",
                  source->id, target->name, target->hopcount + 1, target->id, IsHidden(target) ? "h" : "", target->info);
   sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",
                  target->name, source->name);

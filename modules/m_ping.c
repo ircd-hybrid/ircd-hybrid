@@ -105,7 +105,7 @@ ms_ping(struct Client *source, int parc, char *parv[])
                client_get_id_or_name(&me, source), me.name, client_get_id_or_name(source, source));
   else if (target)
   {
-    if (target->from != source->from)
+    if (target->nexthop != source->nexthop)
       sendto_one(target, ":%s PING %s :%s",
                  client_get_id_or_name(source, target), source->name, client_get_id_or_name(target, target));
   }

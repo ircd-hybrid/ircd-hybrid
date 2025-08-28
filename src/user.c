@@ -228,7 +228,7 @@ user_welcome(struct Client *client)
 void
 user_register_local(struct Client *client)
 {
-  assert(client == client->from);
+  assert(client == client->nexthop);
   assert(client->connection->registration == 0);
   assert(client_is_local(client));
   assert(IsUnknown(client));
@@ -367,7 +367,7 @@ user_register_local(struct Client *client)
 void
 user_register_remote(struct Client *client)
 {
-  assert(client->uplink->from == client->from);
+  assert(client->uplink->nexthop == client->nexthop);
 
   /*
    * If the nick has been introduced by a services server,

@@ -137,7 +137,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
     return;
 
   if (client_is_me(target))
-    target = source->from;
+    target = source->nexthop;
 
   const char *reason = string_default(parv[2], source->name);
   if (client_is_local(target))
@@ -158,7 +158,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
     {
       struct Client *client = node->data;
 
-      if (client == target || client == source->from)
+      if (client == target || client == source->nexthop)
         continue;
 
       sendto_one(client, ":%s SQUIT %s :%s",

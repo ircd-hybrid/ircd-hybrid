@@ -74,7 +74,7 @@ check_clean_nick(struct Client *source, const char *nick)
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
-                 nick, IsServer(source) ? source->name : source->uplink->name, source->from->name);
+                 nick, IsServer(source) ? source->name : source->uplink->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
@@ -102,7 +102,7 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad UID: %s Nickname: %s From: %s(via %s)",
-                 uid, nick, source->name, source->from->name);
+                 uid, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad UID)",
              me.id, uid, me.name);
 
@@ -129,7 +129,7 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
-                 user, nick, source->name, source->from->name);
+                 user, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
 
@@ -156,7 +156,7 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
-                 host, nick, source->name, source->from->name);
+                 host, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
 
@@ -406,7 +406,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(both killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -441,11 +441,11 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
                  me.id, target->id, me.name);
@@ -487,8 +487,8 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick change collision from %s to %s(%s <- %s)(both killed)",
-                   source->name, target->name, target->from->name,
-                   source->from->name);
+                   source->name, target->name, target->nexthop->name,
+                   source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                    me.id, source->id, me.name);
@@ -514,13 +514,13 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
     if (sameuser)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(older killed)",
-                     source->name, target->name, target->from->name,
-                     source->from->name);
+                     source->name, target->name, target->nexthop->name,
+                     source->nexthop->name);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-                     source->name, target->name, target->from->name,
-                     source->from->name);
+                     source->name, target->name, target->nexthop->name,
+                     source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                    me.id, source->id, me.name);
@@ -538,11 +538,11 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision)",
                  me.id, target->id, me.name);
@@ -784,7 +784,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "ID collision on %s(%s <- %s)(both killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
                    me.id, target->id, me.name);

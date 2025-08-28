@@ -298,7 +298,7 @@ struct Client
   struct Client *idhnext;  /**< For SID hash table lookups by sid */
   struct Server *serv;  /**< If non-NULL, points to server-specific data. */
   struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
-  struct Client *from;   /**< The directly-connected server through which traffic for this entity flows. */
+  struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
 
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
 
@@ -430,7 +430,7 @@ client_is_service(const struct Client *client)
 static inline const char *
 client_get_id_or_name(const struct Client *subject_client, const struct Client *context_client)
 {
-  if (IsServer(context_client->from) && subject_client->id[0])
+  if (IsServer(context_client->nexthop) && subject_client->id[0])
     return subject_client->id;
 
   return subject_client->name;

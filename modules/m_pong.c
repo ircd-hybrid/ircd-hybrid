@@ -64,7 +64,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
     if ((target = hash_find_client(destination)) ||
         (target = hash_find_id(destination)))
     {
-      if (!client_is_me(target) && target->from != source->from)
+      if (!client_is_me(target) && target->nexthop != source->nexthop)
         sendto_one(target, ":%s PONG %s %s",
                    client_get_id_or_name(source, target), parv[1], client_get_id_or_name(target, target));
     }

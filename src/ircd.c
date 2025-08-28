@@ -470,8 +470,8 @@ main(int argc, char *argv[])
 
   init_uid();
 
-  me.from = &me;
   me.uplink = &me;
+  me.nexthop = &me;
   me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 

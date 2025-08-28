@@ -229,9 +229,9 @@ client_create_local(void)
   client->connection->activity_timeout_event =
     event_create(ircd_event_manager, "client_activity_timeout", client_activity_timeout_handler, 1, true, client, NULL);
 
-  /* For a local client, 'from' points to itself and 'uplink' points to &me. */
-  client->from = client;
+  /* Local entity topology: The logical parent is this server; the entity is its own nexthop. */
   client->uplink = &me;
+  client->nexthop = client;
 
   _client_init_base(client);
   return client;
@@ -244,12 +244,10 @@ client_create_remote(struct Client *uplink)
   assert(IsServer(uplink));
 
   struct Client *client = io_calloc(sizeof(*client));
-  /*
-   * For a remote client, the uplink is the server introducing it, and 'from'
-   * is that server's 'from' (our direct connection to that part of the net).
-   */
+
+  /* Remote entity topology: Inherit the physical route (nexthop) from the logical parent (uplink). */
   client->uplink = uplink;
-  client->from = uplink->from;
+  client->nexthop = uplink->nexthop;
 
   _client_init_base(client);
   return client;
@@ -449,7 +447,7 @@ find_person(const struct Client *client, const char *name)
 
   if (IsDigit(*name))
   {
-    if (IsServer(client->from))
+    if (IsServer(client->nexthop))
       target = hash_find_id(name);
   }
   else
@@ -682,10 +680,10 @@ _client_exit_notify_network(struct Client *client, const char *reason)
   }
   else if (IsClient(client))
   {
-    assert(client->from);
+    assert(client->nexthop);
 
     if (!client_has_flag(client, FLAGS_KILLED))
-      sendto_servers(client->from, 0, 0, ":%s QUIT :%s", client->id, reason);
+      sendto_servers(client->nexthop, 0, 0, ":%s QUIT :%s", client->id, reason);
 
      /* Notify local clients in common channels that this user has quit. */
     _client_exit_notify_channel_members(client, reason);
@@ -881,7 +879,7 @@ client_exit(struct Client *client, const char *reason)
   /* For local clients, tear down the physical connection and its resources. */
   if (client_is_local(client))
   {
-    assert(client == client->from);
+    assert(client == client->nexthop);
 
     if (IsServer(client))
     {

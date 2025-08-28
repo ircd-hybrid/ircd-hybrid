@@ -136,9 +136,9 @@ sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct db
   assert(client_is_local(to));
   assert(IsServer(to));
   assert(!client_is_me(to));
-  assert(to->from == to);
+  assert(to->nexthop == to);
 
-  if (to == from->from)
+  if (to == from->nexthop)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                    to->name, from->name);
   else
@@ -238,7 +238,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   assert(format);
   assert((context_len > 0) == (context != NULL));
 
-  if (IsDead(to->from))
+  if (IsDead(to->nexthop))
     return;
 
   if (!HasCap(to, CAP_STANDARD_REPLIES))
@@ -257,7 +257,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   dbuf_put_fmt(buffer, " :");
   send_format(buffer, format, args);
 
-  sendto_one_buffer(to->from, buffer);
+  sendto_one_buffer(to->nexthop, buffer);
   dbuf_ref_free(buffer);
 }
 
@@ -301,7 +301,7 @@ sendto_one_note(struct Client *to, const struct Client *from, const char *comman
 void
 sendto_one(struct Client *to, const char *format, ...)
 {
-  if (IsDead(to->from))
+  if (IsDead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -311,7 +311,7 @@ sendto_one(struct Client *to, const char *format, ...)
   send_format(buffer, format, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  sendto_one_buffer(to->nexthop, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -319,7 +319,7 @@ sendto_one(struct Client *to, const char *format, ...)
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-  if (IsDead(to->from))
+  if (IsDead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   const char *dest = client_get_id_or_name(to, to);
@@ -341,7 +341,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   send_format(buffer, numstr, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  sendto_one_buffer(to->nexthop, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -349,7 +349,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *format, ...)
 {
-  if (IsDead(to->from))
+  if (IsDead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   const char *dest = client_get_id_or_name(to, to);
@@ -364,7 +364,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
   send_format(buffer, format, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  sendto_one_buffer(to->nexthop, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -381,7 +381,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
 void
 sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
 {
-  if (IsDead(to->from))
+  if (IsDead(to->nexthop))
     return;
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -400,7 +400,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
   if (client_is_local(to))
     sendto_one_buffer(to, buffer);
   else
-    sendto_one_buffer_remote(to->from, from, buffer);
+    sendto_one_buffer_remote(to->nexthop, from, buffer);
 
   dbuf_ref_free(buffer);
 }
@@ -598,7 +598,7 @@ sendto_servers(const struct Client *one, const unsigned int capab,
       continue;
 
     /* check against 'one' */
-    if (one && (client == one->from))
+    if (one && (client == one->nexthop))
       continue;
 
     /* check we have required capabs */
@@ -643,7 +643,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
   {
     struct Client *target = node->data;
 
-    if (IsDead(target->from))
+    if (IsDead(target->nexthop))
       continue;
 
     /* Do not attempt to send to ourselves ... */
@@ -651,20 +651,20 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
       continue;
 
     /* ... or the source */
-    if (target->from == source->from)
+    if (target->nexthop == source->nexthop)
       continue;
 
-    if (target->from->connection->send_marker == send_marker)
+    if (target->nexthop->connection->send_marker == send_marker)
       continue;
 
-    if (capab_has_flag(target->from, capab) != capab)
+    if (capab_has_flag(target->nexthop, capab) != capab)
       continue;
 
     if (match(mask, target->name))
       continue;
 
-    target->from->connection->send_marker = send_marker;
-    sendto_one_buffer_remote(target->from, source, buffer);
+    target->nexthop->connection->send_marker = send_marker;
+    sendto_one_buffer_remote(target->nexthop, source, buffer);
   }
 
   dbuf_ref_free(buffer);
@@ -758,7 +758,7 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
     if (IsDead(target))
       continue;
 
-    if (one && (target == one->from))
+    if (one && (target == one->nexthop))
       continue;
 
     if (rank && member_highest_rank(member) < rank)
@@ -822,10 +822,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
 
     assert(IsClient(target));
 
-    if (IsDead(target->from))
+    if (IsDead(target->nexthop))
       continue;
 
-    if (one && (target->from == one->from))
+    if (one && (target->nexthop == one->nexthop))
       continue;
 
     if (rank && member_highest_rank(member) < rank)
@@ -836,10 +836,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
 
     if (client_is_local(target))
       sendto_one_buffer(target, buffer_local);
-    else if (target->from->connection->send_marker != send_marker)
-      sendto_one_buffer_remote(target->from, from, buffer_remote);
+    else if (target->nexthop->connection->send_marker != send_marker)
+      sendto_one_buffer_remote(target->nexthop, from, buffer_remote);
 
-    target->from->connection->send_marker = send_marker;
+    target->nexthop->connection->send_marker = send_marker;
   }
 
   dbuf_ref_free(buffer_local);

@@ -85,7 +85,7 @@ server_route_command(struct Client *client, const char *command, const int serve
    * incorrect routing of the message back upstream.
    */
   if (route->target)
-    if (route->target->from == client->from && !client_is_local(route->target))
+    if (route->target->nexthop == client->nexthop && !client_is_local(route->target))
       route->target = NULL;
 
   /* Handle wildcard matches if no exact match was found. */
@@ -99,7 +99,7 @@ server_route_command(struct Client *client, const char *command, const int serve
       assert(client_is_me(tmp) || IsServer(tmp));
       if (match(mask, tmp->name) == 0)
       {
-        if (tmp->from == client->from && !client_is_local(tmp))
+        if (tmp->nexthop == client->nexthop && !client_is_local(tmp))
           continue;
 
         route->target = tmp;
@@ -116,7 +116,7 @@ server_route_command(struct Client *client, const char *command, const int serve
         assert(IsClient(tmp));
         if (match(mask, tmp->name) == 0)
         {
-          if (tmp->from == client->from && !client_is_local(tmp))
+          if (tmp->nexthop == client->nexthop && !client_is_local(tmp))
             continue;
 
           route->target = tmp;

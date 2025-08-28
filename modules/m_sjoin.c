@@ -221,7 +221,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
-                   source->name, source->from->name, parv[2]);
+                   source->name, source->nexthop->name, parv[2]);
     return;
   }
 
@@ -353,7 +353,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
      * If the client doesn't exist, or if it's fake direction/server, skip.
      */
     struct Client *target = find_person(source, s);
-    if (target == NULL || target->from != source->from)
+    if (target == NULL || target->nexthop != source->nexthop)
       continue;
 
     size_t len_uid = strlen(target->id);

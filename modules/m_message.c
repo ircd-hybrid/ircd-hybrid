@@ -363,7 +363,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
     return;
   }
 
-  const struct Client *exclude_uplink = IsServer(source->from) ? source->from : NULL;
+  const struct Client *exclude_uplink = IsServer(source->nexthop) ? source->nexthop : NULL;
   target_mask_ctx_t ctx = { .mask = mask };
 
   sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);

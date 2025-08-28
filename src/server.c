@@ -47,6 +47,42 @@
 #include "server_capab.h"
 
 /**
+ * @brief Finds the first routable client in a list matching a wildcard mask.
+ *
+ * This is the internal helper for `server_route_command`'s wildcard matching
+ * logic. Its primary responsibility is to encapsulate the search loop and the
+ * anti-looping check.
+ *
+ * A route is considered invalid if the target's physical link (`nexthop`) is the
+ * same as the source's, as this would route the command back to its origin.
+ *
+ * @param list The list of clients to search.
+ * @param mask The wildcard mask to match against the client's name.
+ * @param source The source of the command, used as the reference for the anti-looping check.
+ * @return A pointer to the first matching and routable client, or `NULL` if none is found.
+ */
+static struct Client *
+_server_route_find_match(const list_t *list, const char *mask, const struct Client *source)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, list->head)
+  {
+    struct Client *target = node->data;
+    if (match(mask, target->name) == 0)
+    {
+      /* Anti-looping check: ensure the route is not back to the source's link. */
+      if (target->nexthop == source->nexthop && !client_is_local(target))
+        continue;
+
+      return target;
+    }
+  }
+
+  return NULL;
+}
+
+/**
  * @brief Routes a command to the appropriate server or client.
  *
  * This function attempts to deliver a command to the specified server or client.
@@ -91,39 +127,9 @@ server_route_command(struct Client *client, const char *command, const int serve
   /* Handle wildcard matches if no exact match was found. */
   if (route->target == NULL && has_wildcards(mask))
   {
-    list_node_t *node;
-    LIST_FOREACH(node, global_server_list.head)
-    {
-      struct Client *tmp = node->data;
-
-      assert(client_is_me(tmp) || IsServer(tmp));
-      if (match(mask, tmp->name) == 0)
-      {
-        if (tmp->nexthop == client->nexthop && !client_is_local(tmp))
-          continue;
-
-        route->target = tmp;
-        break;
-      }
-    }
-
+    route->target = _server_route_find_match(&global_server_list, mask, client);
     if (route->target == NULL)
-    {
-      LIST_FOREACH(node, global_client_list.head)
-      {
-        struct Client *tmp = node->data;
-
-        assert(IsClient(tmp));
-        if (match(mask, tmp->name) == 0)
-        {
-          if (tmp->nexthop == client->nexthop && !client_is_local(tmp))
-            continue;
-
-          route->target = tmp;
-          break;
-        }
-      }
-    }
+      route->target = _server_route_find_match(&global_client_list, mask, client);
   }
 
   /* Determine the result of the routing attempt. */

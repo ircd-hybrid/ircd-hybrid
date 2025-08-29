@@ -271,7 +271,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
 
   SetServer(client);
 
-  server_make(client);
+  server_create(client);
   server_conf_set(client, connect);
 
   if (service_find(client->name, irccmp))
@@ -599,7 +599,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   }
 
   target = client_create_remote(source);
-  server_make(target);
+  server_create(target);
   strlcpy(target->name, name, sizeof(target->name));
   strlcpy(target->id, sid, sizeof(target->id));
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));

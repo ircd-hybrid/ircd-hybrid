@@ -217,7 +217,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   if (!IsServer(source))
     return;
 
-  if (channel_check_name(parv[2], false) == false)
+  if (channel_is_valid_name(parv[2], false) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
@@ -263,7 +263,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
   {
     isnew = true;
-    channel = channel_make(parv[2]);
+    channel = channel_create(parv[2]);
     channel->creation_time = newts;
   }
   else if (newts < channel->creation_time)
@@ -378,7 +378,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     if (member_find_link(target, channel) == NULL)
     {
       bool synced = client_has_flag(source, FLAGS_EOB);
-      channel_add_user(channel, target, flags, synced);
+      channel_add_member(channel, target, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target->name, target->username, target->host, channel->name,
@@ -422,7 +422,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   sendto_servers(source, 0, 0, "%s", uid_buf);
 
   if (list_is_empty(&channel->members) && isnew)
-    channel_free(channel);
+    channel_destroy(channel);
 }
 
 static struct Command command_table =

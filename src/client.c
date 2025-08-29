@@ -267,12 +267,7 @@ _client_destroy(struct Client *client)
 
   if (client->serv)
   {
-    assert(list_is_empty(&client->serv->child_server_list));
-    assert(list_is_empty(&client->serv->child_client_list));
-
-    io_free(client->serv->initiator_name);
-    client->serv->initiator_name = NULL;
-    io_free(client->serv);
+    server_destroy(client->serv);
     client->serv = NULL;
   }
 

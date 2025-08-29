@@ -231,7 +231,7 @@ struct Connection
   unsigned int operflags;  /**< Bitmask of IRC Operator privilege flags. */
   unsigned int ping_cookie_token; /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
 
-  uintmax_t send_marker;  /**< A per-broadcast marker to prevent duplicate message sends. */
+  uintmax_t last_broadcast_id;  /**< ID of the last broadcast this nexthop was part of; for send de-duplication. */
   uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */
   uintmax_t ping_sent_time;  /**< Monotonic time the last PING was sent, or 0 if none is pending. */
   uintmax_t created_real;  /**< Time client was created; real time */
@@ -294,8 +294,8 @@ struct Client
   list_node_t uplink_node;  /**< Node for membership in an uplink's child_*_list. */
 
   struct Connection *connection;  /**< Connection structure associated with this client */
-  struct Client *hnext;  /**< For client hash table lookups by name */
-  struct Client *idhnext;  /**< For SID hash table lookups by sid */
+  struct Client *hnext;  /**< Next entry in the nickname/servername hash table bucket. */
+  struct Client *idhnext;  /**< Next entry in the UID/SID hash table bucket. */
   struct Server *serv;  /**< If non-NULL, points to server-specific data. */
   struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
   struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
@@ -305,22 +305,22 @@ struct Client
   unsigned int flags;  /**< Client flags */
   uint64_t umodes;  /**< User modes this client has set */
   unsigned int hopcount;  /**< The number of server hops from here to the entity. */
-  unsigned int status;  /**< Client type */
-  unsigned int handler;  /**< Handler index */
+  unsigned int status;  /**< The client's current state (e.g., STAT_CLIENT, STAT_SERVER). */
+  unsigned int handler;  /**< The dispatch index for the command handler table based on client state. */
 
-  list_t whowas_list;
-  list_t channel_list;  /**< Chain of channel pointer blocks */
+  list_t whowas_list;  /**< Historical records for this client's previous nicks. */
+  list_t channel_list;  /**< List of channels this client is a member of. */
   list_t svstag_list;  /**< List of ServicesTag items */
 
   struct io_addr addr;  /**< The binary IP address of the remote end of the connection. */
 
-  char *tls_certfp;  /**< TLS certificate fingerprint */
-  char *tls_cipher;  /**< Exact copy of tls_get_cipher() */
+  char *tls_certfp;  /**< The fingerprint of the client's TLS certificate, if provided. */
+  char *tls_cipher;  /**< The negotiated TLS cipher suite for the connection. */
   char *away_message;  /**< The AWAY message set by this client, or NULL if not away. */
 
   char name[HOSTLEN + 1];  /**< The entity's nickname (for clients) or server name. */
   char id[IDLEN + 1];  /**< The entity's unique ID (UID for clients, SID for servers). */
-  char account[ACCOUNTLEN + 1];  /**< The services account name this client is logged into. */
+  char account[ACCOUNTLEN + 1];  /**< The services account name this client is logged into; "*" if none. */
 
   /** client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise

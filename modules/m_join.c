@@ -175,7 +175,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   if (!IsClient(source))
     return;
 
-  if (channel_check_name(parv[2], false) == false)
+  if (channel_is_valid_name(parv[2], false) == false)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
@@ -195,7 +195,7 @@ ms_join(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    channel = channel_make(parv[2]);
+    channel = channel_create(parv[2]);
     channel->creation_time = newts;
   }
   else if (newts < channel->creation_time)
@@ -246,7 +246,7 @@ ms_join(struct Client *source, int parc, char *parv[])
 
   if (member_find_link(source, channel) == NULL)
   {
-    channel_add_user(channel, source, 0, true);
+    channel_add_member(channel, source, 0, true);
 
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source->name, source->username, source->host, channel->name,

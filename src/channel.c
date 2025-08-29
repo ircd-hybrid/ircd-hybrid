@@ -103,7 +103,7 @@ channel_track_join_flood(struct Channel *channel, struct Client *client, bool tr
  * \param track_join Whether to count this join in flood calculations
  */
 void
-channel_add_user(struct Channel *channel, struct Client *client, unsigned int flags, bool track_join)
+channel_add_member(struct Channel *channel, struct Client *client, unsigned int flags, bool track_join)
 {
   assert(IsClient(client));
 
@@ -126,7 +126,7 @@ channel_add_user(struct Channel *channel, struct Client *client, unsigned int fl
  * \param member Pointer to Membership struct
  */
 void
-channel_remove_user(struct ChannelMember *member)
+channel_remove_member(struct ChannelMember *member)
 {
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
@@ -141,7 +141,7 @@ channel_remove_user(struct ChannelMember *member)
   io_free(member);
 
   if (list_is_empty(&channel->members))
-    channel_free(channel);
+    channel_destroy(channel);
 }
 
 void
@@ -150,7 +150,7 @@ channel_member_clear_list(const list_t *list)
   struct ChannelMember *member;
 
   while ((member = list_peek_head(list)))
-    channel_remove_user(member);
+    channel_remove_member(member);
 }
 
 /* remove_a_mode()
@@ -322,7 +322,7 @@ channel_send_modes(struct Client *client, const struct Channel *channel)
  * \return false if invalid, true otherwise
  */
 bool
-channel_check_name(const char *name, bool local)
+channel_is_valid_name(const char *name, bool is_local_source)
 {
   const char *p = name;
 
@@ -331,7 +331,7 @@ channel_check_name(const char *name, bool local)
   if (!IsChanPrefix(*p))
     return false;
 
-  if (local == false || ConfigChannel.disable_fake_channels == 0)
+  if (is_local_source == false || ConfigChannel.disable_fake_channels == 0)
   {
     while (*++p)
       if (!IsChanChar(*p))
@@ -376,7 +376,7 @@ channel_free_mask_list(list_t *list)
  * \return Channel block
  */
 struct Channel *
-channel_make(const char *name)
+channel_create(const char *name)
 {
   assert(!string_is_empty(name));
 
@@ -401,7 +401,7 @@ channel_make(const char *name)
  * \param channel Channel pointer
  */
 void
-channel_free(struct Channel *channel)
+channel_destroy(struct Channel *channel)
 {
   invite_clear_list(&channel->invites);
 
@@ -448,12 +448,18 @@ channel_free(struct Channel *channel)
   io_free(channel);
 }
 
-/*!
- * \param channel Pointer to channel
- * \return String pointer "=" if public, "@" if secret else "*"
+/**
+ * @brief Gets the symbolic prefix ('=', '*', '@') representing a channel's privacy level.
+ *
+ * Translates a channel's mode flags (+p, +s) into the corresponding prefix
+ * used in protocol messages like RPL_NAMREPLY (353) to denote its public,
+ * private, or secret visibility.
+ *
+ * @param channel The channel whose privacy prefix is to be determined.
+ * @return A string literal containing the privacy prefix ("=", "*", or "@").
  */
 static const char *
-channel_pub_or_secret(const struct Channel *channel)
+_channel_get_privacy_prefix(const struct Channel *channel)
 {
   if (channel_has_mode(channel, MODE_SECRET))
     return "@";
@@ -503,7 +509,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
         sendto_one_numeric(client, &me, RPL_NAMREPLY,
-                           channel_pub_or_secret(channel), channel->name, buf);
+                           _channel_get_privacy_prefix(channel), channel->name, buf);
         bufptr = buf;
       }
 
@@ -518,7 +524,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
     if (bufptr != buf)
       sendto_one_numeric(client, &me, RPL_NAMREPLY,
-                         channel_pub_or_secret(channel), channel->name, buf);
+                         _channel_get_privacy_prefix(channel), channel->name, buf);
   }
 
   sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
@@ -1024,7 +1030,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     if (key && *key == '\0')
       key = NULL;
 
-    if (channel_check_name(name, true) == false)
+    if (channel_is_valid_name(name, true) == false)
     {
       sendto_one_numeric(client, &me, ERR_BADCHANNAME, name);
       continue;
@@ -1064,13 +1070,13 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     else
     {
       flags = CHFL_CHANOP;
-      channel = channel_make(name);
+      channel = channel_create(name);
     }
 
     if (!client_is_oper(client))
       channel_check_spambot_warning(client, channel->name);
 
-    channel_add_user(channel, client, flags, true);
+    channel_add_member(channel, client, flags, true);
     client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
     /*
@@ -1178,7 +1184,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
                          client->name, client->username, client->host, channel->name);
   }
 
-  channel_remove_user(member);
+  channel_remove_member(member);
 }
 
 void

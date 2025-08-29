@@ -29,6 +29,7 @@
 
 struct Client;
 struct ConnectItem;
+struct Server;
 
 /**
  * @enum server_ts_protocol_version_t
@@ -73,10 +74,11 @@ typedef struct
 
 extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);
+extern void server_destroy(struct Server *);
 extern void server_schedule_reconnect(struct Client *);
 extern bool server_connect(struct ConnectItem *, const struct Client *);
 extern bool server_is_valid_name(const char *);
 extern struct ConnectItem *server_conf_get(const struct Client *);
-extern struct Server *server_make(struct Client *);
+extern struct Server *server_create(struct Client *);
 extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);
 #endif  /* INCLUDED_server_h */

@@ -199,12 +199,24 @@ server_is_valid_name(const char *name)
  *                if it was not previously allocated.
  */
 struct Server *
-server_make(struct Client *client)
+server_create(struct Client *client)
 {
   if (client->serv == NULL)
     client->serv = io_calloc(sizeof(*client->serv));
 
   return client->serv;
+}
+
+void
+server_destroy(struct Server *server)
+{
+  assert(server);
+  assert(list_is_empty(&server->child_server_list));
+  assert(list_is_empty(&server->child_client_list));
+
+  io_free(server->initiator_name);
+  server->initiator_name = NULL;
+  io_free(server);
 }
 
 static void
@@ -415,7 +427,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   comm_socket_note(client->connection->fd, "Server: %s", client->name);
 
-  server_make(client);
+  server_create(client);
   server_conf_set(client, connect);
 
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";

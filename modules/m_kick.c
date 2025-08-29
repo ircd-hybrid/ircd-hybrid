@@ -104,7 +104,7 @@ m_kick(struct Client *source, int parc, char *parv[])
                        source->name, source->username, source->host, channel->name,
                        target->name, ConfigChannel.max_kick_length, reason);
 
-  channel_remove_user(member_target);
+  channel_remove_member(member_target);
 }
 
 /*! \brief KICK command handler
@@ -148,7 +148,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
                          IsHidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
 
-  channel_remove_user(member_target);
+  channel_remove_member(member_target);
 }
 
 static struct Command command_table =

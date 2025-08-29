@@ -42,7 +42,15 @@
 #include "server_capab.h"
 #include "user_mode.h"
 
-static uintmax_t send_marker;
+/**
+ * @var broadcast_id
+ * @brief A unique, incrementing ID for a single broadcast operation.
+ *
+ * This is used with the Connection::last_broadcast_id field to de-duplicate
+ * message delivery to a single nexthop during a broadcast that may traverse
+ * multiple paths (e.g., a message to a channel).
+ */
+static uintmax_t broadcast_id;
 
 /* send_format()
  *
@@ -505,7 +513,7 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
 }
 
 void
-sendto_filtered_butone(const struct Client *exclude_uplink, const struct Client *source,
+sendto_filtered_butone(const struct Client *exclude_client, const struct Client *source,
                        send_filter_fn filter_fn, void *filter_ctx, const char *format, ...)
 {
   assert(source);
@@ -549,7 +557,7 @@ sendto_filtered_butone(const struct Client *exclude_uplink, const struct Client 
     if (IsDead(target))
       continue;
 
-    if (target == exclude_uplink)
+    if (target == exclude_client)
       continue;
 
     sendto_one_buffer_remote(target, source, buffer_remote);
@@ -578,8 +586,8 @@ sendto_filtered_butone(const struct Client *exclude_uplink, const struct Client 
  * -davidt
  */
 void
-sendto_servers(const struct Client *one, const unsigned int capab,
-               const unsigned int nocapab, const char *format, ...)
+sendto_servers(const struct Client *exclude_client, const unsigned int required_capab,
+               const unsigned int excluded_capab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -598,15 +606,15 @@ sendto_servers(const struct Client *one, const unsigned int capab,
       continue;
 
     /* check against 'one' */
-    if (one && (client == one->nexthop))
+    if (exclude_client && (client == exclude_client->nexthop))
       continue;
 
     /* check we have required capabs */
-    if (capab_has_flag(client, capab) != capab)
+    if (capab_has_flag(client, required_capab) != required_capab)
       continue;
 
     /* check we don't have any forbidden capabs */
-    if (capab_has_flag(client, nocapab))
+    if (capab_has_flag(client, excluded_capab))
       continue;
 
     sendto_one_buffer(client, buffer);
@@ -625,7 +633,7 @@ sendto_servers(const struct Client *one, const unsigned int capab,
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab, const char *format, ...)
+sendto_match_servs(const struct Client *source, const char *mask, unsigned int required_capab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -636,7 +644,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
   send_format(buffer, format, args);
   va_end(args);
 
-  ++send_marker;
+  ++broadcast_id;
 
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
@@ -654,16 +662,16 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
     if (target->nexthop == source->nexthop)
       continue;
 
-    if (target->nexthop->connection->send_marker == send_marker)
+    if (target->nexthop->connection->last_broadcast_id == broadcast_id)
       continue;
 
-    if (capab_has_flag(target->nexthop, capab) != capab)
+    if (capab_has_flag(target->nexthop, required_capab) != required_capab)
       continue;
 
     if (match(mask, target->name))
       continue;
 
-    target->nexthop->connection->send_marker = send_marker;
+    target->nexthop->connection->last_broadcast_id = broadcast_id;
     sendto_one_buffer_remote(target->nexthop, source, buffer);
   }
 
@@ -680,8 +688,8 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int c
  *		  used by m_nick.c and exit_one_client.
  */
 void
-sendto_common_channels_local(struct Client *user, bool touser, unsigned int poscap,
-                             unsigned int negcap, const char *format, ...)
+sendto_common_channels_local(struct Client *user, bool touser, unsigned int required_cap,
+                             unsigned int excluded_cap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -690,7 +698,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
   send_format(buffer, format, args);
   va_end(args);
 
-  ++send_marker;
+  ++broadcast_id;
 
   list_node_t *node, *node2;
   LIST_FOREACH(node, user->channel_list.head)
@@ -709,22 +717,22 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
       if (target == user)
         continue;
 
-      if (target->connection->send_marker == send_marker)
+      if (target->connection->last_broadcast_id == broadcast_id)
         continue;
 
-      if (poscap && HasCap(target, poscap) != poscap)
+      if (required_cap && HasCap(target, required_cap) != required_cap)
         continue;
 
-      if (negcap && HasCap(target, negcap))
+      if (excluded_cap && HasCap(target, excluded_cap))
         continue;
 
-      target->connection->send_marker = send_marker;
+      target->connection->last_broadcast_id = broadcast_id;
       sendto_one_buffer(target, buffer);
     }
   }
 
   if (touser && client_is_local(user) && !IsDead(user))
-    if (HasCap(user, poscap) == poscap)
+    if (HasCap(user, required_cap) == required_cap)
       sendto_one_buffer(user, buffer);
 
   dbuf_ref_free(buffer);
@@ -739,8 +747,8 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int posc
  * \param format  Format string for command arguments
  */
 void
-sendto_channel_local(const struct Client *one, struct Channel *channel, int rank, unsigned int poscap,
-                     unsigned int negcap, const char *format, ...)
+sendto_channel_local(const struct Client *exclude_client, struct Channel *channel, int required_rank,
+                     unsigned int required_cap, unsigned int excluded_cap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -758,16 +766,16 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
     if (IsDead(target))
       continue;
 
-    if (one && (target == one->nexthop))
+    if (exclude_client && (target == exclude_client->nexthop))
       continue;
 
-    if (rank && member_highest_rank(member) < rank)
+    if (required_rank && member_highest_rank(member) < required_rank)
       continue;
 
-    if (poscap && HasCap(target, poscap) != poscap)
+    if (required_cap && HasCap(target, required_cap) != required_cap)
       continue;
 
-    if (negcap && HasCap(target, negcap))
+    if (excluded_cap && HasCap(target, excluded_cap))
       continue;
 
     sendto_one_buffer(target, buffer);
@@ -788,8 +796,8 @@ sendto_channel_local(const struct Client *one, struct Channel *channel, int rank
  * WARNING - +D clients are ignored
  */
 void
-sendto_channel_butone(struct Client *one, const struct Client *from, struct Channel *channel,
-                      int rank, const char *format, ...)
+sendto_channel_butone(struct Client *exclude_client, const struct Client *from, struct Channel *channel,
+                      int required_rank, const char *format, ...)
 {
   struct dbuf_block *buffer_local = dbuf_alloc();
   struct dbuf_block *buffer_remote = dbuf_alloc();
@@ -812,7 +820,7 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
   va_end(args_copy);
   va_end(args);
 
-  ++send_marker;
+  ++broadcast_id;
 
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
@@ -825,10 +833,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
     if (IsDead(target->nexthop))
       continue;
 
-    if (one && (target->nexthop == one->nexthop))
+    if (exclude_client && (target->nexthop == exclude_client->nexthop))
       continue;
 
-    if (rank && member_highest_rank(member) < rank)
+    if (required_rank && member_highest_rank(member) < required_rank)
       continue;
 
     if (user_mode_has_flag(target, UMODE_DEAF))
@@ -836,10 +844,10 @@ sendto_channel_butone(struct Client *one, const struct Client *from, struct Chan
 
     if (client_is_local(target))
       sendto_one_buffer(target, buffer_local);
-    else if (target->nexthop->connection->send_marker != send_marker)
+    else if (target->nexthop->connection->last_broadcast_id != broadcast_id)
       sendto_one_buffer_remote(target->nexthop, from, buffer_remote);
 
-    target->nexthop->connection->send_marker = send_marker;
+    target->nexthop->connection->last_broadcast_id = broadcast_id;
   }
 
   dbuf_ref_free(buffer_local);

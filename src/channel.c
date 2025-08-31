@@ -744,7 +744,7 @@ can_join(struct Client *client, struct Channel *channel, const char *key)
       if (find_bmask(client, channel, &channel->invexlist, NULL) == false)
         return ERR_INVITEONLYCHAN;
 
-  if (channel->mode.key[0] && (key == NULL || strcmp(channel->mode.key, key)))
+  if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
   if (channel->mode.limit && list_length(&channel->members) >=
@@ -1012,7 +1012,6 @@ channel_set_mode_lock(struct Client *client, struct Channel *channel, const char
 void
 channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
-  const struct ResvItem *resv = NULL;
   assert(MyClient(client));
 
   char *p = NULL;
@@ -1020,113 +1019,115 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
                    name = strtok_r(NULL,      ",", &p))
   {
     const char *key = NULL;
-    unsigned int flags = 0;
-
     /* If we have any more keys, take the first for this channel. */
     if (!string_is_empty(key_list) && (key_list = strchr(key = key_list, ',')))
       *key_list++ = '\0';
 
-    /* Empty keys are the same as no keys. */
-    if (key && *key == '\0')
-      key = NULL;
+    channel_join_one(client, name, key);
+  }
+}
 
-    if (channel_is_valid_name(name, true) == false)
+void
+channel_join_one(struct Client *client, const char *name, const char *key)
+{
+  if (channel_is_valid_name(name, true) == false)
+  {
+    sendto_one_numeric(client, &me, ERR_BADCHANNAME, name);
+    return;
+  }
+
+  const struct ResvItem *resv;
+  if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
+      !(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
+      ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
+  {
+    sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
+                   name, client_get_name(client, HIDE_IP));
+    return;
+  }
+
+  unsigned int max_channels = client_get_max_channels(client);
+  if (list_length(&client->channel_list) >= max_channels)
+  {
+    sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);
+    return;
+  }
+
+  unsigned int flags = 0;
+  struct Channel *channel = hash_find_channel(name);
+  if (channel)
+  {
+    if (member_find_link(client, channel))
+      return;
+
+    /* can_join() checks for +i, +l, key, bans, etc. */
+    int ret = can_join(client, channel, key);
+    if (ret)
     {
-      sendto_one_numeric(client, &me, ERR_BADCHANNAME, name);
-      continue;
+      sendto_one_numeric(client, &me, ret, channel->name);
+      return;
     }
+  }
+  else
+  {
+    flags = CHFL_CHANOP;
+    channel = channel_create(name);
+  }
 
-    if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
-        !(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
-        ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
-    {
-      sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
-      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
-                     name, client_get_name(client, HIDE_IP));
-      continue;
-    }
+  if (!client_is_oper(client))
+    channel_check_spambot_warning(client, channel->name);
 
-    unsigned int max_channels = client_get_max_channels(client);
-    if (list_length(&client->channel_list) >= max_channels)
-    {
-      sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);
-      break;
-    }
+  channel_add_member(channel, client, flags, true);
+  client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-    struct Channel *channel = hash_find_channel(name);
-    if (channel)
-    {
-      if (member_find_link(client, channel))
-        continue;
+  /*
+   * Set channel modes if appropriate, and propagate
+   */
+  if (flags == CHFL_CHANOP)
+  {
+    channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
 
-      /* can_join() checks for +i, +l, key, bans, etc. */
-      int ret = can_join(client, channel, key);
-      if (ret)
-      {
-        sendto_one_numeric(client, &me, ret, channel->name);
-        continue;
-      }
-    }
-    else
-    {
-      flags = CHFL_CHANOP;
-      channel = channel_create(name);
-    }
-
-    if (!client_is_oper(client))
-      channel_check_spambot_warning(client, channel->name);
-
-    channel_add_member(channel, client, flags, true);
-    client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
+                   me.id, channel->creation_time, channel->name, client->id);
 
     /*
-     * Set channel modes if appropriate, and propagate
+     * Notify all other users on the new channel
      */
-    if (flags == CHFL_CHANOP)
-    {
-      channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
-
-      sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
-                     me.id, channel->creation_time, channel->name, client->id);
-
-      /*
-       * Notify all other users on the new channel
-       */
-      sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           client->name, client->username, client->host, channel->name, client->account, client->info);
-      sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           client->name, client->username, client->host, channel->name);
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
-                           me.name, channel->name);
-    }
-    else
-    {
-      sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
-                     client->id, channel->creation_time, channel->name);
-
-      sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           client->name, client->username, client->host, channel->name, client->account, client->info);
-      sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           client->name, client->username, client->host, channel->name);
-    }
-
-    if (client->away_message)
-      sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           client->name, client->username, client->host, client->away_message);
-
-    struct Invite *invite = invite_find(channel, client);
-    if (invite)
-      invite_del(invite);
-
-    if (channel->topic)
-    {
-      sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
-      sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,
-                         channel->name, channel->topic_info, channel->topic_time);
-    }
-
-    channel_send_namereply(client, channel);
+    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                         client->name, client->username, client->host, channel->name, client->account, client->info);
+    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                         client->name, client->username, client->host, channel->name);
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
+                         me.name, channel->name);
   }
+  else
+  {
+    sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
+                   client->id, channel->creation_time, channel->name);
+
+    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                         client->name, client->username, client->host, channel->name, client->account, client->info);
+    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                         client->name, client->username, client->host, channel->name);
+  }
+
+  if (client->away_message)
+    sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                         client->name, client->username, client->host, client->away_message);
+
+  struct Invite *invite = invite_find(channel, client);
+  if (invite)
+    invite_del(invite);
+
+  if (channel->topic)
+  {
+    sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
+    sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,
+                       channel->name, channel->topic_info, channel->topic_time);
+  }
+
+  channel_send_namereply(client, channel);
 }
 
 /*! \brief Removes a client from a specific channel

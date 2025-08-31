@@ -373,7 +373,7 @@ who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQ
 
   if (client_is_admin(source) || member_find_link(source, channel))
     is_member = true;
-  else if (channel_has_mode(channel, MODE_SECRET))
+  else if (channel_is_secret(channel))
     return;
 
   list_node_t *node;

@@ -461,9 +461,9 @@ channel_destroy(struct Channel *channel)
 static const char *
 _channel_get_privacy_prefix(const struct Channel *channel)
 {
-  if (channel_has_mode(channel, MODE_SECRET))
+  if (channel_is_secret(channel))
     return "@";
-  if (channel_has_mode(channel, MODE_PRIVATE))
+  if (channel_is_private(channel))
     return "*";
   return "=";
 }

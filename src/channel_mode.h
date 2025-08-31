@@ -179,4 +179,16 @@ channel_is_public(const struct Channel *channel)
 {
   return channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET) == false;
 }
+
+static inline bool
+channel_is_secret(const struct Channel *channel)
+{
+  return channel_has_mode(channel, MODE_SECRET);
+}
+
+static inline bool
+channel_is_private(const struct Channel *channel)
+{
+  return channel_has_mode(channel, MODE_PRIVATE);
+}
 #endif  /* INCLUDED_channel_mode_h */

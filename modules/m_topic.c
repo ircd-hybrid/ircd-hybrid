@@ -89,7 +89,7 @@ m_topic(struct Client *source, int parc, char *parv[])
   }
   else  /* Only asking for topic */
   {
-    if (channel_has_mode(channel, MODE_SECRET) && member_find_link(source, channel) == NULL)
+    if (channel_is_secret(channel) && member_find_link(source, channel) == NULL)
     {
       sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
       return;

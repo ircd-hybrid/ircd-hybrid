@@ -128,6 +128,7 @@ extern void channel_destroy(struct Channel *);
 extern void channel_join_list(struct Client *, char *, char *);
 extern void channel_join_one(struct Client *, const char *, const char *);
 extern void channel_part_list(struct Client *, char *, const char *);
+extern void channel_part_one(struct Client *, const char *, const char *);
 extern void channel_remove_member(struct ChannelMember *);
 extern void channel_send_modes(struct Client *, const struct Channel *);
 extern void channel_send_namereply(struct Client *, struct Channel *);

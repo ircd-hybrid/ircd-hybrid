@@ -1135,7 +1135,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
  * \param name   Name of channel to remove from
  * \param reason Part reason to show
  */
-static void
+void
 channel_part_one(struct Client *client, const char *name, const char *reason)
 {
   struct Channel *channel = hash_find_channel(name);

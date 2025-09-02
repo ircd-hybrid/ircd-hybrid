@@ -59,7 +59,7 @@ ms_svspart(struct Client *source, int parc, char *parv[])
 
   if (client_is_local(target))
   {
-    channel_part_list(target, parv[2], parv[3]);
+    channel_part_one(target, parv[2], parv[3]);
     return;
   }
 

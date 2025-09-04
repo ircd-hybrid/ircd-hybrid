@@ -54,7 +54,7 @@ whois_send_hook(void *ctx_)
   if (user_mode_has_flag(ctx->target, UMODE_REGISTERED))
     sendto_one_numeric(ctx->source, &me, RPL_WHOISREGNICK, ctx->target->name);
 
-  if (strcmp(ctx->target->account, "*"))
+  if (client_has_account(ctx->target))
     sendto_one_numeric(ctx->source, &me, RPL_WHOISACCOUNT, ctx->target->name, ctx->target->account, "is");
 
   return HOOK_FLOW_CONTINUE;

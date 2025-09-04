@@ -198,7 +198,7 @@ who_send(struct Client *source, const struct Client *target,
 
   if ((who->fields & WHO_FIELD_ACC))
   {
-    if (strcmp(target->account, "*"))
+    if (client_has_account(target))
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", target->account);
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %s", "0");

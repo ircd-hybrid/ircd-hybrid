@@ -35,6 +35,7 @@
 #include "event.h"
 #include "fdlist.h"
 #include "io.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 
@@ -395,6 +396,12 @@ static inline void
 client_unset_flag(struct Client *client, unsigned int flags)
 {
   client->flags &= ~flags;
+}
+
+static inline bool
+client_has_account(const struct Client *client)
+{
+  return !string_is_empty(client->account) && strcmp(client->account, "*");
 }
 
 static inline bool

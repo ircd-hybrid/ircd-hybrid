@@ -54,7 +54,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
-  if (client_has_account(source))
+  if (strcmp(whowas->account, "*"))
     sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
                        whowas->name, whowas->account, "was");
 

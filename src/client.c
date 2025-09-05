@@ -715,6 +715,7 @@ _client_exit_detach(struct Client *client)
   if (IsClient(client))
   {
     assert(client->uplink && client->uplink->serv);
+    assert(list_find(&client->uplink->serv->child_client_list, client));
 
     list_remove(&client->global_node, &global_client_list);
     list_remove(&client->uplink_node, &client->uplink->serv->child_client_list);
@@ -722,6 +723,7 @@ _client_exit_detach(struct Client *client)
   else if (IsServer(client))
   {
     assert(client->uplink && client->uplink->serv);
+    assert(list_find(&client->uplink->serv->child_server_list, client));
 
     list_remove(&client->global_node, &global_server_list);
     list_remove(&client->uplink_node, &client->uplink->serv->child_server_list);

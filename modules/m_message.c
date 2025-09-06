@@ -452,7 +452,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
     return;
   }
 
-  if (notice == false && (!IsDigit(*name) || MyClient(source)))
+  if (notice == false && MyClient(source))
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 }
 

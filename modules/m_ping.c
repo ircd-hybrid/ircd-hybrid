@@ -94,10 +94,7 @@ ms_ping(struct Client *source, int parc, char *parv[])
   struct Client *target = NULL;
 
   if (string_is_empty(parv[1]))
-  {
-    sendto_one_numeric(source, &me, ERR_NOORIGIN);
     return;
-  }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
   if (string_is_empty(destination) || ((target = hash_find_server(destination)) && client_is_me(target)))
@@ -109,8 +106,6 @@ ms_ping(struct Client *source, int parc, char *parv[])
       sendto_one(target, ":%s PING %s :%s",
                  client_get_id_or_name(source, target), source->name, client_get_id_or_name(target, target));
   }
-  else if (!IsDigit(*destination))
-    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
 
 static struct Command command_table =

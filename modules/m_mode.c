@@ -156,7 +156,7 @@ static struct Command command_table =
   .name = "MODE",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_mode, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = m_mode, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = m_mode, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_mode, .args_min = 2 }
 };

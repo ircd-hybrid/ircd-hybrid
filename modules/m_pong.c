@@ -51,26 +51,23 @@
 static void
 ms_pong(struct Client *source, int parc, char *parv[])
 {
-  if (string_is_empty(parv[1]))
-  {
-    sendto_one_numeric(source, &me, ERR_NOORIGIN);
-    return;
-  }
+  const char *const origin_name = parv[1];
+  const char *const destination_name = parv[2];
 
-  const char *const destination = parv[2];
-  if (!string_is_empty(destination))
-  {
-    struct Client *target;
-    if ((target = hash_find_client(destination)) ||
-        (target = hash_find_id(destination)))
-    {
-      if (!client_is_me(target) && target->nexthop != source->nexthop)
-        sendto_one(target, ":%s PONG %s %s",
-                   client_get_id_or_name(source, target), parv[1], client_get_id_or_name(target, target));
-    }
-    else if (!IsDigit(*destination))
-      sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
-  }
+  if (string_is_empty(destination_name))
+    return;
+
+  struct Client *target = hash_find_id(destination_name);
+  if (target == NULL)
+    target = hash_find_client(destination_name);
+
+  if (target == NULL || client_is_me(target))
+    return;  /* Target doesn't exist, or it's us. The chain ends here. */
+
+  if (target->nexthop != source->nexthop)
+    sendto_one(target, ":%s PONG %s %s",
+               client_get_id_or_name(source, target), origin_name,
+               client_get_id_or_name(target, target));
 }
 
 /*! \brief PONG command handler

@@ -55,10 +55,7 @@ ms_tmode(struct Client *source, int parc, char *parv[])
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)
-  {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
-  }
 
   if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
     return;

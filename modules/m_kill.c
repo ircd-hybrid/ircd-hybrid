@@ -151,18 +151,13 @@ ms_kill(struct Client *source, int parc, char *parv[])
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
     return;
+  assert(IsClient(target));
 
   char *reason = strchr(parv[2], ' ');
   if (reason)
     *reason++ = '\0';
   else
     reason = def_reason;
-
-  if (IsServer(target) || client_is_me(target))
-  {
-    sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
-    return;
-  }
 
   if (client_is_local(target))
   {

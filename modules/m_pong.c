@@ -111,7 +111,7 @@ static struct Command command_table =
   .name = "PONG",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pong },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_pong, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_pong, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

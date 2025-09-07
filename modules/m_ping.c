@@ -93,10 +93,7 @@ ms_ping(struct Client *source, int parc, char *parv[])
 {
   struct Client *target = NULL;
 
-  if (string_is_empty(parv[1]))
-    return;
-
-  const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
+  const char *const destination = parv[2];
   if (string_is_empty(destination) || ((target = hash_find_server(destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s",
                client_get_id_or_name(&me, source), me.name, client_get_id_or_name(source, source));
@@ -113,7 +110,7 @@ static struct Command command_table =
   .name = "PING",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ping },
-  .handlers[SERVER_HANDLER] = { .handler = ms_ping },
+  .handlers[SERVER_HANDLER] = { .handler = ms_ping, .args_min = 3 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ping }
 };

@@ -65,7 +65,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
     return;  /* Target doesn't exist, or it's us. The chain ends here. */
 
   if (target->nexthop != source->nexthop)
-    sendto_one(target, ":%s PONG %s %s",
+    sendto_one(target, ":%s PONG %s :%s",
                client_get_id_or_name(source, target), origin_name,
                client_get_id_or_name(target, target));
 }
@@ -114,7 +114,7 @@ static struct Command command_table =
   .name = "PONG",
   .handlers[UNREGISTERED_HANDLER] = { .handler = mr_pong },
   .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_pong },
+  .handlers[SERVER_HANDLER] = { .handler = ms_pong, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ignore }
 };

@@ -39,6 +39,15 @@
 #include "server_capab.h"
 #include "isupport.h"
 
+static void
+_knock_propagate(struct Client *source, const struct Channel *channel)
+{
+  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
+                 source->id, channel->name);
+  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
+                       ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
+                       me.name, channel->name, channel->name, source->name, source->username, source->host);
+}
 
 /*! \brief KNOCK command handler
  *
@@ -54,12 +63,12 @@
 static void
 m_knock(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
+  const char *const channel_name = parv[1];
 
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *channel = hash_find_channel(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
     return;
   }
 
@@ -76,49 +85,59 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (MyClient(source))
+  if (channel_has_mode(channel, MODE_NOKNOCK))
   {
-    if (channel_has_mode(channel, MODE_NOKNOCK))
-    {
-      sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
-      return;
-    }
-
-    /* Don't allow a knock if the user is banned. */
-    if (is_banned(channel, source, NULL) || is_banned(channel, source, &extban_knock))
-    {
-      sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
-      return;
-    }
-
-    if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
-      source->connection->knock.count = 0;
-
-    if (source->connection->knock.count > ConfigChannel.knock_client_count)
-    {
-      sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "user");
-      return;
-    }
-
-    if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
-      return;
-    }
-
-    source->connection->knock.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
-    source->connection->knock.count++;
-
-    sendto_one_numeric(source, &me, RPL_KNOCKDLVR, channel->name);
+    sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "knocks are not allowed (+K)");
+    return;
   }
+
+  /* Don't allow a knock if the user is banned. */
+  if (is_banned(channel, source, NULL) || is_banned(channel, source, &extban_knock))
+  {
+    sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
+    return;
+  }
+
+  if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
+    source->connection->knock.count = 0;
+
+  if (source->connection->knock.count > ConfigChannel.knock_client_count)
+  {
+    sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "user");
+    return;
+  }
+
+  if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  {
+    sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
+    return;
+  }
+
+  sendto_one_numeric(source, &me, RPL_KNOCKDLVR, channel->name);
+
+  source->connection->knock.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->knock.count++;
 
   channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                 source->id, channel->name);
-  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
-                       ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                       me.name, channel->name, channel->name, source->name, source->username, source->host);
+  _knock_propagate(source, channel);
+}
+
+static void
+ms_knock(struct Client *source, int parc, char *parv[])
+{
+  const char *const channel_name = parv[1];
+
+  struct Channel *channel = hash_find_channel(channel_name);
+  if (channel == NULL)
+    return;
+
+  if (member_find_link(source, channel))
+    return;
+
+  channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  _knock_propagate(source, channel);
 }
 
 static struct Command command_table =
@@ -126,7 +145,7 @@ static struct Command command_table =
   .name = "KNOCK",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_knock, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = m_knock, .args_min = 2 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_knock, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_knock, .args_min = 2 }
 };

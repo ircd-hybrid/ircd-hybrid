@@ -144,7 +144,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int p
    */
   if (IsChanPrefix(*name))
   {
-    struct Channel *channel = hash_find_channel(name);
+    const struct Channel *channel = hash_find_channel(name);
     if (channel == NULL)
       return;
 

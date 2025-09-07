@@ -84,6 +84,6 @@ extern void sendto_filtered_butone(const struct Client *, const struct Client *,
 extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
 extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
-extern void sendto_channel_local(const struct Client *, struct Channel *, int, unsigned int, unsigned int, const char *, ...) IO_AFP(6,7);
-extern void sendto_channel_butone(struct Client *, const struct Client *, struct Channel *, int, const char *, ...) IO_AFP(5,6);
+extern void sendto_channel_local(const struct Client *, const struct Channel *, int, unsigned int, unsigned int, const char *, ...) IO_AFP(6,7);
+extern void sendto_channel_butone(const struct Client *, const struct Client *, const struct Channel *, int, const char *, ...) IO_AFP(5,6);
 #endif  /* INCLUDED_send_h */

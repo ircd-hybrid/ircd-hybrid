@@ -703,12 +703,12 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
   list_node_t *node, *node2;
   LIST_FOREACH(node, user->channel_list.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Channel *channel = member->channel;
+    const struct ChannelMember *member = node->data;
+    const struct Channel *channel = member->channel;
 
     LIST_FOREACH(node2, channel->members_local.head)
     {
-      struct ChannelMember *member2 = node2->data;
+      const struct ChannelMember *member2 = node2->data;
       struct Client *target = member2->client;
 
       if (IsDead(target))
@@ -747,7 +747,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
  * \param format  Format string for command arguments
  */
 void
-sendto_channel_local(const struct Client *exclude_client, struct Channel *channel, int required_rank,
+sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
                      unsigned int required_cap, unsigned int excluded_cap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
@@ -760,7 +760,7 @@ sendto_channel_local(const struct Client *exclude_client, struct Channel *channe
   list_node_t *node;
   LIST_FOREACH(node, channel->members_local.head)
   {
-    struct ChannelMember *member = node->data;
+    const struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
     if (IsDead(target))
@@ -796,7 +796,7 @@ sendto_channel_local(const struct Client *exclude_client, struct Channel *channe
  * WARNING - +D clients are ignored
  */
 void
-sendto_channel_butone(struct Client *exclude_client, const struct Client *from, struct Channel *channel,
+sendto_channel_butone(const struct Client *exclude_client, const struct Client *from, const struct Channel *channel,
                       int required_rank, const char *format, ...)
 {
   struct dbuf_block *buffer_local = dbuf_alloc();
@@ -825,7 +825,7 @@ sendto_channel_butone(struct Client *exclude_client, const struct Client *from, 
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
-    struct ChannelMember *member = node->data;
+    const struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
     assert(IsClient(target));

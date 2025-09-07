@@ -246,7 +246,7 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  struct WhowasGroup *group = whowas_group_find(name);
+  const struct WhowasGroup *group = whowas_group_find(name);
   if (group == NULL)
     return NULL;
 

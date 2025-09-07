@@ -74,6 +74,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
                       parv[1], target->name);
   }
 
+  assert(IsClient(target));
   if (!client_is_local(target) && !HasOFlag(source, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill:remote");
@@ -83,12 +84,6 @@ mo_kill(struct Client *source, int parc, char *parv[])
   if (client_is_local(target) && !HasOFlag(source, OPER_FLAG_KILL))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill");
-    return;
-  }
-
-  if (IsServer(target) || client_is_me(target))
-  {
-    sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
     return;
   }
 

@@ -54,9 +54,6 @@ ms_pong(struct Client *source, int parc, char *parv[])
   const char *const origin_name = parv[1];
   const char *const destination_name = parv[2];
 
-  if (string_is_empty(destination_name))
-    return;
-
   struct Client *target = hash_find_id(destination_name);
   if (target == NULL)
     target = hash_find_client(destination_name);

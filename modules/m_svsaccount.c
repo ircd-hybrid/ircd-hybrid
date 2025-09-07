@@ -43,7 +43,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = ignored/unused
  *      - parv[3] = account name
  */
 static void
@@ -56,14 +56,10 @@ ms_svsaccount(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
-    return;
-
   strlcpy(target->account, parv[3], sizeof(target->account));
 
-  sendto_servers(source, 0, 0, ":%s SVSACCOUNT %s %ju %s",
-                 source->id, target->id, target->tsinfo, target->account);
+  sendto_servers(source, 0, 0, ":%s SVSACCOUNT %s 0 %s",
+                 source->id, target->id, target->account);
   sendto_common_channels_local(target, true, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
                                target->name, target->username, target->host, target->account);
 }

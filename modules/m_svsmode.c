@@ -48,7 +48,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = ignored/unused
  *      - parv[3] = modes to be added or removed
  */
 static void
@@ -59,10 +59,6 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
 
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
-    return;
-
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
     return;
 
   const uint64_t mode_flags_old = target->umodes;
@@ -85,8 +81,8 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
     }
   }
 
-  sendto_servers(source, 0, 0, ":%s SVSMODE %s %ju %s",
-                 source->id, target->id, target->tsinfo, modes);
+  sendto_servers(source, 0, 0, ":%s SVSMODE %s 0 %s",
+                 source->id, target->id, modes);
 
   if (client_is_local(target))
     user_mode_send(target, mode_flags_old, USER_MODE_SEND_CLIENT);

@@ -70,8 +70,8 @@ oper_up(struct Client *client, const struct OperItem *oper)
   if (!string_is_empty(oper->whois_text))
   {
     svstag_attach(&client->svstag_list, RPL_WHOISOPERATOR, "+", oper->whois_text);
-    sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, oper->whois_text);
+    sendto_servers(NULL, 0, 0, ":%s SVSTAG %s 0 %u + :%s",
+                   me.id, client->id, RPL_WHOISOPERATOR, oper->whois_text);
   }
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",

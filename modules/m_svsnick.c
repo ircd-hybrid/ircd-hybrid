@@ -52,7 +52,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = old nickname
- *      - parv[2] = old timestamp
+ *      - parv[2] = ignored/unused
  *      - parv[3] = new nickname
  *      - parv[4] = new timestamp
  */
@@ -64,10 +64,6 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
-    return;
-
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
     return;
 
   const char *const new_nick = parv[3];
@@ -85,8 +81,8 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     }
 
     uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
-    sendto_one(target, ":%s SVSNICK %s %ju %s %ju",
-               source->id, target->id, ts, new_nick, new_ts);
+    sendto_one(target, ":%s SVSNICK %s 0 %s %ju",
+               source->id, target->id, new_nick, new_ts);
     return;
   }
 

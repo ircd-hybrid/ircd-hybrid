@@ -207,9 +207,8 @@ server_send_client(struct Client *client, const struct Client *target)
   LIST_FOREACH_PREV(node, target->svstag_list.tail)
   {
     const struct ServicesTag *svstag = node->data;
-    sendto_one(client, ":%s SVSTAG %s %ju %u +%s :%s",
-               me.id, target->id, target->tsinfo, svstag->numeric,
-               user_mode_to_str(svstag->umodes), svstag->tag);
+    sendto_one(client, ":%s SVSTAG %s 0 %u +%s :%s",
+               me.id, target->id, svstag->numeric, user_mode_to_str(svstag->umodes), svstag->tag);
   }
 }
 

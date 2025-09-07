@@ -44,7 +44,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = ignored/unused
  *      - parv[3] = [-][raw]
  *      - parv[4] = required user mode(s) to see the tag
  *      - parv[5] = tag line
@@ -59,15 +59,11 @@ ms_svstag(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
-    return;
-
   if (strcmp(parv[3], "-") == 0)
   {
     svstag_clear_list(&target->svstag_list);
-    sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju -",
-                   source->id, target->id, target->tsinfo);
+    sendto_servers(source, 0, 0, ":%s SVSTAG %s 0 -",
+                   source->id, target->id);
     return;
   }
 
@@ -76,8 +72,8 @@ ms_svstag(struct Client *source, int parc, char *parv[])
 
   svstag_attach(&target->svstag_list, strtoul(parv[3], NULL, 10), parv[4], parv[5]);
 
-  sendto_servers(source, 0, 0, ":%s SVSTAG %s %ju %s %s :%s",
-                 source->id, target->id, target->tsinfo, parv[3], parv[4], parv[5]);
+  sendto_servers(source, 0, 0, ":%s SVSTAG %s 0 %s %s :%s",
+                 source->id, target->id, parv[3], parv[4], parv[5]);
 }
 
 static struct Command command_table =

@@ -513,8 +513,8 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   strlcpy(client->host, hostname, sizeof(client->host));
 
   if (svshost)
-    sendto_servers(client, 0, 0, ":%s SVSHOST %s %ju %s",
-                   client->uplink->id, client->id, client->tsinfo, client->host);
+    sendto_servers(client, 0, 0, ":%s SVSHOST %s 0 %s",
+                   client->uplink->id, client->id, client->host);
 
   if (client_is_local(client))
   {

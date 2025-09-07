@@ -42,7 +42,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = TS
+ *      - parv[2] = ignored/unused
  *      - parv[3] = host name
  */
 static void
@@ -55,16 +55,12 @@ ms_svshost(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
-    return;
-
   if (valid_hostname(parv[3]) == false)
     return;
 
   user_set_hostmask(target, parv[3], false);
-  sendto_servers(source, 0, 0, ":%s SVSHOST %s %ju %s",
-                 source->id, target->id, target->tsinfo, parv[3]);
+  sendto_servers(source, 0, 0, ":%s SVSHOST %s 0 %s",
+                 source->id, target->id, parv[3]);
 }
 
 static struct Command command_table =

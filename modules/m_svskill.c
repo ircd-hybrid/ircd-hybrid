@@ -43,7 +43,7 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = nickname
- *      - parv[2] = timestamp
+ *      - parv[2] = ignored/unused
  *      - parv[3] = kill message
  */
 static void
@@ -54,10 +54,6 @@ ms_svskill(struct Client *source, int parc, char *parv[])
 
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
-    return;
-
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
     return;
 
   const char *const reason = parv[3];
@@ -75,8 +71,8 @@ ms_svskill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  sendto_one(target, ":%s SVSKILL %s %ju :%s",
-             source->id, target->id, ts, reason);
+  sendto_one(target, ":%s SVSKILL %s 0 :%s",
+             source->id, target->id, reason);
 }
 
 static struct Command command_table =

@@ -443,8 +443,11 @@ channel_destroy(struct Channel *channel)
   assert(channel->invexlist.tail == NULL);
 
   io_free(channel->topic);
+  channel->topic = NULL;
   io_free(channel->topic_info);
+  channel->topic_info = NULL;
   io_free(channel->mode_lock);
+  channel->mode_lock = NULL;
   io_free(channel);
 }
 

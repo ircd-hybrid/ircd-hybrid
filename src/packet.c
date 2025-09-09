@@ -111,8 +111,11 @@ extract_one_line(struct dbuf_queue *queue, char *dest_buffer)
       }
       else if (eol_bytes)
         goto out;
-      else if (line_bytes++ < IRCD_BUFSIZE - 2)
+      else if (line_bytes < IRCD_BUFSIZE - 2)
+      {
+        ++line_bytes;
         *dest_buffer++ = c;
+      }
     }
   }
 

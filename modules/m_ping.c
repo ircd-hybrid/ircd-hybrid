@@ -110,7 +110,7 @@ static struct Command command_table =
   .name = "PING",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_ping },
-  .handlers[SERVER_HANDLER] = { .handler = ms_ping, .args_min = 3 },
+  .handlers[SERVER_HANDLER] = { .handler = ms_ping, .args_min = 2 },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_ping }
 };

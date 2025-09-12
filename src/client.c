@@ -1028,10 +1028,10 @@ client_get_idle_time(const struct Client *source,
   const struct ClassItem *const klass = client_get_active_class(target);
 
   if (!(klass->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
-    return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
+    return client_get_idle_duration(target);
 
   if (client_is_oper(source) && !(klass->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
+    return client_get_idle_duration(target);
 
   const unsigned int min_idle = klass->min_idle;
   const unsigned int max_idle = klass->max_idle;
@@ -1042,7 +1042,7 @@ client_get_idle_time(const struct Client *source,
   if (klass->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else
-    idle = io_time_get(IO_TIME_MONOTONIC_SEC) - target->connection->last_privmsg;
+    idle = client_get_idle_duration(target);
 
   if (max_idle)
     idle %= max_idle;

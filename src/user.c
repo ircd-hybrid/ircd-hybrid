@@ -308,7 +308,7 @@ user_register_local(struct Client *client)
 
   SetClient(client);
 
-  client->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->last_privmsg_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   assert(client->connection->flood_recalc_event == NULL);
   client->connection->flood_recalc_event =

@@ -524,7 +524,7 @@ m_privmsg(struct Client *source, int parc, char *parv[])
     return;
 
   if (client_is_local(source))
-    source->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
+    source->connection->last_privmsg_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   m_message(source, parc, parv, false);
 }

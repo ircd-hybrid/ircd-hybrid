@@ -239,7 +239,7 @@ struct Connection
   uintmax_t created_monotonic;  /**< Time client was created; monotonic time */
   uintmax_t last_caller_id_time;  /**< Monotonic time */
   uintmax_t first_received_message_time;  /**< Monotonic time */
-  uintmax_t last_privmsg;  /**< Last time we got a PRIVMSG; monotonic time */
+  uintmax_t last_privmsg_time;  /**< Last time we got a PRIVMSG; monotonic time */
   uintmax_t last_join_time;  /**< When this client last joined a channel; monotonic time */
   uintmax_t last_leave_time;  /**< When this client last left a channel; monotonic time */
 
@@ -489,6 +489,12 @@ static inline uintmax_t
 client_get_socket_idle_duration(const struct Client *client)
 {
   return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_receive_time;
+}
+
+static inline uintmax_t
+client_get_idle_duration(const struct Client *client)
+{
+  return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_privmsg_time;
 }
 
 static inline const char *

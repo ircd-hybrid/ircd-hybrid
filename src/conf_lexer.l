@@ -211,7 +211,6 @@ have_ident                  { return NEED_IDENT; }
 hidden                      { return HIDDEN; }
 hidden_name                 { return HIDDEN_NAME; }
 hide_idle_from_opers        { return HIDE_IDLE_FROM_OPERS; }
-hide_server_ips             { return HIDE_SERVER_IPS; }
 hide_servers                { return HIDE_SERVERS; }
 hide_services               { return HIDE_SERVICES; }
 host                        { return HOST; }

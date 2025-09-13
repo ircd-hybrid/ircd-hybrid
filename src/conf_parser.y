@@ -203,7 +203,6 @@ reset_block_state(void)
 %token  HIDE_CHANS
 %token  HIDE_IDLE
 %token  HIDE_IDLE_FROM_OPERS
-%token  HIDE_SERVER_IPS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
 %token  HOST
@@ -2767,7 +2766,6 @@ serverhide_item:    serverhide_flatten_links |
                     serverhide_hide_services |
                     serverhide_hidden |
                     serverhide_hidden_name |
-                    serverhide_hide_server_ips |
                     error;
 
 serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'
@@ -2827,10 +2825,4 @@ serverhide_hidden: HIDDEN '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = yylval.number;
-};
-
-serverhide_hide_server_ips: HIDE_SERVER_IPS '=' TBOOL ';'
-{
-  if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_server_ips = yylval.number;
 };

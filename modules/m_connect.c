@@ -83,8 +83,7 @@ do_connect(struct Client *source, const char *name)
   if (server_connect(connect, source) == false)
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
                       connect->name, connect->port);
-  else if (client_is_local(source) &&
-           (ConfigServerHide.hide_server_ips == 0 && client_is_admin(source)))
+  else if (client_is_local(source) && client_is_admin(source))
     sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
                       connect->name, connect->host, connect->port);
   else

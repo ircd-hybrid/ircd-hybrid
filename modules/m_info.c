@@ -130,7 +130,6 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("serverhide", "flatten_links_file", INFO_OUTPUT_STRING, &ConfigServerHide.flatten_links_file, "Path to the flatten links cache file"),
   INFO_ENTRY_INIT("serverhide", "hidden", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hidden, "Hide this server from a flattened /links on remote servers"),
   INFO_ENTRY_INIT("serverhide", "hidden_name", INFO_OUTPUT_STRING, &ConfigServerHide.hidden_name, "Server name users see if hide_servers = yes"),
-  INFO_ENTRY_INIT("serverhide", "hide_server_ips", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hide_server_ips, "Prevent people from seeing server IP addresses"),
   INFO_ENTRY_INIT("serverhide", "hide_servers", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hide_servers, "Hide servernames from users"),
   INFO_ENTRY_INIT("serverhide", "hide_services", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hide_services, "Hides the location of services server"),
   INFO_ENTRY_INIT("serverinfo", "default_max_clients", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.default_max_clients, "The default maximum number of clients permitted simultaneously on this server"),

@@ -620,7 +620,6 @@ conf_set_defaults(void)
   ConfigServerHide.hide_servers = 0;
   ConfigServerHide.hide_services = 0;
   ConfigServerHide.hidden_name = io_strdup(NETWORK_NAME_DEFAULT);
-  ConfigServerHide.hide_server_ips = 0;
   ConfigServerHide.disable_remote_commands = 0;
 
   ConfigGeneral.away_count = 2;

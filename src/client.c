@@ -494,12 +494,8 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
     return client->name;
 
   if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
-  {
     if (irccmp(client->name, client->host) == 0)
       return client->name;
-    else if (ConfigServerHide.hide_server_ips)
-      type = MASK_IP;
-  }
 
   /* And finally, let's get the host information, ip or name */
   switch (type)

@@ -271,15 +271,9 @@ stats_connect(struct Client *client, int parc, char *parv[])
 
     *bufptr = '\0';
 
-    /*
-     * Allow admins to see actual ips unless 'hide_server_ips' is enabled
-     */
-    if (ConfigServerHide.hide_server_ips == 0 && client_is_admin(client))
-      sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', connect->host, buf, connect->name, connect->port, connect->klass->name);
-    else
-      sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                         'C', "*@127.0.0.1", buf, connect->name, connect->port, connect->klass->name);
+    const char *visible_host = client_is_admin(client) ? connect->host : "*@127.0.0.1";
+    sendto_one_numeric(client, &me, RPL_STATSCLINE,
+                       'C', visible_host, buf, connect->name, connect->port, connect->klass->name);
   }
 }
 
@@ -874,14 +868,10 @@ stats_ports(struct Client *client, int parc, char *parv[])
       *bufptr++ = 'D';
     *bufptr = '\0';
 
-    if (client_is_admin(client) && ConfigServerHide.hide_server_ips == 0)
-      sendto_one_numeric(client, &me, RPL_STATSPLINE,
-                         'P', listener_get_port(listener), listener_get_name(listener), listener->ref_count, buf,
-                         listener_is_active(listener) ? "active" : "disabled");
-    else
-      sendto_one_numeric(client, &me, RPL_STATSPLINE,
-                         'P', listener_get_port(listener), me.name, listener->ref_count, buf,
-                         listener_is_active(listener) ? "active" : "disabled");
+    const char *visible_host = client_is_admin(client) ? listener_get_name(listener) : me.name;
+    sendto_one_numeric(client, &me, RPL_STATSPLINE,
+                       'P', listener_get_port(listener), visible_host, listener->ref_count, buf,
+                       listener_is_active(listener) ? "active" : "disabled");
   }
 }
 

@@ -208,7 +208,6 @@ struct config_serverhide_entry
   unsigned int hide_servers;
   unsigned int hide_services;
   unsigned int hidden;
-  unsigned int hide_server_ips;
 };
 
 struct config_serverinfo_entry

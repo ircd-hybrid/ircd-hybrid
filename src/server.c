@@ -274,8 +274,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   assert(client->connection->fd);
   assert(client->connection->fd == fde);
 
-  const char *tls_error = NULL;
-  tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, &tls_error);
+  tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
   {
     _server_handshake_tls_finish(client);
@@ -291,8 +290,6 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
       comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client);
       break;
     default:
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Error connecting to %s: %s",
-                     client->name, tls_error ? tls_error : "unknown TLS error");
       client_exit(client, "Error during TLS handshake");
       break;
   }

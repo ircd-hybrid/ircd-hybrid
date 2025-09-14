@@ -52,7 +52,7 @@ mo_close(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const unsigned int closed = list_length(&unknown_list);
+  const unsigned int closed_count = list_length(&unknown_list);
   while (unknown_list.head)
   {
     struct Client *target = unknown_list.head->data;
@@ -64,7 +64,7 @@ mo_close(struct Client *source, int parc, char *parv[])
     client_exit(target, "Oper Closing");
   }
 
-  sendto_one_numeric(source, &me, RPL_CLOSEEND, closed);
+  sendto_one_numeric(source, &me, RPL_CLOSEEND, closed_count);
 }
 
 static struct Command command_table =

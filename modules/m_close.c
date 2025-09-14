@@ -56,14 +56,11 @@ mo_close(struct Client *source, int parc, char *parv[])
   while (unknown_list.head)
   {
     struct Client *target = unknown_list.head->data;
+    /* An oper (source) can never be in the unknown_list. */
+    assert(source != target);
 
     sendto_one_numeric(source, &me, RPL_CLOSING,
                        client_get_name(target, SHOW_IP), target->status);
-
-    /*
-     * Exit here is safe, because it is guaranteed not to be source
-     * because it is unregistered and source is an oper.
-     */
     client_exit(target, "Oper Closing");
   }
 

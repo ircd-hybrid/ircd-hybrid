@@ -437,7 +437,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   /* Now, initiate the connection */
   comm_connect_tcp(client->connection->fd, &connect->remote_addr, connect->port, &connect->bind_addr,
-                   _server_connect_callback, client, connect->timeout * 1000);
+                   _server_connect_callback, client, connect->timeout * 1000ULL);
 
   /*
    * At this point we have a connection in progress and a connect {} block

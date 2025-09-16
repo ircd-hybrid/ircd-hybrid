@@ -39,7 +39,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       umode_skill.la           \
                       umode_softcallerid.la    \
                       umode_spy.la             \
-                      umode_wallops.la         \
                       umode_webirc.la          \
                       m_accept.la     \
                       m_admin.la      \
@@ -162,7 +161,6 @@ umode_servnotice_la_LDFLAGS = $(MODULE_FLAGS)
 umode_skill_la_LDFLAGS = $(MODULE_FLAGS)
 umode_softcallerid_la_LDFLAGS = $(MODULE_FLAGS)
 umode_spy_la_LDFLAGS = $(MODULE_FLAGS)
-umode_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 umode_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
@@ -285,7 +283,6 @@ umode_servnotice_la_SOURCES = umode_servnotice.c
 umode_skill_la_SOURCES = umode_skill.c
 umode_softcallerid_la_SOURCES = umode_softcallerid.c
 umode_spy_la_SOURCES = umode_spy.c
-umode_wallops_la_SOURCES = umode_wallops.c
 umode_webirc_la_SOURCES = umode_webirc.c
 
 m_accept_la_SOURCES = m_accept.c

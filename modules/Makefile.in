@@ -893,13 +893,6 @@ umode_spy_la_OBJECTS = $(am_umode_spy_la_OBJECTS)
 umode_spy_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(umode_spy_la_LDFLAGS) $(LDFLAGS) -o $@
-umode_wallops_la_LIBADD =
-am_umode_wallops_la_OBJECTS = umode_wallops.lo
-umode_wallops_la_OBJECTS = $(am_umode_wallops_la_OBJECTS)
-umode_wallops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_wallops_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
 umode_webirc_la_LIBADD =
 am_umode_webirc_la_OBJECTS = umode_webirc.lo
 umode_webirc_la_OBJECTS = $(am_umode_webirc_la_OBJECTS)
@@ -984,7 +977,7 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/umode_secure.Plo ./$(DEPDIR)/umode_secureonly.Plo \
 	./$(DEPDIR)/umode_servnotice.Plo ./$(DEPDIR)/umode_skill.Plo \
 	./$(DEPDIR)/umode_softcallerid.Plo ./$(DEPDIR)/umode_spy.Plo \
-	./$(DEPDIR)/umode_wallops.Plo ./$(DEPDIR)/umode_webirc.Plo
+	./$(DEPDIR)/umode_webirc.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -1062,8 +1055,7 @@ SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
 	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
 	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
-	$(umode_spy_la_SOURCES) $(umode_wallops_la_SOURCES) \
-	$(umode_webirc_la_SOURCES)
+	$(umode_spy_la_SOURCES) $(umode_webirc_la_SOURCES)
 DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
 	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
@@ -1122,8 +1114,7 @@ DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
 	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
 	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
-	$(umode_spy_la_SOURCES) $(umode_wallops_la_SOURCES) \
-	$(umode_webirc_la_SOURCES)
+	$(umode_spy_la_SOURCES) $(umode_webirc_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1335,7 +1326,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       umode_skill.la           \
                       umode_softcallerid.la    \
                       umode_spy.la             \
-                      umode_wallops.la         \
                       umode_webirc.la          \
                       m_accept.la     \
                       m_admin.la      \
@@ -1456,7 +1446,6 @@ umode_servnotice_la_LDFLAGS = $(MODULE_FLAGS)
 umode_skill_la_LDFLAGS = $(MODULE_FLAGS)
 umode_softcallerid_la_LDFLAGS = $(MODULE_FLAGS)
 umode_spy_la_LDFLAGS = $(MODULE_FLAGS)
-umode_wallops_la_LDFLAGS = $(MODULE_FLAGS)
 umode_webirc_la_LDFLAGS = $(MODULE_FLAGS)
 m_accept_la_LDFLAGS = $(MODULE_FLAGS)
 m_admin_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1576,7 +1565,6 @@ umode_servnotice_la_SOURCES = umode_servnotice.c
 umode_skill_la_SOURCES = umode_skill.c
 umode_softcallerid_la_SOURCES = umode_softcallerid.c
 umode_spy_la_SOURCES = umode_spy.c
-umode_wallops_la_SOURCES = umode_wallops.c
 umode_webirc_la_SOURCES = umode_webirc.c
 m_accept_la_SOURCES = m_accept.c
 m_admin_la_SOURCES = m_admin.c
@@ -2082,9 +2070,6 @@ umode_softcallerid.la: $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_
 umode_spy.la: $(umode_spy_la_OBJECTS) $(umode_spy_la_DEPENDENCIES) $(EXTRA_umode_spy_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(umode_spy_la_LINK) -rpath $(modulesdir) $(umode_spy_la_OBJECTS) $(umode_spy_la_LIBADD) $(LIBS)
 
-umode_wallops.la: $(umode_wallops_la_OBJECTS) $(umode_wallops_la_DEPENDENCIES) $(EXTRA_umode_wallops_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_wallops_la_LINK) -rpath $(modulesdir) $(umode_wallops_la_OBJECTS) $(umode_wallops_la_LIBADD) $(LIBS)
-
 umode_webirc.la: $(umode_webirc_la_OBJECTS) $(umode_webirc_la_DEPENDENCIES) $(EXTRA_umode_webirc_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(umode_webirc_la_LINK) -rpath $(modulesdir) $(umode_webirc_la_OBJECTS) $(umode_webirc_la_LIBADD) $(LIBS)
 
@@ -2212,7 +2197,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_skill.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_softcallerid.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_spy.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_wallops.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/umode_webirc.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -2496,7 +2480,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/umode_skill.Plo
 	-rm -f ./$(DEPDIR)/umode_softcallerid.Plo
 	-rm -f ./$(DEPDIR)/umode_spy.Plo
-	-rm -f ./$(DEPDIR)/umode_wallops.Plo
 	-rm -f ./$(DEPDIR)/umode_webirc.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -2661,7 +2644,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/umode_skill.Plo
 	-rm -f ./$(DEPDIR)/umode_softcallerid.Plo
 	-rm -f ./$(DEPDIR)/umode_spy.Plo
-	-rm -f ./$(DEPDIR)/umode_wallops.Plo
 	-rm -f ./$(DEPDIR)/umode_webirc.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

@@ -32,7 +32,6 @@ User Modes:
 +r (registered): Indicates that the user has registered and identified with their nickname. This mode can only be set by servers and services.
 +R (regonly): Restricts message reception to registered/identified users.
 +s (servnotice): Allows viewing of general server notices.
-+w (wallop): Grants visibility of WALLOPS messages.
 +W (webirc): Indicates connection via a webirc gateway.
 +x (cloak): Provides host cloaking functionality for enhanced security by obscuring IP addresses.
 +X (expiration): Allows viewing of *LINE expiration notices.

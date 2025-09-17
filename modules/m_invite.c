@@ -42,7 +42,7 @@
 
 
 static void
-send_invite(struct Client *source, struct Client *target, struct Channel *channel)
+_invite_propagate(const struct Client *source, struct Client *target, struct Channel *channel)
 {
   channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
@@ -162,7 +162,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   if (target->away_message)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 
-  send_invite(source, target, channel);
+  _invite_propagate(source, target, channel);
 }
 
 /*! \brief INVITE command handler
@@ -195,7 +195,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
     return;
 
-  send_invite(source, target, channel);
+  _invite_propagate(source, target, channel);
 }
 
 static struct Command command_table =

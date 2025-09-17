@@ -40,7 +40,7 @@
 #include "isupport.h"
 
 static void
-_knock_propagate(struct Client *source, const struct Channel *channel)
+_knock_propagate(const struct Client *source, const struct Channel *channel)
 {
   sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
                  source->id, channel->name);

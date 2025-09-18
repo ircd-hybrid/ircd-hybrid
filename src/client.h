@@ -151,7 +151,6 @@ extern uint64_t UMODE_HIDECHANS;
 extern uint64_t UMODE_HIDEIDLE;
 extern uint64_t UMODE_REGISTERED;
 extern uint64_t UMODE_SERVNOTICE;
-extern uint64_t UMODE_WALLOP;
 extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
 

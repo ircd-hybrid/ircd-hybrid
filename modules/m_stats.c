@@ -92,7 +92,6 @@ oper_privs_as_string(const unsigned int flags)
     { OPER_FLAG_UNKLINE,        'X' },
     { OPER_FLAG_UNRESV,         'Y' },
     { OPER_FLAG_UNXLINE,        'Z' },
-    { OPER_FLAG_WALLOPS,        'a' },
     { OPER_FLAG_XLINE,          'b' },
     { 0, '\0' }
   };

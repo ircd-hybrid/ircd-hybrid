@@ -251,6 +251,9 @@ server_burst(struct Client *client)
 static void
 server_estab(struct Client *client, struct ConnectItem *connect)
 {
+  assert(client && client_is_local(client));
+  assert(IsUnknown(client) || IsHandshake(client));
+
   if (IsUnknown(client))
   {
     sendto_one(client, "PASS %s", connect->send_password);
@@ -376,6 +379,9 @@ server_estab(struct Client *client, struct ConnectItem *connect)
 static void
 mr_server(struct Client *source, int parc, char *parv[])
 {
+  assert(source && client_is_local(source));
+  assert(!IsServer(source));
+
   if (listener_has_flag(source->connection->listener, LISTENER_CLIENT))
   {
     client_exit(source, "Use a different port");
@@ -504,7 +510,11 @@ mr_server(struct Client *source, int parc, char *parv[])
 static void
 ms_sid(struct Client *source, int parc, char *parv[])
 {
-  /* Just to be sure -A1kmm. */
+  assert(IsServer(source));
+  assert(source->serv);
+  assert(source->nexthop);
+
+  /* This handler should only ever be called for a fully established server. */
   if (!IsServer(source))
     return;
 
@@ -579,6 +589,9 @@ ms_sid(struct Client *source, int parc, char *parv[])
    */
 
   const struct ConnectItem *const connect = server_conf_get(source->nexthop);
+  /* An established server link must have a connect block associated with it. */
+  assert(connect);
+
   /* Ok, check source->nexthop can hub the new server */
   if (list_find_cmp(&connect->hub_masks, name, match) == NULL)
   {

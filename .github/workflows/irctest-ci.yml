@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Checkout irctest
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: irctest
           ref: aaa2e26b6e468112665ad7b15d144574a969b411
@@ -32,7 +32,7 @@ jobs:
         run: make install
 
       - name: Checkout Anope
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: anope
           ref: 2.1.1

@@ -532,7 +532,8 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
       rpl_endlist = RPL_ENDOFINVEXLIST;
       break;
     default:
-      list = NULL;  /* Let it crash */
+      log_write(LOG_TYPE_IRCD, "BUG: chm_mask called with unknown flag %u", mode->flag);
+      return;
   }
 
   if (parc <= *parn)

@@ -276,18 +276,18 @@ address_strip_ipv4(struct io_addr *addr)
   if (address_is_ipv4_mapped(addr) == false)
     return;
 
-  /* If IPv6-mapped IPv4, extract IPv4 portion and update address. */
   struct sockaddr_in6 v6;
-  struct sockaddr_in *v4 = (struct sockaddr_in *)addr;
+  memcpy(&v6, &addr->ss, sizeof(v6));
 
-  memcpy(&v6, addr, sizeof(v6));
-  memset(v4, 0, sizeof(struct sockaddr_in));
+  /* Wipe the underlying storage to remove v6 garbage padding. */
+  address_clear(addr);
+
+  struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
+  v4->sin_family = AF_INET;
+  v4->sin_port = v6.sin6_port;
 
   /* Copy the IPv4 portion from the IPv6-mapped address to the input address. */
   memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
-
-  /* Update address family and length to indicate IPv4. */
-  addr->ss.ss_family = AF_INET;
 }
 
 /**

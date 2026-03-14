@@ -79,6 +79,8 @@ comm_socket_get_error(const fde_t *fde, int *const sock_err_out)
   assert(fde->flags.open);
   assert(sock_err_out);
 
+  *sock_err_out = 0;
+
   int sock_err = 0;
   socklen_t len = sizeof(sock_err);
   if (getsockopt(fde->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len) == 0)

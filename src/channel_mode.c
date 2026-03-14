@@ -24,6 +24,7 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "address.h"
 #include "io_string.h"

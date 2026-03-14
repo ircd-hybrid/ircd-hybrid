@@ -24,6 +24,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 
 #include "address.h"
 #include "comm.h"

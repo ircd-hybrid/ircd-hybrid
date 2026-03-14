@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <unistd.h>
 #include <netinet/in.h>

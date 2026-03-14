@@ -441,7 +441,7 @@ comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
 
   address_clear(addr);
 
-  socklen_t addrlen = sizeof(*addr);
+  socklen_t addrlen = sizeof(addr->ss);
   int fd = accept(listener_fde->fd, (struct sockaddr *)&addr->ss, &addrlen);
   if (fd < 0)
   {

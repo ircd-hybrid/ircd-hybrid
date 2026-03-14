@@ -26,6 +26,7 @@
 #ifndef INCLUDED_address_h
 #define INCLUDED_address_h
 
+#include <assert.h>
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -175,6 +176,9 @@ address_clear(struct io_addr *addr)
 static inline void
 address_copy(struct io_addr *dst, const struct io_addr *src)
 {
-  memcpy(dst, src, sizeof(*dst));
+  assert(dst);
+  assert(src);
+
+  *dst = *src;
 }
 #endif  /* INCLUDED_address_h */

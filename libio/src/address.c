@@ -57,7 +57,7 @@ address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
   int bits = 128;
   int deficit = 0;
   uint16_t dc[8];
-  struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)addr;
+  struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr->ss;
 
   for (const char *p = text; (c = *p); ++p)
   {
@@ -311,7 +311,7 @@ address_mask(struct io_addr *addr, int bits)
   {
     /* Calculate the IPv4 mask based on the prefix length. */
     const int mask = ~((1 << (32 - bits)) - 1);
-    struct sockaddr_in *const v4_base_ip = (struct sockaddr_in *)addr;
+    struct sockaddr_in *const v4_base_ip = (struct sockaddr_in *)&addr->ss;
 
     /* Apply the mask to the network portion of the IPv4 address. */
     v4_base_ip->sin_addr.s_addr = htonl(ntohl(v4_base_ip->sin_addr.s_addr) & mask);
@@ -325,7 +325,7 @@ address_mask(struct io_addr *addr, int bits)
 
     /* Calculate the IPv6 mask based on the remaining bits. */
     const int mask = ~((1 << (8 - m)) - 1);
-    struct sockaddr_in6 *const v6_base_ip = (struct sockaddr_in6 *)addr;
+    struct sockaddr_in6 *const v6_base_ip = (struct sockaddr_in6 *)&addr->ss;
 
     /* Apply the mask to the specified octet in the IPv6 address. */
     v6_base_ip->sin6_addr.s6_addr[n] = v6_base_ip->sin6_addr.s6_addr[n] & mask;
@@ -359,8 +359,8 @@ address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact
 
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)addr;
-    const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)mask;
+    const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)&mask->ss;
 
     /* Compare port numbers if required */
     if (port && (sin1->sin_port != sin2->sin_port))
@@ -372,8 +372,8 @@ address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact
   else
   {
     assert(address_is_ipv6(addr));
-    const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)addr;
-    const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)mask;
+    const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)&mask->ss;
 
     if (port && (sin1->sin6_port != sin2->sin6_port))
       return false;
@@ -395,8 +395,8 @@ bool
 address_match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
   int i, m, n = bits / 8;
-  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
-  const struct sockaddr_in6 *const v6mask = (const struct sockaddr_in6 *)mask;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
+  const struct sockaddr_in6 *const v6mask = (const struct sockaddr_in6 *)&mask->ss;
 
   for (i = 0; i < n; ++i)
     if (v6->sin6_addr.s6_addr[i] != v6mask->sin6_addr.s6_addr[i])
@@ -418,8 +418,8 @@ address_match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int b
 bool
 address_match_ipv4(const struct io_addr *addr, const struct io_addr *mask, int bits)
 {
-  const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
-  const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)mask;
+  const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
+  const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)&mask->ss;
 
   if ((ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1)) ==
       ntohl(v4mask->sin_addr.s_addr))
@@ -437,7 +437,7 @@ hash_ipv4(const struct io_addr *addr, int bits)
 {
   if (bits)
   {
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)addr;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     uint32_t av = ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1);
 
     return (av ^ (av >> 12) ^ (av >> 24)) & (ADDRESS_HASHSIZE - 1);
@@ -455,7 +455,7 @@ uint32_t
 hash_ipv6(const struct io_addr *addr, int bits)
 {
   uint32_t v = 0, n;
-  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)addr;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
 
   for (n = 0; n < 16; ++n)
   {

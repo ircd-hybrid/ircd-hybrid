@@ -344,15 +344,12 @@ read_packet(fde_t *F, void *data_)
       return;
 
     /* Check to make sure we're not flooding */
-    if (!(IsServer(client) || IsHandshake(client) || IsConnecting(client)))
+    const unsigned int max_recvq = client_get_max_recvq(client);
+    const size_t current_recvq = dbuf_length(&client->connection->buf_recvq);
+    if (current_recvq > max_recvq)
     {
-      const unsigned int max_recvq = client_get_max_recvq(client);
-      const size_t current_recvq = dbuf_length(&client->connection->buf_recvq);
-      if (current_recvq > max_recvq)
-      {
-        client_exit_fmt(client, "Max RecvQ exceeded (%zu > %u)", current_recvq, max_recvq);
-        return;
-      }
+      client_exit_fmt(client, "Max RecvQ exceeded (%zu > %u)", current_recvq, max_recvq);
+      return;
     }
   }
 }

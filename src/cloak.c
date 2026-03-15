@@ -238,13 +238,13 @@ cloak_mac_and_compose(const struct io_addr *addr)
   /* Determine the address pointer and length based on the address family (IPv4 or IPv6). */
   if (address_is_ipv6(addr))
   {
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *const)addr;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *const)&addr->ss;
     addr_ptr = &v6->sin6_addr;
     addr_len = sizeof(struct in6_addr);
   }
   else
   {
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *const)addr;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *const)&addr->ss;
     addr_ptr = &v4->sin_addr;
     addr_len = sizeof(struct in_addr);
   }

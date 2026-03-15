@@ -102,7 +102,7 @@ comm_socket_get_error(const fde_t *fde, int *const sock_err_out)
  * Set the socket non-blocking, and other wonderful bits.
  */
 static bool
-setup_socket(int fd, int sock_type)
+setup_socket(int fd, int family, int sock_type)
 {
   if (sock_type == SOCK_STREAM)
   {
@@ -111,11 +111,23 @@ setup_socket(int fd, int sock_type)
       log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_NODELAY) failed for FD %d: %s",
                 fd, strerror(errno));
 
-#ifdef IPTOS_LOWDELAY
+#if defined(IPTOS_LOWDELAY)
     opt = IPTOS_LOWDELAY;
-    if (setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt)) == -1)
-      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IP_TOS) failed for FD %d: %s",
-                fd, strerror(errno));
+
+    if (family == AF_INET)
+    {
+      if (setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt)) == -1)
+        log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IP_TOS) failed for FD %d: %s",
+                  fd, strerror(errno));
+    }
+#ifdef IPV6_TCLASS
+    else if (family == AF_INET6)
+    {
+      if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, &opt, sizeof(opt)) == -1)
+        log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IPV6_TCLASS) failed for FD %d: %s",
+                  fd, strerror(errno));
+    }
+#endif
 #endif
 
 #ifdef TCP_QUICKACK
@@ -352,7 +364,7 @@ comm_socket_create(int family, int sock_type, int proto, const char *desc)
     return NULL;
   }
 
-  if (setup_socket(fd, sock_type) == false)
+  if (setup_socket(fd, family, sock_type) == false)
   {
     close(fd);
     return NULL;
@@ -455,7 +467,7 @@ comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
 
   address_strip_ipv4(addr);
 
-  if (setup_socket(fd, SOCK_STREAM) == false)
+  if (setup_socket(fd, address_get_family(addr), SOCK_STREAM) == false)
   {
     close(fd);
     return NULL;

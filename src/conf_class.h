@@ -33,6 +33,12 @@
 #include "list.h"
 #include "patricia.h"
 
+enum
+{
+  CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,
+  CLASS_DEFAULT_MAX_RECVQ = 2560,
+};
+
 /**
  * @brief Flags for controlling class behavior.
  */

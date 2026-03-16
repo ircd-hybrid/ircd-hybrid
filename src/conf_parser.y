@@ -1194,8 +1194,8 @@ class_entry: CLASS
 
   block_state.ping_freq.value = DEFAULT_PINGFREQUENCY;
   block_state.con_freq.value  = DEFAULT_CONNECTFREQUENCY;
-  block_state.max_sendq.value = DEFAULT_SENDQ;
-  block_state.max_recvq.value = DEFAULT_RECVQ;
+  block_state.max_sendq.value = CLASS_DEFAULT_MAX_SENDQ;
+  block_state.max_recvq.value = CLASS_DEFAULT_MAX_RECVQ;
 } '{' class_items '}' ';'
 {
   if (conf_parser_ctx.pass != 1)

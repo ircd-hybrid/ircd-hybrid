@@ -82,7 +82,7 @@ void
 class_init(void)
 {
   class_default = class_make();
-  class_default->name = io_strdup("default");
+  class_default->name = io_strdup(CLASS_DEFAULT_NAME);
 }
 
 /*

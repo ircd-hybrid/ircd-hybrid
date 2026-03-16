@@ -33,6 +33,8 @@
 #include "list.h"
 #include "patricia.h"
 
+#define CLASS_DEFAULT_NAME "default"
+
 enum
 {
   CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,

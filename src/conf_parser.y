@@ -1310,7 +1310,7 @@ class_sendq: SENDQ '=' sizespec ';'
 class_recvq: T_RECVQ '=' sizespec ';'
 {
   if (conf_parser_ctx.pass == 1)
-    if ($3 >= CLIENT_FLOOD_MIN && $3 <= CLIENT_FLOOD_MAX)
+    if ($3 >= CLIENT_FLOOD_MIN)
       block_state.max_recvq.value = $3;
 };
 

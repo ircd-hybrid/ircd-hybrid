@@ -4755,7 +4755,7 @@ yyreduce:
 #line 1311 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
-    if ((yyvsp[-1].number) >= CLIENT_FLOOD_MIN && (yyvsp[-1].number) <= CLIENT_FLOOD_MAX)
+    if ((yyvsp[-1].number) >= CLIENT_FLOOD_MIN)
       block_state.max_recvq.value = (yyvsp[-1].number);
 }
 #line 4762 "conf_parser.c"

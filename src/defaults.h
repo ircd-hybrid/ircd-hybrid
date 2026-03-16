@@ -75,7 +75,7 @@
 #define MAXCLIENTS_MIN   32
 
 /* class {} default values */
-#define DEFAULT_SENDQ 9000000           /* default max SendQ */
+#define DEFAULT_SENDQ (512 * 1024)           /* default max SendQ */
 #define DEFAULT_RECVQ 2560           /* default max RecvQ */
 #define PORTNUM 6667                    /* default outgoing portnum */
 #define DEFAULT_PINGFREQUENCY    120    /* Default ping frequency */

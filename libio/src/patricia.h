@@ -42,6 +42,8 @@
 #define BIT_TEST(f, b)  ((f) & (b))
 
 #define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)
+#define PATRICIA_MAXBITS_IPV4 (sizeof(struct in_addr) * 8)
+#define PATRICIA_MAXBITS_IPV6 (sizeof(struct in6_addr) * 8)
 
 #define PATRICIA_DATA_GET(node, type) (type *)((node)->data)
 #define PATRICIA_DATA_SET(node, value) ((node)->data = (void *)(value))

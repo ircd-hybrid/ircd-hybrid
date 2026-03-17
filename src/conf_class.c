@@ -54,8 +54,8 @@ class_make(void)
   klass->ping_freq = DEFAULT_PINGFREQUENCY;
   klass->max_sendq = CLASS_DEFAULT_MAX_SENDQ;
   klass->max_recvq = CLASS_DEFAULT_MAX_RECVQ;
-  klass->ip_tree_v6 = patricia_new(128);
-  klass->ip_tree_v4 = patricia_new( 32);
+  klass->ip_tree_v6 = patricia_new(PATRICIA_MAXBITS_IPV6);
+  klass->ip_tree_v4 = patricia_new(PATRICIA_MAXBITS_IPV4);
   list_add(klass, &klass->node, &class_list);
 
   return klass;

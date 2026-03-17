@@ -75,7 +75,6 @@
 #define MAXCLIENTS_MIN   32
 
 /* class {} default values */
-#define PORTNUM 6667                    /* default outgoing portnum */
 #define DEFAULT_PINGFREQUENCY    120    /* Default ping frequency */
 #define DEFAULT_CONNECTFREQUENCY 600    /* Default connect frequency */
 #define CLIENT_FLOOD_MIN     512

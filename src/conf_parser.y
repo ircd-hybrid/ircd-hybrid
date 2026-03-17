@@ -1881,7 +1881,6 @@ connect_entry: CONNECT
 
   reset_block_state();
   block_state.aftype.value = AF_INET;
-  block_state.port.value = PORTNUM;
   block_state.timeout.value = CONNECTTIMEOUT;
 } '{' connect_items '}' ';'
 {

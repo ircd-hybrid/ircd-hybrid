@@ -1,6 +1,6 @@
                              Server Hide Reference
 
-   Copyright (c) 2001-2025 ircd-hybrid development team
+   Copyright (c) 2001-2026 ircd-hybrid development team
 
      ----------------------------------------------------------------------
 

@@ -50,8 +50,8 @@ class_create(void)
 {
   struct ClassItem *klass = io_calloc(sizeof(*klass));
   klass->active = true;
-  klass->con_freq = DEFAULT_CONNECTFREQUENCY;
-  klass->ping_freq = DEFAULT_PINGFREQUENCY;
+  klass->con_freq = CLASS_DEFAULT_CONNECT_FREQ;
+  klass->ping_freq = CLASS_DEFAULT_PING_FREQ;
   klass->max_sendq = CLASS_DEFAULT_MAX_SENDQ;
   klass->max_recvq = CLASS_DEFAULT_MAX_RECVQ;
   klass->ip_tree_v6 = patricia_new(PATRICIA_MAXBITS_IPV6);

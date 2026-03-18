@@ -37,8 +37,10 @@
 
 enum
 {
-  CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,
-  CLASS_DEFAULT_MAX_RECVQ = 2560,
+  CLASS_DEFAULT_PING_FREQ = 120,  /**< Default ping frequency in seconds. */
+  CLASS_DEFAULT_CONNECT_FREQ = 600,  /**< Default server autoconnect frequency in seconds. */
+  CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,  /**< Default max send queue size in bytes. */
+  CLASS_DEFAULT_MAX_RECVQ = 2560,  /**< Default max receive queue size in bytes. */
 };
 
 /**

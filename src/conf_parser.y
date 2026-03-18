@@ -1192,8 +1192,8 @@ class_entry: CLASS
 
   reset_block_state();
 
-  block_state.ping_freq.value = DEFAULT_PINGFREQUENCY;
-  block_state.con_freq.value  = DEFAULT_CONNECTFREQUENCY;
+  block_state.ping_freq.value = CLASS_DEFAULT_PING_FREQ;
+  block_state.con_freq.value  = CLASS_DEFAULT_CONNECT_FREQ;
   block_state.max_sendq.value = CLASS_DEFAULT_MAX_SENDQ;
   block_state.max_recvq.value = CLASS_DEFAULT_MAX_RECVQ;
 } '{' class_items '}' ';'

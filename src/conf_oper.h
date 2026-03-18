@@ -101,7 +101,7 @@ struct OperItem
 };
 
 extern void oper_assign_class(struct OperItem *, const char *);
-extern void oper_free(struct OperItem *);
+extern void oper_destroy(struct OperItem *);
 extern void oper_free_all(void);
 extern oper_auth_result_t oper_authenticate(const struct Client *, const char *, const char *, struct OperItem **);
 extern list_t *oper_get_list(void);

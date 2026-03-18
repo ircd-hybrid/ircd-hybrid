@@ -720,9 +720,9 @@ conf_read(FILE *file)
                     /* Some global values are also loaded here. */
   whowas_trim();  /* Attempt to trim whowas list if necessary */
 
-  connect_free_inactive();
+  connect_sweep_inactive();
 
-  class_free_inactive();  /* Delete unused classes that are marked for deletion */
+  class_sweep_inactive();  /* Delete unused classes that are marked for deletion */
 }
 
 /* conf_rehash()

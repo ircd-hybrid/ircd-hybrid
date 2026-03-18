@@ -46,7 +46,7 @@ class_get_list(void)
 }
 
 struct ClassItem *
-class_make(void)
+class_create(void)
 {
   struct ClassItem *klass = io_calloc(sizeof(*klass));
   klass->active = true;
@@ -62,7 +62,7 @@ class_make(void)
 }
 
 void
-class_free(struct ClassItem *const klass)
+class_destroy(struct ClassItem *const klass)
 {
   assert(klass != class_default);
   assert(klass->active == false);
@@ -81,7 +81,7 @@ class_free(struct ClassItem *const klass)
 void
 class_init(void)
 {
-  class_default = class_make();
+  class_default = class_create();
   class_default->name = io_strdup(CLASS_DEFAULT_NAME);
 }
 
@@ -130,7 +130,7 @@ class_mark_all_inactive(void)
 }
 
 void
-class_free_inactive(void)
+class_sweep_inactive(void)
 {
   list_node_t *node, *node_next;
 
@@ -138,7 +138,7 @@ class_free_inactive(void)
   {
     struct ClassItem *klass = node->data;
     if (klass->active == false && klass->ref_count == 0)
-      class_free(klass);
+      class_destroy(klass);
   }
 }
 
@@ -244,5 +244,5 @@ class_decref(struct ClassItem *klass)
   klass->ref_count--;
 
   if (klass->ref_count == 0 && klass->active == false)
-    class_free(klass);
+    class_destroy(klass);
 }

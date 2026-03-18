@@ -69,14 +69,14 @@ connect_mark_all_inactive(void)
 }
 
 void
-connect_free_inactive(void)
+connect_sweep_inactive(void)
 {
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, connect_items.head)
   {
     struct ConnectItem *const connect = node->data;
     if (connect->active == false && connect->ref_count == 0)
-      connect_free(connect);
+      connect_destroy(connect);
   }
 }
 
@@ -92,7 +92,7 @@ connect_create(void)
 }
 
 void
-connect_free(struct ConnectItem *connect)
+connect_destroy(struct ConnectItem *connect)
 {
   list_remove(&connect->node, &connect_items);
 
@@ -266,7 +266,7 @@ connect_decref(struct ConnectItem *connect)
   connect->ref_count--;
 
   if (connect->ref_count == 0 && connect->active == false)
-    connect_free(connect);
+    connect_destroy(connect);
 }
 
 const char *

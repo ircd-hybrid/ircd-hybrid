@@ -57,7 +57,7 @@ oper_free_all(void)
   LIST_FOREACH_SAFE(node, node_next, operator_items.head)
   {
     struct OperItem *const oper = node->data;
-    oper_free(oper);
+    oper_destroy(oper);
   }
 }
 
@@ -71,7 +71,7 @@ oper_create(void)
 }
 
 void
-oper_free(struct OperItem *oper)
+oper_destroy(struct OperItem *oper)
 {
   list_remove(&oper->node, &operator_items);
 

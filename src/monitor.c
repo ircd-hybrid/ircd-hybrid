@@ -134,7 +134,7 @@ monitor_signoff(const struct Client *client)
  * \param monitor Name to remove
  */
 static void
-monitor_free(struct Monitor *monitor)
+monitor_destroy(struct Monitor *monitor)
 {
   assert(monitor->monitored_by.head == NULL);
   assert(list_find(&monitor_hash[monitor->hash_value], monitor));
@@ -203,7 +203,7 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 
   /* In case this header is now empty of notices, remove it */
   if (list_is_empty(&monitor->monitored_by))
-    monitor_free(monitor);
+    monitor_destroy(monitor);
 }
 
 /*! \brief Removes all entries from client's monitor list
@@ -226,7 +226,7 @@ monitor_clear_list(struct Client *client)
 
     /* If this leaves a header without notifies, remove it. */
     if (list_is_empty(&monitor->monitored_by))
-      monitor_free(monitor);
+      monitor_destroy(monitor);
 
     list_remove(node, &client->connection->monitor_list);
     list_free_node(node);

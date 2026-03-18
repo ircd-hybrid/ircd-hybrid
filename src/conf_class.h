@@ -90,14 +90,14 @@ extern struct ClassItem *class_default;
 
 extern void class_incref(struct ClassItem *);
 extern void class_decref(struct ClassItem *);
-extern void class_free(struct ClassItem *const);
+extern void class_destroy(struct ClassItem *const);
 extern void class_init(void);
 extern void class_mark_all_inactive(void);
-extern void class_free_inactive(void);
+extern void class_sweep_inactive(void);
 extern void class_ip_limit_rebuild(struct ClassItem *);
 extern bool class_ip_limit_add(struct ClassItem *, const void *, bool);
 extern bool class_ip_limit_remove(struct ClassItem *, const void *);
-extern struct ClassItem *class_make(void);
+extern struct ClassItem *class_create(void);
 extern struct ClassItem *class_find(const char *, bool);
 extern const list_t *class_get_list(void);
 

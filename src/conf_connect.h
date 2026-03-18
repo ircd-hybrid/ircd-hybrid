@@ -78,11 +78,11 @@ struct ConnectItem
 
 extern void connect_assign_class(struct ConnectItem *, const char *);
 extern void connect_decref(struct ConnectItem *);
+extern void connect_destroy(struct ConnectItem *);
 extern void connect_dns_lookup(struct ConnectItem *);
-extern void connect_free(struct ConnectItem *);
-extern void connect_free_inactive(void);
 extern void connect_incref(struct ConnectItem *);
 extern void connect_mark_all_inactive(void);
+extern void connect_sweep_inactive(void);
 extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
 extern list_t *connect_get_list(void);
 extern struct ConnectItem *connect_create(void);

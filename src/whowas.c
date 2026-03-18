@@ -71,7 +71,7 @@ whowas_group_find(const char *name)
  * @return A pointer to the newly created WhowasGroup struct.
  */
 static struct WhowasGroup *
-whowas_group_make(const char *name)
+whowas_group_create(const char *name)
 {
   struct WhowasGroup *group = io_calloc(sizeof(*group));
   group->name = io_strdup(name);
@@ -87,7 +87,7 @@ whowas_group_make(const char *name)
  * @param group Pointer to the WhowasGroup struct to be freed.
  */
 static void
-whowas_group_free(struct WhowasGroup *group)
+whowas_group_destroy(struct WhowasGroup *group)
 {
   if (list_is_empty(&group->whowas_records) == false)
     return;
@@ -102,7 +102,7 @@ whowas_group_free(struct WhowasGroup *group)
  * @param whowas Pointer to the Whowas struct to be unlinked and freed.
  */
 static void
-whowas_free(struct Whowas *whowas)
+whowas_destroy(struct Whowas *whowas)
 {
   if (whowas->client)
     list_remove(&whowas->client_list_node, &whowas->client->whowas_list);
@@ -110,7 +110,7 @@ whowas_free(struct Whowas *whowas)
   list_remove(&whowas->whowas_list_node, &whowas_list);
   list_remove(&whowas->group_list_node, &whowas->group->whowas_records);
 
-  whowas_group_free(whowas->group);
+  whowas_group_destroy(whowas->group);
 
   io_free(whowas->name);
   io_free(whowas->username);
@@ -132,11 +132,11 @@ whowas_free(struct Whowas *whowas)
  * @return A pointer to the allocated Whowas struct.
  */
 static struct Whowas *
-whowas_make(void)
+whowas_create(void)
 {
   if (list_length(&whowas_list) &&
       list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(list_peek_tail(&whowas_list));  /* Free oldest item. */
+    whowas_destroy(list_peek_tail(&whowas_list));  /* Free oldest item. */
 
   struct Whowas *whowas = io_calloc(sizeof(*whowas));
   return whowas;
@@ -155,7 +155,7 @@ whowas_trim(void)
 {
   while (list_length(&whowas_list) &&
          list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(list_peek_tail(&whowas_list));
+    whowas_destroy(list_peek_tail(&whowas_list));
 }
 
 /**
@@ -170,7 +170,7 @@ whowas_add(struct Whowas *whowas, struct Client *client, bool online)
 {
   whowas->group = whowas_group_find(whowas->name);
   if (whowas->group == NULL)
-    whowas->group = whowas_group_make(whowas->name);
+    whowas->group = whowas_group_create(whowas->name);
 
   if (online)
   {
@@ -198,7 +198,7 @@ whowas_add_history(struct Client *client, bool online)
 {
   assert(IsClient(client));
 
-  struct Whowas *whowas = whowas_make();
+  struct Whowas *whowas = whowas_create();
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = IsHidden(client->uplink) != 0;
   whowas->name = io_strdup(client->name);

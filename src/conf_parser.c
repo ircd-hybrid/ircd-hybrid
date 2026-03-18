@@ -4642,7 +4642,7 @@ yyreduce:
 
   struct ClassItem *klass = class_find(block_state.klass.buf, false);
   if (klass == NULL)
-    klass = class_make();
+    klass = class_create();
 
   klass->active = true;
   io_free(klass->name);

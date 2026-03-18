@@ -52,7 +52,7 @@ listener_get_list(void)
 }
 
 static struct Listener *
-listener_make(const struct io_addr *addr)
+listener_create(const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
   address_copy(&listener->addr, addr);
@@ -63,7 +63,7 @@ listener_make(const struct io_addr *addr)
 }
 
 static void
-listener_free(struct Listener *listener)
+listener_destroy(struct Listener *listener)
 {
   list_remove(&listener->node, &listener_list);
   io_free(listener->name);
@@ -353,7 +353,7 @@ listener_close(struct Listener *listener)
   if (listener->ref_count)
     return;
 
-  listener_free(listener);
+  listener_destroy(listener);
 }
 
 /*
@@ -407,7 +407,7 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
 
   struct Listener *listener = listener_find(&addr);
   if (listener == NULL)
-    listener = listener_make(&addr);
+    listener = listener_create(&addr);
 
   listener->flags = flags;
 

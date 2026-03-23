@@ -220,4 +220,6 @@ list_task_start(struct ListTask *lt)
 
   list_add(lt, &lt->node, &list_task_queue);
   lt->is_queued = true;
+
+  _list_task_execute_global(lt);
 }

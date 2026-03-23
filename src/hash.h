@@ -66,8 +66,6 @@ enum
   HASH_TYPE_CHANNEL
 };
 
-extern event_handle_t event_channel_list_pump;
-
 extern unsigned int hash_string(const char *);
 extern void *hash_get_bucket(int, unsigned int);
 extern void hash_add_client(struct Client *);
@@ -80,8 +78,4 @@ extern struct Client *hash_find_id(const char *);
 extern struct Client *hash_find_client(const char *);
 extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
-
-extern void free_list_task(struct Client *);
-extern void safe_list_channels(struct Client *, bool);
-extern void channel_list_pump(void *);
 #endif  /* INCLUDED_hash_h */

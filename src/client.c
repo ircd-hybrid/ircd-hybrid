@@ -45,6 +45,7 @@
 #include "ipcache.h"
 #include "ircd.h"
 #include "ircd_hook.h"
+#include "list_task.h"
 #include "listener.h"
 #include "monitor.h"
 #include "numeric.h"
@@ -81,7 +82,6 @@ uint64_t UMODE_SERVNOTICE;
 uint64_t UMODE_CLOAK;
 uint64_t UMODE_SPY;
 
-list_t listing_client_list;
 list_t unknown_list;
 list_t local_client_list;
 list_t local_server_list;
@@ -561,6 +561,12 @@ _client_exit_teardown_connection(struct Client *client)
 {
   assert(client && client_is_local(client));
 
+  if (client->connection->list_task)
+  {
+    list_task_destroy(client->connection->list_task);
+    client->connection->list_task = NULL;
+  }
+
   if (client->connection->activity_timeout_event)
   {
     event_destroy(client->connection->activity_timeout_event);
@@ -686,7 +692,6 @@ _client_exit_detach(struct Client *client)
   assert(list_find(&local_client_list, client) == NULL);
   assert(list_find(&local_server_list, client) == NULL);
   assert(list_find(&unknown_list, client) == NULL);
-  assert(list_find(&listing_client_list, client) == NULL);
   assert(list_find(&oper_list, client) == NULL);
   assert(list_find(&abort_list, client) == NULL);
 
@@ -827,7 +832,6 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
       list_free_node(node);
   }
 
-  free_list_task(client);
   invite_clear_list(&client->connection->invite_list);
   accept_clear_list(&client->connection->accept_list);
   monitor_clear_list(client);

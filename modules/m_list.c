@@ -37,145 +37,136 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "list_task.h"
+
+static bool
+parse_list_args(struct ListTask *lt, char *args)
+{
+  char *save = NULL;
+
+  lt->exact_match = true;
+
+  for (char *opt = strtok_r(args, ",", &save); opt;
+             opt = strtok_r(NULL, ",", &save))
+  {
+    const char cmd = *opt;
+    if (cmd == '<')
+    {
+      const int val = atoi(opt + 1);
+      if (val <= 0)
+        return false;
+
+      lt->users_max = (unsigned int)val - 1;
+    }
+    else if (cmd == '>')
+    {
+      const int val = atoi(opt + 1);
+      if (val < 0)
+        return false;
+
+      lt->users_min = (unsigned int)val + 1;
+    }
+    else if (cmd == 'C' || cmd == 'c')
+    {
+      const char subcmd = *(opt + 1);
+      if (subcmd == '<' || subcmd == '>')
+      {
+        const int val = atoi(opt + 2);
+        if (val < 0)
+          return false;
+
+	const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
+
+        if (subcmd == '<')
+          lt->created_max = target;
+        else if (subcmd == '>')
+          lt->created_min = target;
+      }
+      else
+        return false;
+    }
+    else if (cmd == 'T' || cmd == 't')
+    {
+      const char subcmd = *(opt + 1);
+      if (subcmd == ':')
+      {
+        const char *topic_str = opt + 2;
+        if (string_is_empty(topic_str))
+          return false;
+
+	lt->topic = io_strndup(topic_str, TOPICLEN);
+      }
+      else if (subcmd == '<' || subcmd == '>')
+      {
+        const int val = atoi(opt + 2);
+        if (val < 0)
+          return false;
+
+	const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
+
+        if (subcmd == '<')
+          lt->topicts_min = target;
+        else if (subcmd == '>')
+          lt->topicts_max = target;
+      }
+      else
+        return false;
+    }
+    else
+    {
+      list_t *target_list = &lt->include_masks;
+      const char *mask = opt;
+
+      /* Handle exclusion masks. */
+      if (*mask == '!')
+      {
+        target_list = &lt->exclude_masks;
+        ++mask;
+      }
+
+      const char *const name = IsChanPrefix(*mask) ? mask + 1 : mask;
+      if (has_wildcards(name))
+      {
+        if (target_list == &lt->include_masks)
+          lt->exact_match = false;
+      }
+      else if (!IsChanPrefix(*mask))
+        return false;  /* Exact matches must have a valid channel prefix. */
+
+      list_add(io_strdup(mask), list_make_node(), target_list);
+    }
+  }
+
+  if (list_is_empty(&lt->include_masks))
+    lt->exact_match = false;
+
+  return true;
+}
 
 static void
-do_list(struct Client *source, char *arg)
+do_list(struct Client *client, char *arg)
 {
-  if (source->connection->list_task)
+  if (client->connection->list_task)
   {
-    free_list_task(source);
-    sendto_one_numeric(source, &me, RPL_LISTEND);
+    list_task_destroy(client->connection->list_task);
+    sendto_one_numeric(client, &me, RPL_LISTEND);
     return;
   }
 
-  struct ListTask *lt = io_calloc(sizeof(*lt));
-  lt->users_max = UINT_MAX;
-  lt->created_max = UINT_MAX;
-  lt->topicts_max = UINT_MAX;
-  source->connection->list_task = lt;
+  struct ListTask *lt = list_task_create(client);
 
-  if (list_is_empty(&listing_client_list))
-  {
-    if (event_channel_list_pump == NULL)
-    {
-      event_channel_list_pump = event_create(ircd_event_manager, "event_channel_list_pump", channel_list_pump, 125, false, NULL, NULL);
-      event_set_priority(event_channel_list_pump, 2);
-    }
-
-    event_schedule(event_channel_list_pump);
-  }
-
-  list_add(source, &lt->node, &listing_client_list);
-
-  bool no_masked_channels = true;
   if (!string_is_empty(arg))
   {
-    list_t *list;
-    char *opt, *save = NULL;
-    const char *topic;
-    bool error = false;
-    int i;
-
-    for (opt = strtok_r(arg,  ",", &save); opt;
-         opt = strtok_r(NULL, ",", &save))
+    if (parse_list_args(lt, arg) == false)
     {
-      switch (*opt)
-      {
-        case '<':
-          if ((i = atoi(opt + 1)) > 0)
-            lt->users_max = (unsigned int)i - 1;
-          else
-            error = true;
-          break;
-        case '>':
-          if ((i = atoi(opt + 1)) >= 0)
-            lt->users_min = (unsigned int)i + 1;
-          else
-            error = true;
-          break;
-        case 'C':
-        case 'c':
-          switch (*++opt)
-          {
-            case '<':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->created_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case '>':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->created_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            default:
-              error = true;
-          }
-
-          break;
-
-        case 'T':
-        case 't':
-          switch (*++opt)
-          {
-            case '<':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case '>':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case ':':
-              topic = opt + 1;
-              if (!string_is_empty(topic))
-                lt->topic = io_strndup(topic, TOPICLEN);
-              else
-                error = true;
-              break;
-            default:
-              error = true;
-          }
-
-          break;
-
-        default:
-          if (*opt == '!')
-          {
-            list = &lt->exclude_masks;
-            opt++;
-          }
-          else
-            list = &lt->include_masks;
-
-          if (has_wildcards(opt + !!IsChanPrefix(*opt)))
-          {
-            if (list == &lt->include_masks)
-              no_masked_channels = false;
-          }
-          else if (!IsChanPrefix(*opt))
-            error = true;
-
-          if (error == false)
-            list_add(io_strdup(opt), list_make_node(), list);
-      }
-    }
-
-    if (error)
-    {
-      free_list_task(source);
-      sendto_one_numeric(source, &me, ERR_LISTSYNTAX);
+      list_task_destroy(lt);
+      sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
       return;
     }
   }
 
-  sendto_one_numeric(source, &me, RPL_LISTSTART);
-  safe_list_channels(source, (no_masked_channels && !list_is_empty(&lt->include_masks)));
+  sendto_one_numeric(client, &me, RPL_LISTSTART);
+  list_task_start(lt);
 }
 
 /*! \brief LIST command handler

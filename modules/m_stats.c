@@ -315,8 +315,6 @@ stats_memory(struct Client *client, int parc, char *parv[])
   size_t channel_ban_memory = 0;
   size_t channel_except_memory = 0;
   size_t channel_invex_memory = 0;
-  unsigned int safelist_count = 0;
-  size_t safelist_memory = 0;
   size_t mem_ips_stored = 0;        /* memory used by ip address hash */
   unsigned int local_client_count  = 0;
   unsigned int remote_client_count = 0;
@@ -328,7 +326,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
   unsigned int listener_count = 0;
   size_t listener_memory = 0;
 
-  list_node_t *node, *node2;
+  list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *const target = node->data;
@@ -369,23 +367,6 @@ stats_memory(struct Client *client, int parc, char *parv[])
 
     channel_invex += list_length(&channel->invexlist);
     channel_invex_memory += list_length(&channel->invexlist) * sizeof(struct Ban);
-  }
-
-  safelist_count = list_length(&listing_client_list);
-  if (safelist_count)
-  {
-    safelist_memory = safelist_count * sizeof(struct ListTask);
-
-    LIST_FOREACH(node, listing_client_list.head)
-    {
-      const struct Client *acptr = node->data;
-
-      LIST_FOREACH(node2, acptr->connection->list_task->include_masks.head)
-        safelist_memory += strlen(node2->data);
-
-      LIST_FOREACH(node2, acptr->connection->list_task->exclude_masks.head)
-        safelist_memory += strlen(node2->data);
-    }
   }
 
   monitor_count_memory(&monitor_list_headers, &monitor_list_memory);
@@ -436,9 +417,6 @@ stats_memory(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channel members %u(%zu) invites %u(%zu)",
                      channel_members, channel_members * sizeof(struct ChannelMember),
                      channel_invites, channel_invites * sizeof(struct Invite));
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Safelist %u(%zu)",
-                     safelist_count, safelist_memory);
 
   unsigned int group_count, whowas_count;
   size_t group_bytes, whowas_bytes;

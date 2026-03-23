@@ -45,6 +45,7 @@
 #include "conf_connect.h"
 #include "conf_oper.h"
 #include "ircd_defs.h"
+#include "list_task.h"
 #include "lookup.h"
 #include "user_mode.h"
 
@@ -199,23 +200,6 @@ struct Server
   struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
 
-/** ListTask structure */
-struct ListTask
-{
-  list_node_t node;  /**< Embedded list node used to link into listing_client_list */
-  list_t include_masks;  /**< Channels to show */
-  list_t exclude_masks;  /**< Channels to hide */
-
-  unsigned int hash_index;  /**< The hash bucket we are currently in */
-  unsigned int users_min;
-  unsigned int users_max;
-  unsigned int created_min;  /**< Real time */
-  unsigned int created_max;  /**< Real time */
-  unsigned int topicts_min;  /**< Real time */
-  unsigned int topicts_max;  /**< Real time */
-  char *topic;
-};
-
 /** Connection structure
  * Allocated only for local clients, that are directly connected
  * to this server with a socket.
@@ -352,7 +336,6 @@ struct Client
 };
 
 extern struct Client me;
-extern list_t listing_client_list;
 extern list_t global_client_list;
 extern list_t global_server_list;  /* global servers on the network */
 extern list_t local_client_list;  /* local clients only ON this server */

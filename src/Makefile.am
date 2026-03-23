@@ -88,6 +88,8 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                links_cache.c     \
                links_cache.h     \
+               list_task.c       \
+               list_task.h       \
                listener.c        \
                listener.h        \
                lookup.c          \

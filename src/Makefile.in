@@ -140,11 +140,12 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
 	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) links_cache.$(OBJEXT) \
-	listener.$(OBJEXT) lookup.$(OBJEXT) monitor.$(OBJEXT) \
-	motd.$(OBJEXT) nuh.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
-	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
-	user.$(OBJEXT) user_mode.$(OBJEXT) whowas.$(OBJEXT)
+	list_task.$(OBJEXT) listener.$(OBJEXT) lookup.$(OBJEXT) \
+	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
+	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
+	whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -190,13 +191,14 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
 	./$(DEPDIR)/ircd_exit.Po ./$(DEPDIR)/ircd_hook.Po \
 	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/links_cache.Po ./$(DEPDIR)/listener.Po \
-	./$(DEPDIR)/lookup.Po ./$(DEPDIR)/monitor.Po \
-	./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po ./$(DEPDIR)/numeric.Po \
-	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
-	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
-	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po \
-	./$(DEPDIR)/user_mode.Po ./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/links_cache.Po ./$(DEPDIR)/list_task.Po \
+	./$(DEPDIR)/listener.Po ./$(DEPDIR)/lookup.Po \
+	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po \
+	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
+	./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
+	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
+	./$(DEPDIR)/user.Po ./$(DEPDIR)/user_mode.Po \
+	./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -496,6 +498,8 @@ ircd_SOURCES = accept.c          \
                isupport.h        \
                links_cache.c     \
                links_cache.h     \
+               list_task.c       \
+               list_task.h       \
                listener.c        \
                listener.h        \
                lookup.c          \
@@ -665,6 +669,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/isupport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/links_cache.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list_task.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lookup.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@ # am--include-marker
@@ -899,6 +904,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/links_cache.Po
+	-rm -f ./$(DEPDIR)/list_task.Po
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po
@@ -1006,6 +1012,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ircd_signal.Po
 	-rm -f ./$(DEPDIR)/isupport.Po
 	-rm -f ./$(DEPDIR)/links_cache.Po
+	-rm -f ./$(DEPDIR)/list_task.Po
 	-rm -f ./$(DEPDIR)/listener.Po
 	-rm -f ./$(DEPDIR)/lookup.Po
 	-rm -f ./$(DEPDIR)/monitor.Po

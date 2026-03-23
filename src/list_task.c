@@ -19,6 +19,7 @@
  *  USA
  */
 
+#include <limits.h>
 #include <stddef.h>
 
 #include "event.h"

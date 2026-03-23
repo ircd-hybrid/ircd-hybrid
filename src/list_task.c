@@ -124,12 +124,10 @@ _list_task_eval_channel(const struct ListTask *lt, const struct Channel *channel
   if (lt->topic && match(lt->topic, channel->topic))
     return false;
 
-  if (list_is_empty(&lt->include_masks) == false &&
-      list_find_cmp(&lt->include_masks, channel->name, match) == NULL)
+  if (!list_is_empty(&lt->include_masks) && list_find_cmp(&lt->include_masks, channel->name, match) == NULL)
     return false;
 
-  if (list_is_empty(&lt->exclude_masks) == false &&
-      list_find_cmp(&lt->exclude_masks, channel->name, match) != NULL)
+  if (!list_is_empty(&lt->exclude_masks) && list_find_cmp(&lt->exclude_masks, channel->name, match) != NULL)
     return false;
 
   return true;
@@ -204,7 +202,7 @@ void
 list_task_start(struct ListTask *lt)
 {
   /* If the query is an exact match (e.g. /LIST #a,#b), run it instantly. */
-  if (lt->exact_match && list_is_empty(&lt->include_masks) == false)
+  if (lt->exact_match && !list_is_empty(&lt->include_masks))
   {
     _list_task_execute_exact(lt);
     return;

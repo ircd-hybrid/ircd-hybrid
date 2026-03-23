@@ -89,7 +89,7 @@ whowas_group_create(const char *name)
 static void
 whowas_group_destroy(struct WhowasGroup *group)
 {
-  if (list_is_empty(&group->whowas_records) == false)
+  if (!list_is_empty(&group->whowas_records))
     return;
 
   list_remove(&group->hash_node, &whowas_hash[group->hash_value]);

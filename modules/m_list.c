@@ -75,7 +75,7 @@ parse_list_args(struct ListTask *lt, char *args)
         if (val < 0)
           return false;
 
-	const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
+        const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
 
         if (subcmd == '<')
           lt->created_max = target;
@@ -94,7 +94,7 @@ parse_list_args(struct ListTask *lt, char *args)
         if (string_is_empty(topic_str))
           return false;
 
-	lt->topic = io_strndup(topic_str, TOPICLEN);
+        lt->topic = io_strndup(topic_str, TOPICLEN);
       }
       else if (subcmd == '<' || subcmd == '>')
       {
@@ -102,7 +102,7 @@ parse_list_args(struct ListTask *lt, char *args)
         if (val < 0)
           return false;
 
-	const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
+        const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
 
         if (subcmd == '<')
           lt->topicts_min = target;
@@ -157,7 +157,7 @@ do_list(struct Client *client, char *arg)
 
   if (!string_is_empty(arg))
   {
-    if (parse_list_args(lt, arg) == false)
+    if (!parse_list_args(lt, arg))
     {
       list_task_destroy(lt);
       sendto_one_numeric(client, &me, ERR_LISTSYNTAX);

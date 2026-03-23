@@ -121,13 +121,13 @@ _list_task_eval_channel(const struct ListTask *lt, const struct Channel *channel
   if (ttime < lt->topicts_min || ttime > lt->topicts_max)
     return false;
 
-  if (lt->topic && match(lt->topic, channel->topic))
-    return false;
-
   if (!list_is_empty(&lt->include_masks) && list_find_cmp(&lt->include_masks, channel->name, match) == NULL)
     return false;
 
   if (!list_is_empty(&lt->exclude_masks) && list_find_cmp(&lt->exclude_masks, channel->name, match) != NULL)
+    return false;
+
+  if (lt->topic && (string_is_empty(channel->topic) || match(lt->topic, channel->topic)))
     return false;
 
   return true;

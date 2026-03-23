@@ -94,6 +94,7 @@ parse_list_args(struct ListTask *lt, char *args)
         if (string_is_empty(topic_str))
           return false;
 
+        io_free(lt->topic);
         lt->topic = io_strndup(topic_str, TOPICLEN);
       }
       else if (subcmd == '<' || subcmd == '>')

@@ -212,7 +212,7 @@ list_task_start(struct ListTask *lt)
   if (list_task_timer == NULL)
   {
     list_task_timer =
-      event_create(ircd_event_manager, "_list_task_pump", _list_task_pump, 125, false, NULL, NULL);
+      event_create(ircd_event_manager, "_list_task_pump", _list_task_pump, 50, false, NULL, NULL);
     event_set_priority(list_task_timer, 2);
     event_schedule(list_task_timer);
   }

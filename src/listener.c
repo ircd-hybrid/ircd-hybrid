@@ -52,7 +52,7 @@ listener_get_list(void)
 }
 
 static struct Listener *
-listener_create(const struct io_addr *addr)
+_listener_create(const struct io_addr *addr)
 {
   struct Listener *listener = io_calloc(sizeof(*listener));
   address_copy(&listener->addr, addr);
@@ -63,7 +63,7 @@ listener_create(const struct io_addr *addr)
 }
 
 static void
-listener_destroy(struct Listener *listener)
+_listener_destroy(struct Listener *listener)
 {
   list_remove(&listener->node, &listener_list);
   io_free(listener->name);
@@ -90,7 +90,7 @@ listener_count_memory(unsigned int *count, size_t *bytes)
  * read/write events if necessary.
  */
 static void
-ssl_handshake(fde_t *F, void *data_)
+_ssl_handshake(fde_t *F, void *data_)
 {
   struct Client *client = data_;
 
@@ -117,10 +117,10 @@ ssl_handshake(fde_t *F, void *data_)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(F, COMM_SELECT_WRITE, ssl_handshake, client);
+      comm_setselect(F, COMM_SELECT_WRITE, _ssl_handshake, client);
       return;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(F, COMM_SELECT_READ, ssl_handshake, client);
+      comm_setselect(F, COMM_SELECT_READ, _ssl_handshake, client);
       return;
     default:
       client_exit(client, tls_error ? tls_error : "Error during TLS handshake");
@@ -136,7 +136,7 @@ ssl_handshake(fde_t *F, void *data_)
  * any client list yet.
  */
 static void
-add_connection(fde_t *client_fde, struct Listener *listener, const struct io_addr *remote_addr, const char *remote_addr_str)
+_add_connection(fde_t *client_fde, struct Listener *listener, const struct io_addr *remote_addr, const char *remote_addr_str)
 {
   struct Client *client = client_create_local();
   client->connection->fd = client_fde;
@@ -172,7 +172,7 @@ add_connection(fde_t *client_fde, struct Listener *listener, const struct io_add
     client_set_flag(client, FLAGS_TLS_HANDSHAKING);
     client_reset_activity_timeout(client);
 
-    ssl_handshake(client->connection->fd, client);
+    _ssl_handshake(client->connection->fd, client);
   }
   else
     lookup_start(client);
@@ -181,7 +181,7 @@ add_connection(fde_t *client_fde, struct Listener *listener, const struct io_add
 enum { LISTENER_ACCEPT_BUDGET = 128 };
 
 static void
-listener_accept_connection(fde_t *F, void *data_)
+_listener_accept_connection(fde_t *F, void *data_)
 {
   struct Listener *const listener = data_;
   assert(listener);
@@ -249,11 +249,11 @@ listener_accept_connection(fde_t *F, void *data_)
     }
 
     ++ServerStats.is_ac;
-    add_connection(client_fde, listener, &remote_addr, remote_addr_str);
+    _add_connection(client_fde, listener, &remote_addr, remote_addr_str);
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fd, COMM_SELECT_READ, listener_accept_connection, listener);
+  comm_setselect(listener->fd, COMM_SELECT_READ, _listener_accept_connection, listener);
 }
 
 /**
@@ -268,7 +268,7 @@ listener_accept_connection(fde_t *F, void *data_)
 enum { LISTEN_BACKLOG = 511 };
 
 static bool
-listener_finalize(struct Listener *listener)
+_listener_finalize(struct Listener *listener)
 {
   char buf[HOSTIPLEN + 1];
   address_to_string(&listener->addr, buf, sizeof(buf));
@@ -310,12 +310,12 @@ listener_finalize(struct Listener *listener)
 
   listener->fd = new_fde;
   /* Listen completion events are READ events .. */
-  listener_accept_connection(listener->fd, listener);
+  _listener_accept_connection(listener->fd, listener);
   return true;
 }
 
 static struct Listener *
-listener_find(const struct io_addr *addr)
+_listener_find(const struct io_addr *addr)
 {
   struct Listener *last_closed = NULL;
 
@@ -340,7 +340,7 @@ listener_find(const struct io_addr *addr)
  * close_listener - close a single listener
  */
 static void
-listener_close(struct Listener *listener)
+_listener_close(struct Listener *listener)
 {
   if (listener->fd)
   {
@@ -353,7 +353,7 @@ listener_close(struct Listener *listener)
   if (listener->ref_count)
     return;
 
-  listener_destroy(listener);
+  _listener_destroy(listener);
 }
 
 /*
@@ -366,7 +366,7 @@ listener_close_marked(void)
 
   /* close all 'extra' listening ports we have */
   LIST_FOREACH_SAFE(node, node_next, listener_list.head)
-    listener_close(node->data);
+    _listener_close(node->data);
 }
 
 void
@@ -375,7 +375,7 @@ listener_release(struct Listener *listener)
   assert(listener->ref_count > 0);
 
   if (--listener->ref_count == 0 && listener_is_active(listener) == false)
-    listener_close(listener);
+    _listener_close(listener);
 }
 
 /*
@@ -405,15 +405,15 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
 
   address_set_port(&addr, port);
 
-  struct Listener *listener = listener_find(&addr);
+  struct Listener *listener = _listener_find(&addr);
   if (listener == NULL)
-    listener = listener_create(&addr);
+    listener = _listener_create(&addr);
 
   listener->flags = flags;
 
   if (listener_is_active(listener))
     return;
 
-  if (listener_finalize(listener) == false)
-    listener_close(listener);
+  if (_listener_finalize(listener) == false)
+    _listener_close(listener);
 }

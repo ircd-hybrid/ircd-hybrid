@@ -74,7 +74,7 @@ monitor_count_memory(unsigned int *const count, size_t *const bytes)
  * \param name Nick name to look up
  */
 static struct Monitor *
-monitor_find(const char *name)
+_monitor_find(const char *name)
 {
   list_node_t *node;
 
@@ -97,7 +97,7 @@ monitor_signon(const struct Client *client)
 {
   assert(IsClient(client));
 
-  struct Monitor *monitor = monitor_find(client->name);
+  struct Monitor *monitor = _monitor_find(client->name);
   if (monitor == NULL)
     return;  /* This name isn't on monitor */
 
@@ -119,7 +119,7 @@ monitor_signoff(const struct Client *client)
 {
   assert(IsClient(client));
 
-  struct Monitor *monitor = monitor_find(client->name);
+  struct Monitor *monitor = _monitor_find(client->name);
   if (monitor == NULL)
     return;  /* This name isn't on monitor */
 
@@ -134,7 +134,7 @@ monitor_signoff(const struct Client *client)
  * \param monitor Name to remove
  */
 static void
-monitor_destroy(struct Monitor *monitor)
+_monitor_destroy(struct Monitor *monitor)
 {
   assert(monitor->monitored_by.head == NULL);
   assert(list_find(&monitor_hash[monitor->hash_value], monitor));
@@ -155,7 +155,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
   list_node_t *node = NULL;
 
   /* If found NULL (no header for this name), make one... */
-  struct Monitor *monitor = monitor_find(name);
+  struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
   {
     monitor = io_calloc(sizeof(*monitor));
@@ -187,7 +187,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
 void
 monitor_del_from_hash_table(const char *name, struct Client *client)
 {
-  struct Monitor *monitor = monitor_find(name);
+  struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
     return;  /* No header found for that name. i.e. it's not being monitored */
 
@@ -203,7 +203,7 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 
   /* In case this header is now empty of notices, remove it */
   if (list_is_empty(&monitor->monitored_by))
-    monitor_destroy(monitor);
+    _monitor_destroy(monitor);
 }
 
 /*! \brief Removes all entries from client's monitor list
@@ -226,7 +226,7 @@ monitor_clear_list(struct Client *client)
 
     /* If this leaves a header without notifies, remove it. */
     if (list_is_empty(&monitor->monitored_by))
-      monitor_destroy(monitor);
+      _monitor_destroy(monitor);
 
     list_remove(node, &client->connection->monitor_list);
     list_free_node(node);

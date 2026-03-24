@@ -36,7 +36,7 @@
 static list_t operator_items;
 
 static bool
-oper_match_password(const struct OperItem *oper, const char *password)
+_oper_match_password(const struct OperItem *oper, const char *password)
 {
   if (string_is_empty(password) || string_is_empty(oper->password))
     return false;
@@ -163,7 +163,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
       continue;
     }
 
-    if (oper_match_password(oper, password) == false)
+    if (_oper_match_password(oper, password) == false)
     {
       if (result < OPER_AUTH_FAIL_PASSWORD)
         result = OPER_AUTH_FAIL_PASSWORD;

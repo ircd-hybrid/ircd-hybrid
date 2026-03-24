@@ -230,7 +230,7 @@ cloak_init(void)
  * @return The statically allocated cloaked hostname string.
  */
 static const char *
-cloak_mac_and_compose(const struct io_addr *addr)
+_cloak_mac_and_compose(const struct io_addr *addr)
 {
   const void *addr_ptr;
   size_t addr_len;
@@ -301,5 +301,5 @@ cloak_compute(const struct io_addr *addr)
   else /* address_is_ipv4(addr) == true */
     address_mask(&tmp, config->cidr_len_ipv4);
 
-  return cloak_mac_and_compose(&tmp);
+  return _cloak_mac_and_compose(&tmp);
 }

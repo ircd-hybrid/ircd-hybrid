@@ -35,7 +35,7 @@ static list_t extban_list;
 static unsigned int matching_mask, acting_mask;
 
 static unsigned int
-extban_find_mask(void)
+_extban_find_mask(void)
 {
   list_node_t *node;
   unsigned int used = 0;
@@ -77,7 +77,7 @@ extban_init(void)
 void
 extban_add(struct Extban *extban)
 {
-  unsigned int mask = extban_find_mask();
+  unsigned int mask = _extban_find_mask();
   if (mask == 0)
     return;
 

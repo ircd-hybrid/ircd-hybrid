@@ -143,7 +143,7 @@ class_sweep_inactive(void)
 }
 
 static patricia_tree_t *
-class_ip_limit_trie(struct ClassItem *klass, const void *addr)
+_class_ip_limit_trie(struct ClassItem *klass, const void *addr)
 {
   if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
     return klass->ip_tree_v6;
@@ -164,7 +164,7 @@ class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
   if (klass->number_per_cidr == 0 || bitlen == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(klass, addr), addr, bitlen);
+  patricia_node_t *pnode = patricia_make_and_lookup_addr(_class_ip_limit_trie(klass, addr), addr, bitlen);
   if (((uintptr_t)pnode->data) >= klass->number_per_cidr)
   {
     if (over_rule)
@@ -196,7 +196,7 @@ class_ip_limit_remove(struct ClassItem *klass, const void *addr)
   if (klass->number_per_cidr == 0 || bitlen == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(klass, addr), addr, 0);
+  patricia_node_t *pnode = patricia_try_search_best_addr(_class_ip_limit_trie(klass, addr), addr, 0);
   if (pnode == NULL)
     return false;
 
@@ -204,7 +204,7 @@ class_ip_limit_remove(struct ClassItem *klass, const void *addr)
 
   if (((uintptr_t)pnode->data) == 0)
   {
-    patricia_remove(class_ip_limit_trie(klass, addr), pnode);
+    patricia_remove(_class_ip_limit_trie(klass, addr), pnode);
     return true;
   }
 

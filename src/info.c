@@ -57,7 +57,7 @@ static list_t info_list;
  * @return A negative value if a < b, zero if a == b, and a positive value if a > b.
  */
 static int
-info_compare(const void *const a_, const void *const b_)
+_info_compare(const void *const a_, const void *const b_)
 {
   const struct InfoEntry *const a = a_;
   const struct InfoEntry *const b = b_;
@@ -105,7 +105,7 @@ info_register(const char *namespace, const char *name, info_output_type_t output
   info->description = strdup(description);
 
   list_node_t *node = list_make_node();
-  list_add_sorted(info, node, &info_list, info_compare);
+  list_add_sorted(info, node, &info_list, _info_compare);
 
   return INFO_SUCCESS;
 }

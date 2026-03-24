@@ -67,7 +67,7 @@ pseudo_get_list(void)
  * @param parv Array of parameters in the message.
  */
 static void
-pseudo_message_handler(struct Client *source, int parc, char *parv[])
+_pseudo_message_handler(struct Client *source, int parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
@@ -126,10 +126,10 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
     .name = pseudo->command,
     .extra = pseudo,
     .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 },
+    .handlers[CLIENT_HANDLER] = { .handler = _pseudo_message_handler, .args_max = 2 },
     .handlers[SERVER_HANDLER] = { .handler = m_ignore },
     .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 }
+    .handlers[OPER_HANDLER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 
   list_add(pseudo, &pseudo->node, &pseudo_list);

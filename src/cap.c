@@ -36,7 +36,7 @@ cap_get_list(void)
 }
 
 static int
-cap_compare_direct(const void *const a_, const void *const b_)
+_cap_compare_direct(const void *const a_, const void *const b_)
 {
   const char *const a = ((const struct Cap *)a_)->name;
   const char *const b = ((const struct Cap *)b_)->name;
@@ -44,7 +44,7 @@ cap_compare_direct(const void *const a_, const void *const b_)
 }
 
 static int
-cap_compare_indirect(const void *const a_, const void *const b_)
+_cap_compare_indirect(const void *const a_, const void *const b_)
 {
   const char *const a = (*(const struct Cap *const *)a_)->name;
   const char *const b = (*(const struct Cap *const *)b_)->name;
@@ -68,7 +68,7 @@ cap_register(unsigned int flag, const char *name, const char *value)
     cap->value_len = strlen(value);
   }
 
-  list_add_sorted(cap, &cap->node, &cap_list, cap_compare_direct);
+  list_add_sorted(cap, &cap->node, &cap_list, _cap_compare_direct);
   cap_array_stale = true;
 }
 
@@ -95,7 +95,7 @@ cap_unregister(const char *name)
 }
 
 static void
-cap_array_update(void)
+_cap_array_update(void)
 {
   cap_array_stale = false;
 
@@ -113,14 +113,14 @@ struct Cap *
 cap_find(const char *name)
 {
   if (cap_array_stale)
-    cap_array_update();
+    _cap_array_update();
 
   if (cap_array_size == 0)
     return NULL;
 
   const struct Cap key = { .name = name };
   const struct Cap *key_ptr = &key;
-  struct Cap **cap = bsearch(&key_ptr, cap_array, cap_array_size, sizeof(key_ptr), cap_compare_indirect);
+  struct Cap **cap = bsearch(&key_ptr, cap_array, cap_array_size, sizeof(key_ptr), _cap_compare_indirect);
 
   return cap ? *cap : NULL;
 }

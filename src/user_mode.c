@@ -35,7 +35,7 @@ static struct UserMode *user_mode_table[USER_MODE_CAPACITY];
 static char user_mode_string[USER_MODE_CAPACITY + 1];
 
 static uint64_t
-user_mode_char_to_bit(char mode_char)
+_user_mode_char_to_bit(char mode_char)
 {
   if (mode_char >= 'a' && mode_char <= 'z')
     return 1ULL << (mode_char - 'a');
@@ -46,7 +46,7 @@ user_mode_char_to_bit(char mode_char)
 }
 
 static int
-user_mode_char_to_index(char mode_char)
+_user_mode_char_to_index(char mode_char)
 {
   if (mode_char >= 'a' && mode_char <= 'z')
     return mode_char - 'a';
@@ -57,7 +57,7 @@ user_mode_char_to_index(char mode_char)
 }
 
 static char
-user_mode_index_to_char(int index)
+_user_mode_index_to_char(int index)
 {
   if (index >= 0 && index < 26)
     return 'a' + index;
@@ -74,7 +74,7 @@ user_mode_get_string(void)
 }
 
 static void
-user_mode_add_char(char mode_char)
+_user_mode_add_char(char mode_char)
 {
   size_t len = strlen(user_mode_string);
   if (len >= USER_MODE_CAPACITY)
@@ -92,7 +92,7 @@ user_mode_add_char(char mode_char)
 }
 
 static void
-user_mode_remove_char(char mode_char)
+_user_mode_remove_char(char mode_char)
 {
   char *const pos = strchr(user_mode_string, mode_char);
   if (pos)
@@ -103,7 +103,7 @@ user_mode_remove_char(char mode_char)
 struct UserMode *
 user_mode_find(char mode_char)
 {
-  int index = user_mode_char_to_index(mode_char);
+  int index = _user_mode_char_to_index(mode_char);
   if (index < 0)
     return NULL;
 
@@ -113,21 +113,21 @@ user_mode_find(char mode_char)
 user_mode_result_t
 user_mode_register(struct UserMode *mode)
 {
-  int index = user_mode_char_to_index(mode->mode_char);
+  int index = _user_mode_char_to_index(mode->mode_char);
   if (index < 0)
     return USER_MODE_RESULT_INVALID_CHAR;
 
   if (user_mode_table[index])
     return USER_MODE_RESULT_MODE_ALREADY_EXISTS;
 
-  mode->mode_bit = user_mode_char_to_bit(mode->mode_char);
+  mode->mode_bit = _user_mode_char_to_bit(mode->mode_char);
   if (mode->mode_bit == 0)
     return USER_MODE_RESULT_INVALID_CHAR;
 
   if (mode->mode_flag)
     *(mode->mode_flag) = mode->mode_bit;
 
-  user_mode_add_char(mode->mode_char);
+  _user_mode_add_char(mode->mode_char);
 
   struct UserMode *mode_new = io_calloc(sizeof(*mode_new));
   *mode_new = *mode;
@@ -139,7 +139,7 @@ user_mode_register(struct UserMode *mode)
 user_mode_result_t
 user_mode_unregister(struct UserMode *mode)
 {
-  int index = user_mode_char_to_index(mode->mode_char);
+  int index = _user_mode_char_to_index(mode->mode_char);
   if (index < 0)
     return USER_MODE_RESULT_INVALID_CHAR;
 
@@ -149,7 +149,7 @@ user_mode_unregister(struct UserMode *mode)
   if (mode->mode_flag)
     *(mode->mode_flag) = 0;
 
-  user_mode_remove_char(mode->mode_char);
+  _user_mode_remove_char(mode->mode_char);
 
   io_free(user_mode_table[index]);
   user_mode_table[index] = NULL;
@@ -185,7 +185,7 @@ user_mode_string_to_flags(const char *mode_string)
 
   for (const char *m = mode_string; *m; ++m)
   {
-    int index = user_mode_char_to_index(*m);
+    int index = _user_mode_char_to_index(*m);
     if (index >= 0)
     {
       const struct UserMode *mode = user_mode_table[index];
@@ -203,7 +203,7 @@ user_mode_string_to_flags(const char *mode_string)
 }
 
 static bool
-user_mode_check_policy(const struct UserMode *mode, const struct Client *client, user_mode_source_t source, user_mode_action_t action)
+_user_mode_check_policy(const struct UserMode *mode, const struct Client *client, user_mode_source_t source, user_mode_action_t action)
 {
   if (mode->policy & USER_MODE_POLICY_INTERNAL_ONLY)
     return false;
@@ -226,7 +226,7 @@ user_mode_change(struct Client *client, char mode_char, user_mode_source_t sourc
   if (mode == NULL)
     return USER_MODE_RESULT_MODE_NOT_FOUND;
 
-  if (user_mode_check_policy(mode, client, source, action) == false)
+  if (_user_mode_check_policy(mode, client, source, action) == false)
     return USER_MODE_RESULT_POLICY_VIOLATION;
 
   switch (action)
@@ -265,7 +265,7 @@ user_mode_unset(struct Client *client, char mode_char, user_mode_source_t source
 bool
 user_mode_has(const struct Client *client, char mode_char)
 {
-  uint64_t mode_bit = user_mode_char_to_bit(mode_char);
+  uint64_t mode_bit = _user_mode_char_to_bit(mode_char);
   return (client->umodes & mode_bit) != 0;
 }
 
@@ -411,7 +411,7 @@ user_mode_has_mode(const struct Client *client, const struct UserMode *mode)
 }
 
 static uint64_t
-user_mode_purge_invalid(struct Client *client)
+_user_mode_purge_invalid(struct Client *client)
 {
   for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
   {
@@ -433,7 +433,7 @@ user_mode_send_invalid(void)
   {
     struct Client *client = node->data;
     const uint64_t mode_flags_old = client->umodes;
-    if (mode_flags_old != user_mode_purge_invalid(client))
+    if (mode_flags_old != _user_mode_purge_invalid(client))
       user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
   }
 }
@@ -459,7 +459,7 @@ user_mode_send(struct Client *client, uint64_t mode_flags_old, user_mode_send_t 
     const uint64_t mode_bit = 1ULL << i;
     if (changed_modes & mode_bit)
     {
-      const char mode_char = user_mode_index_to_char(i);
+      const char mode_char = _user_mode_index_to_char(i);
 
       if (user_mode_has_flag(client, mode_bit))
       {
@@ -501,7 +501,7 @@ user_mode_to_str(uint64_t mode_flags)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flags & mode_bit)
-      *bufptr++ = user_mode_index_to_char(i);
+      *bufptr++ = _user_mode_index_to_char(i);
   }
 
   *bufptr = '\0';

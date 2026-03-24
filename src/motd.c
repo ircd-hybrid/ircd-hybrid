@@ -57,7 +57,7 @@ static struct
  * \param path Path to MOTD file.
  */
 static struct Motd *
-motd_create(const char *mask, const char *path)
+_motd_create(const char *mask, const char *path)
 {
   struct Motd *motd = io_calloc(sizeof(*motd));
 
@@ -95,7 +95,7 @@ motd_create(const char *mask, const char *path)
  * \return Matching MotdCache entry.
  */
 static struct MotdCache *
-motd_cache(struct Motd *motd)
+_motd_cache(struct Motd *motd)
 {
   if (motd == NULL)
     return NULL;
@@ -179,7 +179,7 @@ motd_cache(struct Motd *motd)
  * \param motd MOTD to uncache.
  */
 static void
-motd_decache(struct Motd *motd)
+_motd_decache(struct Motd *motd)
 {
   if (motd == NULL)
     return;
@@ -203,13 +203,13 @@ motd_decache(struct Motd *motd)
  * \param motd MOTD to destroy.
  */
 static void
-motd_destroy(struct Motd *motd)
+_motd_destroy(struct Motd *motd)
 {
   if (motd == NULL)
     return;
 
   if (motd->cache)  /* Drop the cache */
-    motd_decache(motd);
+    _motd_decache(motd);
 
   io_free(motd->path);  /* We always must have a path */
   io_free(motd->mask);
@@ -225,7 +225,7 @@ motd_destroy(struct Motd *motd)
  * \return Pointer to first matching MOTD for the client.
  */
 static struct Motd *
-motd_lookup(const struct Client *client)
+_motd_lookup(const struct Client *client)
 {
   assert(client);
 
@@ -271,7 +271,7 @@ motd_lookup(const struct Client *client)
  * \param cache  MOTD body to send to client.
  */
 static void
-motd_forward(struct Client *client, const struct MotdCache *cache)
+_motd_forward(struct Client *client, const struct MotdCache *cache)
 {
   if (cache == NULL)  /* No motd to send */
   {
@@ -296,7 +296,7 @@ motd_send(struct Client *client)
 {
   assert(client);
 
-  motd_forward(client, motd_cache(motd_lookup(client)));
+  _motd_forward(client, _motd_cache(_motd_lookup(client)));
 }
 
 /*! \brief Send the signon MOTD to a user.
@@ -308,10 +308,10 @@ motd_send(struct Client *client)
 void
 motd_signon(struct Client *client)
 {
-  const struct MotdCache *cache = motd_cache(motd_lookup(client));
+  const struct MotdCache *cache = _motd_cache(_motd_lookup(client));
 
   if (ConfigGeneral.short_motd == 0 || cache == NULL)
-    motd_forward(client, cache);
+    _motd_forward(client, cache);
   else
   {
     sendto_one_notice(client, &me, ":*** Notice -- motd was last changed at %s",
@@ -330,18 +330,18 @@ void
 motd_recache(void)
 {
   if (MotdList.local)
-    motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
+    _motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
 
   if (MotdList.remote)
-    motd_decache(MotdList.remote);
+    _motd_decache(MotdList.remote);
 
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)  /* Now all the others */
-    motd_decache(node->data);
+    _motd_decache(node->data);
 
   /* Now recache local and remote MOTDs */
-  motd_cache(MotdList.local);
-  motd_cache(MotdList.remote);
+  _motd_cache(MotdList.local);
+  _motd_cache(MotdList.remote);
 }
 
 /*! \brief Re-cache the local and remote MOTDs.
@@ -352,13 +352,13 @@ motd_init(void)
 {
   if (MotdList.local)  /* Destroy old local MOTD */
   {
-    motd_destroy(MotdList.local);
+    _motd_destroy(MotdList.local);
     MotdList.local = NULL;
   }
 
   if (MotdList.remote)  /* Destroy old remote MOTD */
   {
-    motd_destroy(MotdList.remote);
+    _motd_destroy(MotdList.remote);
     MotdList.remote = NULL;
   }
 
@@ -366,11 +366,11 @@ motd_init(void)
   if (string_is_empty(path))
     return;
 
-  MotdList.local = motd_create(NULL, path);
-  motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
+  MotdList.local = _motd_create(NULL, path);
+  _motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
 
-  MotdList.remote = motd_create(NULL, path);
-  motd_cache(MotdList.remote);  /* Initialize remote MOTD and cache it */
+  MotdList.remote = _motd_create(NULL, path);
+  _motd_cache(MotdList.remote);  /* Initialize remote MOTD and cache it */
 }
 
 /* \brief Add a new MOTD.
@@ -380,7 +380,7 @@ motd_init(void)
 void
 motd_add(const char *mask, const char *path)
 {
-  struct Motd *motd = motd_create(mask, path);  /* Create the motd */
+  struct Motd *motd = _motd_create(mask, path);  /* Create the motd */
   list_add(motd, &motd->node, &MotdList.other);
 }
 
@@ -392,19 +392,19 @@ motd_add(const char *mask, const char *path)
 void
 motd_clear(void)
 {
-  motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
-  motd_decache(MotdList.remote);
+  _motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
+  _motd_decache(MotdList.remote);
 
   while (MotdList.other.head)  /* Destroy other MOTDs */
   {
     struct Motd *motd = MotdList.other.head->data;
     list_remove(&motd->node, &MotdList.other);
-    motd_destroy(motd);
+    _motd_destroy(motd);
   }
 
   /* Now recache local and remote MOTDs */
-  motd_cache(MotdList.local);
-  motd_cache(MotdList.remote);
+  _motd_cache(MotdList.local);
+  _motd_cache(MotdList.remote);
 }
 
 /*! \brief Report list of non-default MOTDs.
@@ -417,7 +417,7 @@ motd_report(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, MotdList.other.head)
   {
-    const struct Motd *motd = node->data;
+    const struct Motd *const motd = node->data;
     sendto_one_numeric(client, &me, RPL_STATSTLINE, motd->mask, motd->path);
   }
 }

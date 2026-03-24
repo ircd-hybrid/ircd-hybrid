@@ -132,7 +132,7 @@ connect_destroy(struct ConnectItem *connect)
 }
 
 static void
-connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
+_connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
   struct ConnectItem *const connect = vptr;
   connect->dns_pending = false;
@@ -159,7 +159,7 @@ connect_dns_lookup(struct ConnectItem *connect)
   connect->dns_pending = true;
 
   int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
-  gethost_byname_type(connect_dns_callback, connect, connect->host, query_type);
+  gethost_byname_type(_connect_dns_callback, connect, connect->host, query_type);
 }
 
 struct ConnectItem *
@@ -177,7 +177,7 @@ connect_find(const char *name)
 }
 
 static bool
-connect_match_password(const struct ConnectItem *connect, const char *password)
+_connect_match_password(const struct ConnectItem *connect, const char *password)
 {
   if (string_is_empty(password) || string_is_empty(connect->accept_password))
     return false;
@@ -228,7 +228,7 @@ connect_authenticate_server(const char *server_name, const struct Client *client
       continue;
     }
 
-    if (connect_match_password(connect, client->connection->password) == false)
+    if (_connect_match_password(connect, client->connection->password) == false)
     {
       if (result < CONNECT_AUTH_FAIL_PASSWORD)
         result = CONNECT_AUTH_FAIL_PASSWORD;

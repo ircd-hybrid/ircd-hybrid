@@ -67,7 +67,7 @@ volatile sig_atomic_t doremotd;
  * @param sig Signal number.
  */
 static void
-ircd_signal_handler(int sig)
+_ircd_signal_handler(int sig)
 {
   switch (sig)
   {
@@ -111,11 +111,11 @@ ircd_signal_init(void)
 {
   const io_signal_t signals[] =
   {
-    { SIGTERM, ircd_signal_handler },
-    { SIGHUP, ircd_signal_handler },
-    { SIGUSR1, ircd_signal_handler },
-    { SIGCHLD, ircd_signal_handler },
-    { SIGINT, ircd_signal_handler }
+    { SIGTERM, _ircd_signal_handler },
+    { SIGHUP, _ircd_signal_handler },
+    { SIGUSR1, _ircd_signal_handler },
+    { SIGCHLD, _ircd_signal_handler },
+    { SIGINT, _ircd_signal_handler }
   };
 
   const int ignore_signals[] =

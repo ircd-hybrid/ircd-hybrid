@@ -57,7 +57,7 @@ typedef struct parser_context
 } parse_context_t;
 
 static void
-parse_handle_unknown_prefix(struct Client *client, const char *prefix, const char *buffer)
+_parse_handle_unknown_prefix(struct Client *client, const char *prefix, const char *buffer)
 {
   assert(prefix && prefix[0]);
   assert(buffer);
@@ -106,7 +106,7 @@ parse_handle_unknown_prefix(struct Client *client, const char *prefix, const cha
  * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
-parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
+_parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
 {
   assert(parc <= PARSE_MAX_PARAMETERS + 2);
   assert(parv);
@@ -166,7 +166,7 @@ parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int p
 }
 
 static void
-parse_handle_command(struct Command *command, struct Client *source, unsigned int parc, char *parv[])
+_parse_handle_command(struct Command *command, struct Client *source, unsigned int parc, char *parv[])
 {
   assert(parc <= PARSE_MAX_PARAMETERS + 2);
 
@@ -197,7 +197,7 @@ parse_handle_command(struct Command *command, struct Client *source, unsigned in
 }
 
 static bool
-parse_extract_and_validate_prefix(parse_context_t *ctx)
+_parse_extract_and_validate_prefix(parse_context_t *ctx)
 {
   char *ch = ctx->buffer_cursor;
 
@@ -241,7 +241,7 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
     if (from == NULL)
     {
       ++ServerStats.is_unpf;
-      parse_handle_unknown_prefix(ctx->client, prefix, ctx->buffer);
+      _parse_handle_unknown_prefix(ctx->client, prefix, ctx->buffer);
       return false;
     }
 
@@ -265,13 +265,13 @@ parse_extract_and_validate_prefix(parse_context_t *ctx)
 }
 
 static bool
-parse_is_numeric(const char *token)
+_parse_is_numeric(const char *token)
 {
   return IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]) && token[3] == ' ';
 }
 
 static bool
-parse_identify_command(parse_context_t *ctx)
+_parse_identify_command(parse_context_t *ctx)
 {
   char *const token = ctx->buffer_cursor;
   ctx->command_numeric_str = token;
@@ -313,7 +313,7 @@ parse_identify_command(parse_context_t *ctx)
 }
 
 static bool
-parse_identify_numeric(parse_context_t *ctx)
+_parse_identify_numeric(parse_context_t *ctx)
 {
   char *const token = ctx->buffer_cursor;
   ctx->command_numeric_str = token;
@@ -339,7 +339,7 @@ parse_identify_numeric(parse_context_t *ctx)
 }
 
 static bool
-parse_identify_command_or_numeric(parse_context_t *ctx)
+_parse_identify_command_or_numeric(parse_context_t *ctx)
 {
   if (*ctx->buffer_cursor == '\0')
   {
@@ -347,14 +347,14 @@ parse_identify_command_or_numeric(parse_context_t *ctx)
     return false;
   }
 
-  if (parse_is_numeric(ctx->buffer_cursor))
-    return parse_identify_numeric(ctx);
+  if (_parse_is_numeric(ctx->buffer_cursor))
+    return _parse_identify_numeric(ctx);
 
-  return parse_identify_command(ctx);
+  return _parse_identify_command(ctx);
 }
 
 static void
-parse_split_parameters(parse_context_t *ctx)
+_parse_split_parameters(parse_context_t *ctx)
 {
   char *s = ctx->buffer_cursor;
   if (*s == '\0')
@@ -407,14 +407,14 @@ parse_split_parameters(parse_context_t *ctx)
 }
 
 static void
-parse_dispatch_handler(parse_context_t *ctx)
+_parse_dispatch_handler(parse_context_t *ctx)
 {
   assert(ctx->command || ctx->numeric);
 
   if (ctx->command)
-    parse_handle_command(ctx->command, ctx->source, ctx->parc, ctx->parv);
+    _parse_handle_command(ctx->command, ctx->source, ctx->parc, ctx->parv);
   else
-    parse_handle_numeric(ctx->numeric, ctx->source, ctx->parc, ctx->parv);
+    _parse_handle_numeric(ctx->numeric, ctx->source, ctx->parc, ctx->parv);
 }
 
 void
@@ -438,15 +438,15 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
     .buffer_cursor = buffer
   };
 
-  if (parse_extract_and_validate_prefix(&ctx) == false)
+  if (_parse_extract_and_validate_prefix(&ctx) == false)
     return;
 
-  if (parse_identify_command_or_numeric(&ctx) == false)
+  if (_parse_identify_command_or_numeric(&ctx) == false)
     return;
 
-  parse_split_parameters(&ctx);
+  _parse_split_parameters(&ctx);
 
-  parse_dispatch_handler(&ctx);
+  _parse_dispatch_handler(&ctx);
 }
 
 /* m_not_oper()

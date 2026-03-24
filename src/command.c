@@ -104,7 +104,7 @@ static struct CommandTree command_tree;
  * in the parent.
  */
 static void
-command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *const name)
+_command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *const name)
 {
   if (*name == '\0')
   {
@@ -128,7 +128,7 @@ command_tree_add_element(struct CommandTree *tree, struct Command *command, cons
       tree->links++;  /* Have new pointer, so up ref count */
     }
 
-    command_tree_add_element(current, command, name + 1);
+    _command_tree_add_element(current, command, name + 1);
   }
 }
 
@@ -156,7 +156,7 @@ command_tree_add_element(struct CommandTree *tree, struct Command *command, cons
  * Thus, we continue to go back up removing all unused CommandTree(s)
  */
 static void
-command_tree_del_element(struct CommandTree *tree, const char *const name)
+_command_tree_del_element(struct CommandTree *tree, const char *const name)
 {
   /*
    * In case this is called for a nonexistent command
@@ -170,10 +170,10 @@ command_tree_del_element(struct CommandTree *tree, const char *const name)
   }
   else
   {
-    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    struct CommandTree *const current = tree->pointers[*name & (MAXPTRLEN - 1)];
     if (current)
     {
-      command_tree_del_element(current, name + 1);
+      _command_tree_del_element(current, name + 1);
 
       if (current->links == 0)
       {
@@ -193,7 +193,7 @@ command_tree_del_element(struct CommandTree *tree, const char *const name)
  * side effects	- none
  */
 static struct Command *
-command_tree_find(const char *name)
+_command_tree_find(const char *name)
 {
   struct CommandTree *tree = &command_tree;
 
@@ -219,8 +219,8 @@ command_add(struct Command *command)
   assert(command->name);
 
   /* Command already added? */
-  if (command_tree_find(command->name) == NULL)
-    command_tree_add_element(&command_tree, command, command->name);
+  if (_command_tree_find(command->name) == NULL)
+    _command_tree_add_element(&command_tree, command, command->name);
 }
 
 /* command_del()
@@ -235,8 +235,8 @@ command_del(struct Command *command)
   assert(command);
   assert(command->name);
 
-  if (command_tree_find(command->name))
-    command_tree_del_element(&command_tree, command->name);
+  if (_command_tree_find(command->name))
+    _command_tree_del_element(&command_tree, command->name);
 }
 
 void
@@ -268,7 +268,7 @@ command_del_array(struct Command *commands, size_t elements)
 struct Command *
 command_find(const char *name)
 {
-  return command_tree_find(name);
+  return _command_tree_find(name);
 }
 
 /* report_messages()
@@ -290,7 +290,7 @@ command_report(struct Client *client)
   while (top > 0)
   {
     /* Pop the top of the stack. */
-    const struct CommandTree *current = stack[--top];
+    const struct CommandTree *const current = stack[--top];
 
     if (current->command)
       sendto_one_numeric(client, &me, RPL_STATSCOMMANDS,

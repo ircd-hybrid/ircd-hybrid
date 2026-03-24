@@ -121,7 +121,7 @@ aline_valid_mask(int count, ...)
 }
 
 static intmax_t
-aline_valid_time(const char *data)
+_aline_valid_time(const char *data)
 {
   static const unsigned int max_aline_time = 24*60*360;
   const unsigned char *p = (const unsigned char *)data;
@@ -185,7 +185,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
   ++parv;
   --parc;
 
-  if (aline->add && (duration = aline_valid_time(*parv)) >= 0)
+  if (aline->add && (duration = _aline_valid_time(*parv)) >= 0)
   {
     aline->duration = duration;
     ++parv;

@@ -94,7 +94,7 @@ static list_t isupport_list_lines;
  * deallocates memory, and frees the associated data.
  */
 static void
-isupport_clear_lines(void)
+_isupport_clear_lines(void)
 {
   while (isupport_list_lines.head)
   {
@@ -113,7 +113,7 @@ isupport_clear_lines(void)
  * and the resulting lines are stored in isupport_list_lines.
  */
 static void
-isupport_build_lines(void)
+_isupport_build_lines(void)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
@@ -121,7 +121,7 @@ isupport_build_lines(void)
   size_t len = 0;
   size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
 
-  isupport_clear_lines();
+  _isupport_clear_lines();
 
   list_node_t *node;
   LIST_FOREACH(node, isupport_list.head)
@@ -160,7 +160,7 @@ isupport_build_lines(void)
  * @return A pointer to the Isupport structure if found, otherwise NULL.
  */
 static struct Isupport *
-isupport_find(const char *name)
+_isupport_find(const char *name)
 {
   list_node_t *node;
 
@@ -175,7 +175,7 @@ isupport_find(const char *name)
 }
 
 static int
-isupport_cmp(const void *const a_, const void *const b_)
+_isupport_cmp(const void *const a_, const void *const b_)
 {
   const char *const a = ((const struct Isupport *)a_)->name;
   const char *const b = ((const struct Isupport *)b_)->name;
@@ -193,12 +193,12 @@ isupport_cmp(const void *const a_, const void *const b_)
  * @return A pointer to the newly created Isupport structure.
  */
 static struct Isupport *
-isupport_create(const char *name, const char *options)
+_isupport_create(const char *name, const char *options)
 {
   struct Isupport *support = io_calloc(sizeof(*support));
   support->name = io_strdup(name);
   support->options = (options) ? io_strdup(options) : NULL;
-  list_add_sorted(support, &support->node, &isupport_list, isupport_cmp);
+  list_add_sorted(support, &support->node, &isupport_list, _isupport_cmp);
 
   return support;
 }
@@ -211,7 +211,7 @@ isupport_create(const char *name, const char *options)
  * @param support A pointer to the Isupport structure to destroy.
  */
 static void
-isupport_destroy(struct Isupport *support)
+_isupport_destroy(struct Isupport *support)
 {
   list_remove(&support->node, &isupport_list);
   io_free(support->name);
@@ -244,14 +244,14 @@ isupport_add(const char *name, const char *format, ...)
     va_end(args);
   }
 
-  struct Isupport *support = isupport_find(name);
+  struct Isupport *support = _isupport_find(name);
   if (support)
-    isupport_destroy(support);
+    _isupport_destroy(support);
 
-  isupport_create(name, format ? buf : NULL);
+  _isupport_create(name, format ? buf : NULL);
 
   /* Rebuild ISUPPORT lines after modification. */
-  isupport_build_lines();
+  _isupport_build_lines();
 }
 
 /**
@@ -265,14 +265,14 @@ isupport_add(const char *name, const char *format, ...)
 void
 isupport_delete(const char *name)
 {
-  struct Isupport *support = isupport_find(name);
+  struct Isupport *support = _isupport_find(name);
   if (support == NULL)
     return;
 
-  isupport_destroy(support);
+  _isupport_destroy(support);
 
   /* Rebuild ISUPPORT lines after modification. */
-  isupport_build_lines();
+  _isupport_build_lines();
 }
 
 /**

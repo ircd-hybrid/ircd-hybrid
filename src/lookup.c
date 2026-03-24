@@ -64,7 +64,7 @@ static const char *const lookup_report_headers[] =
 };
 
 static void
-lookup_check_complete(struct LookupRequest *lookup)
+_lookup_check_complete(struct LookupRequest *lookup)
 {
   /* Do not proceed if other asynchronous lookups are still in flight. */
   if (lookup->dns_pending || lookup->ident_pending)
@@ -87,7 +87,7 @@ lookup_check_complete(struct LookupRequest *lookup)
 }
 
 static bool
-lookup_verify_hostname(const char *hostname)
+_lookup_verify_hostname(const char *hostname)
 {
   const char *p = hostname;
   assert(p);
@@ -103,7 +103,7 @@ lookup_verify_hostname(const char *hostname)
 }
 
 static void
-lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
+_lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
   struct LookupRequest *lookup = vptr;
   lookup->dns_pending = false;
@@ -114,7 +114,7 @@ lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, si
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_TOO_LONG]);
   else if (address_match(addr, &lookup->client->addr, true, false, 0) == false)
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_IP_MISMATCH]);
-  else if (lookup_verify_hostname(name) == false)
+  else if (_lookup_verify_hostname(name) == false)
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_INVALID]);
   else
   {
@@ -122,11 +122,11 @@ lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, si
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_SUCCESS]);
   }
 
-  lookup_check_complete(lookup);
+  _lookup_check_complete(lookup);
 }
 
 static void
-lookup_ident_callback(void *user_data, const char *username)
+_lookup_ident_callback(void *user_data, const char *username)
 {
   struct LookupRequest *lookup = user_data;
 
@@ -149,7 +149,7 @@ lookup_ident_callback(void *user_data, const char *username)
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_SUCCESS]);
   }
 
-  lookup_check_complete(lookup);
+  _lookup_check_complete(lookup);
 }
 
 void
@@ -180,7 +180,7 @@ lookup_start(struct Client *client)
   {
     sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_DNS_START]);
     lookup->dns_pending = true;
-    gethost_byaddr(lookup_dns_callback, lookup, &client->addr);
+    gethost_byaddr(_lookup_dns_callback, lookup, &client->addr);
   }
 
   if (ConfigGeneral.disable_ident == 0)
@@ -189,7 +189,7 @@ lookup_start(struct Client *client)
 
     const uintmax_t timeout_ms = ConfigGeneral.ident_timeout * 1000ULL;
     lookup->ident_request =
-      ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, timeout_ms);
+      ident_start(&client->addr, client->connection->fd->fd, _lookup_ident_callback, lookup, timeout_ms);
     if (lookup->ident_request)
       lookup->ident_pending = true;
     else
@@ -199,5 +199,5 @@ lookup_start(struct Client *client)
     }
   }
 
-  lookup_check_complete(lookup);
+  _lookup_check_complete(lookup);
 }

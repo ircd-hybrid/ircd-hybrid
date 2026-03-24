@@ -63,7 +63,7 @@ channel_get_list(void)
 }
 
 static void
-channel_track_join_flood(struct Channel *channel, struct Client *client, bool track_join)
+_channel_track_join_flood(struct Channel *channel, struct Client *client, bool track_join)
 {
   if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;
@@ -107,7 +107,7 @@ channel_add_member(struct Channel *channel, struct Client *client, unsigned int 
 {
   assert(IsClient(client));
 
-  channel_track_join_flood(channel, client, track_join);
+  _channel_track_join_flood(channel, client, track_join);
 
   struct ChannelMember *member = io_calloc(sizeof(*member));
   member->client = client;
@@ -211,7 +211,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
  * side effects -
  */
 static void
-channel_send_members(struct Client *client, const struct Channel *channel)
+_channel_send_members(struct Client *client, const struct Channel *channel)
 {
   size_t len;
   char buf[IRCD_BUFSIZE];
@@ -248,7 +248,7 @@ channel_send_members(struct Client *client, const struct Channel *channel)
  * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
  */
 static void
-channel_send_mask_list(struct Client *client, const struct Channel *channel, const list_t *list, const char flag)
+_channel_send_mask_list(struct Client *client, const struct Channel *channel, const list_t *list, const char flag)
 {
   if (list_is_empty(list))
     return;
@@ -286,11 +286,11 @@ channel_send_mask_list(struct Client *client, const struct Channel *channel, con
 void
 channel_send_modes(struct Client *client, const struct Channel *channel)
 {
-  channel_send_members(client, channel);
+  _channel_send_members(client, channel);
 
-  channel_send_mask_list(client, channel, &channel->banlist, 'b');
-  channel_send_mask_list(client, channel, &channel->exceptlist, 'e');
-  channel_send_mask_list(client, channel, &channel->invexlist, 'I');
+  _channel_send_mask_list(client, channel, &channel->banlist, 'b');
+  _channel_send_mask_list(client, channel, &channel->exceptlist, 'e');
+  _channel_send_mask_list(client, channel, &channel->invexlist, 'I');
 
   /*
    * We may also send an empty topic here, but only if topic_time isn't 0,
@@ -361,7 +361,7 @@ remove_ban(struct Ban *ban, list_t *list)
  * side effects -
  */
 static void
-channel_free_mask_list(list_t *list)
+_channel_free_mask_list(list_t *list)
 {
   while (list->head)
   {
@@ -406,9 +406,9 @@ channel_destroy(struct Channel *channel)
   invite_clear_list(&channel->invites);
 
   /* Free ban/exception/invex lists */
-  channel_free_mask_list(&channel->banlist);
-  channel_free_mask_list(&channel->exceptlist);
-  channel_free_mask_list(&channel->invexlist);
+  _channel_free_mask_list(&channel->banlist);
+  _channel_free_mask_list(&channel->exceptlist);
+  _channel_free_mask_list(&channel->invexlist);
 
   list_remove(&channel->node, &channel_list);
   hash_del_channel(channel);
@@ -638,7 +638,7 @@ member_highest_rank(const struct ChannelMember *member)
  * \return true if ban found for given n!u\@h mask, false otherwise
  */
 static bool
-ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+_ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
   /* Is a matching extban, call custom match handler */
   if (ban->extban & extban_matching_mask())
@@ -700,7 +700,7 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
         continue;
     }
 
-    bool matches = ban_matches(client, channel, ban);
+    bool matches = _ban_matches(client, channel, ban);
     if (matches == false)
       continue;
 
@@ -731,7 +731,7 @@ is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
  *         or 0 if allowed to join.
  */
 static int
-can_join(struct Client *client, struct Channel *channel, const char *key)
+_can_join(struct Client *client, struct Channel *channel, const char *key)
 {
   if (channel_has_mode(channel, MODE_SECUREONLY) && user_mode_has_flag(client, UMODE_SECURE) == false)
     return ERR_SECUREONLYCHAN;
@@ -790,7 +790,7 @@ member_find_link(const struct Client *client, const struct Channel *channel)
  * \return true if the message does contain any control codes, false otherwise
  */
 static bool
-msg_has_ctrls(const char *message)
+_msg_has_ctrls(const char *message)
 {
   const unsigned char *p = (const unsigned char *)message;
 
@@ -845,7 +845,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     }
   }
 
-  if (channel_has_mode(channel, MODE_NOCTRL) && msg_has_ctrls(message))
+  if (channel_has_mode(channel, MODE_NOCTRL) && _msg_has_ctrls(message))
   {
     *error = "control codes are not permitted";
     return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -928,7 +928,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
  * \param name   Channel name or NULL if this is a part.
  */
 static void
-channel_check_spambot_warning(struct Client *client, const char *name)
+_channel_check_spambot_warning(struct Client *client, const char *name)
 {
   if (GlobalSetOptions.spam_num &&
       (client->connection->join_leave_count >= GlobalSetOptions.spam_num))
@@ -1065,7 +1065,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
       return;
 
     /* can_join() checks for +i, +l, key, bans, etc. */
-    int ret = can_join(client, channel, key);
+    int ret = _can_join(client, channel, key);
     if (ret)
     {
       sendto_one_numeric(client, &me, ret, channel->name);
@@ -1079,7 +1079,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   }
 
   if (!client_is_oper(client))
-    channel_check_spambot_warning(client, channel->name);
+    _channel_check_spambot_warning(client, channel->name);
 
   channel_add_member(channel, client, flags, true);
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -1156,7 +1156,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
   }
 
   if (client_is_local(client) && !client_is_oper(client))
-    channel_check_spambot_warning(client, NULL);
+    _channel_check_spambot_warning(client, NULL);
 
   /*
    * Remove user from the old channel (if any). Only allow /part reasons in -m chans.

@@ -218,6 +218,9 @@ monitor_clear_list(struct Client *client)
     list_node_t *node = client->connection->monitor_list.head;
     struct Monitor *monitor = node->data;
 
+    list_remove(node, &client->connection->monitor_list);
+    list_free_node(node);
+
     assert(list_find(&monitor->monitored_by, client));
 
     list_node_t *temp = list_find_remove(&monitor->monitored_by, client);
@@ -227,9 +230,6 @@ monitor_clear_list(struct Client *client)
     /* If this leaves a header without notifies, remove it. */
     if (list_is_empty(&monitor->monitored_by))
       _monitor_destroy(monitor);
-
-    list_remove(node, &client->connection->monitor_list);
-    list_free_node(node);
   }
 
   assert(client->connection->monitor_list.head == NULL);

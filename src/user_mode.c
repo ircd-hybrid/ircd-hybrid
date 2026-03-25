@@ -76,7 +76,7 @@ user_mode_get_string(void)
 static void
 _user_mode_add_char(char mode_char)
 {
-  size_t len = strlen(user_mode_string);
+  const size_t len = strlen(user_mode_string);
   if (len >= USER_MODE_CAPACITY)
     return;
 
@@ -103,7 +103,7 @@ _user_mode_remove_char(char mode_char)
 struct UserMode *
 user_mode_find(char mode_char)
 {
-  int index = _user_mode_char_to_index(mode_char);
+  const int index = _user_mode_char_to_index(mode_char);
   if (index < 0)
     return NULL;
 
@@ -113,7 +113,7 @@ user_mode_find(char mode_char)
 user_mode_result_t
 user_mode_register(struct UserMode *mode)
 {
-  int index = _user_mode_char_to_index(mode->mode_char);
+  const int index = _user_mode_char_to_index(mode->mode_char);
   if (index < 0)
     return USER_MODE_RESULT_INVALID_CHAR;
 
@@ -139,7 +139,7 @@ user_mode_register(struct UserMode *mode)
 user_mode_result_t
 user_mode_unregister(struct UserMode *mode)
 {
-  int index = _user_mode_char_to_index(mode->mode_char);
+  const int index = _user_mode_char_to_index(mode->mode_char);
   if (index < 0)
     return USER_MODE_RESULT_INVALID_CHAR;
 
@@ -175,17 +175,16 @@ user_mode_get_oper_only(void)
 uint64_t
 user_mode_string_to_flags(const char *mode_string)
 {
-  uint64_t mode_flags = 0;
-
   if (string_is_empty(mode_string))
     return 0;
 
   if (*mode_string == '+')
     ++mode_string;
 
+  uint64_t mode_flags = 0;
   for (const char *m = mode_string; *m; ++m)
   {
-    int index = _user_mode_char_to_index(*m);
+    const int index = _user_mode_char_to_index(*m);
     if (index >= 0)
     {
       const struct UserMode *mode = user_mode_table[index];
@@ -265,7 +264,7 @@ user_mode_unset(struct Client *client, char mode_char, user_mode_source_t source
 bool
 user_mode_has(const struct Client *client, char mode_char)
 {
-  uint64_t mode_bit = _user_mode_char_to_bit(mode_char);
+  const uint64_t mode_bit = _user_mode_char_to_bit(mode_char);
   return (client->umodes & mode_bit) != 0;
 }
 
@@ -292,11 +291,10 @@ user_mode_unset_flag(struct Client *client, uint64_t mode_flag)
 bool
 user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_source_t source)
 {
-  bool success = true;
-
   if (mode_flag == 0)
     return false;
 
+  bool success = true;
   for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
@@ -322,11 +320,10 @@ user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_sou
 bool
 user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_source_t source)
 {
-  bool success = true;
-
   if (mode_flag == 0)
     return false;
 
+  bool success = true;
   for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;

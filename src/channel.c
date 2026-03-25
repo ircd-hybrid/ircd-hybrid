@@ -385,7 +385,6 @@ channel_create(const char *name)
   /* Doesn't hurt to set it here */
   channel->creation_time = io_time_get(IO_TIME_REALTIME_SEC);
   channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
   /* Cache channel name length to avoid repetitive strlen() calls. */
   channel->name_len = strlcpy(channel->name, name, sizeof(channel->name));
   if (channel->name_len >= sizeof(channel->name))
@@ -478,11 +477,11 @@ _channel_get_privacy_prefix(const struct Channel *channel)
 void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
-  bool is_member = member_find_link(client, channel) != NULL;
-  bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
-  bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
-
   assert(IsClient(client));
+
+  const bool is_member = member_find_link(client, channel) != NULL;
+  const bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
+  const bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
 
   if (channel_is_public(channel) || is_member)
   {
@@ -496,8 +495,8 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     LIST_FOREACH(node, channel->members.head)
     {
       size_t masklen = 0;
-      const struct ChannelMember *member = node->data;
 
+      const struct ChannelMember *const member = node->data;
       if (user_mode_has_flag(member->client, UMODE_INVISIBLE) && is_member == false)
         continue;
 
@@ -750,8 +749,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
-  if (channel->mode.limit && list_length(&channel->members) >=
-      channel->mode.limit)
+  if (channel->mode.limit && list_length(&channel->members) >= channel->mode.limit)
     return ERR_CHANNELISFULL;
 
   if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))
@@ -948,10 +946,10 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
   }
   else
   {
-    unsigned int t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
+    const unsigned int t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
-      unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
+      const unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
       if (decrement_count > client->connection->join_leave_count)
         client->connection->join_leave_count = 0;
       else

@@ -227,7 +227,6 @@ client_create_local(void)
   client->connection->registration = REG_INIT;
   client->connection->activity_timeout_event =
     event_create(ircd_event_manager, "client_activity_timeout", client_activity_timeout_handler, 1, true, client, NULL);
-
   /* Local entity topology: The logical parent is this server; the entity is its own nexthop. */
   client->uplink = &me;
   client->nexthop = client;
@@ -243,7 +242,6 @@ client_create_remote(struct Client *uplink)
   assert(IsServer(uplink));
 
   struct Client *client = io_calloc(sizeof(*client));
-
   /* Remote entity topology: Inherit the physical route (nexthop) from the logical parent (uplink). */
   client->uplink = uplink;
   client->nexthop = uplink->nexthop;
@@ -326,7 +324,6 @@ check_conf_klines(void)
   LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
     struct Client *client = node->data;
-
     /* If a client is already being exited */
     if (IsDead(client))
       continue;
@@ -358,7 +355,6 @@ check_conf_klines(void)
   LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
   {
     struct Client *client = node->data;
-
     /* If a client is already being exited */
     if (IsDead(client))
       continue;
@@ -462,7 +458,6 @@ struct Client *
 find_chasing(struct Client *client, const char *name)
 {
   struct Client *target = find_person(client, name);
-
   if (target)
     return target;
 
@@ -1020,12 +1015,9 @@ exit_aborted_clients(void)
  * @return The calculated (fake) idle time for the target client.
  */
 unsigned int
-client_get_idle_time(const struct Client *source,
-                     const struct Client *target)
+client_get_idle_time(const struct Client *source, const struct Client *target)
 {
-  unsigned int idle = 0;
   const struct ClassItem *const klass = client_get_active_class(target);
-
   if (!(klass->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
     return client_get_idle_duration(target);
 
@@ -1034,10 +1026,10 @@ client_get_idle_time(const struct Client *source,
 
   const unsigned int min_idle = klass->min_idle;
   const unsigned int max_idle = klass->max_idle;
-
   if (min_idle == max_idle)
     return min_idle;
 
+  unsigned int idle = 0;
   if (klass->flags & CLASS_FLAGS_RANDOM_IDLE)
     idle = genrand_int32();
   else

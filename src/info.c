@@ -61,7 +61,6 @@ _info_compare(const void *const a_, const void *const b_)
 {
   const struct InfoEntry *const a = a_;
   const struct InfoEntry *const b = b_;
-
   if (a->namespace == NULL && b->namespace == NULL)
     return strcasecmp(a->name, b->name);
 

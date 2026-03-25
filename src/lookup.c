@@ -129,7 +129,6 @@ static void
 _lookup_ident_callback(void *user_data, const char *username)
 {
   struct LookupRequest *lookup = user_data;
-
   ident_delete(lookup->ident_request);
 
   lookup->ident_request = NULL;
@@ -172,6 +171,7 @@ void
 lookup_start(struct Client *client)
 {
   assert(client->connection->lookup_request == NULL);
+
   struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
   lookup->client = client;
   client->connection->lookup_request = lookup;

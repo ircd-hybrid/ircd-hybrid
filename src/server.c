@@ -100,8 +100,8 @@ server_route_command(struct Client *client, const char *command, const int serve
 {
   static server_route_t r;
   server_route_t *const route = &r;
-  const char *const mask = parv[server];
 
+  const char *const mask = parv[server];
   /* Assume it's this server if no target is specified. */
   if (string_is_empty(mask))
   {
@@ -331,7 +331,6 @@ static void
 _server_connect_callback(fde_t *fde, int status, void *data_)
 {
   struct Client *const client = data_;
-
   /* First, make sure it's a real client! */
   assert(client);
   assert(client->connection);

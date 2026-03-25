@@ -124,7 +124,6 @@ _command_tree_add_element(struct CommandTree *tree, struct Command *command, con
     {
       current = io_calloc(sizeof(*current));
       tree->pointers[*name & (MAXPTRLEN - 1)] = current;
-
       tree->links++;  /* Have new pointer, so up ref count */
     }
 
@@ -195,10 +194,9 @@ _command_tree_del_element(struct CommandTree *tree, const char *const name)
 static struct Command *
 _command_tree_find(const char *name)
 {
-  struct CommandTree *tree = &command_tree;
-
   assert(!string_is_empty(name));
 
+  struct CommandTree *tree = &command_tree;
   while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
     if (*++name == '\0')
       return tree->command;
@@ -291,7 +289,6 @@ command_report(struct Client *client)
   {
     /* Pop the top of the stack. */
     const struct CommandTree *const current = stack[--top];
-
     if (current->command)
       sendto_one_numeric(client, &me, RPL_STATSCOMMANDS,
                          current->command->name,
@@ -303,7 +300,7 @@ command_report(struct Client *client)
     /* Push non-null pointers onto the stack in descending order. */
     for (int i = MAXPTRLEN - 1; i >= 0; --i)
     {
-      const struct CommandTree *ptr = current->pointers[i];
+      const struct CommandTree *const ptr = current->pointers[i];
       if (ptr)
       {
         if (top >= IO_ARRAY_LENGTH(stack))

@@ -215,7 +215,7 @@ static const char *const infotext[] =
  * side effects	- birthdate and online time are sent
  */
 static void
-send_birthdate_online_time(struct Client *client)
+_send_birthdate_online_time(struct Client *client)
 {
   sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":On-line since %s",
                      date(me.connection->created_real));
@@ -228,7 +228,7 @@ send_birthdate_online_time(struct Client *client)
  * side effects - info text is sent to client
  */
 static void
-send_info_text(struct Client *client)
+_send_info_text(struct Client *client)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                  client->name, client->username, client->host, client->uplink->name);
@@ -250,7 +250,7 @@ send_info_text(struct Client *client)
       sendto_one_numeric(client, &me, RPL_INFO, tls_get_version());
   }
 
-  send_birthdate_online_time(client);
+  _send_birthdate_online_time(client);
 
   sendto_one_numeric(client, &me, RPL_ENDOFINFO);
 }
@@ -283,7 +283,7 @@ m_info(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s INFO :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  send_info_text(source);
+  _send_info_text(source);
 }
 
 /*! \brief INFO command handler
@@ -303,7 +303,7 @@ ms_info(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s INFO :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  send_info_text(source);
+  _send_info_text(source);
 }
 
 static struct Command command_table =

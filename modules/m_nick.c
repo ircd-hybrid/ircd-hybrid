@@ -228,7 +228,7 @@ nick_change_local(struct Client *source, const char *nick)
 
     clear_ban_cache_list(&source->channel_list);
 
-    monitor_signoff(source);
+    monitor_notify_signoff(source);
 
     if (user_mode_has_flag(source, UMODE_REGISTERED))
     {
@@ -255,7 +255,7 @@ nick_change_local(struct Client *source, const char *nick)
   comm_socket_note(source->connection->fd, "Nick: %s", source->name);
 
   if (samenick == false)
-    monitor_signon(source);
+    monitor_notify_signon(source);
 }
 
 /*!
@@ -288,7 +288,7 @@ nick_change_remote(struct Client *source, char *parv[])
 
     user_mode_unset_flag(source, UMODE_REGISTERED);
 
-    monitor_signoff(source);
+    monitor_notify_signoff(source);
   }
 
   ircd_hook_nick_change_ctx ctx = { .client = source, .nick = new_nick };
@@ -307,7 +307,7 @@ nick_change_remote(struct Client *source, char *parv[])
   hash_add_client(source);
 
   if (samenick == false)
-    monitor_signon(source);
+    monitor_notify_signon(source);
 }
 
 /*!

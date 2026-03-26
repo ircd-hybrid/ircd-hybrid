@@ -59,7 +59,7 @@ enum { READBUF_SIZE = 16384 };
  *      necessary fields (buffer etc..)
  */
 static void
-client_dopacket(struct Client *client, char *line_buffer, size_t line_length)
+_client_dopacket(struct Client *client, char *line_buffer, size_t line_length)
 {
   assert(line_length < IRCD_BUFSIZE);
 
@@ -82,7 +82,7 @@ client_dopacket(struct Client *client, char *line_buffer, size_t line_length)
  * side effects - one line is copied and removed from the dbuf
  */
 static size_t
-extract_one_line(struct dbuf_queue *queue, char *dest_buffer)
+_extract_one_line(struct dbuf_queue *queue, char *dest_buffer)
 {
   size_t line_bytes = 0, eol_bytes = 0;
   list_node_t *node;
@@ -142,7 +142,7 @@ out:
  * parse_client_queued - parse client queued messages
  */
 static void
-parse_client_queued(struct Client *client)
+_parse_client_queued(struct Client *client)
 {
   char line_buffer[IRCD_BUFSIZE];
 
@@ -159,11 +159,11 @@ parse_client_queued(struct Client *client)
       if (i >= MAX_FLOOD_HANDSHAKE)
         return;
 
-      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      const size_t line_length = _extract_one_line(&client->connection->buf_recvq, line_buffer);
       if (line_length == 0)
         return;
 
-      client_dopacket(client, line_buffer, line_length);
+      _client_dopacket(client, line_buffer, line_length);
       ++i;
 
       /*
@@ -182,11 +182,11 @@ parse_client_queued(struct Client *client)
       if (IsDefunct(client))
         return;
 
-      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      const size_t line_length = _extract_one_line(&client->connection->buf_recvq, line_buffer);
       if (line_length == 0)
         return;
 
-      client_dopacket(client, line_buffer, line_length);
+      _client_dopacket(client, line_buffer, line_length);
     }
   }
   else if (IsClient(client))
@@ -227,11 +227,11 @@ parse_client_queued(struct Client *client)
             (client_has_flag(client, FLAGS_FLOODDONE) ? MAX_FLOOD : MAX_FLOOD_BURST))
           return;
 
-      const size_t line_length = extract_one_line(&client->connection->buf_recvq, line_buffer);
+      const size_t line_length = _extract_one_line(&client->connection->buf_recvq, line_buffer);
       if (line_length == 0)
         return;
 
-      client_dopacket(client, line_buffer, line_length);
+      _client_dopacket(client, line_buffer, line_length);
       ++client->connection->sent_parsed;
     }
   }
@@ -279,7 +279,7 @@ flood_recalc(void *data_)
   if (client->connection->sent_parsed < 0)
     client->connection->sent_parsed = 0;
 
-  parse_client_queued(client);
+  _parse_client_queued(client);
 }
 
 /*
@@ -338,7 +338,7 @@ read_packet(fde_t *F, void *data_)
     client_reset_activity_timeout(client);
 
     /* Attempt to parse what we have */
-    parse_client_queued(client);
+    _parse_client_queued(client);
 
     if (IsDefunct(client))
       return;

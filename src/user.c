@@ -175,7 +175,7 @@ user_introduce(struct Client *client)
     sendto_servers(client, 0, 0, ":%s METADATA client %s cipher :%s",
                    client->uplink->id, client->id, client->tls_cipher);
 
-  monitor_signon(client);
+  monitor_notify_signon(client);
 }
 
 /* user_welcome()

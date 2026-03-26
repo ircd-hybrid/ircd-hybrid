@@ -73,7 +73,7 @@ typedef enum
  * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
 */
 static whois_channel_visibility_t
-whois_channel_visibility_get(struct Channel *channel, struct Client *source, const struct Client *target)
+_whois_channel_visibility_get(struct Channel *channel, struct Client *source, const struct Client *target)
 {
   if (channel_is_public(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
     return WHOIS_CHANNEL_VISIBILITY_FULL;
@@ -93,7 +93,7 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, con
 }
 
 static const char *
-whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
+_whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
 {
   switch (vis)
   {
@@ -109,14 +109,14 @@ whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
 }
 
 static void
-whois_send_user_numeric(struct Client *source, const struct Client *target)
+_whois_send_user_numeric(struct Client *source, const struct Client *target)
 {
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
 }
 
 static void
-whois_send_host_numeric(struct Client *source, const struct Client *target)
+_whois_send_host_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_oper(source) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
@@ -124,7 +124,7 @@ whois_send_host_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send_channels_numeric(struct Client *source, const struct Client *target)
+_whois_send_channels_numeric(struct Client *source, const struct Client *target)
 {
   if (list_is_empty(&target->channel_list))
     return;
@@ -144,7 +144,7 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
   LIST_FOREACH(node, target->channel_list.head)
   {
     const struct ChannelMember *member = node->data;
-    whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
+    whois_channel_visibility_t vis = _whois_channel_visibility_get(member->channel, source, target);
 
     if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
       continue;
@@ -155,7 +155,7 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
       bufptr = buf;
     }
 
-    const char *const channel_prefix = whois_channel_visibility_get_prefix(vis);
+    const char *const channel_prefix = _whois_channel_visibility_get_prefix(vis);
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
                        channel_prefix, member_get_prefix(member, true), member->channel->name);
   }
@@ -165,7 +165,7 @@ whois_send_channels_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send_server_numeric(struct Client *source, const struct Client *target)
+_whois_send_server_numeric(struct Client *source, const struct Client *target)
 {
   if ((ConfigServerHide.hide_servers || IsHidden(target->uplink)) &&
       !(client_is_oper(source) || source == target))
@@ -177,14 +177,14 @@ whois_send_server_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send_away_numeric(struct Client *source, const struct Client *target)
+_whois_send_away_numeric(struct Client *source, const struct Client *target)
 {
   if (target->away_message)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 }
 
 static void
-whois_send_operator_numeric(struct Client *source, const struct Client *target)
+_whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_oper(target) || client_is_service(target))
   {
@@ -220,7 +220,7 @@ whois_send_operator_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send_modes_numeric(struct Client *source, const struct Client *target)
+_whois_send_modes_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_oper(source) || source == target)
     sendto_one_numeric(source, &me, RPL_WHOISMODES,
@@ -228,7 +228,7 @@ whois_send_modes_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send_idle_numeric(struct Client *source, const struct Client *target)
+_whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_local(target))
     if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || client_is_oper(source) || source == target)
@@ -237,25 +237,25 @@ whois_send_idle_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-whois_send(struct Client *source, struct Client *target)
+_whois_send(struct Client *source, struct Client *target)
 {
-  whois_send_user_numeric(source, target);
+  _whois_send_user_numeric(source, target);
 
-  whois_send_host_numeric(source, target);
+  _whois_send_host_numeric(source, target);
 
-  whois_send_channels_numeric(source, target);
+  _whois_send_channels_numeric(source, target);
 
-  whois_send_server_numeric(source, target);
+  _whois_send_server_numeric(source, target);
 
-  whois_send_away_numeric(source, target);
+  _whois_send_away_numeric(source, target);
 
-  whois_send_operator_numeric(source, target);
+  _whois_send_operator_numeric(source, target);
 
-  whois_send_modes_numeric(source, target);
+  _whois_send_modes_numeric(source, target);
 
   hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
 
-  whois_send_idle_numeric(source, target);
+  _whois_send_idle_numeric(source, target);
 }
 
 /* do_whois()
@@ -267,12 +267,12 @@ whois_send(struct Client *source, struct Client *target)
  * side effects - Does whois
  */
 static void
-whois_process(struct Client *source, const char *name)
+_whois_process(struct Client *source, const char *name)
 {
   struct Client *target = hash_find_client(name);
 
   if (target && IsClient(target))
-    whois_send(source, target);
+    _whois_send(source, target);
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 
@@ -327,7 +327,7 @@ m_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  whois_process(source, parv[1]);
+  _whois_process(source, parv[1]);
 }
 
 /*! \brief WHOIS command handler
@@ -359,7 +359,7 @@ mo_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  whois_process(source, parv[1]);
+  _whois_process(source, parv[1]);
 }
 
 static struct Command command_table =

@@ -75,7 +75,7 @@ monitor_add(struct Client *source, char *list)
       return;
     }
 
-    if (monitor_add_to_hash_table(name, source) == false)
+    if (monitor_subscribe(source, name) == false)
       continue;  /* Name is already being monitored */
 
     const struct Client *target = find_person(source, name);
@@ -123,7 +123,7 @@ monitor_del(struct Client *source, char *list)
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
     if (!string_is_empty(name))
-      monitor_del_from_hash_table(name, source);
+      monitor_unsubscribe(source, name);
 }
 
 static void

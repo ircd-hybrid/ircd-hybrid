@@ -704,7 +704,7 @@ _client_exit_detach(struct Client *client)
     whowas_add_history(client, false);
     whowas_off_history(client);
 
-    monitor_signoff(client);
+    monitor_notify_signoff(client);
   }
 
   if (IsClient(client))

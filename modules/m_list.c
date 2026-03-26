@@ -40,7 +40,7 @@
 #include "list_task.h"
 
 static bool
-parse_list_args(struct ListTask *lt, char *args)
+_parse_list_args(struct ListTask *lt, char *args)
 {
   char *save = NULL;
 
@@ -145,7 +145,7 @@ parse_list_args(struct ListTask *lt, char *args)
 }
 
 static void
-do_list(struct Client *client, char *arg)
+_do_list(struct Client *client, char *arg)
 {
   if (client->connection->list_task)
   {
@@ -158,7 +158,7 @@ do_list(struct Client *client, char *arg)
 
   if (!string_is_empty(arg))
   {
-    if (!parse_list_args(lt, arg))
+    if (!_parse_list_args(lt, arg))
     {
       list_task_destroy(lt);
       sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
@@ -184,7 +184,7 @@ do_list(struct Client *client, char *arg)
 static void
 m_list(struct Client *source, int parc, char *parv[])
 {
-  do_list(source, parv[1]);
+  _do_list(source, parv[1]);
 }
 
 static struct Command command_table =

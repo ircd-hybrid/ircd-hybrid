@@ -41,15 +41,15 @@
 
 
 static void
-trace_get_dependent(unsigned int *const servers,
-                    unsigned int *const clients, const struct Client *target)
+_trace_get_dependent(unsigned int *const servers,
+                     unsigned int *const clients, const struct Client *target)
 {
   (*servers)++;
   (*clients) += list_length(&target->serv->child_client_list);
 
   list_node_t *node;
   LIST_FOREACH(node, target->serv->child_server_list.head)
-    trace_get_dependent(servers, clients, node->data);
+    _trace_get_dependent(servers, clients, node->data);
 }
 
 /* report_this_status()
@@ -60,7 +60,7 @@ trace_get_dependent(unsigned int *const servers,
  * side effects - NONE
  */
 static void
-trace_send_status(struct Client *source, const struct Client *target)
+_trace_send_status(struct Client *source, const struct Client *target)
 {
   const char *class_name = client_get_class_name(target);
   const char *name = client_get_name(target, HIDE_IP);
@@ -96,7 +96,7 @@ trace_send_status(struct Client *source, const struct Client *target)
       unsigned int servers = 0;
       unsigned int clients = 0;
 
-      trace_get_dependent(&servers, &clients, target);
+      _trace_get_dependent(&servers, &clients, target);
 
       if (!client_is_admin(source))
         name = client_get_name(target, MASK_IP);
@@ -115,7 +115,7 @@ trace_send_status(struct Client *source, const struct Client *target)
 }
 
 static void
-do_trace(struct Client *source, const char *name)
+_trace_do(struct Client *source, const char *name)
 {
   assert(client_is_oper(source));
 
@@ -140,7 +140,7 @@ do_trace(struct Client *source, const char *name)
       const struct Client *target = node->data;
 
       if (doall || match(name, target->name) == 0)
-        trace_send_status(source, target);
+        _trace_send_status(source, target);
     }
   }
 
@@ -200,7 +200,7 @@ mo_trace(struct Client *source, int parc, char *parv[])
                          IRCD_VERSION, route->target->name, route->target->nexthop->name);
       break;
     case SERVER_ROUTE_ISME:
-      do_trace(source, parv[1]);
+      _trace_do(source, parv[1]);
       break;
     default:
       break;

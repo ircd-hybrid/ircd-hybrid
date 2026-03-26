@@ -90,8 +90,8 @@ struct WhoQuery
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_send(struct Client *source, const struct Client *target,
-         const struct ChannelMember *member, const struct WhoQuery *who)
+_who_send(struct Client *source, const struct Client *target,
+          const struct ChannelMember *member, const struct WhoQuery *who)
 {
   char buf[IRCD_BUFSIZE];
   char *p = buf;
@@ -222,8 +222,8 @@ who_send(struct Client *source, const struct Client *target,
  * \return true if mask matches, false otherwise.
  */
 static bool
-who_matches(struct Client *source, const struct Client *target,
-            const char *mask, const struct WhoQuery *who)
+_who_matches(struct Client *source, const struct Client *target,
+             const char *mask, const struct WhoQuery *who)
 {
   if ((who->bitsel & WHOSELECT_OPER))
     if (!client_is_oper(target) ||
@@ -282,8 +282,8 @@ who_matches(struct Client *source, const struct Client *target,
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_on_common_channel(struct Client *source, struct Channel *channel,
-                      const char *mask, struct WhoQuery *who)
+_who_on_common_channel(struct Client *source, struct Channel *channel,
+                       const char *mask, struct WhoQuery *who)
 {
   list_node_t *node;
 
@@ -299,9 +299,9 @@ who_on_common_channel(struct Client *source, struct Channel *channel,
 
     if (who->maxmatches)
     {
-      if (who_matches(source, target, mask, who))
+      if (_who_matches(source, target, mask, who))
       {
-        who_send(source, target, member, who);
+        _who_send(source, target, member, who);
         --who->maxmatches;
       }
     }
@@ -314,7 +314,7 @@ who_on_common_channel(struct Client *source, struct Channel *channel,
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_global(struct Client *source, const char *mask, struct WhoQuery *who)
+_who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 {
   static uintmax_t last_used = 0;
 
@@ -334,14 +334,13 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
   LIST_FOREACH(node, source->channel_list.head)
   {
     struct ChannelMember *member = node->data;
-    who_on_common_channel(source, member->channel, mask, who);
+    _who_on_common_channel(source, member->channel, mask, who);
   }
 
   /* Second, list all matching visible clients */
   LIST_FOREACH(node, global_client_list.head)
   {
     struct Client *target = node->data;
-
     assert(IsClient(target));
 
     if (user_mode_has_flag(target, UMODE_INVISIBLE))
@@ -352,9 +351,9 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 
     if (who->maxmatches)
     {
-      if (who_matches(source, target, mask, who))
+      if (_who_matches(source, target, mask, who))
       {
-        who_send(source, target, NULL, who);
+        _who_send(source, target, NULL, who);
         --who->maxmatches;
       }
     }
@@ -367,7 +366,7 @@ who_global(struct Client *source, const char *mask, struct WhoQuery *who)
  * \param who Pointer to struct WhoQuery item that defines the options for this query.
  */
 static void
-who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQuery *who)
+_who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQuery *who)
 {
   bool is_member = false;
 
@@ -389,7 +388,7 @@ who_on_channel(struct Client *source, struct Channel *channel, const struct WhoQ
             (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
           continue;
 
-      who_send(source, target, member, who);
+      _who_send(source, target, member, who);
     }
   }
 }
@@ -549,7 +548,7 @@ m_who(struct Client *source, int parc, char *parv[])
     /* List all users on a given channel */
     struct Channel *channel = hash_find_channel(mask);
     if (channel)
-      who_on_channel(source, channel, who);
+      _who_on_channel(source, channel, who);
 
     sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
     return;
@@ -564,7 +563,7 @@ m_who(struct Client *source, int parc, char *parv[])
       if (!(who->bitsel & WHOSELECT_OPER) ||
           (client_is_oper(target) &&
            (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))))
-        who_send(source, target, NULL, who);
+        _who_send(source, target, NULL, who);
 
       sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
       return;
@@ -579,7 +578,7 @@ m_who(struct Client *source, int parc, char *parv[])
   if (who->matchsel == 0)
     who->matchsel = WHO_FIELD_DEF;
 
-  who_global(source, mask, who);
+  _who_global(source, mask, who);
 
   if (who->maxmatches == 0)
     sendto_one_numeric(source, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");

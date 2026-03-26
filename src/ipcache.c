@@ -36,7 +36,7 @@ static patricia_tree_t *ipcache_trie_v6;
 static patricia_tree_t *ipcache_trie_v4;
 
 static patricia_tree_t *
-ipcache_get_trie(void *addr)
+_ipcache_get_trie(void *addr)
 {
   if (((struct sockaddr *)addr)->sa_family == AF_INET6)
     return ipcache_trie_v6;
@@ -56,7 +56,7 @@ ipcache_get_trie(void *addr)
 struct ip_entry *
 ipcache_record_find_or_add(void *addr)
 {
-  patricia_tree_t *ptrie = ipcache_get_trie(addr);
+  patricia_tree_t *ptrie = _ipcache_get_trie(addr);
   patricia_node_t *pnode = patricia_make_and_lookup_addr(ptrie, addr, 0);
 
   if (pnode->data)  /* Deliberate crash if 'pnode' is NULL */
@@ -72,7 +72,7 @@ ipcache_record_find_or_add(void *addr)
 }
 
 static void
-ipcache_record_delete(patricia_node_t *pnode)
+_ipcache_record_delete(patricia_node_t *pnode)
 {
   struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
 
@@ -84,6 +84,21 @@ ipcache_record_delete(patricia_node_t *pnode)
     list_remove(&iptr->node, &ipcache_list);
     io_free(iptr);
   }
+}
+
+/* ipcache_remove_expired_entries()
+ *
+ * input        - NONE
+ * output       - NONE
+ * side effects - free up all ip entries with no connections
+ */
+static void
+_ipcache_remove_expired_records(void *unused)
+{
+  list_node_t *node, *node_next;
+
+  LIST_FOREACH_SAFE(node, node_next, ipcache_list.head)
+    _ipcache_record_delete(node->data);
 }
 
 /* ipcache_remove_addres()
@@ -98,7 +113,7 @@ ipcache_record_delete(patricia_node_t *pnode)
 void
 ipcache_record_remove(void *addr, bool local)
 {
-  patricia_node_t *pnode = patricia_try_search_exact_addr(ipcache_get_trie(addr), addr, 0);
+  patricia_node_t *pnode = patricia_try_search_exact_addr(_ipcache_get_trie(addr), addr, 0);
   if (pnode == NULL)
     return;
 
@@ -110,22 +125,7 @@ ipcache_record_remove(void *addr, bool local)
   else
     --iptr->count_remote;
 
-  ipcache_record_delete(pnode);
-}
-
-/* ipcache_remove_expired_entries()
- *
- * input        - NONE
- * output       - NONE
- * side effects - free up all ip entries with no connections
- */
-static void
-ipcache_remove_expired_records(void *unused)
-{
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, ipcache_list.head)
-    ipcache_record_delete(node->data);
+  _ipcache_record_delete(pnode);
 }
 
 /* ipcache_get_stats()
@@ -152,6 +152,7 @@ ipcache_init(void)
   ipcache_trie_v6 = patricia_new(PATRICIA_MAXBITS_IPV6);
   ipcache_trie_v4 = patricia_new(PATRICIA_MAXBITS_IPV4);
 
-  event_handle_t event_expire_ipcache = event_create(ircd_event_manager, "ipcache_remove_expired_records", ipcache_remove_expired_records, 123000, false, NULL, NULL);
+  event_handle_t event_expire_ipcache =
+    event_create(ircd_event_manager, "_ipcache_remove_expired_records", _ipcache_remove_expired_records, 123000, false, NULL, NULL);
   event_schedule(event_expire_ipcache);
 }

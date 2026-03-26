@@ -105,7 +105,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   whowas_add_history(target, true);
 
-  monitor_signoff(target);
+  monitor_notify_signoff(target);
 
   clear_ban_cache_list(&target->channel_list);
 
@@ -129,7 +129,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   comm_socket_note(target->connection->fd, "Nick: %s", target->name);
 
-  monitor_signon(target);
+  monitor_notify_signon(target);
 }
 
 static struct Command command_table =

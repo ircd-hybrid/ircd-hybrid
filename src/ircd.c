@@ -184,7 +184,7 @@ static struct io_getopt myopts[] =
  * processing events, checking for rehash signals, and managing client connections.
  */
 static void
-io_loop(void)
+_io_loop(void)
 {
   while (true)
   {
@@ -220,7 +220,7 @@ io_loop(void)
  * structure, which holds key settings that can be modified using the SET irc command.
  */
 static void
-initialize_global_set_options(void)
+_initialize_global_set_options(void)
 {
   GlobalSetOptions.maxclients = ConfigServerInfo.default_max_clients;
   GlobalSetOptions.autoconnect = true;
@@ -238,7 +238,7 @@ initialize_global_set_options(void)
  * This function reports an out-of-memory condition and restarts the program.
  */
 static void
-ircd_oom(void)
+_ircd_oom(void)
 {
   ircd_exit(IRCD_EXIT_RESTART, "out of memory");
 }
@@ -253,7 +253,7 @@ ircd_oom(void)
  * @param message The error message providing details about the time provider API error.
  */
 static void
-ircd_time_failure(enum io_time_error_code error_code, const char *message)
+_ircd_time_failure(enum io_time_error_code error_code, const char *message)
 {
   if (error_code == IO_TIME_ERR_INIT)
   {
@@ -273,7 +273,7 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
  * @param pid Process ID of the ircd server.
  */
 static void
-print_startup(pid_t pid)
+_print_startup(pid_t pid)
 {
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
@@ -290,7 +290,7 @@ print_startup(pid_t pid)
  * to /dev/null to isolate the daemon from the terminal.
  */
 static void
-make_daemon(void)
+_make_daemon(void)
 {
   pid_t pid = fork();
   if (pid == -1)
@@ -300,7 +300,7 @@ make_daemon(void)
   }
   else if (pid > 0)
   {
-    print_startup(pid);
+    _print_startup(pid);
     exit(EXIT_SUCCESS);
   }
 
@@ -351,13 +351,13 @@ main(int argc, char *argv[])
     return -1;
   }
 
-  io_set_oom_handler(ircd_oom);
+  io_set_oom_handler(_ircd_oom);
 
   io_rlimit_set_max_core();
 
   io_rlimit_set_max_nofile();
 
-  io_time_set_error_callback(ircd_time_failure);
+  io_time_set_error_callback(_ircd_time_failure);
   io_time_init();
 
   /* Configure libjansson to use io_calloc and io_free. */
@@ -405,9 +405,9 @@ main(int argc, char *argv[])
   }
 
   if (server_state.foreground)
-    print_startup(getpid());
+    _print_startup(getpid());
   else
-    make_daemon();
+    _make_daemon();
 
   ircd_signal_init();
 
@@ -439,7 +439,7 @@ main(int argc, char *argv[])
   channel_mode_init();
   extban_init();
   capab_init();  /* Set up default_server_capabs */
-  initialize_global_set_options();  /* Has to be called after conf_read_files() */
+  _initialize_global_set_options();  /* Has to be called after conf_read_files() */
   links_cache_init();
 
   if (string_is_empty(ConfigServerInfo.name))
@@ -490,17 +490,20 @@ main(int argc, char *argv[])
 
   module_load_all(NULL);
 
-  event_handle_t event_cleanup_tklines = event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
+  event_handle_t event_cleanup_tklines =
+    event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
   event_schedule_fuzzed(event_cleanup_tklines);
 
-  event_handle_t event_server_connect_auto = event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
+  event_handle_t event_server_connect_auto =
+    event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
   event_schedule_fuzzed(event_server_connect_auto);
 
-  event_handle_t event_save_all_databases = event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
+  event_handle_t event_save_all_databases =
+    event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
   event_schedule_fuzzed(event_save_all_databases);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
-  io_loop();
+  _io_loop();
 
   return 0;
 }

@@ -50,26 +50,6 @@ static list_t monitor_hash[HASHSIZE];
  *       |- client1
  */
 
-/*! \brief Counts up memory used by monitor list headers
- */
-void
-monitor_count_memory(unsigned int *const count, size_t *const bytes)
-{
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
-  {
-    (*count) += list_length(&monitor_hash[i]);
-
-    list_node_t *node;
-    LIST_FOREACH(node, monitor_hash[i].head)
-    {
-      const struct Monitor *const monitor = node->data;
-      (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
-    }
-  }
-
-  (*bytes) += *count * sizeof(struct Monitor);
-}
-
 /*! \brief Looks up the monitor table for a given name
  * \param name Nick name to look up
  */
@@ -88,12 +68,27 @@ _monitor_find(const char *name)
   return NULL;
 }
 
+/*! \brief Unlinks a Monitor struct from its associated hash table
+ *         and frees memory.
+ * \param monitor Name to remove
+ */
+static void
+_monitor_destroy(struct Monitor *monitor)
+{
+  assert(monitor->monitored_by.head == NULL);
+  assert(list_find(&monitor_hash[monitor->hash_value], monitor));
+
+  list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
+  io_free(monitor->name);
+  io_free(monitor);
+}
+
 /*! \brief Notifies all clients that have client's name on
  *         their monitor list.
  * \param client Pointer to Client struct
  */
 void
-monitor_signon(const struct Client *client)
+monitor_notify_signon(const struct Client *client)
 {
   assert(IsClient(client));
 
@@ -115,7 +110,7 @@ monitor_signon(const struct Client *client)
  * \param client Pointer to Client struct
  */
 void
-monitor_signoff(const struct Client *client)
+monitor_notify_signoff(const struct Client *client)
 {
   assert(IsClient(client));
 
@@ -129,28 +124,13 @@ monitor_signoff(const struct Client *client)
     sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
 }
 
-/*! \brief Unlinks a Monitor struct from its associated hash table
- *         and frees memory.
- * \param monitor Name to remove
- */
-static void
-_monitor_destroy(struct Monitor *monitor)
-{
-  assert(monitor->monitored_by.head == NULL);
-  assert(list_find(&monitor_hash[monitor->hash_value], monitor));
-
-  list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
-  io_free(monitor->name);
-  io_free(monitor);
-}
-
 /*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
  * \param name   Nick name to add
  * \param client Pointer to Client struct
  * \return false if the target is already being monitored, true otherwise
  */
 bool
-monitor_add_to_hash_table(const char *name, struct Client *client)
+monitor_subscribe(struct Client *client, const char *name)
 {
   list_node_t *node = NULL;
 
@@ -185,7 +165,7 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
  * \param client Pointer to Client struct
  */
 void
-monitor_del_from_hash_table(const char *name, struct Client *client)
+monitor_unsubscribe(struct Client *client, const char *name)
 {
   struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
@@ -234,4 +214,24 @@ monitor_clear_list(struct Client *client)
 
   assert(client->connection->monitor_list.head == NULL);
   assert(client->connection->monitor_list.tail == NULL);
+}
+
+/*! \brief Counts up memory used by monitor list headers
+ */
+void
+monitor_count_memory(unsigned int *const count, size_t *const bytes)
+{
+  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  {
+    (*count) += list_length(&monitor_hash[i]);
+
+    list_node_t *node;
+    LIST_FOREACH(node, monitor_hash[i].head)
+    {
+      const struct Monitor *const monitor = node->data;
+      (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
+    }
+  }
+
+  (*bytes) += *count * sizeof(struct Monitor);
 }

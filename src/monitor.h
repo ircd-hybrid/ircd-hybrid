@@ -36,10 +36,10 @@ struct Monitor
   list_t monitored_by;  /**< List of clients that have this entry on their monitor list */
 };
 
-extern void monitor_signon(const struct Client *);
-extern void monitor_signoff(const struct Client *);
-extern void monitor_del_from_hash_table(const char *, struct Client *);
 extern void monitor_clear_list(struct Client *);
 extern void monitor_count_memory(unsigned int *const, size_t *const);
-extern bool monitor_add_to_hash_table(const char *, struct Client *);
+extern void monitor_notify_signoff(const struct Client *);
+extern void monitor_notify_signon(const struct Client *);
+extern void monitor_unsubscribe(struct Client *, const char *);
+extern bool monitor_subscribe(struct Client *, const char *);
 #endif  /* INCLUDED_monitor_h */

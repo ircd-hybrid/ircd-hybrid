@@ -545,13 +545,16 @@ client_get_oper_name(const struct Client *client)
 void
 free_exited_clients(void)
 {
-  list_node_t *node, *node_next;
+  list_node_t *node;
 
-  LIST_FOREACH_SAFE(node, node_next, dead_list.head)
+  while ((node = dead_list.head))
   {
-    _client_destroy(node->data);
+    struct Client *client = node->data;
+
     list_remove(node, &dead_list);
     list_free_node(node);
+
+    _client_destroy(client);
   }
 }
 

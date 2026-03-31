@@ -250,6 +250,38 @@ client_create_remote(struct Client *uplink)
 }
 
 static void
+_client_destroy_local(struct Client *client)
+{
+  assert(client->connection);
+  assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
+  assert(client->connection->list_task == NULL);
+  assert(client->connection->lookup_request == NULL);
+  assert(client->connection->fd == NULL);
+  assert(client->connection->listener == NULL);
+  assert(client->connection->activity_timeout_event == NULL);
+  assert(client->connection->flood_recalc_event == NULL);
+  assert(list_is_empty(&client->connection->accept_list));
+  assert(list_is_empty(&client->connection->monitor_list));
+  assert(list_is_empty(&client->connection->invite_list));
+  assert(dbuf_length(&client->connection->buf_recvq) == 0);
+  assert(dbuf_length(&client->connection->buf_sendq) == 0);
+  assert(client->connection->base_class == NULL);
+  assert(client->connection->oper_class == NULL);
+  assert(server_conf_get(client) == NULL);
+  assert(client_has_flag(client, FLAGS_CLOSING) && IsDead(client));
+
+  io_free(client->connection->password);
+  client->connection->password = NULL;
+  io_free(client->connection->oper_name);
+  client->connection->oper_name = NULL;
+  io_free(client->connection->abort_reason);
+  client->connection->abort_reason = NULL;
+
+  io_free(client->connection);
+  client->connection = NULL;
+}
+
+static void
 _client_destroy(struct Client *client)
 {
   assert(client && !client_is_me(client));
@@ -275,34 +307,7 @@ _client_destroy(struct Client *client)
   client->away_message = NULL;
 
   if (client_is_local(client))
-  {
-    assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
-    assert(client->connection->list_task == NULL);
-    assert(client->connection->lookup_request == NULL);
-    assert(client->connection->fd == NULL);
-    assert(client->connection->listener == NULL);
-    assert(client->connection->activity_timeout_event == NULL);
-    assert(client->connection->flood_recalc_event == NULL);
-    assert(list_is_empty(&client->connection->accept_list));
-    assert(list_is_empty(&client->connection->monitor_list));
-    assert(list_is_empty(&client->connection->invite_list));
-    assert(dbuf_length(&client->connection->buf_recvq) == 0);
-    assert(dbuf_length(&client->connection->buf_sendq) == 0);
-    assert(client->connection->base_class == NULL);
-    assert(client->connection->oper_class == NULL);
-    assert(server_conf_get(client) == NULL);
-    assert(client_has_flag(client, FLAGS_CLOSING) && IsDead(client));
-
-    io_free(client->connection->password);
-    client->connection->password = NULL;
-    io_free(client->connection->oper_name);
-    client->connection->oper_name = NULL;
-    io_free(client->connection->abort_reason);
-    client->connection->abort_reason = NULL;
-
-    io_free(client->connection);
-    client->connection = NULL;
-  }
+    _client_destroy_local(client);
 
   io_free(client);
 }

@@ -90,7 +90,6 @@ list_t global_server_list;
 list_t oper_list;
 
 static list_t dead_list, abort_list;
-static list_node_t *eac_next;  /* next aborted client to exit */
 
 static void _client_exit_teardown_connection(struct Client *client);
 static void _client_exit_log_session(const struct Client *client, const char *reason);
@@ -945,9 +944,6 @@ _client_exit_schedule(struct Client *client, const char *reason)
   assert(list_find(&abort_list, client) == NULL);
   list_node_t *node = list_make_node();
   list_add_tail(client, node, &abort_list);
-
-  if (eac_next == NULL)
-    eac_next = node;
 }
 
 void
@@ -987,10 +983,9 @@ exit_aborted_clients(void)
 {
   list_node_t *node;
 
-  LIST_FOREACH_SAFE(node, eac_next, abort_list.head)
+  while ((node = abort_list.head))
   {
     struct Client *client = node->data;
-    eac_next = node->next;
 
     list_remove(node, &abort_list);
     list_free_node(node);

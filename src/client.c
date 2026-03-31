@@ -743,8 +743,8 @@ _client_exit_detach(struct Client *client)
   }
 
   assert(list_find(&dead_list, client) == NULL);
-  /* Schedule the final memory deallocation. */
-  list_add(client, list_make_node(), &dead_list);
+  /* Queue the client for final destruction at the tail so dead_list preserves detach order. */
+  list_add_tail(client, list_make_node(), &dead_list);
 }
 
 static void

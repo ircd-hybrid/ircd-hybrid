@@ -190,7 +190,7 @@ _who_send(struct Client *source, const struct Client *target,
 
   if ((who->fields & WHO_FIELD_IDL))
   {
-    if (MyClient(target) && (client_is_oper(source) || target == source))
+    if (client_is_local(target) && (client_is_oper(source) || target == source))
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source, target));
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", 0);

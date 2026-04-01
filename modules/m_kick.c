@@ -145,7 +145,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
                          target->name, ConfigChannel.max_kick_length, reason);
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
-                         IsHidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
+                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
 
   channel_remove_member(member_target);

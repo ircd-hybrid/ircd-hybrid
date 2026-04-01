@@ -166,7 +166,6 @@ extern uint64_t UMODE_SPY;
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
-#define IsHidden(x)             ((x)->flags &  FLAGS_HIDDEN)
 
 
 enum client_class_type
@@ -408,6 +407,12 @@ static inline bool
 client_is_admin(const struct Client *client)
 {
   return user_mode_has_flag(client, UMODE_ADMIN);
+}
+
+static inline bool
+client_is_hidden(const struct Client *client)
+{
+  return client_has_flag(client, FLAGS_HIDDEN);
 }
 
 static inline bool

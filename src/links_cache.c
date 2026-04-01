@@ -152,7 +152,7 @@ _links_cache_update(void *unused)
   LIST_FOREACH(node, global_server_list.head)
   {
     const struct Client *server = node->data;
-    if (IsHidden(server) || client_is_me(server))
+    if (client_is_hidden(server) || client_is_me(server))
       continue;
     if (client_is_service(server) && ConfigServerHide.hide_services)
       continue;

@@ -206,7 +206,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   }
 
   const struct Client *origin = source->uplink;
-  if (IsHidden(source->uplink) || ConfigServerHide.hide_servers)
+  if (client_is_hidden(source->uplink) || ConfigServerHide.hide_servers)
     origin = &me;
 
   /* Lost the TS, other side wins, so remove modes on this side */

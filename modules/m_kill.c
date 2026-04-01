@@ -159,7 +159,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
     if (IsServer(source))
     {
       /* Don't send clients kills from a hidden server */
-      if ((IsHidden(source) || ConfigServerHide.hide_servers) && !client_is_oper(target))
+      if ((client_is_hidden(source) || ConfigServerHide.hide_servers) && !client_is_oper(target))
         sendto_one(target, ":%s KILL %s :%s",
                    me.name, target->name, reason);
       else
@@ -199,7 +199,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
   client_set_flag(target, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */
-  if (IsServer(source) && (IsHidden(source) || ConfigServerHide.hide_servers))
+  if (IsServer(source) && (client_is_hidden(source) || ConfigServerHide.hide_servers))
     client_exit_fmt(target, "Killed (%s %s)", me.name, reason);
   else
     client_exit_fmt(target, "Killed (%s %s)", source->name, reason);

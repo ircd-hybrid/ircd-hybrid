@@ -65,7 +65,7 @@ _links_send_live(struct Client *client, const char *mask)
     const struct Client *const server = node->data;
     if (!client_is_oper(client))
     {
-      if (IsHidden(server))
+      if (client_is_hidden(server))
         continue;
       if (client_is_service(server) && ConfigServerHide.hide_services)
         continue;

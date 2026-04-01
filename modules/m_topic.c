@@ -131,7 +131,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
   if (IsClient(source))
     snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
              source->name, source->username, source->host);
-  else if (IsHidden(source) || ConfigServerHide.hide_servers)
+  else if (client_is_hidden(source) || ConfigServerHide.hide_servers)
     strlcpy(topic_info, me.name, sizeof(topic_info));
   else
     strlcpy(topic_info, source->name, sizeof(topic_info));
@@ -146,7 +146,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
                          source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                         (IsHidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
+                         (client_is_hidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
                          channel->name, string_or_empty(channel->topic));
 }
 

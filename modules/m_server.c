@@ -323,7 +323,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   }
 
   sendto_servers(client, 0, 0, ":%s SID %s 2 %s +%s :%s",
-                 me.id, client->name, client->id, IsHidden(client) ? "h" : "", client->info);
+                 me.id, client->name, client->id, client_is_hidden(client) ? "h" : "", client->info);
 
   /*
    * Pass on my client information to the new server
@@ -349,7 +349,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
 
     sendto_one(client, ":%s SID %s %u %s +%s :%s",
                target->uplink->id, target->name, target->hopcount + 1,
-               target->id, IsHidden(target) ? "h" : "", target->info);
+               target->id, client_is_hidden(target) ? "h" : "", target->info);
   }
 
   server_burst(client);
@@ -630,7 +630,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   hash_add_id(target);
 
   sendto_servers(source->nexthop, 0, 0, ":%s SID %s %u %s +%s :%s",
-                 source->id, target->name, target->hopcount + 1, target->id, IsHidden(target) ? "h" : "", target->info);
+                 source->id, target->name, target->hopcount + 1, target->id, client_is_hidden(target) ? "h" : "", target->info);
   sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",
                  target->name, source->name);
 }

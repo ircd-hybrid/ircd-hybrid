@@ -157,7 +157,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
       return;
 
     /* Fake it for server hiding, if it's our client */
-    if ((ConfigServerHide.hide_servers || IsHidden(source)) &&
+    if ((ConfigServerHide.hide_servers || client_is_hidden(source)) &&
         client_is_local(target) && !client_is_oper(target))
       sendto_one_numeric(target, &me, numeric | SND_EXPLICIT, "%s", text);
     else

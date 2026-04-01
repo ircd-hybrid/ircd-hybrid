@@ -167,7 +167,7 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_server_numeric(struct Client *source, const struct Client *target)
 {
-  if ((ConfigServerHide.hide_servers || IsHidden(target->uplink)) &&
+  if ((ConfigServerHide.hide_servers || client_is_hidden(target->uplink)) &&
       !(client_is_oper(source) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);

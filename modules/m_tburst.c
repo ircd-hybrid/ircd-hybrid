@@ -96,7 +96,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
   if (accept_remote)
   {
     bool topic_differs = strncmp(string_or_empty(channel->topic), topic, TOPICLEN);
-    bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source));
+    bool hidden_server = (ConfigServerHide.hide_servers || client_is_hidden(source));
 
     channel_set_topic(channel, topic, setby, remote_topic_ts, false);
 

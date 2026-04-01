@@ -228,7 +228,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   if (IsClient(client))
     snprintf(ban->who, sizeof(ban->who), "%s!%s@%s",
              client->name, client->username, client->host);
-  else if (IsHidden(client) || ConfigServerHide.hide_servers)
+  else if (client_is_hidden(client) || ConfigServerHide.hide_servers)
     strlcpy(ban->who, me.name, sizeof(ban->who));
   else
     strlcpy(ban->who, client->name, sizeof(ban->who));
@@ -828,7 +828,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
                    client->name, client->username, client->host, channel->name);
   else
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                   (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
+                   (client_is_hidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
 
   for (unsigned int i = 0; i < mode_count; ++i)
   {
@@ -854,7 +854,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
                        client->name, client->username, client->host, channel->name);
       else
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                       (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
+                       (client_is_hidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
 
       pbl = 0;
       parabuf[0] = '\0';

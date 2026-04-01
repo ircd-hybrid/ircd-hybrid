@@ -293,7 +293,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   channel->mode = mode;
 
   const struct Client *origin = source;
-  if (IsHidden(source) || ConfigServerHide.hide_servers)
+  if (client_is_hidden(source) || ConfigServerHide.hide_servers)
     origin = &me;
 
   /* Lost the TS, other side wins, so remove modes on this side */

@@ -127,7 +127,7 @@ _trace_do(struct Client *source, const char *name)
     doall = true;
   else if (match(name, me.name) == 0)
     doall = true;
-  else if (!MyClient(source) && strcmp(name, me.id) == 0)
+  else if (!client_is_local(source) && strcmp(name, me.id) == 0)
     doall = true;
 
   const list_node_t *node;

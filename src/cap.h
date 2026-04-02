@@ -36,8 +36,6 @@ enum
   CAP_STANDARD_REPLIES = 1 << 8,  /**< standard-replies client capability */
 };
 
-#define HasCap(x, y) ((x)->connection->cap & (y))
-
 struct Cap
 {
   const char *name;

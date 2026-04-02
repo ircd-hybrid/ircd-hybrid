@@ -250,7 +250,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   if (IsDead(to->nexthop))
     return;
 
-  if (!HasCap(to, CAP_STANDARD_REPLIES))
+  if (!client_has_cap(to, CAP_STANDARD_REPLIES))
     return;
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -721,10 +721,10 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
       if (target->connection->last_broadcast_id == broadcast_id)
         continue;
 
-      if (required_cap && HasCap(target, required_cap) != required_cap)
+      if (required_cap && (target->connection->cap & required_cap) != required_cap)
         continue;
 
-      if (excluded_cap && HasCap(target, excluded_cap))
+      if (excluded_cap && (target->connection->cap & excluded_cap))
         continue;
 
       target->connection->last_broadcast_id = broadcast_id;
@@ -733,7 +733,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
   }
 
   if (touser && client_is_local(user) && !IsDead(user))
-    if (HasCap(user, required_cap) == required_cap)
+    if ((user->connection->cap & required_cap) == required_cap)
       sendto_one_buffer(user, buffer);
 
   dbuf_ref_free(buffer);
@@ -773,10 +773,10 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
     if (required_rank && member_highest_rank(member) < required_rank)
       continue;
 
-    if (required_cap && HasCap(target, required_cap) != required_cap)
+    if (required_cap && (target->connection->cap & required_cap) != required_cap)
       continue;
 
-    if (excluded_cap && HasCap(target, excluded_cap))
+    if (excluded_cap && (target->connection->cap & excluded_cap))
       continue;
 
     sendto_one_buffer(target, buffer);

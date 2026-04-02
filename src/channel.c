@@ -480,8 +480,8 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
   assert(IsClient(client));
 
   const bool is_member = member_find_link(client, channel) != NULL;
-  const bool multi_prefix = HasCap(client, CAP_MULTI_PREFIX) != 0;
-  const bool uhnames = HasCap(client, CAP_UHNAMES) != 0;
+  const bool multi_prefix = client_has_cap(client, CAP_MULTI_PREFIX);
+  const bool uhnames = client_has_cap(client, CAP_UHNAMES);
 
   if (channel_is_public(channel) || is_member)
   {

@@ -361,6 +361,18 @@ extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
 
 static inline bool
+client_is_local(const struct Client *client)
+{
+  return client->connection != NULL;
+}
+
+static inline bool
+client_has_cap(const struct Client *client, unsigned int cap_flag)
+{
+  return client_is_local(client) && ((client->connection->cap & cap_flag));
+}
+
+static inline bool
 client_has_flag(const struct Client *client, unsigned int flag)
 {
   return (client->flags & flag) != 0;
@@ -388,12 +400,6 @@ static inline bool
 client_is_me(const struct Client *client)
 {
   return client == &me;
-}
-
-static inline bool
-client_is_local(const struct Client *client)
-{
-  return client->connection != NULL;
 }
 
 static inline bool

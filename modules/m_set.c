@@ -121,7 +121,7 @@ set_option_find(const char *name)
 static void
 mo_set(struct Client *source, int parc, char *parv[])
 {
-  if (!HasOFlag(source, OPER_FLAG_SET))
+  if (!client_has_oper_flag(source, OPER_FLAG_SET))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "set");
     return;

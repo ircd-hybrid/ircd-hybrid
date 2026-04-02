@@ -186,7 +186,7 @@ mo_kline(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = true, .simple_mask = false };
 
-  if (!HasOFlag(source, OPER_FLAG_KLINE))
+  if (!client_has_oper_flag(source, OPER_FLAG_KLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kline");
     return;

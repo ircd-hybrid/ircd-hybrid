@@ -271,7 +271,7 @@ mo_module(struct Client *source, int parc, char *parv[])
   const char *const subcmd = parv[1];
   const char *const module = parv[2];
 
-  if (!HasOFlag(source, OPER_FLAG_MODULE))
+  if (!client_has_oper_flag(source, OPER_FLAG_MODULE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "module");
     return;

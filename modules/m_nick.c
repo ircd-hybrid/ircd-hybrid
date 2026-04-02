@@ -641,7 +641,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   }
 
   if (!client_has_flag(source, FLAGS_EXEMPTRESV) &&
-      !(client_is_oper(source) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
+      !(client_is_oper(source) && client_has_oper_flag(source, OPER_FLAG_NICK_RESV)) &&
       (resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);

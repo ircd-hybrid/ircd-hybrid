@@ -335,7 +335,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
     return;
   }
 
-  if (MyClient(source) && !HasOFlag(source, OPER_FLAG_MESSAGE_MASS))
+  if (MyClient(source) && !client_has_oper_flag(source, OPER_FLAG_MESSAGE_MASS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
     return;

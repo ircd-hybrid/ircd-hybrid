@@ -56,7 +56,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
   const char *const name = parv[1];
   list_node_t *node;
 
-  if (!HasOFlag(source, OPER_FLAG_OPME))
+  if (!client_has_oper_flag(source, OPER_FLAG_OPME))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "opme");
     return;

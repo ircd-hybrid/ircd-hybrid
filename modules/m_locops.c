@@ -52,7 +52,7 @@ mo_locops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (!HasOFlag(source, OPER_FLAG_LOCOPS))
+  if (!client_has_oper_flag(source, OPER_FLAG_LOCOPS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "locops");
     return;

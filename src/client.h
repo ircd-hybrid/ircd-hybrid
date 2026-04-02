@@ -154,13 +154,6 @@ extern uint64_t UMODE_SERVNOTICE;
 extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
 
-#define HasOFlag(x, y) ((x)->connection->operflags &   (y))
-#define AddOFlag(x, y) ((x)->connection->operflags |=  (y))
-#define DelOFlag(x, y) ((x)->connection->operflags &= ~(y))
-#define ClrOFlag(x)    ((x)->connection->operflags = 0)
-
-
-
 /* flags macros. */
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
@@ -388,6 +381,33 @@ static inline void
 client_unset_flag(struct Client *client, unsigned int flags)
 {
   client->flags &= ~flags;
+}
+
+static inline bool
+client_has_oper_flag(const struct Client *client, unsigned int flag)
+{
+  return client_is_local(client) && ((client->connection->operflags & flag));
+}
+
+static inline void
+client_set_oper_flag(struct Client *client, unsigned int flag)
+{
+  if (client_is_local(client))
+    client->connection->operflags |= flag;
+}
+
+static inline void
+client_unset_oper_flag(struct Client *client, unsigned int flag)
+{
+  if (client_is_local(client))
+    client->connection->operflags &= ~flag;
+}
+
+static inline void
+client_clear_oper_flags(struct Client *client)
+{
+  if (client_is_local(client))
+    client->connection->operflags = 0;
 }
 
 static inline bool

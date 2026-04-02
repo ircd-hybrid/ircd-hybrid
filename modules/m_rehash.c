@@ -124,7 +124,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
 
   if (!string_is_empty(parv[2]))
   {
-    if (!HasOFlag(source, OPER_FLAG_REHASH_REMOTE))
+    if (!client_has_oper_flag(source, OPER_FLAG_REHASH_REMOTE))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash:remote");
       return;
@@ -135,7 +135,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
   }
   else
   {
-    if (!HasOFlag(source, OPER_FLAG_REHASH))
+    if (!client_has_oper_flag(source, OPER_FLAG_REHASH))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash");
       return;

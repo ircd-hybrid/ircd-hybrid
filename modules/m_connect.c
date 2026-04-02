@@ -114,7 +114,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
 {
   if (!string_is_empty(parv[3]))
   {
-    if (!HasOFlag(source, OPER_FLAG_CONNECT_REMOTE))
+    if (!client_has_oper_flag(source, OPER_FLAG_CONNECT_REMOTE))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect:remote");
       return;
@@ -124,7 +124,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
       return;
   }
 
-  if (!HasOFlag(source, OPER_FLAG_CONNECT))
+  if (!client_has_oper_flag(source, OPER_FLAG_CONNECT))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect");
     return;

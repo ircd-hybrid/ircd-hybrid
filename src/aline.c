@@ -234,7 +234,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
       ++parv;
       --parc;
 
-      if (!HasOFlag(client, OPER_FLAG_REMOTEBAN))
+      if (!client_has_oper_flag(client, OPER_FLAG_REMOTEBAN))
       {
         sendto_one_numeric(client, &me, ERR_NOPRIVS, "remoteban");
         return false;

@@ -48,7 +48,7 @@ mo_globops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
 
-  if (!HasOFlag(source, OPER_FLAG_GLOBOPS))
+  if (!client_has_oper_flag(source, OPER_FLAG_GLOBOPS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "globops");
     return;

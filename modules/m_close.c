@@ -46,7 +46,7 @@
 static void
 mo_close(struct Client *source, int parc, char *parv[])
 {
-  if (!HasOFlag(source, OPER_FLAG_CLOSE))
+  if (!client_has_oper_flag(source, OPER_FLAG_CLOSE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "close");
     return;

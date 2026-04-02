@@ -90,7 +90,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
 {
   struct aline_ctx aline = { .add = false, .simple_mask = true };
 
-  if (!HasOFlag(source, OPER_FLAG_UNRESV))
+  if (!client_has_oper_flag(source, OPER_FLAG_UNRESV))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unresv");
     return;

@@ -832,7 +832,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
   if (client_is_local(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
   {
-    if (!(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)))
+    if (!(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)))
     {
       const struct ResvItem *const resv = resv_find(channel->name, match);
       if (resv && resv_exempt_find(client, resv) == false)
@@ -1039,7 +1039,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
 
   const struct ResvItem *resv;
   if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
-      !(client_is_oper(client) && HasOFlag(client, OPER_FLAG_JOIN_RESV)) &&
+      !(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)) &&
       ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
   {
     sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);

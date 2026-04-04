@@ -104,7 +104,7 @@ static void _client_exit_detach(struct Client *client);
 void
 client_reset_activity_timeout(struct Client *client)
 {
-  assert(client_is_local(client));
+  assert(client && client_is_local(client));
   assert(client->connection->activity_timeout_event);
 
   uintmax_t timeout_duration_ms;
@@ -126,7 +126,7 @@ static void
 client_activity_timeout_handler(void *data)
 {
   struct Client *const client = data;
-  assert(client_is_local(client));
+  assert(client && client_is_local(client));
 
   /*
    * It is possible for this event to fire for a client that has already been
@@ -186,7 +186,7 @@ client_activity_timeout_handler(void *data)
 void
 client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
 {
-  assert(client->connection);
+  assert(client && client_is_local(client));
 
   struct ClassItem **class_ptr_location = NULL;
   if (type == CLIENT_CLASS_BASE)
@@ -252,7 +252,7 @@ client_create_remote(struct Client *uplink)
 static void
 _client_destroy_local(struct Client *client)
 {
-  assert(client->connection);
+  assert(client && client_is_local(client));
   assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
   assert(client->connection->list_task == NULL);
   assert(client->connection->lookup_request == NULL);

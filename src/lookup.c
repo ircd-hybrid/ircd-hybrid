@@ -170,6 +170,7 @@ lookup_delete(struct LookupRequest *lookup)
 void
 lookup_start(struct Client *client)
 {
+  assert(client && client_is_local(client));
   assert(client->connection->lookup_request == NULL);
 
   struct LookupRequest *lookup = io_calloc(sizeof(*lookup));

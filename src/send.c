@@ -94,8 +94,8 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
 static void
 sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 {
+  assert(to && client_is_local(to));
   assert(!client_is_me(to));
-  assert(client_is_local(to));
 
   const unsigned int max_sendq = client_get_max_sendq(to);
   const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
@@ -142,9 +142,9 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
 static void
 sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
 {
-  assert(client_is_local(to));
-  assert(IsServer(to));
+  assert(to && client_is_local(to));
   assert(!client_is_me(to));
+  assert(IsServer(to));
   assert(to->nexthop == to);
 
   if (to == from->nexthop)
@@ -182,6 +182,8 @@ sendq_unblocked(fde_t *F, void *data)
 void
 send_queued_write(struct Client *to)
 {
+  assert(to && client_is_local(to));
+
   /*
    * Once socket is marked dead, we cannot start writing to it,
    * even if the error is removed...

@@ -424,10 +424,10 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
   assert(buffer_end >= buffer);
   assert((buffer_end - buffer) < IRCD_BUFSIZE);
   assert(*buffer_end == '\0');
-  assert(!IsDead(client));
-  assert(client->connection);
+  assert(client && client_is_local(client));
   assert(client->connection->fd);
   assert(client->connection->fd->flags.open);
+  assert(!IsDead(client));
 
   parse_context_t ctx =
   {

@@ -525,9 +525,8 @@ server_connect_auto(void *unused)
 void
 server_schedule_reconnect(struct Client *client)
 {
-  assert(client);
+  assert(client && client_is_local(client));
   assert(IsServer(client));
-  assert(client_is_local(client));
 
   struct ConnectItem *const connect = server_conf_get(client);
   if (connect == NULL)

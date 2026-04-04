@@ -177,9 +177,8 @@ hook_container_find(const char *name)
  * @param container Pointer to the HookContainer structure.
  * @param function Address of the hook function.
  * @param priority Priority level to insert the hook in the chain.
- * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
-list_node_t *
+void
 hook_install(struct HookContainer *container, hook_function_t function, hook_priority_t priority)
 {
   unsigned int length = list_length(&container->chain);
@@ -223,8 +222,6 @@ hook_install(struct HookContainer *container, hook_function_t function, hook_pri
 
   list_node_t *node = io_calloc(sizeof(*node));
   list_add_at(&container->chain, insert_position, function, node);
-
-  return node;
 }
 
 /**

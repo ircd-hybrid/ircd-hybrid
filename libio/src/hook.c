@@ -160,7 +160,7 @@ hook_container_find(const char *name)
   LIST_FOREACH(node, hook_container_list.head)
   {
     struct HookContainer *container = node->data;
-    if (strcasecmp(container->name, name) == 0)
+    if (strcmp(container->name, name) == 0)
       return container;
   }
 

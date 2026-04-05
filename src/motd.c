@@ -126,9 +126,16 @@ _motd_cache(struct Motd *motd)
 
   /* Need the file's modification time */
   struct stat sb;
-  if (fstat(fd, &sb) || !S_ISREG(sb.st_mode))
+  if (fstat(fd, &sb))
   {
     log_write(LOG_TYPE_IRCD, "Couldn't fstat \"%s\": %s", motd->path, strerror(errno));
+    close(fd);
+    return NULL;
+  }
+
+  if (!S_ISREG(sb.st_mode))
+  {
+    log_write(LOG_TYPE_IRCD, "\"%s\" is not a regular file", motd->path);
     close(fd);
     return NULL;
   }

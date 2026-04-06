@@ -53,7 +53,7 @@ xline_check(const struct GecosItem *gecos)
   {
     struct Client *client = node->data;
 
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     if (match(gecos->mask, client->info) == 0)

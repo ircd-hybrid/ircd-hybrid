@@ -427,7 +427,7 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
   assert(client && client_is_local(client));
   assert(client->connection->fd);
   assert(client->connection->fd->flags.open);
-  assert(!IsDead(client));
+  assert(!client_is_dead(client));
 
   parse_context_t ctx =
   {

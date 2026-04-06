@@ -188,7 +188,7 @@ send_queued_write(struct Client *to)
    * Once socket is marked dead, we cannot start writing to it,
    * even if the error is removed...
    */
-  if (IsDead(to) || client_has_flag(to, FLAGS_BLOCKED))
+  if (client_is_dead(to) || client_has_flag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
@@ -249,7 +249,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   assert(format);
   assert((context_len > 0) == (context != NULL));
 
-  if (IsDead(to->nexthop))
+  if (client_is_dead(to->nexthop))
     return;
 
   if (!client_has_cap(to, CAP_STANDARD_REPLIES))
@@ -312,7 +312,7 @@ sendto_one_note(struct Client *to, const struct Client *from, const char *comman
 void
 sendto_one(struct Client *to, const char *format, ...)
 {
-  if (IsDead(to->nexthop))
+  if (client_is_dead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -330,7 +330,7 @@ sendto_one(struct Client *to, const char *format, ...)
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-  if (IsDead(to->nexthop))
+  if (client_is_dead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   const char *dest = client_get_id_or_name(to, to);
@@ -360,7 +360,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *format, ...)
 {
-  if (IsDead(to->nexthop))
+  if (client_is_dead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
   const char *dest = client_get_id_or_name(to, to);
@@ -392,7 +392,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
 void
 sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
 {
-  if (IsDead(to->nexthop))
+  if (client_is_dead(to->nexthop))
     return;
 
   struct dbuf_block *buffer = dbuf_alloc();
@@ -478,7 +478,7 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
   LIST_FOREACH(node, list->head)
   {
     struct Client *client = node->data;
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     if (sendto_clients_qualifies(client, flags, recipient) == false)
@@ -547,7 +547,7 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   LIST_FOREACH(node, local_client_list.head)
   {
     struct Client *target = node->data;
-    if (IsDead(target))
+    if (client_is_dead(target))
       continue;
 
     if (filter_fn(target, filter_ctx))
@@ -557,7 +557,7 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   LIST_FOREACH(node, local_server_list.head)
   {
     struct Client *target = node->data;
-    if (IsDead(target))
+    if (client_is_dead(target))
       continue;
 
     if (target == exclude_client)
@@ -605,7 +605,7 @@ sendto_servers(const struct Client *exclude_client, const unsigned int required_
     struct Client *client = node->data;
 
     /* If dead already skip */
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     /* check against 'one' */
@@ -654,7 +654,7 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int r
   {
     struct Client *target = node->data;
 
-    if (IsDead(target->nexthop))
+    if (client_is_dead(target->nexthop))
       continue;
 
     /* Do not attempt to send to ourselves ... */
@@ -714,7 +714,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
       const struct ChannelMember *member2 = node2->data;
       struct Client *target = member2->client;
 
-      if (IsDead(target))
+      if (client_is_dead(target))
         continue;
 
       if (target == user)
@@ -734,7 +734,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
     }
   }
 
-  if (touser && client_is_local(user) && !IsDead(user))
+  if (touser && client_is_local(user) && !client_is_dead(user))
     if ((user->connection->cap & required_cap) == required_cap)
       sendto_one_buffer(user, buffer);
 
@@ -766,7 +766,7 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
     const struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
-    if (IsDead(target))
+    if (client_is_dead(target))
       continue;
 
     if (exclude_client && (target == exclude_client->nexthop))
@@ -833,7 +833,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
 
     assert(IsClient(target));
 
-    if (IsDead(target->nexthop))
+    if (client_is_dead(target->nexthop))
       continue;
 
     if (exclude_client && (target->nexthop == exclude_client->nexthop))

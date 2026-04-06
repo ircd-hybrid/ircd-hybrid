@@ -133,7 +133,7 @@ client_activity_timeout_handler(void *data)
    * marked for termination (e.g., in the same main loop iteration). Do not
    * proceed if the client is already dead.
    */
-  if (IsDead(client))
+  if (client_is_dead(client))
     return;
 
   /*
@@ -268,7 +268,7 @@ _client_destroy_local(struct Client *client)
   assert(client->connection->base_class == NULL);
   assert(client->connection->oper_class == NULL);
   assert(server_conf_get(client) == NULL);
-  assert(client_has_flag(client, FLAGS_CLOSING) && IsDead(client));
+  assert(client_has_flag(client, FLAGS_CLOSING) && client_is_dead(client));
 
   io_free(client->connection->password);
   client->connection->password = NULL;
@@ -329,7 +329,7 @@ check_conf_klines(void)
   {
     struct Client *client = node->data;
     /* If a client is already being exited */
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
@@ -360,7 +360,7 @@ check_conf_klines(void)
   {
     struct Client *client = node->data;
     /* If a client is already being exited */
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))

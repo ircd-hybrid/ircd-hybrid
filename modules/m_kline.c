@@ -53,7 +53,7 @@ kline_check(const struct AddressRec *arec)
   {
     struct Client *client = node->data;
 
-    if (IsDead(client))
+    if (client_is_dead(client))
       continue;
 
     if (match(arec->username, client->username))

@@ -155,7 +155,6 @@ extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
 
 /* flags macros. */
-#define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
 #define IsDefunct(x)            ((x)->flags & (FLAGS_DEADSOCKET|FLAGS_CLOSING|FLAGS_KILLED))
 
@@ -432,6 +431,12 @@ static inline bool
 client_is_admin(const struct Client *client)
 {
   return user_mode_has_flag(client, UMODE_ADMIN);
+}
+
+static inline bool
+client_is_dead(const struct Client *client)
+{
+  return client_has_flag(client, FLAGS_DEADSOCKET);
 }
 
 static inline bool

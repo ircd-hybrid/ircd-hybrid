@@ -956,7 +956,7 @@ client_exit_fmt(struct Client *client, const char *format, ...)
 static void
 _client_exit_schedule(struct Client *client, const char *reason)
 {
-  if (IsDefunct(client))
+  if (client_is_defunct(client))
     return;
 
   SetDead(client);
@@ -975,7 +975,7 @@ _client_exit_schedule(struct Client *client, const char *reason)
 void
 dead_link_on_write(struct Client *client, const char *format, ...)
 {
-  if (IsDefunct(client))
+  if (client_is_defunct(client))
     return;
 
   char err_str[IRCD_BUFSIZE];
@@ -991,7 +991,7 @@ dead_link_on_write(struct Client *client, const char *format, ...)
 void
 dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
 {
-  if (IsDefunct(client))
+  if (client_is_defunct(client))
     return;
 
   if (recv_return_val == 0)

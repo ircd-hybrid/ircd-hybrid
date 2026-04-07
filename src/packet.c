@@ -152,7 +152,7 @@ _parse_client_queued(struct Client *client)
 
     while (true)
     {
-      if (IsDefunct(client))
+      if (client_is_defunct(client))
         return;
 
       /* Rate unknown clients at MAX_FLOOD_HANDSHAKE per loop */
@@ -179,7 +179,7 @@ _parse_client_queued(struct Client *client)
   {
     while (true)
     {
-      if (IsDefunct(client))
+      if (client_is_defunct(client))
         return;
 
       const size_t line_length = _extract_one_line(&client->connection->buf_recvq, line_buffer);
@@ -205,7 +205,7 @@ _parse_client_queued(struct Client *client)
      */
     while (true)
     {
-      if (IsDefunct(client))
+      if (client_is_defunct(client))
         return;
 
       /*
@@ -297,7 +297,7 @@ read_packet(fde_t *F, void *data_)
   assert(client->connection->fd);
   assert(client->connection->fd == F);
 
-  if (IsDefunct(client))
+  if (client_is_defunct(client))
     return;
 
   /*
@@ -340,7 +340,7 @@ read_packet(fde_t *F, void *data_)
     /* Attempt to parse what we have */
     _parse_client_queued(client);
 
-    if (IsDefunct(client))
+    if (client_is_defunct(client))
       return;
 
     /* Check to make sure we're not flooding */

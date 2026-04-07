@@ -337,6 +337,7 @@ extern void client_reset_activity_timeout(struct Client *);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
+extern void client_update_name(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
 extern void check_conf_klines(void);
 extern void client_init(void);

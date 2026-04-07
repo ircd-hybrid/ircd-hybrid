@@ -122,12 +122,8 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
                                target->name, target->username, target->host, new_nick);
 
-  hash_del_client(target);
-  strlcpy(target->name, new_nick, sizeof(target->name));
+  client_update_name(target, new_nick);
   target->tsinfo = new_ts;
-  hash_add_client(target);
-
-  comm_socket_note(target->connection->fd, "Nick: %s", target->name);
 
   monitor_notify_signon(target);
 }

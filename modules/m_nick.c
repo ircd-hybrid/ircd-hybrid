@@ -180,13 +180,7 @@ set_initial_nick(struct Client *source, const char *nick)
   if (samenick == false)
     source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
 
-  if (source->name[0])
-    hash_del_client(source);
-
-  strlcpy(source->name, nick, sizeof(source->name));
-  hash_add_client(source);
-
-  comm_socket_note(source->connection->fd, "Nick: %s", source->name);
+  client_update_name(source, nick);
 
   source->connection->registration &= ~REG_NEED_NICK;
   if (source->connection->registration == 0)
@@ -248,11 +242,7 @@ nick_change_local(struct Client *source, const char *nick)
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, nick);
 
-  hash_del_client(source);
-  strlcpy(source->name, nick, sizeof(source->name));
-  hash_add_client(source);
-
-  comm_socket_note(source->connection->fd, "Nick: %s", source->name);
+  client_update_name(source, nick);
 
   if (samenick == false)
     monitor_notify_signon(source);
@@ -302,9 +292,7 @@ nick_change_remote(struct Client *source, char *parv[])
                                source->name, source->username, source->host, new_nick);
 
   /* Set the new nick name */
-  hash_del_client(source);
-  strlcpy(source->name, new_nick, sizeof(source->name));
-  hash_add_client(source);
+  client_update_name(source, new_nick);
 
   if (samenick == false)
     monitor_notify_signon(source);

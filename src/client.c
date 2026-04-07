@@ -312,6 +312,24 @@ _client_destroy(struct Client *client)
   io_free(client);
 }
 
+void
+client_update_name(struct Client *client, const char *new_name)
+{
+  assert(client);
+  assert(!string_is_empty(new_name));
+
+  if (client->name[0])
+    hash_del_client(client);
+
+  const size_t len = strlcpy(client->name, new_name, sizeof(client->name));
+  assert(len < sizeof(client->name));
+
+  hash_add_client(client);
+
+  if (client_is_local(client) && client->connection->fd)
+    comm_socket_note(client->connection->fd, "Name: %s", client->name);
+}
+
 /* check_conf_klines()
  *
  * inputs       - NONE

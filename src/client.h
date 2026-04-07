@@ -466,7 +466,7 @@ client_get_id_or_name(const struct Client *subject_client, const struct Client *
   return subject_client->name;
 }
 
-static inline struct ClassItem *
+static inline const struct ClassItem *
 client_get_active_class(const struct Client *client)
 {
   if (client->connection->oper_class)

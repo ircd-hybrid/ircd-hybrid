@@ -60,7 +60,7 @@ mo_close(struct Client *source, int parc, char *parv[])
     assert(source != target);
 
     sendto_one_numeric(source, &me, RPL_CLOSING,
-                       client_get_name(target, SHOW_IP), target->status);
+                       client_get_name(target, SHOW_IP), target->state);
     client_exit(target, "Oper Closing");
   }
 

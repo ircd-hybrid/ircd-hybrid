@@ -226,7 +226,7 @@ _server_handshake_irc_start(struct Client *client)
   assert(connect);
 
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
-  SetHandshake(client);
+  client_set_state(client, CLIENT_STATE_HANDSHAKE);
 
   /* Start the activity timer now that the link is ready for IRC traffic. */
   client_reset_activity_timeout(client);
@@ -429,7 +429,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";
   client->serv->initiator_name = io_strdup(initiator_name);
 
-  SetConnecting(client);
+  client_set_state(client, CLIENT_STATE_CONNECTING);
 
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);

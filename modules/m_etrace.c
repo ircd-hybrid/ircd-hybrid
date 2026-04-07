@@ -49,7 +49,7 @@
 static void
 trace_send_status(struct Client *source, const struct Client *target)
 {
-  if (target->status != STAT_CLIENT)
+  if (!IsClient(target))
     return;
 
   const char *class_name = client_get_class_name(target);

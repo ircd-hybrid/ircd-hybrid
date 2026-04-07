@@ -475,7 +475,7 @@ main(int argc, char *argv[])
   me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
   me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  SetMe(&me);
+  client_set_state(&me, CLIENT_STATE_ME);
   server_create(&me);
 
   hash_add_id(&me);

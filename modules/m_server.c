@@ -271,7 +271,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
     hash_add_client(client);
   hash_add_id(client);
 
-  SetServer(client);
+  client_set_state(client, CLIENT_STATE_SERVER);
 
   server_create(client);
   server_conf_set(client, connect);
@@ -617,7 +617,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));
   target->hopcount = hopcount;
 
-  SetServer(target);
+  client_set_state(target, CLIENT_STATE_SERVER);
   server_set_flags(target, parv[4]);
 
   if (service_find(target->name, irccmp))

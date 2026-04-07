@@ -50,14 +50,14 @@
 #include "user_mode.h"
 
 /** Client connection states */
-enum
+enum client_state
 {
-  STAT_CONNECTING = 1,  /**< Connecting to another server */
-  STAT_HANDSHAKE,  /**< PASS, CAPAB, and SERVER sent */
-  STAT_ME,  /**< This is &me */
-  STAT_UNKNOWN,  /**< Unknown/unidentified connection */
-  STAT_SERVER,  /**< Fully registered server */
-  STAT_CLIENT,  /**< Fully registered client */
+  CLIENT_STATE_UNKNOWN = 1,
+  CLIENT_STATE_CONNECTING,  /**< Connecting to another server */
+  CLIENT_STATE_HANDSHAKE,  /**< PASS, CAPAB, and SERVER sent */
+  CLIENT_STATE_SERVER,  /**< Fully registered server */
+  CLIENT_STATE_CLIENT,  /**< Fully registered client */
+  CLIENT_STATE_ME,  /**< This is &me */
 };
 
 enum
@@ -68,30 +68,11 @@ enum
   REG_INIT      = REG_NEED_USER | REG_NEED_NICK
 };
 
-#define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
-#define IsHandshake(x)          ((x)->status == STAT_HANDSHAKE)
-#define IsUnknown(x)            ((x)->status == STAT_UNKNOWN)
-#define IsServer(x)             ((x)->status == STAT_SERVER)
-#define IsClient(x)             ((x)->status == STAT_CLIENT)
-
-#define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
-                                 (x)->handler = UNREGISTERED_HANDLER; }
-
-#define SetHandshake(x)         {(x)->status = STAT_HANDSHAKE; \
-                                 (x)->handler = UNREGISTERED_HANDLER; }
-
-#define SetMe(x)                {(x)->status = STAT_ME; \
-                                 (x)->handler = UNREGISTERED_HANDLER; }
-
-#define SetUnknown(x)           {(x)->status = STAT_UNKNOWN; \
-                                 (x)->handler = UNREGISTERED_HANDLER; }
-
-#define SetServer(x)            {(x)->status = STAT_SERVER; \
-                                 (x)->handler = SERVER_HANDLER; }
-
-#define SetClient(x)            {(x)->status = STAT_CLIENT; \
-                                 (x)->handler = CLIENT_HANDLER; }
-
+#define IsConnecting(x)         ((x)->state == CLIENT_STATE_CONNECTING)
+#define IsHandshake(x)          ((x)->state == CLIENT_STATE_HANDSHAKE)
+#define IsUnknown(x)            ((x)->state == CLIENT_STATE_UNKNOWN)
+#define IsServer(x)             ((x)->state == CLIENT_STATE_SERVER)
+#define IsClient(x)             ((x)->state == CLIENT_STATE_CLIENT)
 #define MyClient(x)             (client_is_local(x) && IsClient(x))
 
 
@@ -278,7 +259,7 @@ struct Client
   unsigned int flags;  /**< Client flags */
   uint64_t umodes;  /**< User modes this client has set */
   unsigned int hopcount;  /**< The number of server hops from here to the entity. */
-  unsigned int status;  /**< The client's current state (e.g., STAT_CLIENT, STAT_SERVER). */
+  enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_CLIENT, CLIENT_STATE_SERVER). */
   unsigned int handler;  /**< The dispatch index for the command handler table based on client state. */
 
   list_t whowas_list;  /**< Historical records for this client's previous nicks. */
@@ -334,6 +315,7 @@ extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
 extern void client_reset_activity_timeout(struct Client *);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
+extern void client_set_state(struct Client *, enum client_state);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_update_name(struct Client *, const char *);

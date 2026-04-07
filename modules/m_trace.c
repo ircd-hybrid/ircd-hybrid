@@ -65,23 +65,24 @@ _trace_send_status(struct Client *source, const struct Client *target)
   const char *class_name = client_get_class_name(target);
   const char *name = client_get_name(target, HIDE_IP);
 
-  switch (target->status)
+  switch (target->state)
   {
-    case STAT_CONNECTING:
+    case CLIENT_STATE_CONNECTING:
       sendto_one_numeric(source, &me, RPL_TRACECONNECTING,
                          class_name, client_is_admin(source) ? name : target->name);
       break;
-    case STAT_HANDSHAKE:
+    case CLIENT_STATE_HANDSHAKE:
       sendto_one_numeric(source, &me, RPL_TRACEHANDSHAKE,
                          class_name, client_is_admin(source) ? name : target->name);
       break;
-    case STAT_ME:
+    case CLIENT_STATE_ME:
+      /* `&me` is not reported as a regular TRACE target here. */
       break;
-    case STAT_UNKNOWN:
+    case CLIENT_STATE_UNKNOWN:
       sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
                          class_name, name, target->sockhost, client_get_session_duration(target));
       break;
-    case STAT_CLIENT:
+    case CLIENT_STATE_CLIENT:
       if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, name, target->sockhost, client_get_socket_idle_duration(target),
@@ -91,7 +92,7 @@ _trace_send_status(struct Client *source, const struct Client *target)
                            class_name, name, target->sockhost, client_get_socket_idle_duration(target),
                            client_get_idle_time(source, target));
       break;
-    case STAT_SERVER:
+    case CLIENT_STATE_SERVER:
     {
       unsigned int servers = 0;
       unsigned int clients = 0;
@@ -108,7 +109,8 @@ _trace_send_status(struct Client *source, const struct Client *target)
       break;
     }
 
-    default: /* ...we actually shouldn't come here... --msa */
+    default:
+      assert(!"unexpected client state in TRACE");
       sendto_one_numeric(source, &me, RPL_TRACENEWTYPE, name);
       break;
   }

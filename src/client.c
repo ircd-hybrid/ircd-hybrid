@@ -204,10 +204,38 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
   *class_ptr_location = new_class;
 }
 
+void
+client_set_state(struct Client *client, enum client_state state)
+{
+  assert(client);
+
+  client->state = state;
+
+  switch (state)
+  {
+    case CLIENT_STATE_UNKNOWN:
+    case CLIENT_STATE_CONNECTING:
+    case CLIENT_STATE_HANDSHAKE:
+    case CLIENT_STATE_ME:
+      client->handler = UNREGISTERED_HANDLER;
+      break;
+    case CLIENT_STATE_SERVER:
+      client->handler = SERVER_HANDLER;
+      break;
+    case CLIENT_STATE_CLIENT:
+      client->handler = CLIENT_HANDLER;
+      break;
+    default:
+      assert(!"invalid client state");
+      client->handler = UNREGISTERED_HANDLER;
+      break;
+  }
+}
+
 static void
 _client_init_base(struct Client *client)
 {
-  SetUnknown(client);
+  client_set_state(client, CLIENT_STATE_UNKNOWN);
 
   client->idhnext = client;
   client->hnext = client;

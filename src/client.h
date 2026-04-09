@@ -26,6 +26,7 @@
 
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -451,6 +452,7 @@ client_get_id_or_name(const struct Client *subject_client, const struct Client *
 static inline const struct ClassItem *
 client_get_active_class(const struct Client *client)
 {
+  assert(client_is_local(client));
   if (client->connection->oper_class)
     return client->connection->oper_class;
   if (client->connection->base_class)
@@ -462,24 +464,28 @@ client_get_active_class(const struct Client *client)
 static inline unsigned int
 client_get_max_sendq(const struct Client *client)
 {
+  assert(client_is_local(client));
   return class_get_max_sendq(client_get_active_class(client));
 }
 
 static inline unsigned int
 client_get_max_recvq(const struct Client *client)
 {
+  assert(client_is_local(client));
   return class_get_max_recvq(client_get_active_class(client));
 }
 
 static inline unsigned int
 client_get_ping_freq(const struct Client *client)
 {
+  assert(client_is_local(client));
   return class_get_ping_freq(client_get_active_class(client));
 }
 
 static inline unsigned int
 client_get_max_channels(const struct Client *client)
 {
+  assert(client_is_local(client));
   const unsigned int class_limit = class_get_max_channels(client_get_active_class(client));
   return (class_limit > 0) ? class_limit : ConfigChannel.max_channels;
 }
@@ -487,24 +493,28 @@ client_get_max_channels(const struct Client *client)
 static inline uintmax_t
 client_get_session_duration(const struct Client *client)
 {
+  assert(client_is_local(client));
   return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->created_monotonic;
 }
 
 static inline uintmax_t
 client_get_socket_idle_duration(const struct Client *client)
 {
+  assert(client_is_local(client));
   return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_receive_time;
 }
 
 static inline uintmax_t
 client_get_idle_duration(const struct Client *client)
 {
+  assert(client_is_local(client));
   return io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_privmsg_time;
 }
 
 static inline const char *
 client_get_class_name(const struct Client *client)
 {
+  assert(client_is_local(client));
   return class_get_name(client_get_active_class(client));
 }
 #endif  /* INCLUDED_client_h */

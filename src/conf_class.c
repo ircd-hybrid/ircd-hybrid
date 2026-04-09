@@ -196,7 +196,7 @@ class_ip_limit_remove(struct ClassItem *klass, const void *addr)
   if (klass->number_per_cidr == 0 || bitlen == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_try_search_best_addr(_class_ip_limit_trie(klass, addr), addr, 0);
+  patricia_node_t *pnode = patricia_try_search_exact_addr(_class_ip_limit_trie(klass, addr), addr, bitlen);
   if (pnode == NULL)
     return false;
 

@@ -111,11 +111,10 @@ get_mask(const struct Ban *ban)
  */
 
 const char *
-add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
+add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
   char mask[MODEBUFLEN];
   char *maskptr = mask;
-  unsigned int extbans, offset;
 
   strlcpy(mask, banid, sizeof(mask));
 
@@ -135,6 +134,8 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     collapse(mask);
   }
 
+  uint32_t extbans;
+  size_t offset;
   enum extban_type etype = extban_parse(mask, &extbans, &offset);
   maskptr += offset;
 
@@ -152,7 +153,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       return NULL;
     }
 
-    unsigned int extban_acting = extbans & extban_acting_mask();
+    uint32_t extban_acting = extbans & extban_acting_mask();
     if (extban_acting)
     {
       const struct Extban *extban = extban_find_flag(extban_acting);
@@ -163,7 +164,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       }
     }
 
-    unsigned extban_matching = extbans & extban_matching_mask();
+    uint32_t extban_matching = extbans & extban_matching_mask();
     if (extban_matching)
     {
       const struct Extban *extban = extban_find_flag(extban_matching);
@@ -246,7 +247,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
  * side effects	-
  */
 static const char *
-del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
+del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
   static char mask[MODEBUFLEN];
   list_node_t *node;

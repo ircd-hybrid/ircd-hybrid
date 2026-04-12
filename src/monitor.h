@@ -26,6 +26,9 @@
 
 #ifndef INCLUDED_monitor_h
 #define INCLUDED_monitor_h
+#include <stdint.h>
+
+#include "list.h"
 
 /** Monitor structure */
 struct Monitor
@@ -37,7 +40,7 @@ struct Monitor
 };
 
 extern void monitor_clear_list(struct Client *);
-extern void monitor_count_memory(unsigned int *const, size_t *const);
+extern void monitor_count_memory(uint32_t *const, size_t *const);
 extern void monitor_notify_signoff(const struct Client *);
 extern void monitor_notify_signon(const struct Client *);
 extern void monitor_unsubscribe(struct Client *, const char *);

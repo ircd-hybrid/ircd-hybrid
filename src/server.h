@@ -80,5 +80,5 @@ extern bool server_connect(struct ConnectItem *, const struct Client *);
 extern bool server_is_valid_name(const char *);
 extern struct ConnectItem *server_conf_get(const struct Client *);
 extern struct Server *server_create(struct Client *);
-extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);
+extern const server_route_t *server_route_command(struct Client *, const char *, int, char *[]);
 #endif  /* INCLUDED_server_h */

@@ -49,7 +49,7 @@
  * parv[2] - modes to change
  */
 static void
-set_user_mode(struct Client *source, const int parc, char *parv[])
+set_user_mode(struct Client *source, int parc, char *parv[])
 {
   const struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
@@ -121,9 +121,8 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
 static void
 m_mode(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
-
   /* Now, try to find the channel in question */
+  const char *const name = parv[1];
   if (!IsChanPrefix(*name))
   {
     /* If here, it has to be a non-channel name */

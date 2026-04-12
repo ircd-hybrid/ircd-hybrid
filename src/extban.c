@@ -32,21 +32,21 @@
 #include "isupport.h"
 
 static list_t extban_list;
-static unsigned int matching_mask, acting_mask;
+static uint32_t matching_mask, acting_mask;
 
-static unsigned int
+static uint32_t
 _extban_find_mask(void)
 {
-  list_node_t *node;
-  unsigned int used = 0;
-  unsigned int i;
+  uint32_t used = 0;
 
+  list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
     const struct Extban *extban = node->data;
     used |= extban->flag;
   }
 
+  uint32_t i;
   for (i = 1; (i < EXTBAN_MASK) && (used & i); i <<= 1)
     ;
 
@@ -77,7 +77,7 @@ extban_init(void)
 void
 extban_add(struct Extban *extban)
 {
-  unsigned int mask = _extban_find_mask();
+  uint32_t mask = _extban_find_mask();
   if (mask == 0)
     return;
 
@@ -118,7 +118,7 @@ extban_find(unsigned char c)
 }
 
 struct Extban *
-extban_find_flag(unsigned int flag)
+extban_find_flag(uint32_t flag)
 {
   list_node_t *node;
 
@@ -133,7 +133,7 @@ extban_find_flag(unsigned int flag)
 }
 
 enum extban_type
-extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset)
+extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
 {
   *input_extbans = *offset = 0;
 
@@ -173,7 +173,7 @@ extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset
 }
 
 size_t
-extban_format(unsigned int e, char *buf)
+extban_format(uint32_t e, char *buf)
 {
   list_node_t *node;
   size_t written = 0;
@@ -219,13 +219,13 @@ extban_format(unsigned int e, char *buf)
   return written;
 }
 
-unsigned int
+uint32_t
 extban_matching_mask(void)
 {
   return matching_mask;
 }
 
-unsigned int
+uint32_t
 extban_acting_mask(void)
 {
   return acting_mask;
@@ -249,7 +249,7 @@ extban_get_isupport(void)
 
   char *p = buf + strlcpy(buf, "$,", sizeof(buf));
 
-  for (unsigned int i = 0; i < 256; ++i)
+  for (size_t i = 0; i < sizeof(extban_chars); ++i)
     if (extban_chars[i])
       *p++ = extban_chars[i];
   *p = '\0';

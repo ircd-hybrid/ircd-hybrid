@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_conf_shared_h
 #define INCLUDED_conf_shared_h
+#include <stdint.h>
 
 enum
 {
@@ -38,7 +39,7 @@ enum
   SHARED_DLINE   = 1 << 7,
   SHARED_UNDLINE = 1 << 8,
   SHARED_REHASH  = 1 << 9,
-  SHARED_ALL     = UINT_MAX
+  SHARED_ALL     = UINT32_MAX
 };
 
 struct SharedItem
@@ -47,7 +48,7 @@ struct SharedItem
   char *server;
   char *user;
   char *host;
-  unsigned int type;
+  uint32_t type;
 };
 
 extern void shared_clear(void);

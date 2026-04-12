@@ -96,7 +96,7 @@ _server_route_find_match(const list_t *list, const char *mask, const struct Clie
  * @return A pointer to a server_route_t structure containing the result of the routing attempt.
  */
 const server_route_t *
-server_route_command(struct Client *client, const char *command, const int server, char *parv[])
+server_route_command(struct Client *client, const char *command, int server, char *parv[])
 {
   static server_route_t r;
   server_route_t *const route = &r;

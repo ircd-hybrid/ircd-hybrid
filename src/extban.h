@@ -27,6 +27,7 @@
 #ifndef INCLUDED_extban_h
 #define INCLUDED_extban_h
 #include <stddef.h>
+#include <stdint.h>
 
 #include "list.h"
 
@@ -35,11 +36,7 @@ struct Client;
 struct Ban;
 struct ChannelMember;
 
-enum
-{
-  /* All possible mask values */
-  EXTBAN_MASK = 0xFFFFFFFF
-};
+#define EXTBAN_MASK UINT32_MAX  /* All possible mask values */
 
 enum extban_type
 {
@@ -62,8 +59,8 @@ struct Extban
   enum extban_type type;
   int (*is_valid)(const char *);
   enum extban_match (*matches)(struct Client *, struct Channel *, struct Ban *);
-  unsigned int types;  /* CHFL_BAN/EXCEPTION/INVEX */
-  unsigned int flag;
+  uint32_t types;  /* CHFL_BAN/EXCEPTION/INVEX */
+  uint32_t flag;
 };
 
 extern struct Extban extban_account;
@@ -82,11 +79,11 @@ extern struct Extban extban_usermode;
 extern void extban_init(void);
 extern void extban_add(struct Extban *);
 extern void extban_del(struct Extban *);
-extern enum extban_type extban_parse(const char *, unsigned int *, unsigned int *);
-extern size_t extban_format(unsigned int, char *);
-extern unsigned int extban_matching_mask(void);
-extern unsigned int extban_acting_mask(void);
+extern enum extban_type extban_parse(const char *, uint32_t *, size_t *);
+extern size_t extban_format(uint32_t, char *);
+extern uint32_t extban_matching_mask(void);
+extern uint32_t extban_acting_mask(void);
 extern struct Extban *extban_find(unsigned char);
-extern struct Extban *extban_find_flag(unsigned int);
+extern struct Extban *extban_find_flag(uint32_t);
 extern const char *extban_get_isupport(void);
 #endif  /* INCLUDED_extban_h */

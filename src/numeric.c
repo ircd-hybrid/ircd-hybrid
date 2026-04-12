@@ -27,6 +27,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 
 #include "numeric.h"
 
@@ -78,7 +79,7 @@ static const char *const replies[] =
   /* 246 */  [RPL_STATSSERVICE] = "S %s * %s %u %u",
   /* 247 */  [RPL_STATSXLINE] = "%c %s :%s",
   /* 248 */  [RPL_STATSULINE] = "U %s %s@%s %s",
-  /* 250 */  [RPL_STATSCONN] = ":Highest connection count: %u (%u clients) (%ju connections received)",
+  /* 250 */  [RPL_STATSCONN] = ":Highest connection count: %u (%u clients) (%" PRIu64 " connections received)",
   /* 251 */  [RPL_LUSERCLIENT] = ":There are %u users and %u invisible on %u servers",
   /* 252 */  [RPL_LUSEROP] = "%u :IRC Operators online",
   /* 253 */  [RPL_LUSERUNKNOWN] = "%u :unknown connection(s)",

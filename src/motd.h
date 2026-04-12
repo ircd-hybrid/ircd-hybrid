@@ -26,6 +26,7 @@
 
 #ifndef INCLUDED_motd_h
 #define INCLUDED_motd_h
+#include <stdint.h>
 
 /** Type of MOTD. */
 enum MotdType
@@ -62,9 +63,9 @@ struct MotdCache
 {
   list_node_t node;  /**< Next MotdCache in list. */
   char *path;  /**< Pathname of file. */
-  unsigned int ref;  /**< Number of references to this entry. */
-  unsigned int maxcount;  /**< Number of lines allocated for message. */
-  unsigned int count;  /**< Actual number of lines used in message. */
+  uint32_t ref_count;  /**< Number of references to this entry. */
+  size_t maxcount;  /**< Number of lines allocated for message. */
+  size_t count;  /**< Actual number of lines used in message. */
   uintmax_t modtime;  /**< Last modification time from file. */
   char motd[][MOTD_LINESIZE];  /**< Message body. */
 };

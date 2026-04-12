@@ -56,7 +56,7 @@ whowas_group_find(const char *name)
 
   LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
-    struct WhowasGroup *group = node->data;
+    struct WhowasGroup *const group = node->data;
     if (irccmp(group->name, name) == 0)
       return group;
   }
@@ -227,7 +227,7 @@ whowas_off_history(struct Client *client)
 {
   while (client->whowas_list.head)
   {
-    struct Whowas *whowas = client->whowas_list.head->data;
+    struct Whowas *const whowas = client->whowas_list.head->data;
     whowas->client = NULL;
     list_remove(&whowas->client_list_node, &client->whowas_list);
   }
@@ -255,7 +255,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
-    struct Whowas *whowas = node->data;
+    struct Whowas *const whowas = node->data;
     if (whowas->logoff >= timelimit)
       return whowas->client;
   }
@@ -297,8 +297,8 @@ whowas_query(const char *name, int max_results, whowas_callback_t callback, void
  * @param whowas_bytes A pointer to a size_t to store the total memory occupied by the Whowas structures.
  */
 void
-whowas_count_memory(unsigned int *const group_count, size_t *const group_bytes,
-                    unsigned int *const whowas_count, size_t *const whowas_bytes)
+whowas_count_memory(uint32_t *const group_count, size_t *const group_bytes,
+                    uint32_t *const whowas_count, size_t *const whowas_bytes)
 {
   *whowas_count = *whowas_bytes = *group_count = *group_bytes = 0;
 
@@ -318,7 +318,7 @@ whowas_count_memory(unsigned int *const group_count, size_t *const group_bytes,
     *whowas_bytes += strlen(whowas->servername) + 1;
   }
 
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  for (size_t i = 0; i < HASHSIZE; ++i)
   {
     LIST_FOREACH(node, whowas_hash[i].head)
     {

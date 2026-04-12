@@ -49,8 +49,8 @@ struct Client;
 /** Mode structure for channels */
 struct Mode
 {
-  unsigned int mode;  /**< Simple modes */
-  unsigned int limit;  /**< +l userlimit */
+  uint32_t mode;  /**< Simple modes */
+  uint32_t limit;  /**< +l userlimit */
   char key[KEYLEN + 1];  /**< +k key */
 };
 
@@ -58,13 +58,13 @@ struct Mode
 struct Channel
 {
   list_node_t node;  /**< List node; linked into channel_list */
-
   struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
+  char name[CHANNELLEN + 1];  /**< Unique name of the channel */
+  size_t name_len;  /**< Cached string length of Channel::name */
   struct Mode mode;
-
+  char *mode_lock;
   char *topic;
   char *topic_info;
-
   uintmax_t creation_time;  /**< Time the channel has been created; real time */
   uintmax_t topic_time;  /**< Modification time of the topic; real time */
   uintmax_t mode_lock_time;  /**< Real time; this gets set by services only */
@@ -72,23 +72,16 @@ struct Channel
   uintmax_t last_invite_time;  /**< Last time an INVITE to this channel has been issued; monotonic time */
   uintmax_t last_join_time;  /**< Last time a user has joined the channel; monotonic time */
   uintmax_t first_received_message_time;  /**< Channel flood control; monotonic time */
-  unsigned int received_number_of_privmsgs;
-
+  uint32_t received_number_of_privmsgs;
+  float number_joined;
   bool sent_join_flood_notice;  /**< Indicates whether a server notice about a join flood event has been sent to IRC operators. */
   bool sent_message_flood_notice;  /**< Indicates whether a server notice about a message flood event has been sent to IRC operators. */
-
   list_t members_local;  /**< List of local members on this channel */
   list_t members;  /**< List of members on this channel */
   list_t invites;  /**< List of invites on this channel */
   list_t banlist;  /**< List of bans on this channel */
   list_t exceptlist;  /**< List of ban exceptions on this channel */
   list_t invexlist;  /**< List of invite exceptions on this channel */
-
-  float number_joined;
-
-  char *mode_lock;
-  char name[CHANNELLEN + 1];  /**< Unique name of the channel */
-  size_t name_len;  /**< Cached string length of Channel::name */
 };
 
 /** ChannelMember structure */
@@ -99,7 +92,7 @@ struct ChannelMember
   list_node_t usernode;  /**< link to client->channel */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
-  unsigned int flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
+  uint32_t flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
 enum { BANSTRLEN = 200 }; /* XXX */
@@ -108,7 +101,7 @@ enum { BANSTRLEN = 200 }; /* XXX */
 struct Ban
 {
   list_node_t node;
-  unsigned int extban;
+  uint32_t extban;
   char banstr[BANSTRLEN];
   char name[NICKLEN + 1];
   char user[USERLEN + 1];
@@ -122,7 +115,7 @@ struct Ban
 };
 
 extern void channel_member_clear_list(const list_t *);
-extern void channel_add_member(struct Channel *, struct Client *, unsigned int, bool);
+extern void channel_add_member(struct Channel *, struct Client *, uint32_t, bool);
 extern void channel_demote_members(struct Channel *, const struct Client *);
 extern void channel_destroy(struct Channel *);
 extern void channel_join_list(struct Client *, char *, char *);
@@ -151,19 +144,19 @@ extern const char *channel_rank_to_prefix(const int);
 extern const char *member_get_prefix(const struct ChannelMember *, bool);
 
 static inline bool
-member_has_flags(const struct ChannelMember *member, unsigned int flags)
+member_has_flags(const struct ChannelMember *member, uint32_t flags)
 {
   return (member->flags & flags) != 0;
 }
 
 static inline void
-member_set_flags(struct ChannelMember *member, unsigned int flags)
+member_set_flags(struct ChannelMember *member, uint32_t flags)
 {
   member->flags |= flags;
 }
 
 static inline void
-member_unset_flags(struct ChannelMember *member, unsigned int flags)
+member_unset_flags(struct ChannelMember *member, uint32_t flags)
 {
   member->flags &= ~flags;
 }

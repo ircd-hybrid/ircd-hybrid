@@ -589,8 +589,8 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
  * -davidt
  */
 void
-sendto_servers(const struct Client *exclude_client, const unsigned int required_capab,
-               const unsigned int excluded_capab, const char *format, ...)
+sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
+               uint32_t excluded_capab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -636,7 +636,7 @@ sendto_servers(const struct Client *exclude_client, const unsigned int required_
  * side effects	- data sent to servers matching with capab
  */
 void
-sendto_match_servs(const struct Client *source, const char *mask, unsigned int required_capab, const char *format, ...)
+sendto_match_servs(const struct Client *source, const char *mask, uint32_t required_capab, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -691,8 +691,8 @@ sendto_match_servs(const struct Client *source, const char *mask, unsigned int r
  *		  used by m_nick.c and exit_one_client.
  */
 void
-sendto_common_channels_local(struct Client *user, bool touser, unsigned int required_cap,
-                             unsigned int excluded_cap, const char *format, ...)
+sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
+                             uint32_t excluded_cap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 
@@ -751,7 +751,7 @@ sendto_common_channels_local(struct Client *user, bool touser, unsigned int requ
  */
 void
 sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
-                     unsigned int required_cap, unsigned int excluded_cap, const char *format, ...)
+                     uint32_t required_cap, uint32_t excluded_cap, const char *format, ...)
 {
   struct dbuf_block *buffer = dbuf_alloc();
 

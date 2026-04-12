@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_ipcache_h
 #define INCLUDED_ipcache_h
+#include <stdint.h>
 
 #include "list.h"
 #include "patricia.h"
@@ -40,7 +41,7 @@ struct ip_entry
 };
 
 extern void ipcache_record_remove(void *, bool);
-extern void ipcache_get_stats(unsigned int *const, size_t *const);
+extern void ipcache_get_stats(uint32_t *const, size_t *const);
 extern void ipcache_init(void);
 extern struct ip_entry *ipcache_record_find_or_add(void *);
 #endif  /* INCLUDED_ipcache_h */

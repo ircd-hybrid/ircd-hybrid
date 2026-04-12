@@ -57,14 +57,14 @@
  */
 struct SetOptions
 {
-  unsigned int autoconnect;  /**< Flag indicating if autoconnect is enabled for all servers. */
-  unsigned int maxclients;  /**< Maximum allowed client connections. */
-  unsigned int floodcount;  /**< Number of messages allowed in 'floodtime' seconds. */
-  unsigned int floodtime;  /**< Time threshold for flood control. */
-  unsigned int joinfloodtime;  /**< Time threshold for join flood control. */
-  unsigned int joinfloodcount;  /**< Number of join messages allowed in 'joinfloodtime' seconds. */
-  unsigned int spam_num;  /**< Number of spam messages allowed. */
-  unsigned int spam_time;  /**< Time threshold for spam control. */
+  uint32_t autoconnect;  /**< Flag indicating if autoconnect is enabled for all servers. */ /* XXX bool -> m_set.c */
+  uint32_t maxclients;  /**< Maximum allowed client connections. */
+  uint32_t floodcount;  /**< Number of messages allowed in 'floodtime' seconds. */
+  uint32_t floodtime;  /**< Time threshold for flood control. */
+  uint32_t joinfloodtime;  /**< Time threshold for join flood control. */
+  uint32_t joinfloodcount;  /**< Number of join messages allowed in 'joinfloodtime' seconds. */
+  uint32_t spam_num;  /**< Number of spam messages allowed. */
+  uint32_t spam_time;  /**< Time threshold for spam control. */
 };
 
 /**
@@ -77,25 +77,25 @@ struct SetOptions
  */
 struct ServerStatistics
 {
-  size_t is_cbs;  /**< Bytes sent to clients. */
-  size_t is_cbr;  /**< Bytes received from clients. */
-  size_t is_sbs;  /**< Bytes sent to servers. */
-  size_t is_sbr;  /**< Bytes received from servers. */
-  uintmax_t is_cti;  /**< Time spent connected by clients. */
-  uintmax_t is_sti;  /**< Time spent connected by servers. */
-  unsigned int is_cl;  /**< Number of client connections. */
-  unsigned int is_sv;  /**< Number of server connections. */
-  unsigned int is_ni;  /**< Connections with unidentified sources. */
-  unsigned int is_ac;  /**< Number of accepted connections. */
-  unsigned int is_ref;  /**< Number of refused connections. */
-  unsigned int is_unco;  /**< Number of unknown commands received. */
-  unsigned int is_wrdi;  /**< Number of commands going in the wrong direction. */
-  unsigned int is_unpf;  /**< Number of messages with unknown prefixes. */
-  unsigned int is_empt;  /**< Number of empty messages received. */
-  unsigned int is_num;  /**< Number of numeric messages received. */
-  unsigned int is_kill;  /**< Number of kills generated on collisions. */
-  unsigned int is_asuc;  /**< Number of successful authentication requests. */
-  unsigned int is_abad;  /**< Number of unsuccessful authentication requests. */
+  uint64_t is_cbs;  /**< Bytes sent to clients. */
+  uint64_t is_cbr;  /**< Bytes received from clients. */
+  uint64_t is_sbs;  /**< Bytes sent to servers. */
+  uint64_t is_sbr;  /**< Bytes received from servers. */
+  uint64_t is_cti;  /**< Time spent connected by clients. */
+  uint64_t is_sti;  /**< Time spent connected by servers. */
+  uint64_t is_cl;  /**< Number of client connections. */
+  uint64_t is_sv;  /**< Number of server connections. */
+  uint64_t is_ni;  /**< Connections with unidentified sources. */
+  uint64_t is_ac;  /**< Number of accepted connections. */
+  uint64_t is_ref;  /**< Number of refused connections. */
+  uint64_t is_unco;  /**< Number of unknown commands received. */
+  uint64_t is_wrdi;  /**< Number of commands going in the wrong direction. */
+  uint64_t is_unpf;  /**< Number of messages with unknown prefixes. */
+  uint64_t is_empt;  /**< Number of empty messages received. */
+  uint64_t is_num;  /**< Number of numeric messages received. */
+  uint64_t is_kill;  /**< Number of kills generated on collisions. */
+  uint64_t is_asuc;  /**< Number of successful authentication requests. */
+  uint64_t is_abad;  /**< Number of unsuccessful authentication requests. */
 };
 
 /**
@@ -107,12 +107,12 @@ struct ServerStatistics
  */
 struct Counter
 {
-  uintmax_t totalrestartcount;  /**< Total clients connected since server startup. */
-  unsigned int oper;  /**< Current IRC operators. */
-  unsigned int invisi;  /**< Current invisible clients (users with user mode +i). */
-  unsigned int max_loc;  /**< Peak local client count. */
-  unsigned int max_tot;  /**< Peak global client count. */
-  unsigned int max_loc_con;  /**< Peak local connections (clients + server). */
+  uint64_t totalrestartcount;  /**< Total clients connected since server startup. */
+  uint32_t oper;  /**< Current IRC operators. */
+  uint32_t invisi;  /**< Current invisible clients (users with user mode +i). */
+  uint32_t max_loc;  /**< Peak local client count. */
+  uint32_t max_tot;  /**< Peak global client count. */
+  uint32_t max_loc_con;  /**< Peak local connections (clients + server). */
 };
 
 /**

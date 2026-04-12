@@ -151,7 +151,7 @@ _list_task_execute_exact(struct ListTask *lt)
   list_node_t *node;
   LIST_FOREACH(node, lt->include_masks.head)
   {
-    struct Channel *channel = hash_find_channel(node->data);
+    struct Channel *const channel = hash_find_channel(node->data);
     if (channel && _list_task_eval_channel(lt, channel))
       _list_task_send_channel(lt, channel);
   }

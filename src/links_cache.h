@@ -28,7 +28,7 @@
 typedef struct
 {
   uintmax_t generated_at_unix;
-  unsigned int network_users_total;
+  uint32_t network_users_total;
 } links_cache_metadata_t;
 
 typedef struct
@@ -36,7 +36,7 @@ typedef struct
   char *name;
   char *uplink_name;
   char *description;
-  unsigned int user_count;
+  uint32_t user_count;
   list_node_t node;
 } links_cache_entry_t;
 

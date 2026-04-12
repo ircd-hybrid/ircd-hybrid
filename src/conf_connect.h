@@ -48,32 +48,27 @@ typedef enum
 
 struct ConnectItem
 {
+  list_node_t node;
+  struct ClassItem *klass;
   char *name;
   char *host;
   char *accept_password;
   char *send_password;
   char *tls_cert_fingerprint;
   char *cipher_list;
-
   struct io_addr remote_addr;
   struct io_addr bind_addr;
-
   list_t hub_masks;
   list_t leaf_masks;
-
-  struct ClassItem *klass;
-
-  int port;
   int address_family;
-  unsigned int flags;
-  unsigned int timeout;
-
-  list_node_t node;
-  unsigned int ref_count;
+  uint16_t port;
+  uint32_t flags;
+  uint32_t timeout;
+  uint32_t ref_count;
+  uintmax_t autoconnect_hold_until;
   bool active;
   bool dns_pending;
   bool dns_failed;
-  uintmax_t autoconnect_hold_until;
 };
 
 extern void connect_assign_class(struct ConnectItem *, const char *);

@@ -51,7 +51,7 @@ struct Listener
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   listener_flag_t flags;  /**< Listener flags (tls, hidden, server, client, defer) */
   fde_t *fd;  /**< File descriptor (NULL if inactive) */
-  unsigned int ref_count;  /**< Number of connection references */
+  uint32_t ref_count;  /**< Number of connection references */
 };
 
 extern void listener_add(uint16_t, const char *, listener_flag_t);

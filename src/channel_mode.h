@@ -154,7 +154,7 @@ extern char cmode_class[][256];
 extern void channel_mode_init(void);
 extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
 extern void clear_ban_cache_list(list_t *);
-extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, unsigned int);
+extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, uint32_t);
 
 static inline bool
 channel_has_mode(const struct Channel *channel, unsigned int mode)

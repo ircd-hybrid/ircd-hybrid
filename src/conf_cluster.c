@@ -95,8 +95,8 @@ cluster_make(void)
  * @param ... Additional arguments for the command.
  */
 void
-cluster_distribute(const void *client, const char *command, unsigned int capab,
-                   unsigned int type, const char *pattern, ...)
+cluster_distribute(const void *client, const char *command, uint32_t capab, uint32_t type,
+                   const char *pattern, ...)
 {
   char buf[IRCD_BUFSIZE];
 

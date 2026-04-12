@@ -35,7 +35,7 @@
 
 
 static void
-do_hash(struct Client *source, unsigned int type)
+do_hash(struct Client *source, enum hash_type type)
 {
   unsigned int max_chain = 0;
   unsigned int buckets   = 0;
@@ -43,7 +43,7 @@ do_hash(struct Client *source, unsigned int type)
 
   assert(type == HASH_TYPE_CLIENT || type == HASH_TYPE_ID || type == HASH_TYPE_CHANNEL);
 
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  for (size_t i = 0; i < HASHSIZE; ++i)
   {
     const void *ptr = hash_get_bucket(type, i);
     if (ptr)

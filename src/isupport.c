@@ -117,7 +117,7 @@ _isupport_build_lines(void)
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
-  int tokens = 0;
+  unsigned int tokens = 0;
   size_t len = 0;
   size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
 

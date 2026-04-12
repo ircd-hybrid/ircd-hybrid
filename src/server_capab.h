@@ -32,6 +32,8 @@
 #ifndef INCLUDED_server_capab_h
 #define INCLUDED_server_capab_h
 #include <stdbool.h>
+#include <stdint.h>
+
 #include "list.h"
 #include "client.h"
 
@@ -71,14 +73,14 @@ struct Capability
 {
   list_node_t node;  /**< List node; linked into capab_list. */
   char *name;  /**< Name of the capability. */
-  unsigned int flag;  /**< Bitmask value representing the capability. */
+  uint32_t flag;  /**< Bitmask value representing the capability. */
   bool active;  /**< Indicates whether the capability is currently active on this server and advertised to others. */
 };
 
 extern void capab_init(void);
-extern void capab_add(const char *, unsigned int, bool);
+extern void capab_add(const char *, uint32_t, bool);
 extern void capab_del(const char *);
-extern unsigned int capab_find(const char *);
+extern uint32_t capab_find(const char *);
 extern const char *capab_get(const struct Client *, bool);
 
 /**
@@ -89,7 +91,7 @@ extern const char *capab_get(const struct Client *, bool);
  * @return true if the flag is set; false otherwise.
  */
 static inline bool
-capab_has_flag(const struct Client *client, unsigned int flag)
+capab_has_flag(const struct Client *client, uint32_t flag)
 {
   return (client->connection->capab & flag) != 0;
 }
@@ -101,7 +103,7 @@ capab_has_flag(const struct Client *client, unsigned int flag)
  * @param flag The flag to set.
  */
 static inline void
-capab_set_flag(struct Client *client, unsigned int flag)
+capab_set_flag(struct Client *client, uint32_t flag)
 {
   client->connection->capab |= flag;
 }
@@ -113,7 +115,7 @@ capab_set_flag(struct Client *client, unsigned int flag)
  * @param flag The flag to clear.
  */
 static inline void
-capab_unset_flag(struct Client *client, unsigned int flag)
+capab_unset_flag(struct Client *client, uint32_t flag)
 {
   client->connection->capab &= ~flag;
 }

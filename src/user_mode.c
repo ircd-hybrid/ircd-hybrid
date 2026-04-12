@@ -162,7 +162,7 @@ user_mode_get_oper_only(void)
 {
   uint64_t mode_flags = 0;
 
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const struct UserMode *mode = user_mode_table[i];
     if (mode && (mode->policy & USER_MODE_POLICY_OPER_ONLY))
@@ -295,7 +295,7 @@ user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_sou
     return false;
 
   bool success = true;
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flag & mode_bit)
@@ -324,7 +324,7 @@ user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_s
     return false;
 
   bool success = true;
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flag & mode_bit)
@@ -410,7 +410,7 @@ user_mode_has_mode(const struct Client *client, const struct UserMode *mode)
 static uint64_t
 _user_mode_purge_invalid(struct Client *client)
 {
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (user_mode_has_flag(client, mode_bit))
@@ -451,7 +451,7 @@ user_mode_send(struct Client *client, uint64_t mode_flags_old, user_mode_send_t 
   char *bufptr_add = buf_add;
   char *bufptr_del = buf_del;
 
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (changed_modes & mode_bit)
@@ -494,7 +494,7 @@ user_mode_to_str(uint64_t mode_flags)
 
   *bufptr++ = '+';
 
-  for (unsigned int i = 0; i < USER_MODE_CAPACITY; ++i)
+  for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flags & mode_bit)

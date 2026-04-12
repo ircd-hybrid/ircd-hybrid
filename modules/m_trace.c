@@ -41,8 +41,8 @@
 
 
 static void
-_trace_get_dependent(unsigned int *const servers,
-                     unsigned int *const clients, const struct Client *target)
+_trace_get_dependent(uint32_t *const servers,
+                     uint32_t *const clients, const struct Client *target)
 {
   (*servers)++;
   (*clients) += list_length(&target->serv->child_client_list);
@@ -94,9 +94,8 @@ _trace_send_status(struct Client *source, const struct Client *target)
       break;
     case CLIENT_STATE_SERVER:
     {
-      unsigned int servers = 0;
-      unsigned int clients = 0;
-
+      uint32_t servers = 0;
+      uint32_t clients = 0;
       _trace_get_dependent(&servers, &clients, target);
 
       if (!client_is_admin(source))
@@ -139,8 +138,7 @@ _trace_do(struct Client *source, const char *name)
   {
     LIST_FOREACH(node, (*list)->head)
     {
-      const struct Client *target = node->data;
-
+      const struct Client *const target = node->data;
       if (doall || match(name, target->name) == 0)
         _trace_send_status(source, target);
     }

@@ -139,7 +139,7 @@ ipcache_record_remove(void *addr, bool local)
  * used in the hash.
  */
 void
-ipcache_get_stats(unsigned int *const number_ips_stored, size_t *const mem_ips_stored)
+ipcache_get_stats(uint32_t *const number_ips_stored, size_t *const mem_ips_stored)
 {
   /* TBD: inaccurate for now as it does only count the amount of memory for struct ip_entry items */
   (*number_ips_stored) = list_length(&ipcache_list);

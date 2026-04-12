@@ -21,6 +21,8 @@
 
 #ifndef INCLUDED_cap_h
 #define INCLUDED_cap_h
+#include <stdint.h>
+
 #include "list.h"
 
 enum
@@ -40,7 +42,7 @@ struct Cap
 {
   const char *name;
   const char *value;
-  unsigned int flag;
+  uint32_t flag;
   size_t name_len;
   size_t value_len;
   list_node_t node;

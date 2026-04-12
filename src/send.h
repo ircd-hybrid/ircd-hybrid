@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_send_h
 #define INCLUDED_send_h
+#include <stdint.h>
 
 #include "io.h"
 #include "fdlist.h"
@@ -81,9 +82,9 @@ extern void sendto_one_anywhere(struct Client *, const struct Client *, const ch
 extern void sendto_clients(uint64_t, send_recipient_t, send_type_t, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
 extern void sendto_filtered_butone(const struct Client *, const struct Client *, send_filter_fn, void *, const char *, ...) IO_AFP(5,6);
-extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
-extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
-extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
-extern void sendto_channel_local(const struct Client *, const struct Channel *, int, unsigned int, unsigned int, const char *, ...) IO_AFP(6,7);
+extern void sendto_servers(const struct Client *, uint32_t, uint32_t, const char *, ...) IO_AFP(4,5);
+extern void sendto_match_servs(const struct Client *, const char *, uint32_t, const char *, ...) IO_AFP(4,5);
+extern void sendto_common_channels_local(struct Client *, bool, uint32_t, uint32_t, const char *, ...) IO_AFP(5,6);
+extern void sendto_channel_local(const struct Client *, const struct Channel *, int, uint32_t, uint32_t, const char *, ...) IO_AFP(6,7);
 extern void sendto_channel_butone(const struct Client *, const struct Client *, const struct Channel *, int, const char *, ...) IO_AFP(5,6);
 #endif  /* INCLUDED_send_h */

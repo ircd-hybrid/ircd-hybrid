@@ -56,7 +56,7 @@ valid_sid(const char *sid)
   if (!IsDigit(*sid))
     return false;
 
-  for (unsigned int i = 1; i < IRC_MAXSID; ++i)
+  for (size_t i = 1; i < IRC_MAXSID; ++i)
     if (!IsUpper(*(sid + i)) && !IsDigit(*(sid + i)))
       return false;
 
@@ -81,7 +81,7 @@ valid_uid(const char *uid)
   if (!IsDigit(*uid))
     return false;
 
-  for (unsigned int i = 1; i < TOTALSIDUID; ++i)
+  for (size_t i = 1; i < TOTALSIDUID; ++i)
     if (!IsUpper(*(uid + i)) && !IsDigit(*(uid + i)))
       return false;
 
@@ -109,7 +109,7 @@ init_uid(void)
  * @param i Index number into new_uid.
  */
 static void
-add_one_to_uid(unsigned int i)
+add_one_to_uid(size_t i)
 {
   if (i < IRC_MAXSID)
     return;
@@ -148,12 +148,11 @@ uid_get(void)
 void
 generate_sid(void)
 {
-  unsigned int sid = 0;
-  const char *p;
+  uint32_t sid = 0;
 
-  for (p = me.name; *p; ++p)
+  for (const char *p = me.name; *p; ++p)
     sid = 5 * sid + *p;
-  for (p = me.info; *p; ++p)
+  for (const char *p = me.info; *p; ++p)
     sid = 5 * sid + *p;
 
   snprintf(me.id, IRC_MAXSID + 1, "%03d", sid % 1000);

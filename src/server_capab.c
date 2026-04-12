@@ -66,7 +66,7 @@ capab_init(void)
  * @param active Boolean indicating whether the capability is initially active.
  */
 void
-capab_add(const char *name, unsigned int flag, bool active)
+capab_add(const char *name, uint32_t flag, bool active)
 {
   struct Capability *cap = io_calloc(sizeof(*cap));
   cap->name = io_strdup(name);
@@ -110,7 +110,7 @@ capab_del(const char *name)
  * @param name String name of the capability to find.
  * @return Integer flag value of the capability; returns 0 if not found.
  */
-unsigned int
+uint32_t
 capab_find(const char *name)
 {
   list_node_t *node;

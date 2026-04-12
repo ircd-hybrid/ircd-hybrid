@@ -84,11 +84,11 @@ static struct Channel *channelTable[HASHSIZE];
  * @param name A pointer to the null-terminated string for which the hash is generated.
  * @return The calculated hash value for the input string.
  */
-unsigned int
+uint32_t
 hash_string(const char *name)
 {
-  static unsigned int hashf_xor_key = 0;
-  unsigned int hval = FNV1_32_INIT;
+  static uint32_t hashf_xor_key = 0;
+  uint32_t hval = FNV1_32_INIT;
 
   if (string_is_empty(name))
     return 0;
@@ -118,7 +118,7 @@ hash_string(const char *name)
 void
 hash_add_client(struct Client *client)
 {
-  const unsigned int hashv = hash_string(client->name);
+  const uint32_t hashv = hash_string(client->name);
 
   client->hnext = clientTable[hashv];
   clientTable[hashv] = client;
@@ -134,7 +134,7 @@ hash_add_client(struct Client *client)
 void
 hash_add_channel(struct Channel *channel)
 {
-  const unsigned int hashv = hash_string(channel->name);
+  const uint32_t hashv = hash_string(channel->name);
 
   channel->hnextch = channelTable[hashv];
   channelTable[hashv] = channel;
@@ -150,7 +150,7 @@ hash_add_channel(struct Channel *channel)
 void
 hash_add_id(struct Client *client)
 {
-  const unsigned int hashv = hash_string(client->id);
+  const uint32_t hashv = hash_string(client->id);
 
   client->idhnext = idTable[hashv];
   idTable[hashv] = client;
@@ -166,7 +166,7 @@ hash_add_id(struct Client *client)
 void
 hash_del_id(struct Client *client)
 {
-  const unsigned int hashv = hash_string(client->id);
+  const uint32_t hashv = hash_string(client->id);
   struct Client *tmp = idTable[hashv];
 
   if (tmp)
@@ -198,7 +198,7 @@ hash_del_id(struct Client *client)
 void
 hash_del_client(struct Client *client)
 {
-  const unsigned int hashv = hash_string(client->name);
+  const uint32_t hashv = hash_string(client->name);
   struct Client *tmp = clientTable[hashv];
 
   if (tmp)
@@ -230,7 +230,7 @@ hash_del_client(struct Client *client)
 void
 hash_del_channel(struct Channel *channel)
 {
-  const unsigned int hashv = hash_string(channel->name);
+  const uint32_t hashv = hash_string(channel->name);
   struct Channel *tmp = channelTable[hashv];
 
   if (tmp)
@@ -265,7 +265,7 @@ hash_del_channel(struct Channel *channel)
 struct Client *
 hash_find_client(const char *name)
 {
-  const unsigned int hashv = hash_string(name);
+  const uint32_t hashv = hash_string(name);
   struct Client *client;
 
   if ((client = clientTable[hashv]))
@@ -303,7 +303,7 @@ hash_find_client(const char *name)
 struct Client *
 hash_find_id(const char *name)
 {
-  const unsigned int hashv = hash_string(name);
+  const uint32_t hashv = hash_string(name);
   struct Client *client;
 
   if ((client = idTable[hashv]))
@@ -341,7 +341,7 @@ hash_find_id(const char *name)
 struct Client *
 hash_find_server(const char *name)
 {
-  const unsigned int hashv = hash_string(name);
+  const uint32_t hashv = hash_string(name);
   struct Client *client;
 
   if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
@@ -384,7 +384,7 @@ hash_find_server(const char *name)
 struct Channel *
 hash_find_channel(const char *name)
 {
-  const unsigned int hashv = hash_string(name);
+  const uint32_t hashv = hash_string(name);
   struct Channel *channel;
 
   if ((channel = channelTable[hashv]))
@@ -419,7 +419,7 @@ hash_find_channel(const char *name)
  * @return A pointer to the first entry in the specified hash bucket.
  */
 void *
-hash_get_bucket(int type, unsigned int hashv)
+hash_get_bucket(enum hash_type type, size_t hashv)
 {
   assert(hashv < HASHSIZE);
 

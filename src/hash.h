@@ -30,7 +30,7 @@
 
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
-#include "event.h"
+#include <stdint.h>
 
 /**
  * @def FNV1_32_INIT
@@ -59,15 +59,15 @@
 struct Client;
 struct Channel;
 
-enum
+enum hash_type
 {
   HASH_TYPE_ID,
   HASH_TYPE_CLIENT,
   HASH_TYPE_CHANNEL
 };
 
-extern unsigned int hash_string(const char *);
-extern void *hash_get_bucket(int, unsigned int);
+extern uint32_t hash_string(const char *);
+extern void *hash_get_bucket(enum hash_type, size_t);
 extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);

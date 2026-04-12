@@ -107,11 +107,10 @@ _motd_cache(struct Motd *motd)
   list_node_t *node;
   LIST_FOREACH(node, MotdList.cachelist.head)
   {
-    struct MotdCache *cache = node->data;
-
+    struct MotdCache *const cache = node->data;
     if (strcmp(cache->path, motd->path) == 0 && cache->maxcount == motd->maxcount)
     {
-      cache->ref++;  /* Increase reference count */
+      cache->ref_count++;  /* Increase reference count */
       motd->cache = cache;  /* Remember cache */
       return motd->cache;  /* Return it */
     }
@@ -151,7 +150,7 @@ _motd_cache(struct Motd *motd)
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
   struct MotdCache *cache = io_calloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
-  cache->ref = 1;
+  cache->ref_count = 1;
   cache->path = io_strdup(motd->path);
   cache->maxcount = motd->maxcount;
   cache->modtime = sb.st_mtime;  /* Store modtime */
@@ -159,7 +158,7 @@ _motd_cache(struct Motd *motd)
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
   {
-    unsigned int i = 0;
+    size_t i = 0;
     /* Copy over line, stopping when we overflow or hit line end */
     for (char *tmp = line; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
@@ -197,7 +196,7 @@ _motd_decache(struct Motd *motd)
 
   motd->cache = NULL;  /* Zero the cache */
 
-  if (--cache->ref == 0)  /* Reduce reference count */
+  if (--cache->ref_count == 0)
   {
     list_remove(&cache->node, &MotdList.cachelist);
     io_free(cache->path);  /* Free path info */
@@ -243,8 +242,7 @@ _motd_lookup(const struct Client *client)
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)
   {
-    struct Motd *motd = node->data;
-
+    struct Motd *const motd = node->data;
     switch (motd->type)
     {
       case MOTD_CLASS:
@@ -289,7 +287,7 @@ _motd_forward(struct Client *client, const struct MotdCache *cache)
   /* Send the motd */
   sendto_one_numeric(client, &me, RPL_MOTDSTART, me.name);
 
-  for (unsigned int i = 0; i < cache->count; ++i)
+  for (size_t i = 0; i < cache->count; ++i)
     sendto_one_numeric(client, &me, RPL_MOTD, cache->motd[i]);
 
   sendto_one_numeric(client, &me, RPL_ENDOFMOTD);
@@ -404,7 +402,7 @@ motd_clear(void)
 
   while (MotdList.other.head)  /* Destroy other MOTDs */
   {
-    struct Motd *motd = MotdList.other.head->data;
+    struct Motd *const motd = MotdList.other.head->data;
     list_remove(&motd->node, &MotdList.other);
     _motd_destroy(motd);
   }
@@ -435,7 +433,7 @@ motd_report(struct Client *client, int parc, char *parv[])
 void
 motd_memory_count(struct Client *client)
 {
-  unsigned int motd_count = 0;
+  size_t motd_count = 0;
   size_t motd_bytes = 0;
 
   if (MotdList.local)
@@ -455,19 +453,19 @@ motd_memory_count(struct Client *client)
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)
   {
-    const struct Motd *motd = node->data;
+    const struct Motd *const motd = node->data;
     ++motd_count;
     motd_bytes += sizeof(struct Motd);
     motd_bytes += motd->path ? strlen(motd->path) + 1 : 0;
     motd_bytes += motd->mask ? strlen(motd->mask) + 1 : 0;
   }
 
-  unsigned int motd_cache_count = 0;
+  size_t motd_cache_count = 0;
   size_t motd_cache_bytes = 0;
 
   LIST_FOREACH(node, MotdList.cachelist.head)
   {
-    const struct MotdCache *cache = node->data;
+    const struct MotdCache *const cache = node->data;
     ++motd_cache_count;
     motd_cache_bytes += sizeof(struct MotdCache) + (MOTD_LINESIZE * cache->count);
     motd_cache_bytes += cache->path ? strlen(cache->path) + 1 : 0;

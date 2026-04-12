@@ -59,11 +59,11 @@
 #include "stats.h"
 
 static const char *
-oper_privs_as_string(const unsigned int flags)
+oper_privs_as_string(uint32_t flags)
 {
   static const struct oper_flags
   {
-    unsigned int flag;
+    uint32_t flag;
     unsigned char letter;
   } flag_table[] = {
     { OPER_FLAG_ADMIN,          'A' },
@@ -116,7 +116,7 @@ report_shared(struct Client *client)
 {
   static const struct shared_types
   {
-    unsigned int type;
+    uint32_t type;
     unsigned char letter;
   } flag_table[] = {
     { SHARED_KLINE,   'K' },
@@ -159,7 +159,7 @@ report_cluster(struct Client *client)
 {
   static const struct cluster_types
   {
-    unsigned int type;
+    uint32_t type;
     unsigned char letter;
   } flag_table[] = {
     { CLUSTER_KLINE,   'K' },
@@ -305,25 +305,25 @@ stats_resv(struct Client *client, int parc, char *parv[])
 static void
 stats_memory(struct Client *client, int parc, char *parv[])
 {
-  unsigned int attached_class_count = 0;
-  unsigned int channel_members = 0;
-  unsigned int channel_invites = 0;
-  unsigned int channel_bans = 0;
-  unsigned int channel_except = 0;
-  unsigned int channel_invex = 0;
-  unsigned int number_ips_stored = 0;        /* number of ip addresses hashed */
+  uint32_t attached_class_count = 0;
+  uint32_t channel_members = 0;
+  uint32_t channel_invites = 0;
+  uint32_t channel_bans = 0;
+  uint32_t channel_except = 0;
+  uint32_t channel_invex = 0;
+  uint32_t number_ips_stored = 0;        /* number of ip addresses hashed */
   size_t channel_ban_memory = 0;
   size_t channel_except_memory = 0;
   size_t channel_invex_memory = 0;
   size_t mem_ips_stored = 0;        /* memory used by ip address hash */
-  unsigned int local_client_count  = 0;
-  unsigned int remote_client_count = 0;
+  uint32_t local_client_count  = 0;
+  uint32_t remote_client_count = 0;
   size_t local_client_memory_used  = 0;
   size_t remote_client_memory_used = 0;
-  unsigned int monitor_list_headers = 0;   /* monitorlist headers     */
-  unsigned int monitor_list_entries = 0;   /* monitorlist entries     */
+  uint32_t monitor_list_headers = 0;   /* monitorlist headers     */
+  uint32_t monitor_list_entries = 0;   /* monitorlist entries     */
   size_t monitor_list_memory = 0; /* monitorlist memory used */
-  unsigned int listener_count = 0;
+  uint32_t listener_count = 0;
   size_t listener_memory = 0;
 
   list_node_t *node;
@@ -418,7 +418,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
                      channel_members, channel_members * sizeof(struct ChannelMember),
                      channel_invites, channel_invites * sizeof(struct Invite));
 
-  unsigned int group_count, whowas_count;
+  uint32_t group_count, whowas_count;
   size_t group_bytes, whowas_bytes;
   whowas_count_memory(&group_count, &group_bytes, &whowas_count, &whowas_bytes);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas groups %u(%zu), users %u(%zu)",
@@ -442,7 +442,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
 static void
 stats_dns_servers(struct Client *client, int parc, char *parv[])
 {
-  for (unsigned int i = 0; i < reslib_nscount; ++i)
+  for (size_t i = 0; i < reslib_nscount; ++i)
   {
     char buf[HOSTIPLEN + 1];
     if (address_to_string(&reslib_nsaddr_list[i], buf, sizeof(buf)))
@@ -459,7 +459,7 @@ stats_dns_servers(struct Client *client, int parc, char *parv[])
 static void
 stats_deny(struct Client *client, int parc, char *parv[])
 {
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -488,7 +488,7 @@ stats_deny(struct Client *client, int parc, char *parv[])
 static void
 stats_tdeny(struct Client *client, int parc, char *parv[])
 {
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -523,7 +523,7 @@ stats_exempt(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -655,7 +655,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -695,7 +695,7 @@ stats_kill(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -726,7 +726,7 @@ stats_tkill(struct Client *client, int parc, char *parv[])
     return;
   }
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -876,26 +876,26 @@ stats_tstats(struct Client *client, int parc, char *parv[])
     sp.is_cl++;
   }
 
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :accepts %u refused %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :accepts %" PRIu64 " refused %" PRIu64,
                      sp.is_ac, sp.is_ref);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :unknown commands %u prefixes %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :unknown commands %" PRIu64 " prefixes %" PRIu64,
                      sp.is_unco, sp.is_unpf);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :nick collisions %u unknown closes %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :nick collisions %" PRIu64 " unknown closes %" PRIu64,
                      sp.is_kill, sp.is_ni);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :wrong direction %u empty %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :wrong direction %" PRIu64 " empty %" PRIu64,
                      sp.is_wrdi, sp.is_empt);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :numerics seen %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :numerics seen %" PRIu64,
                      sp.is_num);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :auth successes %u fails %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :auth successes %" PRIu64 " fails %" PRIu64,
                      sp.is_asuc, sp.is_abad);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :Client Server");
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :connected %u %u",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :connected %" PRIu64 " %" PRIu64,
                      sp.is_cl, sp.is_sv);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes sent %zu %zu",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes sent %" PRIu64 " %" PRIu64,
                      sp.is_cbs, sp.is_sbs);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes received %zu %zu",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes received %" PRIu64 " %" PRIu64,
                      sp.is_cbr, sp.is_sbr);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :time connected %ju %ju",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :time connected %" PRIu64 " %" PRIu64,
                      sp.is_cti, sp.is_sti);
 }
 

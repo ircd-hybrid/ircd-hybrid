@@ -178,14 +178,14 @@ struct Server
 struct Connection
 {
   list_node_t node;
-
-  unsigned int registration;
-  unsigned int cap;  /**< Bitmask of client-announced CAP features. */
-  unsigned int capab;  /**< Bitmask of server-announced CAPAB features. */
-
-  unsigned int operflags;  /**< Bitmask of IRC Operator privilege flags. */
-  unsigned int ping_cookie_token; /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
-
+  uint32_t registration;
+  uint32_t cap;  /**< Bitmask of client-announced CAP features. */
+  uint32_t capab;  /**< Bitmask of server-announced CAPAB features. */
+  uint32_t operflags;  /**< Bitmask of IRC Operator privilege flags. */
+  uint32_t ping_cookie_token;  /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
+  uint32_t join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
+  uint32_t oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
+  uint32_t received_number_of_privmsgs;
   uintmax_t last_broadcast_id;  /**< ID of the last broadcast this nexthop was part of; for send de-duplication. */
   uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */
   uintmax_t ping_sent_time;  /**< Monotonic time the last PING was sent, or 0 if none is pending. */
@@ -196,19 +196,13 @@ struct Connection
   uintmax_t last_privmsg_time;  /**< Last time we got a PRIVMSG; monotonic time */
   uintmax_t last_join_time;  /**< When this client last joined a channel; monotonic time */
   uintmax_t last_leave_time;  /**< When this client last left a channel; monotonic time */
-
-  unsigned int join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
-  unsigned int oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
-  unsigned int received_number_of_privmsgs;
-
   struct ListTask  *list_task;  /**< State for an in-progress /LIST command. */
-
   struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
   struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
 
   struct
   {
-    unsigned int messages;  /**< Statistics: protocol messages sent/received */
+    uint32_t messages;  /**< Statistics: protocol messages sent/received */
     uintmax_t bytes;  /**< Statistics: total bytes sent/received */
   } recv, send;
 
@@ -256,10 +250,10 @@ struct Client
   struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
 
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
-
-  unsigned int flags;  /**< Client flags */
+  uint32_t hopcount;  /**< The number of server hops from here to the entity. */
+  uint32_t flags;  /**< Client flags */
   uint64_t umodes;  /**< User modes this client has set */
-  unsigned int hopcount;  /**< The number of server hops from here to the entity. */
+
   enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_CLIENT, CLIENT_STATE_SERVER). */
   unsigned int handler;  /**< The dispatch index for the command handler table based on client state. */
 
@@ -342,44 +336,44 @@ client_is_local(const struct Client *client)
 }
 
 static inline bool
-client_has_cap(const struct Client *client, unsigned int cap_flag)
+client_has_cap(const struct Client *client, uint32_t cap_flag)
 {
   return client_is_local(client) && ((client->connection->cap & cap_flag));
 }
 
 static inline bool
-client_has_flag(const struct Client *client, unsigned int flag)
+client_has_flag(const struct Client *client, uint32_t flag)
 {
   return (client->flags & flag) != 0;
 }
 
 static inline void
-client_set_flag(struct Client *client, unsigned int flags)
+client_set_flag(struct Client *client, uint32_t flags)
 {
   client->flags |= flags;
 }
 
 static inline void
-client_unset_flag(struct Client *client, unsigned int flags)
+client_unset_flag(struct Client *client, uint32_t flags)
 {
   client->flags &= ~flags;
 }
 
 static inline bool
-client_has_oper_flag(const struct Client *client, unsigned int flag)
+client_has_oper_flag(const struct Client *client, uint32_t flag)
 {
   return client_is_local(client) && ((client->connection->operflags & flag));
 }
 
 static inline void
-client_set_oper_flag(struct Client *client, unsigned int flag)
+client_set_oper_flag(struct Client *client, uint32_t flag)
 {
   if (client_is_local(client))
     client->connection->operflags |= flag;
 }
 
 static inline void
-client_unset_oper_flag(struct Client *client, unsigned int flag)
+client_unset_oper_flag(struct Client *client, uint32_t flag)
 {
   if (client_is_local(client))
     client->connection->operflags &= ~flag;

@@ -219,9 +219,9 @@ monitor_clear_list(struct Client *client)
 /*! \brief Counts up memory used by monitor list headers
  */
 void
-monitor_count_memory(unsigned int *const count, size_t *const bytes)
+monitor_count_memory(uint32_t *const count, size_t *const bytes)
 {
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
+  for (size_t i = 0; i < HASHSIZE; ++i)
   {
     (*count) += list_length(&monitor_hash[i]);
 

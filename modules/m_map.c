@@ -37,28 +37,29 @@
 #include "send.h"
 #include "user_mode.h"
 
-#define MAP_LINE_PREFIX_WIDTH 50
+enum { MAP_LINE_PREFIX_WIDTH = 50 };
+enum { MAP_PROMPT_BUFFER_SIZE = 64 };
 
-static void _map_format_line(char *buffer, size_t buffer_size, const char *server_name, const char *server_id, unsigned int indent_len, unsigned int user_count, unsigned int total_users);
+static void _map_format_line(char *buffer, size_t buffer_size, const char *server_name, const char *server_id, size_t indent_len, unsigned int user_count, unsigned int total_users);
 static void _map_send_flat(struct Client *client);
-static void _map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, unsigned int prompt_length);
+static void _map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, size_t prompt_length);
 static bool _map_should_hide_server(const struct Client *server, const struct Client *client);
-static float _map_get_user_percentage(unsigned int count, unsigned int total);
+static double _map_get_user_percentage(unsigned int count, unsigned int total);
 
-static float
+static double
 _map_get_user_percentage(unsigned int count, unsigned int total)
 {
   if (total == 0)
-    return 0.0f;
+    return 0.0;
 
-  return 100.0f * (float)count / (float)total;
+  return 100.0 * (double)count / (double)total;
 }
 
 static void
 _map_format_line(char *buffer, size_t buffer_size, const char *server_name, const char *server_id,
-                 unsigned int indent_len, unsigned int user_count, unsigned int total_users)
+                 size_t indent_len, unsigned int user_count, unsigned int total_users)
 {
-  unsigned int bufpos = snprintf(buffer, buffer_size, "%s", server_name);
+  size_t bufpos = snprintf(buffer, buffer_size, "%s", server_name);
   if (server_id)
     bufpos += snprintf(buffer + bufpos, buffer_size - bufpos, "[%s]", server_id);
 
@@ -126,9 +127,9 @@ _map_send_flat(struct Client *client)
 }
 
 static void
-_map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, unsigned int prompt_length)
+_map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, size_t prompt_length)
 {
-  assert(prompt_length < 64);
+  assert(prompt_length < MAP_PROMPT_BUFFER_SIZE);
   char *const p = prompt_buffer + prompt_length;
   *p = '\0';
 
@@ -210,7 +211,7 @@ m_map(struct Client *source, int parc, char *parv[])
   if (ConfigServerHide.flatten_links && !client_is_oper(source))
     _map_send_flat(source);
   else
-    _map_send_live(source, &me, (char[64]){0}, 0);
+    _map_send_live(source, &me, (char[MAP_PROMPT_BUFFER_SIZE]){ 0 }, 0);
 
   sendto_one_numeric(source, &me, RPL_MAPEND);
 }
@@ -231,7 +232,7 @@ mo_map(struct Client *source, int parc, char *parv[])
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
 
-  _map_send_live(source, &me, (char[64]){0}, 0);
+  _map_send_live(source, &me, (char[MAP_PROMPT_BUFFER_SIZE]){ 0 }, 0);
   sendto_one_numeric(source, &me, RPL_MAPEND);
 }
 

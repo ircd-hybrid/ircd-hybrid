@@ -103,7 +103,7 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
  * \param track_join Whether to count this join in flood calculations
  */
 void
-channel_add_member(struct Channel *channel, struct Client *client, unsigned int flags, bool track_join)
+channel_add_member(struct Channel *channel, struct Client *client, uint32_t flags, bool track_join)
 {
   assert(IsClient(client));
 
@@ -1055,7 +1055,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
     return;
   }
 
-  unsigned int flags = 0;
+  uint32_t flags = 0;
   struct Channel *channel = hash_find_channel(name);
   if (channel)
   {

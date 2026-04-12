@@ -267,7 +267,7 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
     return;
   }
 
-  if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
+  if (perm == CHANNEL_SEND_PERM_ELEVATED || !flood_attack_channel(notice, source, channel))
   {
     const char *const prefix = channel_rank_to_prefix(rank);
     sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
@@ -395,14 +395,14 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
 static void
 target_handle_channel(struct Client *source, void *target, unsigned int access_rank)
 {
-  if (target_is_duplicate(target) == false)
+  if (!target_is_duplicate(target))
     target_add_to_list(target, TARGET_ENTITY_CHANNEL, access_rank);
 }
 
 static void
 target_handle_client(struct Client *source, void *target)
 {
-  if (target_is_duplicate(target) == false)
+  if (!target_is_duplicate(target))
     target_add_to_list(target, TARGET_ENTITY_CLIENT, 0);
 }
 

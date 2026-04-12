@@ -255,7 +255,7 @@ user_register_local(struct Client *client)
   if (conf == NULL)
     return;
 
-  if (valid_username(client->username, true) == false)
+  if (!valid_username(client->username, true))
   {
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Invalid username: %s (%s@%s)",
                    client->name, client->username, client->host);

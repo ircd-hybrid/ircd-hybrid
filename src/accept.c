@@ -120,7 +120,7 @@ accept_message(struct Client *source, struct Client *target)
                                       &target->connection->accept_list, match))
     return true;
 
-  if (user_mode_has_flag(target, UMODE_CALLERID) == false && user_mode_has_flag(target, UMODE_SOFTCALLERID))
+  if (!user_mode_has_flag(target, UMODE_CALLERID) && user_mode_has_flag(target, UMODE_SOFTCALLERID))
     LIST_FOREACH(node, target->channel_list.head)
       if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
         return true;

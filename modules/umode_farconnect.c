@@ -37,7 +37,6 @@ static hook_flow_t
 user_register_hook(void *ctx_)
 {
   ircd_hook_user_register_ctx *ctx = ctx_;
-
   if (client_has_flag(ctx->client->uplink, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
@@ -51,7 +50,6 @@ static hook_flow_t
 client_exit_hook(void *ctx_)
 {
   ircd_hook_client_exit_ctx *ctx = ctx_;
-
   if (IsClient(ctx->client) && client_has_flag(ctx->client->uplink, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting at %s: %s (%s@%s) [%s] [%s]",

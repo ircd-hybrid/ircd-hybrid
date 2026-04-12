@@ -209,7 +209,7 @@ _user_mode_check_policy(const struct UserMode *mode, const struct Client *client
 
   if (action == USER_MODE_ACTION_ADD)
     if ((mode->policy & USER_MODE_POLICY_OPER_ONLY) && source != USER_MODE_SOURCE_SVSMODE)
-      if (client_is_local(client) && user_mode_has_flag(client, UMODE_OPER) == false)
+      if (client_is_local(client) && !user_mode_has_flag(client, UMODE_OPER))
         return false;
 
   if ((mode->policy & USER_MODE_POLICY_SERVICE_ONLY) && source != USER_MODE_SOURCE_SVSMODE)
@@ -225,7 +225,7 @@ user_mode_change(struct Client *client, char mode_char, user_mode_source_t sourc
   if (mode == NULL)
     return USER_MODE_RESULT_MODE_NOT_FOUND;
 
-  if (_user_mode_check_policy(mode, client, source, action) == false)
+  if (!_user_mode_check_policy(mode, client, source, action))
     return USER_MODE_RESULT_POLICY_VIOLATION;
 
   switch (action)

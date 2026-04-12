@@ -250,7 +250,7 @@ _server_handshake_tls_finish(struct Client *client)
   fde_t *fde = client->connection->fd;
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
-  if (tls_verify_certificate(&fde->tls, &client->tls_certfp) == false)
+  if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
     log_write(LOG_TYPE_IRCD, "Link %s presented an invalid TLS certificate.",
               client_get_name(client, MASK_IP));
 
@@ -303,7 +303,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
   assert(client->connection->fd);
   assert(client->connection->fd == fde);
 
-  if (tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT) == false)
+  if (!tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
   {
     SetDead(client);
     client_exit(client, "TLS context initialization failed");

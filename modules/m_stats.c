@@ -788,7 +788,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
       continue;
 
     const char *duration = "n/a";
-    if (client_is_oper(client) || user_mode_has_flag(target, UMODE_HIDEIDLE) == false)
+    if (client_is_oper(client) || !user_mode_has_flag(target, UMODE_HIDEIDLE))
       duration = time_format_duration(client_get_idle_time(client, target));
 
     if (client_is_local(client) && client_is_oper(client))

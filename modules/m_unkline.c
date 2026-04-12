@@ -109,7 +109,7 @@ mo_unkline(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (aline_parse("UNKLINE", source, parc, parv, &aline) == false)
+  if (!aline_parse("UNKLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)

@@ -86,13 +86,13 @@ mr_webirc(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (conf_match_password(pass, conf) == false)
+  if (!conf_match_password(pass, conf))
   {
     client_exit(source, "Invalid WebIRC password");
     return;
   }
 
-  if (address_from_string(addr, &source->addr) == false)
+  if (!address_from_string(addr, &source->addr))
   {
     client_exit(source, "Invalid WebIRC IP address");
     return;

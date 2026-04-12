@@ -55,7 +55,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
 {
   if (!client_is_service(source))
   {
-    if (aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)) == false)
+    if (!aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)))
     {
       if (IsClient(source))
         sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the RESV",
@@ -118,7 +118,7 @@ mo_resv(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (aline_parse("RESV", source, parc, parv, &aline) == false)
+  if (!aline_parse("RESV", source, parc, parv, &aline))
     return;
 
   if (aline.server)

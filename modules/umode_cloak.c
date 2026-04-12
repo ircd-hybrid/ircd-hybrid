@@ -57,7 +57,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (source != USER_MODE_SOURCE_REGULAR)
     return false;
 
-  if (user_mode_has_flag(client, UMODE_CLOAK) == false)
+  if (!user_mode_has_flag(client, UMODE_CLOAK))
     return false;
 
   if (client_is_local(client))

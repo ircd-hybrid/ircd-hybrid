@@ -569,7 +569,7 @@ mr_nick(struct Client *source, int parc, char *parv[])
   strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
-  if (valid_nickname(nick, true) == false)
+  if (!valid_nickname(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
     return;
@@ -622,7 +622,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   /* Check the nickname is ok */
-  if (valid_nickname(nick, true) == false)
+  if (!valid_nickname(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
     return;
@@ -707,7 +707,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
   if (!IsClient(source))
     return;  /* Servers and unknown clients can't change nicks.. */
 
-  if (check_clean_nick(source, parv[1]) == false)
+  if (!check_clean_nick(source, parv[1]))
     return;
 
   /* If the nick doesn't exist, allow it and process like normal */

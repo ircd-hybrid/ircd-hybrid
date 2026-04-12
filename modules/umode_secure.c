@@ -39,7 +39,6 @@ static hook_flow_t
 who_send_hook(void *ctx_)
 {
   ircd_hook_who_send_ctx *ctx = ctx_;
-
   if (user_mode_has_flag(ctx->target, UMODE_SECURE))
     if (ctx->modes_len < sizeof(ctx->modes) - 1)
       ctx->modes[ctx->modes_len++] = secure_mode.mode_char;
@@ -51,8 +50,7 @@ static hook_flow_t
 whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
-
-  if (user_mode_has_flag(ctx->target, UMODE_SECURE) == false)
+  if (!user_mode_has_flag(ctx->target, UMODE_SECURE))
     return HOOK_FLOW_CONTINUE;
 
   char buf[IRCD_BUFSIZE];

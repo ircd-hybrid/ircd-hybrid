@@ -389,14 +389,14 @@ mr_server(struct Client *source, int parc, char *parv[])
   }
 
   const char *const name = parv[1];
-  if (server_is_valid_name(name) == false)
+  if (!server_is_valid_name(name))
   {
     server_reject_connection(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
   const char *const sid = parv[3];
-  if (valid_sid(sid) == false)
+  if (!valid_sid(sid))
   {
     server_reject_connection(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;
@@ -519,14 +519,14 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
 
   const char *const name = parv[1];
-  if (server_is_valid_name(name) == false)
+  if (!server_is_valid_name(name))
   {
     server_reject_introduction(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
   const char *const sid = parv[3];
-  if (valid_sid(sid) == false)
+  if (!valid_sid(sid))
   {
     server_reject_introduction(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;

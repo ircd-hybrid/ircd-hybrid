@@ -106,7 +106,7 @@ _ssl_handshake(fde_t *F, void *data_)
     client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
     comm_setselect(F, 0, NULL, NULL);
 
-    if (tls_verify_certificate(&F->tls, &client->tls_certfp) == false)
+    if (!tls_verify_certificate(&F->tls, &client->tls_certfp))
       log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
                 client_get_name(client, MASK_IP));
 
@@ -161,7 +161,7 @@ _add_connection(fde_t *client_fde, struct Listener *listener, const struct io_ad
 
   if (listener_has_flag(listener, LISTENER_TLS))
   {
-    if (tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER) == false)
+    if (!tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER))
     {
       SetDead(client);
       client_exit(client, "TLS context initialization failed");
@@ -210,7 +210,7 @@ _listener_accept_connection(fde_t *F, void *data_)
     }
 
     char remote_addr_str[HOSTIPLEN + 1];
-    if (address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)) == false)
+    if (!address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)))
     {
       log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
       ++ServerStats.is_ref;
@@ -374,7 +374,7 @@ listener_release(struct Listener *listener)
 {
   assert(listener->ref_count > 0);
 
-  if (--listener->ref_count == 0 && listener_is_active(listener) == false)
+  if (--listener->ref_count == 0 && !listener_is_active(listener))
     _listener_close(listener);
 }
 
@@ -400,7 +400,7 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
   }
 
   struct io_addr addr;
-  if (address_from_string(addr_string, &addr) == false)
+  if (!address_from_string(addr_string, &addr))
     return;
 
   address_set_port(&addr, port);
@@ -414,6 +414,6 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
   if (listener_is_active(listener))
     return;
 
-  if (_listener_finalize(listener) == false)
+  if (!_listener_finalize(listener))
     _listener_close(listener);
 }

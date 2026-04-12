@@ -29,7 +29,7 @@
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
 {
-  if (user_mode_has_flag(client, UMODE_INVISIBLE) == false)
+  if (!user_mode_has_flag(client, UMODE_INVISIBLE))
     ++Count.invisi;
   return true;
 }

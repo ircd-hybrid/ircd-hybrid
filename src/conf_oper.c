@@ -163,7 +163,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
       continue;
     }
 
-    if (_oper_match_password(oper, password) == false)
+    if (!_oper_match_password(oper, password))
     {
       if (result < OPER_AUTH_FAIL_PASSWORD)
         result = OPER_AUTH_FAIL_PASSWORD;

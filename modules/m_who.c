@@ -292,7 +292,7 @@ _who_on_common_channel(struct Client *source, struct Channel *channel,
     struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
-    if (user_mode_has_flag(target, UMODE_INVISIBLE) == false || client_has_flag(target, FLAGS_MARK))
+    if (!user_mode_has_flag(target, UMODE_INVISIBLE) || client_has_flag(target, FLAGS_MARK))
       continue;
 
     client_set_flag(target, FLAGS_MARK);
@@ -316,10 +316,9 @@ _who_on_common_channel(struct Client *source, struct Channel *channel,
 static void
 _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 {
-  static uintmax_t last_used = 0;
-
   if (!client_is_oper(source))
   {
+    static uintmax_t last_used = 0;
     if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {
       sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHO");
@@ -381,7 +380,7 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
     struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
-    if (is_member || user_mode_has_flag(target, UMODE_INVISIBLE) == false)
+    if (is_member || !user_mode_has_flag(target, UMODE_INVISIBLE))
     {
       if ((who->bitsel & WHOSELECT_OPER))
         if (!client_is_oper(target) ||
@@ -562,7 +561,7 @@ m_who(struct Client *source, int parc, char *parv[])
     {
       if (!(who->bitsel & WHOSELECT_OPER) ||
           (client_is_oper(target) &&
-           (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))))
+           (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))))
         _who_send(source, target, NULL, who);
 
       sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);

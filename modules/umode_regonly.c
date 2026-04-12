@@ -37,8 +37,7 @@ static hook_flow_t
 msg_client_source_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
-
-  if (user_mode_has_flag(ctx->target, UMODE_REGONLY) == false || ctx->target == ctx->source)
+  if (!user_mode_has_flag(ctx->target, UMODE_REGONLY) || ctx->target == ctx->source)
     return HOOK_FLOW_CONTINUE;
 
   if (user_mode_has_flag(ctx->source, UMODE_REGISTERED | UMODE_OPER))

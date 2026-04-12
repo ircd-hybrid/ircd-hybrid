@@ -84,7 +84,7 @@ who_send_hook(void *ctx_)
   ircd_hook_who_send_ctx *ctx = ctx_;
 
   if (client_is_oper(ctx->target))
-    if (client_is_oper(ctx->source) || user_mode_has_flag(ctx->target, UMODE_HIDDEN) == false)
+    if (client_is_oper(ctx->source) || !user_mode_has_flag(ctx->target, UMODE_HIDDEN))
       if (ctx->modes_len < sizeof(ctx->modes) - 1)
         ctx->modes[ctx->modes_len++] = '*';
 

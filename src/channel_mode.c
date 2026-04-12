@@ -456,7 +456,7 @@ static void
 chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   /* If have already dealt with this simple mode, ignore it */
@@ -555,7 +555,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (MyClient(client) && (++mode_limit > MAXMODEPARAMS))
@@ -594,7 +594,7 @@ static void
 chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (parc <= *parn)
@@ -626,7 +626,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (member_has_flags(member, mode->flag) == false)
+    if (!member_has_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
     member_unset_flags(member, mode->flag);
@@ -642,7 +642,7 @@ static void
 chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (dir == MODE_ADD && parc > *parn)
@@ -685,7 +685,7 @@ static void
 chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (dir == MODE_ADD && parc > *parn)

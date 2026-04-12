@@ -41,7 +41,7 @@ msg_client_target_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_SOFTCALLERID) == false)
+  if (!user_mode_has_flag(ctx->target, UMODE_SOFTCALLERID))
     return HOOK_FLOW_CONTINUE;
 
   if (accept_message(ctx->source, ctx->target))
@@ -70,7 +70,7 @@ whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_SOFTCALLERID) == false)
+  if (!user_mode_has_flag(ctx->target, UMODE_SOFTCALLERID))
     return HOOK_FLOW_CONTINUE;
 
   if (user_mode_has_flag(ctx->target, UMODE_CALLERID))

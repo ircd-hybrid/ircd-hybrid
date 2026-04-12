@@ -419,7 +419,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
 static bool
 sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recipient_t recipient)
 {
-  if (flags && user_mode_has_flag(client, flags) == false)
+  if (flags && !user_mode_has_flag(client, flags))
     return false;
 
   switch (recipient)
@@ -481,7 +481,7 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
     if (client_is_dead(client))
       continue;
 
-    if (sendto_clients_qualifies(client, flags, recipient) == false)
+    if (!sendto_clients_qualifies(client, flags, recipient))
       continue;
 
     sendto_one_buffer(client, buffer);

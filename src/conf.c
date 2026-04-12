@@ -481,7 +481,7 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
 
   if (!string_is_empty(conf->passwd))
   {
-    if (conf_match_password(client->connection->password, conf) == false)
+    if (!conf_match_password(client->connection->password, conf))
     {
       sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
       *error_reason = "Bad Password";
@@ -552,7 +552,7 @@ conf_authorize_client(struct Client *client)
   if (conf == NULL)
     goto fail;
 
-  if (conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), &reason) == false)
+  if (!conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), &reason))
     goto fail;
 
   client_set_class(client, conf->klass, CLIENT_CLASS_BASE);
@@ -894,7 +894,7 @@ conf_clear(void)
 static void
 conf_handle_tls(bool cold)
 {
-  if (tls_new_credentials() == false)
+  if (!tls_new_credentials())
   {
     if (cold)
     {

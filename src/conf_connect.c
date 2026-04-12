@@ -228,7 +228,7 @@ connect_authenticate_server(const char *server_name, const struct Client *client
       continue;
     }
 
-    if (_connect_match_password(connect, client->connection->password) == false)
+    if (!_connect_match_password(connect, client->connection->password))
     {
       if (result < CONNECT_AUTH_FAIL_PASSWORD)
         result = CONNECT_AUTH_FAIL_PASSWORD;

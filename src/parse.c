@@ -438,10 +438,10 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
     .buffer_cursor = buffer
   };
 
-  if (_parse_extract_and_validate_prefix(&ctx) == false)
+  if (!_parse_extract_and_validate_prefix(&ctx))
     return;
 
-  if (_parse_identify_command_or_numeric(&ctx) == false)
+  if (!_parse_identify_command_or_numeric(&ctx))
     return;
 
   _parse_split_parameters(&ctx);

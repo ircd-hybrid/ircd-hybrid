@@ -164,7 +164,7 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
   LIST_FOREACH(node, current_server->serv->child_server_list.head)
   {
     const struct Client *server = node->data;
-    if (_map_should_hide_server(server, client) == false)
+    if (!_map_should_hide_server(server, client))
       ++visible_server_count;
   }
 

@@ -494,12 +494,11 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     list_node_t *node;
     LIST_FOREACH(node, channel->members.head)
     {
-      size_t masklen = 0;
-
       const struct ChannelMember *const member = node->data;
       if (user_mode_has_flag(member->client, UMODE_INVISIBLE) && is_member == false)
         continue;
 
+      size_t masklen = 0;
       if (uhnames)
         masklen = strlen(member->client->name) + strlen(member->client->username) +
                   strlen(member->client->host) + 3;  /* +3 for ! + @ + space */
@@ -718,7 +717,7 @@ bool
 is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 {
   if (find_bmask(client, channel, &channel->banlist, extban))
-    return find_bmask(client, channel, &channel->exceptlist, extban) == false;
+    return !find_bmask(client, channel, &channel->exceptlist, extban);
   return false;
 }
 
@@ -732,10 +731,10 @@ is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 static int
 _can_join(struct Client *client, struct Channel *channel, const char *key)
 {
-  if (channel_has_mode(channel, MODE_SECUREONLY) && user_mode_has_flag(client, UMODE_SECURE) == false)
+  if (channel_has_mode(channel, MODE_SECUREONLY) && !user_mode_has_flag(client, UMODE_SECURE))
     return ERR_SECUREONLYCHAN;
 
-  if (channel_has_mode(channel, MODE_REGONLY) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
+  if (channel_has_mode(channel, MODE_REGONLY) && !user_mode_has_flag(client, UMODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
   if (channel_has_mode(channel, MODE_OPERONLY) && !client_is_oper(client))
@@ -743,7 +742,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
 
   if (channel_has_mode(channel, MODE_INVITEONLY))
     if (invite_find(channel, client) == NULL)
-      if (find_bmask(client, channel, &channel->invexlist, NULL) == false)
+      if (!find_bmask(client, channel, &channel->invexlist, NULL))
         return ERR_INVITEONLYCHAN;
 
   if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
@@ -835,7 +834,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     if (!(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)))
     {
       const struct ResvItem *const resv = resv_find(channel->name, match);
-      if (resv && resv_exempt_find(client, resv) == false)
+      if (resv && !resv_exempt_find(client, resv))
       {
         *error = "channel is reserved";
         return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -880,7 +879,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (channel_has_mode(channel, MODE_MODREG) && user_mode_has_flag(client, UMODE_REGISTERED) == false)
+  if (channel_has_mode(channel, MODE_MODREG) && !user_mode_has_flag(client, UMODE_REGISTERED))
   {
     *error = "you need to identify to a registered nick";
     return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -1031,7 +1030,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
 void
 channel_join_one(struct Client *client, const char *name, const char *key)
 {
-  if (channel_is_valid_name(name, true) == false)
+  if (!channel_is_valid_name(name, true))
   {
     sendto_one_numeric(client, &me, ERR_BADCHANNAME, name);
     return;
@@ -1040,7 +1039,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   const struct ResvItem *resv;
   if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
       !(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)) &&
-      ((resv = resv_find(name, match)) && resv_exempt_find(client, resv) == false))
+      ((resv = resv_find(name, match)) && !resv_exempt_find(client, resv)))
   {
     sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
@@ -1057,7 +1056,12 @@ channel_join_one(struct Client *client, const char *name, const char *key)
 
   uint32_t flags = 0;
   struct Channel *channel = hash_find_channel(name);
-  if (channel)
+  if (channel == NULL)
+  {
+    flags = CHFL_CHANOP;
+    channel = channel_create(name);
+  }
+  else
   {
     if (member_find_link(client, channel))
       return;
@@ -1069,11 +1073,6 @@ channel_join_one(struct Client *client, const char *name, const char *key)
       sendto_one_numeric(client, &me, ret, channel->name);
       return;
     }
-  }
-  else
-  {
-    flags = CHFL_CHANOP;
-    channel = channel_create(name);
   }
 
   if (!client_is_oper(client))

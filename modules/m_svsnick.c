@@ -67,7 +67,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     return;
 
   const char *const new_nick = parv[3];
-  if (valid_nickname(new_nick, true) == false)
+  if (!valid_nickname(new_nick, true))
     return;
 
   if (!client_is_local(target))

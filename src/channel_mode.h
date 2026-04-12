@@ -177,7 +177,7 @@ channel_unset_mode(struct Channel *channel, unsigned int mode)
 static inline bool
 channel_is_public(const struct Channel *channel)
 {
-  return channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET) == false;
+  return !channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET);
 }
 
 static inline bool

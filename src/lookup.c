@@ -112,9 +112,9 @@ _lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, s
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_FAIL]);
   else if (name_length > HOSTLEN)
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_TOO_LONG]);
-  else if (address_match(addr, &lookup->client->addr, true, false, 0) == false)
+  else if (!address_match(addr, &lookup->client->addr, true, false, 0))
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_IP_MISMATCH]);
-  else if (_lookup_verify_hostname(name) == false)
+  else if (!_lookup_verify_hostname(name))
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_INVALID]);
   else
   {

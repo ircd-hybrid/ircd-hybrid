@@ -53,7 +53,7 @@ monitor_add(struct Client *source, char *list)
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
   {
-    if (valid_nickname(name, true) == false)
+    if (!valid_nickname(name, true))
       continue;
 
     if (list_length(&source->connection->monitor_list) >= ConfigGeneral.max_monitor)
@@ -75,7 +75,7 @@ monitor_add(struct Client *source, char *list)
       return;
     }
 
-    if (monitor_subscribe(source, name) == false)
+    if (!monitor_subscribe(source, name))
       continue;  /* Name is already being monitored */
 
     const struct Client *target = find_person(source, name);

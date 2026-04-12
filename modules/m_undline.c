@@ -109,7 +109,7 @@ mo_undline(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (aline_parse("UNDLINE", source, parc, parv, &aline) == false)
+  if (!aline_parse("UNDLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)

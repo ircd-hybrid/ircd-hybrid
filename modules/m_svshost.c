@@ -55,7 +55,7 @@ ms_svshost(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  if (valid_hostname(parv[3]) == false)
+  if (!valid_hostname(parv[3]))
     return;
 
   user_set_hostmask(target, parv[3], false);

@@ -217,7 +217,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   if (!IsServer(source))
     return;
 
-  if (channel_is_valid_name(parv[2], false) == false)
+  if (!channel_is_valid_name(parv[2], false))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",

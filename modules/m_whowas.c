@@ -116,14 +116,13 @@ whowas_do(struct Client *source, const char *name, const char *limit_str)
 static void
 m_whowas(struct Client *source, int parc, char *parv[])
 {
-  static uintmax_t last_used = 0;
-
   if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
+  static uintmax_t last_used = 0;
   if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOWAS");

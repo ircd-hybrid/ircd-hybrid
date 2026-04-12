@@ -42,7 +42,7 @@ shared_clear(void)
 {
   while (shared_list.head)
   {
-    struct SharedItem *shared = shared_list.head->data;
+    struct SharedItem *const shared = shared_list.head->data;
     list_remove(&shared->node, &shared_list);
     io_free(shared->server);
     io_free(shared->user);
@@ -61,13 +61,13 @@ shared_make(void)
 }
 
 const struct SharedItem *
-shared_find(unsigned int type, const char *server, const char *user, const char *host)
+shared_find(uint32_t type, const char *server, const char *user, const char *host)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, shared_list.head)
   {
-    const struct SharedItem *shared = node->data;
+    const struct SharedItem *const shared = node->data;
     if (shared->type & type)
       if (match(shared->server, server) == 0)
         if (match(shared->user, user) == 0 && match(shared->host, host) == 0)

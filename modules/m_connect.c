@@ -80,7 +80,7 @@ do_connect(struct Client *source, const char *name)
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block.
    */
-  if (server_connect(connect, source) == false)
+  if (!server_connect(connect, source))
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
                       connect->name, connect->port);
   else if (client_is_local(source) && client_is_admin(source))

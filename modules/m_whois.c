@@ -75,7 +75,7 @@ typedef enum
 static whois_channel_visibility_t
 _whois_channel_visibility_get(struct Channel *channel, struct Client *source, const struct Client *target)
 {
-  if (channel_is_public(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
+  if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (source == target || member_find_link(source, channel))
@@ -188,7 +188,7 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_oper(target) || client_is_service(target))
   {
-    if (user_mode_has_flag(target, UMODE_HIDDEN) == false || client_is_oper(source))
+    if (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))
     {
       const struct ServicesTag *svstag = list_peek_head(&target->svstag_list);
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
@@ -231,7 +231,7 @@ static void
 _whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
   if (client_is_local(target))
-    if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || client_is_oper(source) || source == target)
+    if (!user_mode_has_flag(target, UMODE_HIDEIDLE) || client_is_oper(source) || source == target)
       sendto_one_numeric(source, &me, RPL_WHOISIDLE,
                          target->name, client_get_idle_time(source, target), target->connection->created_real);
 }
@@ -294,8 +294,6 @@ _whois_process(struct Client *source, const char *name)
 static void
 m_whois(struct Client *source, int parc, char *parv[])
 {
-  static uintmax_t last_used = 0;
-
   if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
@@ -304,6 +302,7 @@ m_whois(struct Client *source, int parc, char *parv[])
 
   if (!string_is_empty(parv[2]))
   {
+    static uintmax_t last_used = 0;
     /* seeing as this is going across servers, we should limit it */
     if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
     {

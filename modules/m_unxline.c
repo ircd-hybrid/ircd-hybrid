@@ -102,7 +102,7 @@ mo_unxline(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (aline_parse("UNXLINE", source, parc, parv, &aline) == false)
+  if (!aline_parse("UNXLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)

@@ -108,7 +108,7 @@ client_reset_activity_timeout(struct Client *client)
   assert(client->connection->activity_timeout_event);
 
   uintmax_t timeout_duration_ms;
-  if (IsUnknown(client) || IsConnecting(client) || IsHandshake(client))
+  if (client_is_unknown(client) || client_is_connecting(client) || client_is_handshake(client))
     timeout_duration_ms = ConfigGeneral.registration_timeout * 1000ULL;
   else
   {
@@ -150,9 +150,9 @@ client_activity_timeout_handler(void *data)
   }
 
   /* Handle timeouts for any connection that is not yet fully registered or linked. */
-  if (IsUnknown(client) || IsConnecting(client) || IsHandshake(client))
+  if (client_is_unknown(client) || client_is_connecting(client) || client_is_handshake(client))
   {
-    const char *reason = IsUnknown(client) ? "Registration timed out" : "Timeout during server handshake";
+    const char *reason = client_is_unknown(client) ? "Registration timed out" : "Timeout during server handshake";
     client_exit(client, reason);
     return;
   }
@@ -537,7 +537,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
   if (!client_is_local(client))
     return client->name;
 
-  if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
+  if (IsServer(client) || client_is_connecting(client) || client_is_handshake(client))
     if (irccmp(client->name, client->host) == 0)
       return client->name;
 
@@ -892,9 +892,9 @@ static void
 _client_exit_cleanup_unregistered_connection(struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
-  assert(IsUnknown(client) || IsConnecting(client) || IsHandshake(client));
+  assert(client_is_unknown(client) || client_is_connecting(client) || client_is_handshake(client));
 
-  if (IsConnecting(client) || IsHandshake(client))
+  if (client_is_connecting(client) || client_is_handshake(client))
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Link Failed: %s [ip=%s] (Reason: %s)",
                    client->name, client->sockhost, reason);
@@ -904,7 +904,7 @@ _client_exit_cleanup_unregistered_connection(struct Client *client, const char *
   assert(list_find(&unknown_list, client));
   list_remove(&client->connection->node, &unknown_list);
 
-  if (IsConnecting(client) || IsHandshake(client))
+  if (client_is_connecting(client) || client_is_handshake(client))
     server_conf_set(client, NULL);
 
   client_set_class(client, NULL, CLIENT_CLASS_BASE);

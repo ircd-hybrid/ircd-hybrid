@@ -49,7 +49,7 @@ mr_error(struct Client *source, int parc, char *parv[])
 {
   assert(client_is_local(source));
 
-  if (!IsHandshake(source) && !IsConnecting(source))
+  if (!client_is_handshake(source) && !client_is_connecting(source))
     return;
 
   const char *message = string_default(parv[1], "<>");

@@ -252,9 +252,9 @@ static void
 server_estab(struct Client *client, struct ConnectItem *connect)
 {
   assert(client && client_is_local(client));
-  assert(IsUnknown(client) || IsHandshake(client));
+  assert(client_is_unknown(client) || client_is_handshake(client));
 
-  if (IsUnknown(client))
+  if (client_is_unknown(client))
   {
     sendto_one(client, "PASS %s", connect->send_password);
 
@@ -267,7 +267,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   sendto_one(client, ":%s SVINFO %u %u 0 :%ju",
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
-  if (!IsHandshake(client))
+  if (!client_is_handshake(client))
     hash_add_client(client);
   hash_add_id(client);
 
@@ -409,7 +409,7 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (IsHandshake(source) && strcmp(source->name, name))
+  if (client_is_handshake(source) && strcmp(source->name, name))
   {
     server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
     return;

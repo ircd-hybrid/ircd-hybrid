@@ -1064,7 +1064,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
     else
       type = HIDE_IP;
 
-    if (IsServer(target) || IsConnecting(target) || IsHandshake(target))
+    if (IsServer(target) || client_is_connecting(target) || client_is_handshake(target))
       if (!client_is_admin(client))
         type = MASK_IP;
 

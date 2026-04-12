@@ -673,7 +673,7 @@ m_nick(struct Client *source, int parc, char *parv[])
     if (strcmp(target->name, nick))
       nick_change_local(source, nick);
   }
-  else if (IsUnknown(target))
+  else if (client_is_unknown(target))
   {
     /*
      * If the client that has the nick isn't registered yet (NICK but no
@@ -714,7 +714,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
   struct Client *target = hash_find_client(parv[1]);
   if (target == NULL)
     nick_change_remote(source, parv);
-  else if (IsUnknown(target))
+  else if (client_is_unknown(target))
   {
     /* We're not living in the past anymore, an unknown client is local only. */
     client_exit(target, "Overridden by other sign on");
@@ -787,7 +787,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
   target = hash_find_client(parv[1]);
   if (target == NULL)
     uid_from_server(source, parc, parv);
-  else if (IsUnknown(target))
+  else if (client_is_unknown(target))
   {
     client_exit(target, "Overridden by other sign on");
 

@@ -69,9 +69,6 @@ enum
   REG_INIT      = REG_NEED_USER | REG_NEED_NICK
 };
 
-#define IsConnecting(x)         ((x)->state == CLIENT_STATE_CONNECTING)
-#define IsHandshake(x)          ((x)->state == CLIENT_STATE_HANDSHAKE)
-#define IsUnknown(x)            ((x)->state == CLIENT_STATE_UNKNOWN)
 #define IsServer(x)             ((x)->state == CLIENT_STATE_SERVER)
 #define IsClient(x)             ((x)->state == CLIENT_STATE_CLIENT)
 #define MyClient(x)             (client_is_local(x) && IsClient(x))
@@ -396,6 +393,24 @@ static inline bool
 client_is_me(const struct Client *client)
 {
   return client == &me;
+}
+
+static inline bool
+client_is_connecting(const struct Client *client)
+{
+  return client->state == CLIENT_STATE_CONNECTING;
+}
+
+static inline bool
+client_is_handshake(const struct Client *client)
+{
+  return client->state == CLIENT_STATE_HANDSHAKE;
+}
+
+static inline bool
+client_is_unknown(const struct Client *client)
+{
+  return client->state == CLIENT_STATE_UNKNOWN;
 }
 
 static inline bool

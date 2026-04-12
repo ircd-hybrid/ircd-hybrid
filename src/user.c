@@ -231,7 +231,7 @@ user_register_local(struct Client *client)
   assert(client == client->nexthop);
   assert(client->connection->registration == 0);
   assert(client_is_local(client));
-  assert(IsUnknown(client));
+  assert(client_is_unknown(client));
   assert(list_find(&unknown_list, client));
   assert(list_find(&local_client_list, client) == NULL);
 

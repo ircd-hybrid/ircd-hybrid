@@ -54,7 +54,7 @@ mr_user(struct Client *source, int parc, char *parv[])
   const char *const username = parv[1];
   const char *const realname = parv[4];
 
-  assert(IsUnknown(source));
+  assert(client_is_unknown(source));
 
   if (listener_has_flag(source->connection->listener, LISTENER_SERVER))
   {

@@ -94,7 +94,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
       if (strcmp(target->name, new_nick) == 0)
         return;
     }
-    else if (IsUnknown(exists_p))
+    else if (client_is_unknown(exists_p))
       client_exit(exists_p, "SVSNICK Override");
     else
     {

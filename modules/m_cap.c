@@ -142,7 +142,7 @@ send_caplist(struct Client *source,
 static void
 cap_ls(struct Client *source, const char *arg)
 {
-  if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
+  if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;
 
   if (arg && atoi(arg) >= 302)
@@ -160,7 +160,7 @@ cap_req(struct Client *source, const char *arg)
   unsigned int set = 0, rem = 0;
   unsigned int cs = source->connection->cap;  /* Enabled capabilities */
 
-  if (IsUnknown(source))  /* Registration hasn't completed; suspend it... */
+  if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;
 
   /* Walk through the capabilities list... */
@@ -207,7 +207,7 @@ cap_req(struct Client *source, const char *arg)
 static void
 cap_end(struct Client *source, const char *arg)
 {
-  if (!IsUnknown(source))  /* Registration has completed... */
+  if (!client_is_unknown(source))  /* Registration has completed... */
     return;  /* So just ignore the message... */
 
   /* Capability negotiation is now done... */

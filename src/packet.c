@@ -146,7 +146,7 @@ _parse_client_queued(struct Client *client)
 {
   char line_buffer[IRCD_BUFSIZE];
 
-  if (IsUnknown(client))
+  if (client_is_unknown(client))
   {
     unsigned int i = 0;
 
@@ -170,12 +170,12 @@ _parse_client_queued(struct Client *client)
        * If they've dropped out of the unknown state, break and move
        * to the parsing for their appropriate status.  --fl
        */
-      if (!IsUnknown(client))
+      if (!client_is_unknown(client))
         break;
     }
   }
 
-  if (IsServer(client) || IsConnecting(client) || IsHandshake(client))
+  if (IsServer(client) || client_is_connecting(client) || client_is_handshake(client))
   {
     while (true)
     {

@@ -85,9 +85,7 @@ find_cap(const char **caplist_p, bool *negate_p)
  * @param[in] subcmd Name of capability subcommand.
  */
 static void
-send_caplist(struct Client *source,
-             const unsigned int *const set,
-             const unsigned int *const rem, const char *subcmd)
+send_caplist(struct Client *source, uint32_t *const set, uint32_t *const rem, const char *subcmd)
 {
   char capbuf[IRCD_BUFSIZE] = "";
   char cmdbuf[IRCD_BUFSIZE] = "";
@@ -114,7 +112,7 @@ send_caplist(struct Client *source,
 
     /* Build the prefix (space separator and any modifiers needed). */
     char pfx[4];
-    unsigned int pfx_len = 0;
+    size_t pfx_len = 0;
 
     if (loc)
       pfx[pfx_len++] = ' ';
@@ -157,8 +155,8 @@ cap_ls(struct Client *source, const char *arg)
 static void
 cap_req(struct Client *source, const char *arg)
 {
-  unsigned int set = 0, rem = 0;
-  unsigned int cs = source->connection->cap;  /* Enabled capabilities */
+  uint32_t set = 0, rem = 0;
+  uint32_t cs = source->connection->cap;  /* Enabled capabilities */
 
   if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;

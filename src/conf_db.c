@@ -39,7 +39,7 @@ save_kline_database(const char *filename)
   json_t *kline_array = json_array();
   json_object_set_new(root, "k_lines", kline_array);
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
@@ -134,7 +134,7 @@ save_dline_database(const char *filename)
   json_t *dline_array = json_array();
   json_object_set_new(root, "d_lines", dline_array);
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
+  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)

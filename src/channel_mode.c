@@ -55,7 +55,7 @@ char cmode_class[4][256];
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
-static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
+static uint32_t simple_modes_mask;  /* bit mask of simple modes already set */
 
 /* check_string()
  *

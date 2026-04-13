@@ -71,9 +71,9 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
   if (track_join)
     channel->number_joined += 1.0f;
 
-  channel->number_joined -= (io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
-    (((float)GlobalSetOptions.joinfloodcount) /
-     (float)GlobalSetOptions.joinfloodtime);
+  channel->number_joined -=
+    (float)(io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
+    ((float)GlobalSetOptions.joinfloodcount / (float)GlobalSetOptions.joinfloodtime);
 
   if (channel->number_joined <= 0.0f)
   {
@@ -558,7 +558,7 @@ channel_rank_to_prefix(const int rank)
   return "";
 }
 
-unsigned int
+uint32_t
 channel_prefix_to_flag(const char prefix)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
@@ -945,7 +945,7 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
   }
   else
   {
-    const unsigned int t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
+    const uintmax_t t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       const unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);

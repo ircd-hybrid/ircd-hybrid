@@ -133,7 +133,7 @@ extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct 
 extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
 extern int channel_prefix_to_rank(const char);
 extern int member_highest_rank(const struct ChannelMember *);
-extern unsigned int channel_prefix_to_flag(const char);
+extern uint32_t channel_prefix_to_flag(const char);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
 extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_create(const char *);

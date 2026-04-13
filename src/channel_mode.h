@@ -25,6 +25,8 @@
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
+#include <stdint.h>
+
 #include "channel.h"
 
 
@@ -133,8 +135,8 @@ struct chan_mode
 {
   unsigned char letter;
   unsigned char prefix;
-  unsigned int mode;
-  unsigned int flag;
+  uint32_t mode;
+  uint32_t flag;
   enum mode_class class;
   bool only_opers;
   bool only_servers;
@@ -157,19 +159,19 @@ extern void clear_ban_cache_list(list_t *);
 extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, uint32_t);
 
 static inline bool
-channel_has_mode(const struct Channel *channel, unsigned int mode)
+channel_has_mode(const struct Channel *channel, uint32_t mode)
 {
   return (channel->mode.mode & mode) != 0;
 }
 
 static inline void
-channel_set_mode(struct Channel *channel, unsigned int mode)
+channel_set_mode(struct Channel *channel, uint32_t mode)
 {
   channel->mode.mode |= mode;
 }
 
 static inline void
-channel_unset_mode(struct Channel *channel, unsigned int mode)
+channel_unset_mode(struct Channel *channel, uint32_t mode)
 {
   channel->mode.mode &= ~mode;
 }

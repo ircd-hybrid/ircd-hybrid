@@ -76,9 +76,9 @@ static void
 _monitor_destroy(struct Monitor *monitor)
 {
   assert(monitor->monitored_by.head == NULL);
-  assert(list_find(&monitor_hash[monitor->hash_value], monitor));
+  assert(list_find(&monitor_hash[hash_string(monitor->name)], monitor));
 
-  list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
+  list_remove(&monitor->node, &monitor_hash[hash_string(monitor->name)]);
   io_free(monitor->name);
   io_free(monitor);
 }
@@ -140,8 +140,7 @@ monitor_subscribe(struct Client *client, const char *name)
   {
     monitor = io_calloc(sizeof(*monitor));
     monitor->name = io_strdup(name);
-    monitor->hash_value = hash_string(monitor->name);
-    list_add(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
+    list_add(monitor, &monitor->node, &monitor_hash[hash_string(monitor->name)]);
   }
   else
   {

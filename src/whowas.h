@@ -47,7 +47,6 @@ struct WhowasGroup
 {
   list_node_t hash_node;  /**< List node; linked into whowas_hash. */
   char *name;  /**< Nickname string. */
-  unsigned int hash_value;  /**< Hash value derived from WhowasGroup::name. */
   list_t whowas_records;  /**< List of Whowas structs for this nickname. */
 };
 

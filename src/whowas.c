@@ -75,8 +75,7 @@ _whowas_group_create(const char *name)
 {
   struct WhowasGroup *group = io_calloc(sizeof(*group));
   group->name = io_strdup(name);
-  group->hash_value = hash_string(name);
-  list_add(group, &group->hash_node, &whowas_hash[group->hash_value]);
+  list_add(group, &group->hash_node, &whowas_hash[hash_string(group->name)]);
 
   return group;
 }
@@ -92,7 +91,7 @@ _whowas_group_destroy(struct WhowasGroup *group)
   if (!list_is_empty(&group->whowas_records))
     return;
 
-  list_remove(&group->hash_node, &whowas_hash[group->hash_value]);
+  list_remove(&group->hash_node, &whowas_hash[hash_string(group->name)]);
   io_free(group->name);
   io_free(group);
 }

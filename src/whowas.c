@@ -153,7 +153,7 @@ void
 whowas_trim(void)
 {
   while (list_length(&whowas_list) &&
-         list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+         list_length(&whowas_list) > ConfigGeneral.whowas_history_length)
     _whowas_destroy(list_peek_tail(&whowas_list));
 }
 

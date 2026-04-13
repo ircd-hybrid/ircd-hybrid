@@ -132,31 +132,23 @@ monitor_notify_signoff(const struct Client *client)
 bool
 monitor_subscribe(struct Client *client, const char *name)
 {
-  list_node_t *node = NULL;
+  assert(client_is_local(client));
 
-  /* If found NULL (no header for this name), make one... */
   struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
   {
+    /* First subscriber for this name: create the monitor bucket entry. */
     monitor = io_calloc(sizeof(*monitor));
     monitor->name = io_strdup(name);
     list_add(monitor, &monitor->node, &monitor_hash[hash_string(monitor->name)]);
   }
-  else
-  {
-    /* Is this client already on the monitor-list? */
-    node = list_find(&monitor->monitored_by, client);
-  }
+  else if (list_find(&monitor->monitored_by, client))
+    return false;  /* Already subscribed. */
 
-  if (node == NULL)
-  {
-    /* No it isn't, so add it in the bucket and client adding it */
-    list_add(client, list_make_node(), &monitor->monitored_by);
-    list_add(monitor, list_make_node(), &client->connection->monitor_list);
-    return true;
-  }
-
-  return false;
+  /* Link both directions: monitor -> client and client -> monitor. */
+  list_add(client, list_make_node(), &monitor->monitored_by);
+  list_add(monitor, list_make_node(), &client->connection->monitor_list);
+  return true;
 }
 
 /*! \brief Removes a single entry from client's monitor list
@@ -166,21 +158,24 @@ monitor_subscribe(struct Client *client, const char *name)
 void
 monitor_unsubscribe(struct Client *client, const char *name)
 {
+  assert(client_is_local(client));
+
   struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
-    return;  /* No header found for that name. i.e. it's not being monitored */
+    return;  /* No header found for that name, i.e. it is not being monitored. */
 
   list_node_t *node = list_find_remove(&monitor->monitored_by, client);
   if (node == NULL)
-    return;  /* This name isn't being monitored by client */
-
+    return;  /* This name is not being monitored by this client. */
   list_free_node(node);
 
   node = list_find_remove(&client->connection->monitor_list, monitor);
-  if (node)
-    list_free_node(node);
+  assert(node);
+  if (node == NULL)
+    return;
+  list_free_node(node);
 
-  /* In case this header is now empty of notices, remove it */
+  /* Remove the monitor header if nobody is subscribed anymore. */
   if (list_is_empty(&monitor->monitored_by))
     _monitor_destroy(monitor);
 }
@@ -192,6 +187,8 @@ monitor_unsubscribe(struct Client *client, const char *name)
 void
 monitor_clear_list(struct Client *client)
 {
+  assert(client_is_local(client));
+
   while (client->connection->monitor_list.head)
   {
     list_node_t *node = client->connection->monitor_list.head;
@@ -220,6 +217,8 @@ monitor_clear_list(struct Client *client)
 void
 monitor_count_memory(uint32_t *const count, size_t *const bytes)
 {
+  *count = *bytes = 0;
+
   for (size_t i = 0; i < HASHSIZE; ++i)
   {
     (*count) += list_length(&monitor_hash[i]);

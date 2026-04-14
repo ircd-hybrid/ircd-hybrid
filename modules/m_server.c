@@ -415,19 +415,12 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  /*
+   * A server with this name is already fully established in the network view.
+   * This is a hard collision and the connection must be rejected.
+   */
   if (hash_find_server(name))
   {
-    /*
-     * This link is trying feed me a server that I already have
-     * access through another path -- multiple paths not accepted
-     * currently, kill this link immediately!!
-     *
-     * Rather than KILL the link which introduced it, KILL the
-     * youngest of the two links. -avalon
-     *
-     * Definitely don't do that here. This is from an unregistered
-     * connect - A1kmm.
-     */
     server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
@@ -467,13 +460,30 @@ mr_server(struct Client *source, int parc, char *parv[])
     }
   }
 
-  /* XXX If somehow there is a connect in progress and
-   * a connect comes in with same name toss the pending one,
-   * but only if it's not the same client! - Dianora
+  /*
+   * A matching entry in the client hash may only be replaced if it is another
+   * local connection that has not yet completed server registration.
    */
   struct Client *const target = hash_find_client(name);
-  if (target && (target != source))
-    client_exit(target, "Overridden");
+  if (target && target != source)
+  {
+    /*
+     * Any non-local entry, or any local entry that is already fully established,
+     * is treated as a genuine name collision and must not be replaced.
+     */
+    if (!client_is_local(target) ||
+        (!client_is_unknown(target) && !client_is_connecting(target) && !client_is_handshake(target)))
+    {
+      server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+      return;
+    }
+
+    /*
+     * At this point, the match refers to a different local pending link for the
+     * same server name. Replace it in favor of the current connection.
+     */
+    client_exit(target, "Replaced by incoming server introduction");
+  }
 
   /*
    * If we are connecting (Handshake), we already have the name from the
@@ -546,68 +556,65 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  /*
+   * A server with this name is already fully established in the network view.
+   * This is a hard collision and the introduction must be rejected.
+   */
   if (hash_find_server(name))
   {
     server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 
-  /* XXX If somehow there is a connect in progress and
-   * a connect comes in with same name toss the pending one,
-   * but only if it's not the same client! - Dianora
-   */
-  struct Client *target = hash_find_client(name);
-  if (target && (target != source->nexthop))
-    client_exit(target, "Overridden");
-
-  /*
-   * See if the newly found server is behind a guaranteed
-   * leaf. If so, close the link.
-   */
-  /*
-   * Ok, this way this works is
-   *
-   * A server can have a CONF_HUB allowing it to introduce servers
-   * behind it.
-   *
-   * connect {
-   *            name = "irc.bighub.net";
-   *            hub_mask = "*";
-   *            ...
-   *
-   * That would allow "irc.bighub.net" to introduce anything it wanted..
-   *
-   * However
-   *
-   * connect {
-   *            name = "irc.somehub.fi";
-   *            hub_mask = "*";
-   *            leaf_mask = "*.edu";
-   *            ...
-   *
-   * Would allow this server in finland to hub anything but .edu's
-   */
-
   const struct ConnectItem *const connect = server_conf_get(source->nexthop);
   /* An established server link must have a connect block associated with it. */
   assert(connect);
 
-  /* Ok, check source->nexthop can hub the new server */
+  /*
+   * The introducing uplink must be permitted to introduce this server name.
+   * If no matching hub mask exists, the introduction violates link policy.
+   */
   if (list_find_cmp(&connect->hub_masks, name, match) == NULL)
   {
-    /* OOOPs nope can't HUB */
     server_reject_introduction(source, SERVER_REJECT_HUB_POLICY,
                                "Introducer '%s' is not an authorized hub for '%s'", source->name, name);
     return;
   }
 
-  /* Check for the new server being leafed behind this HUB */
+  /*
+   * Reject the introduction if the target server name matches a configured
+   * leaf mask behind this uplink.
+   */
   if (list_find_cmp(&connect->leaf_masks, name, match))
   {
-    /* OOOPs nope can't HUB this leaf */
     server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,
                                "Introduction of '%s' by '%s' denied (server is designated as a leaf)", name, source->name);
     return;
+  }
+
+  /*
+   * A matching entry in the client hash may only be replaced if it is a
+   * local connection that has not yet completed server registration.
+   */
+  struct Client *target = hash_find_client(name);
+  if (target)
+  {
+    /*
+     * Any non-local entry, or any local entry that is already fully established,
+     * is treated as a genuine name collision and must not be replaced.
+     */
+    if (!client_is_local(target) ||
+        (!client_is_unknown(target) && !client_is_connecting(target) && !client_is_handshake(target)))
+    {
+      server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+      return;
+    }
+
+    /*
+     * At this point, the match refers to a local pending link for the same
+     * server name. Replace it in favor of the incoming introduction.
+     */
+    client_exit(target, "Replaced by incoming server introduction");
   }
 
   target = client_create_remote(source);

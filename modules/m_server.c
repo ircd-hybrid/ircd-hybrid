@@ -272,6 +272,7 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   hash_add_id(client);
 
   client_set_state(client, CLIENT_STATE_SERVER);
+  client_reset_activity_timeout(client);
 
   server_create(client);
   server_conf_set(client, connect);

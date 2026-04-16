@@ -22,6 +22,8 @@ ircd_SOURCES = accept.c          \
                channel_mode.h    \
                client.c          \
                client.h          \
+               client_input.c    \
+               client_input.h    \
                client_svstag.c   \
                client_svstag.h   \
                cloak.c           \

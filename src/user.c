@@ -42,6 +42,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_input.h"
 #include "cloak.h"
 #include "conf.h"
 #include "conf_gecos.h"
@@ -313,7 +314,7 @@ user_register_local(struct Client *client)
 
   assert(client->connection->flood_recalc_event == NULL);
   client->connection->flood_recalc_event =
-    event_create(ircd_event_manager, "flood_recalc", flood_recalc, 1000, false, client, NULL);
+    event_create(ircd_event_manager, "client_input_flood_recalc", client_input_flood_recalc, 1000, false, client, NULL);
   event_set_priority(client->connection->flood_recalc_event, 2);
   event_schedule(client->connection->flood_recalc_event);
 

@@ -219,12 +219,7 @@ struct Connection
 
   fde_t *fd;  /**< Pointer to the file descriptor entry for the underlying socket. */
 
-  /* Anti-flood stuff. We track how many messages were parsed and how
-   * many we were allowed in the current second, and apply a simple
-   * decay to avoid flooding.
-   *   -- adrian
-   */
-  int sent_parsed;  /**< How many messages we've parsed in this second */
+  int input_parse_debt;  /**< Decaying parse debt that limits queued input processing. */
 
   char *password;  /**< Password supplied by the client/server during handshake. */
   char *oper_name;  /**< The name of the oper block, if opered up. */

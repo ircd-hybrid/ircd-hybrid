@@ -31,6 +31,7 @@
 
 #include "channel.h"
 #include "client.h"
+#include "client_input.h"
 #include "conf.h"
 #include "hash.h"
 #include "id.h"
@@ -176,7 +177,7 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
 
   const struct CommandHandler *const handler = &command->handlers[source->nexthop->handler];
   if (handler->end_grace_period && MyClient(source))
-    flood_endgrace(source);
+    client_input_flood_endgrace(source);
 
   if (handler->args_min &&
       ((parc < handler->args_min) ||

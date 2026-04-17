@@ -305,7 +305,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 
   if (!tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
   {
-    SetDead(client);
+    client_set_dead(client);
     client_exit(client, "TLS context initialization failed");
     return;
   }

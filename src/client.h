@@ -133,10 +133,6 @@ extern uint64_t UMODE_SERVNOTICE;
 extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
 
-/* flags macros. */
-#define SetDead(x)              ((x)->flags |= FLAGS_DEADSOCKET)
-
-
 enum client_class_type
 {
   CLIENT_CLASS_BASE,
@@ -424,6 +420,12 @@ static inline bool
 client_is_dead(const struct Client *client)
 {
   return client_has_flag(client, FLAGS_DEADSOCKET);
+}
+
+static inline void
+client_set_dead(struct Client *client)
+{
+  client_set_flag(client, FLAGS_DEADSOCKET);
 }
 
 static inline bool

@@ -942,7 +942,7 @@ client_exit(struct Client *client, const char *reason)
     _client_exit_teardown_connection(client);
   }
 
-  SetDead(client);
+  client_set_dead(client);
   hook_dispatch(client_is_local(client) ? ircd_hook_client_exit_local : ircd_hook_client_exit_remote,
                 &(ircd_hook_client_exit_ctx){ .client = client, .reason = reason });
 
@@ -987,7 +987,7 @@ _client_exit_schedule(struct Client *client, const char *reason)
   if (client_is_defunct(client))
     return;
 
-  SetDead(client);
+  client_set_dead(client);
 
   io_free(client->connection->abort_reason);
   client->connection->abort_reason = io_strdup(reason);

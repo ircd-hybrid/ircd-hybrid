@@ -163,7 +163,7 @@ _add_connection(fde_t *client_fde, struct Listener *listener, const struct io_ad
   {
     if (!tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER))
     {
-      SetDead(client);
+      client_set_dead(client);
       client_exit(client, "TLS context initialization failed");
       return;
     }

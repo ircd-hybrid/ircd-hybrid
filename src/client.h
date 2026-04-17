@@ -23,7 +23,6 @@
  * \brief Header including structures, macros and prototypes for client handling
  */
 
-
 #ifndef INCLUDED_client_h
 #define INCLUDED_client_h
 #include <assert.h>
@@ -50,6 +49,22 @@
 #include "lookup.h"
 #include "user_mode.h"
 
+/** Server ban types */
+enum
+{
+  CLIENT_BAN_KLINE,
+  CLIENT_BAN_DLINE,
+  CLIENT_BAN_XLINE
+};
+
+/** addr_mask_type enumeration */
+enum addr_mask_type
+{
+  HIDE_IP,  /**< IP is hidden. Resolved hostname is shown instead */
+  SHOW_IP,  /**< IP is shown. No parts of it are hidden or masked */
+  MASK_IP   /**< IP is masked. 255.255.255.255 is shown instead */
+};
+
 /** Client connection states */
 enum client_state
 {
@@ -61,6 +76,18 @@ enum client_state
   CLIENT_STATE_ME,  /**< This is &me */
 };
 
+/* XXX */
+#define IsServer(x)             ((x)->state == CLIENT_STATE_SERVER)
+#define IsClient(x)             ((x)->state == CLIENT_STATE_CLIENT)
+#define MyClient(x)             (client_is_local(x) && IsClient(x))
+/* XXX */
+
+enum client_class_type
+{
+  CLIENT_CLASS_BASE,
+  CLIENT_CLASS_OPER,
+};
+
 enum
 {
   REG_NEED_USER = 1 << 0,  /**< User must send USER command */
@@ -68,11 +95,6 @@ enum
   REG_NEED_CAP  = 1 << 2,  /**< In middle of CAP negotiations */
   REG_INIT      = REG_NEED_USER | REG_NEED_NICK
 };
-
-#define IsServer(x)             ((x)->state == CLIENT_STATE_SERVER)
-#define IsClient(x)             ((x)->state == CLIENT_STATE_CLIENT)
-#define MyClient(x)             (client_is_local(x) && IsClient(x))
-
 
 /** Client flags */
 enum
@@ -96,63 +118,13 @@ enum
   FLAGS_GOTUSER         = 1 << 16,  /**< If we received a USER command */
   FLAGS_FLOOD_NOTICED   = 1 << 17,  /**< Notice to opers about this flooder has been sent */
   FLAGS_SERVICE         = 1 << 18,  /**< Client/server is a network service */
-  FLAGS_TLS_HANDSHAKING = 1 << 19,/**< The connection is actively negotiating a TLS handshake. */
+  FLAGS_TLS_HANDSHAKING = 1 << 19,  /**< The connection is actively negotiating a TLS handshake. */
   FLAGS_TLS_ACTIVE      = 1 << 20,  /**< The connection is secured with an active TLS session. */
   FLAGS_SQUIT           = 1 << 21,
   FLAGS_EXEMPTXLINE     = 1 << 22,  /**< Client is exempt from x-lines */
   FLAGS_CAP302          = 1 << 23,  /**< Client supports the IRCv3 CAP 302 extension */
   FLAGS_SPOOF           = 1 << 24,
   FLAGS_INTRODUCED      = 1 << 25,
-};
-
-extern uint64_t UMODE_BOT;
-extern uint64_t UMODE_DEAF;
-extern uint64_t UMODE_FARCONNECT;
-extern uint64_t UMODE_SOFTCALLERID;
-extern uint64_t UMODE_HIDDEN;
-extern uint64_t UMODE_EXPIRATION;
-extern uint64_t UMODE_REGONLY;
-extern uint64_t UMODE_SECURE;
-extern uint64_t UMODE_WEBIRC;
-extern uint64_t UMODE_SECUREONLY;
-extern uint64_t UMODE_ADMIN;
-extern uint64_t UMODE_CCONN;
-extern uint64_t UMODE_EXTERNAL;
-extern uint64_t UMODE_FLOOD;
-extern uint64_t UMODE_CALLERID;
-extern uint64_t UMODE_INVISIBLE;
-extern uint64_t UMODE_REJ;
-extern uint64_t UMODE_SKILL;
-extern uint64_t UMODE_LOCOPS;
-extern uint64_t UMODE_NCHANGE;
-extern uint64_t UMODE_OPER;
-extern uint64_t UMODE_HIDECHANS;
-extern uint64_t UMODE_HIDEIDLE;
-extern uint64_t UMODE_REGISTERED;
-extern uint64_t UMODE_SERVNOTICE;
-extern uint64_t UMODE_CLOAK;
-extern uint64_t UMODE_SPY;
-
-enum client_class_type
-{
-  CLIENT_CLASS_BASE,
-  CLIENT_CLASS_OPER,
-};
-
-/** Server ban types */
-enum
-{
-  CLIENT_BAN_KLINE,
-  CLIENT_BAN_DLINE,
-  CLIENT_BAN_XLINE
-};
-
-/** addr_mask_type enumeration */
-enum addr_mask_type
-{
-  HIDE_IP,  /**< IP is hidden. Resolved hostname is shown instead */
-  SHOW_IP,  /**< IP is shown. No parts of it are hidden or masked */
-  MASK_IP   /**< IP is masked. 255.255.255.255 is shown instead */
 };
 
 /** Server structure */
@@ -295,6 +267,34 @@ extern list_t local_client_list;  /* local clients only ON this server */
 extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
+
+extern uint64_t UMODE_BOT;
+extern uint64_t UMODE_DEAF;
+extern uint64_t UMODE_FARCONNECT;
+extern uint64_t UMODE_SOFTCALLERID;
+extern uint64_t UMODE_HIDDEN;
+extern uint64_t UMODE_EXPIRATION;
+extern uint64_t UMODE_REGONLY;
+extern uint64_t UMODE_SECURE;
+extern uint64_t UMODE_WEBIRC;
+extern uint64_t UMODE_SECUREONLY;
+extern uint64_t UMODE_ADMIN;
+extern uint64_t UMODE_CCONN;
+extern uint64_t UMODE_EXTERNAL;
+extern uint64_t UMODE_FLOOD;
+extern uint64_t UMODE_CALLERID;
+extern uint64_t UMODE_INVISIBLE;
+extern uint64_t UMODE_REJ;
+extern uint64_t UMODE_SKILL;
+extern uint64_t UMODE_LOCOPS;
+extern uint64_t UMODE_NCHANGE;
+extern uint64_t UMODE_OPER;
+extern uint64_t UMODE_HIDECHANS;
+extern uint64_t UMODE_HIDEIDLE;
+extern uint64_t UMODE_REGISTERED;
+extern uint64_t UMODE_SERVNOTICE;
+extern uint64_t UMODE_CLOAK;
+extern uint64_t UMODE_SPY;
 
 extern void check_conf_klines(void);
 extern void client_exit(struct Client *, const char *);

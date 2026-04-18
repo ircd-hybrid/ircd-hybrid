@@ -254,6 +254,9 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   assert(client && client_is_local(client));
   assert(client_is_unknown(client) || client_is_handshake(client));
 
+  /* Outgoing links already occupy the name hash during handshake. */
+  const bool add_namehash = !client_is_handshake(client);
+
   if (client_is_unknown(client))
   {
     sendto_one(client, "PASS %s", connect->send_password);
@@ -267,18 +270,18 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   sendto_one(client, ":%s SVINFO %u %u 0 :%ju",
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
 
-  if (!client_is_handshake(client))
-    hash_add_client(client);
-  hash_add_id(client);
-
-  client_set_state(client, CLIENT_STATE_SERVER);
-  client_reset_activity_timeout(client);
-
   server_create(client);
   server_conf_set(client, connect);
 
   if (service_find(client->name, irccmp))
     client_set_flag(client, FLAGS_SERVICE);
+
+  client_set_state(client, CLIENT_STATE_SERVER);
+  client_reset_activity_timeout(client);
+
+  if (add_namehash)
+    hash_add_client(client);
+  hash_add_id(client);
 
   assert(list_find(&unknown_list, client));
   list_move_node(&client->connection->node, &local_server_list, &unknown_list);

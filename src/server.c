@@ -421,8 +421,6 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   strlcpy(client->host, connect->host, sizeof(client->host));
   strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
 
-  comm_socket_note(client->connection->fd, "Server: %s", client->name);
-
   server_create(client);
   server_conf_set(client, connect);
 
@@ -430,6 +428,8 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   client->serv->initiator_name = io_strdup(initiator_name);
 
   client_set_state(client, CLIENT_STATE_CONNECTING);
+
+  comm_socket_note(client->connection->fd, "Server: %s", client->name);
 
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);

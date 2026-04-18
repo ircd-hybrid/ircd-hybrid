@@ -104,15 +104,6 @@ connect_destroy(struct ConnectItem *connect)
   if (connect->send_password)
     memset(connect->send_password, 0, strlen(connect->send_password));
 
-  connect->klass = NULL;
-
-  io_free(connect->name);
-  io_free(connect->host);
-  io_free(connect->accept_password);
-  io_free(connect->send_password);
-  io_free(connect->tls_cert_fingerprint);
-  io_free(connect->cipher_list);
-
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, connect->hub_masks.head)
   {
@@ -128,6 +119,14 @@ connect_destroy(struct ConnectItem *connect)
     list_free_node(node);
   }
 
+  connect->klass = NULL;
+
+  io_free(connect->name);
+  io_free(connect->host);
+  io_free(connect->accept_password);
+  io_free(connect->send_password);
+  io_free(connect->tls_cert_fingerprint);
+  io_free(connect->cipher_list);
   io_free(connect);
 }
 

@@ -153,7 +153,7 @@ server_reject_introduction(struct Client *introducer, server_rejection_reason_t 
  * \param flags    Pointer to the flag string to be parsed
  */
 static void
-server_set_flags(struct Client *client, const char *flags)
+_server_set_flags(struct Client *client, const char *flags)
 {
   const unsigned char *p = (const unsigned char *)flags;
 
@@ -173,15 +173,8 @@ server_set_flags(struct Client *client, const char *flags)
   }
 }
 
-/* sendnick_TS()
- *
- * inputs       - client (server) to send nick towards
- *          - client to send nick for
- * output       - NONE
- * side effects - NICK message is sent towards given client
- */
 static void
-server_send_client(struct Client *client, const struct Client *target)
+_server_burst_send_client(struct Client *client, const struct Client *target)
 {
   assert(IsClient(target));
 
@@ -206,69 +199,48 @@ server_send_client(struct Client *client, const struct Client *target)
   list_node_t *node;
   LIST_FOREACH_PREV(node, target->svstag_list.tail)
   {
-    const struct ServicesTag *svstag = node->data;
+    const struct ServicesTag *const svstag = node->data;
     sendto_one(client, ":%s SVSTAG %s 0 %u +%s :%s",
                me.id, target->id, svstag->numeric, user_mode_to_str(svstag->umodes), svstag->tag);
   }
 }
 
-/* burst_all()
- *
- * inputs       - pointer to server to send burst to
- * output       - NONE
- * side effects - complete burst of channels/nicks is sent to client
- */
 static void
-server_burst(struct Client *client)
-{
-  list_node_t *node;
-
-  LIST_FOREACH(node, global_client_list.head)
-  {
-    const struct Client *target = node->data;
-    if (target->nexthop != client)
-      server_send_client(client, target);
-  }
-
-  LIST_FOREACH(node, channel_get_list()->head)
-  {
-    const struct Channel *channel = node->data;
-    assert(list_length(&channel->members));
-    if (list_length(&channel->members))
-      channel_send_modes(client, channel);
-  }
-
-  /* Always send a PING after connect burst is done */
-  sendto_one(client, "PING :%s", me.id);
-}
-
-/* server_estab()
- *
- * inputs       - pointer to a struct Client
- * output       -
- * side effects -
- */
-static void
-server_estab(struct Client *client, struct ConnectItem *connect)
+_server_establish_send_handshake(struct Client *client, const struct ConnectItem *connect)
 {
   assert(client && client_is_local(client));
   assert(client_is_unknown(client) || client_is_handshake(client));
-
-  /* Outgoing links already occupy the name hash during handshake. */
-  const bool add_namehash = !client_is_handshake(client);
+  assert(connect);
 
   if (client_is_unknown(client))
   {
     sendto_one(client, "PASS %s", connect->send_password);
-
     sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
-
     sendto_one(client, "SERVER %s 1 %s +%s :%s",
                me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
   }
 
   sendto_one(client, ":%s SVINFO %u %u 0 :%ju",
              me.id, SERVER_TS_PROTOCOL_CURRENT, SERVER_TS_PROTOCOL_MINIMUM, io_time_get(IO_TIME_REALTIME_SEC));
+}
+
+static void
+_server_establish_finalize_local(struct Client *client, struct ConnectItem *connect)
+{
+  assert(client && client_is_local(client));
+  assert(client_is_unknown(client) || client_is_handshake(client));
+  assert(connect);
+
+  /* Fixing eob timings.. -gnp */
+  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+
+  io_free(client->connection->password);
+  client->connection->password = NULL;
+
+  comm_socket_note(client->connection->fd, "Server: %s", client->name);
+
+  client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
 
   server_create(client);
   server_conf_set(client, connect);
@@ -276,8 +248,19 @@ server_estab(struct Client *client, struct ConnectItem *connect)
   if (service_find(client->name, irccmp))
     client_set_flag(client, FLAGS_SERVICE);
 
+  if (tls_isusing(&client->connection->fd->tls))
+    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
+
   client_set_state(client, CLIENT_STATE_SERVER);
   client_reset_activity_timeout(client);
+}
+
+static void
+_server_establish_publish_local(struct Client *client, bool add_namehash)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
+  assert(client->serv);
 
   if (add_namehash)
     hash_add_client(client);
@@ -291,12 +274,16 @@ server_estab(struct Client *client, struct ConnectItem *connect)
 
   if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
     Count.max_loc_con = list_length(&local_client_list) + list_length(&local_server_list);
+}
 
-  /* Show the real host/IP to admins */
+static void
+_server_establish_report_link(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
+
   if (tls_isusing(&client->connection->fd->tls))
   {
-    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
-
     /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
@@ -325,28 +312,28 @@ server_estab(struct Client *client, struct ConnectItem *connect)
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
               client_get_name(client, SHOW_IP), capab_get(client, true));
   }
+}
+
+static void
+_server_establish_introduce_server(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
 
   sendto_servers(client, 0, 0, ":%s SID %s 2 %s +%s :%s",
                  me.id, client->name, client->id, client_is_hidden(client) ? "h" : "", client->info);
+}
 
-  /*
-   * Pass on my client information to the new server
-   *
-   * First, pass only servers (idea is that if the link gets
-   * cancelled beacause the server was already there,
-   * there are no NICK's to be cancelled...). Of course,
-   * if cancellation occurs, all this info is sent anyway,
-   * and I guess the link dies when a read is attempted...? --msa
-   *
-   * Note: Link cancellation to occur at this point means
-   * that at least two servers from my fragment are building
-   * up connection this other fragment at the same time, it's
-   * a race condition, not the normal way of operation...
-   */
+static void
+_server_establish_send_servers(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
+
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
-    const struct Client *target = node->data;
+    const struct Client *const target = node->data;
     /* target->nexthop == target for target == client */
     if (client_is_me(target) || target->nexthop == client)
       continue;
@@ -355,21 +342,78 @@ server_estab(struct Client *client, struct ConnectItem *connect)
                target->uplink->id, target->name, target->hopcount + 1,
                target->id, client_is_hidden(target) ? "h" : "", target->info);
   }
+}
 
-  server_burst(client);
+static void
+_server_establish_burst(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
 
-  if (capab_has_flag(client, CAPAB_EOB))
+  list_node_t *node;
+  LIST_FOREACH(node, global_client_list.head)
   {
-    LIST_FOREACH_PREV(node, global_server_list.tail)
-    {
-      const struct Client *target = node->data;
-      if (target->nexthop == client)
-        continue;
-
-      if (client_is_me(target) || client_has_flag(target, FLAGS_EOB))
-        sendto_one(client, ":%s EOB", target->id);
-    }
+    const struct Client *const target = node->data;
+    if (target->nexthop != client)
+      _server_burst_send_client(client, target);
   }
+
+  LIST_FOREACH(node, channel_get_list()->head)
+  {
+    const struct Channel *const channel = node->data;
+    assert(list_length(&channel->members));
+    if (list_length(&channel->members))
+      channel_send_modes(client, channel);
+  }
+
+  /* Always send a PING after connect burst is done. */
+  sendto_one(client, "PING :%s", me.id);
+}
+
+static void
+_server_establish_send_eobs(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(IsServer(client));
+
+  if (!capab_has_flag(client, CAPAB_EOB))
+    return;
+
+  list_node_t *node;
+  LIST_FOREACH_PREV(node, global_server_list.tail)
+  {
+    const struct Client *const target = node->data;
+    if (target->nexthop == client)
+      continue;
+
+    if (client_is_me(target) || client_has_flag(target, FLAGS_EOB))
+      sendto_one(client, ":%s EOB", target->id);
+  }
+}
+
+/* server_estab()
+ *
+ * inputs       - pointer to a struct Client
+ * output       -
+ * side effects -
+ */
+static void
+_server_establish(struct Client *client, struct ConnectItem *connect)
+{
+  assert(client && client_is_local(client));
+  assert(client_is_unknown(client) || client_is_handshake(client));
+
+  /* Outgoing links already occupy the name hash during handshake. */
+  const bool add_namehash = !client_is_handshake(client);
+
+  _server_establish_send_handshake(client, connect);
+  _server_establish_finalize_local(client, connect);
+  _server_establish_publish_local(client, add_namehash);
+  _server_establish_report_link(client);
+  _server_establish_introduce_server(client);
+  _server_establish_send_servers(client);
+  _server_establish_burst(client);
+  _server_establish_send_eobs(client);
 }
 
 /* mr_server()
@@ -497,20 +541,9 @@ mr_server(struct Client *source, int parc, char *parv[])
   strlcpy(source->id, sid, sizeof(source->id));
   strlcpy(source->info, parv[parc - 1], sizeof(source->info));
   source->hopcount = hopcount;
+  _server_set_flags(source, parv[4]);
 
-  /* Fixing eob timings.. -gnp */
-  source->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-  source->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-
-  io_free(source->connection->password);
-  source->connection->password = NULL;
-
-  comm_socket_note(source->connection->fd, "Server: %s", source->name);
-
-  server_set_flags(source, parv[4]);
-  client_set_class(source, connect->klass, CLIENT_CLASS_BASE);
-
-  server_estab(source, connect);
+  _server_establish(source, connect);
 }
 
 /* ms_sid()
@@ -629,7 +662,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   target->hopcount = hopcount;
 
   client_set_state(target, CLIENT_STATE_SERVER);
-  server_set_flags(target, parv[4]);
+  _server_set_flags(target, parv[4]);
 
   if (service_find(target->name, irccmp))
     client_set_flag(target, FLAGS_SERVICE);

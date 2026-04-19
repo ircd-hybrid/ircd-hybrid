@@ -242,7 +242,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
 
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
 
-  server_create(client);
+  server_get_or_create(client);
   server_conf_set(client, connect);
 
   if (service_find(client->name, irccmp))
@@ -655,7 +655,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   }
 
   target = client_create_remote(source);
-  server_create(target);
+  server_get_or_create(target);
   strlcpy(target->name, name, sizeof(target->name));
   strlcpy(target->id, sid, sizeof(target->id));
   strlcpy(target->info, parv[parc - 1], sizeof(target->info));

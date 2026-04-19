@@ -199,7 +199,7 @@ server_is_valid_name(const char *name)
  *                if it was not previously allocated.
  */
 struct Server *
-server_create(struct Client *client)
+server_get_or_create(struct Client *client)
 {
   if (client->serv == NULL)
     client->serv = io_calloc(sizeof(*client->serv));
@@ -421,11 +421,11 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   strlcpy(client->host, connect->host, sizeof(client->host));
   strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
 
-  server_create(client);
+  struct Server *server = server_get_or_create(client);
   server_conf_set(client, connect);
 
   const char *initiator_name = initiator ? initiator->name : "AutoConn.";
-  client->serv->initiator_name = io_strdup(initiator_name);
+  server->initiator_name = io_strdup(initiator_name);
 
   client_set_state(client, CLIENT_STATE_CONNECTING);
 

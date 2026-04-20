@@ -431,7 +431,7 @@ client_set_dead(struct Client *client)
 static inline bool
 client_is_defunct(const struct Client *client)
 {
-  return client_has_flag(client, FLAGS_DEADSOCKET | FLAGS_CLOSING | FLAGS_KILLED);
+  return client_has_flag(client, FLAGS_DEADSOCKET | FLAGS_CLOSING);
 }
 
 static inline bool

@@ -332,11 +332,7 @@ static void
 _server_connect_callback(fde_t *fde, int status, void *data_)
 {
   struct Client *const client = data_;
-  /* First, make sure it's a real client! */
-  assert(client);
-  assert(client->connection);
-  assert(client->connection->fd);
-  assert(client->connection->fd == fde);
+  assert(client && client_is_local(client));
   assert(client_is_connecting(client));
 
   /* Check the status */
@@ -349,6 +345,9 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
     client_exit_fmt(client, "Connection failed: %s", err_str);
     return;
   }
+
+  assert(fde);
+  assert(client->connection->fd == fde);
 
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */

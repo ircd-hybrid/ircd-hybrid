@@ -85,99 +85,6 @@ listener_count_memory(unsigned int *count, size_t *bytes)
   }
 }
 
-/*
- * ssl_handshake - let OpenSSL initialize the protocol. Register for
- * read/write events if necessary.
- */
-static void
-_ssl_handshake(fde_t *F, void *data_)
-{
-  struct Client *client = data_;
-
-  assert(client);
-  assert(client->connection);
-  assert(client->connection->fd);
-  assert(client->connection->fd == F);
-
-  const char *tls_error = NULL;
-  tls_handshake_status_t ret = tls_handshake(&F->tls, TLS_ROLE_SERVER, &tls_error);
-  if (ret == TLS_HANDSHAKE_DONE)
-  {
-    client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
-    comm_setselect(F, 0, NULL, NULL);
-
-    if (!tls_verify_certificate(&F->tls, &client->tls_certfp))
-      log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
-                client_get_name(client, MASK_IP));
-
-    lookup_start(client);
-    return;
-  }
-
-  switch (ret)
-  {
-    case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(F, COMM_SELECT_WRITE, _ssl_handshake, client);
-      return;
-    case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(F, COMM_SELECT_READ, _ssl_handshake, client);
-      return;
-    default:
-      client_exit(client, tls_error ? tls_error : "Error during TLS handshake");
-      return;
-  }
-}
-
-/*
- * add_connection - creates a client which has just connected to us on
- * the given fd. The sockhost field is initialized with the ip# of the host.
- * An unique id is calculated now, in case it is needed for auth.
- * The client is sent to the auth module for verification, and not put in
- * any client list yet.
- */
-static void
-_add_connection(fde_t *client_fde, struct Listener *listener, const struct io_addr *remote_addr, const char *remote_addr_str)
-{
-  struct Client *client = client_create_local();
-  client->connection->fd = client_fde;
-
-  address_copy(&client->addr, remote_addr);
-
-  strlcpy(client->sockhost, remote_addr_str, sizeof(client->sockhost));
-
-  if (client->sockhost[0] == ':' &&
-      client->sockhost[1] == ':')
-  {
-    memmove(client->sockhost + 1, client->sockhost, sizeof(client->sockhost) - 1);
-    client->sockhost[0] = '0';
-  }
-
-  strlcpy(client->host, client->sockhost, sizeof(client->host));
-
-  client->connection->listener = listener;
-  ++listener->ref_count;
-
-  list_add(client, &client->connection->node, &unknown_list);
-
-  if (listener_has_flag(listener, LISTENER_TLS))
-  {
-    if (!tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER))
-    {
-      client_set_dead(client);
-      client_exit(client, "TLS context initialization failed");
-      return;
-    }
-
-    client_set_flag(client, FLAGS_TLS_ACTIVE);
-    client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-    client_reset_activity_timeout(client);
-
-    _ssl_handshake(client->connection->fd, client);
-  }
-  else
-    lookup_start(client);
-}
-
 enum { LISTENER_ACCEPT_BUDGET = 128 };
 
 static void
@@ -189,13 +96,14 @@ _listener_accept_connection(fde_t *F, void *data_)
   assert(listener->fd);
   assert(listener->fd->flags.open);
 
-  const char *desc = listener_has_flag(listener, LISTENER_TLS) ?
-                       "Incoming TLS connection" : "Incoming connection";
+  const char *desc =
+    listener_has_flag(listener, LISTENER_TLS) ? "Incoming TLS connection" : "Incoming connection";
 
   for (unsigned int accepted_count = 0; accepted_count < LISTENER_ACCEPT_BUDGET; ++accepted_count)
   {
     struct io_addr remote_addr;
-    fde_t *client_fde = comm_accept(listener->fd, &remote_addr, desc);
+
+    fde_t *const client_fde = comm_accept(listener->fd, &remote_addr, desc);
     if (client_fde == NULL)
     {
       /*
@@ -218,38 +126,7 @@ _listener_accept_connection(fde_t *F, void *data_)
       continue;
     }
 
-    /*
-     * check for connection limit
-     */
-    if (number_fd > hard_fdlimit - 10)
-    {
-      static uintmax_t rate = 0;
-      sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
-                                 remote_addr_str, listener_get_name(listener), listener_get_port(listener));
-
-      ++ServerStats.is_ref;
-      comm_socket_close(client_fde);
-      continue;  /* drop the one and keep on clearing the queue */
-    }
-
-    /*
-     * Do an initial check we aren't connecting too fast or with too many
-     * from this IP...
-     */
-    int pe = conf_connect_allowed(&remote_addr);
-    if (pe)
-    {
-      log_write(LOG_TYPE_DEBUG, "Refused connection from %s on listener [%s/%hu]: %s",
-                remote_addr_str, listener_get_name(listener), listener_get_port(listener),
-                pe == BANNED_CLIENT ? "D-lined" : "Throttled");
-
-      ++ServerStats.is_ref;
-      comm_socket_close(client_fde);
-      continue;    /* drop the one and keep on clearing the queue */
-    }
-
-    ++ServerStats.is_ac;
-    _add_connection(client_fde, listener, &remote_addr, remote_addr_str);
+    client_process_accepted_connection(client_fde, listener, &remote_addr, remote_addr_str);
   }
 
   /* Re-register a new IO request for the next accept .. */
@@ -376,6 +253,13 @@ listener_release(struct Listener *listener)
 
   if (--listener->ref_count == 0 && !listener_is_active(listener))
     _listener_close(listener);
+}
+
+void
+listener_retain(struct Listener *listener)
+{
+  assert(listener);
+  ++listener->ref_count;
 }
 
 /*

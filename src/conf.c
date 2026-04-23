@@ -760,7 +760,7 @@ conf_rehash(bool sig)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct io_addr *addr)
+conf_connect_allowed(const struct io_addr *addr)
 {
   const struct MaskItem *conf = find_dline_conf(addr);
 

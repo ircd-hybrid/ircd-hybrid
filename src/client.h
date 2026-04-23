@@ -300,6 +300,7 @@ extern void check_conf_klines(void);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_init(void);
+extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
 extern void client_reset_activity_timeout(struct Client *);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_set_state(struct Client *, enum client_state);

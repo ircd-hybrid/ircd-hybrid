@@ -291,7 +291,7 @@ extern void conf_rehash(bool);
 extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void yyerror(const char *);
 extern bool conf_match_password(const char *, const struct MaskItem *);
-extern int conf_connect_allowed(struct io_addr *);
+extern int conf_connect_allowed(const struct io_addr *);
 extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
 extern struct MaskItem *conf_authorize_client(struct Client *);
 extern struct MaskItem *conf_make(enum maskitem_type);

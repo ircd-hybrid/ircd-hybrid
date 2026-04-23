@@ -1049,6 +1049,175 @@ exit_aborted_clients(void)
   }
 }
 
+static void
+_client_normalize_ipv6_address_string(char *addr_string, size_t addr_string_size)
+{
+  assert(addr_string);
+  assert(addr_string_size > 0);
+
+  if (addr_string[0] == ':' && addr_string[1] == ':')
+  {
+    const size_t len = strlen(addr_string);
+    if (len + 2 <= addr_string_size)
+    {
+      memmove(addr_string + 1, addr_string, len + 1);
+      addr_string[0] = '0';
+    }
+  }
+}
+
+static void
+_client_reject_connection_server_full(fde_t *client_fde, const struct Listener *listener, const char *remote_addr_str)
+{
+  assert(client_fde);
+  assert(listener);
+  assert(remote_addr_str);
+
+  static uintmax_t rate = 0;
+  sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
+                             remote_addr_str, listener_get_name(listener), listener_get_port(listener));
+
+  ++ServerStats.is_ref;
+  comm_socket_close(client_fde);
+}
+
+static void
+_client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *listener,
+                                    const char *remote_addr_str, int policy_result)
+{
+  assert(client_fde);
+  assert(listener);
+  assert(remote_addr_str);
+  assert(policy_result);
+
+  log_write(LOG_TYPE_DEBUG, "Refused connection from %s on listener [%s/%hu]: %s",
+            remote_addr_str, listener_get_name(listener), listener_get_port(listener),
+            policy_result == BANNED_CLIENT ? "D-lined" : "Throttled");
+
+  ++ServerStats.is_ref;
+  comm_socket_close(client_fde);
+}
+
+static void
+_client_tls_handshake_handler(fde_t *fd, void *data)
+{
+  struct Client *const client = data;
+  assert(client && client_is_local(client));
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->fd == fd);
+
+  const char *tls_error = NULL;
+  const tls_handshake_status_t status = tls_handshake(&fd->tls, TLS_ROLE_SERVER, &tls_error);
+
+  switch (status)
+  {
+    case TLS_HANDSHAKE_DONE:
+      client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
+      comm_setselect(fd, 0, NULL, NULL);
+
+      if (!tls_verify_certificate(&fd->tls, &client->tls_certfp))
+        log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
+                  client_get_name(client, MASK_IP));
+
+      lookup_start(client);
+      return;
+    case TLS_HANDSHAKE_WANT_WRITE:
+      comm_setselect(fd, COMM_SELECT_WRITE, _client_tls_handshake_handler, client);
+      return;
+    case TLS_HANDSHAKE_WANT_READ:
+      comm_setselect(fd, COMM_SELECT_READ, _client_tls_handshake_handler, client);
+      return;
+    default:
+      client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
+      client_exit(client, tls_error ? tls_error : "Error during TLS handshake");
+      return;
+  }
+}
+
+static void
+_client_begin_local_connection_ingress(struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(client->connection);
+  assert(client->connection->fd);
+  assert(client->connection->listener);
+
+  if (!listener_has_flag(client->connection->listener, LISTENER_TLS))
+  {
+    lookup_start(client);
+    return;
+  }
+
+  if (!tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER))
+  {
+    client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
+    client_exit(client, "TLS context initialization failed");
+    return;
+  }
+
+  client_set_flag(client, FLAGS_TLS_ACTIVE | FLAGS_TLS_HANDSHAKING);
+  client_reset_activity_timeout(client);
+
+  _client_tls_handshake_handler(client->connection->fd, client);
+}
+
+static struct Client *
+_client_create_accepted_local_connection(fde_t *client_fde, struct Listener *listener,
+                                         const struct io_addr *remote_addr, const char *remote_addr_str)
+{
+  assert(client_fde);
+  assert(listener);
+  assert(remote_addr);
+  assert(remote_addr_str);
+
+  struct Client *client = client_create_local();
+  client->connection->fd = client_fde;
+
+  address_copy(&client->addr, remote_addr);
+
+  strlcpy(client->sockhost, remote_addr_str, sizeof(client->sockhost));
+  _client_normalize_ipv6_address_string(client->sockhost, sizeof(client->sockhost));
+
+  strlcpy(client->host, client->sockhost, sizeof(client->host));
+
+  client->connection->listener = listener;
+  listener_retain(listener);
+
+  list_add(client, &client->connection->node, &unknown_list);
+
+  return client;
+}
+
+void
+client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
+                                   const struct io_addr *remote_addr, const char *remote_addr_str)
+{
+  assert(client_fde);
+  assert(listener);
+  assert(remote_addr);
+  assert(remote_addr_str);
+
+  if (number_fd > hard_fdlimit - 10)
+  {
+    _client_reject_connection_server_full(client_fde, listener, remote_addr_str);
+    return;
+  }
+
+  int policy_result = conf_connect_allowed(remote_addr);
+  if (policy_result)
+  {
+    _client_reject_connection_by_policy(client_fde, listener, remote_addr_str, policy_result);
+    return;
+  }
+
+  ++ServerStats.is_ac;
+
+  struct Client *client =
+    _client_create_accepted_local_connection(client_fde, listener, remote_addr, remote_addr_str);
+  _client_begin_local_connection_ingress(client);
+}
+
 /**
  * @brief Retrieves the (fake) idle time for a target client.
  *

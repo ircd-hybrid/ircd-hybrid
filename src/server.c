@@ -290,6 +290,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
       comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client);
       break;
     default:
+      client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
       client_exit(client, "Error during TLS handshake");
       break;
   }
@@ -305,7 +306,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 
   if (!tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
   {
-    client_set_dead(client);
+    client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
     return;
   }

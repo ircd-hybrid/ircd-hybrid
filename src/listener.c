@@ -148,7 +148,11 @@ static bool
 _listener_finalize(struct Listener *listener)
 {
   char buf[HOSTIPLEN + 1];
-  address_to_string(&listener->addr, buf, sizeof(buf));
+  if (!address_to_string(&listener->addr, buf, sizeof(buf)))
+  {
+    log_write(LOG_TYPE_IRCD, "listener_finalize: address_to_string() failed for listener");
+    return false;
+  }
 
   if (buf[0] == ':' && buf[1] == ':')
   {
@@ -287,7 +291,8 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
   if (!address_from_string(addr_string, &addr))
     return;
 
-  address_set_port(&addr, port);
+  if (!address_set_port(&addr, port))
+    return;
 
   struct Listener *listener = _listener_find(&addr);
   if (listener == NULL)

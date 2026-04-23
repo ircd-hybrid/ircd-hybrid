@@ -344,6 +344,8 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   {
     /* We have an error, so report it and quit */
     const char *const err_str = comm_errstr(status);
+
+    client_set_dead(client);  /* Prevent client_exit() from sending on a failed or closed connect socket. */
     client_exit_fmt(client, "Connection failed: %s", err_str);
     return;
   }

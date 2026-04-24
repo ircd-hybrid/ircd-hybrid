@@ -56,6 +56,7 @@ _client_id_is_valid(const char *id, size_t length)
   if (strlen(id) != length)
     return false;
 
+  /* Per TS6 specification, the first character must always be a digit. */
   if (!IsDigit(id[0]))
     return false;
 

@@ -136,8 +136,13 @@ _client_id_generate_sid(const char *server_name, const char *server_description,
   hash = _client_id_hash_djb2_update_byte(hash, 0);
   hash = _client_id_hash_djb2_update(hash, server_description);
 
+  /*
+   * The valid SID space is:
+   *   [0-9][A-Z0-9][A-Z0-9]
+   *
+   * This gives 10 * 36 * 36 distinct values.
+   */
   uint32_t value = hash % (10U * 36U * 36U);
-
   sid[0] = '0' + (value / (36U * 36U));
   value %= (36U * 36U);
   sid[1] = alphabet[value / 36U];
@@ -277,6 +282,7 @@ client_id_allocate_uid(struct Client *client)
     if (!client_id_set_next_uid(client))
       return false;
 
+    /* Verify the generated UID is not currently in use by an active client. */
     if (hash_find_id(client->id) == NULL)
       return true;
 

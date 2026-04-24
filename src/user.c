@@ -298,32 +298,11 @@ user_register_local(struct Client *client)
     }
   }
 
-  char first_colliding_uid[CLIENT_ID_UID_LENGTH + 1] = "";
-  for (;;)
+  if (!client_id_allocate_uid(client))
   {
-    if (!client_id_set_next_uid(client))
-    {
-      client_exit(client, "Local client ID generator unavailable");
-      ++ServerStats.is_ref;
-      return;
-    }
-
-    if (hash_find_id(client->id) == NULL)
-      break;
-
-    /*
-     * The local UID generator wraps. If we collide with the same UID again,
-     * we have completed a full pass through the namespace without finding a
-     * free slot.
-     */
-    if (first_colliding_uid[0] == '\0')
-      strlcpy(first_colliding_uid, client->id, sizeof(first_colliding_uid));
-    else if (strcmp(client->id, first_colliding_uid) == 0)
-    {
-      client_exit(client, "Local client ID generator exhausted");
-      ++ServerStats.is_ref;
-      return;
-    }
+    client_exit(client, "Local client ID generator exhausted");
+    ++ServerStats.is_ref;
+    return;
   }
 
   hash_add_id(client);

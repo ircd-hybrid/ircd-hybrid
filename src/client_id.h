@@ -41,6 +41,7 @@ enum
   CLIENT_ID_UID_LENGTH = CLIENT_ID_SID_LENGTH + CLIENT_ID_UID_SUFFIX_LENGTH,
 };
 
+extern bool client_id_allocate_uid(struct Client *);
 extern bool client_id_has_valid_sid(const struct Client *);
 extern bool client_id_has_valid_uid(const struct Client *);
 extern bool client_id_init_generator(const struct Client *);

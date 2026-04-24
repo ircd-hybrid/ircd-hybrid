@@ -32,6 +32,7 @@
 
 #include "client.h"
 #include "client_id.h"
+#include "hash.h"
 
 struct ClientIdGenerator
 {
@@ -262,6 +263,33 @@ _client_id_generator_next(struct ClientIdGenerator *generator, char uid[CLIENT_I
   memcpy(uid, generator->next_uid, CLIENT_ID_UID_LENGTH + 1);
   _client_id_generator_advance(generator);
   return true;
+}
+
+bool
+client_id_allocate_uid(struct Client *client)
+{
+  assert(client);
+
+  char first_colliding_uid[CLIENT_ID_UID_LENGTH + 1] = "";
+
+  for (;;)
+  {
+    if (!client_id_set_next_uid(client))
+      return false;
+
+    if (hash_find_id(client->id) == NULL)
+      return true;
+
+    /*
+     * The local UID generator wraps. If we collide with the same UID again,
+     * we have completed a full pass through the namespace without finding a
+     * free slot.
+     */
+    if (first_colliding_uid[0] == '\0')
+      strlcpy(first_colliding_uid, client->id, sizeof(first_colliding_uid));
+    else if (strcmp(client->id, first_colliding_uid) == 0)
+      return false;
+  }
 }
 
 bool

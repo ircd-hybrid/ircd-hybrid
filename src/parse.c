@@ -57,32 +57,77 @@ typedef struct parser_context
   char *parv[PARSE_MAX_PARAMETERS + 2];  /* <command> + <parameters> + NULL */
 } parse_context_t;
 
+static bool
+_parse_uid_belongs_to_source(const struct Client *source_server, const char *uid)
+{
+  assert(source_server);
+  assert(IsServer(source_server));
+  assert(client_id_is_valid_uid(uid));
+
+  char sid[CLIENT_ID_SID_LENGTH + 1];
+  strlcpy(sid, uid, sizeof(sid));
+
+  /*
+   * A UID is only eligible for unknown-client cleanup if its server SID
+   * resolves to a server that is actually routed through the sending link.
+   */
+  const struct Client *server = hash_find_id(sid);
+  return server && server->nexthop == source_server;
+}
+
 static void
 _parse_handle_unknown_prefix(struct Client *client, const char *prefix, const char *buffer)
 {
-  assert(prefix && prefix[0]);
+  assert(client);
+  assert(IsServer(client));
+  assert(!string_is_empty(prefix));
   assert(buffer);
 
   /*
-   * Do kill if it came from a server because it means there is a ghost
-   * user on the other server which needs to be removed. -avalon
-   * Tell opers about this. -Taner
+   * Unknown prefixes are classified as follows:
+   *   - valid SID or dotted server name: server prefix
+   *   - valid UID from this server path:  client ID
+   *   - digit-starting but otherwise invalid: invalid numeric prefix
+   *   - everything else: nickname
    */
-  /*
-   * '[0-9]something'  is an ID      (KILL/SQUIT depending on its length)
-   * 'nodots'          is a nickname (KILL)
-   * 'no.dot.at.start' is a server   (SQUIT)
-   */
-  const char *command_name;
-  if (client_id_is_valid_sid(prefix) || strchr(prefix, '.'))
-    command_name = "SQUIT";
-  else
-    command_name = "KILL";
+  const char *const source_name = client_get_name(client, SHOW_IP);
 
-  sendto_one(client, ":%s %s %s :Unknown prefix from %s",
-             me.id, command_name, prefix, client_get_name(client, SHOW_IP));
-  log_write(LOG_TYPE_DEBUG, "Unknown prefix ('%s') from %s, sending %s %s",
-            prefix, client_get_name(client, SHOW_IP), command_name, prefix);
+  if (client_id_is_valid_sid(prefix) || strchr(prefix, '.'))
+  {
+    sendto_one(client, ":%s SQUIT %s :Unknown server prefix",
+               me.id, prefix);
+    log_write(LOG_TYPE_DEBUG, "Received message with unknown server prefix '%s' from %s",
+              prefix, source_name);
+    return;
+  }
+
+  if (client_id_is_valid_uid(prefix))
+  {
+    if (_parse_uid_belongs_to_source(client, prefix))
+    {
+      sendto_one(client, ":%s KILL %s :%s (Unknown client ID)",
+                 me.id, prefix, me.name);
+      log_write(LOG_TYPE_DEBUG, "Received message with unknown client ID '%s' from %s",
+                prefix, source_name);
+    }
+    else
+      log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
+                prefix, source_name);
+
+    return;
+  }
+
+  if (IsDigit(prefix[0]))
+  {
+    log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
+              prefix, source_name);
+    return;
+  }
+
+  sendto_one(client, ":%s KILL %s :%s (Unknown nickname)",
+             me.id, prefix, me.name);
+  log_write(LOG_TYPE_DEBUG, "Received message with unknown nickname '%s' from %s",
+            prefix, source_name);
 }
 
 /*

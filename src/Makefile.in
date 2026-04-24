@@ -124,11 +124,12 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
-	channel_mode.$(OBJEXT) client.$(OBJEXT) client_input.$(OBJEXT) \
-	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
-	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
-	conf_connect.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
-	conf_oper.$(OBJEXT) conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	channel_mode.$(OBJEXT) client.$(OBJEXT) client_id.$(OBJEXT) \
+	client_input.$(OBJEXT) client_svstag.$(OBJEXT) cloak.$(OBJEXT) \
+	command.$(OBJEXT) conf.$(OBJEXT) conf_class.$(OBJEXT) \
+	conf_cluster.$(OBJEXT) conf_connect.$(OBJEXT) \
+	conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) conf_oper.$(OBJEXT) \
+	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
 	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
 	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
@@ -137,15 +138,14 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
 	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
 	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	hash.$(OBJEXT) id.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) \
-	ircd.$(OBJEXT) ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) \
-	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) links_cache.$(OBJEXT) \
-	list_task.$(OBJEXT) listener.$(OBJEXT) lookup.$(OBJEXT) \
-	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
-	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
-	stats.$(OBJEXT) send.$(OBJEXT) server.$(OBJEXT) \
-	server_capab.$(OBJEXT) user.$(OBJEXT) user_mode.$(OBJEXT) \
-	whowas.$(OBJEXT)
+	hash.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
+	ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) ircd_signal.$(OBJEXT) \
+	isupport.$(OBJEXT) links_cache.$(OBJEXT) list_task.$(OBJEXT) \
+	listener.$(OBJEXT) lookup.$(OBJEXT) monitor.$(OBJEXT) \
+	motd.$(OBJEXT) nuh.$(OBJEXT) numeric.$(OBJEXT) \
+	packet.$(OBJEXT) parse.$(OBJEXT) stats.$(OBJEXT) \
+	send.$(OBJEXT) server.$(OBJEXT) server_capab.$(OBJEXT) \
+	user.$(OBJEXT) user_mode.$(OBJEXT) whowas.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -172,34 +172,33 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/cap.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_mode.Po \
-	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_input.Po \
-	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
-	./$(DEPDIR)/command.Po ./$(DEPDIR)/conf.Po \
-	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
-	./$(DEPDIR)/conf_connect.Po ./$(DEPDIR)/conf_db.Po \
-	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
-	./$(DEPDIR)/conf_oper.Po ./$(DEPDIR)/conf_parser.Po \
-	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
-	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
-	./$(DEPDIR)/extban.Po ./$(DEPDIR)/extban_account.Po \
-	./$(DEPDIR)/extban_channel.Po \
+	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_id.Po \
+	./$(DEPDIR)/client_input.Po ./$(DEPDIR)/client_svstag.Po \
+	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
+	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_class.Po \
+	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_connect.Po \
+	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_gecos.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_oper.Po \
+	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
+	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
+	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/extban.Po \
+	./$(DEPDIR)/extban_account.Po ./$(DEPDIR)/extban_channel.Po \
 	./$(DEPDIR)/extban_fingerprint.Po ./$(DEPDIR)/extban_gecos.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
 	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/hash.Po ./$(DEPDIR)/id.Po ./$(DEPDIR)/info.Po \
-	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
-	./$(DEPDIR)/ircd_exit.Po ./$(DEPDIR)/ircd_hook.Po \
-	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/links_cache.Po ./$(DEPDIR)/list_task.Po \
-	./$(DEPDIR)/listener.Po ./$(DEPDIR)/lookup.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/user_mode.Po \
-	./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/info.Po ./$(DEPDIR)/ipcache.Po \
+	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
+	./$(DEPDIR)/ircd_hook.Po ./$(DEPDIR)/ircd_signal.Po \
+	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/links_cache.Po \
+	./$(DEPDIR)/list_task.Po ./$(DEPDIR)/listener.Po \
+	./$(DEPDIR)/lookup.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/user_mode.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -433,6 +432,8 @@ ircd_SOURCES = accept.c          \
                channel_mode.h    \
                client.c          \
                client.h          \
+               client_id.c       \
+               client_id.h       \
                client_input.c    \
                client_input.h    \
                client_svstag.c   \
@@ -482,8 +483,6 @@ ircd_SOURCES = accept.c          \
                extban_usermode.c \
                hash.c            \
                hash.h            \
-               id.c              \
-               id.h              \
                info.c            \
                info.h            \
                ipcache.c         \
@@ -633,6 +632,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_input.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_svstag.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloak.Po@am__quote@ # am--include-marker
@@ -664,7 +664,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/id.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/info.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipcache.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@ # am--include-marker
@@ -869,6 +868,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
 	-rm -f ./$(DEPDIR)/client.Po
+	-rm -f ./$(DEPDIR)/client_id.Po
 	-rm -f ./$(DEPDIR)/client_input.Po
 	-rm -f ./$(DEPDIR)/client_svstag.Po
 	-rm -f ./$(DEPDIR)/cloak.Po
@@ -900,7 +900,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/info.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/ircd.Po
@@ -978,6 +977,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
 	-rm -f ./$(DEPDIR)/client.Po
+	-rm -f ./$(DEPDIR)/client_id.Po
 	-rm -f ./$(DEPDIR)/client_input.Po
 	-rm -f ./$(DEPDIR)/client_svstag.Po
 	-rm -f ./$(DEPDIR)/cloak.Po
@@ -1009,7 +1009,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/id.Po
 	-rm -f ./$(DEPDIR)/info.Po
 	-rm -f ./$(DEPDIR)/ipcache.Po
 	-rm -f ./$(DEPDIR)/ircd.Po

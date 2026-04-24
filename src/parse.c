@@ -31,10 +31,10 @@
 
 #include "channel.h"
 #include "client.h"
+#include "client_id.h"
 #include "client_input.h"
 #include "conf.h"
 #include "hash.h"
-#include "id.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "packet.h"

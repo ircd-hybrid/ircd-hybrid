@@ -20,7 +20,7 @@
  */
 
 /**
- * @file id.h
+ * @file client_id.h
  * @brief Functions for SID/UID generation and validation.
  *
  * This file contains declarations for functions related to Server ID (SID)
@@ -28,8 +28,8 @@
  * essential for managing unique identifiers within the IRC daemon.
  */
 
-#ifndef INCLUDED_id_h
-#define INCLUDED_id_h
+#ifndef INCLUDED_client_id_h
+#define INCLUDED_client_id_h
 
 /**
  * @var IRC_MAXSID

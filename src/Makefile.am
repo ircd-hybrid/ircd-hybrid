@@ -22,6 +22,8 @@ ircd_SOURCES = accept.c          \
                channel_mode.h    \
                client.c          \
                client.h          \
+               client_id.c       \
+               client_id.h       \
                client_input.c    \
                client_input.h    \
                client_svstag.c   \
@@ -71,8 +73,6 @@ ircd_SOURCES = accept.c          \
                extban_usermode.c \
                hash.c            \
                hash.h            \
-               id.c              \
-               id.h              \
                info.c            \
                info.h            \
                ipcache.c         \

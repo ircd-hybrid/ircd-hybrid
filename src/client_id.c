@@ -24,10 +24,11 @@
  * @brief Contains functions pertaining to SID/UID generation.
  */
 
-#include "stdinc.h"
 #include "io_string.h"
-#include "id.h"
+
+#include "stdinc.h"
 #include "client.h"
+#include "client_id.h"
 
 /**
  * @brief Array to store the generated User ID (UID).

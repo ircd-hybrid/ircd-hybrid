@@ -55,6 +55,7 @@
 
 #include "channel_mode.h"
 #include "client.h"
+#include "client_id.h"
 #include "cloak.h"
 #include "conf.h"
 #include "conf_class.h"
@@ -62,7 +63,6 @@
 #include "defaults.h"
 #include "extban.h"
 #include "hash.h"
-#include "id.h"
 #include "ipcache.h"
 #include "ircd.h"
 #include "ircd_exit.h"

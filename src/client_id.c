@@ -24,12 +24,14 @@
  * @brief Contains functions pertaining to SID/UID generation and validation.
  */
 
+#include <assert.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "io_string.h"
 
-#include "stdinc.h"
 #include "client.h"
 #include "client_id.h"
-
 
 struct ClientIdGenerator
 {
@@ -96,21 +98,52 @@ client_id_has_valid_uid(const struct Client *client)
   return client_id_is_valid_uid(client->id);
 }
 
+static uint32_t
+_client_id_hash_djb2_update(uint32_t hash, const char *str)
+{
+  assert(!string_is_empty(str));
+
+  for (const unsigned char *p = (const unsigned char *)str; *p; ++p)
+    hash = ((hash << 5) + hash) + *p;  /* hash * 33 + byte */
+
+  return hash;
+}
+
+static uint32_t
+_client_id_hash_djb2_update_byte(uint32_t hash, unsigned char byte)
+{
+  return ((hash << 5) + hash) + byte;  /* hash * 33 + byte */
+}
+
 static void
 _client_id_generate_sid(const char *server_name, const char *server_description, char sid[CLIENT_ID_SID_LENGTH + 1])
 {
+  static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
   assert(!string_is_empty(server_name));
   assert(!string_is_empty(server_description));
   assert(sid);
 
-  uint32_t hash = 0;
+  uint32_t hash = 5381U;
+  hash = _client_id_hash_djb2_update(hash, server_name);
 
-  for (const char *p = server_name; *p; ++p)
-    hash = 5 * hash + (unsigned char)*p;
-  for (const char *p = server_description; *p; ++p)
-    hash = 5 * hash + (unsigned char)*p;
+  /*
+   * Hash an explicit separator so the pair
+   *   ("ab", "c")
+   * does not collide with
+   *   ("a", "bc").
+   */
+  hash = _client_id_hash_djb2_update_byte(hash, 0);
+  hash = _client_id_hash_djb2_update(hash, server_description);
 
-  snprintf(sid, CLIENT_ID_SID_LENGTH + 1, "%03u", hash % 1000U);
+  uint32_t value = hash % (10U * 36U * 36U);
+
+  sid[0] = '0' + (value / (36U * 36U));
+  value %= (36U * 36U);
+  sid[1] = alphabet[value / 36U];
+  sid[2] = alphabet[value % 36U];
+  sid[3] = '\0';
+
   assert(client_id_is_valid_sid(sid));
 }
 

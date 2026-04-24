@@ -30,28 +30,23 @@
 
 #ifndef INCLUDED_client_id_h
 #define INCLUDED_client_id_h
+#include <stdbool.h>
 
-/**
- * @var IRC_MAXSID
- * @brief Maximum length of SID (Server ID).
- */
-enum { IRC_MAXSID = 3 };
+struct Client;
 
-/**
- * @var IRC_MAXUID
- * @brief Maximum length of UID (User ID).
- */
-enum { IRC_MAXUID = 6 };
+enum
+{
+  CLIENT_ID_SID_LENGTH = 3,
+  CLIENT_ID_UID_SUFFIX_LENGTH = 6,
+  CLIENT_ID_UID_LENGTH = CLIENT_ID_SID_LENGTH + CLIENT_ID_UID_SUFFIX_LENGTH,
+};
 
-/**
- * @var TOTALSIDUID
- * @brief Total length of SID and UID combined.
- */
-enum { TOTALSIDUID = IRC_MAXSID + IRC_MAXUID };
+extern bool client_id_has_valid_sid(const struct Client *);
+extern bool client_id_has_valid_uid(const struct Client *);
+extern bool client_id_init_generator(const struct Client *);
+extern bool client_id_is_valid_sid(const char *);
+extern bool client_id_is_valid_uid(const char *);
+extern bool client_id_set_next_uid(struct Client *);
+extern bool client_id_set_server_sid(struct Client *, const char *, const char *, const char *, bool *);
+#endif  /* INCLUDED_client_id_h */
 
-extern bool valid_sid(const char *);
-extern bool valid_uid(const char *);
-extern void init_uid(void);
-extern void generate_sid(void);
-extern const char *uid_get(void);
-#endif  /* INCLUDED_id_h */

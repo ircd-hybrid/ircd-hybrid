@@ -344,7 +344,7 @@ hash_find_server(const char *name)
   const uint32_t hashv = hash_string(name);
   struct Client *client;
 
-  if (IsDigit(*name) && strlen(name) == IRC_MAXSID)
+  if (client_id_is_valid_sid(name))
     return hash_find_id(name);
 
   if ((client = clientTable[hashv]))

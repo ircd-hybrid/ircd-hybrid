@@ -3748,7 +3748,7 @@ yyreduce:
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.sid == NULL)
   {
-    if (valid_sid(yylval.string))
+    if (client_id_is_valid_sid(yylval.string))
       ConfigServerInfo.sid = io_strdup(yylval.string);
     else
     {

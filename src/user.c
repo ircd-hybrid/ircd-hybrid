@@ -298,11 +298,16 @@ user_register_local(struct Client *client)
     }
   }
 
-  const char *id;
-  while (hash_find_id((id = uid_get())))
-    ;
+  do
+  {
+    if (!client_id_set_next_uid(client))
+    {
+      client_exit(client, "User ID space exhausted");
+      ++ServerStats.is_ref;
+      return;
+    }
+  } while (hash_find_id(client->id));
 
-  strlcpy(client->id, id, sizeof(client->id));
   hash_add_id(client);
 
   hook_dispatch(ircd_hook_user_register_local, &(ircd_hook_user_register_ctx){ .client = client });

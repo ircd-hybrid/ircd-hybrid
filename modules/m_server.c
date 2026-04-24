@@ -444,7 +444,7 @@ mr_server(struct Client *source, int parc, char *parv[])
   }
 
   const char *const sid = parv[3];
-  if (!valid_sid(sid))
+  if (!client_id_is_valid_sid(sid))
   {
     server_reject_connection(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;
@@ -573,7 +573,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   }
 
   const char *const sid = parv[3];
-  if (!valid_sid(sid))
+  if (!client_id_is_valid_sid(sid))
   {
     server_reject_introduction(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;

@@ -460,15 +460,24 @@ main(int argc, char *argv[])
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
   if (string_is_empty(ConfigServerInfo.sid))
-  {
     log_write(LOG_TYPE_IRCD, "Generating server ID");
-    generate_sid();
-    ConfigServerInfo.sid = io_strdup(me.id);
-  }
-  else
-    strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
 
-  init_uid();
+  bool sid_generated = false;
+  if (!client_id_set_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name, ConfigServerInfo.description,
+                                &sid_generated))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize server ID.");
+    exit(EXIT_FAILURE);
+  }
+
+  if (sid_generated)
+    ConfigServerInfo.sid = io_strdup(me.id);
+
+  if (!client_id_init_generator(&me))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize client ID generator.");
+    exit(EXIT_FAILURE);
+  }
 
   me.uplink = &me;
   me.nexthop = &me;

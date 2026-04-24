@@ -98,7 +98,7 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
 {
   assert(IsServer(source));
 
-  if (valid_uid(uid) && strncmp(uid, source->id, IRC_MAXSID) == 0)
+  if (client_id_is_valid_uid(uid) && strncmp(uid, source->id, CLIENT_ID_SID_LENGTH) == 0)
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,

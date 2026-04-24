@@ -37,7 +37,6 @@ struct ClientIdGenerator
 {
   char next_uid[CLIENT_ID_UID_LENGTH + 1];
   bool initialized;
-  bool exhausted;
 };
 
 static struct ClientIdGenerator client_id_generator;
@@ -191,7 +190,6 @@ _client_id_generator_init(struct ClientIdGenerator *generator, const char *sid)
 
   generator->next_uid[CLIENT_ID_UID_LENGTH] = '\0';
   generator->initialized = true;
-  generator->exhausted = false;
   return true;
 }
 
@@ -206,49 +204,49 @@ client_id_init_generator(const struct Client *server)
   return _client_id_generator_init(&client_id_generator, server->id);
 }
 
-static bool
-_client_id_generator_advance(char uid[CLIENT_ID_UID_LENGTH + 1])
+static void
+_client_id_generator_advance(struct ClientIdGenerator *generator)
 {
-  assert(uid);
+  assert(generator);
+  assert(generator->initialized);
 
   /*
    * Suffix order is:
    *   A-Z, 0-9
    *
-   * A carry occurs only when a digit rolls over from '9' back to 'A'.
-   * If we carry past the leftmost suffix character, the generator is
-   * exhausted and no further UIDs are available.
+   * Advance from right to left. A carry occurs only when a suffix character
+   * rolls over from '9' back to 'A'. If every suffix character is already
+   * '9', the generator wraps from "<SID>999999" back to "<SID>AAAAAA".
    */
   for (size_t i = CLIENT_ID_UID_LENGTH; i-- > CLIENT_ID_SID_LENGTH; )
   {
-    if (uid[i] >= 'A' && uid[i] < 'Z')
+    char *const ch = &generator->next_uid[i];
+    if (*ch >= 'A' && *ch < 'Z')
     {
-      ++uid[i];
-      return true;
+      ++*ch;
+      return;
     }
 
-    if (uid[i] == 'Z')
+    if (*ch == 'Z')
     {
-      uid[i] = '0';
-      return true;
+      *ch = '0';
+      return;
     }
 
-    if (uid[i] >= '0' && uid[i] < '9')
+    if (*ch >= '0' && *ch < '9')
     {
-      ++uid[i];
-      return true;
+      ++*ch;
+      return;
     }
 
-    if (uid[i] == '9')
+    if (*ch == '9')
     {
-      uid[i] = 'A';
+      *ch = 'A';
       continue;
     }
 
-    return false;
+    assert(!"invalid local UID generator state");
   }
-
-  return false;
 }
 
 static bool
@@ -257,14 +255,12 @@ _client_id_generator_next(struct ClientIdGenerator *generator, char uid[CLIENT_I
   assert(generator);
   assert(uid);
 
-  if (generator->initialized == false || generator->exhausted)
+  if (generator->initialized == false)
     return false;
 
+  /* Return the current UID, then advance the generator state. */
   memcpy(uid, generator->next_uid, CLIENT_ID_UID_LENGTH + 1);
-
-  if (!_client_id_generator_advance(generator->next_uid))
-    generator->exhausted = true;
-
+  _client_id_generator_advance(generator);
   return true;
 }
 

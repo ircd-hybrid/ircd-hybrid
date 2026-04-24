@@ -772,8 +772,8 @@ ms_uid(struct Client *source, int parc, char *parv[])
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "ID collision on %s(%s <- %s)(both killed)",
-                   target->name, target->nexthop->name, source->nexthop->name);
+                   "ID collision for UID %s on %s (%s <- %s) (both killed)",
+                   target->id, target->name, target->nexthop->name, source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
                    me.id, target->id, me.name);

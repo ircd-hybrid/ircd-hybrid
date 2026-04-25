@@ -38,6 +38,61 @@
 #include "parse.h"
 #include "module.h"
 
+static void
+_topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)
+{
+  if (IsClient(source))
+  {
+    snprintf(buf, buflen, "%s!%s@%s",
+             source->name, source->username, source->host);
+    return;
+  }
+
+  if (client_is_hidden(source) || ConfigServerHide.hide_servers)
+    strlcpy(buf, me.name, buflen);
+  else
+    strlcpy(buf, source->name, buflen);
+}
+
+static void
+_topic_send_local(struct Client *source, const struct Channel *channel)
+{
+  if (IsServer(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
+                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
+                         channel->name, string_or_empty(channel->topic));
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+                         source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
+}
+
+static void
+_topic_commit(struct Client *source, struct Channel *channel, const char *topic)
+{
+  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
+  _topic_get_setter_info(source, topic_info, sizeof(topic_info));
+
+  channel_set_topic(channel, topic, topic_info, io_time_get(IO_TIME_REALTIME_SEC), !!MyClient(source));
+
+  sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
+                 source->id, channel->name, string_or_empty(channel->topic));
+  _topic_send_local(source, channel);
+}
+
+static void
+_topic_send_current(struct Client *source, const struct Channel *channel)
+{
+  if (channel->topic == NULL)
+  {
+    sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
+    return;
+  }
+
+  sendto_one_numeric(source, &me, RPL_TOPIC,
+                     channel->name, channel->topic);
+  sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
+                     channel->name, channel->topic_info, channel->topic_time);
+}
 
 /*! \brief TOPIC command handler
  *
@@ -77,36 +132,19 @@ m_topic(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
-             source->name, source->username, source->host);
-    channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), true);
-
-    sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
-                   source->id, channel->name, string_or_empty(channel->topic));
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
+    _topic_commit(source, channel, parv[2]);
+    return;
   }
-  else  /* Only asking for topic */
+
+  /* Only asking for topic */
+  if (channel_is_secret(channel) && member_find_link(source, channel) == NULL)
   {
-    if (channel_is_secret(channel) && member_find_link(source, channel) == NULL)
-    {
-      sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
-      return;
-    }
-
-    if (channel->topic == NULL)
-      sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
-    else
-    {
-      sendto_one_numeric(source, &me, RPL_TOPIC,
-                         channel->name, channel->topic);
-      sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
-                         channel->name, channel->topic_info, channel->topic_time);
-    }
+    sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
+    return;
   }
-}
 
+  _topic_send_current(source, channel);
+}
 
 /*! \brief TOPIC command handler
  *
@@ -127,27 +165,7 @@ ms_topic(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  if (IsClient(source))
-    snprintf(topic_info, sizeof(topic_info), "%s!%s@%s",
-             source->name, source->username, source->host);
-  else if (client_is_hidden(source) || ConfigServerHide.hide_servers)
-    strlcpy(topic_info, me.name, sizeof(topic_info));
-  else
-    strlcpy(topic_info, source->name, sizeof(topic_info));
-
-  channel_set_topic(channel, parv[2], topic_info, io_time_get(IO_TIME_REALTIME_SEC), false);
-
-  sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
-                 source->id, channel->name, string_or_empty(channel->topic));
-
-  if (IsClient(source))
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
-  else
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                         (client_is_hidden(source) || ConfigServerHide.hide_servers) ? me.name : source->name,
-                         channel->name, string_or_empty(channel->topic));
+  _topic_commit(source, channel, parv[2]);
 }
 
 static struct Command command_table =

@@ -37,6 +37,38 @@
 #include "parse.h"
 #include "hash.h"
 
+static const char *
+_kick_get_reason(const struct Client *source, const char *reason)
+{
+  return string_default(reason, source->name);
+}
+
+static void
+_kick_send_local(struct Client *source, const struct Channel *channel,
+                 const struct Client *target, const char *reason)
+{
+  if (IsServer(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
+                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
+                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
+                         source->name, source->username, source->host,
+                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
+}
+
+static void
+_kick_commit(struct Client *source, struct Channel *channel,
+             struct Client *target, struct ChannelMember *member_target, const char *reason)
+{
+  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
+                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
+
+  _kick_send_local(source, channel, target, reason);
+
+  channel_remove_member(member_target);
+}
+
 
 /*! \brief KICK command handler
  *
@@ -97,14 +129,8 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *reason = string_default(parv[3], source->name);
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
-  sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                       source->name, source->username, source->host, channel->name,
-                       target->name, ConfigChannel.max_kick_length, reason);
-
-  channel_remove_member(member_target);
+  const char *const reason = _kick_get_reason(source, parv[3]);
+  _kick_commit(source, channel, target, member_target, reason);
 }
 
 /*! \brief KICK command handler
@@ -135,20 +161,8 @@ ms_kick(struct Client *source, int parc, char *parv[])
   if (member_target == NULL)
     return;
 
-  const char *reason = string_default(parv[3], source->name);
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
-
-  if (IsClient(source))
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                         source->name, source->username, source->host, channel->name,
-                         target->name, ConfigChannel.max_kick_length, reason);
-  else
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
-                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
-                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
-
-  channel_remove_member(member_target);
+  const char *const reason = _kick_get_reason(source, parv[3]);
+  _kick_commit(source, channel, target, member_target, reason);
 }
 
 static struct Command command_table =

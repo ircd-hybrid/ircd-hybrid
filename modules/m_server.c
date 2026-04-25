@@ -196,6 +196,10 @@ _server_burst_send_client(struct Client *client, const struct Client *target)
   if (target->away_message)
     sendto_one(client, ":%s AWAY :%s", target->id, target->away_message);
 
+  /*
+   * Replay SVSTAGs in reverse insertion order so the receiving server applies
+   * them in the original effective order.
+   */
   list_node_t *node;
   LIST_FOREACH_PREV(node, target->svstag_list.tail)
   {
@@ -272,8 +276,10 @@ _server_establish_publish_local(struct Client *client, bool add_namehash)
   list_add(client, &client->global_node, &global_server_list);
   list_add(client, &client->uplink_node, &me.serv->child_server_list);
 
-  if ((list_length(&local_client_list) + list_length(&local_server_list)) > Count.max_loc_con)
-    Count.max_loc_con = list_length(&local_client_list) + list_length(&local_server_list);
+  const size_t local_connection_count =
+    list_length(&local_client_list) + list_length(&local_server_list);
+  if (local_connection_count > Count.max_loc_con)
+    Count.max_loc_con = local_connection_count;
 }
 
 static void
@@ -354,16 +360,20 @@ _server_establish_burst(struct Client *client)
   LIST_FOREACH(node, global_client_list.head)
   {
     const struct Client *const target = node->data;
-    if (target->nexthop != client)
-      _server_burst_send_client(client, target);
+    if (target->nexthop == client)
+      continue;
+
+    _server_burst_send_client(client, target);
   }
 
   LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *const channel = node->data;
     assert(list_length(&channel->members));
-    if (list_length(&channel->members))
-      channel_send_modes(client, channel);
+    if (list_length(&channel->members) == 0)
+      continue;
+
+    channel_send_modes(client, channel);
   }
 
   /* Always send a PING after connect burst is done. */
@@ -443,6 +453,13 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  /* While completing an outgoing handshake, reject peers that present an unexpected server name. */
+  if (client_is_handshake(source) && strcmp(source->name, name))
+  {
+    server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
+    return;
+  }
+
   const char *const sid = parv[3];
   if (!client_id_is_valid_sid(sid))
   {
@@ -454,28 +471,6 @@ mr_server(struct Client *source, int parc, char *parv[])
   if (hopcount != 1)
   {
     server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %d", hopcount);
-    return;
-  }
-
-  if (client_is_handshake(source) && strcmp(source->name, name))
-  {
-    server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
-    return;
-  }
-
-  /*
-   * A server with this name is already fully established in the network view.
-   * This is a hard collision and the connection must be rejected.
-   */
-  if (hash_find_server(name))
-  {
-    server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
-    return;
-  }
-
-  if (hash_find_id(sid))
-  {
-    server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
@@ -506,6 +501,22 @@ mr_server(struct Client *source, int parc, char *parv[])
       server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "Mismatching AOP/QOP capabilities");
       return;
     }
+  }
+
+  /*
+   * A fully established server with the same SID or name already exists in the
+   * network view. This is a hard collision and the introduction must be rejected.
+   */
+  if (hash_find_id(sid))
+  {
+    server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
+    return;
+  }
+
+  if (hash_find_server(name))
+  {
+    server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+    return;
   }
 
   /*
@@ -587,22 +598,6 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (hash_find_id(sid))
-  {
-    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
-    return;
-  }
-
-  /*
-   * A server with this name is already fully established in the network view.
-   * This is a hard collision and the introduction must be rejected.
-   */
-  if (hash_find_server(name))
-  {
-    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
-    return;
-  }
-
   const struct ConnectItem *const connect = server_conf_get(source->nexthop);
   /* An established server link must have a connect block associated with it. */
   assert(connect);
@@ -626,6 +621,22 @@ ms_sid(struct Client *source, int parc, char *parv[])
   {
     server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,
                                "Introduction of '%s' by '%s' denied (server is designated as a leaf)", name, source->name);
+    return;
+  }
+
+  /*
+   * A fully established server with the same SID or name already exists in the
+   * network view. This is a hard collision and the introduction must be rejected.
+   */
+  if (hash_find_id(sid))
+  {
+    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
+    return;
+  }
+
+  if (hash_find_server(name))
+  {
+    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 

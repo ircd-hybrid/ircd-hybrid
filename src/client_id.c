@@ -58,7 +58,8 @@ _client_id_is_valid_char(const char ch)
 static bool
 _client_id_is_valid(const char *id, size_t length)
 {
-  assert(!string_is_empty(id));
+  if (string_is_empty(id))
+    return false;
 
   if (strlen(id) != length)
     return false;
@@ -90,9 +91,6 @@ bool
 client_id_has_valid_sid(const struct Client *client)
 {
   assert(client);
-
-  if (string_is_empty(client->id))
-    return false;
   return client_id_is_valid_sid(client->id);
 }
 
@@ -100,9 +98,6 @@ bool
 client_id_has_valid_uid(const struct Client *client)
 {
   assert(client);
-
-  if (string_is_empty(client->id))
-    return false;
   return client_id_is_valid_uid(client->id);
 }
 

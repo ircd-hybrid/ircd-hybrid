@@ -276,16 +276,20 @@ client_id_allocate_uid(struct Client *client)
 {
   assert(client);
 
+  char uid[CLIENT_ID_UID_LENGTH + 1];
   char first_colliding_uid[CLIENT_ID_UID_LENGTH + 1] = "";
 
   for (;;)
   {
-    if (!client_id_set_next_uid(client))
+    if (!_client_id_generator_next(&client_id_generator, uid))
       return false;
 
     /* Verify the generated UID is not currently in use by an active client. */
-    if (hash_find_id(client->id) == NULL)
+    if (hash_find_id(uid) == NULL)
+    {
+      memcpy(client->id, uid, CLIENT_ID_UID_LENGTH + 1);
       return true;
+    }
 
     /*
      * The local UID generator wraps. If we collide with the same UID again,
@@ -293,16 +297,8 @@ client_id_allocate_uid(struct Client *client)
      * free slot.
      */
     if (first_colliding_uid[0] == '\0')
-      strlcpy(first_colliding_uid, client->id, sizeof(first_colliding_uid));
-    else if (strcmp(client->id, first_colliding_uid) == 0)
+      memcpy(first_colliding_uid, uid, sizeof(first_colliding_uid));
+    else if (strcmp(uid, first_colliding_uid) == 0)
       return false;
   }
-}
-
-bool
-client_id_set_next_uid(struct Client *client)
-{
-  assert(client);
-  assert(sizeof(client->id) >= CLIENT_ID_UID_LENGTH + 1);
-  return _client_id_generator_next(&client_id_generator, client->id);
 }

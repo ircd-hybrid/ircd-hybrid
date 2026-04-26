@@ -34,6 +34,13 @@
 #include "client_id.h"
 #include "hash.h"
 
+_Static_assert(CLIENT_ID_SID_LENGTH == 3, "CLIENT_ID_SID_LENGTH must be 3");
+_Static_assert(CLIENT_ID_UID_LENGTH == 9, "CLIENT_ID_UID_LENGTH must be 9");
+_Static_assert(CLIENT_ID_UID_LENGTH == CLIENT_ID_SID_LENGTH + CLIENT_ID_UID_SUFFIX_LENGTH,
+               "CLIENT_ID_UID_LENGTH must equal SID length plus UID suffix length");
+_Static_assert(sizeof(((struct Client *)0)->id) >= CLIENT_ID_UID_LENGTH + 1,
+               "struct Client.id is too small for a full UID plus terminator");
+
 struct ClientIdGenerator
 {
   char next_uid[CLIENT_ID_UID_LENGTH + 1];

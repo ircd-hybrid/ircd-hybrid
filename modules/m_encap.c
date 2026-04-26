@@ -69,7 +69,7 @@ ms_encap(struct Client *source, int parc, char *parv[])
   if (match(parv[1], me.name))
     return;
 
-  struct Command *command = command_find(parv[2]);
+  struct Command *const command = command_find(parv[2]);
   if (command == NULL)
     return;
 

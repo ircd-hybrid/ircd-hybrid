@@ -101,14 +101,13 @@ dline_remove(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_undline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = false };
-
   if (!client_has_oper_flag(source, OPER_FLAG_UNDLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "undline");
     return;
   }
 
+  struct aline_ctx aline = { .add = false, .simple_mask = false };
   if (!aline_parse("UNDLINE", source, parc, parv, &aline))
     return;
 

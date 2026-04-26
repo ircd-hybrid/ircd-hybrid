@@ -101,14 +101,13 @@ kline_remove(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_unkline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = false };
-
   if (!client_has_oper_flag(source, OPER_FLAG_UNKLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unkline");
     return;
   }
 
+  struct aline_ctx aline = { .add = false, .simple_mask = false };
   if (!aline_parse("UNKLINE", source, parc, parv, &aline))
     return;
 

@@ -46,14 +46,13 @@
 static void
 mo_globops(struct Client *source, int parc, char *parv[])
 {
-  const char *const message = parv[1];
-
   if (!client_has_oper_flag(source, OPER_FLAG_GLOBOPS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "globops");
     return;
   }
 
+  const char *const message = parv[1];
   sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
                  source->name, message);

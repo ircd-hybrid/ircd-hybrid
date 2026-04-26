@@ -51,8 +51,7 @@ kline_check(const struct AddressRec *arec)
 
   LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client = node->data;
-
+    struct Client *const client = node->data;
     if (client_is_dead(client))
       continue;
 
@@ -184,14 +183,13 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_kline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = false };
-
   if (!client_has_oper_flag(source, OPER_FLAG_KLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kline");
     return;
   }
 
+  struct aline_ctx aline = { .add = true, .simple_mask = false };
   if (!aline_parse("KLINE", source, parc, parv, &aline))
     return;
 

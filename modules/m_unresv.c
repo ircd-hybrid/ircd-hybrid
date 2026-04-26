@@ -88,14 +88,13 @@ resv_remove(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_unresv(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = true };
-
   if (!client_has_oper_flag(source, OPER_FLAG_UNRESV))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unresv");
     return;
   }
 
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
   if (!aline_parse("UNRESV", source, parc, parv, &aline))
     return;
 

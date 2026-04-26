@@ -51,8 +51,6 @@
 static void
 m_ping(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target = NULL;
-
   if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
@@ -67,6 +65,7 @@ m_ping(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  struct Client *target = NULL;
   if (string_is_empty(destination) || ((target = hash_find_server(destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target)

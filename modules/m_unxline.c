@@ -94,14 +94,13 @@ xline_remove(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_unxline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = true };
-
   if (!client_has_oper_flag(source, OPER_FLAG_UNXLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unxline");
     return;
   }
 
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
   if (!aline_parse("UNXLINE", source, parc, parv, &aline))
     return;
 

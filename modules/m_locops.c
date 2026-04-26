@@ -50,14 +50,13 @@
 static void
 mo_locops(struct Client *source, int parc, char *parv[])
 {
-  const char *const message = parv[1];
-
   if (!client_has_oper_flag(source, OPER_FLAG_LOCOPS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "locops");
     return;
   }
 
+  const char *const message = parv[1];
   sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                  source->name, message);
   cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, "%s", message);

@@ -51,8 +51,7 @@ xline_check(const struct GecosItem *gecos)
 
   LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client = node->data;
-
+    struct Client *const client = node->data;
     if (client_is_dead(client))
       continue;
 
@@ -146,14 +145,13 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_xline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = true };
-
   if (!client_has_oper_flag(source, OPER_FLAG_XLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "xline");
     return;
   }
 
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
   if (!aline_parse("XLINE", source, parc, parv, &aline))
     return;
 

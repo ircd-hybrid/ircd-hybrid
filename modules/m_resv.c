@@ -110,14 +110,13 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_resv(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = true };
-
   if (!client_has_oper_flag(source, OPER_FLAG_RESV))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "resv");
     return;
   }
 
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
   if (!aline_parse("RESV", source, parc, parv, &aline))
     return;
 

@@ -48,14 +48,13 @@
 static void
 mo_die(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
-
   if (!client_has_oper_flag(source, OPER_FLAG_DIE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "die");
     return;
   }
 
+  const char *const name = parv[1];
   if (irccmp(name, me.name))
   {
     sendto_one_notice(source, &me, ":Mismatch on /die %s", me.name);

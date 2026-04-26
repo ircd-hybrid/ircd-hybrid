@@ -53,11 +53,9 @@ dline_check(const struct AddressRec *arec)
   for (list_t **list = tab; *list; ++list)
   {
     list_node_t *node, *node_next;
-
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
-      struct Client *client = node->data;
-
+      struct Client *const client = node->data;
       if (client_is_dead(client))
         continue;
 
@@ -172,14 +170,13 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
 static void
 mo_dline(struct Client *source, int parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = false };
-
   if (!client_has_oper_flag(source, OPER_FLAG_DLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "dline");
     return;
   }
 
+  struct aline_ctx aline = { .add = true, .simple_mask = false };
   if (!aline_parse("DLINE", source, parc, parv, &aline))
     return;
 

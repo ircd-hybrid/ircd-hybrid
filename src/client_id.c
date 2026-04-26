@@ -277,6 +277,7 @@ bool
 client_id_allocate_uid(struct Client *client)
 {
   assert(client);
+  assert(string_is_empty(client->id));
 
   char uid[CLIENT_ID_UID_LENGTH + 1];
   char first_colliding_uid[CLIENT_ID_UID_LENGTH + 1] = "";

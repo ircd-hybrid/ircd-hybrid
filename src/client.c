@@ -564,6 +564,18 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
   return buf;
 }
 
+const char *
+client_get_visible_server_name(const struct Client *client)
+{
+  assert(client);
+  assert(IsServer(client) || client_is_me(client));
+
+  if (client_is_hidden(client) || ConfigServerHide.hide_servers)
+    return me.name;
+
+  return client->name;
+}
+
 /*
  * Input: A client to find the active operator {} name for.
  * Output: The nick!user@host{oper} of the oper.

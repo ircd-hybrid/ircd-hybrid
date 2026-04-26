@@ -330,6 +330,59 @@ _make_daemon(void)
     close(null_fd);
 }
 
+static void
+_ircd_init_me(void)
+{
+  if (string_is_empty(ConfigServerInfo.name))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
+    exit(EXIT_FAILURE);
+  }
+
+  strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
+
+  if (string_is_empty(ConfigServerInfo.description))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
+    exit(EXIT_FAILURE);
+  }
+
+  strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
+
+  if (string_is_empty(ConfigServerInfo.sid))
+    log_write(LOG_TYPE_IRCD, "Generating server ID");
+
+  bool sid_generated = false;
+  if (!client_id_set_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name,
+                                ConfigServerInfo.description, &sid_generated))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize server ID.");
+    exit(EXIT_FAILURE);
+  }
+
+  if (sid_generated)
+    ConfigServerInfo.sid = io_strdup(me.id);
+
+  if (!client_id_init_generator(&me))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize client ID generator.");
+    exit(EXIT_FAILURE);
+  }
+
+  me.uplink = &me;
+  me.nexthop = &me;
+  me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+  me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  client_set_state(&me, CLIENT_STATE_ME);
+  server_get_or_create(&me);
+
+  hash_add_id(&me);
+  hash_add_client(&me);
+
+  list_add(&me, &me.global_node, &global_server_list);
+}
+
 /**
  * @brief Main function to initialize and run the IRC server.
  *
@@ -441,56 +494,7 @@ main(int argc, char *argv[])
   capab_init();  /* Set up default_server_capabs */
   _initialize_global_set_options();  /* Has to be called after conf_read_files() */
   links_cache_init();
-
-  if (string_is_empty(ConfigServerInfo.name))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
-    exit(EXIT_FAILURE);
-  }
-
-  strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
-
-  /* serverinfo {} description must exist.  If not, error out.*/
-  if (string_is_empty(ConfigServerInfo.description))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
-    exit(EXIT_FAILURE);
-  }
-
-  strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
-
-  if (string_is_empty(ConfigServerInfo.sid))
-    log_write(LOG_TYPE_IRCD, "Generating server ID");
-
-  bool sid_generated = false;
-  if (!client_id_set_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name, ConfigServerInfo.description,
-                                &sid_generated))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize server ID.");
-    exit(EXIT_FAILURE);
-  }
-
-  if (sid_generated)
-    ConfigServerInfo.sid = io_strdup(me.id);
-
-  if (!client_id_init_generator(&me))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize client ID generator.");
-    exit(EXIT_FAILURE);
-  }
-
-  me.uplink = &me;
-  me.nexthop = &me;
-  me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-  client_set_state(&me, CLIENT_STATE_ME);
-  server_get_or_create(&me);
-
-  hash_add_id(&me);
-  hash_add_client(&me);
-
-  list_add(&me, &me.global_node, &global_server_list);
+  _ircd_init_me();
 
   load_kline_database(ConfigGeneral.klinefile);
   load_dline_database(ConfigGeneral.dlinefile);

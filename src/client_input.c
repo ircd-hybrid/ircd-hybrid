@@ -203,9 +203,9 @@ _client_input_process_recvq_client(struct Client *client)
      * available.
      */
     if (enforce_limits && client->connection->input_parse_debt >=
-      (client_has_flag(client, FLAGS_FLOODDONE) ?
-       CLIENT_INPUT_USER_LINE_BUDGET :
-       CLIENT_INPUT_USER_BURST_LINE_BUDGET))
+        (client_has_flag(client, FLAGS_FLOODDONE) ?
+         CLIENT_INPUT_USER_LINE_BUDGET :
+         CLIENT_INPUT_USER_BURST_LINE_BUDGET))
       return;
 
     const size_t line_length = _client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer);

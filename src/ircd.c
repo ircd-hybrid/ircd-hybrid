@@ -41,6 +41,7 @@
 #include "comm.h"
 #include "event.h"
 #include "fdlist.h"
+#include "io_daemon.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
 #include "io_rlimit.h"
@@ -273,61 +274,12 @@ _ircd_time_failure(enum io_time_error_code error_code, const char *message)
  * @param pid Process ID of the ircd server.
  */
 static void
-_print_startup(pid_t pid)
+_ircd_print_startup(pid_t pid)
 {
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n",
          server_state.foreground ? "foreground": "background", ConfigGeneral.dpath);
-}
-
-/**
- * @brief Transforms the current process into a daemon for background execution.
- *
- * This function creates a child process using fork(), allowing the parent process
- * to exit. The child becomes a daemon by detaching from the terminal and setting
- * up a new session using setsid(). Standard input, output, and error are redirected
- * to /dev/null to isolate the daemon from the terminal.
- */
-static void
-_make_daemon(void)
-{
-  pid_t pid = fork();
-  if (pid == -1)
-  {
-    perror("fork");
-    exit(EXIT_FAILURE);
-  }
-  else if (pid > 0)
-  {
-    _print_startup(pid);
-    exit(EXIT_SUCCESS);
-  }
-
-  if (setsid() == -1)
-  {
-    perror("setsid");
-    exit(EXIT_FAILURE);
-  }
-
-  /* Connect stdin, stdout, and stderr to /dev/null */
-  const int null_fd = open("/dev/null", O_RDWR);
-  if (null_fd == -1)
-  {
-    perror("failed to open /dev/null");
-    exit(EXIT_FAILURE);
-  }
-
-  if (dup2(null_fd, STDIN_FILENO ) == -1 ||
-      dup2(null_fd, STDOUT_FILENO) == -1 ||
-      dup2(null_fd, STDERR_FILENO) == -1)
-  {
-    perror("failed to redirect standard fds");
-    exit(EXIT_FAILURE);
-  }
-
-  if (null_fd > STDERR_FILENO)
-    close(null_fd);
 }
 
 static void
@@ -381,6 +333,27 @@ _ircd_init_me(void)
   hash_add_client(&me);
 
   list_add(&me, &me.global_node, &global_server_list);
+}
+
+static void
+_ircd_daemonize(void)
+{
+  pid_t child_pid;
+  const io_daemon_result_t result = io_daemonize(&child_pid);
+
+  switch (result)
+  {
+    case IO_DAEMON_PARENT:
+      _ircd_print_startup(child_pid);
+      exit(EXIT_SUCCESS);
+    case IO_DAEMON_CHILD:
+      return;
+    case IO_DAEMON_ERROR:
+      perror("daemonize");
+      exit(EXIT_FAILURE);
+  }
+
+  assert(!"unreachable");
 }
 
 /**
@@ -458,9 +431,9 @@ main(int argc, char *argv[])
   }
 
   if (server_state.foreground)
-    _print_startup(getpid());
+    _ircd_print_startup(getpid());
   else
-    _make_daemon();
+    _ircd_daemonize();
 
   ircd_signal_init();
 

@@ -24,6 +24,8 @@ libio_la_SOURCES =  address.c     \
                     ident.c       \
                     ident.h       \
                     io.h          \
+                    io_daemon.c   \
+                    io_daemon.h   \
                     io_getopt.c   \
                     io_getopt.h   \
                     io_pidfile.c  \

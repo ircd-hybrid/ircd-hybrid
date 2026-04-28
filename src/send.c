@@ -97,6 +97,9 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   assert(to && client_is_local(to));
   assert(!client_is_me(to));
 
+  if (client_is_dead(to))
+    return;
+
   const unsigned int max_sendq = client_get_max_sendq(to);
   const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
   if (new_sendq_size > max_sendq)
@@ -147,6 +150,9 @@ sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct db
   assert(IsServer(to));
   assert(to->nexthop == to);
 
+  if (client_is_dead(to))
+    return;
+
   if (to == from->nexthop)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                    to->name, from->name);
@@ -163,8 +169,13 @@ sendq_unblocked(fde_t *F, void *data)
 {
   struct Client *const client = data;
 
+  assert(F);
   assert(client);
   assert(client->connection);
+
+  if (client_is_dead(client))
+    return;
+
   assert(client->connection->fd);
   assert(client->connection->fd == F);
   assert(client_has_flag(client, FLAGS_BLOCKED));

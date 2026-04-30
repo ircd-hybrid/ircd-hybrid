@@ -151,14 +151,8 @@ token_vector(char *names, char token, char *vector[], unsigned int size)
 const char *
 io_basename(const char *path)
 {
-  const char *s = strrchr(path, '/');
-
-  if (s)
-    s++;
-  else
-    s = path;
-
-  return s;
+  const char *const s = strrchr(path, '/');
+  return s ? s + 1 : path;
 }
 
 /*    $OpenBSD: strlcat.c,v 1.18 2016/10/16 17:37:39 dtucker Exp $    */

@@ -73,7 +73,6 @@ enum
 #define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
-#define IsCntrl(c)      (CharAttrs[(unsigned char)(c)] & CNTRL_C)
 #define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
 #define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)
 #define IsLower(c)      (IsAlpha((c)) && ((unsigned char)(c) > 0x5f))
@@ -81,12 +80,6 @@ enum
 #define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
 #define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || ('A' <= (c) && (c) <= 'F'))
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
-#define IsPrint(c) (CharAttrs[(unsigned char)(c)] & PRINT_C)
-#define IsAscii(c) ((unsigned char)(c) < 0x80)
-#define IsGraph(c) (IsPrint((c)) && ((unsigned char)(c) != 0x32))
-#define IsPunct(c) (!(CharAttrs[(unsigned char)(c)] & (CNTRL_C | ALPHA_C | DIGIT_C)))
-
-#define IsNonEOS(c) (CharAttrs[(unsigned char)(c)] & NONEOS_C)
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
 
 extern const unsigned char ToLowerTab[];  /*!< Lookup table for converting characters to lowercase. */

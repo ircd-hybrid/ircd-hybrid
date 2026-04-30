@@ -25,9 +25,8 @@
 
 #ifndef INCLUDED_comm_h
 #define INCLUDED_comm_h
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "event.h"
 #include "fdlist.h"

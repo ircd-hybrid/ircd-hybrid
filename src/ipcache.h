@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_ipcache_h
 #define INCLUDED_ipcache_h
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "list.h"

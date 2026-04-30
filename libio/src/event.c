@@ -28,10 +28,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "event.h"
 #include "io_time.h"
 #include "memory.h"
 #include "rng_mt.h"
-#include "event.h"
 
 #define EVENT_HEAP_INVALID_IDX (SIZE_MAX - 1)
 #define EVENT_HEAP_MIN_CAPACITY 8

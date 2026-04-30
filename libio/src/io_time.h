@@ -31,7 +31,6 @@
 
 #ifndef INCLUDED_io_time_h
 #define INCLUDED_io_time_h
-
 #include <stdint.h>
 
 /**

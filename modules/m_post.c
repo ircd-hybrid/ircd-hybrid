@@ -23,14 +23,12 @@
  * \brief Includes required functions for processing the POST/GET/PUT command.
  */
 
-#include "stdinc.h"
 #include "misc.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "send.h"
+#include "parse.h"
 
 /*! \brief GET/POST/PUT command handler
  *

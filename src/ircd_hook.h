@@ -21,6 +21,8 @@
 
 #ifndef INCLUDED_ircd_hook_h
 #define INCLUDED_ircd_hook_h
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hook.h"
 

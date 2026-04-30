@@ -23,13 +23,18 @@
  * \brief Includes required functions for processing the ENCAP command.
  */
 
-#include "stdinc.h"
-#include "module.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_string.h"
+#include "module.h"
+
 #include "client.h"
 #include "parse.h"
-#include "server_capab.h"
 #include "send.h"
+#include "server_capab.h"
 
 /*
  * ms_encap()

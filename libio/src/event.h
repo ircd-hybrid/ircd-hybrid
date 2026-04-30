@@ -25,7 +25,6 @@
 
 #ifndef INCLUDED_event_h
 #define INCLUDED_event_h
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

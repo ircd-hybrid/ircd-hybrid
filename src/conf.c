@@ -23,6 +23,17 @@
  * \brief Configuration file functions.
  */
 
+#include <assert.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "address.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -33,9 +44,7 @@
 #include "module.h"
 #include "res.h"
 
-#include "stdinc.h"
-#include "defaults.h"
-#include "ircd_defs.h"
+#include "client.h"
 #include "cloak.h"
 #include "conf.h"
 #include "conf_class.h"
@@ -47,9 +56,10 @@
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "client.h"
+#include "defaults.h"
 #include "ipcache.h"
 #include "ircd.h"
+#include "ircd_defs.h"
 #include "isupport.h"
 #include "links_cache.h"
 #include "listener.h"

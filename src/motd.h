@@ -26,6 +26,7 @@
 
 #ifndef INCLUDED_motd_h
 #define INCLUDED_motd_h
+#include <stddef.h>
 #include <stdint.h>
 
 /** Type of MOTD. */

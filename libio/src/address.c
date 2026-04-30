@@ -23,9 +23,14 @@
  * \brief Code to efficiently find IP & hostmask based configs.
  */
 
-#include <stdlib.h>
-#include <arpa/inet.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #include "address.h"
 #include "io_string.h"

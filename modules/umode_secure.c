@@ -19,13 +19,17 @@
  *  USA
  */
 
-#include "module.h"
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+
 #include "io_string.h"
+#include "module.h"
+
 #include "client.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode secure_mode =

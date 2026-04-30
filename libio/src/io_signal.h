@@ -29,6 +29,7 @@
 
 #ifndef INCLUDED_io_signal_h
 #define INCLUDED_io_signal_h
+#include <stddef.h>
 
 /**
  * @brief Structure to define a signal and its handler.

@@ -27,14 +27,23 @@
 %define parse.error verbose
 
 %{
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "stdinc.h"
-#include "defaults.h"
+#include "address.h"
 #include "io_string.h"
-#include "ircd.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "module.h"
+
 #include "client.h"
 #include "client_id.h"
+#include "cloak.h"
 #include "command.h"
 #include "conf.h"
 #include "conf_class.h"
@@ -46,18 +55,15 @@
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
+#include "defaults.h"
+#include "ircd.h"
 #include "ircd_defs.h"
-#include "log.h"
-#include "memory.h"
-#include "module.h"
-#include "nuh.h"
-#include "server.h"
-#include "address.h"
 #include "links_cache.h"
 #include "listener.h"
-#include "user.h"
 #include "motd.h"
-#include "cloak.h"
+#include "nuh.h"
+#include "server.h"
+#include "user.h"
 
 int yylex(void);
 

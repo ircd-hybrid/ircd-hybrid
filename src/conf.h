@@ -25,8 +25,8 @@
 
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "address.h"

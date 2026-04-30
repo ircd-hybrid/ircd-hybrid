@@ -23,11 +23,7 @@
  * \brief Implements $K extban which bans users from using the KNOCK command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "channel.h"
 #include "channel_mode.h"
-#include "client.h"
 #include "extban.h"
 
 struct Extban extban_knock =

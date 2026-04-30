@@ -24,13 +24,17 @@
  * @brief Implements cluster block configuration management.
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
+
 #include "list.h"
 #include "memory.h"
+
 #include "conf_cluster.h"
 #include "ircd_defs.h"
-#include "server_capab.h"
 #include "send.h"
+#include "server_capab.h"
 
 static list_t cluster_list;  /**< List to manage cluster items. */
 

@@ -23,8 +23,10 @@
  * \brief Implements channel name based extended channel bans.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "list.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"

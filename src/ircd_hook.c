@@ -19,9 +19,9 @@
  *  USA
  */
 
-#include "stdinc.h"
-#include "list.h"
 #include "hook.h"
+#include "list.h"
+
 #include "ircd_hook.h"
 
 struct HookContainer *ircd_hook_client_exit_local;

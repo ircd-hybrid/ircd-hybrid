@@ -24,9 +24,8 @@
 
 #ifndef INCLUDED_base32_h
 #define INCLUDED_base32_h
-
-#include <stddef.h>  /* size_t */
 #include <stdbool.h>
+#include <stddef.h>  /* size_t */
 
 /**
  * Returns the length of the output buffer required to encode len bytes of

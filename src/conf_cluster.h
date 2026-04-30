@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include "io.h"
+#include "list.h"
 
 /**
  * @brief Configuration options for clustering.

@@ -25,6 +25,7 @@
 
 #ifndef INCLUDED_channel_invite_h
 #define INCLUDED_channel_invite_h
+#include <stdint.h>
 
 /** Invite structure */
 struct Invite

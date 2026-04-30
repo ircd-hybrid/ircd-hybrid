@@ -24,10 +24,8 @@
  * \brief Implements TLS certificate fingerprint based extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
 #include "io_string.h"
-#include "channel.h"
+
 #include "channel_mode.h"
 #include "client.h"
 #include "extban.h"

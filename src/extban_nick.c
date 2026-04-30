@@ -23,11 +23,7 @@
  * \brief Implements nick change restriction extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "channel.h"
 #include "channel_mode.h"
-#include "client.h"
 #include "extban.h"
 
 struct Extban extban_nick =

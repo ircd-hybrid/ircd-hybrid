@@ -21,7 +21,6 @@
 
 #ifndef INCLUDED_conf_oper_h
 #define INCLUDED_conf_oper_h
-
 #include <stdbool.h>
 #include <stdint.h>
 

@@ -24,17 +24,25 @@
  * \brief Includes required functions for processing the CAP command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "misc.h"
 #include "module.h"
-#include "io_string.h"
+
 #include "cap.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "user.h"
-#include "send.h"
 #include "parse.h"
+#include "send.h"
+#include "user.h"
 
 static const struct Cap *
 find_cap(const char **caplist_p, bool *negate_p)

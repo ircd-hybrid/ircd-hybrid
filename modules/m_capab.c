@@ -23,11 +23,14 @@
  * \brief Includes required functions for processing the CAPAB command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <string.h>
+
 #include "module.h"
+
 #include "client.h"
-#include "server_capab.h"
 #include "parse.h"
+#include "server_capab.h"
 
 /*! \brief CAPAB command handler
  *

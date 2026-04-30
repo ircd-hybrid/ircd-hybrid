@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_misc_h
 #define INCLUDED_misc_h
-
 #include <stdint.h>
 
 /**

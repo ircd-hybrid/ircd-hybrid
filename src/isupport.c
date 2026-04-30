@@ -29,15 +29,20 @@
  * handling and managing ISUPPORT messages within the ircd-hybrid server.
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "send.h"
-#include "numeric.h"
+
 #include "client.h"
 #include "ircd_defs.h"
 #include "isupport.h"
+#include "numeric.h"
+#include "send.h"
 
 /**
  * @enum ISUPPORT_TOKENS_PER_LINE

@@ -26,6 +26,8 @@
 
 #ifndef INCLUDED_monitor_h
 #define INCLUDED_monitor_h
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "list.h"

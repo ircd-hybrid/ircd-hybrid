@@ -24,9 +24,11 @@
  * \brief Implements services account based extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stddef.h>
+
 #include "io_string.h"
+#include "list.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"

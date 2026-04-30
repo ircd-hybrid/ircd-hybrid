@@ -23,13 +23,19 @@
  * \brief Routines to count connections from particular IP addresses.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <sys/socket.h>
+
 #include "event.h"
-#include "memory.h"
 #include "io_time.h"
+#include "memory.h"
+
 #include "conf.h"
-#include "ircd.h"
 #include "ipcache.h"
+#include "ircd.h"
 
 static list_t ipcache_list;
 static patricia_tree_t *ipcache_trie_v6;

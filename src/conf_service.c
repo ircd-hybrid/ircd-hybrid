@@ -24,9 +24,9 @@
  * @brief Implementation of service {} block configuration management.
  */
 
-#include "stdinc.h"
 #include "list.h"
 #include "memory.h"
+
 #include "conf_service.h"
 
 /**

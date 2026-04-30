@@ -23,10 +23,15 @@
  * \brief Includes file utilities for database handling
  */
 
-#include <jansson.h>
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <jansson.h>  /**< Jansson JSON library. */
+
 #include "log.h"
 #include "memory.h"
+
 #include "conf.h"
 #include "conf_db.h"
 #include "conf_gecos.h"

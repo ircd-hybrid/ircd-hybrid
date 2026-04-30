@@ -23,18 +23,20 @@
  * \brief Includes required functions for processing the PONG command.
  */
 
-#include "stdinc.h"
-#include "ircd.h"
-#include "user.h"
-#include "client.h"
-#include "hash.h"
-#include "numeric.h"
-#include "conf.h"
-#include "send.h"
+#include <stddef.h>
+#include <stdlib.h>
+
 #include "io_string.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "conf.h"
+#include "hash.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "user.h"
 
 /*! \brief PONG command handler
  *

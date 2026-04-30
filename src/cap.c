@@ -19,9 +19,14 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "list.h"
 #include "memory.h"
+
 #include "cap.h"
 
 static list_t cap_list;

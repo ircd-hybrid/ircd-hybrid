@@ -23,9 +23,9 @@
  * \brief Implements usermode based extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "channel.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "channel_mode.h"
 #include "client.h"
 #include "extban.h"

@@ -24,8 +24,14 @@
  * \brief Message-of-the-day manipulation implementation.
  */
 
-#include <sys/stat.h>
+#include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "address.h"
 #include "io_string.h"
@@ -33,7 +39,7 @@
 #include "log.h"
 #include "memory.h"
 #include "misc.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "conf.h"
 #include "defaults.h"

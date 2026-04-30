@@ -20,7 +20,7 @@
  */
 
 #include "module.h"
-#include "stdinc.h"
+
 #include "cap.h"
 
 static void

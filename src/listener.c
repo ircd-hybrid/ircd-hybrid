@@ -25,6 +25,9 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>

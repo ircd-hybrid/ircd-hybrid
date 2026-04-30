@@ -23,9 +23,11 @@
  * \brief Controls SVSTAGS.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "list.h"
 #include "memory.h"
+
 #include "client_svstag.h"
 #include "numeric.h"
 #include "user_mode.h"

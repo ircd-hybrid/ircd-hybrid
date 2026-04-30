@@ -20,11 +20,15 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "io_string.h"
 #include "memory.h"
+
 #include "client.h"
 #include "send.h"
 #include "user_mode.h"

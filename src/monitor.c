@@ -24,16 +24,23 @@
  * \brief File including functions for MONITOR support
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "io_string.h"
+
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
+#include "monitor.h"
 #include "numeric.h"
 #include "send.h"
-#include "monitor.h"
 
 static list_t monitor_hash[HASHSIZE];
 

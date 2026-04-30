@@ -21,7 +21,8 @@
 
 #ifndef INCLUDED_command_h
 #define INCLUDED_command_h
-
+#include <stdbool.h>
+#include <stddef.h>
 
 struct Client;
 
@@ -89,8 +90,8 @@ struct Command
 };
 
 extern void command_add(struct Command *);
-extern void command_del(struct Command *);
 extern void command_add_array(struct Command *, size_t);
+extern void command_del(struct Command *);
 extern void command_del_array(struct Command *, size_t);
 extern void command_report(struct Client *);
 extern struct Command *command_find(const char *);

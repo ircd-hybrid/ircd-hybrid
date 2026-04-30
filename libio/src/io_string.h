@@ -30,7 +30,6 @@
 
 #ifndef INCLUDED_io_string_h
 #define INCLUDED_io_string_h
-
 #include <stdbool.h>
 #include <stddef.h>
 

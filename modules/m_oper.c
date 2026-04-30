@@ -23,20 +23,24 @@
  * \brief Includes required functions for processing the OPER command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
 #include "module.h"
+
 #include "client.h"
 #include "client_svstag.h"
+#include "conf.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "conf.h"
+#include "parse.h"
 #include "user_mode.h"
 #include "send.h"
-#include "parse.h"
 
 /*! \brief Blindly opers up given client, using conf info.
  *         All checks on passwords have already been done.

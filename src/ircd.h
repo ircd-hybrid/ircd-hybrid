@@ -32,7 +32,6 @@
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 
 #include "config.h"  /**< Autotools-generated PACKAGE_NAME & PACKAGE_VERSION. */

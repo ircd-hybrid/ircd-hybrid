@@ -23,10 +23,12 @@
  * \brief Channel invitation related functions
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "io_time.h"
-#include "memory.h"
 #include "list.h"
+#include "memory.h"
+
 #include "channel.h"
 #include "channel_invite.h"
 #include "client.h"

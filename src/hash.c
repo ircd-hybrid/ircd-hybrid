@@ -28,18 +28,22 @@
  * clients, channels, and IDs.
  */
 
-#include "stdinc.h"
-#include "dbuf.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "io_string.h"
-#include "conf.h"
+#include "rng_mt.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_id.h"
+#include "conf.h"
 #include "hash.h"
-#include "rng_mt.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

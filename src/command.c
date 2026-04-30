@@ -19,14 +19,17 @@
  *  USA
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "io_string.h"
 #include "memory.h"
 #include "misc.h"
-#include "io_string.h"
+
 #include "client.h"
+#include "command.h"
 #include "numeric.h"
 #include "send.h"
-#include "command.h"
 
 /*
  * (based on orabidoo's parser code)

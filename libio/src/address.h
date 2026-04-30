@@ -19,19 +19,19 @@
  *  USA
  */
 
-/*! \file hostmask.h
+/*! \file address.h
  * \brief A header for the hostmask code.
  */
 
 #ifndef INCLUDED_address_h
 #define INCLUDED_address_h
-
 #include <assert.h>
 #include <stdbool.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <string.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 enum hostmask_type
 {

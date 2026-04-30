@@ -23,20 +23,24 @@
  * \brief Functions to reserve(jupe) a nick/channel.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "address.h"
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "misc.h"
-#include "io_string.h"
-#include "io_time.h"
-#include "send.h"
+
 #include "client.h"
+#include "conf.h"
+#include "conf_resv.h"
 #include "ircd.h"
 #include "ircd_defs.h"
 #include "nuh.h"
-#include "conf.h"
-#include "conf_resv.h"
+#include "send.h"
 
 static list_t resv_chan_list;
 static list_t resv_nick_list;

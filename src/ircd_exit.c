@@ -24,17 +24,25 @@
  * @brief Functions to facilitate the restart and termination of the IRC server.
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+
 #include "fdlist.h"
-#include "log.h"
 #include "io_pidfile.h"
 #include "io_string.h"
-#include "defaults.h"
-#include "ircd.h"
-#include "send.h"
+#include "log.h"
+
 #include "client.h"
 #include "conf_db.h"
+#include "defaults.h"
+#include "ircd.h"
 #include "ircd_exit.h"
+#include "send.h"
 
 /**
  * @brief Initiates server termination or restart with a formatted message.

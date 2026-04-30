@@ -23,10 +23,10 @@
  * \brief Implements shared {} block configuration management.
  */
 
-#include "stdinc.h"
-#include "list.h"
 #include "io_string.h"
+#include "list.h"
 #include "memory.h"
+
 #include "conf_shared.h"
 
 static list_t shared_list;

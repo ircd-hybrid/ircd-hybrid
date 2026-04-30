@@ -29,8 +29,7 @@
 
 #ifndef INCLUDED_pidfile_h
 #define INCLUDED_pidfile_h
-
-#include <unistd.h>
+#include <sys/types.h>
 
 extern void io_pidfile_close(void);
 extern int io_pidfile_create(const char *);

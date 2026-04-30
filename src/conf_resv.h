@@ -25,6 +25,10 @@
 
 #ifndef INCLUDED_conf_resv_h
 #define INCLUDED_conf_resv_h
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "list.h"
 
 struct ResvItem
 {

@@ -33,11 +33,11 @@
 
 #include "comm.h"
 #include "defaults.h"
+#include "fdlist.h"
 #include "io_rlimit.h"
 #include "io_string.h"
 #include "memory.h"
 #include "misc.h"
-#include "fdlist.h"
 
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;

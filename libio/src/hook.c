@@ -32,9 +32,9 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "hook.h"
 #include "list.h"
 #include "memory.h"
-#include "hook.h"
 
 /**
  * @var hook_container_list

@@ -278,7 +278,7 @@ void
 address_strip_ipv4(struct io_addr *addr)
 {
   /* Check if the address is an IPv6-mapped IPv4 address. */
-  if (address_is_ipv4_mapped(addr) == false)
+  if (!address_is_ipv4_mapped(addr))
     return;
 
   struct sockaddr_in6 v6;

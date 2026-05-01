@@ -321,7 +321,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
     return;
   }
 
-  if (comm_errno_is_recoverable(errno) == false)
+  if (!comm_errno_is_recoverable(errno))
   {
     comm_connect_complete(op, COMM_ERR_CONNECT);
     return;
@@ -364,7 +364,7 @@ comm_socket_create(int family, int sock_type, int proto, const char *desc)
     return NULL;
   }
 
-  if (setup_socket(fd, family, sock_type) == false)
+  if (!setup_socket(fd, family, sock_type))
   {
     close(fd);
     return NULL;
@@ -467,7 +467,7 @@ comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
 
   address_strip_ipv4(addr);
 
-  if (setup_socket(fd, address_get_family(addr), SOCK_STREAM) == false)
+  if (!setup_socket(fd, address_get_family(addr), SOCK_STREAM))
   {
     close(fd);
     return NULL;

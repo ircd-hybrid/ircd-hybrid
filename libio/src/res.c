@@ -498,7 +498,7 @@ res_readreply(fde_t *F, void *data)
     /*
      * Check against possibly fake replies
      */
-    if (res_ourserver(&addr) == false)
+    if (!res_ourserver(&addr))
       continue;
 
     /*
@@ -534,7 +534,7 @@ res_readreply(fde_t *F, void *data)
      * We only give it one shot. If it fails, just leave the client
      * unresolved.
      */
-    if (proc_answer(request, header, buf, buf + rc) == false)
+    if (!proc_answer(request, header, buf, buf + rc))
     {
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       rem_request(request);

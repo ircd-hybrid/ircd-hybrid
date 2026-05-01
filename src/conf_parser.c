@@ -5586,7 +5586,7 @@ yyreduce:
       !block_state.spass.buf[0])
     break;
 
-  if (server_is_valid_name(block_state.name.buf) == false)
+  if (!server_is_valid_name(block_state.name.buf))
     break;
 
   if (has_wildcards(block_state.name.buf) ||
@@ -5614,7 +5614,7 @@ yyreduce:
   list_concat(&connect->leaf_masks, &block_state.leaf.list);
 
   if (block_state.bind.buf[0])
-    if (address_from_string(block_state.bind.buf, &connect->bind_addr) == false)
+    if (!address_from_string(block_state.bind.buf, &connect->bind_addr))
       conf_error_report("Invalid IP address for bind address");
 
   connect_assign_class(connect, block_state.klass.buf);

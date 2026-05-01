@@ -83,7 +83,7 @@ address_is_ipv6(const struct io_addr *addr)
 static inline bool
 address_is_ipv4_mapped(const struct io_addr *addr)
 {
-  if (address_is_ipv6(addr) == false)
+  if (!address_is_ipv6(addr))
     return false;
 
   const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
@@ -110,7 +110,7 @@ address_is_unspecified(const struct io_addr *addr)
 static inline bool
 address_is_specific(const struct io_addr *addr)
 {
-  return (address_is_ipv4(addr) || address_is_ipv6(addr)) && address_is_unspecified(addr) == false;
+  return (address_is_ipv4(addr) || address_is_ipv6(addr)) && !address_is_unspecified(addr);
 }
 
 static inline int

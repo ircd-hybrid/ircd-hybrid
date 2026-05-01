@@ -407,7 +407,7 @@ enum module_error_code
 module_unload(const char *name, bool reload, void *user_data)
 {
   /* Ensure the module name has a valid suffix. */
-  if (module_valid_suffix(name) == false)
+  if (!module_valid_suffix(name))
   {
     module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
     return MODULE_ERR_INVALID_SUFFIX;
@@ -492,7 +492,7 @@ module_load(const char *name, bool manual, void *user_data)
   }
 
   /* Ensure the module name has a valid suffix if it's a manual load. */
-  if (manual && module_valid_suffix(name) == false)
+  if (manual && !module_valid_suffix(name))
   {
     module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
     return MODULE_ERR_INVALID_SUFFIX;
@@ -600,7 +600,7 @@ module_config_add(const char *name, bool resident, bool core)
     return MODULE_ERR_CONFIG_EXISTS;
   }
 
-  if (module_valid_suffix(name) == false)
+  if (!module_valid_suffix(name))
   {
     module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
     return MODULE_ERR_INVALID_SUFFIX;

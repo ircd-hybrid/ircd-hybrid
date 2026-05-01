@@ -127,7 +127,7 @@ reslib_add_nameserver(const char *arg)
   if (reslib_nscount >= RESLIB_MAXNS)
     return;
 
-  if (address_from_string(arg, &reslib_nsaddr_list[reslib_nscount]) == false)
+  if (!address_from_string(arg, &reslib_nsaddr_list[reslib_nscount]))
     return;
 
   address_set_port(&reslib_nsaddr_list[reslib_nscount], NS_DEFAULTPORT);

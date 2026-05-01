@@ -78,14 +78,12 @@ _event_heap_swap(event_manager_t mgr, const size_t i, const size_t j)
 
   struct event_instance *const ev_i = mgr->heap_array[i];
   struct event_instance *const ev_j = mgr->heap_array[j];
-
   mgr->heap_array[i] = ev_j;
   mgr->heap_array[j] = ev_i;
 
   ev_i->heap_idx = j;
   ev_j->heap_idx = i;
 }
-
 
 static void
 _event_heap_heapify_up(event_manager_t mgr, size_t idx)
@@ -95,7 +93,6 @@ _event_heap_heapify_up(event_manager_t mgr, size_t idx)
   while (idx > 0)
   {
     size_t parent_idx = (idx - 1) / 2;
-
     if (_event_is_higher_priority_or_earlier(mgr->heap_array[idx], mgr->heap_array[parent_idx]))
     {
       _event_heap_swap(mgr, idx, parent_idx);

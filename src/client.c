@@ -1167,6 +1167,8 @@ _client_begin_local_connection_ingress(struct Client *client)
   assert(client->connection->fd);
   assert(client->connection->listener);
 
+  client_reset_activity_timeout(client);
+
   if (!listener_has_flag(client->connection->listener, LISTENER_TLS))
   {
     lookup_start(client);
@@ -1181,8 +1183,6 @@ _client_begin_local_connection_ingress(struct Client *client)
   }
 
   client_set_flag(client, FLAGS_TLS_ACTIVE | FLAGS_TLS_HANDSHAKING);
-  client_reset_activity_timeout(client);
-
   _client_tls_handshake_handler(client->connection->fd, client);
 }
 

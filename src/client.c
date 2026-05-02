@@ -1134,6 +1134,13 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
   assert(client->connection->fd);
   assert(client->connection->fd == fd);
 
+  /*
+   * This callback may still fire for a client that has already
+   * entered the shutdown path.
+   */
+  if (client_is_defunct(client))
+    return;
+
   const char *tls_error = NULL;
   const tls_handshake_status_t status = tls_handshake(&fd->tls, TLS_ROLE_SERVER, &tls_error);
 

@@ -662,8 +662,11 @@ _client_exit_teardown_connection(struct Client *client)
    * This is safe because even if this write re-blocks, the very next step
    * is to close the socket anyway.
    */
-  client_unset_flag(client, FLAGS_BLOCKED);
-  send_queued_write(client);
+  if (!client_is_dead(client))
+  {
+    client_unset_flag(client, FLAGS_BLOCKED);
+    send_queued_write(client);
+  }
 
   if (client->connection->fd)
   {

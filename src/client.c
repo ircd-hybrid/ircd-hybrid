@@ -187,6 +187,7 @@ void
 client_set_class(struct Client *client, struct ClassItem *new_class, enum client_class_type type)
 {
   assert(client && client_is_local(client));
+  assert(type == CLIENT_CLASS_BASE || type == CLIENT_CLASS_OPER);
 
   struct ClassItem **class_ptr_location = NULL;
   if (type == CLIENT_CLASS_BASE)
@@ -996,6 +997,9 @@ client_exit_fmt(struct Client *client, const char *format, ...)
 static void
 _client_exit_schedule(struct Client *client, const char *reason)
 {
+  assert(client && client_is_local(client));
+  assert(reason);
+
   if (client_is_defunct(client))
     return;
 
@@ -1015,6 +1019,9 @@ _client_exit_schedule(struct Client *client, const char *reason)
 void
 dead_link_on_write(struct Client *client, const char *format, ...)
 {
+  assert(client && client_is_local(client));
+  assert(format);
+
   if (client_is_defunct(client))
     return;
 
@@ -1031,6 +1038,8 @@ dead_link_on_write(struct Client *client, const char *format, ...)
 void
 dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
 {
+  assert(client && client_is_local(client));
+
   if (client_is_defunct(client))
     return;
 
@@ -1052,6 +1061,8 @@ exit_aborted_clients(void)
   while ((node = abort_list.head))
   {
     struct Client *client = node->data;
+    assert(client && client_is_local(client));
+    assert(client_is_dead(client));
 
     list_remove(node, &abort_list);
     list_free_node(node);

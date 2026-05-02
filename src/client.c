@@ -145,6 +145,7 @@ client_activity_timeout_handler(void *data)
   if (client_has_flag(client, FLAGS_TLS_HANDSHAKING))
   {
     /* The client failed to complete the TLS handshake within the allowed time. */
+    client_set_dead(client);  /* Prevent client_exit() from sending on a half-open TLS connection. */
     client_exit(client, "Timeout during TLS handshake");
     return;
   }

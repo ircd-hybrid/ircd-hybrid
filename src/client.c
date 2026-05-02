@@ -1141,6 +1141,7 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
   {
     case TLS_HANDSHAKE_DONE:
       client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
+      client_set_flag(client, FLAGS_TLS_ACTIVE);
       comm_setselect(fd, 0, NULL, NULL);
 
       if (!tls_verify_certificate(&fd->tls, &client->tls_certfp))
@@ -1185,7 +1186,7 @@ _client_begin_local_connection_ingress(struct Client *client)
     return;
   }
 
-  client_set_flag(client, FLAGS_TLS_ACTIVE | FLAGS_TLS_HANDSHAKING);
+  client_set_flag(client, FLAGS_TLS_HANDSHAKING);
   _client_tls_handshake_handler(client->connection->fd, client);
 }
 

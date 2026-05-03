@@ -346,10 +346,13 @@ event_status_t
 event_destroy(event_handle_t event)
 {
   assert(event->manager);
-  event_status_t status = EVENT_SUCCESS;
 
   if (event_is_scheduled(event))
-    status = event_unschedule(event);
+  {
+    event_status_t status = event_unschedule(event);
+    if (status != EVENT_SUCCESS)
+      return status;
+  }
 
   _event_cleanup_data(event);
 
@@ -360,7 +363,7 @@ event_destroy(event_handle_t event)
   event->name = NULL;
   io_free(event);
 
-  return status;
+  return EVENT_SUCCESS;
 }
 
 event_status_t

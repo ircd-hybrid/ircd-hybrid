@@ -77,6 +77,8 @@ _links_cache_free_entry(void *data)
 void
 links_cache_set_timer(uintmax_t new_interval_seconds)
 {
+  assert(live_cache_ptr == &cache_buffer_A || live_cache_ptr == &cache_buffer_B);
+
   uintmax_t interval_ms = new_interval_seconds * 1000ULL;
   if (interval_ms > 0)
   {
@@ -86,9 +88,9 @@ links_cache_set_timer(uintmax_t new_interval_seconds)
       event_set_interval_ms(update_timer, interval_ms);
 
     if (list_is_empty(live_cache_ptr))
-      event_trigger_now(update_timer);
-    else
-      event_schedule(update_timer);
+      _links_cache_update(NULL);
+
+    event_schedule(update_timer);
   }
   else if (update_timer)
   {

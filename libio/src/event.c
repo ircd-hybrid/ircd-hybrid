@@ -556,36 +556,6 @@ event_set_cleanup_handler(event_handle_t event, event_cleanup_fn new_cleanup_han
   return EVENT_SUCCESS;
 }
 
-event_status_t
-event_trigger_now(event_handle_t event)
-{
-  if (event->manager == NULL || event->handler == NULL)
-    return EVENT_ERR_INVALID_ARG;
-
-  if (event_is_scheduled(event))
-  {
-    event_status_t status = _event_remove_from_heap(event->manager, event);
-    if (status != EVENT_SUCCESS)
-      return status;
-  }
-
-  event->handler(event->data);
-
-  if (event->oneshot == false)
-    return event_schedule(event);
-  else
-  {
-
-    if (event->cleanup_handler && event->fired_and_cleaned == false)
-    {
-      event->cleanup_handler(event->data);
-      event->fired_and_cleaned = true;
-    }
-
-    return EVENT_SUCCESS;
-  }
-}
-
 void
 event_run(event_manager_t mgr)
 {

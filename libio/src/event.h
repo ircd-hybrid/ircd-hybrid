@@ -77,7 +77,6 @@ extern event_status_t event_set_interval_ms(event_handle_t, uintmax_t);
 extern event_status_t event_set_name(event_handle_t event, const char *);
 extern event_status_t event_set_oneshot(event_handle_t, bool);
 extern event_status_t event_set_priority(event_handle_t, uint8_t);
-extern event_status_t event_trigger_now(event_handle_t);
 extern event_status_t event_unschedule(event_handle_t);
 extern void *event_get_data(event_handle_t);
 extern const char *event_get_name(event_handle_t);

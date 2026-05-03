@@ -30,6 +30,7 @@
 
 #include "event.h"
 #include "io_time.h"
+#include "list.h"
 #include "memory.h"
 #include "rng_mt.h"
 
@@ -38,6 +39,7 @@
 
 struct event_instance
 {
+  list_node_t node;
   char *name;
   event_handler_fn handler;
   uintmax_t interval_ms;
@@ -52,9 +54,11 @@ struct event_instance
 
 struct event_manager_instance
 {
+  list_t event_list;
   struct event_instance **heap_array;
   size_t heap_size;
   size_t heap_capacity;
+  bool is_running;
 };
 
 static bool
@@ -256,18 +260,22 @@ event_manager_create(event_manager_config_t *config)
 void
 event_manager_destroy(event_manager_t mgr)
 {
+  assert(mgr);
+  assert(mgr->is_running == false);
   assert(mgr->heap_array || mgr->heap_size == 0);
 
-  while (mgr->heap_size > 0)
+  event_handle_t event;
+  while ((event = list_peek_head(&mgr->event_list)))
   {
-    event_handle_t event = mgr->heap_array[0];
     assert(event);
     assert(event->manager == mgr);
-    assert(event_is_scheduled(event));
 
     event_status_t status = event_destroy(event);
     assert(status == EVENT_SUCCESS);
   }
+
+  assert(mgr->heap_size == 0);
+  assert(list_is_empty(&mgr->event_list));
 
   io_free(mgr->heap_array);
   mgr->heap_array = NULL;
@@ -321,6 +329,7 @@ event_create(event_manager_t mgr, const char *name, event_handler_fn handler, ui
   event->cleanup_handler = cleanup_handler;
   event->heap_idx = EVENT_HEAP_INVALID_IDX;
 
+  list_add(event, &event->node, &mgr->event_list);
   return event;
 }
 
@@ -336,12 +345,16 @@ _event_cleanup_data(event_handle_t event)
 event_status_t
 event_destroy(event_handle_t event)
 {
+  assert(event->manager);
   event_status_t status = EVENT_SUCCESS;
 
   if (event_is_scheduled(event))
     status = event_unschedule(event);
 
   _event_cleanup_data(event);
+
+  list_remove(&event->node, &event->manager->event_list);
+  event->manager = NULL;
 
   io_free(event->name);
   event->name = NULL;
@@ -565,8 +578,11 @@ event_set_cleanup_handler(event_handle_t event, event_cleanup_fn new_cleanup_han
 void
 event_run(event_manager_t mgr)
 {
+  assert(mgr);
+  assert(mgr->is_running == false);
   assert(mgr->heap_array || mgr->heap_size == 0);
-  uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+
+  mgr->is_running = true;
 
   while (mgr->heap_size > 0)
   {
@@ -579,6 +595,7 @@ event_run(event_manager_t mgr)
     assert(event->heap_idx == 0);
     assert(event_is_scheduled(event));
 
+    const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
     if (event->next_fire_time_ms > current_time_ms)
       break;
 
@@ -599,5 +616,6 @@ event_run(event_manager_t mgr)
     }
   }
 
+  mgr->is_running = false;
   assert(mgr->heap_size <= mgr->heap_capacity);
 }

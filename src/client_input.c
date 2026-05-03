@@ -52,7 +52,10 @@ static void
 _client_input_dispatch_line(struct Client *client, char *line_buffer, size_t line_length)
 {
   assert(client && client_is_local(client));
+  assert(!client_is_defunct(client));
+  assert(line_buffer);
   assert(line_length < IRCD_BUFSIZE);
+  assert(line_buffer[line_length] == '\0');
 
   ++me.connection->recv.messages;
   ++client->connection->recv.messages;

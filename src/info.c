@@ -30,6 +30,8 @@
  * namespace support.
  */
 
+#include <assert.h>
+
 #include "list.h"
 #include "memory.h"
 
@@ -127,6 +129,8 @@ info_unregister(const char *namespace, const char *name)
     return INFO_NOT_FOUND;
 
   list_node_t *node = list_find_remove(&info_list, info);
+  assert(node);
+
   if (node)
     list_free_node(node);
 

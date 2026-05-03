@@ -893,6 +893,8 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
   if (client_is_oper(client))
   {
     list_node_t *node = list_find_remove(&oper_list, client);
+    assert(node);
+
     if (node)
       list_free_node(node);
   }

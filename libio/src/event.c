@@ -258,10 +258,15 @@ void
 event_manager_destroy(event_manager_t mgr)
 {
   assert(mgr->heap_array || mgr->heap_size == 0);
+
   while (mgr->heap_size > 0)
   {
-    event_handle_t event_to_destroy = mgr->heap_array[0];
-    event_status_t status = event_destroy(event_to_destroy);
+    event_handle_t event = mgr->heap_array[0];
+    assert(event);
+    assert(event->manager == mgr);
+    assert(event_is_scheduled(event));
+
+    event_status_t status = event_destroy(event);
     assert(status == EVENT_SUCCESS);
   }
 
@@ -590,8 +595,13 @@ event_run(event_manager_t mgr)
   while (mgr->heap_size > 0)
   {
     assert(mgr->heap_array[0]);
+
     struct event_instance *event = mgr->heap_array[0];
     assert(event->manager == mgr);
+    assert(event->handler);
+    assert(event->interval_ms > 0);
+    assert(event->heap_idx == 0);
+    assert(event_is_scheduled(event));
 
     if (event->next_fire_time_ms > current_time_ms)
       break;

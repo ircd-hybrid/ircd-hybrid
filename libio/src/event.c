@@ -149,6 +149,19 @@ _event_heap_resize(event_manager_t mgr, size_t new_capacity)
   mgr->heap_capacity = new_capacity;
 }
 
+static void
+_event_heap_ensure_capacity(event_manager_t mgr)
+{
+  assert(mgr);
+
+  if (mgr->heap_size < mgr->heap_capacity)
+    return;
+
+  const size_t new_capacity =
+    (mgr->heap_capacity == 0) ? EVENT_HEAP_MIN_CAPACITY : mgr->heap_capacity * 2;
+  _event_heap_resize(mgr, new_capacity);
+}
+
 static event_status_t
 _event_add_to_heap(event_manager_t mgr, event_handle_t event)
 {
@@ -156,11 +169,7 @@ _event_add_to_heap(event_manager_t mgr, event_handle_t event)
   assert(event->heap_idx == EVENT_HEAP_INVALID_IDX || event->heap_idx >= mgr->heap_size || mgr->heap_array[event->heap_idx] != event);
   assert(!event_is_scheduled(event));
 
-  if (mgr->heap_size == mgr->heap_capacity)
-  {
-    size_t new_capacity = (mgr->heap_capacity == 0) ? EVENT_HEAP_MIN_CAPACITY : mgr->heap_capacity * 2;
-    _event_heap_resize(mgr, new_capacity);
-  }
+  _event_heap_ensure_capacity(mgr);
 
   mgr->heap_array[mgr->heap_size] = event;
   event->heap_idx = mgr->heap_size;

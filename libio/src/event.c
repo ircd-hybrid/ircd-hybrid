@@ -545,7 +545,7 @@ event_status_t
 event_set_data(event_handle_t event, void *new_data)
 {
   if (event->data != new_data)
-  _event_cleanup_data(event);
+    _event_cleanup_data(event);
 
   event->data = new_data;
   return EVENT_SUCCESS;

@@ -50,6 +50,8 @@ struct event_instance
   uint8_t priority;
   size_t heap_idx;
   struct event_manager_instance *manager;
+  bool destroy_pending;
+  bool auto_reschedule_suppressed;
 };
 
 struct event_manager_instance
@@ -59,6 +61,7 @@ struct event_manager_instance
   size_t heap_size;
   size_t heap_capacity;
   bool is_running;
+  event_handle_t dispatching_event;
 };
 
 static bool
@@ -227,7 +230,13 @@ _event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
   assert(event->manager);
   assert(event->handler);
 
+  if (event->destroy_pending)
+    return EVENT_ERR_INVALID_ARG;
+
   event->next_fire_time_ms = absolute_time_ms;
+
+  if (event->manager->dispatching_event == event)
+    event->auto_reschedule_suppressed = true;
 
   if (event_is_scheduled(event))
   {
@@ -263,6 +272,7 @@ event_manager_destroy(event_manager_t mgr)
   assert(mgr);
   assert(mgr->is_running == false);
   assert(mgr->heap_array || mgr->heap_size == 0);
+  assert(mgr->dispatching_event == NULL);
 
   event_handle_t event;
   while ((event = list_peek_head(&mgr->event_list)))
@@ -342,17 +352,14 @@ _event_cleanup_data(event_handle_t event)
     event->cleanup_handler(event->data);
 }
 
-event_status_t
-event_destroy(event_handle_t event)
+static event_status_t
+_event_destroy_final(event_handle_t event)
 {
+  assert(event);
   assert(event->manager);
-
-  if (event_is_scheduled(event))
-  {
-    event_status_t status = event_unschedule(event);
-    if (status != EVENT_SUCCESS)
-      return status;
-  }
+  assert(event->destroy_pending);
+  assert(event->heap_idx == EVENT_HEAP_INVALID_IDX);
+  assert(event->manager->dispatching_event != event);
 
   _event_cleanup_data(event);
 
@@ -367,10 +374,43 @@ event_destroy(event_handle_t event)
 }
 
 event_status_t
+event_destroy(event_handle_t event)
+{
+  if (event == NULL || event->manager == NULL)
+    return EVENT_ERR_INVALID_ARG;
+
+  if (event->destroy_pending)
+    return EVENT_SUCCESS;
+
+  if (event_is_scheduled(event))
+  {
+    event_status_t status = event_unschedule(event);
+    if (status != EVENT_SUCCESS)
+      return status;
+  }
+
+  event->destroy_pending = true;
+  event->auto_reschedule_suppressed = true;
+
+  if (event->manager->dispatching_event == event)
+    return EVENT_SUCCESS;
+
+  return _event_destroy_final(event);
+}
+
+event_status_t
 event_unschedule(event_handle_t event)
 {
-  if (event->manager == NULL)
+  if (event == NULL || event->manager == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  if (event->manager->dispatching_event == event)
+  {
+    event->auto_reschedule_suppressed = true;
+
+    if (!event_is_scheduled(event))
+      return EVENT_SUCCESS;
+  }
 
   if (!event_is_scheduled(event))
     return EVENT_ERR_NOT_FOUND;
@@ -384,7 +424,7 @@ event_unschedule(event_handle_t event)
 event_status_t
 event_schedule(event_handle_t event)
 {
-  if (event->manager == NULL || event->handler == NULL)
+  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
@@ -396,7 +436,7 @@ event_schedule(event_handle_t event)
 event_status_t
 event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 {
-  if (event->manager == NULL || event->handler == NULL)
+  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
   return _event_schedule_at_internal(event, absolute_time_ms);
@@ -405,7 +445,7 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 event_status_t
 event_schedule_fuzzed(event_handle_t event)
 {
-  if (event->manager == NULL || event->handler == NULL)
+  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
   uintmax_t fuzzed_delay = event->interval_ms;
@@ -435,7 +475,7 @@ event_reset(event_handle_t event)
 event_status_t
 event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
 {
-  if (event->manager == NULL || event->handler == NULL || new_delay_ms == 0)
+  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending || new_delay_ms == 0)
     return EVENT_ERR_INVALID_ARG;
 
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
@@ -468,7 +508,7 @@ event_get_time_until_fire(event_handle_t event)
 bool
 event_is_scheduled(event_handle_t event)
 {
-  if (event->manager == NULL)
+  if (event == NULL || event->manager == NULL)
     return false;
 
   return event->heap_idx != EVENT_HEAP_INVALID_IDX &&
@@ -550,6 +590,7 @@ event_run(event_manager_t mgr)
   assert(mgr);
   assert(mgr->is_running == false);
   assert(mgr->heap_array || mgr->heap_size == 0);
+  assert(mgr->dispatching_event == NULL);
 
   mgr->is_running = true;
 
@@ -562,6 +603,8 @@ event_run(event_manager_t mgr)
     assert(event->interval_ms > 0);
     assert(event->heap_idx == 0);
     assert(event_is_scheduled(event));
+    assert(event->destroy_pending == false);
+    assert(event->auto_reschedule_suppressed == false);
 
     const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
     if (event->next_fire_time_ms > current_time_ms)
@@ -571,17 +614,30 @@ event_run(event_manager_t mgr)
     assert(status == EVENT_SUCCESS);
     assert(event->heap_idx == EVENT_HEAP_INVALID_IDX);
 
+    mgr->dispatching_event = event;
     event->handler(event->data);
+    mgr->dispatching_event = NULL;
 
-    if (event->oneshot == false)
+    if (event->destroy_pending)
+    {
+      status = _event_destroy_final(event);
+      assert(status == EVENT_SUCCESS);
+      continue;
+    }
+
+    if (event->oneshot == false &&
+        event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
       status = _event_add_to_heap(mgr, event);
       assert(status == EVENT_SUCCESS);
       assert(event_is_scheduled(event));
     }
+
+    event->auto_reschedule_suppressed = false;
   }
 
   mgr->is_running = false;
+  assert(mgr->dispatching_event == NULL);
   assert(mgr->heap_size <= mgr->heap_capacity);
 }

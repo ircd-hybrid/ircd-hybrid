@@ -565,13 +565,6 @@ event_set_handler(event_handle_t event, event_handler_fn new_handler)
 }
 
 event_status_t
-event_set_oneshot(event_handle_t event, bool oneshot)
-{
-  event->oneshot = oneshot;
-  return EVENT_SUCCESS;
-}
-
-event_status_t
 event_set_cleanup_handler(event_handle_t event, event_cleanup_fn new_cleanup_handler)
 {
   event->cleanup_handler = new_cleanup_handler;

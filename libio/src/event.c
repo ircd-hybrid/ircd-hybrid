@@ -589,9 +589,8 @@ event_run(event_manager_t mgr)
 
   while (mgr->heap_size > 0)
   {
-    assert(mgr->heap_array[0]);
-
-    struct event_instance *event = mgr->heap_array[0];
+    struct event_instance *const event = mgr->heap_array[0];
+    assert(event);
     assert(event->manager == mgr);
     assert(event->handler);
     assert(event->interval_ms > 0);
@@ -601,9 +600,6 @@ event_run(event_manager_t mgr)
     const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
     if (event->next_fire_time_ms > current_time_ms)
       break;
-
-    assert(event->manager == mgr);
-    assert(event->heap_idx == 0);
 
     event_status_t status = _event_remove_from_heap(mgr, event);
     assert(status == EVENT_SUCCESS);
@@ -616,6 +612,7 @@ event_run(event_manager_t mgr)
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
       status = _event_add_to_heap(mgr, event);
       assert(status == EVENT_SUCCESS);
+      assert(event_is_scheduled(event));
     }
   }
 

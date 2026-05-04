@@ -280,13 +280,7 @@ io_time_update_cache(void)
     return NULL;
   }
 
-#ifdef CLOCK_MONOTONIC_RAW
-  ret = io_internal_gettime(CLOCK_MONOTONIC_RAW, &current_monotonic);
-  if (ret != IO_TIME_OK)
-    ret = io_internal_gettime(CLOCK_MONOTONIC, &current_monotonic);
-#else
   ret = io_internal_gettime(CLOCK_MONOTONIC, &current_monotonic);
-#endif
   if (ret != IO_TIME_OK)
   {
     io_time_set_error(ret, &current_monotonic, &previous_monotonic);

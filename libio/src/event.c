@@ -544,33 +544,6 @@ event_get_data(event_handle_t event)
   return event->data;
 }
 
-event_status_t
-event_set_data(event_handle_t event, void *new_data)
-{
-  if (event->data != new_data)
-    _event_cleanup_data(event);
-
-  event->data = new_data;
-  return EVENT_SUCCESS;
-}
-
-event_status_t
-event_set_handler(event_handle_t event, event_handler_fn new_handler)
-{
-  if (new_handler == NULL)
-    return EVENT_ERR_INVALID_ARG;
-
-  event->handler = new_handler;
-  return EVENT_SUCCESS;
-}
-
-event_status_t
-event_set_cleanup_handler(event_handle_t event, event_cleanup_fn new_cleanup_handler)
-{
-  event->cleanup_handler = new_cleanup_handler;
-  return EVENT_SUCCESS;
-}
-
 void
 event_run(event_manager_t mgr)
 {

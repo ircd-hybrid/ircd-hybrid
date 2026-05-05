@@ -39,6 +39,8 @@
 static list_t list_task_queue;
 static event_handle_t list_task_timer;
 
+static void _list_task_pump(void *unused);
+
 static inline bool
 _list_task_is_congested(const struct ListTask *lt)
 {
@@ -186,17 +188,43 @@ _list_task_execute_global(struct ListTask *lt)
 }
 
 static void
-_list_task_pump(void *unused)
+_list_task_timer_schedule(void)
 {
-  if (list_is_empty(&list_task_queue))
+  if (list_task_timer == NULL)
+  {
+    list_task_timer =
+      event_create(ircd_event_manager, "_list_task_pump", _list_task_pump, 50, true, NULL, NULL);
+    assert(list_task_timer);
+
+    event_status_t status = event_set_priority(list_task_timer, 2);
+    assert(status == EVENT_SUCCESS);
+  }
+
+  if (event_is_scheduled(list_task_timer))
     return;
 
+  event_status_t status = event_schedule(list_task_timer);
+  assert(status == EVENT_SUCCESS);
+}
+
+static void
+_list_task_timer_schedule_if_needed(void)
+{
+  if (!list_is_empty(&list_task_queue))
+    _list_task_timer_schedule();
+}
+
+static void
+_list_task_pump(void *unused)
+{
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list_task_queue.head)
   {
     struct ListTask *const lt = node->data;
     _list_task_execute_global(lt);
   }
+
+  _list_task_timer_schedule_if_needed();
 }
 
 void
@@ -209,16 +237,9 @@ list_task_start(struct ListTask *lt)
     return;
   }
 
-  if (list_task_timer == NULL)
-  {
-    list_task_timer =
-      event_create(ircd_event_manager, "_list_task_pump", _list_task_pump, 50, false, NULL, NULL);
-    event_set_priority(list_task_timer, 2);
-    event_schedule(list_task_timer);
-  }
-
   list_add(lt, &lt->node, &list_task_queue);
   lt->is_queued = true;
 
   _list_task_execute_global(lt);
+  _list_task_timer_schedule_if_needed();
 }

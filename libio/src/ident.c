@@ -181,12 +181,14 @@ static void
 ident_read_reply(fde_t *F, void *data)
 {
   ident_request_t *request = data;
+  assert(F);
+  assert(request);
+  assert(request->fd == F);
+  assert(F->flags.open);
 
   /* If callback is NULL, the owner is tearing down the request. Abort. */
   if (request->callback == NULL)
     return;
-
-  assert(F->read_handler);
 
   /* The event is no longer needed as we have received a reply. */
   if (request->reply_timeout_event)

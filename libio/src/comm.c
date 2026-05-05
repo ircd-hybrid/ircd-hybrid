@@ -246,7 +246,10 @@ comm_connect_timeout(void *cbdata)
   comm_op_t *op = cbdata;
   assert(op);
 
+  event_handle_t timeout_event = op->timeout_event;
   op->timeout_event = NULL;
+  event_destroy(timeout_event);
+
   comm_connect_complete(op, COMM_ERR_TIMEOUT);
 }
 

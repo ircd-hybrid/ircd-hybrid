@@ -247,8 +247,9 @@ _ident_reply_timeout_handler(void *data)
   ident_request_t *request = data;
   assert(request);
 
-  /* The event has fired, so clear the handle. */
+  event_handle_t reply_timeout_event = request->reply_timeout_event;
   request->reply_timeout_event = NULL;
+  event_destroy(reply_timeout_event);
 
   /* If callback is NULL, the owner is tearing down the request. Abort. */
   if (request->callback == NULL)

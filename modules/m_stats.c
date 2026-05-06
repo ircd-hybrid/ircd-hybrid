@@ -272,7 +272,8 @@ stats_connect(struct Client *client, int parc, char *parv[])
 
     const char *visible_host = client_is_admin(client) ? connect->host : "*@127.0.0.1";
     sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                       'C', visible_host, buf, connect->name, connect->port, connect->klass->name);
+                       'C', visible_host, buf, connect->name, connect->port, connect->klass->name,
+                       connect->active ? "active" : "disabled");
   }
 }
 

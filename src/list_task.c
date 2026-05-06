@@ -231,6 +231,12 @@ _list_task_pump(void *unused)
 void
 list_task_start(struct ListTask *lt)
 {
+  assert(lt);
+  assert(lt->client);
+  assert(IsClient(lt->client));
+  assert(client_is_local(lt->client));
+  assert(lt->is_queued == false);
+
   /* If the query is an exact match (e.g. /LIST #a,#b), run it instantly. */
   if (lt->exact_match && !list_is_empty(&lt->include_masks))
   {

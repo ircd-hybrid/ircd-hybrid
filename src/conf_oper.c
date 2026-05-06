@@ -148,7 +148,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
       continue;
     }
 
-    if ((oper->flags & OPER_CONF_FLAG_REQUIRE_TLS) && !user_mode_has_flag(client, UMODE_SECURE))
+    if ((oper->flags & OPER_CONF_FLAG_REQUIRE_TLS) && !client_has_flag(client, FLAGS_TLS_ACTIVE))
     {
       if (result < OPER_AUTH_FAIL_TLS)
         result = OPER_AUTH_FAIL_TLS;

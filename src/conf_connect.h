@@ -81,6 +81,6 @@ extern void connect_sweep_inactive(void);
 extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
 extern list_t *connect_get_list(void);
 extern struct ConnectItem *connect_create(void);
-extern struct ConnectItem *connect_find(const char *);
+extern struct ConnectItem *connect_find(const char *, bool);
 extern const char *connect_auth_result_to_string(connect_auth_result_t);
 #endif  /* INCLUDED_conf_connect_h */

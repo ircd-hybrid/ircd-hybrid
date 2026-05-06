@@ -47,7 +47,7 @@ do_connect(struct Client *source, const char *name)
   /*
    * Try to find the name. If it fails, notify and bail.
    */
-  struct ConnectItem *connect = connect_find(name);
+  struct ConnectItem *connect = connect_find(name, true);
   if (connect == NULL)
   {
     sendto_one_notice(source, &me, ":Connect: Server %s not found in configuration.", name);

@@ -477,7 +477,9 @@ server_connect_auto(void *unused)
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    struct ConnectItem *connect = node->data;
+    struct ConnectItem *const connect = node->data;
+    if (connect->active == false)
+      continue;
     assert(connect->klass);
 
     /* Also when already connecting! (update holdtimes) --SRB */

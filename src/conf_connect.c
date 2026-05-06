@@ -164,14 +164,19 @@ connect_dns_lookup(struct ConnectItem *connect)
 }
 
 struct ConnectItem *
-connect_find(const char *name)
+connect_find(const char *name, bool active)
 {
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
     struct ConnectItem *const connect = node->data;
     if (match(name, connect->name) == 0)
+    {
+      if (active && connect->active == false)
+        return NULL;
+
       return connect;
+    }
   }
 
   return NULL;
@@ -204,6 +209,9 @@ connect_authenticate_server(const char *server_name, const struct Client *client
   LIST_FOREACH(node, connect_items.head)
   {
     struct ConnectItem *const connect = node->data;
+    if (connect->active == false)
+      continue;
+
     if (irccmp(server_name, connect->name))
       continue;
 

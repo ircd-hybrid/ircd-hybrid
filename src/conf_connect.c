@@ -96,6 +96,9 @@ connect_create(void)
 void
 connect_destroy(struct ConnectItem *connect)
 {
+  assert(connect);
+  assert(connect->ref_count == 0);
+
   list_remove(&connect->node, &connect_items);
 
   if (connect->dns_pending)
@@ -136,6 +139,9 @@ static void
 _connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
   struct ConnectItem *const connect = vptr;
+  assert(connect);
+  assert(connect->dns_pending);
+
   connect->dns_pending = false;
 
   if (addr)
@@ -150,6 +156,10 @@ _connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, 
 void
 connect_dns_lookup(struct ConnectItem *connect)
 {
+  assert(connect);
+  assert(connect->address_family == AF_INET || connect->address_family == AF_INET6);
+  assert(!string_is_empty(connect->host));
+
   if (address_from_string(connect->host, &connect->remote_addr))
   {
     connect->dns_pending = false;
@@ -174,6 +184,8 @@ connect_dns_lookup(struct ConnectItem *connect)
 struct ConnectItem *
 connect_find(const char *name, bool active)
 {
+  assert(!string_is_empty(name));
+
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
@@ -208,6 +220,8 @@ _connect_match_password(const struct ConnectItem *connect, const char *password)
 connect_auth_result_t
 connect_authenticate_server(const char *server_name, const struct Client *client, struct ConnectItem **connect_out)
 {
+  assert(!string_is_empty(server_name));
+  assert(client && client_is_local(client));
   assert(connect_out);
 
   *connect_out = NULL;

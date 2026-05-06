@@ -212,7 +212,11 @@ server_destroy(struct Server *server)
 {
   assert(server);
   assert(list_is_empty(&server->child_server_list));
+  assert(server->child_server_list.head == NULL);
+  assert(server->child_server_list.tail == NULL);
   assert(list_is_empty(&server->child_client_list));
+  assert(server->child_client_list.head == NULL);
+  assert(server->child_client_list.tail == NULL);
 
   io_free(server->initiator_name);
   server->initiator_name = NULL;
@@ -243,7 +247,10 @@ _server_handshake_irc_start(struct Client *client)
 static void
 _server_handshake_tls_finish(struct Client *client)
 {
+  assert(client && client_is_local(client));
+  assert(client->connection->fd);
   assert(client_has_flag(client, FLAGS_TLS_HANDSHAKING));
+  assert(!client_has_flag(client, FLAGS_TLS_ACTIVE));
 
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
   client_set_flag(client, FLAGS_TLS_ACTIVE);
@@ -269,10 +276,8 @@ static void
 _server_handshake_tls_start(fde_t *fde, void *data_)
 {
   struct Client *const client = data_;
-  assert(client);
-  assert(client->connection);
-  assert(client->connection->fd);
-  assert(client->connection->fd == fde);
+  assert(fde);
+  assert(client && client_is_local(client));
 
   /*
    * This callback may still fire for a client that has already
@@ -280,6 +285,9 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
    */
   if (client_is_defunct(client))
     return;
+
+  assert(client->connection->fd);
+  assert(client->connection->fd == fde);
 
   tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
@@ -306,8 +314,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
 static void
 _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
 {
-  assert(client);
-  assert(client->connection);
+  assert(client && client_is_local(client));
   assert(client->connection->fd);
   assert(client->connection->fd == fde);
 
@@ -339,6 +346,7 @@ static void
 _server_connect_callback(fde_t *fde, int status, void *data_)
 {
   struct Client *const client = data_;
+  assert(fde);
   assert(client && client_is_local(client));
   assert(client_is_connecting(client));
 
@@ -392,7 +400,13 @@ bool
 server_connect(struct ConnectItem *connect, const struct Client *initiator)
 {
   assert(connect);
-  assert(hash_find_client(connect->name) == NULL);  /* This should have been checked by the caller */
+  assert(connect->active);
+  assert(connect->klass);
+  assert(!string_is_empty(connect->name));
+  assert(!string_is_empty(connect->host));
+  assert(connect->port > 0);
+  assert(connect->timeout > 0);
+  assert(hash_find_client(connect->name) == NULL);
 
   /* Still processing a DNS lookup? -> exit */
   if (connect->dns_pending)
@@ -480,7 +494,10 @@ server_connect_auto(void *unused)
     struct ConnectItem *const connect = node->data;
     if (connect->active == false)
       continue;
+
     assert(connect->klass);
+    assert(!string_is_empty(connect->name));
+    assert(!string_is_empty(connect->host));
 
     /* Also when already connecting! (update holdtimes) --SRB */
     if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))

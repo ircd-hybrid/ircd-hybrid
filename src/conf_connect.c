@@ -190,13 +190,12 @@ connect_find(const char *name, bool active)
   LIST_FOREACH(node, connect_items.head)
   {
     struct ConnectItem *const connect = node->data;
-    if (match(name, connect->name) == 0)
-    {
-      if (active && connect->active == false)
-        return NULL;
+    if (match(name, connect->name))
+      continue;
+    if (active && connect->active == false)
+      continue;
 
-      return connect;
-    }
+    return connect;
   }
 
   return NULL;

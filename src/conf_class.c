@@ -98,13 +98,12 @@ class_find(const char *name, bool active)
   LIST_FOREACH(node, class_list.head)
   {
     struct ClassItem *klass = node->data;
-    if (irccmp(klass->name, name) == 0)
-    {
-      if (active && klass->active == false)
-        return NULL;
+    if (irccmp(klass->name, name))
+      continue;
+    if (active && klass->active == false)
+      continue;
 
-      return klass;
-    }
+    return klass;
   }
 
   return NULL;

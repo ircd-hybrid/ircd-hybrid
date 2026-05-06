@@ -246,6 +246,7 @@ _server_handshake_tls_finish(struct Client *client)
   assert(client_has_flag(client, FLAGS_TLS_HANDSHAKING));
 
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
+  client_set_flag(client, FLAGS_TLS_ACTIVE);
 
   fde_t *fde = client->connection->fd;
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
@@ -261,7 +262,6 @@ _server_handshake_tls_finish(struct Client *client)
     return;
   }
 
-  client_set_flag(client, FLAGS_TLS_ACTIVE);
   _server_handshake_irc_start(client);
 }
 

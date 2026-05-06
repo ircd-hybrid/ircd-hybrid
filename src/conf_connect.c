@@ -139,7 +139,10 @@ _connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, 
   connect->dns_pending = false;
 
   if (addr)
+  {
     address_copy(&connect->remote_addr, addr);
+    connect->dns_failed = false;
+  }
   else
     connect->dns_failed = true;
 }
@@ -148,7 +151,11 @@ void
 connect_dns_lookup(struct ConnectItem *connect)
 {
   if (address_from_string(connect->host, &connect->remote_addr))
+  {
+    connect->dns_pending = false;
+    connect->dns_failed = false;
     return;
+  }
 
   /*
    * By this point connect->host possibly is not a numerical network address. Do a nameserver
@@ -158,6 +165,7 @@ connect_dns_lookup(struct ConnectItem *connect)
     return;
 
   connect->dns_pending = true;
+  connect->dns_failed = false;
 
   int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
   gethost_byname_type(_connect_dns_callback, connect, connect->host, query_type);

@@ -746,8 +746,11 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   }
 
   if (touser && client_is_local(user) && !client_is_dead(user))
-    if ((user->connection->cap & required_cap) == required_cap)
+  {
+    if ((required_cap == 0 || (user->connection->cap & required_cap) == required_cap) &&
+        (excluded_cap == 0 || (user->connection->cap & excluded_cap) == 0))
       sendto_one_buffer(user, buffer);
+  }
 
   dbuf_ref_free(buffer);
 }

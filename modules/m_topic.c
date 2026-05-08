@@ -48,10 +48,7 @@ _topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)
     return;
   }
 
-  if (client_is_hidden(source) || ConfigServerHide.hide_servers)
-    strlcpy(buf, me.name, buflen);
-  else
-    strlcpy(buf, source->name, buflen);
+  strlcpy(buf, client_get_visible_server_name(source), buflen);
 }
 
 static void
@@ -62,8 +59,7 @@ _topic_send_local(struct Client *source, const struct Channel *channel)
                          source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
-                         channel->name, string_or_empty(channel->topic));
+                         client_get_visible_server_name(source), channel->name, string_or_empty(channel->topic));
 }
 
 static void

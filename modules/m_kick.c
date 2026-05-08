@@ -53,7 +53,7 @@ _kick_send_local(struct Client *source, const struct Channel *channel,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
   else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
-                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
+                         client_get_visible_server_name(source),
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
 }
 

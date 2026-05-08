@@ -386,9 +386,6 @@ _server_establish_send_eobs(struct Client *client)
   assert(client && client_is_local(client));
   assert(IsServer(client));
 
-  if (!capab_has_flag(client, CAPAB_EOB))
-    return;
-
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
@@ -396,8 +393,7 @@ _server_establish_send_eobs(struct Client *client)
     if (target->nexthop == client)
       continue;
 
-    if (client_is_me(target) || client_has_flag(target, FLAGS_EOB))
-      sendto_one(client, ":%s EOB", target->id);
+    sendto_one(client, ":%s EOB", target->id);
   }
 }
 

@@ -340,7 +340,7 @@ _server_establish_send_servers(struct Client *client)
   LIST_FOREACH_PREV(node, global_server_list.tail)
   {
     const struct Client *const target = node->data;
-    /* target->nexthop == target for target == client */
+    /* Skip our own server and servers behind the newly established link. */
     if (client_is_me(target) || target->nexthop == client)
       continue;
 

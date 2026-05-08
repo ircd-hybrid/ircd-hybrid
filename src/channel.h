@@ -116,7 +116,7 @@ struct Ban
 
 extern void channel_member_clear_list(const list_t *);
 extern void channel_add_member(struct Channel *, struct Client *, uint32_t, bool);
-extern void channel_demote_members(struct Channel *, const struct Client *);
+extern void channel_demote_members(struct Channel *, const char *);
 extern void channel_destroy(struct Channel *);
 extern void channel_join_list(struct Client *, char *, char *);
 extern void channel_join_one(struct Client *, const char *, const char *);

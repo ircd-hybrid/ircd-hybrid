@@ -141,7 +141,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  * side effects	- given ban list is removed, modes are sent to local clients
  */
 static void
-remove_ban_list(struct Channel *channel, const struct Client *client, list_t *list, char c)
+remove_ban_list(struct Channel *channel, const char *origin_name, list_t *list, char c)
 {
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];
@@ -154,7 +154,7 @@ remove_ban_list(struct Channel *channel, const struct Client *client, list_t *li
     return;
 
   cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
-                            client->name, channel->name);
+                            origin_name, channel->name);
   mbuf = modebuf + mlen;
   pbuf = parabuf;
 
@@ -292,9 +292,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   set_final_mode(&mode, oldmode, modebuf, parabuf);
   channel->mode = mode;
 
-  const struct Client *origin = source;
-  if (client_is_hidden(source) || ConfigServerHide.hide_servers)
-    origin = &me;
+  const char *const origin_name = client_get_visible_server_name(source);
 
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
@@ -306,11 +304,11 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                          me.name, channel->name, channel->name, oldts, newts);
 
-    channel_demote_members(channel, origin);
+    channel_demote_members(channel, origin_name);
 
-    remove_ban_list(channel, origin, &channel->banlist, 'b');
-    remove_ban_list(channel, origin, &channel->exceptlist, 'e');
-    remove_ban_list(channel, origin, &channel->invexlist, 'I');
+    remove_ban_list(channel, origin_name, &channel->banlist, 'b');
+    remove_ban_list(channel, origin_name, &channel->exceptlist, 'e');
+    remove_ban_list(channel, origin_name, &channel->invexlist, 'I');
 
     clear_ban_cache_list(&channel->members_local);
     invite_clear_list(&channel->invites);
@@ -321,13 +319,13 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     {
       channel_set_topic(channel, NULL, NULL, 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
-                           origin->name, channel->name);
+                           origin_name, channel->name);
     }
   }
 
   if (modebuf[0])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
-                         origin->name, channel->name, modebuf, parabuf);
+                         origin_name, channel->name, modebuf, parabuf);
 
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
@@ -402,7 +400,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
         {
           *mbuf = '\0';
           sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                               origin->name, channel->name, modebuf, parabuf);
+                               origin_name, channel->name, modebuf, parabuf);
 
           mbuf = modebuf;
           pbuf = parabuf;
@@ -416,7 +414,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   {
     *mbuf = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                         origin->name, channel->name, modebuf, parabuf);
+                         origin_name, channel->name, modebuf, parabuf);
   }
 
   sendto_servers(source, 0, 0, "%s", uid_buf);

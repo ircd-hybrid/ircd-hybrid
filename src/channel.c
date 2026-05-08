@@ -160,7 +160,7 @@ channel_member_clear_list(const list_t *list)
  * side effects - remove ONE mode from a channel
  */
 void
-channel_demote_members(struct Channel *channel, const struct Client *client)
+channel_demote_members(struct Channel *channel, const char *source_name)
 {
   char modebuf[MAXMODEPARAMS + 1];
   char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
@@ -186,7 +186,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
         {
           *mbuf = '\0';
           sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                               client->name, channel->name, modebuf, parabuf);
+                               source_name, channel->name, modebuf, parabuf);
 
           mbuf = modebuf;
           pbuf = parabuf;
@@ -200,7 +200,7 @@ channel_demote_members(struct Channel *channel, const struct Client *client)
   {
     *mbuf = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                         client->name, channel->name, modebuf, parabuf);
+                         source_name, channel->name, modebuf, parabuf);
   }
 }
 

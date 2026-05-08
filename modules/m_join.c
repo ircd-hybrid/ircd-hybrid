@@ -205,10 +205,6 @@ ms_join(struct Client *source, int parc, char *parv[])
     channel->creation_time = newts;
   }
 
-  const struct Client *origin = source->uplink;
-  if (client_is_hidden(source->uplink) || ConfigServerHide.hide_servers)
-    origin = &me;
-
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
@@ -226,7 +222,8 @@ ms_join(struct Client *source, int parc, char *parv[])
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                          me.name, channel->name, channel->name, oldts, newts);
 
-    channel_demote_members(channel, origin);
+    const char *const origin_name = client_get_visible_server_name(source->uplink);
+    channel_demote_members(channel, origin_name);
 
     invite_clear_list(&channel->invites);
 
@@ -234,13 +231,13 @@ ms_join(struct Client *source, int parc, char *parv[])
 
     if (modebuf[0])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
-                           origin->name, channel->name, modebuf, parabuf);
+                           origin_name, channel->name, modebuf, parabuf);
 
     if (channel->topic)
     {
       channel_set_topic(channel, NULL, NULL, 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
-                           origin->name, channel->name);
+                           origin_name, channel->name);
     }
   }
 

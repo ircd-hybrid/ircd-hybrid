@@ -57,13 +57,13 @@ _topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)
 static void
 _topic_send_local(struct Client *source, const struct Channel *channel)
 {
-  if (IsServer(source))
+  if (IsClient(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+                         source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
+  else
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
                          client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
                          channel->name, string_or_empty(channel->topic));
-  else
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                         source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
 }
 
 static void

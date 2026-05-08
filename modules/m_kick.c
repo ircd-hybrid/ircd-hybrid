@@ -47,13 +47,13 @@ static void
 _kick_send_local(struct Client *source, const struct Channel *channel,
                  const struct Client *target, const char *reason)
 {
-  if (IsServer(source))
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
-                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
-                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
-  else
+  if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                          source->name, source->username, source->host,
+                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
+                         client_is_hidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);
 }
 

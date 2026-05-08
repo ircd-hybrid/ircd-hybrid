@@ -203,11 +203,11 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
       return;
 
     /* Fake it for server hiding, if it's our client */
-    if ((ConfigServerHide.hide_servers || client_is_hidden(source)) &&
-        client_is_local(target) && !client_is_oper(target))
-      sendto_one_numeric(target, &me, numeric | SND_EXPLICIT, "%s", text);
-    else
-      sendto_one_numeric(target, source, numeric | SND_EXPLICIT, "%s", text);
+    const bool hide_source =
+      client_is_local(target) &&
+      !client_is_oper(target) &&
+      (ConfigServerHide.hide_servers || client_is_hidden(source));
+    sendto_one_numeric(target, hide_source ? &me : source, numeric | SND_EXPLICIT, "%s", text);
   }
 }
 

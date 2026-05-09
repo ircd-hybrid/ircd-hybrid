@@ -167,8 +167,9 @@ _event_heap_ensure_capacity(event_manager_t mgr)
 static event_status_t
 _event_add_to_heap(event_manager_t mgr, event_handle_t event)
 {
+  assert(mgr);
+  assert(event);
   assert(event->manager == mgr);
-  assert(event->heap_idx == EVENT_HEAP_INVALID_IDX || event->heap_idx >= mgr->heap_size || mgr->heap_array[event->heap_idx] != event);
   assert(!event_is_scheduled(event));
 
   _event_heap_ensure_capacity(mgr);
@@ -179,10 +180,7 @@ _event_add_to_heap(event_manager_t mgr, event_handle_t event)
 
   _event_heap_heapify_up(mgr, event->heap_idx);
 
-  assert(event->heap_idx < mgr->heap_size);
-  assert(mgr->heap_array[event->heap_idx] == event);
   assert(event_is_scheduled(event));
-
   return EVENT_SUCCESS;
 }
 

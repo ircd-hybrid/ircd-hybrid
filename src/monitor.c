@@ -68,7 +68,7 @@ _monitor_find(const char *name)
   LIST_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
     struct Monitor *monitor = node->data;
-    if (irccmp(monitor->name, name) == 0)
+    if (io_strcasecmp(monitor->name, name) == 0)
       return monitor;
   }
 

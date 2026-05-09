@@ -122,7 +122,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
   LIST_FOREACH(node, operator_items.head)
   {
     struct OperItem *const oper = node->data;
-    if (irccmp(oper->name, oper_name))
+    if (io_strcasecmp(oper->name, oper_name))
       continue;
 
     bool host_match = false;
@@ -156,7 +156,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
     }
 
     if (!string_is_empty(oper->tls_cert_fingerprint) &&
-        (string_is_empty(client->tls_certfp) || strcasecmp(client->tls_certfp, oper->tls_cert_fingerprint)))
+        (string_is_empty(client->tls_certfp) || io_strcasecmp(client->tls_certfp, oper->tls_cert_fingerprint)))
     {
       if (result < OPER_AUTH_FAIL_CERTFP)
         result = OPER_AUTH_FAIL_CERTFP;

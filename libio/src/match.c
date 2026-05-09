@@ -198,10 +198,11 @@ collapse(char *mask)
  *
  * @param s1 Pointer to the first null-terminated string.
  * @param s2 Pointer to the second null-terminated string.
- * @return Returns 0 if the strings are equal, otherwise returns 1.
+ * @return An integer less than, equal to, or greater than zero if @p s1 is
+ *         respectively less than, equal to, or greater than @p s2.
  */
 int
-irccmp(const char *s1, const char *s2)
+io_strcasecmp(const char *s1, const char *s2)
 {
   const unsigned char *str1 = (const unsigned char *)s1;
   const unsigned char *str2 = (const unsigned char *)s2;
@@ -209,11 +210,19 @@ irccmp(const char *s1, const char *s2)
   assert(s1);
   assert(s2);
 
-  for (; ToUpper(*str1) == ToUpper(*str2); ++str1, ++str2)
+  for (;;)
+  {
+    const unsigned char c1 = ToUpper(*str1);
+    const unsigned char c2 = ToUpper(*str2);
+    if (c1 != c2)
+      return (int)c1 - (int)c2;
+
     if (*str1 == '\0')
       return 0;
 
-  return 1;
+    ++str1;
+    ++str2;
+  }
 }
 
 /**
@@ -227,26 +236,36 @@ irccmp(const char *s1, const char *s2)
  * @param s1 Pointer to the first string to be compared.
  * @param s2 Pointer to the second string to be compared.
  * @param n Maximum number of characters to compare.
- * @return Returns 0 if the specified portions of the strings are equal, otherwise returns 1.
+ * @return An integer less than, equal to, or greater than zero if @p s1 is
+ *         respectively less than, equal to, or greater than @p s2.
  */
 int
-ircncmp(const char *s1, const char *s2, size_t n)
+io_strncasecmp(const char *s1, const char *s2, size_t n)
 {
   const unsigned char *str1 = (const unsigned char *)s1;
   const unsigned char *str2 = (const unsigned char *)s2;
 
   assert(s1);
   assert(s2);
-  assert(n > 0);
 
   if (n == 0)
     return 0;
 
-  for (; ToUpper(*str1) == ToUpper(*str2); ++str1, ++str2)
-    if (--n == 0 || *str1 == '\0')
+  while (n--)
+  {
+    const unsigned char c1 = ToUpper(*str1);
+    const unsigned char c2 = ToUpper(*str2);
+    if (c1 != c2)
+      return (int)c1 - (int)c2;
+
+    if (*str1 == '\0')
       return 0;
 
-  return 1;
+    ++str1;
+    ++str2;
+  }
+
+  return 0;
 }
 
 /**

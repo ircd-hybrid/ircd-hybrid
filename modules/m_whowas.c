@@ -63,7 +63,7 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
   {
     if (whowas->server_hidden || ConfigServerHide.hide_servers)
       server_hidden = true;
-    else if (ConfigServerHide.hide_services && service_find(whowas->servername, irccmp))
+    else if (ConfigServerHide.hide_services && service_find(whowas->servername, io_strcasecmp))
       server_hidden = true;
   }
 

@@ -57,7 +57,7 @@ whowas_group_find(const char *name)
   LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
     struct WhowasGroup *const group = node->data;
-    if (irccmp(group->name, name) == 0)
+    if (io_strcasecmp(group->name, name) == 0)
       return group;
   }
 

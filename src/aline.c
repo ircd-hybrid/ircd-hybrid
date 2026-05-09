@@ -229,7 +229,7 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
 
   if (parc)
   {
-    if (irccmp(*parv, "ON") == 0)
+    if (io_strcasecmp(*parv, "ON") == 0)
     {
       ++parv;
       --parc;

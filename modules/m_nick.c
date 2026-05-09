@@ -177,7 +177,7 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
 static void
 set_initial_nick(struct Client *source, const char *nick)
 {
-  bool samenick = irccmp(source->name, nick) == 0;
+  bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
     source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
 
@@ -216,7 +216,7 @@ nick_change_local(struct Client *source, const char *nick)
   source->connection->nick.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
   source->connection->nick.count++;
 
-  bool samenick = irccmp(source->name, nick) == 0;
+  bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
   {
     source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
@@ -271,7 +271,7 @@ nick_change_remote(struct Client *source, char *parv[])
   assert(source->name[0]);
 
   /* Client changing their nick */
-  bool samenick = irccmp(source->name, new_nick) == 0;
+  bool samenick = io_strcasecmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
     source->tsinfo = strtoumax(parv[2], NULL, 10);
@@ -412,8 +412,8 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   }
 
   /* The timestamps are different */
-  bool sameuser = irccmp(target->username, parv[5]) == 0 &&
-                  irccmp(target->sockhost, parv[8]) == 0;
+  bool sameuser = io_strcasecmp(target->username, parv[5]) == 0 &&
+                  io_strcasecmp(target->sockhost, parv[8]) == 0;
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -496,8 +496,8 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   }
 
   /* The timestamps are different */
-  bool sameuser = irccmp(target->username, source->username) == 0 &&
-                  irccmp(target->sockhost, source->sockhost) == 0;
+  bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
+                  io_strcasecmp(target->sockhost, source->sockhost) == 0;
   if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
   {
     if (sameuser)

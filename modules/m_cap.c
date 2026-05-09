@@ -247,7 +247,7 @@ subcmd_cmp(const void *const name_, const void *const elem_)
 {
   const char *const name = name_;
   const struct subcmd *const elem = elem_;
-  return strcasecmp(name, elem->name);
+  return io_strcasecmp(name, elem->name);
 }
 
 /*! \brief CAP command handler

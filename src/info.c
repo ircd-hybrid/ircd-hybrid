@@ -64,7 +64,7 @@ _info_compare(const void *const a_, const void *const b_)
   const struct InfoEntry *const a = a_;
   const struct InfoEntry *const b = b_;
   if (a->namespace == NULL && b->namespace == NULL)
-    return strcasecmp(a->name, b->name);
+    return io_strcasecmp(a->name, b->name);
 
   if (a->namespace == NULL)
     return -1;
@@ -72,11 +72,11 @@ _info_compare(const void *const a_, const void *const b_)
   if (b->namespace == NULL)
     return 1;
 
-  const int ns_cmp = strcasecmp(a->namespace, b->namespace);
+  const int ns_cmp = io_strcasecmp(a->namespace, b->namespace);
   if (ns_cmp)
     return ns_cmp;
 
-  return strcasecmp(a->name, b->name);
+  return io_strcasecmp(a->name, b->name);
 }
 
 /**
@@ -204,9 +204,9 @@ info_find(const char *namespace, const char *name)
   LIST_FOREACH(node, info_list.head)
   {
     struct InfoEntry *const info = node->data;
-    if (strcasecmp(info->name, name) == 0)
+    if (io_strcasecmp(info->name, name) == 0)
       if ((namespace == NULL && info->namespace == NULL) ||
-          (namespace != NULL && info->namespace != NULL && strcasecmp(info->namespace, namespace) == 0))
+          (namespace != NULL && info->namespace != NULL && io_strcasecmp(info->namespace, namespace) == 0))
         return info;
   }
 

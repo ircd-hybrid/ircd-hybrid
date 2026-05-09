@@ -274,13 +274,13 @@ hash_find_client(const char *name)
 
   if ((client = clientTable[hashv]))
   {
-    if (irccmp(name, client->name))
+    if (io_strcasecmp(name, client->name))
     {
       struct Client *prev;
 
       while (prev = client, (client = client->hnext))
       {
-        if (irccmp(name, client->name) == 0)
+        if (io_strcasecmp(name, client->name) == 0)
         {
           prev->hnext = client->hnext;
           client->hnext = clientTable[hashv];
@@ -354,14 +354,14 @@ hash_find_server(const char *name)
   if ((client = clientTable[hashv]))
   {
     if ((!IsServer(client) && !client_is_me(client)) ||
-        irccmp(name, client->name))
+        io_strcasecmp(name, client->name))
     {
       struct Client *prev;
 
       while (prev = client, (client = client->hnext))
       {
         if ((IsServer(client) || client_is_me(client)) &&
-            irccmp(name, client->name) == 0)
+            io_strcasecmp(name, client->name) == 0)
         {
           prev->hnext = client->hnext;
           client->hnext = clientTable[hashv];
@@ -393,13 +393,13 @@ hash_find_channel(const char *name)
 
   if ((channel = channelTable[hashv]))
   {
-    if (irccmp(name, channel->name))
+    if (io_strcasecmp(name, channel->name))
     {
       struct Channel *prev;
 
       while (prev = channel, (channel = channel->hnextch))
       {
-        if (irccmp(name, channel->name) == 0)
+        if (io_strcasecmp(name, channel->name) == 0)
         {
           prev->hnextch = channel->hnextch;
           channel->hnextch = channelTable[hashv];

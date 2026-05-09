@@ -64,7 +64,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
     }
   }
 
-  struct ResvItem *resv = resv_find(aline->mask, irccmp);
+  struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
   if (resv)
   {
     if (IsClient(source))

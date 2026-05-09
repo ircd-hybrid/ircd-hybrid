@@ -233,10 +233,10 @@ connect_authenticate_server(const char *server_name, const struct Client *client
     if (connect->active == false)
       continue;
 
-    if (irccmp(server_name, connect->name))
+    if (io_strcasecmp(server_name, connect->name))
       continue;
 
-    if (irccmp(connect->host, client->host) && irccmp(connect->host, client->sockhost))
+    if (io_strcasecmp(connect->host, client->host) && io_strcasecmp(connect->host, client->sockhost))
     {
       if (result < CONNECT_AUTH_FAIL_HOST)
         result = CONNECT_AUTH_FAIL_HOST;
@@ -251,7 +251,7 @@ connect_authenticate_server(const char *server_name, const struct Client *client
     }
 
     if (!string_is_empty(connect->tls_cert_fingerprint) &&
-        (string_is_empty(client->tls_certfp) || strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint)))
+        (string_is_empty(client->tls_certfp) || io_strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint)))
     {
       if (result < CONNECT_AUTH_FAIL_CERTFP)
         result = CONNECT_AUTH_FAIL_CERTFP;

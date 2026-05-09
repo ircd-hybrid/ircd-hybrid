@@ -217,7 +217,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   {
     const struct Ban *tmp = node->data;
 
-    if (irccmp(tmp->banstr, ban->banstr) == 0)
+    if (io_strcasecmp(tmp->banstr, ban->banstr) == 0)
     {
       io_free(ban);
       return NULL;
@@ -258,7 +258,7 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   {
     struct Ban *ban = node->data;
 
-    if (irccmp(banid, ban->banstr) == 0)
+    if (io_strcasecmp(banid, ban->banstr) == 0)
     {
       strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
       clear_ban_cache_list(&channel->members_local);

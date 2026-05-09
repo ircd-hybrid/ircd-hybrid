@@ -1030,7 +1030,7 @@ parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, boo
   if (string_is_empty(name))
     return NULL;
 
-  if (irccmp(name, client_get_id_or_name(&me, client)) == 0)
+  if (io_strcasecmp(name, client_get_id_or_name(&me, client)) == 0)
     *doall = true;
   else if (match(name, client_get_id_or_name(&me, client)) == 0)
     *doall = true;
@@ -1057,7 +1057,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
     if (!doall && wilds && match(name, target->name))
       continue;
 
-    if (!(doall || wilds) && irccmp(name, target->name))
+    if (!(doall || wilds) && io_strcasecmp(name, target->name))
       continue;
 
     if (IsUpper(letter))

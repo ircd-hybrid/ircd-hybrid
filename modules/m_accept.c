@@ -122,7 +122,7 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->accept_list, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, io_strcasecmp);
       if (accept == NULL)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTNOT, nick, user, host);
@@ -143,7 +143,7 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->accept_list, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, io_strcasecmp);
       if (accept)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTEXIST, nick, user, host);

@@ -146,7 +146,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
   {
-    if (irccmp(tab->option, option))
+    if (io_strcasecmp(tab->option, option))
       continue;
 
     if (!string_is_empty(server))
@@ -190,7 +190,7 @@ ms_rehash(struct Client *source, int parc, char *parv[])
 
   for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
   {
-    if (irccmp(tab->option, option))
+    if (io_strcasecmp(tab->option, option))
       continue;
 
     tab->handler(source);

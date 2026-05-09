@@ -540,7 +540,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
     return client->name;
 
   if (IsServer(client) || client_is_connecting(client) || client_is_handshake(client))
-    if (irccmp(client->name, client->host) == 0)
+    if (io_strcasecmp(client->name, client->host) == 0)
       return client->name;
 
   /* And finally, let's get the host information, ip or name */

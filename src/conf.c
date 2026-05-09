@@ -103,7 +103,7 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
   list_node_t *node;
   struct MaskItem *hprec = NULL;
   struct AddressRec *arec = NULL;
-  int (*cmpfunc)(const char *, const char *) = do_match ? match : irccmp;
+  int (*cmpfunc)(const char *, const char *) = do_match ? match : io_strcasecmp;
 
   if (addr)
   {

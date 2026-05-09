@@ -196,7 +196,7 @@ reslib_parse_resolv_conf(void)
     if ((p = strpbrk(arg, " \t")))
       *p = '\0';  /* take the first word */
 
-    if (!strcasecmp(opt, "nameserver"))
+    if (!io_strcasecmp(opt, "nameserver"))
       reslib_add_nameserver(arg);
   }
 

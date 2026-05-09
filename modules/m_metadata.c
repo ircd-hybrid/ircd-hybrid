@@ -50,13 +50,13 @@ ms_metadata(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !IsServer(source))
     return;
 
-  if (irccmp(parv[1], "client") == 0)
+  if (io_strcasecmp(parv[1], "client") == 0)
   {
     struct Client *target = find_person(source, parv[2]);
     if (target == NULL)
       return;
 
-    if (irccmp(parv[3], "cipher") == 0)
+    if (io_strcasecmp(parv[3], "cipher") == 0)
     {
       io_free(target->tls_cipher);
       if (!string_is_empty(parv[4]))
@@ -65,7 +65,7 @@ ms_metadata(struct Client *source, int parc, char *parv[])
         target->tls_cipher = NULL;
     }
 
-    if (irccmp(parv[3], "certfp") == 0)
+    if (io_strcasecmp(parv[3], "certfp") == 0)
     {
       io_free(target->tls_certfp);
       if (!string_is_empty(parv[4]))

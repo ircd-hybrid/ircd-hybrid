@@ -98,7 +98,7 @@ class_find(const char *name, bool active)
   LIST_FOREACH(node, class_list.head)
   {
     struct ClassItem *klass = node->data;
-    if (irccmp(klass->name, name))
+    if (io_strcasecmp(klass->name, name))
       continue;
     if (active && klass->active == false)
       continue;

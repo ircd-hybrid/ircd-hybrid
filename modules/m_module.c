@@ -279,7 +279,7 @@ mo_module(struct Client *source, int parc, char *parv[])
 
   for (const struct ModuleStruct *tab = module_cmd_table; tab->handler; ++tab)
   {
-    if (irccmp(tab->cmd, subcmd))
+    if (io_strcasecmp(tab->cmd, subcmd))
       continue;
 
     if (tab->arg_required && string_is_empty(module))

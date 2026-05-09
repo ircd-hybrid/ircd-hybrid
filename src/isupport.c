@@ -172,7 +172,7 @@ _isupport_find(const char *name)
   LIST_FOREACH(node, isupport_list.head)
   {
     struct Isupport *support = node->data;
-    if (irccmp(support->name, name) == 0)
+    if (io_strcasecmp(support->name, name) == 0)
       return support;
   }
 

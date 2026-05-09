@@ -112,7 +112,7 @@ static struct SetStruct *
 set_option_find(const char *name)
 {
   for (struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
-    if (irccmp(tab->name, name) == 0)
+    if (io_strcasecmp(tab->name, name) == 0)
       return tab;
 
   return NULL;
@@ -148,9 +148,9 @@ mo_set(struct Client *source, int parc, char *parv[])
 
   int value_new = -1;
   const char *const arg = parv[2];
-  if (irccmp(arg, "yes") == 0 || irccmp(arg, "on") == 0)
+  if (io_strcasecmp(arg, "yes") == 0 || io_strcasecmp(arg, "on") == 0)
     value_new = 1;
-  else if (irccmp(arg, "no") == 0 || irccmp(arg, "off") == 0)
+  else if (io_strcasecmp(arg, "no") == 0 || io_strcasecmp(arg, "off") == 0)
     value_new = 0;
   else
     value_new = atoi(arg);

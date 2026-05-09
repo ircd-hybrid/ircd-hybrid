@@ -51,7 +51,7 @@
 static void
 xline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct GecosItem *gecos = gecos_find(aline->mask, irccmp);
+  struct GecosItem *gecos = gecos_find(aline->mask, io_strcasecmp);
   if (gecos == NULL)
   {
     if (IsClient(source))

@@ -55,7 +55,7 @@ mo_restart(struct Client *source, int parc, char *parv[])
   }
 
   const char *const name = parv[1];
-  if (irccmp(name, me.name))
+  if (io_strcasecmp(name, me.name))
   {
     sendto_one_notice(source, &me, ":Mismatch on /restart %s", me.name);
     return;

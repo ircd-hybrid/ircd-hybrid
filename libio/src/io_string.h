@@ -96,8 +96,8 @@ extern bool has_wildcards(const char *);
 extern int match(const char *, const char *);
 extern unsigned int token_vector(char *, char, char *[], unsigned int);
 extern char *collapse(char *);
-extern int irccmp(const char *, const char *);
-extern int ircncmp(const char *, const char *, size_t);
+extern int io_strcasecmp(const char *, const char *);
+extern int io_strncasecmp(const char *, const char *, size_t);
 #ifndef HAVE_STRLCPY
 extern size_t strlcpy(char *, const char *, size_t);
 #endif

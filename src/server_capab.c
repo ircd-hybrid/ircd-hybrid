@@ -92,7 +92,7 @@ capab_del(const char *name)
   {
     struct Capability *cap = node->data;
 
-    if (irccmp(cap->name, name) == 0)
+    if (io_strcasecmp(cap->name, name) == 0)
     {
       list_remove(node, &capab_list);
       io_free(cap->name);
@@ -118,7 +118,7 @@ capab_find(const char *name)
   LIST_FOREACH(node, capab_list.head)
   {
     const struct Capability *cap = node->data;
-    if (irccmp(cap->name, name) == 0)
+    if (io_strcasecmp(cap->name, name) == 0)
       return cap->flag;
   }
 

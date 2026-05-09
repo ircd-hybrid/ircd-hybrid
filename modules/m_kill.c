@@ -87,7 +87,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *reason = string_default(parv[2], CONF_NOREASON);
+  const char *const reason = string_default(parv[2], CONF_NOREASON);
   if (client_is_local(target))
     sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
                source->name, source->username, source->host, target->name, REASONLEN, reason);
@@ -160,7 +160,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
 
-  struct Client *target = find_person(source, parv[1]);
+  struct Client *const target = find_person(source, parv[1]);
   if (target == NULL)
     return;
   assert(IsClient(target));

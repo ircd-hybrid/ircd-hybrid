@@ -144,15 +144,10 @@ _event_heap_heapify_down(event_manager_t mgr, size_t idx)
 static void
 _event_heap_resize(event_manager_t mgr, size_t new_capacity)
 {
+  assert(mgr);
   assert(new_capacity >= mgr->heap_size);
 
-  struct event_instance **new_array = io_calloc(new_capacity * sizeof(*new_array));
-
-  if (mgr->heap_array && mgr->heap_size > 0)
-    memcpy(new_array, mgr->heap_array, mgr->heap_size * sizeof(*new_array));
-
-  io_free(mgr->heap_array);
-  mgr->heap_array = new_array;
+  mgr->heap_array = io_realloc(mgr->heap_array, new_capacity * sizeof(*mgr->heap_array));
   mgr->heap_capacity = new_capacity;
 }
 

@@ -250,7 +250,7 @@ _who_matches(struct Client *source, const struct Client *target,
   if ((who->matchsel & WHO_FIELD_REN) && match(mask, target->info) == 0)
     return true;
 
-  if ((who->matchsel & WHO_FIELD_ACC) && match(mask, target->account) == 0)
+  if ((who->matchsel & WHO_FIELD_ACC) && client_has_account(target) && match(mask, target->account) == 0)
     return true;
 
   if ((who->matchsel & WHO_FIELD_NIP) && client_is_oper(source))

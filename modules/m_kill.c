@@ -126,6 +126,25 @@ mo_kill(struct Client *source, int parc, char *parv[])
   client_exit_fmt(target, "Killed (%s (%.*s))", source->name, REASONLEN, reason);
 }
 
+static const char *
+_kill_source_name_for_target(const struct Client *source, const struct Client *target)
+{
+  if (client_is_oper(target))
+    return source->name;
+
+  return client_get_visible_server_name(source);
+}
+
+static const char *
+_kill_source_name_for_exit_reason(const struct Client *source)
+{
+
+  if (IsServer(source) || client_is_me(source))
+    return client_get_visible_server_name(source);
+
+  return source->name;
+}
+
 /*! \brief KILL command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -156,19 +175,12 @@ ms_kill(struct Client *source, int parc, char *parv[])
 
   if (client_is_local(target))
   {
-    if (IsServer(source))
-    {
-      /* Don't send clients kills from a hidden server */
-      if ((client_is_hidden(source) || ConfigServerHide.hide_servers) && !client_is_oper(target))
-        sendto_one(target, ":%s KILL %s :%s",
-                   me.name, target->name, reason);
-      else
-        sendto_one(target, ":%s KILL %s :%s",
-                   source->name, target->name, reason);
-    }
-    else
+    if (IsClient(source))
       sendto_one(target, ":%s!%s@%s KILL %s :%s",
                  source->name, source->username, source->host, target->name, reason);
+    else
+      sendto_one(target, ":%s KILL %s :%s",
+                 _kill_source_name_for_target(source, target), target->name, reason);
   }
 
   /*
@@ -199,10 +211,8 @@ ms_kill(struct Client *source, int parc, char *parv[])
   client_set_flag(target, FLAGS_KILLED);
 
   /* Reason comes supplied with its own ()'s */
-  if (IsServer(source) && (client_is_hidden(source) || ConfigServerHide.hide_servers))
-    client_exit_fmt(target, "Killed (%s %s)", me.name, reason);
-  else
-    client_exit_fmt(target, "Killed (%s %s)", source->name, reason);
+  client_exit_fmt(target, "Killed (%s %s)",
+                  _kill_source_name_for_exit_reason(source), reason);
 }
 
 

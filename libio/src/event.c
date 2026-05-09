@@ -260,11 +260,15 @@ event_manager_create(event_manager_config_t *config)
   return mgr;
 }
 
-void
+event_status_t
 event_manager_destroy(event_manager_t mgr)
 {
-  assert(mgr);
-  assert(mgr->is_running == false);
+  if (mgr == NULL)
+    return EVENT_ERR_INVALID_ARG;
+
+  if (mgr->is_running)
+    return EVENT_ERR_BUSY;
+
   assert(mgr->heap_array || mgr->heap_size == 0);
   assert(mgr->dispatching_event == NULL);
 
@@ -284,6 +288,8 @@ event_manager_destroy(event_manager_t mgr)
   io_free(mgr->heap_array);
   mgr->heap_array = NULL;
   io_free(mgr);
+
+  return EVENT_SUCCESS;
 }
 
 uintmax_t
@@ -596,8 +602,11 @@ event_get_data(event_handle_t event)
 event_status_t
 event_run(event_manager_t mgr)
 {
-  if (mgr == NULL || mgr->is_running)
+  if (mgr == NULL)
     return EVENT_ERR_INVALID_ARG;
+
+  if (mgr->is_running)
+    return EVENT_ERR_BUSY;
 
   assert(mgr->heap_array || mgr->heap_size == 0);
   assert(mgr->dispatching_event == NULL);

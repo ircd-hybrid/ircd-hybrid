@@ -43,6 +43,7 @@ typedef enum
   EVENT_SUCCESS = 0,
   EVENT_ERR_INVALID_ARG,
   EVENT_ERR_NOT_FOUND,
+  EVENT_ERR_BUSY,
 } event_status_t;
 
 typedef struct
@@ -50,7 +51,6 @@ typedef struct
   size_t initial_capacity;
 } event_manager_config_t;
 
-extern void event_manager_destroy(event_manager_t);
 extern void event_manager_for_each_scheduled(event_manager_t, void (*callback)(event_handle_t, void *), void *);
 extern bool event_is_oneshot(event_handle_t);
 extern bool event_is_scheduled(event_handle_t);
@@ -63,6 +63,7 @@ extern uintmax_t event_manager_get_next_fire_time(event_manager_t);
 extern event_handle_t event_create(event_manager_t, const char *, event_handler_fn, uintmax_t, bool, void *, event_cleanup_fn);
 extern event_manager_t event_get_manager(event_handle_t);
 extern event_manager_t event_manager_create(event_manager_config_t *);
+extern event_status_t event_manager_destroy(event_manager_t);
 extern event_status_t event_destroy(event_handle_t);
 extern event_status_t event_reschedule(event_handle_t, uintmax_t);
 extern event_status_t event_reset(event_handle_t);

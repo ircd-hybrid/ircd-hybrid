@@ -90,8 +90,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
   const char *reason = string_default(parv[2], CONF_NOREASON);
   if (client_is_local(target))
     sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
-               source->name, source->username, source->host,
-               target->name, REASONLEN, reason);
+               source->name, source->username, source->host, target->name, REASONLEN, reason);
 
   /*
    * Do not change the format of this message. There's no point in changing messages
@@ -138,7 +137,6 @@ _kill_source_name_for_target(const struct Client *source, const struct Client *t
 static const char *
 _kill_source_name_for_exit_reason(const struct Client *source)
 {
-
   if (IsServer(source) || client_is_me(source))
     return client_get_visible_server_name(source);
 
@@ -208,13 +206,12 @@ ms_kill(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s KILL %s :%s %s",
                  source->id, target->id, parv[2], reason);
-  client_set_flag(target, FLAGS_KILLED);
 
+  client_set_flag(target, FLAGS_KILLED);
   /* Reason comes supplied with its own ()'s */
   client_exit_fmt(target, "Killed (%s %s)",
                   _kill_source_name_for_exit_reason(source), reason);
 }
-
 
 static struct Command command_table =
 {

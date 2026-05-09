@@ -45,7 +45,6 @@ static const char *const replies[] =
   /* 003 */  [RPL_CREATED] = ":This server was created %s",
   /* 004 */  [RPL_MYINFO] = "%s %s %s %s %s",
   /* 005 */  [RPL_ISUPPORT] = "%s :are supported by this server",
-  /* 010 */  [RPL_REDIR] = "%s %u :Please use this Server/Port instead",
   /* 015 */  [RPL_MAP] = ":%s%s",
   /* 016 */  [RPL_MAPMORE] = ":%s%s --> *more*",
   /* 017 */  [RPL_MAPEND] = ":End of /MAP",

@@ -50,7 +50,6 @@ enum
   CONF_FLAGS_EXEMPTKLINE     = 1 <<  2,
   CONF_FLAGS_NOLIMIT         = 1 <<  3,
   CONF_FLAGS_SPOOF_IP        = 1 <<  4,
-  CONF_FLAGS_REDIR           = 1 <<  5,
   CONF_FLAGS_CAN_FLOOD       = 1 <<  6,
   CONF_FLAGS_NEED_PASSWORD   = 1 <<  7,
   CONF_FLAGS_ENCRYPTED       = 1 <<  9,
@@ -79,7 +78,6 @@ enum
 #define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
 #define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
 #define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfRedir(x)            ((x)->flags & CONF_FLAGS_REDIR)
 #define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
 #define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
 

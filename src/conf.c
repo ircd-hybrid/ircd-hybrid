@@ -476,13 +476,6 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
     return NULL;
   }
 
-  if (IsConfRedir(conf))
-  {
-    sendto_one_numeric(client, &me, RPL_REDIR, string_or_empty(conf->name), conf->port);
-    *error_reason = "Redirected to another server";
-    return NULL;
-  }
-
   if (IsNeedIdentd(conf) && !client_has_flag(client, FLAGS_GOTID))
   {
     *error_reason = "Identd is required and was not found";

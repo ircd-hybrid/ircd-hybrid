@@ -285,8 +285,6 @@ reset_block_state(void)
 %token  PORT
 %token  RANDOM_IDLE
 %token  REASON
-%token  REDIRPORT
-%token  REDIRSERV
 %token  REGISTRATION_TIMEOUT
 %token  REHASH
 %token  REMOTE
@@ -1518,8 +1516,6 @@ auth_item:      auth_user |
                 auth_class |
                 auth_flags |
                 auth_spoof |
-                auth_redir_serv |
-                auth_redir_port |
                 auth_encrypted |
                 error ';' ;
 
@@ -1609,24 +1605,6 @@ auth_spoof: SPOOF '=' QSTRING ';'
   }
   else
     log_write(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
-};
-
-auth_redir_serv: REDIRSERV '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
-  block_state.flags.value |= CONF_FLAGS_REDIR;
-};
-
-auth_redir_port: REDIRPORT '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  block_state.flags.value |= CONF_FLAGS_REDIR;
-  block_state.port.value = $3;
 };
 
 
@@ -2206,6 +2184,7 @@ exempt_ip: IP '=' QSTRING ';'
   }
 };
 
+
 /***************************************************************************
  * gecos {} section
  ***************************************************************************/
@@ -2619,6 +2598,7 @@ general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'
 {
   ConfigGeneral.registration_timeout = $3;
 };
+
 
 /***************************************************************************
  * channel {} section

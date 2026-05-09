@@ -145,7 +145,7 @@ report_shared(struct Client *client)
       if (tab->type & shared->type)
         *bufptr++ = tab->letter;
       else
-        *bufptr++ = ToLower(tab->letter);
+        *bufptr++ = io_ascii_to_lower(tab->letter);
 
     *bufptr = '\0';
 
@@ -188,7 +188,7 @@ report_cluster(struct Client *client)
       if (tab->type & cluster->type)
         *bufptr++ = tab->letter;
       else
-        *bufptr++ = ToLower(tab->letter);
+        *bufptr++ = io_ascii_to_lower(tab->letter);
 
     *bufptr = '\0';
 

@@ -82,11 +82,8 @@ enum
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
 #define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
 
-extern const unsigned char ToLowerTab[];  /*!< Lookup table for converting characters to lowercase. */
-#define ToLower(c) (ToLowerTab[(unsigned char)(c)]) /*!< Converts a character to lowercase using the lookup table. */
-
-extern const unsigned char ToUpperTab[];  /*!< Lookup table for converting characters to uppercase. */
-#define ToUpper(c) (ToUpperTab[(unsigned char)(c)])  /*!< Converts a character to uppercase using the lookup table. */
+extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
+extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */
 
 extern const unsigned int CharAttrs[];
 
@@ -104,6 +101,18 @@ extern size_t strlcpy(char *, const char *, size_t);
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *, const char *, size_t);
 #endif
+
+static inline unsigned char
+io_ascii_to_lower(unsigned char c)
+{
+  return io_ascii_to_lower_table[c];
+}
+
+static inline unsigned char
+io_ascii_to_upper(unsigned char c)
+{
+  return io_ascii_to_upper_table[c];
+}
 
 /**
  * @brief Returns a default string if the provided string is NULL or empty.

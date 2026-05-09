@@ -106,7 +106,7 @@ hash_string(const char *name)
   {
     hval += (hval << 1) + (hval << 4) +
             (hval << 7) + (hval << 8) + (hval << 24);
-    hval ^= (ToLower(*p) ^ hashf_xor_key);
+    hval ^= (io_ascii_to_lower(*p) ^ hashf_xor_key);
   }
 
   return (hval >> FNV1_32_BITS) ^ (hval & ((1 << FNV1_32_BITS) - 1));

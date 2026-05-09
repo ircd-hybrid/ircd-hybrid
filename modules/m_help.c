@@ -85,7 +85,7 @@ do_help(struct Client *source, char *topic)
     topic = h_index;
   else
     for (char *p = topic; *p; ++p)
-      *p = ToLower(*p);
+      *p = io_ascii_to_lower(*p);
 
   if (strchr(topic, '/'))
   {

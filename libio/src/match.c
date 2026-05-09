@@ -102,7 +102,7 @@ match(const char *mask, const char *name)
 
         break;
       default:
-        if (*n == '\0' || ToLower(*m) != ToLower(*n))  /* Case-insensitive character comparison. */
+        if (*n == '\0' || io_ascii_to_lower_table[*m] != io_ascii_to_lower_table[*n])  /* Case-insensitive character comparison. */
         {
           if (m_tmp == NULL)
             return 1;  /* No '*' to backtrack to, match fails. */
@@ -212,8 +212,8 @@ io_strcasecmp(const char *s1, const char *s2)
 
   for (;;)
   {
-    const unsigned char c1 = ToUpper(*str1);
-    const unsigned char c2 = ToUpper(*str2);
+    const unsigned char c1 = io_ascii_to_upper_table[*str1];
+    const unsigned char c2 = io_ascii_to_upper_table[*str2];
     if (c1 != c2)
       return (int)c1 - (int)c2;
 
@@ -253,8 +253,8 @@ io_strncasecmp(const char *s1, const char *s2, size_t n)
 
   while (n--)
   {
-    const unsigned char c1 = ToUpper(*str1);
-    const unsigned char c2 = ToUpper(*str2);
+    const unsigned char c1 = io_ascii_to_upper_table[*str1];
+    const unsigned char c2 = io_ascii_to_upper_table[*str2];
     if (c1 != c2)
       return (int)c1 - (int)c2;
 
@@ -269,17 +269,17 @@ io_strncasecmp(const char *s1, const char *s2, size_t n)
 }
 
 /**
- * @var ToLowerTab
+ * @var io_ascii_to_lower_table
  * @brief Array for converting characters to lowercase.
  *
- * The ToLowerTab array is a lookup table that associates each ASCII character code
+ * The io_ascii_to_lower_table array is a lookup table that associates each ASCII character code
  * with its corresponding lowercase representation. The table includes entries for
  * control characters, punctuation, digits, and alphabetic characters. The conversion
  * is case-insensitive, and non-alphabetic characters remain unchanged.
  *
  * Note: The array extends beyond the ASCII range (0-127) to cover extended ASCII and Unicode characters.
  */
-const unsigned char ToLowerTab[] =
+const unsigned char io_ascii_to_lower_table[] =
 {
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
   0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,
@@ -316,17 +316,17 @@ const unsigned char ToLowerTab[] =
 };
 
 /**
- * @var ToUpperTab
+ * @var io_ascii_to_upper_table
  * @brief Array for converting characters to uppercase.
  *
- * The ToUpperTab array is a lookup table that associates each ASCII character code
+ * The io_ascii_to_upper_table array is a lookup table that associates each ASCII character code
  * with its corresponding uppercase representation. The table includes entries for
  * control characters, punctuation, digits, and alphabetic characters. The conversion
  * is case-insensitive, and non-alphabetic characters remain unchanged.
  *
  * Note: The array extends beyond the ASCII range (0-127) to cover extended ASCII and Unicode characters.
  */
-const unsigned char ToUpperTab[] =
+const unsigned char io_ascii_to_upper_table[] =
 {
   0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
   0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14,

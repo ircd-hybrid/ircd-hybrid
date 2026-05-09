@@ -492,7 +492,7 @@ hash_text(const char *start)
   uint32_t h = 0;
 
   for (const char *p = start; *p; ++p)
-    h = (h << 4) - (h + ToLower(*p));
+    h = (h << 4) - (h + io_ascii_to_lower(*p));
 
   return h & (ADDRESS_HASHSIZE - 1);
 }

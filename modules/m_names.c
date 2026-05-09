@@ -35,7 +35,6 @@
 #include "parse.h"
 #include "module.h"
 
-
 /*! \brief NAMES command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -51,17 +50,20 @@ static void
 m_names(struct Client *source, int parc, char *parv[])
 {
   const char *const name = parv[1];
-
-  if (!string_is_empty(name))
+  if (string_is_empty(name))
   {
-    struct Channel *channel = hash_find_channel(name);
-    if (channel)
-      channel_send_namereply(source, channel);
-    else
-      sendto_one_numeric(source, &me, RPL_ENDOFNAMES, name);
-  }
-  else
     sendto_one_numeric(source, &me, RPL_ENDOFNAMES, "*");
+    return;
+  }
+
+  struct Channel *const channel = hash_find_channel(name);
+  if (channel == NULL)
+  {
+    sendto_one_numeric(source, &me, RPL_ENDOFNAMES, name);
+    return;
+  }
+
+  channel_send_namereply(source, channel);
 }
 
 static struct Command command_table =

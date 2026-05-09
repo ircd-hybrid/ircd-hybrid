@@ -52,7 +52,6 @@ typedef struct
 
 extern void event_manager_destroy(event_manager_t);
 extern void event_manager_for_each_scheduled(event_manager_t, void (*callback)(event_handle_t, void *), void *);
-extern void event_run(event_manager_t);
 extern bool event_is_oneshot(event_handle_t);
 extern bool event_is_scheduled(event_handle_t);
 extern uint8_t event_get_priority(event_handle_t);
@@ -67,6 +66,7 @@ extern event_manager_t event_manager_create(event_manager_config_t *);
 extern event_status_t event_destroy(event_handle_t);
 extern event_status_t event_reschedule(event_handle_t, uintmax_t);
 extern event_status_t event_reset(event_handle_t);
+extern event_status_t event_run(event_manager_t);
 extern event_status_t event_schedule(event_handle_t);
 extern event_status_t event_schedule_at(event_handle_t, uintmax_t);
 extern event_status_t event_schedule_fuzzed(event_handle_t);

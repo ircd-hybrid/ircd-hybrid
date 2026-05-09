@@ -77,6 +77,7 @@ _event_is_higher_priority_or_earlier(const struct event_instance *a, const struc
 static void
 _event_heap_swap(event_manager_t mgr, const size_t i, const size_t j)
 {
+  assert(mgr);
   assert(i < mgr->heap_size);
   assert(j < mgr->heap_size);
   assert(mgr->heap_array[i]);
@@ -295,7 +296,7 @@ event_manager_destroy(event_manager_t mgr)
 uintmax_t
 event_manager_get_next_fire_time(event_manager_t mgr)
 {
-  if (mgr->heap_size == 0)
+  if (mgr == NULL || mgr->heap_size == 0)
     return UINTMAX_MAX;
 
   return mgr->heap_array[0]->next_fire_time_ms;
@@ -304,12 +305,15 @@ event_manager_get_next_fire_time(event_manager_t mgr)
 size_t
 event_manager_get_scheduled_count(event_manager_t mgr)
 {
-  return mgr->heap_size;
+  return mgr ? mgr->heap_size : 0;
 }
 
 void
 event_manager_for_each_scheduled(event_manager_t mgr, void (*callback)(event_handle_t event, void *user_data), void *user_data)
 {
+  if (mgr == NULL || callback == NULL)
+    return;
+
   if (mgr->heap_size == 0)
     return;
 
@@ -469,6 +473,9 @@ event_schedule_fuzzed(event_handle_t event)
 event_status_t
 event_reset(event_handle_t event)
 {
+  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
+    return EVENT_ERR_INVALID_ARG;
+
   return event_reschedule(event, event->interval_ms);
 }
 
@@ -518,24 +525,30 @@ event_is_scheduled(event_handle_t event)
 bool
 event_is_oneshot(event_handle_t event)
 {
-  return event->oneshot;
+  return event ? event->oneshot : false;
 }
 
 event_manager_t
 event_get_manager(event_handle_t event)
 {
-  return event->manager;
+  return event ? event->manager : NULL;
 }
 
 const char *
 event_get_name(event_handle_t event)
 {
+  if (event == NULL)
+    return "[invalid]";
+
   return event->name ? event->name : "[unnamed]";
 }
 
 event_status_t
 event_set_name(event_handle_t event, const char *new_name)
 {
+  if (event == NULL || event->manager == NULL || event->destroy_pending)
+    return EVENT_ERR_INVALID_ARG;
+
   io_free(event->name);
   event->name = new_name ? io_strdup(new_name) : NULL;
 
@@ -545,12 +558,15 @@ event_set_name(event_handle_t event, const char *new_name)
 uint8_t
 event_get_priority(event_handle_t event)
 {
-  return event->priority;
+  return event ? event->priority : 0;
 }
 
 event_status_t
 event_set_priority(event_handle_t event, uint8_t new_priority)
 {
+  if (event == NULL || event->manager == NULL || event->destroy_pending)
+    return EVENT_ERR_INVALID_ARG;
+
   if (event->priority == new_priority)
     return EVENT_SUCCESS;
 
@@ -565,13 +581,13 @@ event_set_priority(event_handle_t event, uint8_t new_priority)
 uintmax_t
 event_get_interval_ms(event_handle_t event)
 {
-  return event->interval_ms;
+  return event ? event->interval_ms : 0;
 }
 
 event_status_t
 event_set_interval_ms(event_handle_t event, uintmax_t new_interval_ms)
 {
-  if (new_interval_ms == 0)
+  if (event == NULL || event->manager == NULL || event->destroy_pending || new_interval_ms == 0)
     return EVENT_ERR_INVALID_ARG;
 
   event->interval_ms = new_interval_ms;
@@ -581,14 +597,15 @@ event_set_interval_ms(event_handle_t event, uintmax_t new_interval_ms)
 void *
 event_get_data(event_handle_t event)
 {
-  return event->data;
+  return event ? event->data : NULL;
 }
 
-void
+event_status_t
 event_run(event_manager_t mgr)
 {
-  assert(mgr);
-  assert(mgr->is_running == false);
+  if (mgr == NULL || mgr->is_running)
+    return EVENT_ERR_INVALID_ARG;
+
   assert(mgr->heap_array || mgr->heap_size == 0);
   assert(mgr->dispatching_event == NULL);
 
@@ -638,6 +655,8 @@ event_run(event_manager_t mgr)
   }
 
   mgr->is_running = false;
+
   assert(mgr->dispatching_event == NULL);
   assert(mgr->heap_size <= mgr->heap_capacity);
+  return EVENT_SUCCESS;
 }

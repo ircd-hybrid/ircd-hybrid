@@ -302,7 +302,7 @@ event_manager_get_next_fire_time(event_manager_t mgr)
 }
 
 size_t
-event_manager_get_active_count(event_manager_t mgr)
+event_manager_get_scheduled_count(event_manager_t mgr)
 {
   return mgr->heap_size;
 }

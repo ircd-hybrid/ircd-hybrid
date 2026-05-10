@@ -48,7 +48,7 @@ typedef enum
 
 typedef struct
 {
-  size_t initial_capacity;
+  size_t initial_heap_capacity;
 } event_manager_config_t;
 
 typedef struct
@@ -74,7 +74,7 @@ extern uintmax_t event_get_time_until_fire(event_handle_t);
 extern uintmax_t event_manager_get_next_fire_time(event_manager_t);
 extern event_handle_t event_create(event_manager_t, const char *, event_handler_fn, uintmax_t, bool, void *, event_cleanup_fn);
 extern event_manager_t event_get_manager(event_handle_t);
-extern event_manager_t event_manager_create(event_manager_config_t *);
+extern event_manager_t event_manager_create(const event_manager_config_t *);
 extern event_status_t event_manager_destroy(event_manager_t);
 extern event_status_t event_manager_for_each_snapshot(event_manager_t, event_snapshot_callback_fn, void *);
 extern event_status_t event_manager_run(event_manager_t);

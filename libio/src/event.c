@@ -282,18 +282,18 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
 }
 
 event_manager_t
-event_manager_create(event_manager_config_t *config)
+event_manager_create(const event_manager_config_t *config)
 {
-  size_t initial_capacity = EVENT_HEAP_MIN_CAPACITY;
+  size_t initial_heap_capacity = EVENT_HEAP_MIN_CAPACITY;
 
-  if (config && config->initial_capacity)
-    initial_capacity = config->initial_capacity;
+  if (config && config->initial_heap_capacity)
+    initial_heap_capacity = config->initial_heap_capacity;
 
   event_manager_t mgr = io_calloc(sizeof(*mgr));
-  _event_heap_resize(mgr, initial_capacity);
+  _event_heap_resize(mgr, initial_heap_capacity);
 
-  assert(mgr->heap_array || initial_capacity == 0);
-  assert(mgr->heap_capacity == initial_capacity);
+  assert(mgr->heap_array || initial_heap_capacity == 0);
+  assert(mgr->heap_capacity == initial_heap_capacity);
   assert(mgr->heap_size == 0);
 
   return mgr;

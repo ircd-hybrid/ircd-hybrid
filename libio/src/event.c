@@ -548,8 +548,10 @@ event_set_name(event_handle_t event, const char *new_name)
   if (event == NULL || event->manager == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
+  char *const copy = new_name ? io_strdup(new_name) : NULL;
+
   io_free(event->name);
-  event->name = new_name ? io_strdup(new_name) : NULL;
+  event->name = copy;
 
   return EVENT_SUCCESS;
 }

@@ -33,7 +33,7 @@
 #include "memory.h"
 #include "rng_mt.h"
 
-#define EVENT_HEAP_INVALID_IDX (SIZE_MAX - 1)
+#define EVENT_HEAP_INVALID_INDEX (SIZE_MAX - 1)
 #define EVENT_HEAP_MIN_CAPACITY 8
 
 struct event_instance
@@ -47,7 +47,7 @@ struct event_instance
   event_cleanup_fn cleanup_handler;
   uintmax_t next_fire_time_ms;
   uint8_t priority;
-  size_t heap_idx;
+  size_t heap_index;
   struct event_manager_instance *manager;
   bool destroy_pending;
   bool auto_reschedule_suppressed;
@@ -64,7 +64,7 @@ struct event_manager_instance
 };
 
 static bool
-_event_is_higher_priority_or_earlier(const struct event_instance *a, const struct event_instance *b)
+_event_heap_precedes(const struct event_instance *a, const struct event_instance *b)
 {
   if (a->next_fire_time_ms < b->next_fire_time_ms)
     return true;
@@ -82,24 +82,24 @@ _event_heap_swap(event_manager_t mgr, const size_t i, const size_t j)
   assert(mgr->heap_array[i]);
   assert(mgr->heap_array[j]);
 
-  struct event_instance *const ev_i = mgr->heap_array[i];
-  struct event_instance *const ev_j = mgr->heap_array[j];
-  mgr->heap_array[i] = ev_j;
-  mgr->heap_array[j] = ev_i;
+  struct event_instance *const event_i = mgr->heap_array[i];
+  struct event_instance *const event_j = mgr->heap_array[j];
+  mgr->heap_array[i] = event_j;
+  mgr->heap_array[j] = event_i;
 
-  ev_i->heap_idx = j;
-  ev_j->heap_idx = i;
+  event_i->heap_index = j;
+  event_j->heap_index = i;
 }
 
 static void
-_event_heap_heapify_up(event_manager_t mgr, size_t idx)
+_event_heap_sift_up(event_manager_t mgr, size_t idx)
 {
   assert(idx < mgr->heap_size);
 
   while (idx > 0)
   {
     size_t parent_idx = (idx - 1) / 2;
-    if (_event_is_higher_priority_or_earlier(mgr->heap_array[idx], mgr->heap_array[parent_idx]))
+    if (_event_heap_precedes(mgr->heap_array[idx], mgr->heap_array[parent_idx]))
     {
       _event_heap_swap(mgr, idx, parent_idx);
       idx = parent_idx;
@@ -110,7 +110,7 @@ _event_heap_heapify_up(event_manager_t mgr, size_t idx)
 }
 
 static void
-_event_heap_heapify_down(event_manager_t mgr, size_t idx)
+_event_heap_sift_down(event_manager_t mgr, size_t idx)
 {
   assert(idx < mgr->heap_size);
 
@@ -123,11 +123,11 @@ _event_heap_heapify_down(event_manager_t mgr, size_t idx)
     assert(mgr->heap_array[idx] || mgr->heap_size == 0);
 
     if (left_child_idx < mgr->heap_size &&
-        _event_is_higher_priority_or_earlier(mgr->heap_array[left_child_idx], mgr->heap_array[preferred_idx]))
+        _event_heap_precedes(mgr->heap_array[left_child_idx], mgr->heap_array[preferred_idx]))
       preferred_idx = left_child_idx;
 
     if (right_child_idx < mgr->heap_size &&
-        _event_is_higher_priority_or_earlier(mgr->heap_array[right_child_idx], mgr->heap_array[preferred_idx]))
+        _event_heap_precedes(mgr->heap_array[right_child_idx], mgr->heap_array[preferred_idx]))
       preferred_idx = right_child_idx;
 
     if (preferred_idx != idx)
@@ -164,7 +164,7 @@ _event_heap_ensure_capacity(event_manager_t mgr)
 }
 
 static event_status_t
-_event_add_to_heap(event_manager_t mgr, event_handle_t event)
+_event_heap_insert(event_manager_t mgr, event_handle_t event)
 {
   assert(mgr);
   assert(event);
@@ -174,17 +174,17 @@ _event_add_to_heap(event_manager_t mgr, event_handle_t event)
   _event_heap_ensure_capacity(mgr);
 
   mgr->heap_array[mgr->heap_size] = event;
-  event->heap_idx = mgr->heap_size;
+  event->heap_index = mgr->heap_size;
   mgr->heap_size++;
 
-  _event_heap_heapify_up(mgr, event->heap_idx);
+  _event_heap_sift_up(mgr, event->heap_index);
 
   assert(event_is_scheduled(event));
   return EVENT_SUCCESS;
 }
 
 static event_status_t
-_event_remove_from_heap(event_manager_t mgr, event_handle_t event)
+_event_heap_remove(event_manager_t mgr, event_handle_t event)
 {
   if (event->manager != mgr)
     return EVENT_ERR_INVALID_ARG;
@@ -192,7 +192,7 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
   assert(event_is_scheduled(event));
 
   const size_t original_heap_size = mgr->heap_size;
-  const size_t idx_to_remove = event->heap_idx;
+  const size_t idx_to_remove = event->heap_index;
   const size_t last_idx = mgr->heap_size - 1;
 
   if (idx_to_remove < last_idx)
@@ -204,20 +204,20 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
   if (mgr->heap_size > 0 && idx_to_remove < mgr->heap_size)
   {
     const size_t parent_idx = (idx_to_remove - 1) / 2;
-    if (idx_to_remove > 0 && _event_is_higher_priority_or_earlier(mgr->heap_array[idx_to_remove], mgr->heap_array[parent_idx]))
-      _event_heap_heapify_up(mgr, idx_to_remove);
+    if (idx_to_remove > 0 && _event_heap_precedes(mgr->heap_array[idx_to_remove], mgr->heap_array[parent_idx]))
+      _event_heap_sift_up(mgr, idx_to_remove);
     else
-      _event_heap_heapify_down(mgr, idx_to_remove);
+      _event_heap_sift_down(mgr, idx_to_remove);
   }
 
-  event->heap_idx = EVENT_HEAP_INVALID_IDX;
+  event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
   assert(mgr->heap_size == original_heap_size - 1);
   return EVENT_SUCCESS;
 }
 
 static void
-_event_snapshot_init(event_snapshot_t *snapshot, event_handle_t event, uintmax_t current_time_ms)
+_event_snapshot_capture(event_snapshot_t *snapshot, event_handle_t event, uintmax_t current_time_ms)
 {
   assert(snapshot);
   assert(event);
@@ -248,7 +248,7 @@ _event_snapshot_init(event_snapshot_t *snapshot, event_handle_t event, uintmax_t
 }
 
 static void
-_event_snapshot_free(event_snapshot_t *snapshot)
+_event_snapshot_destroy(event_snapshot_t *snapshot)
 {
   assert(snapshot);
 
@@ -257,7 +257,7 @@ _event_snapshot_free(event_snapshot_t *snapshot)
 }
 
 static event_status_t
-_event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
+_event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
 {
   assert(event);
   assert(event->manager);
@@ -273,12 +273,12 @@ _event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
 
   if (event_is_scheduled(event))
   {
-    event_status_t status = _event_remove_from_heap(event->manager, event);
+    event_status_t status = _event_heap_remove(event->manager, event);
     if (status != EVENT_SUCCESS)
       return status;
   }
 
-  return _event_add_to_heap(event->manager, event);
+  return _event_heap_insert(event->manager, event);
 }
 
 event_manager_t
@@ -368,7 +368,7 @@ event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn 
     assert(event->manager == mgr);
     assert(i < count);
 
-    _event_snapshot_init(&snapshots[i], event, current_time_ms);
+    _event_snapshot_capture(&snapshots[i], event, current_time_ms);
     ++i;
   }
 
@@ -378,7 +378,7 @@ event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn 
     callback(&snapshots[i], user_data);
 
   for (i = 0; i < count; ++i)
-    _event_snapshot_free(&snapshots[i]);
+    _event_snapshot_destroy(&snapshots[i]);
   io_free(snapshots);
 
   return EVENT_SUCCESS;
@@ -398,7 +398,7 @@ event_create(event_manager_t mgr, const char *name, event_handler_fn handler, ui
   event->oneshot = oneshot;
   event->data = data;
   event->cleanup_handler = cleanup_handler;
-  event->heap_idx = EVENT_HEAP_INVALID_IDX;
+  event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
   list_add(event, &event->node, &mgr->event_list);
   return event;
@@ -414,12 +414,12 @@ _event_cleanup_data(event_handle_t event)
 }
 
 static event_status_t
-_event_destroy_final(event_handle_t event)
+_event_destroy_finalize(event_handle_t event)
 {
   assert(event);
   assert(event->manager);
   assert(event->destroy_pending);
-  assert(event->heap_idx == EVENT_HEAP_INVALID_IDX);
+  assert(event->heap_index == EVENT_HEAP_INVALID_INDEX);
   assert(event->manager->dispatching_event != event);
 
   _event_cleanup_data(event);
@@ -456,7 +456,7 @@ event_destroy(event_handle_t event)
   if (event->manager->dispatching_event == event)
     return EVENT_SUCCESS;
 
-  return _event_destroy_final(event);
+  return _event_destroy_finalize(event);
 }
 
 event_status_t
@@ -476,8 +476,8 @@ event_unschedule(event_handle_t event)
   if (!event_is_scheduled(event))
     return EVENT_ERR_NOT_FOUND;
 
-  event_status_t status = _event_remove_from_heap(event->manager, event);
-  assert(event->heap_idx == EVENT_HEAP_INVALID_IDX || status != EVENT_SUCCESS);
+  event_status_t status = _event_heap_remove(event->manager, event);
+  assert(event->heap_index == EVENT_HEAP_INVALID_INDEX || status != EVENT_SUCCESS);
 
   return status;
 }
@@ -491,7 +491,7 @@ event_schedule(event_handle_t event)
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
   const uintmax_t absolute_time_ms = current_time_ms + event->interval_ms;
 
-  return _event_schedule_at_internal(event, absolute_time_ms);
+  return _event_schedule_absolute(event, absolute_time_ms);
 }
 
 event_status_t
@@ -500,31 +500,31 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
-  return _event_schedule_at_internal(event, absolute_time_ms);
+  return _event_schedule_absolute(event, absolute_time_ms);
 }
 
 event_status_t
-event_schedule_fuzzed(event_handle_t event)
+event_schedule_jittered(event_handle_t event)
 {
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
-  uintmax_t fuzzed_delay = event->interval_ms;
+  uintmax_t delay_ms = event->interval_ms;
 
   if (event->interval_ms >= 3000)
   {
-    const uintmax_t fuzz_offset = event->interval_ms / 3;
-    const uintmax_t max_random_add = 2 * fuzz_offset;
+    const uintmax_t jitter_ms = event->interval_ms / 3;
+    const uintmax_t random_range_ms = 2 * jitter_ms;
 
-    fuzzed_delay = event->interval_ms + (genrand_int32() % (max_random_add + 1)) - fuzz_offset;
-    if (fuzzed_delay == 0)
-      fuzzed_delay = 1;
+    delay_ms = event->interval_ms + (genrand_int32() % (random_range_ms + 1)) - jitter_ms;
+    if (delay_ms == 0)
+      delay_ms = 1;
   }
 
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
-  const uintmax_t absolute_time_ms = current_time_ms + fuzzed_delay;
+  const uintmax_t absolute_time_ms = current_time_ms + delay_ms;
 
-  return _event_schedule_at_internal(event, absolute_time_ms);
+  return _event_schedule_absolute(event, absolute_time_ms);
 }
 
 event_status_t
@@ -545,7 +545,7 @@ event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
   const uintmax_t new_absolute_fire_time_ms = current_time_ms + new_delay_ms;
 
-  return _event_schedule_at_internal(event, new_absolute_fire_time_ms);
+  return _event_schedule_absolute(event, new_absolute_fire_time_ms);
 }
 
 uintmax_t
@@ -575,8 +575,8 @@ event_is_scheduled(event_handle_t event)
   if (event == NULL || event->manager == NULL)
     return false;
 
-  return event->heap_idx != EVENT_HEAP_INVALID_IDX &&
-         event->heap_idx < event->manager->heap_size && event->manager->heap_array[event->heap_idx] == event;
+  return event->heap_index != EVENT_HEAP_INVALID_INDEX &&
+         event->heap_index < event->manager->heap_size && event->manager->heap_array[event->heap_index] == event;
 }
 
 bool
@@ -660,7 +660,7 @@ event_get_data(event_handle_t event)
 }
 
 event_status_t
-event_run(event_manager_t mgr)
+event_manager_run(event_manager_t mgr)
 {
   if (mgr == NULL)
     return EVENT_ERR_INVALID_ARG;
@@ -680,7 +680,7 @@ event_run(event_manager_t mgr)
     assert(event->manager == mgr);
     assert(event->handler);
     assert(event->interval_ms > 0);
-    assert(event->heap_idx == 0);
+    assert(event->heap_index == 0);
     assert(event_is_scheduled(event));
     assert(event->destroy_pending == false);
     assert(event->auto_reschedule_suppressed == false);
@@ -689,9 +689,9 @@ event_run(event_manager_t mgr)
     if (event->next_fire_time_ms > current_time_ms)
       break;
 
-    event_status_t status = _event_remove_from_heap(mgr, event);
+    event_status_t status = _event_heap_remove(mgr, event);
     assert(status == EVENT_SUCCESS);
-    assert(event->heap_idx == EVENT_HEAP_INVALID_IDX);
+    assert(event->heap_index == EVENT_HEAP_INVALID_INDEX);
 
     mgr->dispatching_event = event;
     event->handler(event->data);
@@ -699,7 +699,7 @@ event_run(event_manager_t mgr)
 
     if (event->destroy_pending)
     {
-      status = _event_destroy_final(event);
+      status = _event_destroy_finalize(event);
       assert(status == EVENT_SUCCESS);
       continue;
     }
@@ -708,7 +708,7 @@ event_run(event_manager_t mgr)
         event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
-      status = _event_add_to_heap(mgr, event);
+      status = _event_heap_insert(mgr, event);
       assert(status == EVENT_SUCCESS);
       assert(event_is_scheduled(event));
     }

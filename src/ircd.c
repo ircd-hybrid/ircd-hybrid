@@ -196,7 +196,7 @@ _io_loop(void)
     free_exited_clients();
 
     io_time_update_cache();
-    event_run(ircd_event_manager);
+    event_manager_run(ircd_event_manager);
 
     /* Check to see whether we have to rehash the configuration. */
     if (dorehash)
@@ -480,15 +480,15 @@ main(int argc, char *argv[])
 
   event_handle_t event_cleanup_tklines =
     event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
-  event_schedule_fuzzed(event_cleanup_tklines);
+  event_schedule_jittered(event_cleanup_tklines);
 
   event_handle_t event_server_connect_auto =
     event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
-  event_schedule_fuzzed(event_server_connect_auto);
+  event_schedule_jittered(event_server_connect_auto);
 
   event_handle_t event_save_all_databases =
     event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
-  event_schedule_fuzzed(event_save_all_databases);
+  event_schedule_jittered(event_save_all_databases);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   _io_loop();

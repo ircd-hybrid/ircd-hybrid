@@ -543,20 +543,24 @@ stats_exempt(struct Client *client, int parc, char *parv[])
 typedef struct
 {
   struct Client *client;
-  struct Client *client_me;
 } event_stats_context_t;
 
 static void
-stats_events_callback(event_handle_t event, void *user_data)
+stats_events_callback(const event_snapshot_t *snapshot, void *user_data)
 {
   event_stats_context_t *ctx = user_data;
 
-  const uintmax_t remaining_ms = event_get_time_until_fire(event);
-  const double remaining_seconds_fp = (double)remaining_ms / 1000.0;
-
-  sendto_one_numeric(ctx->client, ctx->client_me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "E :%-35s %4d %c %10.3f seconds",
-                     event_get_name(event), event_get_priority(event), event_is_oneshot(event) ? 'S' : 'P', remaining_seconds_fp);
+  if (snapshot->scheduled)
+  {
+    const double remaining_seconds_fp = (double)snapshot->time_until_fire_ms / 1000.0;
+    sendto_one_numeric(ctx->client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                       "E :%-35s %4u %c %10.3f seconds",
+                       snapshot->name, snapshot->priority, snapshot->oneshot ? 'S' : 'P', remaining_seconds_fp);
+  }
+  else
+    sendto_one_numeric(ctx->client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                       "E :%-35s %4u %c %10s",
+                       snapshot->name, snapshot->priority, snapshot->oneshot ? 'S' : 'P', "unscheduled");
 }
 
 static void
@@ -567,8 +571,14 @@ stats_events(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :-------------------------------------------------------------");
 
-  event_stats_context_t context = { .client = client, .client_me = &me };
-  event_manager_for_each_scheduled(ircd_event_manager, stats_events_callback, &context);
+  event_stats_context_t context = { .client = client };
+  const event_status_t status =
+    event_manager_for_each_snapshot(ircd_event_manager, stats_events_callback, &context);
+
+  if (status != EVENT_SUCCESS)
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
+                       "E :event snapshot unavailable: status=%u",
+                       (unsigned int)status);
 }
 
 static void

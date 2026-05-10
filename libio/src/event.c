@@ -26,7 +26,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "event.h"
 #include "io_time.h"
@@ -217,6 +216,46 @@ _event_remove_from_heap(event_manager_t mgr, event_handle_t event)
   return EVENT_SUCCESS;
 }
 
+static void
+_event_snapshot_init(event_snapshot_t *snapshot, event_handle_t event, uintmax_t current_time_ms)
+{
+  assert(snapshot);
+  assert(event);
+  assert(event->manager);
+
+  const bool scheduled = event_is_scheduled(event);
+
+  snapshot->name = io_strdup(event->name ? event->name : "[unnamed]");
+  snapshot->interval_ms = event->interval_ms;
+  snapshot->priority = event->priority;
+  snapshot->oneshot = event->oneshot;
+  snapshot->scheduled = scheduled;
+
+  if (scheduled)
+  {
+    snapshot->next_fire_time_ms = event->next_fire_time_ms;
+
+    if (event->next_fire_time_ms <= current_time_ms)
+      snapshot->time_until_fire_ms = 0;
+    else
+      snapshot->time_until_fire_ms = event->next_fire_time_ms - current_time_ms;
+  }
+  else
+  {
+    snapshot->next_fire_time_ms = UINTMAX_MAX;
+    snapshot->time_until_fire_ms = UINTMAX_MAX;
+  }
+}
+
+static void
+_event_snapshot_free(event_snapshot_t *snapshot)
+{
+  assert(snapshot);
+
+  io_free(snapshot->name);
+  snapshot->name = NULL;
+}
+
 static event_status_t
 _event_schedule_at_internal(event_handle_t event, uintmax_t absolute_time_ms)
 {
@@ -307,23 +346,42 @@ event_manager_get_scheduled_count(event_manager_t mgr)
   return mgr ? mgr->heap_size : 0;
 }
 
-void
-event_manager_for_each_scheduled(event_manager_t mgr, void (*callback)(event_handle_t event, void *user_data), void *user_data)
+event_status_t
+event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn callback, void *user_data)
 {
   if (mgr == NULL || callback == NULL)
-    return;
+    return EVENT_ERR_INVALID_ARG;
 
-  if (mgr->heap_size == 0)
-    return;
+  const size_t count = list_length(&mgr->event_list);
+  if (count == 0)
+    return EVENT_SUCCESS;
 
-  const size_t count = mgr->heap_size;
-  event_handle_t *handles = io_calloc(count * sizeof(event_handle_t));
-  memcpy(handles, mgr->heap_array, count * sizeof(event_handle_t));
+  event_snapshot_t *snapshots = io_calloc(count * sizeof(*snapshots));
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
 
-  for (size_t i = 0; i < count; ++i)
-    callback(handles[i], user_data);
+  size_t i = 0;
+  list_node_t *node;
+  LIST_FOREACH(node, mgr->event_list.head)
+  {
+    event_handle_t event = node->data;
+    assert(event);
+    assert(event->manager == mgr);
+    assert(i < count);
 
-  io_free(handles);
+    _event_snapshot_init(&snapshots[i], event, current_time_ms);
+    ++i;
+  }
+
+  assert(i == count);
+
+  for (i = 0; i < count; ++i)
+    callback(&snapshots[i], user_data);
+
+  for (i = 0; i < count; ++i)
+    _event_snapshot_free(&snapshots[i]);
+  io_free(snapshots);
+
+  return EVENT_SUCCESS;
 }
 
 event_handle_t

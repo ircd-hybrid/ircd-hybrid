@@ -23,6 +23,15 @@
  * \brief Includes required functions for processing the SERVER/SID command.
  */
 
+#include <assert.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "comm.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -32,7 +41,6 @@
 #include "misc.h"
 #include "module.h"
 
-#include "stdinc.h"
 #include "channel.h"
 #include "client.h"
 #include "client_id.h"

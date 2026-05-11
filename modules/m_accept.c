@@ -23,20 +23,23 @@
  * \brief Includes required functions for processing the ACCEPT command.
  */
 
-#include "stdinc.h"
-#include "client.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_string.h"
-#include "ircd.h"
 #include "list.h"
+#include "memory.h"
+#include "module.h"
+
+#include "accept.h"
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
 #include "nuh.h"
 #include "numeric.h"
-#include "conf.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "accept.h"
-
+#include "send.h"
 
 /*! \brief Sends a list of nick!user\@host masks a Client
  *         has on its acceptlist.

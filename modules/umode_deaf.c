@@ -19,8 +19,10 @@
  *  USA
  */
 
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "isupport.h"
 #include "user_mode.h"

@@ -20,7 +20,7 @@
  */
 
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "user_mode.h"
 

@@ -19,16 +19,19 @@
  *  USA
  */
 
-#include "module.h"
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_time.h"
-#include "client.h"
-#include "numeric.h"
-#include "send.h"
+#include "module.h"
+
 #include "accept.h"
+#include "client.h"
 #include "conf.h"
 #include "ircd_hook.h"
 #include "isupport.h"
+#include "numeric.h"
+#include "send.h"
 #include "user_mode.h"
 
 static struct UserMode callerid_mode =

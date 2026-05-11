@@ -23,19 +23,20 @@
  * \brief Includes required functions for processing the SQUIT command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "hash.h"
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
+#include "list.h"
 #include "log.h"
-#include "send.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "conf.h"
+#include "hash.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief SQUIT command handler
  *

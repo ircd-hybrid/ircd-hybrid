@@ -20,11 +20,11 @@
  */
 
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode webirc_mode =

@@ -23,21 +23,26 @@
  * \brief Includes required functions for processing the LIST command.
  */
 
-#include "event.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
+#include "event.h"
 #include "hash.h"
-#include "isupport.h"
 #include "ircd.h"
+#include "isupport.h"
+#include "list_task.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "list_task.h"
 
 static bool
 _parse_list_args(struct ListTask *lt, char *args)

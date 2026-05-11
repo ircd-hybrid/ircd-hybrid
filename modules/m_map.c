@@ -23,11 +23,17 @@
  * \brief Includes required functions for processing the MAP command.
  */
 
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_time.h"
 #include "misc.h"
 #include "module.h"
 
-#include "stdinc.h"
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"

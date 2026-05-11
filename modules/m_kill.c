@@ -23,11 +23,15 @@
  * \brief Includes required functions for processing the KILL command.
  */
 
+#include <assert.h>
+#include <stddef.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "conf.h"
 #include "conf_oper.h"

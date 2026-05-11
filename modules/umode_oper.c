@@ -19,17 +19,21 @@
  *  USA
  */
 
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "list.h"
 #include "memory.h"
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "client_svstag.h"
 #include "conf.h"
 #include "command.h"
 #include "ircd.h"
-#include "numeric.h"
 #include "ircd_hook.h"
+#include "numeric.h"
 #include "user_mode.h"
 
 static bool

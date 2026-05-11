@@ -19,12 +19,13 @@
  *  USA
  */
 
+#include <stdbool.h>
+
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "ircd.h"
 #include "user_mode.h"
-
 
 static bool
 set_callback(struct Client *client, user_mode_source_t source)

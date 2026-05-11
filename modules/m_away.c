@@ -23,19 +23,22 @@
  * \brief Includes required functions for processing the AWAY command.
  */
 
-#include "stdinc.h"
-#include "memory.h"
-#include "module.h"
+#include <assert.h>
+#include <stddef.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "io_time.h"
+#include "memory.h"
+#include "module.h"
+
 #include "cap.h"
 #include "client.h"
+#include "conf.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "conf.h"
-
+#include "send.h"
 
 /*!
  *

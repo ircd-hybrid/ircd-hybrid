@@ -23,13 +23,16 @@
  * \brief Implements gecos {} block configuration management.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "io_time.h"
-#include "send.h"
+
 #include "client.h"
 #include "conf_gecos.h"
+#include "send.h"
 
 static list_t gecos_list;
 

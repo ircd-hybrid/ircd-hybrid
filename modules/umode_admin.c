@@ -19,8 +19,10 @@
  *  USA
  */
 
+#include <stdbool.h>
+
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "conf_oper.h"
 #include "user_mode.h"

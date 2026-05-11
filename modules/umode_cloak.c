@@ -19,8 +19,11 @@
  *  USA
  */
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "cloak.h"
 #include "user.h"

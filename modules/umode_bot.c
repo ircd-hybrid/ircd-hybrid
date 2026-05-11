@@ -19,13 +19,15 @@
  *  USA
  */
 
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
+#include "ircd_hook.h"
 #include "isupport.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode bot_mode =

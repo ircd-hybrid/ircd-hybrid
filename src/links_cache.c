@@ -33,7 +33,6 @@
 
 #include "client.h"
 #include "conf.h"
-#include "event.h"
 #include "ircd.h"
 #include "links_cache.h"
 

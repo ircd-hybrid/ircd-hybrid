@@ -23,18 +23,17 @@
  * \brief Includes required functions for processing the ADMIN command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
 #include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
-#include "server.h"
-#include "send.h"
-#include "parse.h"
+#include "io_time.h"
 #include "module.h"
 
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
 
 /*! \brief Sends administrative information about this server.
  *

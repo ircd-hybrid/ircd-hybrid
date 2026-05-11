@@ -20,11 +20,11 @@
  */
 
 #include "module.h"
-#include "stdinc.h"
+
 #include "client.h"
 #include "conf_class.h"
-#include "send.h"
 #include "ircd_hook.h"
+#include "send.h"
 #include "user_mode.h"
 
 static struct UserMode connect_mode =

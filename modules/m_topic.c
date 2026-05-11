@@ -23,20 +23,22 @@
  * \brief Includes required functions for processing the TOPIC command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdio.h>
+
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "conf.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 
 static void
 _topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)

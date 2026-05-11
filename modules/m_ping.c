@@ -23,18 +23,19 @@
  * \brief Includes required functions for processing the PING command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "client.h"
+#include "conf.h"
+#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
-#include "io_string.h"
 #include "parse.h"
+#include "send.h"
 #include "user_mode.h"
-#include "module.h"
-#include "hash.h"
-#include "conf.h"
-
 
 /*! \brief PING command handler
  *

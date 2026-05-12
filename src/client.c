@@ -746,7 +746,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
     if (!client_has_flag(client, FLAGS_KILLED))
       sendto_servers(client->nexthop, 0, 0, ":%s QUIT :%s", client->id, reason);
 
-     /* Notify local clients in common channels that this user has quit. */
+    /* Notify local clients in common channels that this user has quit. */
     _client_exit_notify_channel_members(client, reason);
   }
 }
@@ -1018,8 +1018,7 @@ client_schedule_exit(struct Client *client, const char *reason)
   dbuf_clear(&client->connection->buf_sendq);
 
   assert(list_find(&abort_list, client) == NULL);
-  list_node_t *node = list_make_node();
-  list_add_tail(client, node, &abort_list);
+  list_add_tail(client, list_make_node(), &abort_list);
 }
 
 void

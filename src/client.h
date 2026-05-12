@@ -203,7 +203,7 @@ struct Connection
 
   char *password;  /**< Password supplied by the client/server during handshake. */
   char *oper_name;  /**< The name of the oper block, if opered up. */
-  char *abort_reason;  /**< The reason for an ungraceful connection termination. */
+  char *scheduled_exit_reason;  /**< Exit reason retained while the client is queued for deferred exit. */
   event_handle_t activity_timeout_event;  /**< Event handle for the client's activity (idle/ping) timeout. */
   event_handle_t flood_recalc_event;  /**< Repeating event handle for the client's anti-flood timer. */
 };

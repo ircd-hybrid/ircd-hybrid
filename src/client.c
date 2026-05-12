@@ -304,8 +304,8 @@ _client_destroy_local(struct Client *client)
   client->connection->password = NULL;
   io_free(client->connection->oper_name);
   client->connection->oper_name = NULL;
-  io_free(client->connection->abort_reason);
-  client->connection->abort_reason = NULL;
+  io_free(client->connection->scheduled_exit_reason);
+  client->connection->scheduled_exit_reason = NULL;
 
   io_free(client->connection);
   client->connection = NULL;
@@ -990,14 +990,14 @@ client_exit(struct Client *client, const char *reason)
 void
 client_exit_fmt(struct Client *client, const char *format, ...)
 {
-  char buf[IRCD_BUFSIZE];
+  char reason[IRCD_BUFSIZE];
   va_list args;
 
   va_start(args, format);
-  vsnprintf(buf, sizeof(buf), format, args);
+  vsnprintf(reason, sizeof(reason), format, args);
   va_end(args);
 
-  client_exit(client, buf);
+  client_exit(client, reason);
 }
 
 void
@@ -1011,8 +1011,8 @@ client_schedule_exit(struct Client *client, const char *reason)
 
   client_set_dead(client);
 
-  io_free(client->connection->abort_reason);
-  client->connection->abort_reason = io_strdup(reason);
+  io_free(client->connection->scheduled_exit_reason);
+  client->connection->scheduled_exit_reason = io_strdup(reason);
 
   dbuf_clear(&client->connection->buf_recvq);
   dbuf_clear(&client->connection->buf_sendq);
@@ -1096,7 +1096,7 @@ exit_aborted_clients(void)
     list_remove(node, &abort_list);
     list_free_node(node);
 
-    const char *reason = client->connection->abort_reason;
+    const char *reason = client->connection->scheduled_exit_reason;
     client_exit(client, reason);
   }
 }

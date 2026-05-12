@@ -82,14 +82,11 @@ ircd_exit_fmt(ircd_exit_action_t action, const char *format, ...)
 void
 ircd_exit(ircd_exit_action_t action, const char *message)
 {
-  if (action == IRCD_EXIT_RESTART)
-  {
-    static bool was_here = false;
-    if (was_here)
-      abort();
+  static bool was_here = false;
 
-    was_here = true;
-  }
+  if (was_here)
+    abort();
+  was_here = true;
 
   char buf[IRCD_BUFSIZE];
   if (string_is_empty(message))

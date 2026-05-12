@@ -85,10 +85,13 @@ read_packet(fde_t *F, void *data_)
        * If true, then we can recover from this error. Stop here and register for
        * another COMM_SELECT_READ io-request.
        */
-      if (length < 0 && comm_errno_is_recoverable(errno))
+      const int error_code = length < 0 ? errno : 0;
+      if (length < 0 && comm_errno_is_recoverable(error_code))
         comm_setselect(F, COMM_SELECT_READ, read_packet, client);
       else
-        dead_link_on_read(client, length, errno);
+        client_schedule_exit_on_io_failure(client, CLIENT_IO_OPERATION_READ,
+                                           length == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED
+                                                       : CLIENT_IO_FAILURE_ERROR, error_code);
       return;
     }
 

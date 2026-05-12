@@ -88,6 +88,18 @@ enum client_class_type
   CLIENT_CLASS_OPER,
 };
 
+enum client_io_operation
+{
+  CLIENT_IO_OPERATION_READ,
+  CLIENT_IO_OPERATION_WRITE,
+};
+
+enum client_io_failure
+{
+  CLIENT_IO_FAILURE_PEER_CLOSED,
+  CLIENT_IO_FAILURE_ERROR,
+};
+
 enum
 {
   REG_NEED_USER = 1 << 0,  /**< User must send USER command */
@@ -302,12 +314,13 @@ extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_init(void);
 extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
 extern void client_reset_activity_timeout(struct Client *);
+extern void client_schedule_exit(struct Client *, const char *);
+extern void client_schedule_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
+extern void client_schedule_exit_on_io_failure(struct Client *, enum client_io_operation, enum client_io_failure, int);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_set_state(struct Client *, enum client_state);
 extern void client_update_name(struct Client *, const char *);
 extern void conf_try_ban(struct Client *, int, const char *);
-extern void dead_link_on_read(struct Client *, int, int);
-extern void dead_link_on_write(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);

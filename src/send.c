@@ -112,8 +112,9 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Max SendQ limit exceeded for %s: %zu > %u",
                        client_get_name(to, HIDE_IP), new_sendq_size, max_sendq);
-      dead_link_on_write(to, "Max SendQ exceeded (%zu > %u)",
-                         new_sendq_size, max_sendq);
+
+      client_schedule_exit_fmt(to, "Max SendQ exceeded (%zu > %u)",
+                               new_sendq_size, max_sendq);
     }
 
     return;
@@ -223,7 +224,8 @@ send_queued_write(struct Client *to)
 
     if (retlen <= 0)
     {
-      if (retlen < 0 && comm_errno_is_recoverable(errno))
+      const int error_code = retlen < 0 ? errno : 0;
+      if (retlen < 0 && comm_errno_is_recoverable(error_code))
       {
         client_set_flag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
@@ -231,8 +233,9 @@ send_queued_write(struct Client *to)
       }
       else
       {
-        const char *err_str = (retlen < 0) ? strerror(errno) : "Connection closed by peer";
-        dead_link_on_write(to, "Write error: %s", err_str);
+        client_schedule_exit_on_io_failure(to, CLIENT_IO_OPERATION_WRITE,
+                                           retlen == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED
+                                                       : CLIENT_IO_FAILURE_ERROR, error_code);
       }
 
       return;

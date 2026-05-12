@@ -1000,8 +1000,8 @@ client_exit_fmt(struct Client *client, const char *format, ...)
   client_exit(client, buf);
 }
 
-static void
-_client_exit_schedule(struct Client *client, const char *reason)
+void
+client_schedule_exit(struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
   assert(reason);
@@ -1023,7 +1023,7 @@ _client_exit_schedule(struct Client *client, const char *reason)
 }
 
 void
-dead_link_on_write(struct Client *client, const char *format, ...)
+client_schedule_exit_fmt(struct Client *client, const char *format, ...)
 {
   assert(client && client_is_local(client));
   assert(format);
@@ -1031,32 +1031,56 @@ dead_link_on_write(struct Client *client, const char *format, ...)
   if (client_is_defunct(client))
     return;
 
-  char err_str[IRCD_BUFSIZE];
+  char reason[IRCD_BUFSIZE];
   va_list args;
 
   va_start(args, format);
-  vsnprintf(err_str, sizeof(err_str), format, args);
+  vsnprintf(reason, sizeof(reason), format, args);
   va_end(args);
 
-  _client_exit_schedule(client, err_str);
+  client_schedule_exit(client, reason);
 }
 
 void
-dead_link_on_read(struct Client *client, int recv_return_val, int error_code)
+client_schedule_exit_on_io_failure(struct Client *client, enum client_io_operation operation,
+                                   enum client_io_failure failure, int error_code)
 {
   assert(client && client_is_local(client));
 
   if (client_is_defunct(client))
     return;
 
-  if (recv_return_val == 0)
-    _client_exit_schedule(client, "Remote host closed the connection");
-  else
+  const char *operation_name = NULL;
+  switch (operation)
   {
-    char reason_buf[IRCD_BUFSIZE];
-    snprintf(reason_buf, sizeof(reason_buf), "Read error: %s", strerror(error_code));
-    _client_exit_schedule(client, reason_buf);
+    case CLIENT_IO_OPERATION_READ:
+      operation_name = "Read";
+      break;
+    case CLIENT_IO_OPERATION_WRITE:
+      operation_name = "Write";
+      break;
+    default:
+      operation_name = "IO";
+      break;
   }
+
+  const char *failure_reason = NULL;
+  switch (failure)
+  {
+    case CLIENT_IO_FAILURE_PEER_CLOSED:
+      failure_reason = "Connection closed by peer";
+      break;
+    case CLIENT_IO_FAILURE_ERROR:
+      failure_reason = error_code ? strerror(error_code) : "Unknown error";
+      break;
+    default:
+      failure_reason = "Unknown error";
+      break;
+  }
+
+  char reason[IRCD_BUFSIZE];
+  snprintf(reason, sizeof(reason), "%s failed: %s", operation_name, failure_reason);
+  client_schedule_exit(client, reason);
 }
 
 void

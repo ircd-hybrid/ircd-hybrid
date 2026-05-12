@@ -23,16 +23,13 @@
  * \brief Includes required functions for processing the QUIT command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
-#include "ircd.h"
 #include "io_string.h"
-#include "parse.h"
-#include "user_mode.h"
+#include "io_time.h"
 #include "module.h"
-#include "conf.h"
 
+#include "client.h"
+#include "conf.h"
+#include "parse.h"
 
 /*! \brief QUIT command handler
  *

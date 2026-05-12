@@ -281,7 +281,7 @@ _ircd_print_startup(pid_t pid)
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n",
-         server_state.foreground ? "foreground": "background", ConfigGeneral.dpath);
+         server_state.foreground ? "foreground" : "background", ConfigGeneral.dpath);
 }
 
 static void
@@ -353,9 +353,10 @@ _ircd_daemonize(void)
     case IO_DAEMON_ERROR:
       perror("daemonize");
       exit(EXIT_FAILURE);
+    default:
+      assert(!"invalid io_daemonize result");
+      exit(EXIT_FAILURE);
   }
-
-  assert(!"unreachable");
 }
 
 /**

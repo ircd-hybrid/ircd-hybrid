@@ -218,7 +218,7 @@ client_id_init_generator(const struct Client *server)
   return _client_id_generator_init(&client_id_generator, server->id);
 }
 
-static void
+static bool
 _client_id_generator_advance(struct ClientIdGenerator *generator)
 {
   assert(generator);
@@ -238,19 +238,19 @@ _client_id_generator_advance(struct ClientIdGenerator *generator)
     if (*ch >= 'A' && *ch < 'Z')
     {
       ++*ch;
-      return;
+      return true;
     }
 
     if (*ch == 'Z')
     {
       *ch = '0';
-      return;
+      return true;
     }
 
     if (*ch >= '0' && *ch < '9')
     {
       ++*ch;
-      return;
+      return true;
     }
 
     if (*ch == '9')
@@ -260,7 +260,10 @@ _client_id_generator_advance(struct ClientIdGenerator *generator)
     }
 
     assert(!"invalid local UID generator state");
+    return false;
   }
+
+  return true;
 }
 
 static bool
@@ -272,10 +275,11 @@ _client_id_generator_next(struct ClientIdGenerator *generator, char uid[CLIENT_I
   if (generator->initialized == false)
     return false;
 
+  assert(client_id_is_valid_uid(generator->next_uid));
+
   /* Return the current UID, then advance the generator state. */
   memcpy(uid, generator->next_uid, CLIENT_ID_UID_LENGTH + 1);
-  _client_id_generator_advance(generator);
-  return true;
+  return _client_id_generator_advance(generator);
 }
 
 bool

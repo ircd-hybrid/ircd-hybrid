@@ -200,8 +200,8 @@ _client_id_generator_init(struct ClientIdGenerator *generator, const char *sid)
 
   for (size_t i = CLIENT_ID_SID_LENGTH; i < CLIENT_ID_UID_LENGTH; ++i)
     generator->next_uid[i] = 'A';
-
   generator->next_uid[CLIENT_ID_UID_LENGTH] = '\0';
+
   generator->initialized = true;
   return true;
 }

@@ -1,5 +1,8 @@
 #### Noteworthy changes in version 8.2.48 (2025-??-??)
 * The `general::disable_auth` configuration directive has been renamed to `general::disable_ident`
+* The `LIST` command now implements the standard ELIST `C<` and `C>` creation-time
+  filters correctly: `C<num` matches channels created within the last `<num>` minutes,
+  while `C>num` matches channels created more than `<num>` minutes ago.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

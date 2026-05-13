@@ -160,6 +160,7 @@ client_id_set_server_sid(struct Client *client, const char *configured_sid, cons
                          const char *server_description, bool *generated)
 {
   assert(client);
+  assert(string_is_empty(client->id));
   assert(sizeof(client->id) >= CLIENT_ID_SID_LENGTH + 1);
 
   if (generated)

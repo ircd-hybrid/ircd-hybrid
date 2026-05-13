@@ -1,6 +1,7 @@
 #ifndef INCLUDED_list_task_h
 #define INCLUDED_list_task_h
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "list.h"
 

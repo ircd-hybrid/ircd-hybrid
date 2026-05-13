@@ -23,14 +23,17 @@
  * \brief Includes required functions for processing the ISON command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "module.h"
+
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
 
 /*! \brief ISON command handler
  *

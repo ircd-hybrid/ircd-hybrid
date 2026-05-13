@@ -23,15 +23,18 @@
  * \brief Includes required functions for processing the USERHOST command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "module.h"
-#include "io_string.h"
+
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"
+#include "parse.h"
 #include "send.h"
 #include "user_mode.h"
-#include "parse.h"
 
 /** See 5.7 Userhost message in RFC1459 */
 enum { RFC1459_MAX_USERHOST_LIST = 5 };

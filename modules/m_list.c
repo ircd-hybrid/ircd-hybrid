@@ -23,8 +23,11 @@
  * \brief Includes required functions for processing the LIST command.
  */
 
+#include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 

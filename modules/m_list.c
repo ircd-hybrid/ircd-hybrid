@@ -83,9 +83,9 @@ _parse_list_args(struct ListTask *task, char *args)
         const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
 
         if (subcmd == '<')
-          task->created_max = target;
-        else if (subcmd == '>')
           task->created_min = target;
+        else if (subcmd == '>')
+          task->created_max = target;
       }
       else
         return false;

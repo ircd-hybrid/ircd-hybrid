@@ -136,7 +136,7 @@ _client_id_generate_sid(const char *server_name, const char *server_description,
    * does not collide with
    *   ("a", "bc").
    */
-  hash = _client_id_hash_djb2_update_byte(hash, 0);
+  hash = _client_id_hash_djb2_update_byte(hash, '\0');
   hash = _client_id_hash_djb2_update(hash, server_description);
 
   /*
@@ -210,6 +210,7 @@ bool
 client_id_init_generator(const struct Client *server)
 {
   assert(server);
+  assert(client_id_generator.initialized == false);
 
   if (!client_id_has_valid_sid(server))
     return false;

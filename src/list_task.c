@@ -156,7 +156,7 @@ static void
 _list_task_send_channel(const struct ListTask *task, const struct Channel *channel)
 {
   char mode_buf[MODEBUFLEN];
-  snprintf(mode_buf, sizeof(mode_buf), channel->topic ? "[%s] " : "[%s]",
+  snprintf(mode_buf, sizeof(mode_buf), string_is_empty(channel->topic) ? "[%s]" : "[%s] ",
            channel_modes(channel, task->client, false));
 
   sendto_one_numeric(task->client, &me, RPL_LIST, channel->name,

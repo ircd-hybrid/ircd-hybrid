@@ -38,8 +38,6 @@
 #include "module.h"
 
 #include "client.h"
-#include "event.h"
-#include "hash.h"
 #include "ircd.h"
 #include "isupport.h"
 #include "list_task.h"

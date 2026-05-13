@@ -45,11 +45,11 @@
 #include "send.h"
 
 static bool
-_parse_list_args(struct ListTask *lt, char *args)
+_parse_list_args(struct ListTask *task, char *args)
 {
   char *save = NULL;
 
-  lt->exact_match = true;
+  task->exact_match = true;
 
   for (char *opt = strtok_r(args, ",", &save); opt;
              opt = strtok_r(NULL, ",", &save))
@@ -61,7 +61,7 @@ _parse_list_args(struct ListTask *lt, char *args)
       if (val <= 0)
         return false;
 
-      lt->users_max = (unsigned int)val - 1;
+      task->users_max = (unsigned int)val - 1;
     }
     else if (cmd == '>')
     {
@@ -69,7 +69,7 @@ _parse_list_args(struct ListTask *lt, char *args)
       if (val < 0)
         return false;
 
-      lt->users_min = (unsigned int)val + 1;
+      task->users_min = (unsigned int)val + 1;
     }
     else if (cmd == 'C' || cmd == 'c')
     {
@@ -83,9 +83,9 @@ _parse_list_args(struct ListTask *lt, char *args)
         const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
 
         if (subcmd == '<')
-          lt->created_max = target;
+          task->created_max = target;
         else if (subcmd == '>')
-          lt->created_min = target;
+          task->created_min = target;
       }
       else
         return false;
@@ -99,8 +99,8 @@ _parse_list_args(struct ListTask *lt, char *args)
         if (string_is_empty(topic_str))
           return false;
 
-        io_free(lt->topic);
-        lt->topic = io_strndup(topic_str, TOPICLEN);
+        io_free(task->topic);
+        task->topic = io_strndup(topic_str, TOPICLEN);
       }
       else if (subcmd == '<' || subcmd == '>')
       {
@@ -111,30 +111,30 @@ _parse_list_args(struct ListTask *lt, char *args)
         const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
 
         if (subcmd == '<')
-          lt->topicts_min = target;
+          task->topicts_min = target;
         else if (subcmd == '>')
-          lt->topicts_max = target;
+          task->topicts_max = target;
       }
       else
         return false;
     }
     else
     {
-      list_t *target_list = &lt->include_masks;
+      list_t *target_list = &task->include_masks;
       const char *mask = opt;
 
       /* Handle exclusion masks. */
       if (*mask == '!')
       {
-        target_list = &lt->exclude_masks;
+        target_list = &task->exclude_masks;
         ++mask;
       }
 
       const char *const name = IsChanPrefix(*mask) ? mask + 1 : mask;
       if (has_wildcards(name))
       {
-        if (target_list == &lt->include_masks)
-          lt->exact_match = false;
+        if (target_list == &task->include_masks)
+          task->exact_match = false;
       }
       else if (!IsChanPrefix(*mask))
         return false;  /* Exact matches must have a valid channel prefix. */
@@ -143,8 +143,8 @@ _parse_list_args(struct ListTask *lt, char *args)
     }
   }
 
-  if (list_is_empty(&lt->include_masks))
-    lt->exact_match = false;
+  if (list_is_empty(&task->include_masks))
+    task->exact_match = false;
 
   return true;
 }
@@ -159,20 +159,20 @@ _do_list(struct Client *client, char *arg)
     return;
   }
 
-  struct ListTask *lt = list_task_create(client);
+  struct ListTask *task = list_task_create(client);
 
   if (!string_is_empty(arg))
   {
-    if (!_parse_list_args(lt, arg))
+    if (!_parse_list_args(task, arg))
     {
-      list_task_destroy(lt);
+      list_task_destroy(task);
       sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
       return;
     }
   }
 
   sendto_one_numeric(client, &me, RPL_LISTSTART);
-  list_task_start(lt);
+  list_task_start(task);
 }
 
 /*! \brief LIST command handler

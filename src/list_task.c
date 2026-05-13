@@ -43,20 +43,20 @@ static event_handle_t list_task_timer;
 static void _list_task_pump(void *unused);
 
 static inline bool
-_list_task_is_congested(const struct ListTask *lt)
+_list_task_is_congested(const struct ListTask *task)
 {
-  const unsigned int max_sendq = client_get_max_sendq(lt->client);
-  return dbuf_length(&lt->client->connection->buf_sendq) > (max_sendq / 2);
+  const unsigned int max_sendq = client_get_max_sendq(task->client);
+  return dbuf_length(&task->client->connection->buf_sendq) > (max_sendq / 2);
 }
 
 static void
-_list_task_dequeue(struct ListTask *lt)
+_list_task_dequeue(struct ListTask *task)
 {
-  if (lt->is_queued == false)
+  if (task->is_queued == false)
     return;
 
-  list_remove(&lt->node, &list_task_queue);
-  lt->is_queued = false;
+  list_remove(&task->node, &list_task_queue);
+  task->is_queued = false;
 }
 
 static void
@@ -74,117 +74,117 @@ _list_task_clear_masks(list_t *list)
 struct ListTask *
 list_task_create(struct Client *client)
 {
-  struct ListTask *lt = io_calloc(sizeof(*lt));
-  lt->client = client;
-  lt->users_max = UINT_MAX;
-  lt->created_max = UINT_MAX;
-  lt->topicts_max = UINT_MAX;
-  lt->exact_match = true;
-  client->connection->list_task = lt;
+  struct ListTask *task = io_calloc(sizeof(*task));
+  task->client = client;
+  task->users_max = UINT_MAX;
+  task->created_max = UINT_MAX;
+  task->topicts_max = UINT_MAX;
+  task->exact_match = true;
+  client->connection->list_task = task;
 
-  return lt;
+  return task;
 }
 
 void
-list_task_destroy(struct ListTask *lt)
+list_task_destroy(struct ListTask *task)
 {
-  if (lt == NULL)
+  if (task == NULL)
     return;
 
-  _list_task_dequeue(lt);
+  _list_task_dequeue(task);
 
-  _list_task_clear_masks(&lt->include_masks);
-  _list_task_clear_masks(&lt->exclude_masks);
+  _list_task_clear_masks(&task->include_masks);
+  _list_task_clear_masks(&task->exclude_masks);
 
-  io_free(lt->topic);
-  lt->topic = NULL;
+  io_free(task->topic);
+  task->topic = NULL;
 
-  lt->client->connection->list_task = NULL;
-  io_free(lt);
+  task->client->connection->list_task = NULL;
+  io_free(task);
 }
 
 static bool
-_list_task_eval_channel(const struct ListTask *lt, const struct Channel *channel)
+_list_task_eval_channel(const struct ListTask *task, const struct Channel *channel)
 {
-  const struct Client *const client = lt->client;
+  const struct Client *const client = task->client;
   if (channel_is_secret(channel) && !(client_is_admin(client) || member_find_link(client, channel)))
     return false;
 
   const unsigned int user_count = list_length(&channel->members);
-  if (user_count < lt->users_min || user_count > lt->users_max)
+  if (user_count < task->users_min || user_count > task->users_max)
     return false;
 
   if (channel->creation_time)
   {
     const unsigned int ctime = (unsigned int)channel->creation_time;
-    if (ctime < lt->created_min || ctime > lt->created_max)
+    if (ctime < task->created_min || ctime > task->created_max)
       return false;
   }
 
   const unsigned int ttime = channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX;
-  if (ttime < lt->topicts_min || ttime > lt->topicts_max)
+  if (ttime < task->topicts_min || ttime > task->topicts_max)
     return false;
 
-  if (!list_is_empty(&lt->include_masks) && list_find_cmp(&lt->include_masks, channel->name, match) == NULL)
+  if (!list_is_empty(&task->include_masks) && list_find_cmp(&task->include_masks, channel->name, match) == NULL)
     return false;
 
-  if (!list_is_empty(&lt->exclude_masks) && list_find_cmp(&lt->exclude_masks, channel->name, match) != NULL)
+  if (!list_is_empty(&task->exclude_masks) && list_find_cmp(&task->exclude_masks, channel->name, match) != NULL)
     return false;
 
-  if (lt->topic && (string_is_empty(channel->topic) || match(lt->topic, channel->topic)))
+  if (task->topic && (string_is_empty(channel->topic) || match(task->topic, channel->topic)))
     return false;
 
   return true;
 }
 
 static void
-_list_task_send_channel(const struct ListTask *lt, const struct Channel *channel)
+_list_task_send_channel(const struct ListTask *task, const struct Channel *channel)
 {
   char mode_buf[MODEBUFLEN];
   snprintf(mode_buf, sizeof(mode_buf), channel->topic ? "[%s] " : "[%s]",
-           channel_modes(channel, lt->client, false));
+           channel_modes(channel, task->client, false));
 
-  sendto_one_numeric(lt->client, &me, RPL_LIST, channel->name,
+  sendto_one_numeric(task->client, &me, RPL_LIST, channel->name,
                      list_length(&channel->members), mode_buf, string_or_empty(channel->topic));
 }
 
 static void
-_list_task_execute_exact(struct ListTask *lt)
+_list_task_execute_exact(struct ListTask *task)
 {
   list_node_t *node;
-  LIST_FOREACH(node, lt->include_masks.head)
+  LIST_FOREACH(node, task->include_masks.head)
   {
     struct Channel *const channel = hash_find_channel(node->data);
-    if (channel && _list_task_eval_channel(lt, channel))
-      _list_task_send_channel(lt, channel);
+    if (channel && _list_task_eval_channel(task, channel))
+      _list_task_send_channel(task, channel);
   }
 
-  struct Client *const client = lt->client;
-  list_task_destroy(lt);
+  struct Client *const client = task->client;
+  list_task_destroy(task);
   sendto_one_numeric(client, &me, RPL_LISTEND);
 }
 
 static void
-_list_task_execute_global(struct ListTask *lt)
+_list_task_execute_global(struct ListTask *task)
 {
-  for (unsigned int i = lt->hash_index; i < HASHSIZE; ++i)
+  for (unsigned int i = task->hash_index; i < HASHSIZE; ++i)
   {
     /* Backpressure check. Yield control if the send queue is filling up. */
-    if (_list_task_is_congested(lt))
+    if (_list_task_is_congested(task))
     {
-      lt->hash_index = i;
+      task->hash_index = i;
       return;  /* Yield back to event loop. */
     }
 
     for (struct Channel *channel = hash_get_bucket(HASH_TYPE_CHANNEL, i); channel; channel = channel->hnextch)
     {
-      if (_list_task_eval_channel(lt, channel))
-        _list_task_send_channel(lt, channel);
+      if (_list_task_eval_channel(task, channel))
+        _list_task_send_channel(task, channel);
     }
   }
 
-  struct Client *const client = lt->client;
-  list_task_destroy(lt);
+  struct Client *const client = task->client;
+  list_task_destroy(task);
   sendto_one_numeric(client, &me, RPL_LISTEND);
 }
 
@@ -221,32 +221,32 @@ _list_task_pump(void *unused)
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list_task_queue.head)
   {
-    struct ListTask *const lt = node->data;
-    _list_task_execute_global(lt);
+    struct ListTask *const task = node->data;
+    _list_task_execute_global(task);
   }
 
   _list_task_timer_schedule_if_needed();
 }
 
 void
-list_task_start(struct ListTask *lt)
+list_task_start(struct ListTask *task)
 {
-  assert(lt);
-  assert(lt->client);
-  assert(IsClient(lt->client));
-  assert(client_is_local(lt->client));
-  assert(lt->is_queued == false);
+  assert(task);
+  assert(task->client);
+  assert(IsClient(task->client));
+  assert(client_is_local(task->client));
+  assert(task->is_queued == false);
 
   /* If the query is an exact match (e.g. /LIST #a,#b), run it instantly. */
-  if (lt->exact_match && !list_is_empty(&lt->include_masks))
+  if (task->exact_match && !list_is_empty(&task->include_masks))
   {
-    _list_task_execute_exact(lt);
+    _list_task_execute_exact(task);
     return;
   }
 
-  list_add(lt, &lt->node, &list_task_queue);
-  lt->is_queued = true;
+  list_add(task, &task->node, &list_task_queue);
+  task->is_queued = true;
 
-  _list_task_execute_global(lt);
+  _list_task_execute_global(task);
   _list_task_timer_schedule_if_needed();
 }

@@ -80,11 +80,16 @@ _list_task_clear_masks(list_t *list)
 struct ListTask *
 list_task_create(struct Client *client)
 {
+  assert(client);
+  assert(client_is_local(client));
+  assert(IsClient(client));
+  assert(client->connection->list_task == NULL);
+
   struct ListTask *task = io_calloc(sizeof(*task));
   task->client = client;
   task->users_max = UINT_MAX;
-  task->created_max = UINT_MAX;
-  task->topicts_max = UINT_MAX;
+  task->creation_time_max = UINTMAX_MAX;
+  task->topic_time_max = UINTMAX_MAX;
   task->exact_match = true;
   client->connection->list_task = task;
 
@@ -112,6 +117,11 @@ list_task_destroy(struct ListTask *task)
 static void
 _list_task_finish(struct ListTask *task)
 {
+  assert(task);
+  assert(task->client);
+  assert(client_is_local(task->client));
+  assert(task->client->connection->list_task == task);
+
   struct Client *const client = task->client;
 
   list_task_destroy(task);
@@ -129,16 +139,25 @@ _list_task_eval_channel(const struct ListTask *task, const struct Channel *chann
   if (user_count < task->users_min || user_count > task->users_max)
     return false;
 
-  if (channel->creation_time)
+  if (task->has_creation_time_filter)
   {
-    const unsigned int ctime = (unsigned int)channel->creation_time;
-    if (ctime < task->created_min || ctime > task->created_max)
+    if (channel->creation_time == 0)
+      return false;
+
+    const uintmax_t creation_time = channel->creation_time;
+    if (creation_time < task->creation_time_min || creation_time > task->creation_time_max)
       return false;
   }
 
-  const unsigned int ttime = channel->topic_time ? (unsigned int)channel->topic_time : UINT_MAX;
-  if (ttime < task->topicts_min || ttime > task->topicts_max)
-    return false;
+  if (task->has_topic_time_filter)
+  {
+    if (channel->topic_time == 0)
+      return false;
+
+    const uintmax_t topic_time = channel->topic_time;
+    if (topic_time < task->topic_time_min || topic_time > task->topic_time_max)
+      return false;
+  }
 
   if (!list_is_empty(&task->include_masks) && list_find_cmp(&task->include_masks, channel->name, match) == NULL)
     return false;

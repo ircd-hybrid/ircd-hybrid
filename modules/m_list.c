@@ -45,103 +45,198 @@
 #include "send.h"
 
 static bool
+_parse_list_uint(const char *text, unsigned int *value_out)
+{
+  if (string_is_empty(text))
+    return false;
+
+  unsigned int value = 0;
+  for (const char *p = text; *p; ++p)
+  {
+    const unsigned char ch = (unsigned char)*p;
+    if (!IsDigit(ch))
+      return false;
+
+    const unsigned int digit = (unsigned int)(ch - '0');
+    if (value > (UINT_MAX - digit) / 10U)
+      return false;
+
+    value = (value * 10U) + digit;
+  }
+
+  *value_out = value;
+  return true;
+}
+
+static uintmax_t
+_list_age_filter_cutoff(uintmax_t now, unsigned int minutes)
+{
+  const uintmax_t seconds = (uintmax_t)minutes * 60ULL;
+  return seconds > now ? 0 : now - seconds;
+}
+
+static bool
+_parse_list_user_count_filter(struct ListTask *task, char modifier, const char *value_text)
+{
+  assert(modifier == '<' || modifier == '>');
+
+  unsigned int value = 0;
+  if (!_parse_list_uint(value_text, &value))
+    return false;
+
+  /*
+   * ELIST <val matches channels with less than val users.
+   * ELIST >val matches channels with more than val users.
+   */
+  if (modifier == '<')
+  {
+    if (value == 0)
+      return false;
+
+    task->users_max = value - 1;
+    return true;
+  }
+
+  if (value == UINT_MAX)
+    return false;
+
+  task->users_min = value + 1;
+  return true;
+}
+
+static bool
+_parse_list_creation_time_filter(struct ListTask *task, char modifier, const char *value_text, uintmax_t now)
+{
+  if (modifier != '<' && modifier != '>')
+    return false;
+
+  unsigned int minutes = 0;
+  if (!_parse_list_uint(value_text, &minutes))
+    return false;
+
+  const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);
+
+  /*
+   * ELIST C<val matches channels created less than val minutes ago.
+   * ELIST C>val matches channels created more than val minutes ago.
+   */
+  if (modifier == '<')
+    task->creation_time_min = cutoff_time;
+  else
+    task->creation_time_max = cutoff_time;
+
+  task->has_creation_time_filter = true;
+  return true;
+}
+
+static bool
+_parse_list_topic_filter(struct ListTask *task, char modifier, const char *value_text, uintmax_t now)
+{
+  if (modifier == ':')
+  {
+    if (string_is_empty(value_text))
+      return false;
+
+    io_free(task->topic);
+    task->topic = io_strndup(value_text, TOPICLEN);
+    return true;
+  }
+
+  if (modifier != '<' && modifier != '>')
+    return false;
+
+  unsigned int minutes = 0;
+  if (!_parse_list_uint(value_text, &minutes))
+    return false;
+
+  const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);
+
+  /*
+   * ELIST T<val matches topics set less than val minutes ago.
+   * ELIST T>val matches topics set more than val minutes ago.
+   */
+  if (modifier == '<')
+    task->topic_time_min = cutoff_time;
+  else
+    task->topic_time_max = cutoff_time;
+
+  task->has_topic_time_filter = true;
+  return true;
+}
+
+static bool
+_parse_list_mask_filter(struct ListTask *task, const char *option)
+{
+  if (string_is_empty(option))
+    return false;
+
+  list_t *target_list = &task->include_masks;
+  const char *mask = option;
+
+  /* Handle exclusion masks. */
+  if (*mask == '!')
+  {
+    target_list = &task->exclude_masks;
+    ++mask;
+  }
+
+  if (string_is_empty(mask))
+    return false;
+
+  const char *const name = IsChanPrefix(*mask) ? mask + 1 : mask;
+  if (has_wildcards(name))
+  {
+    /*
+     * exact_match only describes the include side. Exclusion masks are still
+     * evaluated after an exact channel lookup.
+     */
+    if (target_list == &task->include_masks)
+      task->exact_match = false;
+  }
+  else if (!IsChanPrefix(*mask))
+    return false;  /* Exact matches must have a valid channel prefix. */
+
+  list_add(io_strdup(mask), list_make_node(), target_list);
+  return true;
+}
+
+static bool
+_parse_list_option(struct ListTask *task, char *option, uintmax_t now)
+{
+  if (string_is_empty(option))
+    return false;
+
+  if (option[0] == '<' || option[0] == '>')
+    return _parse_list_user_count_filter(task, option[0], option + 1);
+
+  if (option[0] == 'C' || option[0] == 'c')
+  {
+    const char modifier = option[1];
+    return _parse_list_creation_time_filter(task, modifier, modifier ? option + 2 : "", now);
+  }
+
+  if (option[0] == 'T' || option[0] == 't')
+  {
+    const char modifier = option[1];
+    return _parse_list_topic_filter(task, modifier, modifier ? option + 2 : "", now);
+  }
+
+  return _parse_list_mask_filter(task, option);
+}
+
+static bool
 _parse_list_args(struct ListTask *task, char *args)
 {
-  char *save = NULL;
+  if (string_is_empty(args))
+    return true;
 
   task->exact_match = true;
 
-  for (char *opt = strtok_r(args, ",", &save); opt;
-             opt = strtok_r(NULL, ",", &save))
-  {
-    const char cmd = *opt;
-    if (cmd == '<')
-    {
-      const int val = atoi(opt + 1);
-      if (val <= 0)
-        return false;
-
-      task->users_max = (unsigned int)val - 1;
-    }
-    else if (cmd == '>')
-    {
-      const int val = atoi(opt + 1);
-      if (val < 0)
-        return false;
-
-      task->users_min = (unsigned int)val + 1;
-    }
-    else if (cmd == 'C' || cmd == 'c')
-    {
-      const char subcmd = *(opt + 1);
-      if (subcmd == '<' || subcmd == '>')
-      {
-        const int val = atoi(opt + 2);
-        if (val < 0)
-          return false;
-
-        const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
-
-        if (subcmd == '<')
-          task->created_min = target;
-        else if (subcmd == '>')
-          task->created_max = target;
-      }
-      else
-        return false;
-    }
-    else if (cmd == 'T' || cmd == 't')
-    {
-      const char subcmd = *(opt + 1);
-      if (subcmd == ':')
-      {
-        const char *topic_str = opt + 2;
-        if (string_is_empty(topic_str))
-          return false;
-
-        io_free(task->topic);
-        task->topic = io_strndup(topic_str, TOPICLEN);
-      }
-      else if (subcmd == '<' || subcmd == '>')
-      {
-        const int val = atoi(opt + 2);
-        if (val < 0)
-          return false;
-
-        const unsigned int target = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - (60 * val));
-
-        if (subcmd == '<')
-          task->topicts_min = target;
-        else if (subcmd == '>')
-          task->topicts_max = target;
-      }
-      else
-        return false;
-    }
-    else
-    {
-      list_t *target_list = &task->include_masks;
-      const char *mask = opt;
-
-      /* Handle exclusion masks. */
-      if (*mask == '!')
-      {
-        target_list = &task->exclude_masks;
-        ++mask;
-      }
-
-      const char *const name = IsChanPrefix(*mask) ? mask + 1 : mask;
-      if (has_wildcards(name))
-      {
-        if (target_list == &task->include_masks)
-          task->exact_match = false;
-      }
-      else if (!IsChanPrefix(*mask))
-        return false;  /* Exact matches must have a valid channel prefix. */
-
-      list_add(io_strdup(mask), list_make_node(), target_list);
-    }
-  }
+  char *save = NULL;
+  for (char *option = strtok_r(args, ",", &save); option;
+             option = strtok_r(NULL, ",", &save))
+    if (!_parse_list_option(task, option, io_time_get(IO_TIME_REALTIME_SEC)))
+      return false;
 
   if (list_is_empty(&task->include_masks))
     task->exact_match = false;
@@ -160,15 +255,12 @@ _do_list(struct Client *client, char *arg)
   }
 
   struct ListTask *task = list_task_create(client);
-
-  if (!string_is_empty(arg))
+  if (!string_is_empty(arg) && !_parse_list_args(task, arg))
   {
-    if (!_parse_list_args(task, arg))
-    {
-      list_task_destroy(task);
-      sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
-      return;
-    }
+    list_task_destroy(task);
+    sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
+    sendto_one_numeric(client, &me, RPL_LISTEND);
+    return;
   }
 
   sendto_one_numeric(client, &me, RPL_LISTSTART);

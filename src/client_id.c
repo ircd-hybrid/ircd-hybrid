@@ -175,6 +175,9 @@ client_id_set_server_sid(struct Client *client, const char *configured_sid, cons
     return true;
   }
 
+  if (string_is_empty(server_name) || string_is_empty(server_description))
+    return false;
+
   _client_id_generate_sid(server_name, server_description, client->id);
 
   if (generated)

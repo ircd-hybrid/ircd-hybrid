@@ -37,6 +37,12 @@
 #include "numeric.h"
 #include "send.h"
 
+enum list_task_run_result
+{
+  LIST_TASK_RUN_DONE,
+  LIST_TASK_RUN_PENDING,
+};
+
 static list_t list_task_queue;
 static event_handle_t list_task_timer;
 
@@ -103,6 +109,15 @@ list_task_destroy(struct ListTask *task)
   io_free(task);
 }
 
+static void
+_list_task_finish(struct ListTask *task)
+{
+  struct Client *const client = task->client;
+
+  list_task_destroy(task);
+  sendto_one_numeric(client, &me, RPL_LISTEND);
+}
+
 static bool
 _list_task_eval_channel(const struct ListTask *task, const struct Channel *channel)
 {
@@ -159,12 +174,10 @@ _list_task_execute_exact(struct ListTask *task)
       _list_task_send_channel(task, channel);
   }
 
-  struct Client *const client = task->client;
-  list_task_destroy(task);
-  sendto_one_numeric(client, &me, RPL_LISTEND);
+  _list_task_finish(task);
 }
 
-static void
+static enum list_task_run_result
 _list_task_execute_global(struct ListTask *task)
 {
   for (unsigned int i = task->hash_index; i < HASHSIZE; ++i)
@@ -173,7 +186,7 @@ _list_task_execute_global(struct ListTask *task)
     if (_list_task_is_congested(task))
     {
       task->hash_index = i;
-      return;  /* Yield back to event loop. */
+      return LIST_TASK_RUN_PENDING;  /* Yield back to event loop. */
     }
 
     for (struct Channel *channel = hash_get_bucket(HASH_TYPE_CHANNEL, i); channel; channel = channel->hnextch)
@@ -183,9 +196,8 @@ _list_task_execute_global(struct ListTask *task)
     }
   }
 
-  struct Client *const client = task->client;
-  list_task_destroy(task);
-  sendto_one_numeric(client, &me, RPL_LISTEND);
+  _list_task_finish(task);
+  return LIST_TASK_RUN_DONE;
 }
 
 static void
@@ -244,9 +256,11 @@ list_task_start(struct ListTask *task)
     return;
   }
 
-  list_add(task, &task->node, &list_task_queue);
-  task->is_queued = true;
+  if (_list_task_execute_global(task) == LIST_TASK_RUN_PENDING)
+  {
+    list_add(task, &task->node, &list_task_queue);
+    task->is_queued = true;
+  }
 
-  _list_task_execute_global(task);
   _list_task_timer_schedule_if_needed();
 }

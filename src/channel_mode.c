@@ -300,7 +300,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
 
     if (params)
       server_or_member =
-        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
+        (server_or_member == true || IsServer(client) || channel_member_find(client, channel));
   }
 
   if (channel->mode.key[0])
@@ -309,7 +309,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
 
     if (params)
       server_or_member =
-        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
+        (server_or_member == true || IsServer(client) || channel_member_find(client, channel));
   }
 
   if (server_or_member)
@@ -602,7 +602,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   if (client_target == NULL)
     return;  /* find_chasing sends ERR_NOSUCHNICK */
 
-  struct ChannelMember *member = member_find_link(client_target, channel);
+  struct ChannelMember *member = channel_member_find(client_target, channel);
   if (member == NULL)
   {
     if (!(*errors & SM_ERR_NOTONCHANNEL))
@@ -1007,7 +1007,7 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
   int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
 
   if (MyClient(client))
-    rank = member_highest_rank(member_find_link(client, channel));
+    rank = member_highest_rank(channel_member_find(client, channel));
 
   mode_count = 0;
   mode_limit = 0;

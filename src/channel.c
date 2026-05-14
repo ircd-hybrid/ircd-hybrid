@@ -479,7 +479,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 {
   assert(IsClient(client));
 
-  const bool is_member = member_find_link(client, channel) != NULL;
+  const bool is_member = channel_member_find(client, channel) != NULL;
   const bool multi_prefix = client_has_cap(client, CAP_MULTI_PREFIX);
   const bool uhnames = client_has_cap(client, CAP_UHNAMES);
 
@@ -758,7 +758,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
 }
 
 struct ChannelMember *
-member_find_link(const struct Client *client, const struct Channel *channel)
+channel_member_find(const struct Client *client, const struct Channel *channel)
 {
   if (!IsClient(client))
     return NULL;
@@ -857,7 +857,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     }
   }
 
-  if (member || (member = member_find_link(client, channel)))
+  if (member || (member = channel_member_find(client, channel)))
     if (member_highest_rank(member) > CHACCESS_PEON)
       return CHANNEL_SEND_PERM_ELEVATED;
 
@@ -1063,7 +1063,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   }
   else
   {
-    if (member_find_link(client, channel))
+    if (channel_member_find(client, channel))
       return;
 
     /* can_join() checks for +i, +l, key, bans, etc. */
@@ -1145,7 +1145,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
     return;
   }
 
-  struct ChannelMember *member = member_find_link(client, channel);
+  struct ChannelMember *member = channel_member_find(client, channel);
   if (member == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOTONCHANNEL, channel->name);

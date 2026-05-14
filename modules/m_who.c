@@ -112,7 +112,7 @@ _who_send(struct Client *source, const struct Client *target,
       {
         member = node->data;
 
-        if (channel_is_public(member->channel) || source == target || member_find_link(source, member->channel))
+        if (channel_is_public(member->channel) || source == target || channel_member_find(source, member->channel))
           break;
         member = NULL;
       }
@@ -369,7 +369,7 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
 {
   bool is_member = false;
 
-  if (client_is_admin(source) || member_find_link(source, channel))
+  if (client_is_admin(source) || channel_member_find(source, channel))
     is_member = true;
   else if (channel_is_secret(channel))
     return;

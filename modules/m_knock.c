@@ -73,7 +73,7 @@ m_knock(struct Client *source, int parc, char *parv[])
   }
 
   /* Normal channel, just be sure they aren't on it. */
-  if (member_find_link(source, channel))
+  if (channel_member_find(source, channel))
   {
     sendto_one_numeric(source, &me, ERR_KNOCKONCHAN, channel->name);
     return;
@@ -132,7 +132,7 @@ ms_knock(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (member_find_link(source, channel))
+  if (channel_member_find(source, channel))
     return;
 
   channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);

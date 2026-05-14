@@ -241,7 +241,7 @@ ms_join(struct Client *source, int parc, char *parv[])
     }
   }
 
-  if (member_find_link(source, channel) == NULL)
+  if (channel_member_find(source, channel) == NULL)
   {
     channel_add_member(channel, source, 0, true);
 

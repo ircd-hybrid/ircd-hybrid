@@ -84,7 +84,7 @@ _whois_channel_visibility_get(struct Channel *channel, struct Client *source, co
   if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
-  if (source == target || member_find_link(source, channel))
+  if (source == target || channel_member_find(source, channel))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (client_is_oper(source))

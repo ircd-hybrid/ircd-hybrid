@@ -373,7 +373,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), uid_ptr != uid_buf_start ? " %s%s" : "%s%s", uid_prefix, target->id);
 
-    if (member_find_link(target, channel) == NULL)
+    if (channel_member_find(target, channel) == NULL)
     {
       bool synced = client_has_flag(source, FLAGS_EOB);
       channel_add_member(channel, target, flags, synced);

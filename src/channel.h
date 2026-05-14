@@ -137,7 +137,7 @@ extern uint32_t channel_prefix_to_flag(const char);
 extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
 extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_create(const char *);
-extern struct ChannelMember *member_find_link(const struct Client *, const struct Channel *);
+extern struct ChannelMember *channel_member_find(const struct Client *, const struct Channel *);
 extern const list_t *channel_get_list(void);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
 extern const char *channel_rank_to_prefix(const int);

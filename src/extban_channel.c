@@ -53,7 +53,7 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   if (!channel_is_public(tmp) && tmp != channel)
     return EXTBAN_NO_MATCH;
 
-  struct ChannelMember *member = member_find_link(client, tmp);
+  struct ChannelMember *member = channel_member_find(client, tmp);
   if (member)
   {
     if (rank > member_highest_rank(member))

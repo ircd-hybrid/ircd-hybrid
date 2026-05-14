@@ -114,7 +114,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const struct ChannelMember *member = member_find_link(source, channel);
+  const struct ChannelMember *member = channel_member_find(source, channel);
   if (member == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
@@ -127,7 +127,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (member_find_link(target, channel))
+  if (channel_member_find(target, channel))
   {
     sendto_one_numeric(source, &me, ERR_USERONCHANNEL, target->name, channel->name);
     return;
@@ -189,7 +189,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (member_find_link(target, channel))
+  if (channel_member_find(target, channel))
     return;
 
   if (strtoumax(parv[3], NULL, 10) > channel->creation_time)

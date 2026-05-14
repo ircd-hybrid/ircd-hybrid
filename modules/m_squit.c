@@ -38,6 +38,18 @@
 #include "parse.h"
 #include "send.h"
 
+static const char *
+_squit_get_reason(const struct Client *source, const char *reason)
+{
+  if (!string_is_empty(reason))
+    return reason;
+
+  if (IsClient(source))
+    return source->name;
+
+  return client_get_visible_server_name(source);
+}
+
 /*! \brief SQUIT command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -90,7 +102,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *reason = string_default(parv[2], CONF_NOREASON);
+  const char *const reason = _squit_get_reason(source, parv[2]);
   if (client_is_local(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
@@ -140,7 +152,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
   if (client_is_me(target))
     target = source->nexthop;
 
-  const char *reason = string_default(parv[2], source->name);
+  const char *const reason = _squit_get_reason(source, parv[2]);
   if (client_is_local(target))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",

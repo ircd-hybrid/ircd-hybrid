@@ -43,7 +43,13 @@
 static const char *
 _kick_get_reason(const struct Client *source, const char *reason)
 {
-  return string_default(reason, source->name);
+  if (!string_is_empty(reason))
+    return reason;
+
+  if (IsClient(source))
+    return source->name;
+
+  return client_get_visible_server_name(source);
 }
 
 static void

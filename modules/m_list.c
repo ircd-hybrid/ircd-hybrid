@@ -233,10 +233,11 @@ _parse_list_args(struct ListTask *task, char *args)
 
   task->exact_match = true;
 
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
   char *save = NULL;
   for (char *option = strtok_r(args, ",", &save); option;
              option = strtok_r(NULL, ",", &save))
-    if (!_parse_list_option(task, option, io_time_get(IO_TIME_REALTIME_SEC)))
+    if (!_parse_list_option(task, option, now))
       return false;
 
   if (list_is_empty(&task->include_masks))

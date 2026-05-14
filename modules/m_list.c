@@ -184,7 +184,11 @@ _parse_list_mask_filter(struct ListTask *task, const char *option)
   if (string_is_empty(mask))
     return false;
 
-  const char *const name = IsChanPrefix(*mask) ? mask + 1 : mask;
+  const bool has_channel_prefix = IsChanPrefix(*mask);
+  const char *const name = has_channel_prefix ? mask + 1 : mask;
+  if (has_channel_prefix && string_is_empty(name))
+    return false;
+
   if (has_wildcards(name))
   {
     /*
@@ -194,7 +198,7 @@ _parse_list_mask_filter(struct ListTask *task, const char *option)
     if (target_list == &task->include_masks)
       task->exact_match = false;
   }
-  else if (!IsChanPrefix(*mask))
+  else if (has_channel_prefix == false)
     return false;  /* Exact matches must have a valid channel prefix. */
 
   list_add(io_strdup(mask), list_make_node(), target_list);

@@ -40,30 +40,60 @@
 #include "parse.h"
 #include "module.h"
 
+static void
+_invite_send_invite_list(struct Client *source)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, source->connection->invite_list.head)
+  {
+    const struct Invite *const invite = node->data;
+    sendto_one_numeric(source, &me, RPL_INVITELIST, invite->channel->name);
+  }
+
+  sendto_one_numeric(source, &me, RPL_ENDOFINVITELIST);
+}
 
 static void
-_invite_propagate(const struct Client *source, struct Client *target, struct Channel *channel)
+_invite_send_to_target(const struct Client *source, struct Client *target, struct Channel *channel)
 {
-  channel->last_invite_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (!client_is_local(target))
+    return;
+
+  sendto_one(target, ":%s!%s@%s INVITE %s :%s",
+             source->name, source->username, source->host, target->name, channel->name);
+}
+
+static void
+_invite_notify_channel_members(const struct Client *source, const struct Client *target,
+                               const struct Channel *channel, bool invite_only)
+{
+  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0, ":%s!%s@%s INVITE %s %s",
+                       source->name, source->username, source->host, target->name, channel->name);
+
+  if (invite_only)
+    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
+                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
+                         me.name, channel->name, source->name, target->name, channel->name);
+}
+
+static void
+_invite_commit(const struct Client *source, struct Client *target, struct Channel *channel, uintmax_t now)
+{
+  assert(IsClient(source));
+  assert(IsClient(target));
+
+  channel->last_invite_time = now;
+
+  const bool invite_only = channel_has_mode(channel, MODE_INVITEONLY);
+  if (invite_only && client_is_local(target))
+    invite_add(channel, target);
 
   sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
                  source->id, target->id, channel->name, channel->creation_time);
 
-  if (client_is_local(target))
-  {
-    sendto_one(target, ":%s!%s@%s INVITE %s :%s",
-               source->name, source->username, source->host, target->name, channel->name);
-
-    if (channel_has_mode(channel, MODE_INVITEONLY))
-      invite_add(channel, target);  /* Add the invite if channel is +i */
-  }
-
-  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0, ":%s!%s@%s INVITE %s %s",
-                       source->name, source->username, source->host, target->name, channel->name);
-
-  if (channel_has_mode(channel, MODE_INVITEONLY))
-    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY, ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, channel->name, source->name, target->name, channel->name);
+  _invite_send_to_target(source, target, channel);
+  _invite_notify_channel_members(source, target, channel, invite_only);
 }
 
 /*! \brief INVITE command handler
@@ -83,14 +113,7 @@ m_invite(struct Client *source, int parc, char *parv[])
 {
   if (parc < 2)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, source->connection->invite_list.head)
-    {
-      const struct Invite *const invite = node->data;
-      sendto_one_numeric(source, &me, RPL_INVITELIST, invite->channel->name);
-    }
-
-    sendto_one_numeric(source, &me, RPL_ENDOFINVITELIST);
+    _invite_send_invite_list(source);
     return;
   }
 
@@ -139,7 +162,8 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((source->connection->invite.last_attempt + ConfigChannel.invite_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((source->connection->invite.last_attempt + ConfigChannel.invite_client_time) < now)
     source->connection->invite.count = 0;
 
   if (source->connection->invite.count > ConfigChannel.invite_client_count)
@@ -148,13 +172,13 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > now)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYINVITE, channel->name, "channel");
     return;
   }
 
-  source->connection->invite.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->invite.last_attempt = now;
   source->connection->invite.count++;
 
   sendto_one_numeric(source, &me, RPL_INVITING, target->name, channel->name);
@@ -162,7 +186,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   if (target->away_message)
     sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 
-  _invite_propagate(source, target, channel);
+  _invite_commit(source, target, channel, now);
 }
 
 /*! \brief INVITE command handler
@@ -181,6 +205,9 @@ m_invite(struct Client *source, int parc, char *parv[])
 static void
 ms_invite(struct Client *source, int parc, char *parv[])
 {
+  if (!IsClient(source))
+    return;
+
   struct Client *target = find_person(source, parv[1]);
   if (target == NULL)
     return;
@@ -195,7 +222,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
     return;
 
-  _invite_propagate(source, target, channel);
+  _invite_commit(source, target, channel, io_time_get(IO_TIME_MONOTONIC_SEC));
 }
 
 static struct Command command_table =

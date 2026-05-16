@@ -31,9 +31,9 @@
 #include <stdio.h>
 
 #include "conf.h"  /* XXX: decouple */
+#include "io_hex.h"
 #include "log.h"
 #include "memory.h"
-#include "misc.h"
 #include "tls.h"
 
 #ifdef HAVE_TLS_OPENSSL
@@ -403,29 +403,38 @@ bool
 tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   SSL *ssl = *tls_data;
-  unsigned int n;
-  char buf[EVP_MAX_MD_SIZE * 2 + 1];
-  unsigned char md[EVP_MAX_MD_SIZE];
-  bool ret = false;
 
   /* Accept NULL return from SSL_get_peer_certificate */
   X509 *cert = SSL_get_peer_certificate(ssl);
   if (cert == NULL)
     return true;
 
+  bool ret = false;
   switch (SSL_get_verify_result(ssl))
   {
     case X509_V_OK:
     case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
     case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
     case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+    {
       ret = true;
 
-      if (X509_digest(cert, message_digest_algorithm, md, &n))
+      unsigned int digest_len = 0;
+      unsigned char digest[EVP_MAX_MD_SIZE];
+      char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
+
+      if (X509_digest(cert, message_digest_algorithm, digest, &digest_len))
       {
-        binary_to_hex(md, buf, n);
-        *fingerprint = io_strdup(buf);
+        if (io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+        {
+          io_free(*fingerprint);
+          *fingerprint = io_strdup(hex_digest);
+        }
       }
+
+      break;
+    }
+
     default:
       break;
   }

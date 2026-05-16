@@ -28,6 +28,8 @@ libio_la_SOURCES =  address.c     \
                     io_daemon.h   \
                     io_getopt.c   \
                     io_getopt.h   \
+                    io_hex.c      \
+                    io_hex.h      \
                     io_pidfile.c  \
                     io_pidfile.h  \
                     io_rlimit.c   \

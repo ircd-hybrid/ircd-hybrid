@@ -183,26 +183,3 @@ time_format_duration(uintmax_t duration)
            days, days == 1 ? "" : "s", hours, minutes, seconds);
   return buf;
 }
-
-/**
- * @brief Converts binary data to a hexadecimal string.
- *
- * This function takes binary data and converts it into a hexadecimal string.
- *
- * @param bin Binary data to convert.
- * @param hex Output buffer for the hexadecimal string.
- * @param length Length of the binary data.
- */
-void
-binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
-{
-  static const char trans[] = "0123456789ABCDEF";
-
-  for (const unsigned char *const end = bin + length; bin < end; ++bin)
-  {
-    *hex++ = trans[*bin >>  4];
-    *hex++ = trans[*bin & 0xf];
-  }
-
-  *hex = '\0';
-}

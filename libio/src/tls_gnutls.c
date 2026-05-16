@@ -31,9 +31,9 @@
 #include <stdio.h>
 
 #include "conf.h"  /* XXX: decouple */
+#include "io_hex.h"
 #include "log.h"
 #include "memory.h"
-#include "misc.h"
 #include "tls.h"
 
 #ifdef HAVE_TLS_GNUTLS
@@ -324,34 +324,36 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 bool
 tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
-  gnutls_x509_crt_t cert;
-  unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
-  size_t digest_size = sizeof(digestbuf);
-  char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
-
   const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
   if (cert_list == NULL)
     return true;  /* No certificate */
 
+  gnutls_x509_crt_t cert;
   int ret = gnutls_x509_crt_init(&cert);
   if (ret != GNUTLS_E_SUCCESS)
     return true;
 
   ret = gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
   if (ret != GNUTLS_E_SUCCESS)
-    goto info_done_dealloc;
+    goto cleanup_cert;
 
-  ret = gnutls_x509_crt_get_fingerprint(cert, message_digest_algorithm, digestbuf, &digest_size);
+  unsigned char digest[TLS_GNUTLS_MAX_HASH_SIZE];
+  size_t digest_len = sizeof(digest);
+  ret = gnutls_x509_crt_get_fingerprint(cert, message_digest_algorithm, digest, &digest_len);
   if (ret != GNUTLS_E_SUCCESS)
-    goto info_done_dealloc;
+    goto cleanup_cert;
 
-  binary_to_hex(digestbuf, buf, digest_size);
-  *fingerprint = io_strdup(buf);
+  char hex_digest[(TLS_GNUTLS_MAX_HASH_SIZE * 2) + 1];
+  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+    goto cleanup_cert;
+
+  io_free(*fingerprint);
+  *fingerprint = io_strdup(hex_digest);
 
   gnutls_x509_crt_deinit(cert);
   return true;
 
-info_done_dealloc:
+cleanup_cert:
   gnutls_x509_crt_deinit(cert);
   return false;
 }

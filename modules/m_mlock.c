@@ -93,7 +93,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
 
   _mlock_apply(source, channel, parv[4], mode_lock_ts);
 
-  sendto_servers(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
+  sendto_servers(source, 0, 0, ":%s MLOCK %ju %s %ju :%s",
                  source->id, channel->creation_time, channel->name, channel->mode_lock_time,
                  string_or_empty(channel->mode_lock));
 }

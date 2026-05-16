@@ -40,13 +40,24 @@
 #include "isupport.h"
 
 static void
-_knock_propagate(const struct Client *source, const struct Channel *channel)
+_knock_notify_channel_members(const struct Client *source, const struct Channel *channel)
 {
-  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
-                 source->id, channel->name);
   sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, 0,
                        ":%s NOTICE %%%s :KNOCK: %s (%s [%s@%s] has asked for an invite)",
                        me.name, channel->name, channel->name, source->name, source->username, source->host);
+}
+
+static void
+_knock_commit(const struct Client *source, struct Channel *channel, uintmax_t now)
+{
+  assert(IsClient(source));
+
+  channel->last_knock_time = now;
+
+  sendto_servers(source, CAPAB_KNOCK, 0, ":%s KNOCK %s",
+                 source->id, channel->name);
+
+  _knock_notify_channel_members(source, channel);
 }
 
 /*! \brief KNOCK command handler
@@ -98,7 +109,8 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < now)
     source->connection->knock.count = 0;
 
   if (source->connection->knock.count > ConfigChannel.knock_client_count)
@@ -107,7 +119,7 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > now)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
     return;
@@ -115,12 +127,10 @@ m_knock(struct Client *source, int parc, char *parv[])
 
   sendto_one_numeric(source, &me, RPL_KNOCKDLVR, channel->name);
 
-  source->connection->knock.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->knock.last_attempt = now;
   source->connection->knock.count++;
 
-  channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-  _knock_propagate(source, channel);
+  _knock_commit(source, channel, now);
 }
 
 static void
@@ -135,9 +145,7 @@ ms_knock(struct Client *source, int parc, char *parv[])
   if (channel_member_find(source, channel))
     return;
 
-  channel->last_knock_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-  _knock_propagate(source, channel);
+  _knock_commit(source, channel, io_time_get(IO_TIME_MONOTONIC_SEC));
 }
 
 static struct Command command_table =

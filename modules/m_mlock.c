@@ -23,17 +23,21 @@
  * \brief Includes required functions for processing the MLOCK command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "module.h"
-#include "io_string.h"
+
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
-#include "send.h"
 #include "parse.h"
+#include "send.h"
 #include "server_capab.h"
 
 static bool

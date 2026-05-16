@@ -36,6 +36,28 @@
 #include "parse.h"
 #include "server_capab.h"
 
+static bool
+_mlock_should_accept(const struct Client *source, const struct Channel *channel,
+                     uintmax_t channel_ts, uintmax_t mode_lock_ts)
+{
+  if (channel_ts > channel->creation_time)
+    return false;
+
+  if (client_is_service(source))
+    return true;
+
+  if (channel_ts < channel->creation_time)
+    return true;
+
+  return mode_lock_ts >= channel->mode_lock_time;
+}
+
+static void
+_mlock_apply(struct Client *source, struct Channel *channel, const char *mode_lock, uintmax_t mode_lock_ts)
+{
+  channel_set_mode_lock(source, channel, mode_lock);
+  channel->mode_lock_time = mode_lock_ts;
+}
 
 /*! \brief MLOCK command handler
  *
@@ -60,12 +82,12 @@ ms_mlock(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
-    channel_set_mode_lock(source, channel, parv[4]);
+  const uintmax_t channel_ts = strtoumax(parv[1], NULL, 10);
+  const uintmax_t mode_lock_ts = strtoumax(parv[3], NULL, 10);
+  if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts))
+    return;
 
-  uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
-  if (timestamp)
-    channel->mode_lock_time = timestamp;
+  _mlock_apply(source, channel, parv[4], mode_lock_ts);
 
   sendto_servers(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
                  source->id, channel->creation_time, channel->name, channel->mode_lock_time,

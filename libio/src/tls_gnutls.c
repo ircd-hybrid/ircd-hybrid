@@ -324,8 +324,9 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 bool
 tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
-  const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
-  if (cert_list == NULL)
+  unsigned int cert_list_size = 0;
+  const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);
+  if (cert_list == NULL || cert_list_size == 0)
     return true;  /* No certificate */
 
   gnutls_x509_crt_t cert;

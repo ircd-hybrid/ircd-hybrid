@@ -23,16 +23,18 @@
  * \brief Includes required functions for processing the RESTART command.
  */
 
-#include "stdinc.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "ircd_exit.h"
-#include "send.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "ircd.h"
+#include "ircd_exit.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief RESTART command handler
  *

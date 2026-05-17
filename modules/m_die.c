@@ -23,16 +23,18 @@
  * \brief Includes required functions for processing the DIE command.
  */
 
-#include "stdinc.h"
-#include "module.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
+#include "module.h"
+
 #include "client.h"
-#include "conf_oper.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "parse.h"
 #include "ircd_exit.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief DIE command handler
  *

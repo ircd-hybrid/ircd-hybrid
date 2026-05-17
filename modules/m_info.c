@@ -23,21 +23,23 @@
  * \brief Includes required functions for processing the INFO command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_time.h"
 #include "list.h"
+#include "misc.h"
+#include "module.h"
+
 #include "client.h"
+#include "conf.h"
+#include "info.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "misc.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
-#include "conf.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
+#include "server.h"
 #include "tls.h"
-#include "info.h"
 
 static const struct InfoEntry info_table[] =
 {

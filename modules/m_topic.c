@@ -80,7 +80,7 @@ _topic_commit(struct Client *source, struct Channel *channel, const char *topic)
 static void
 _topic_send_current(struct Client *source, const struct Channel *channel)
 {
-  if (channel->topic == NULL)
+  if (string_is_empty(channel->topic))
   {
     sendto_one_numeric(source, &me, RPL_NOTOPIC, channel->name);
     return;

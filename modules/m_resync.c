@@ -23,15 +23,17 @@
  * \brief Includes required functions for processing the RESYNC command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "module.h"
+
+#include "channel.h"
 #include "client.h"
+#include "hash.h"
 #include "ircd.h"
 #include "parse.h"
-#include "module.h"
 #include "server_capab.h"
-#include "hash.h"
-#include "channel.h"
-
 
 /*! \brief RESYNC command handler
  *
@@ -53,7 +55,7 @@ ms_resync(struct Client *source, int parc, char *parv[])
   if (!client_is_local(source) || !IsServer(source))
     return;
 
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = hash_find_channel(parv[1]);
   if (channel == NULL)
     return;
 

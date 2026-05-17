@@ -233,7 +233,7 @@ ms_join(struct Client *source, int parc, char *parv[])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                            origin_name, channel->name, modebuf, parabuf);
 
-    if (channel->topic)
+    if (!string_is_empty(channel->topic))
     {
       channel_set_topic(channel, NULL, NULL, 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",

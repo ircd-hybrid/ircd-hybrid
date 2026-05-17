@@ -144,7 +144,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("serverinfo", "sid", INFO_OUTPUT_STRING, &ConfigServerInfo.sid, "Server ID")
 };
 
-static const char *const infotext[] =
+static const char *const info_lines[] =
 {
   "ircd-hybrid --",
   "Based on the original code written by Jarkko Oikarinen",
@@ -233,9 +233,9 @@ _send_info_text(struct Client *client)
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                  client->name, client->username, client->host, client->uplink->name);
 
-  for (const char *const *text = infotext; *text; ++text)
+  for (const char *const *line_ptr = info_lines; *line_ptr; ++line_ptr)
   {
-    const char *line = *text;
+    const char *line = *line_ptr;
     if (*line == '\0')
       line = " ";
 

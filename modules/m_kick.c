@@ -53,8 +53,8 @@ _kick_get_reason(const struct Client *source, const char *reason)
 }
 
 static void
-_kick_send_local(struct Client *source, const struct Channel *channel,
-                 const struct Client *target, const char *reason)
+_kick_notify_channel_members(struct Client *source, const struct Channel *channel,
+                             const struct Client *target, const char *reason)
 {
   if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
@@ -73,7 +73,7 @@ _kick_commit(struct Client *source, struct Channel *channel,
   sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
                  source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
 
-  _kick_send_local(source, channel, target, reason);
+  _kick_notify_channel_members(source, channel, target, reason);
 
   channel_remove_member(member_target);
 }

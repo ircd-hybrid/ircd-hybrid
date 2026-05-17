@@ -97,7 +97,7 @@ typedef struct server_rejection_context
 } server_rejection_context_t;
 
 static void
-server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list ap)
+_server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list ap)
 {
   char detail_buf[IRCD_BUFSIZE];
   char oper_msg[IRCD_BUFSIZE];
@@ -121,7 +121,7 @@ server_reject_internal(const server_rejection_context_t *ctx, const char *detail
 }
 
 static void
-server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...)
+_server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {
   server_rejection_context_t ctx =
   {
@@ -134,12 +134,12 @@ server_reject_connection(struct Client *source, server_rejection_reason_t reason
 
   va_list ap;
   va_start(ap, detail_fmt);
-  server_reject_internal(&ctx, detail_fmt, ap);
+  _server_reject_internal(&ctx, detail_fmt, ap);
   va_end(ap);
 }
 
 static void
-server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...)
+_server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {
   server_rejection_context_t ctx =
   {
@@ -152,7 +152,7 @@ server_reject_introduction(struct Client *introducer, server_rejection_reason_t 
 
   va_list ap;
   va_start(ap, detail_fmt);
-  server_reject_internal(&ctx, detail_fmt, ap);
+  _server_reject_internal(&ctx, detail_fmt, ap);
   va_end(ap);
 }
 
@@ -453,28 +453,28 @@ mr_server(struct Client *source, int parc, char *parv[])
   const char *const name = parv[1];
   if (!server_is_valid_name(name))
   {
-    server_reject_connection(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
+    _server_reject_connection(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
   /* While completing an outgoing handshake, reject peers that present an unexpected server name. */
   if (client_is_handshake(source) && strcmp(source->name, name))
   {
-    server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
+    _server_reject_connection(source, SERVER_REJECT_NAME_MISMATCH, "Presented as '%s', expected '%s'", name, source->name);
     return;
   }
 
   const char *const sid = parv[3];
   if (!client_id_is_valid_sid(sid))
   {
-    server_reject_connection(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
+    _server_reject_connection(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;
   }
 
   const int hopcount = atoi(parv[2]);
   if (hopcount != 1)
   {
-    server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %d", hopcount);
+    _server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %d", hopcount);
     return;
   }
 
@@ -487,13 +487,13 @@ mr_server(struct Client *source, int parc, char *parv[])
     if (result == CONNECT_AUTH_FAIL_NAME && ConfigGeneral.warn_no_connect_block == 0)
       client_exit(source, reason);
     else
-      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", reason, name);
+      _server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "%s for server '%s'", reason, name);
     return;
   }
 
   if (ConfigServerInfo.hub == 0 && !list_is_empty(&local_server_list))
   {
-    server_reject_connection(source, SERVER_REJECT_LEAF_LINK_POLICY, "Server is configured as a non-hub leaf");
+    _server_reject_connection(source, SERVER_REJECT_LEAF_LINK_POLICY, "Server is configured as a non-hub leaf");
     return;
   }
 
@@ -502,7 +502,7 @@ mr_server(struct Client *source, int parc, char *parv[])
     if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
         (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
     {
-      server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "Mismatching AOP/QOP capabilities");
+      _server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "Mismatching AOP/QOP capabilities");
       return;
     }
   }
@@ -513,13 +513,13 @@ mr_server(struct Client *source, int parc, char *parv[])
    */
   if (hash_find_id(sid))
   {
-    server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
+    _server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
   if (hash_find_server(name))
   {
-    server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+    _server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 
@@ -537,7 +537,7 @@ mr_server(struct Client *source, int parc, char *parv[])
     if (!client_is_local(target) ||
         (!client_is_unknown(target) && !client_is_connecting(target) && !client_is_handshake(target)))
     {
-      server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+      _server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
       return;
     }
 
@@ -583,22 +583,22 @@ ms_sid(struct Client *source, int parc, char *parv[])
   const char *const name = parv[1];
   if (!server_is_valid_name(name))
   {
-    server_reject_introduction(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
+    _server_reject_introduction(source, SERVER_REJECT_INVALID_NAME, "'%s'", name);
     return;
   }
 
   const char *const sid = parv[3];
   if (!client_id_is_valid_sid(sid))
   {
-    server_reject_introduction(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
+    _server_reject_introduction(source, SERVER_REJECT_INVALID_SID, "'%s'", sid);
     return;
   }
 
   const int hopcount = atoi(parv[2]);
   if (hopcount != (int)source->hopcount + 1)
   {
-    server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Introducer hopcount: %d, New server hopcount: %d",
-                               source->hopcount, hopcount);
+    _server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Introducer hopcount: %d, New server hopcount: %d",
+                                source->hopcount, hopcount);
     return;
   }
 
@@ -612,8 +612,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
    */
   if (list_find_cmp(&connect->hub_masks, name, match) == NULL)
   {
-    server_reject_introduction(source, SERVER_REJECT_HUB_POLICY,
-                               "Introducer '%s' is not an authorized hub for '%s'", source->name, name);
+    _server_reject_introduction(source, SERVER_REJECT_HUB_POLICY,
+                                "Introducer '%s' is not an authorized hub for '%s'", source->name, name);
     return;
   }
 
@@ -623,8 +623,8 @@ ms_sid(struct Client *source, int parc, char *parv[])
    */
   if (list_find_cmp(&connect->leaf_masks, name, match))
   {
-    server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,
-                               "Introduction of '%s' by '%s' denied (server is designated as a leaf)", name, source->name);
+    _server_reject_introduction(source, SERVER_REJECT_LEAF_POLICY,
+                                "Introduction of '%s' by '%s' denied (server is designated as a leaf)", name, source->name);
     return;
   }
 
@@ -634,13 +634,13 @@ ms_sid(struct Client *source, int parc, char *parv[])
    */
   if (hash_find_id(sid))
   {
-    server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
+    _server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
   if (hash_find_server(name))
   {
-    server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+    _server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
   }
 
@@ -658,7 +658,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
     if (!client_is_local(target) ||
         (!client_is_unknown(target) && !client_is_connecting(target) && !client_is_handshake(target)))
     {
-      server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
+      _server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
       return;
     }
 

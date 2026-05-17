@@ -41,7 +41,7 @@
 #include "send.h"
 
 static void
-_topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)
+_topic_format_setter_info(const struct Client *source, char *buf, size_t buflen)
 {
   if (IsClient(source))
   {
@@ -54,7 +54,7 @@ _topic_get_setter_info(const struct Client *source, char *buf, size_t buflen)
 }
 
 static void
-_topic_send_local(struct Client *source, const struct Channel *channel)
+_topic_notify_channel_members(struct Client *source, const struct Channel *channel)
 {
   if (IsClient(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
@@ -68,13 +68,13 @@ static void
 _topic_commit(struct Client *source, struct Channel *channel, const char *topic)
 {
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  _topic_get_setter_info(source, topic_info, sizeof(topic_info));
+  _topic_format_setter_info(source, topic_info, sizeof(topic_info));
 
   channel_set_topic(channel, topic, topic_info, io_time_get(IO_TIME_REALTIME_SEC), !!MyClient(source));
 
   sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
                  source->id, channel->name, string_or_empty(channel->topic));
-  _topic_send_local(source, channel);
+  _topic_notify_channel_members(source, channel);
 }
 
 static void

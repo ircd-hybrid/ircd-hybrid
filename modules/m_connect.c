@@ -31,16 +31,13 @@
 #include "module.h"
 
 #include "client.h"
-#include "conf.h"
 #include "conf_connect.h"
-#include "conf_oper.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
 #include "server.h"
-#include "user_mode.h"
 
 static void
 do_connect(struct Client *source, const char *name)

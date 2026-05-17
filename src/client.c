@@ -248,7 +248,7 @@ _client_init_base(struct Client *client)
 struct Client *
 client_create_local(void)
 {
-  struct Client *client = io_calloc(sizeof(*client));
+  struct Client *const client = io_calloc(sizeof(*client));
   client->connection = io_calloc(sizeof(*client->connection));
   client->connection->last_receive_time = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -270,7 +270,7 @@ client_create_remote(struct Client *uplink)
   assert(uplink);
   assert(IsServer(uplink));
 
-  struct Client *client = io_calloc(sizeof(*client));
+  struct Client *const client = io_calloc(sizeof(*client));
   /* Remote entity topology: Inherit the physical route (nexthop) from the logical parent (uplink). */
   client->uplink = uplink;
   client->nexthop = uplink->nexthop;
@@ -609,7 +609,7 @@ free_exited_clients(void)
 
   while ((node = dead_list.head))
   {
-    struct Client *client = node->data;
+    struct Client *const client = node->data;
 
     list_remove(node, &dead_list);
     list_free_node(node);
@@ -696,7 +696,7 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_client_list.head)
   {
-    struct Client *child_client = node->data;
+    struct Client *const child_client = node->data;
     assert(!client_is_local(child_client));
     _client_exit_notify_channel_members(child_client, reason);
     _client_exit_detach(child_client);
@@ -704,7 +704,7 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
 
   LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_server_list.head)
   {
-    struct Client *child_server = node->data;
+    struct Client *const child_server = node->data;
     _client_exit_unwind_tree(child_server, reason);
     _client_exit_detach(child_server);
   }
@@ -1089,7 +1089,7 @@ exit_aborted_clients(void)
 
   while ((node = abort_list.head))
   {
-    struct Client *client = node->data;
+    struct Client *const client = node->data;
     assert(client && client_is_local(client));
     assert(client_is_dead(client));
 
@@ -1231,7 +1231,7 @@ _client_create_accepted_local_connection(fde_t *client_fde, struct Listener *lis
   assert(remote_addr);
   assert(remote_addr_str);
 
-  struct Client *client = client_create_local();
+  struct Client *const client = client_create_local();
   client->connection->fd = client_fde;
 
   address_copy(&client->addr, remote_addr);

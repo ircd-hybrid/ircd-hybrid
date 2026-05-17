@@ -1120,7 +1120,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   if (invite)
     invite_del(invite);
 
-  if (channel->topic)
+  if (!string_is_empty(channel->topic))
   {
     sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
     sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,

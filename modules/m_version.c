@@ -23,18 +23,19 @@
  * \brief Includes required functions for processing the VERSION command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
-#include "server.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
-#include "isupport.h"
+#include <stdint.h>
 
+#include "io_time.h"
+#include "module.h"
+
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "isupport.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
 
 /* Option string. */
 static const char serveropts[] =

@@ -23,14 +23,15 @@
  * \brief Includes required functions for processing the EOB command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdint.h>
+
 #include "io_time.h"
 #include "module.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
 
+#include "client.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief EOB command handler
  *

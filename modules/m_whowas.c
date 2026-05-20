@@ -23,23 +23,25 @@
  * \brief Includes required functions for processing the WHOWAS command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "misc.h"
-#include "module.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "io_time.h"
-#include "whowas.h"
+#include "misc.h"
+#include "module.h"
+
 #include "client.h"
-#include "hash.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "conf.h"
 #include "conf_service.h"
+#include "ircd.h"
+#include "numeric.h"
 #include "parse.h"
+#include "send.h"
+#include "server.h"
+#include "whowas.h"
 
 /** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
 enum { WHOWAS_MAX_REPLIES = 20 };

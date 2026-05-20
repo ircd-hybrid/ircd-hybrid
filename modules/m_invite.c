@@ -23,9 +23,18 @@
  * \brief Includes required functions for processing the INVITE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "module.h"
+
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
@@ -34,12 +43,10 @@
 #include "client_find.h"
 #include "conf.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 
 static void
 _invite_send_invite_list(struct Client *source)

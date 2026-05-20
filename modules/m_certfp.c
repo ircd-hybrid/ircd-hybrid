@@ -23,13 +23,14 @@
  * \brief Includes required functions for processing the CERTFP command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "memory.h"
 #include "module.h"
+
 #include "client.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
+#include "send.h"
 
 /*! \brief CERTFP command handler
  *

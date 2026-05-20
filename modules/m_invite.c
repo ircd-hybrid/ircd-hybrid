@@ -131,14 +131,14 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = hash_find_channel(parv[2]);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
     return;
   }
 
-  const struct ChannelMember *member = channel_member_find(source, channel);
+  const struct ChannelMember *const member = channel_member_find(source, channel);
   if (member == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
@@ -213,7 +213,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = hash_find_channel(parv[2]);
   if (channel == NULL)
     return;
 

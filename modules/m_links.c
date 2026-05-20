@@ -100,7 +100,7 @@ do_links(struct Client *source, char *parv[])
     return;
   }
 
-  const char *mask = string_default(parv[2], parv[1]);
+  const char *const mask = string_default(parv[2], parv[1]);
   _links_send_live(source, mask);
 }
 

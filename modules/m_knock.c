@@ -76,7 +76,7 @@ m_knock(struct Client *source, int parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
-  struct Channel *channel = hash_find_channel(channel_name);
+  struct Channel *const channel = hash_find_channel(channel_name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
@@ -138,7 +138,7 @@ ms_knock(struct Client *source, int parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
-  struct Channel *channel = hash_find_channel(channel_name);
+  struct Channel *const channel = hash_find_channel(channel_name);
   if (channel == NULL)
     return;
 

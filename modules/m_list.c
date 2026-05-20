@@ -260,7 +260,7 @@ _do_list(struct Client *client, char *arg)
     return;
   }
 
-  struct ListTask *task = list_task_create(client);
+  struct ListTask *const task = list_task_create(client);
   if (!string_is_empty(arg) && !_parse_list_args(task, arg))
   {
     list_task_destroy(task);

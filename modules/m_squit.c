@@ -72,8 +72,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {
-    struct Client *tmp = node->data;
-
+    struct Client *const tmp = node->data;
     if (IsServer(tmp))
     {
       if (match(name, tmp->name) == 0)
@@ -166,8 +165,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, local_server_list.head)
     {
-      struct Client *client = node->data;
-
+      struct Client *const client = node->data;
       if (client == target || client == source->nexthop)
         continue;
 

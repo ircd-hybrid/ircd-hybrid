@@ -51,7 +51,7 @@ trace_send_status(struct Client *source, const struct Client *target)
   if (!IsClient(target))
     return;
 
-  const char *class_name = client_get_class_name(target);
+  const char *const class_name = client_get_class_name(target);
   sendto_one_numeric(source, &me, RPL_ETRACE,
                      client_is_oper(target) ? "Oper" : "User", class_name,
                      target->name, target->username, target->host, target->sockhost, target->info);
@@ -77,8 +77,7 @@ do_etrace(struct Client *source, const char *name)
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target = node->data;
-
+    const struct Client *const target = node->data;
     if (doall || match(name, target->name) == 0)
       trace_send_status(source, target);
   }

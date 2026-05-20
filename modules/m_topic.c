@@ -107,7 +107,7 @@ _topic_send_current(struct Client *source, const struct Channel *channel)
 static void
 m_topic(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -117,7 +117,7 @@ m_topic(struct Client *source, int parc, char *parv[])
   /* Setting topic */
   if (parc > 2)
   {
-    const struct ChannelMember *member = channel_member_find(source, channel);
+    const struct ChannelMember *const member = channel_member_find(source, channel);
     if (member == NULL)
     {
       sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
@@ -159,7 +159,7 @@ m_topic(struct Client *source, int parc, char *parv[])
 static void
 ms_topic(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = hash_find_channel(parv[1]);
   if (channel == NULL)
     return;
 

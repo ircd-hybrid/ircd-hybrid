@@ -96,14 +96,14 @@ _kick_commit(struct Client *source, struct Channel *channel,
 static void
 m_kick(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = hash_find_channel(parv[1]);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
     return;
   }
 
-  struct ChannelMember *member_source = channel_member_find(source, channel);
+  struct ChannelMember *const member_source = channel_member_find(source, channel);
   if (member_source == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
@@ -162,7 +162,7 @@ m_kick(struct Client *source, int parc, char *parv[])
 static void
 ms_kick(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = hash_find_channel(parv[1]);
   if (channel == NULL)
     return;
 
@@ -170,7 +170,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  struct ChannelMember *member_target = channel_member_find(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(target, channel);
   if (member_target == NULL)
     return;
 

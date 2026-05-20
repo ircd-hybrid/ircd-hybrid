@@ -72,7 +72,7 @@ _parse_uid_belongs_to_source(const struct Client *source_server, const char *uid
    * A UID is only eligible for unknown-client cleanup if its server SID
    * resolves to a server that is actually routed through the sending link.
    */
-  const struct Client *server = client_find_server_by_sid(sid);
+  const struct Client *const server = client_find_server_by_sid(sid);
   return server && server->nexthop == source_server;
 }
 
@@ -179,8 +179,8 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
   if (numeric < 100)
     numeric += 100;
 
-  const char *name = parv[1];
-  const char *text = string_or_empty(parv[2]);
+  const char *const name = parv[1];
+  const char *const text = string_or_empty(parv[2]);
 
   /*
    * Who should receive this message ? Will we do something with it ?
@@ -191,7 +191,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
    */
   if (IsChanPrefix(*name))
   {
-    const struct Channel *channel = hash_find_channel(name);
+    const struct Channel *const channel = hash_find_channel(name);
     if (channel == NULL)
       return;
 

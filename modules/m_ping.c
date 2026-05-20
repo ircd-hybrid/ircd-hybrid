@@ -29,8 +29,8 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -67,7 +67,7 @@ m_ping(struct Client *source, int parc, char *parv[])
   }
 
   struct Client *target = NULL;
-  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && client_is_me(target)))
+  if (string_is_empty(destination) || ((target = client_find_server(source, destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target)
     sendto_one(target, ":%s PING %s :%s",
@@ -94,7 +94,7 @@ ms_ping(struct Client *source, int parc, char *parv[])
   struct Client *target = NULL;
 
   const char *const destination = parv[2];
-  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && client_is_me(target)))
+  if (string_is_empty(destination) || ((target = client_find_server(source, destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s",
                client_get_id_or_name(&me, source), me.name, client_get_id_or_name(source, source));
   else if (target)

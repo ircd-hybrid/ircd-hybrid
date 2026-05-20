@@ -31,6 +31,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_id.h"
 #include "conf.h"
 #include "conf_resv.h"
@@ -587,7 +588,7 @@ mr_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Client *target = hash_find_client(nick);
+  struct Client *target = client_find_entity_by_name(nick);
   if (target == NULL || target == source)
     set_initial_nick(source, nick);
   else
@@ -660,7 +661,7 @@ m_nick(struct Client *source, int parc, char *parv[])
     }
   }
 
-  struct Client *target = hash_find_client(nick);
+  struct Client *target = client_find_entity_by_name(nick);
   if (target == NULL)
     nick_change_local(source, nick);
   else if (target == source)
@@ -712,7 +713,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
     return;
 
   /* If the nick doesn't exist, allow it and process like normal */
-  struct Client *target = hash_find_client(parv[1]);
+  struct Client *target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
     nick_change_remote(source, parv);
   else if (client_is_unknown(target))
@@ -768,7 +769,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  struct Client *target = hash_find_id(parv[9]);
+  struct Client *target = client_find_entity_by_id(parv[9]);
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -785,7 +786,7 @@ ms_uid(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  target = hash_find_client(parv[1]);
+  target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
     uid_from_server(source, parc, parv);
   else if (client_is_unknown(target))

@@ -25,6 +25,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "client_find.h"
 #include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -78,7 +79,7 @@ monitor_add(struct Client *source, char *list)
     if (!monitor_subscribe(source, name))
       continue;  /* Name is already being monitored */
 
-    const struct Client *target = find_person(source, name);
+    const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
     {
       size_t masklen = strlen(name) + 1;  /* +1 for comma */
@@ -173,7 +174,7 @@ monitor_status(struct Client *source)
   {
     const struct Monitor *monitor = node->data;
 
-    const struct Client *target = find_person(source, monitor->name);
+    const struct Client *const target = client_find_user_by_name(monitor->name);
     if (target == NULL)
     {
       size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */

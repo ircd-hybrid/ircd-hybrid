@@ -43,6 +43,7 @@
 
 #include "channel.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_id.h"
 #include "client_svstag.h"
 #include "conf.h"
@@ -511,13 +512,13 @@ mr_server(struct Client *source, int parc, char *parv[])
    * A fully established server with the same SID or name already exists in the
    * network view. This is a hard collision and the introduction must be rejected.
    */
-  if (hash_find_id(sid))
+  if (client_find_server_by_sid(sid))
   {
     _server_reject_connection(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
-  if (hash_find_server(name))
+  if (client_find_server_by_name(name))
   {
     _server_reject_connection(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
@@ -527,7 +528,7 @@ mr_server(struct Client *source, int parc, char *parv[])
    * A matching entry in the client hash may only be replaced if it is another
    * local connection that has not yet completed server registration.
    */
-  struct Client *const target = hash_find_client(name);
+  struct Client *const target = client_find_entity_by_name(name);
   if (target && target != source)
   {
     /*
@@ -632,13 +633,13 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * A fully established server with the same SID or name already exists in the
    * network view. This is a hard collision and the introduction must be rejected.
    */
-  if (hash_find_id(sid))
+  if (client_find_server_by_sid(sid))
   {
     _server_reject_introduction(source, SERVER_REJECT_SID_COLLISION, "'%s'", sid);
     return;
   }
 
-  if (hash_find_server(name))
+  if (client_find_server_by_name(name))
   {
     _server_reject_introduction(source, SERVER_REJECT_NAME_COLLISION, "'%s'", name);
     return;
@@ -648,7 +649,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
    * A matching entry in the client hash may only be replaced if it is a
    * local connection that has not yet completed server registration.
    */
-  struct Client *target = hash_find_client(name);
+  struct Client *target = client_find_entity_by_name(name);
   if (target)
   {
     /*

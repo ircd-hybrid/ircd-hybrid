@@ -31,6 +31,7 @@
 
 #include "channel.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_id.h"
 #include "client_input.h"
 #include "conf.h"
@@ -71,7 +72,7 @@ _parse_uid_belongs_to_source(const struct Client *source_server, const char *uid
    * A UID is only eligible for unknown-client cleanup if its server SID
    * resolves to a server that is actually routed through the sending link.
    */
-  const struct Client *server = hash_find_id(sid);
+  const struct Client *server = client_find_server_by_sid(sid);
   return server && server->nexthop == source_server;
 }
 
@@ -198,7 +199,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
   }
   else
   {
-    struct Client *target = find_person(source, name);
+    struct Client *const target = client_find_user(source, name);
     if (target == NULL || target->nexthop == source->nexthop)
       return;
 
@@ -275,9 +276,7 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
 
   if (*prefix && IsServer(ctx->client))
   {
-    struct Client *from = hash_find_id(prefix);
-    if (from == NULL)
-      from = hash_find_client(prefix);
+    struct Client *const from = client_find_entity(ctx->client, prefix);
 
     /*
      * Hmm! If the client corresponding to the prefix is not found--what is

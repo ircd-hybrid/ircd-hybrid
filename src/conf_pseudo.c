@@ -35,8 +35,8 @@
 #include "memory.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf_pseudo.h"
-#include "hash.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -85,10 +85,10 @@ _pseudo_message_handler(struct Client *source, int parc, char *parv[])
     msg = buf;
   }
 
-  struct Client *target = find_person(source, pseudo->nick);
+  struct Client *target = client_find_user_by_name(pseudo->nick);
   if (target)
   {
-    const struct Client *server = hash_find_server(pseudo->server);
+    const struct Client *const server = client_find_server_by_name(pseudo->server);  /* XXX: SID */
     if (server == NULL || target->uplink != server || client_is_me(server))
       target = NULL;
   }

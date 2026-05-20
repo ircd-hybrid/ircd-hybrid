@@ -27,7 +27,6 @@
 #include "io_time.h"
 #include "list.h"
 #include "client.h"
-#include "hash.h"
 #include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"

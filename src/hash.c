@@ -30,24 +30,13 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "io_string.h"
-#include "list.h"
-#include "memory.h"
 #include "rng_mt.h"
 
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
-#include "client_id.h"
-#include "conf.h"
 #include "hash.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "user_mode.h"
 
 /**
  * @var static struct Client *idTable[HASHSIZE]
@@ -323,49 +312,6 @@ hash_find_id(const char *name)
           prev->idhnext = client->idhnext;
           client->idhnext = idTable[hashv];
           idTable[hashv] = client;
-          break;
-        }
-      }
-    }
-  }
-
-  return client;
-}
-
-/**
- * @brief Find a server based on its name in the server hash table.
- *
- * This function searches for a server in the server hash table based on its name.
- * If found, it moves the server to the top of the list and returns it.
- * This reordering of the list optimizes subsequent lookups for the same name.
- *
- * @param name The name of the server to find.
- * @return A pointer to the found server, or NULL if not found.
- */
-struct Client *
-hash_find_server(const char *name)
-{
-  const uint32_t hashv = hash_string(name);
-  struct Client *client;
-
-  if (client_id_is_valid_sid(name))
-    return hash_find_id(name);
-
-  if ((client = clientTable[hashv]))
-  {
-    if ((!IsServer(client) && !client_is_me(client)) ||
-        io_strcasecmp(name, client->name))
-    {
-      struct Client *prev;
-
-      while (prev = client, (client = client->hnext))
-      {
-        if ((IsServer(client) || client_is_me(client)) &&
-            io_strcasecmp(name, client->name) == 0)
-        {
-          prev->hnext = client->hnext;
-          client->hnext = clientTable[hashv];
-          clientTable[hashv] = client;
           break;
         }
       }

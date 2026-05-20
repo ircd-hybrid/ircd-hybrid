@@ -32,6 +32,7 @@
 #include "io_time.h"
 #include "cap.h"
 #include "client.h"
+#include "client_find.h"
 #include "channel.h"
 #include "channel_mode.h"
 #include "hash.h"
@@ -556,7 +557,7 @@ m_who(struct Client *source, int parc, char *parv[])
   /* '/who nick' */
   if (who->matchsel == 0 || (who->matchsel & WHO_FIELD_NIC))
   {
-    const struct Client *target = find_person(source, mask);
+    const struct Client *const target = client_find_user_by_name(mask);
     if (target)
     {
       if (!(who->bitsel & WHOSELECT_OPER) ||

@@ -31,8 +31,8 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -142,11 +142,8 @@ mo_squit(struct Client *source, int parc, char *parv[])
 static void
 ms_squit(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target = hash_find_server(parv[1]);
+  struct Client *target = client_find_server(source, parv[1]);
   if (target == NULL)
-    return;
-
-  if (!IsServer(target) && !client_is_me(target))
     return;
 
   if (client_is_me(target))

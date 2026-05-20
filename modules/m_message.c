@@ -34,6 +34,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
 #include "conf_oper.h"
 #include "hash.h"
@@ -376,7 +377,7 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
   if (server == NULL)
     return;
 
-  struct Client *target = hash_find_server(server + 1);
+  struct Client *const target = client_find_server(source, server + 1);
   if (target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, server + 1);
@@ -436,7 +437,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
       return;
     }
   }
-  else if ((target = find_person(source, name)))
+  else if ((target = client_find_user(source, name)))
   {
     target_handle_client(source, target);
     return;

@@ -26,6 +26,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
+#include "client_find.h"
 #include "ircd.h"
 #include "send.h"
 #include "parse.h"
@@ -52,7 +53,7 @@ ms_metadata(struct Client *source, int parc, char *parv[])
 
   if (io_strcasecmp(parv[1], "client") == 0)
   {
-    struct Client *target = find_person(source, parv[2]);
+    struct Client *const target = client_find_user(source, parv[2]);
     if (target == NULL)
       return;
 

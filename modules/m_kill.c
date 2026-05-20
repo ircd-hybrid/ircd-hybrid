@@ -33,9 +33,9 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
 #include "conf_oper.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -59,24 +59,18 @@
 static void
 mo_kill(struct Client *source, int parc, char *parv[])
 {
-  struct Client *target = find_person(source, parv[1]);
+  bool from_history = false;
+
+  struct Client *const target = client_find_user_with_history(source, parv[1], &from_history);
   if (target == NULL)
   {
-    /*
-     * If the user has recently changed nick, automatically
-     * rewrite the KILL for this new nickname--this keeps
-     * servers in synch when nick change and kill collide
-     */
-    target = whowas_get_history(parv[1], ConfigGeneral.kill_chase_time_limit);
-    if (target == NULL)
-    {
-      sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[1]);
-      return;
-    }
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[1]);
+    return;
+  }
 
+  if (from_history)
     sendto_one_notice(source, &me, ":KILL changed from %s to %s",
                       parv[1], target->name);
-  }
 
   assert(IsClient(target));
   if (!client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL_REMOTE))
@@ -164,7 +158,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
 
-  struct Client *const target = find_person(source, parv[1]);
+  struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
   assert(IsClient(target));

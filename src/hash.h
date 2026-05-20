@@ -76,6 +76,5 @@ extern void hash_add_id(struct Client *);
 extern void hash_del_id(struct Client *);
 extern struct Client *hash_find_id(const char *);
 extern struct Client *hash_find_client(const char *);
-extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
 #endif  /* INCLUDED_hash_h */

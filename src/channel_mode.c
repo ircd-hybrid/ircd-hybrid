@@ -35,6 +35,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
 #include "extban.h"
 #include "ircd.h"
@@ -598,9 +599,15 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   if (parc <= *parn)
     return;
 
-  struct Client *client_target = find_chasing(client, parv[(*parn)++]);
+  const char *const target_name = parv[(*parn)++];
+  struct Client *client_target = client_find_user_with_history(client, target_name, NULL);
   if (client_target == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
+  {
+    if (client_is_local(client))
+      sendto_one_numeric(client, &me, ERR_NOSUCHNICK, target_name);
+
+    return;
+  }
 
   struct ChannelMember *member = channel_member_find(client_target, channel);
   if (member == NULL)

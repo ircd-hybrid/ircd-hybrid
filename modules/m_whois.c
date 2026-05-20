@@ -38,9 +38,9 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_svstag.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "numeric.h"
@@ -275,9 +275,9 @@ _whois_send(struct Client *source, struct Client *target)
 static void
 _whois_process(struct Client *source, const char *name)
 {
-  struct Client *target = hash_find_client(name);
+  struct Client *target = client_find_user(source, name);
 
-  if (target && IsClient(target))
+  if (target)
     _whois_send(source, target);
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);

@@ -31,8 +31,8 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf_connect.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -54,7 +54,7 @@ do_connect(struct Client *source, const char *name)
     return;
   }
 
-  const struct Client *target = hash_find_client(connect->name);
+  const struct Client *const target = client_find_entity_by_name(connect->name);
   if (target)
   {
     if (IsServer(target) || client_is_me(target))

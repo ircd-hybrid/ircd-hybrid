@@ -30,6 +30,7 @@
 #include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "hash.h"
 #include "io_string.h"
 #include "ircd.h"
@@ -350,7 +351,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     /*
      * If the client doesn't exist, or if it's fake direction/server, skip.
      */
-    struct Client *target = find_person(source, s);
+    struct Client *const target = client_find_user(source, s);
     if (target == NULL || target->nexthop != source->nexthop)
       continue;
 

@@ -30,8 +30,8 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -56,10 +56,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
   const char *const origin_name = parv[1];
   const char *const destination_name = parv[2];
 
-  struct Client *target = hash_find_id(destination_name);
-  if (target == NULL)
-    target = hash_find_client(destination_name);
-
+  struct Client *const target = client_find_entity(source, destination_name);
   if (target == NULL || client_is_me(target))
     return;  /* Target doesn't exist, or it's us. The chain ends here. */
 

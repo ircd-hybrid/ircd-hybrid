@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "list.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_svstag.h"
 #include "ircd.h"
 #include "send.h"
@@ -57,7 +58,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !IsServer(source))
     return;
 
-  struct Client *target = find_person(source, parv[1]);
+  struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
 

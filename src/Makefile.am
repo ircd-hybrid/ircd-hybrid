@@ -22,6 +22,8 @@ ircd_SOURCES = accept.c          \
                channel_mode.h    \
                client.c          \
                client.h          \
+               client_find.c     \
+               client_find.h     \
                client_id.c       \
                client_id.h       \
                client_input.c    \

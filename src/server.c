@@ -35,6 +35,7 @@
 #include "memory.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
 #include "conf_connect.h"
 #include "hash.h"
@@ -110,10 +111,10 @@ server_route_command(struct Client *client, const char *command, int server, cha
     return route;
   }
 
-  /* Attempt to find the target as a person or server. */
-  route->target = find_person(client, mask);
+  /* Attempt to find the target as a user or server. */
+  route->target = client_find_user(client, mask);
   if (route->target == NULL)
-    route->target = hash_find_server(mask);
+    route->target = client_find_server(client, mask);
 
   /*
    * Ensure the target is not from the same upstream server as the client,
@@ -406,7 +407,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   assert(!string_is_empty(connect->host));
   assert(connect->port > 0);
   assert(connect->timeout > 0);
-  assert(hash_find_client(connect->name) == NULL);
+  assert(client_find_entity_by_name(connect->name) == NULL);
 
   /* Still processing a DNS lookup? -> exit */
   if (connect->dns_pending)
@@ -519,7 +520,7 @@ server_connect_auto(void *unused)
       continue;
 
     /* Skip if a server with this name is already connected or connecting. */
-    if (hash_find_client(connect->name))
+    if (client_find_entity_by_name(connect->name))
       continue;
 
     /*

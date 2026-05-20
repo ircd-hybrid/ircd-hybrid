@@ -32,7 +32,7 @@
 
 #include "client.h"
 #include "client_id.h"
-#include "hash.h"
+#include "client_find.h"
 
 _Static_assert(CLIENT_ID_SID_LENGTH == 3, "CLIENT_ID_SID_LENGTH must be 3");
 _Static_assert(CLIENT_ID_UID_LENGTH == 9, "CLIENT_ID_UID_LENGTH must be 9");
@@ -297,7 +297,7 @@ client_id_allocate_uid(struct Client *client)
       return false;
 
     /* Verify the generated UID is not currently in use by an active client. */
-    if (hash_find_id(uid) == NULL)
+    if (client_find_entity_by_id(uid) == NULL)
     {
       memcpy(client->id, uid, CLIENT_ID_UID_LENGTH + 1);
       return true;

@@ -28,6 +28,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "client_svstag.h"
 #include "cloak.h"
 #include "hash.h"
@@ -51,7 +52,7 @@
 static void
 set_user_mode(struct Client *source, int parc, char *parv[])
 {
-  const struct Client *target = find_person(source, parv[1]);
+  const struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
   {
     if (client_is_local(source))

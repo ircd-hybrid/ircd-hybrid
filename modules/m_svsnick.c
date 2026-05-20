@@ -27,6 +27,7 @@
 
 #include "stdinc.h"
 #include "client.h"
+#include "client_find.h"
 #include "ircd.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -36,7 +37,6 @@
 #include "io_string.h"
 #include "user.h"
 #include "user_mode.h"
-#include "hash.h"
 #include "monitor.h"
 #include "whowas.h"
 #include "comm.h"
@@ -62,7 +62,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !IsServer(source))
     return;
 
-  struct Client *target = find_person(source, parv[1]);
+  struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
 
@@ -86,7 +86,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Client *exists_p = hash_find_client(new_nick);
+  struct Client *const exists_p = client_find_entity_by_name(new_nick);
   if (exists_p)
   {
     if (target == exists_p)

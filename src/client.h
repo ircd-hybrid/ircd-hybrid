@@ -326,8 +326,6 @@ extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct Client *client_create_local(void);
 extern struct Client *client_create_remote(struct Client *);
-extern struct Client *find_chasing(struct Client *, const char *);
-extern struct Client *find_person(const struct Client *, const char *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
 extern const char *client_get_visible_server_name(const struct Client *);

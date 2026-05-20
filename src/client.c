@@ -476,53 +476,6 @@ conf_try_ban(struct Client *client, int type, const char *reason)
   client_exit(client, reason);
 }
 
-/* find_person()
- *
- * inputs	- pointer to name
- * output	- return client pointer
- * side effects - find person by (nick)name
- */
-struct Client *
-find_person(const struct Client *client, const char *name)
-{
-  struct Client *target = NULL;
-
-  if (IsDigit(*name))
-  {
-    if (IsServer(client->nexthop))
-      target = hash_find_id(name);
-  }
-  else
-    target = hash_find_client(name);
-
-  if (target && IsClient(target))
-    return target;
-
-  return NULL;
-}
-
-/*
- * find_chasing - find the client structure for a nick name (name)
- *      using history mechanism if necessary. If the client is not found,
- *      an error message (NO SUCH NICK) is generated.
- */
-struct Client *
-find_chasing(struct Client *client, const char *name)
-{
-  struct Client *target = find_person(client, name);
-  if (target)
-    return target;
-
-  if (IsDigit(*name))
-    return NULL;
-
-  target = whowas_get_history(name, ConfigGeneral.kill_chase_time_limit);
-  if (target == NULL)
-    sendto_one_numeric(client, &me, ERR_NOSUCHNICK, name);
-
-  return target;
-}
-
 /*
  * client_get_name -  Return the name of the client
  *    for various tracking and

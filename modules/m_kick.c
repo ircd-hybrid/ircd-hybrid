@@ -32,6 +32,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
 #include "hash.h"
 #include "ircd.h"
@@ -115,9 +116,12 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Client *target = find_chasing(source, parv[2]);
+  struct Client *const target = client_find_user_with_history(source, parv[2], NULL);
   if (target == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
+  {
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[2]);
+    return;
+  }
 
   struct ChannelMember *member_target = channel_member_find(target, channel);
   if (member_target == NULL)
@@ -162,7 +166,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  struct Client *target = find_person(source, parv[2]);
+  struct Client *const target = client_find_user(source, parv[2]);
   if (target == NULL)
     return;
 

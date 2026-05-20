@@ -30,6 +30,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_find.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -60,7 +61,7 @@ m_ison(struct Client *source, int parc, char *parv[])
   for (const char *name = strtok_r(parv[1], " ", &p); name;
                    name = strtok_r(NULL,    " ", &p))
   {
-    const struct Client *target = find_person(source, name);
+    const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
       continue;
 

@@ -68,7 +68,7 @@ ms_svspart(struct Client *source, int parc, char *parv[])
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received wrong-direction SVSPART for %s (behind %s) from %s",
-                   target->name, source->nexthop->name, client_get_name(source, HIDE_IP));
+                   target->name, source->nexthop->name, source->name);
     return;
   }
 

@@ -920,7 +920,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
 /*! \brief Updates the client's oper_warn_count_down, warns the
  *         IRC operators if necessary, and updates
- *         join_leave_countdown as needed.
+ *         join_part_countdown as needed.
  * \param client Pointer to struct Client to check
  * \param name   Channel name or NULL if this is a part.
  */
@@ -928,7 +928,7 @@ static void
 _channel_check_spambot_warning(struct Client *client, const char *name)
 {
   if (GlobalSetOptions.spam_num &&
-      (client->connection->join_leave_count >= GlobalSetOptions.spam_num))
+      (client->connection->join_part_count >= GlobalSetOptions.spam_num))
   {
     if (client->connection->oper_warn_count_down)
       --client->connection->oper_warn_count_down;
@@ -945,25 +945,25 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
   }
   else
   {
-    const uintmax_t t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_leave_time;
+    const uintmax_t t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_part_time;
     if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
       const unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
-      if (decrement_count > client->connection->join_leave_count)
-        client->connection->join_leave_count = 0;
+      if (decrement_count > client->connection->join_part_count)
+        client->connection->join_part_count = 0;
       else
-        client->connection->join_leave_count -= decrement_count;
+        client->connection->join_part_count -= decrement_count;
     }
     else
     {
       if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_join_time) < GlobalSetOptions.spam_time)
-        ++client->connection->join_leave_count;  /* It's a possible spambot */
+        ++client->connection->join_part_count;  /* It's a possible spambot */
     }
 
     if (name)
       client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     else
-      client->connection->last_leave_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+      client->connection->last_part_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 }
 

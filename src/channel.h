@@ -72,7 +72,7 @@ struct Channel
   uintmax_t last_invite_time;  /**< Last time an INVITE to this channel has been issued; monotonic time */
   uintmax_t last_join_time;  /**< Last time a user has joined the channel; monotonic time */
   uintmax_t first_received_message_time;  /**< Channel flood control; monotonic time */
-  uint32_t received_number_of_privmsgs;
+  uint32_t received_privmsg_count;
   float number_joined;
   bool sent_join_flood_notice;  /**< Indicates whether a server notice about a join flood event has been sent to IRC operators. */
   bool sent_message_flood_notice;  /**< Indicates whether a server notice about a message flood event has been sent to IRC operators. */

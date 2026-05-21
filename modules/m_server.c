@@ -273,7 +273,7 @@ _server_establish_publish_local(struct Client *client, bool add_namehash)
 {
   assert(client && client_is_local(client));
   assert(IsServer(client));
-  assert(client->serv);
+  assert(client->server);
 
   if (add_namehash)
     hash_add_client(client);
@@ -283,7 +283,7 @@ _server_establish_publish_local(struct Client *client, bool add_namehash)
   list_move_node(&client->connection->node, &local_server_list, &unknown_list);
 
   list_add(client, &client->global_node, &global_server_list);
-  list_add(client, &client->uplink_node, &me.serv->child_server_list);
+  list_add(client, &client->uplink_node, &me.server->child_server_list);
 
   const size_t local_connection_count =
     list_length(&local_client_list) + list_length(&local_server_list);
@@ -574,7 +574,7 @@ static void
 ms_sid(struct Client *source, int parc, char *parv[])
 {
   assert(IsServer(source));
-  assert(source->serv);
+  assert(source->server);
   assert(source->nexthop);
 
   /* This handler should only ever be called for a fully established server. */
@@ -684,7 +684,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
     client_set_flag(target, FLAGS_SERVICE);
 
   list_add(target, &target->global_node, &global_server_list);
-  list_add(target, &target->uplink_node, &target->uplink->serv->child_server_list);
+  list_add(target, &target->uplink_node, &target->uplink->server->child_server_list);
 
   hash_add_client(target);
   hash_add_id(target);

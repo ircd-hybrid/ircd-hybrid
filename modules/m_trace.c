@@ -44,10 +44,10 @@ _trace_get_dependent(uint32_t *const servers,
                      uint32_t *const clients, const struct Client *target)
 {
   (*servers)++;
-  (*clients) += list_length(&target->serv->child_client_list);
+  (*clients) += list_length(&target->server->child_client_list);
 
   list_node_t *node;
-  LIST_FOREACH(node, target->serv->child_server_list.head)
+  LIST_FOREACH(node, target->server->child_server_list.head)
     _trace_get_dependent(servers, clients, node->data);
 }
 
@@ -102,7 +102,7 @@ _trace_send_status(struct Client *source, const struct Client *target)
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
                          class_name, servers, clients, name,
-                         target->serv->initiator_name ? target->serv->initiator_name : "*", "*",
+                         target->server->initiator_name ? target->server->initiator_name : "*", "*",
                          me.name, client_get_socket_idle_duration(target));
       break;
     }

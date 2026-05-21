@@ -323,10 +323,10 @@ _client_destroy(struct Client *client)
   assert(list_is_empty(&client->channel_list));
   assert(list_is_empty(&client->svstag_list));
 
-  if (client->serv)
+  if (client->server)
   {
-    server_destroy(client->serv);
-    client->serv = NULL;
+    server_destroy(client->server);
+    client->server = NULL;
   }
 
   io_free(client->tls_certfp);
@@ -644,10 +644,10 @@ static void
 _client_exit_unwind_tree(struct Client *split_root, const char *reason)
 {
   assert(split_root && IsServer(split_root));
-  assert(split_root->serv);
+  assert(split_root->server);
 
   list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_client_list.head)
   {
     struct Client *const child_client = node->data;
     assert(!client_is_local(child_client));
@@ -655,7 +655,7 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
     _client_exit_detach(child_client);
   }
 
-  LIST_FOREACH_SAFE(node, node_next, split_root->serv->child_server_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_server_list.head)
   {
     struct Client *const child_server = node->data;
     _client_exit_unwind_tree(child_server, reason);
@@ -668,7 +668,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
 {
   if (IsServer(client))
   {
-    assert(client->serv);
+    assert(client->server);
     assert(client->uplink);
 
     char split_reason[HOSTLEN + HOSTLEN + 2];  /* +2 for space and \0 */
@@ -732,19 +732,19 @@ _client_exit_detach(struct Client *client)
 
   if (IsClient(client))
   {
-    assert(client->uplink && client->uplink->serv);
-    assert(list_find(&client->uplink->serv->child_client_list, client));
+    assert(client->uplink && client->uplink->server);
+    assert(list_find(&client->uplink->server->child_client_list, client));
 
     list_remove(&client->global_node, &global_client_list);
-    list_remove(&client->uplink_node, &client->uplink->serv->child_client_list);
+    list_remove(&client->uplink_node, &client->uplink->server->child_client_list);
   }
   else if (IsServer(client))
   {
-    assert(client->uplink && client->uplink->serv);
-    assert(list_find(&client->uplink->serv->child_server_list, client));
+    assert(client->uplink && client->uplink->server);
+    assert(list_find(&client->uplink->server->child_server_list, client));
 
     list_remove(&client->global_node, &global_server_list);
-    list_remove(&client->uplink_node, &client->uplink->serv->child_server_list);
+    list_remove(&client->uplink_node, &client->uplink->server->child_server_list);
   }
 
   if (client->id[0])

@@ -202,10 +202,10 @@ server_is_valid_name(const char *name)
 struct Server *
 server_get_or_create(struct Client *client)
 {
-  if (client->serv == NULL)
-    client->serv = io_calloc(sizeof(*client->serv));
+  if (client->server == NULL)
+    client->server = io_calloc(sizeof(*client->server));
 
-  return client->serv;
+  return client->server;
 }
 
 void
@@ -568,13 +568,13 @@ server_schedule_reconnect(struct Client *client)
 struct ConnectItem *
 server_conf_get(const struct Client *client)
 {
-  return client->serv ? client->serv->conf : NULL;
+  return client->server ? client->server->conf : NULL;
 }
 
 void
 server_conf_set(struct Client *client, struct ConnectItem *new_connect)
 {
-  if (client->serv == NULL)
+  if (client->server == NULL)
     return;
 
   struct ConnectItem *const old_connect = server_conf_get(client);
@@ -584,5 +584,5 @@ server_conf_set(struct Client *client, struct ConnectItem *new_connect)
   connect_incref(new_connect);
   connect_decref(old_connect);
 
-  client->serv->conf = new_connect;
+  client->server->conf = new_connect;
 }

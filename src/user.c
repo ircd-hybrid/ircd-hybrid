@@ -321,7 +321,7 @@ user_register_local(struct Client *client)
   event_schedule(client->connection->flood_recalc_event);
 
   list_add(client, &client->global_node, &global_client_list);
-  list_add(client, &client->uplink_node, &client->uplink->serv->child_client_list);
+  list_add(client, &client->uplink_node, &client->uplink->server->child_client_list);
   list_move_node(&client->connection->node, &local_client_list, &unknown_list);
 
   if (list_length(&local_client_list) > Count.max_loc)
@@ -383,7 +383,7 @@ user_register_remote(struct Client *client)
   client_set_state(client, CLIENT_STATE_CLIENT);
 
   list_add(client, &client->global_node, &global_client_list);
-  list_add(client, &client->uplink_node, &client->uplink->serv->child_client_list);
+  list_add(client, &client->uplink_node, &client->uplink->server->child_client_list);
 
   if (list_length(&global_client_list) > Count.max_tot)
     Count.max_tot = list_length(&global_client_list);

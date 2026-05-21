@@ -160,9 +160,9 @@ struct Connection
   uint32_t capab;  /**< Bitmask of server-announced CAPAB features. */
   uint32_t operflags;  /**< Bitmask of IRC Operator privilege flags. */
   uint32_t ping_cookie_token;  /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
-  uint32_t join_leave_count;  /**< Count of JOIN/LEAVE in less than MIN_JOIN_LEAVE_TIME seconds */
+  uint32_t join_part_count;  /**< Count of JOIN/PART in less than MIN_JOIN_LEAVE_TIME seconds */
   uint32_t oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
-  uint32_t received_number_of_privmsgs;
+  uint32_t received_privmsg_count;
   uintmax_t last_broadcast_id;  /**< ID of the last broadcast this nexthop was part of; for send de-duplication. */
   uintmax_t last_receive_time;  /**< Monotonic time of the last successful data read from the socket. */
   uintmax_t ping_sent_time;  /**< Monotonic time the last PING was sent, or 0 if none is pending. */
@@ -172,7 +172,7 @@ struct Connection
   uintmax_t first_received_message_time;  /**< Monotonic time */
   uintmax_t last_privmsg_time;  /**< Last time we got a PRIVMSG; monotonic time */
   uintmax_t last_join_time;  /**< When this client last joined a channel; monotonic time */
-  uintmax_t last_leave_time;  /**< When this client last left a channel; monotonic time */
+  uintmax_t last_part_time;  /**< When this client last left a channel; monotonic time */
   struct ListTask  *list_task;  /**< State for an in-progress /LIST command. */
   struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
   struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
@@ -217,7 +217,7 @@ struct Client
   struct Connection *connection;  /**< Connection structure associated with this client */
   struct Client *hnext;  /**< Next entry in the nickname/servername hash table bucket. */
   struct Client *idhnext;  /**< Next entry in the UID/SID hash table bucket. */
-  struct Server *serv;  /**< If non-NULL, points to server-specific data. */
+  struct Server *server;  /**< If non-NULL, points to server-specific data. */
   struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
   struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
 

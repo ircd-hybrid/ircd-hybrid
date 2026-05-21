@@ -164,15 +164,15 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
 
   if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
   {
-    if (target->connection->received_number_of_privmsgs)
-      target->connection->received_number_of_privmsgs = 0;
+    if (target->connection->received_privmsg_count)
+      target->connection->received_privmsg_count = 0;
     else
       client_unset_flag(target, FLAGS_FLOOD_NOTICED);
 
     target->connection->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
-  if (target->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  if (target->connection->received_privmsg_count >= GlobalSetOptions.floodcount)
   {
     if (!client_has_flag(target, FLAGS_FLOOD_NOTICED))
     {
@@ -186,7 +186,7 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
     return true;
   }
 
-  ++target->connection->received_number_of_privmsgs;
+  ++target->connection->received_privmsg_count;
   return false;
 }
 
@@ -213,15 +213,15 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
 
   if (channel->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
   {
-    if (channel->received_number_of_privmsgs)
-      channel->received_number_of_privmsgs = 0;
+    if (channel->received_privmsg_count)
+      channel->received_privmsg_count = 0;
     else
       channel->sent_message_flood_notice = false;
 
     channel->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
   }
 
-  if (channel->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  if (channel->received_privmsg_count >= GlobalSetOptions.floodcount)
   {
     if (channel->sent_message_flood_notice == false)
     {
@@ -238,7 +238,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
     }
   }
 
-  ++channel->received_number_of_privmsgs;
+  ++channel->received_privmsg_count;
   return false;
 }
 

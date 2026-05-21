@@ -145,7 +145,7 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
   {
     char line_buffer[IRCD_BUFSIZE];
     const char *const server_id = client_is_oper(client) ? current_server->id : NULL;
-    const unsigned int server_users = list_length(&current_server->serv->child_client_list);
+    const unsigned int server_users = list_length(&current_server->server->child_client_list);
     const unsigned int global_users = list_length(&global_client_list);
 
     _map_format_line(line_buffer, sizeof(line_buffer),
@@ -167,14 +167,14 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
 
   unsigned int visible_server_count = 0;
   list_node_t *node;
-  LIST_FOREACH(node, current_server->serv->child_server_list.head)
+  LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
     const struct Client *server = node->data;
     if (!_map_should_hide_server(server, client))
       ++visible_server_count;
   }
 
-  LIST_FOREACH(node, current_server->serv->child_server_list.head)
+  LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
     const struct Client *server = node->data;
     if (_map_should_hide_server(server, client))

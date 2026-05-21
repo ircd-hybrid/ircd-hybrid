@@ -162,7 +162,7 @@ _links_cache_update(void *unused)
     entry->name = io_strdup(server->name);
     entry->uplink_name = io_strdup(me.name);
     entry->description = io_strdup(server->info);
-    entry->user_count = list_length(&server->serv->child_client_list);
+    entry->user_count = list_length(&server->server->child_client_list);
 
     list_add_tail(entry, &entry->node, inactive_buffer);
   }

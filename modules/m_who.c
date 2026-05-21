@@ -341,7 +341,7 @@ _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
   LIST_FOREACH(node, global_client_list.head)
   {
     struct Client *target = node->data;
-    assert(IsClient(target));
+    assert(client_is_user(target));
 
     if (user_mode_has_flag(target, UMODE_INVISIBLE))
     {

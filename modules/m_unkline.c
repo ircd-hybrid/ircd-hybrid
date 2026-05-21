@@ -60,20 +60,20 @@ kline_remove(struct Client *source, const struct aline_ctx *aline)
 
   if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)) == NULL)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
     return;
   }
 
   if (!IsConfDatabase(conf))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",
                         conf->user, conf->host);
     return;
   }
 
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_one_notice(source, &me, ":K-Line for [%s@%s] is removed",
                       conf->user, conf->host);
 

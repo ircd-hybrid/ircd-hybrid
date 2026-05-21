@@ -84,7 +84,7 @@ list_task_create(struct Client *client)
 {
   assert(client);
   assert(client_is_local(client));
-  assert(IsClient(client));
+  assert(client_is_user(client));
   assert(client->connection->list_task == NULL);
 
   struct ListTask *task = io_calloc(sizeof(*task));
@@ -266,7 +266,7 @@ list_task_start(struct ListTask *task)
 {
   assert(task);
   assert(task->client);
-  assert(IsClient(task->client));
+  assert(client_is_user(task->client));
   assert(client_is_local(task->client));
   assert(task->is_queued == false);
 

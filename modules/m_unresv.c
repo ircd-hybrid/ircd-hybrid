@@ -48,20 +48,20 @@ resv_remove(struct Client *source, const struct aline_ctx *aline)
   struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
   if (resv == NULL)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":No RESV for %s", aline->mask);
     return;
   }
 
   if (resv->in_database == false)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
                         resv->mask);
     return;
   }
 
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_one_notice(source, &me, ":RESV for [%s] is removed", resv->mask);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the RESV for: [%s]",

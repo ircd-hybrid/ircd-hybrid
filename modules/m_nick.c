@@ -66,7 +66,7 @@
 static bool
 check_clean_nick(struct Client *source, const char *nick)
 {
-  assert(IsServer(source) || (IsClient(source) && !client_is_local(source)));
+  assert(client_is_server(source) || (client_is_user(source) && !client_is_local(source)));
 
   /*
    * The old code did some wacky stuff here, if the nick is invalid, kill it
@@ -76,12 +76,12 @@ check_clean_nick(struct Client *source, const char *nick)
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
-                 nick, IsServer(source) ? source->name : source->uplink->name, source->nexthop->name);
+                 nick, client_is_server(source) ? source->name : source->uplink->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
   /* Bad nick change */
-  if (!IsServer(source))
+  if (!client_is_server(source))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
                    me.id, source->id, me.name);
@@ -97,7 +97,7 @@ check_clean_nick(struct Client *source, const char *nick)
 static bool
 check_clean_uid(struct Client *source, const char *nick, const char *uid)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
   if (client_id_is_valid_uid(uid) && strncmp(uid, source->id, CLIENT_ID_SID_LENGTH) == 0)
     return true;
@@ -124,7 +124,7 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
 static bool
 check_clean_user(struct Client *source, const char *nick, const char *user)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
   if (valid_username(user, false))
     return true;
@@ -151,7 +151,7 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
 static bool
 check_clean_host(struct Client *source, const char *nick, const char *host)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
   if (valid_hostname(host))
     return true;
@@ -201,7 +201,7 @@ static void
 nick_change_local(struct Client *source, const char *nick)
 {
   assert(source->name[0] && !string_is_empty(nick));
-  assert(MyClient(source));
+  assert(client_is_local_user(source));
 
   if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
     source->connection->nick.count = 0;
@@ -268,7 +268,7 @@ nick_change_remote(struct Client *source, char *parv[])
   const char *const new_nick = parv[1];
 
   assert(!string_is_empty(new_nick));
-  assert(IsClient(source));
+  assert(client_is_user(source));
   assert(source->name[0]);
 
   /* Client changing their nick */
@@ -386,8 +386,8 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   const char *uid = parv[9];
   uintmax_t newts = strtoumax(parv[3], NULL, 10);
 
-  assert(IsServer(source));
-  assert(IsClient(target));
+  assert(client_is_server(source));
+  assert(client_is_user(target));
 
   /* Server introducing new nick */
 
@@ -468,8 +468,8 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
 {
   uintmax_t newts = strtoumax(parv[2], NULL, 10);
 
-  assert(IsClient(source));
-  assert(IsClient(target));
+  assert(client_is_user(source));
+  assert(client_is_user(target));
   assert(newts);
 
   /* It's a client changing nick and causing a collide */
@@ -611,7 +611,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 {
   const struct ResvItem *resv = NULL;
 
-  assert(MyClient(source));
+  assert(client_is_local_user(source));
 
   if (string_is_empty(parv[1]))
   {
@@ -706,7 +706,7 @@ m_nick(struct Client *source, int parc, char *parv[])
 static void
 ms_nick(struct Client *source, int parc, char *parv[])
 {
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;  /* Servers and unknown clients can't change nicks.. */
 
   if (!check_clean_nick(source, parv[1]))

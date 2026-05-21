@@ -96,14 +96,14 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
       min_cidr = ConfigGeneral.dline_min_cidr6;
       break;
     default:  /* HM_HOST */
-      if (IsClient(source))
+      if (client_is_user(source))
         sendto_one_notice(source, &me, ":Invalid D-Line");
       return;
   }
 
   if (min_cidr > 0 && !client_is_service(source) && (unsigned int)bits < min_cidr)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
     return;
   }
@@ -111,7 +111,7 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
   struct MaskItem *conf;
   if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, NULL, NULL, 1)))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":[%s] already D-lined by [%s] - %s",
                         aline->host, conf->host, conf->reason);
     return;
@@ -133,7 +133,7 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
   {
     conf->until = conf->setat + aline->duration;
 
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s]",
                         aline->duration / 60, conf->host);
 
@@ -145,7 +145,7 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
   }
   else
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added D-Line [%s]", conf->host);
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added D-Line for [%s] [%s]",

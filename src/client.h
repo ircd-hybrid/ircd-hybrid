@@ -76,12 +76,6 @@ enum client_state
   CLIENT_STATE_ME,  /**< This is &me */
 };
 
-/* XXX */
-#define IsServer(x)             ((x)->state == CLIENT_STATE_SERVER)
-#define IsClient(x)             ((x)->state == CLIENT_STATE_CLIENT)
-#define MyClient(x)             (client_is_local(x) && IsClient(x))
-/* XXX */
-
 enum client_class_type
 {
   CLIENT_CLASS_BASE,
@@ -143,7 +137,7 @@ enum
 struct Server
 {
   list_t child_server_list;  /**< List of servers that are directly connected to this server. */
-  list_t child_client_list;  /**< List of clients that are directly connected to this server. */
+  list_t child_user_list;  /**< List of users that are directly connected to this server. */
   char *initiator_name;  /**< The name of the oper who initiated an outbound link, or "AutoConn." */
   struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
@@ -418,6 +412,24 @@ client_is_unknown(const struct Client *client)
 }
 
 static inline bool
+client_is_server(const struct Client *client)
+{
+  return client->state == CLIENT_STATE_SERVER;
+}
+
+static inline bool
+client_is_user(const struct Client *client)
+{
+  return client->state == CLIENT_STATE_CLIENT;
+}
+
+static inline bool
+client_is_local_user(const struct Client *client)
+{
+  return client_is_local(client) && client_is_user(client);
+}
+
+static inline bool
 client_is_oper(const struct Client *client)
 {
   return user_mode_has_flag(client, UMODE_OPER);
@@ -462,7 +474,7 @@ client_is_service(const struct Client *client)
 static inline const char *
 client_get_id_or_name(const struct Client *subject_client, const struct Client *context_client)
 {
-  if (IsServer(context_client->nexthop) && subject_client->id[0])
+  if (client_is_server(context_client->nexthop) && subject_client->id[0])
     return subject_client->id;
 
   return subject_client->name;

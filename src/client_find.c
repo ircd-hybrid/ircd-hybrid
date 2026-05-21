@@ -37,7 +37,7 @@
 static bool
 _client_find_source_can_lookup_ids(const struct Client *source)
 {
-  return IsServer(source->nexthop) || client_is_me(source->nexthop);
+  return client_is_server(source->nexthop) || client_is_me(source->nexthop);
 }
 
 struct Client *
@@ -47,7 +47,7 @@ client_find_user_by_name(const char *name)
     return NULL;
 
   struct Client *const client = hash_find_client(name);
-  if (client && IsClient(client))
+  if (client && client_is_user(client))
     return client;
 
   return NULL;
@@ -60,7 +60,7 @@ client_find_user_by_uid(const char *uid)
     return NULL;
 
   struct Client *const client = hash_find_id(uid);
-  if (client && IsClient(client))
+  if (client && client_is_user(client))
     return client;
 
   return NULL;
@@ -73,7 +73,7 @@ client_find_server_by_name(const char *name)
     return NULL;
 
   struct Client *const client = hash_find_client(name);
-  if (client && (IsServer(client) || client_is_me(client)))
+  if (client && (client_is_server(client) || client_is_me(client)))
     return client;
 
   return NULL;
@@ -86,7 +86,7 @@ client_find_server_by_sid(const char *sid)
     return NULL;
 
   struct Client *const client = hash_find_id(sid);
-  if (client && (IsServer(client) || client_is_me(client)))
+  if (client && (client_is_server(client) || client_is_me(client)))
     return client;
 
   return NULL;

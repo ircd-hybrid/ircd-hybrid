@@ -60,20 +60,20 @@ dline_remove(struct Client *source, const struct aline_ctx *aline)
 
   if ((conf = find_conf_by_address(NULL, piphost, CONF_DLINE, NULL, NULL, 0)) == NULL)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":No D-Line for [%s] found", aline->host);
     return;
   }
 
   if (!IsConfDatabase(conf))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":The D-Line for [%s] is in the configuration file and must be removed by hand",
                         conf->host);
     return;
   }
 
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_one_notice(source, &me, ":D-Line for [%s] is removed",
                       conf->host);
 

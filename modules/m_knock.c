@@ -50,7 +50,7 @@ _knock_notify_channel_members(const struct Client *source, const struct Channel 
 static void
 _knock_commit(const struct Client *source, struct Channel *channel, uintmax_t now)
 {
-  assert(IsClient(source));
+  assert(client_is_user(source));
 
   channel->last_knock_time = now;
 

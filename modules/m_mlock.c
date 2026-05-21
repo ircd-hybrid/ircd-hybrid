@@ -80,7 +80,7 @@ _mlock_apply(struct Client *source, struct Channel *channel, const char *mode_lo
 static void
 ms_mlock(struct Client *source, int parc, char *parv[])
 {
-  assert(!MyClient(source));
+  assert(!client_is_local_user(source));
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)

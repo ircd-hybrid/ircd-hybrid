@@ -105,7 +105,7 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
 void
 channel_add_member(struct Channel *channel, struct Client *client, uint32_t flags, bool track_join)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   _channel_track_join_flood(channel, client, track_join);
 
@@ -477,7 +477,7 @@ _channel_get_privacy_prefix(const struct Channel *channel)
 void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   const bool is_member = channel_member_find(client, channel) != NULL;
   const bool multi_prefix = client_has_cap(client, CAP_MULTI_PREFIX);
@@ -760,7 +760,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
 struct ChannelMember *
 channel_member_find(const struct Client *client, const struct Channel *channel)
 {
-  if (!IsClient(client))
+  if (!client_is_user(client))
     return NULL;
 
   /* Take the shortest of the two lists */
@@ -826,7 +826,7 @@ channel_send_perm_t
 channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
                        unsigned int statusmsg, const char *message, bool notice, const char **error)
 {
-  if (IsServer(client) || client_is_service(client))
+  if (client_is_server(client) || client_is_service(client))
     return CHANNEL_SEND_PERM_ELEVATED;
 
   if (client_is_local(client) && !client_has_flag(client, FLAGS_EXEMPTRESV))
@@ -1012,7 +1012,7 @@ channel_set_mode_lock(struct Client *client, struct Channel *channel, const char
 void
 channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
-  assert(MyClient(client));
+  assert(client_is_local_user(client));
 
   char *p = NULL;
   for (const char *name = strtok_r(chan_list, ",", &p); name;
@@ -1191,7 +1191,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
 void
 channel_part_list(struct Client *client, char *list, const char *reason)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;

@@ -108,7 +108,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
     {
       client_set_flag(to, FLAGS_SENDQEX);
 
-      if (IsServer(to))
+      if (client_is_server(to))
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Max SendQ limit exceeded for %s: %zu > %u",
                        client_get_name(to, HIDE_IP), new_sendq_size, max_sendq);
@@ -148,7 +148,7 @@ sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct db
 {
   assert(to && client_is_local(to));
   assert(!client_is_me(to));
-  assert(IsServer(to));
+  assert(client_is_server(to));
   assert(to->nexthop == to);
 
   if (client_is_dead(to))
@@ -410,7 +410,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
     return;
 
   struct dbuf_block *buffer = dbuf_alloc();
-  if (MyClient(to) && IsClient(from))
+  if (client_is_local_user(to) && client_is_user(from))
     dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
                  from->name, from->username, from->host, command, to->name);
   else
@@ -539,7 +539,7 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   struct dbuf_block *buffer_local = dbuf_alloc();
   struct dbuf_block *buffer_remote = dbuf_alloc();
 
-  if (IsClient(source))
+  if (client_is_user(source))
     dbuf_put_fmt(buffer_local, ":%s!%s@%s ", source->name, source->username, source->host);
   else
     dbuf_put_fmt(buffer_local, ":%s ", source->name);
@@ -822,7 +822,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
   struct dbuf_block *buffer_local = dbuf_alloc();
   struct dbuf_block *buffer_remote = dbuf_alloc();
 
-  if (IsClient(from))
+  if (client_is_user(from))
     dbuf_put_fmt(buffer_local, ":%s!%s@%s ", from->name, from->username, from->host);
   else
     dbuf_put_fmt(buffer_local, ":%s ", from->name);
@@ -848,7 +848,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
     const struct ChannelMember *member = node->data;
     struct Client *target = member->client;
 
-    assert(IsClient(target));
+    assert(client_is_user(target));
 
     if (client_is_dead(target->nexthop))
       continue;

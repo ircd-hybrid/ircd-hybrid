@@ -145,7 +145,7 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
   {
     char line_buffer[IRCD_BUFSIZE];
     const char *const server_id = client_is_oper(client) ? current_server->id : NULL;
-    const unsigned int server_users = list_length(&current_server->server->child_client_list);
+    const unsigned int server_users = list_length(&current_server->server->child_user_list);
     const unsigned int global_users = list_length(&global_client_list);
 
     _map_format_line(line_buffer, sizeof(line_buffer),

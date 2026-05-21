@@ -92,7 +92,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
 
   if (!client_is_service(source) && !aline_valid_mask(2, aline->user, aline->host))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me,
                         ":Please include at least %u non-wildcard characters with the mask",
                         ConfigGeneral.min_nonwildcard);
@@ -115,7 +115,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
 
   if (min_cidr > 0 && !client_is_service(source) && (unsigned int)bits < min_cidr)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
     return;
   }
@@ -123,7 +123,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   struct MaskItem *conf;
   if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
                         aline->user, aline->host, conf->user, conf->host, conf->reason);
     return;
@@ -146,7 +146,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   {
     conf->until = conf->setat + aline->duration;
 
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",
                         aline->duration / 60, conf->user, conf->host);
 
@@ -158,7 +158,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   }
   else
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
 

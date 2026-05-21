@@ -42,7 +42,7 @@
 static void
 do_connect(struct Client *source, const char *name)
 {
-  assert(IsClient(source));
+  assert(client_is_user(source));
 
   /*
    * Try to find the name. If it fails, notify and bail.
@@ -57,7 +57,7 @@ do_connect(struct Client *source, const char *name)
   const struct Client *const target = client_find_entity_by_name(connect->name);
   if (target)
   {
-    if (IsServer(target) || client_is_me(target))
+    if (client_is_server(target) || client_is_me(target))
       sendto_one_notice(source, &me, ":Connect: Server %s is already connected (via %s).",
                         target->name, target->nexthop->name);
     else if (client_is_connecting(target) || client_is_handshake(target))

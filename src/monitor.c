@@ -97,7 +97,7 @@ _monitor_destroy(struct Monitor *monitor)
 void
 monitor_notify_signon(const struct Client *client)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   struct Monitor *monitor = _monitor_find(client->name);
   if (monitor == NULL)
@@ -119,7 +119,7 @@ monitor_notify_signon(const struct Client *client)
 void
 monitor_notify_signoff(const struct Client *client)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   struct Monitor *monitor = _monitor_find(client->name);
   if (monitor == NULL)

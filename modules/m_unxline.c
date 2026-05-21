@@ -54,20 +54,20 @@ xline_remove(struct Client *source, const struct aline_ctx *aline)
   struct GecosItem *gecos = gecos_find(aline->mask, io_strcasecmp);
   if (gecos == NULL)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":No X-Line for %s", aline->mask);
     return;
   }
 
   if (gecos->in_database == false)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":The X-Line for %s is in the configuration file and must be removed by hand",
                         gecos->mask);
     return;
   }
 
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_one_notice(source, &me, ":X-Line for [%s] is removed", gecos->mask);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the X-Line for: [%s]",

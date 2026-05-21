@@ -150,8 +150,8 @@ target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
 static bool
 flood_attack_client(bool notice, struct Client *source, struct Client *target)
 {
-  assert(MyClient(target));
-  assert(IsClient(source));
+  assert(client_is_local_user(target));
+  assert(client_is_user(source));
 
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
@@ -230,7 +230,7 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
       channel->sent_message_flood_notice = true;
     }
 
-    if (MyClient(source))
+    if (client_is_local_user(source))
     {
       if (notice == false)
         sendto_one_notice(source, &me, ":*** Message to %s throttled due to flooding", channel->name);
@@ -291,7 +291,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 {
   ircd_hook_msg_client_ctx ctx = { .notice = notice, .source = source, .target = target, .text = text };
 
-  if (MyClient(source))
+  if (client_is_local_user(source))
   {
     if (target->away_message && notice == false)
       sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
@@ -300,7 +300,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
   }
 
-  if (MyClient(target) && IsClient(source))
+  if (client_is_local_user(target) && client_is_user(source))
   {
     if (flood_attack_client(notice, source, target))
       return;
@@ -336,7 +336,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
     return;
   }
 
-  if (MyClient(source) && !client_has_oper_flag(source, OPER_FLAG_MESSAGE_MASS))
+  if (client_is_local_user(source) && !client_has_oper_flag(source, OPER_FLAG_MESSAGE_MASS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
     return;
@@ -357,14 +357,14 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
   }
   else  /* Deprecated $server.mask */
   {
-    if (MyClient(source))
+    if (client_is_local_user(source))
       sendto_one_notice(source, &me, ":Invalid syntax for mass-message target '%s'. Use $$<servermask> for servers or $#<hostmask> for hosts.",
                         nick);
     /* Silently ignore for remote opers. */
     return;
   }
 
-  const struct Client *exclude_uplink = IsServer(source->nexthop) ? source->nexthop : NULL;
+  const struct Client *exclude_uplink = client_is_server(source->nexthop) ? source->nexthop : NULL;
   target_mask_ctx_t ctx = { .mask = mask };
 
   sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);
@@ -453,7 +453,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
     return;
   }
 
-  if (notice == false && MyClient(source))
+  if (notice == false && client_is_local_user(source))
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 }
 
@@ -521,7 +521,7 @@ m_privmsg(struct Client *source, int parc, char *parv[])
    * Servers have no reason to send privmsgs, yet sometimes there is cause
    * for a notice.. (for example remote kline replies) --fl_
    */
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
   if (client_is_local(source))

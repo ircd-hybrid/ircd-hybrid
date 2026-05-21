@@ -72,7 +72,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     sendto_one_notice(source, &me, ":KILL changed from %s to %s",
                       parv[1], target->name);
 
-  assert(IsClient(target));
+  assert(client_is_user(target));
   if (!client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill:remote");
@@ -135,7 +135,7 @@ _kill_source_name_for_target(const struct Client *source, const struct Client *t
 static const char *
 _kill_source_name_for_exit_reason(const struct Client *source)
 {
-  if (IsServer(source) || client_is_me(source))
+  if (client_is_server(source) || client_is_me(source))
     return client_get_visible_server_name(source);
 
   return source->name;
@@ -161,7 +161,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
   struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
-  assert(IsClient(target));
+  assert(client_is_user(target));
 
   char *reason = strchr(parv[2], ' ');
   if (reason)
@@ -171,7 +171,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
 
   if (client_is_local(target))
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one(target, ":%s!%s@%s KILL %s :%s",
                  source->name, source->username, source->host, target->name, reason);
     else
@@ -187,7 +187,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
    * Path must contain at least 2 !'s, or bitchx falsely declares it
    * local --fl
    */
-  if (IsClient(source))  /* Send it normally */
+  if (client_is_user(source))  /* Send it normally */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
                    target->name, target->username, target->host,

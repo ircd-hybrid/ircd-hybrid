@@ -48,7 +48,7 @@
 static void
 ms_metadata(struct Client *source, int parc, char *parv[])
 {
-  if (!client_is_service(source) && !IsServer(source))
+  if (!client_is_service(source) && !client_is_server(source))
     return;
 
   if (io_strcasecmp(parv[1], "client") == 0)

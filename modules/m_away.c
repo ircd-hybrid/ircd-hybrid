@@ -48,7 +48,7 @@
 static void
 do_away(struct Client *source, const char *message)
 {
-  assert(IsClient(source));
+  assert(client_is_user(source));
 
   if (string_is_empty(message))
   {

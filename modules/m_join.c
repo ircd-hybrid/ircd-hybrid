@@ -172,7 +172,7 @@ ms_join(struct Client *source, int parc, char *parv[])
 {
   bool keep_our_modes = true;
 
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
   if (!channel_is_valid_name(parv[2], false))

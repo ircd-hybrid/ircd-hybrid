@@ -215,7 +215,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   char *pbuf = parabuf;
   unsigned int pargs = 0;
 
-  if (!IsServer(source))
+  if (!client_is_server(source))
     return;
 
   if (!channel_is_valid_name(parv[2], false))

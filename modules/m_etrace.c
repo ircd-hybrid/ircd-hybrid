@@ -48,7 +48,7 @@
 static void
 trace_send_status(struct Client *source, const struct Client *target)
 {
-  if (!IsClient(target))
+  if (!client_is_user(target))
     return;
 
   const char *const class_name = client_get_class_name(target);

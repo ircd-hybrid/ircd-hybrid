@@ -53,7 +53,7 @@ client_exit_hook(void *ctx_)
 {
   ircd_hook_client_exit_ctx *ctx = ctx_;
 
-  if (IsClient(ctx->client))
+  if (client_is_user(ctx->client))
     sendto_clients(UMODE_CCONN, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting: %s (%s@%s) [%s] [%s]",
                    ctx->client->name, ctx->client->username, ctx->client->realhost, ctx->client->sockhost,

@@ -46,7 +46,7 @@
 static void
 ms_certfp(struct Client *source, int parc, char *parv[])
 {
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
   io_free(source->tls_certfp);

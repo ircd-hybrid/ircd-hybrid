@@ -136,8 +136,8 @@ server_route_command(struct Client *client, const char *command, int server, cha
   /* Determine the result of the routing attempt. */
   if (route->target)
   {
-    assert(client_is_me(route->target) || IsServer(route->target) || IsClient(route->target));
-    if (client_is_me(route->target) || MyClient(route->target))
+    assert(client_is_me(route->target) || client_is_server(route->target) || client_is_user(route->target));
+    if (client_is_me(route->target) || client_is_local_user(route->target))
     {
       route->result = SERVER_ROUTE_ISME;
       return route;
@@ -215,9 +215,9 @@ server_destroy(struct Server *server)
   assert(list_is_empty(&server->child_server_list));
   assert(server->child_server_list.head == NULL);
   assert(server->child_server_list.tail == NULL);
-  assert(list_is_empty(&server->child_client_list));
-  assert(server->child_client_list.head == NULL);
-  assert(server->child_client_list.tail == NULL);
+  assert(list_is_empty(&server->child_user_list));
+  assert(server->child_user_list.head == NULL);
+  assert(server->child_user_list.tail == NULL);
 
   io_free(server->initiator_name);
   server->initiator_name = NULL;
@@ -555,7 +555,7 @@ void
 server_schedule_reconnect(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   struct ConnectItem *const connect = server_conf_get(client);
   if (connect == NULL)

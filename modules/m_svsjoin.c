@@ -51,7 +51,7 @@
 static void
 ms_svsjoin(struct Client *source, int parc, char *parv[])
 {
-  if (!client_is_service(source) && !IsServer(source))
+  if (!client_is_service(source) && !client_is_server(source))
     return;
 
   struct Client *const target = client_find_user(source, parv[1]);

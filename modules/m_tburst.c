@@ -104,7 +104,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
     /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
     if (topic_differs)
     {
-      if (IsClient(source))
+      if (client_is_user(source))
         sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                              source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
       else

@@ -43,7 +43,7 @@
 static void
 _topic_format_setter_info(const struct Client *source, char *buf, size_t buflen)
 {
-  if (IsClient(source))
+  if (client_is_user(source))
   {
     snprintf(buf, buflen, "%s!%s@%s",
              source->name, source->username, source->host);
@@ -56,7 +56,7 @@ _topic_format_setter_info(const struct Client *source, char *buf, size_t buflen)
 static void
 _topic_notify_channel_members(struct Client *source, const struct Channel *channel)
 {
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
                          source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
   else
@@ -70,7 +70,7 @@ _topic_commit(struct Client *source, struct Channel *channel, const char *topic)
   char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
   _topic_format_setter_info(source, topic_info, sizeof(topic_info));
 
-  channel_set_topic(channel, topic, topic_info, io_time_get(IO_TIME_REALTIME_SEC), !!MyClient(source));
+  channel_set_topic(channel, topic, topic_info, io_time_get(IO_TIME_REALTIME_SEC), client_is_local_user(source));
 
   sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
                  source->id, channel->name, string_or_empty(channel->topic));

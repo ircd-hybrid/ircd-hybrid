@@ -62,7 +62,7 @@ static bool
 _parse_uid_belongs_to_source(const struct Client *source_server, const char *uid)
 {
   assert(source_server);
-  assert(IsServer(source_server));
+  assert(client_is_server(source_server));
   assert(client_id_is_valid_uid(uid));
 
   char sid[CLIENT_ID_SID_LENGTH + 1];
@@ -80,7 +80,7 @@ static void
 _parse_handle_unknown_prefix(struct Client *client, const char *prefix, const char *buffer)
 {
   assert(client);
-  assert(IsServer(client));
+  assert(client_is_server(client));
   assert(!string_is_empty(prefix));
   assert(buffer);
 
@@ -164,7 +164,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
   /*
    * Avoid trash, we need it to come from a server and have a target
    */
-  if (parc < 2 || !IsServer(source))
+  if (parc < 2 || !client_is_server(source))
     return;
 
   /*
@@ -218,18 +218,18 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
   assert(parc <= PARSE_MAX_PARAMETERS + 2);
 
   ++command->count;
-  if (IsServer(source->nexthop))
+  if (client_is_server(source->nexthop))
     ++command->rcount;
 
   const struct CommandHandler *const handler = &command->handlers[source->nexthop->handler];
-  if (handler->end_grace_period && MyClient(source))
+  if (handler->end_grace_period && client_is_local_user(source))
     client_input_flood_endgrace(source);
 
   if (handler->args_min &&
       ((parc < handler->args_min) ||
        (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
   {
-    if (IsServer(source->nexthop))
+    if (client_is_server(source->nexthop))
     {
       log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
                 command->name, handler->args_min, parc, client_get_name(source->nexthop, SHOW_IP));
@@ -274,7 +274,7 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
     *prefix_end++ = '\0';
   ch = prefix_end;
 
-  if (*prefix && IsServer(ctx->client))
+  if (*prefix && client_is_server(ctx->client))
   {
     struct Client *const from = client_find_entity(ctx->client, prefix);
 
@@ -340,9 +340,9 @@ _parse_identify_command(parse_context_t *ctx)
      * seems to be well behaving. Perhaps this message
      * should never be generated, though...  --msa
      */
-    if (IsClient(ctx->source))
+    if (client_is_user(ctx->source))
       sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_numeric_str);
-    else if (IsServer(ctx->source))
+    else if (client_is_server(ctx->source))
       log_write(LOG_TYPE_DEBUG, "Unknown command from server: %s via %s",
                 ctx->command_numeric_str, client_get_name(ctx->client, SHOW_IP));
 

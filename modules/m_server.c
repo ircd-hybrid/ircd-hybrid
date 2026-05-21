@@ -185,7 +185,7 @@ _server_set_flags(struct Client *client, const char *flags)
 static void
 _server_burst_send_client(struct Client *client, const struct Client *target)
 {
-  assert(IsClient(target));
+  assert(client_is_user(target));
 
   sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target->uplink->id,
@@ -272,7 +272,7 @@ static void
 _server_establish_publish_local(struct Client *client, bool add_namehash)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
   assert(client->server);
 
   if (add_namehash)
@@ -295,7 +295,7 @@ static void
 _server_establish_report_link(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   if (tls_isusing(&client->connection->fd->tls))
   {
@@ -333,7 +333,7 @@ static void
 _server_establish_introduce_server(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   sendto_servers(client, 0, 0, ":%s SID %s 2 %s +%s :%s",
                  me.id, client->name, client->id, client_is_hidden(client) ? "h" : "", client->info);
@@ -343,7 +343,7 @@ static void
 _server_establish_send_servers(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
@@ -363,7 +363,7 @@ static void
 _server_establish_burst(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   list_node_t *node;
   LIST_FOREACH(node, global_client_list.head)
@@ -393,7 +393,7 @@ static void
 _server_establish_send_eobs(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   list_node_t *node;
   LIST_FOREACH_PREV(node, global_server_list.tail)
@@ -443,7 +443,7 @@ static void
 mr_server(struct Client *source, int parc, char *parv[])
 {
   assert(source && client_is_local(source));
-  assert(!IsServer(source));
+  assert(!client_is_server(source));
 
   if (listener_has_flag(source->connection->listener, LISTENER_CLIENT))
   {
@@ -573,12 +573,12 @@ mr_server(struct Client *source, int parc, char *parv[])
 static void
 ms_sid(struct Client *source, int parc, char *parv[])
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
   assert(source->server);
   assert(source->nexthop);
 
   /* This handler should only ever be called for a fully established server. */
-  if (!IsServer(source))
+  if (!client_is_server(source))
     return;
 
   const char *const name = parv[1];

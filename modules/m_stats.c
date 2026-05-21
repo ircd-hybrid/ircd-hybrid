@@ -1075,7 +1075,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
     else
       type = HIDE_IP;
 
-    if (IsServer(target) || client_is_connecting(target) || client_is_handshake(target))
+    if (client_is_server(target) || client_is_connecting(target) || client_is_handshake(target))
       if (!client_is_admin(client))
         type = MASK_IP;
 
@@ -1088,7 +1088,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
                        target->connection->recv.bytes >> 10,
                        client_get_session_duration(target),
                        client_get_socket_idle_duration(target),
-                       IsServer(target) ? capab_get(target, true) : "-");
+                       client_is_server(target) ? capab_get(target, true) : "-");
   }
 }
 

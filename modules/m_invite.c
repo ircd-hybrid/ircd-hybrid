@@ -88,8 +88,8 @@ _invite_notify_channel_members(const struct Client *source, const struct Client 
 static void
 _invite_commit(const struct Client *source, struct Client *target, struct Channel *channel, uintmax_t now)
 {
-  assert(IsClient(source));
-  assert(IsClient(target));
+  assert(client_is_user(source));
+  assert(client_is_user(target));
 
   channel->last_invite_time = now;
 
@@ -213,7 +213,7 @@ m_invite(struct Client *source, int parc, char *parv[])
 static void
 ms_invite(struct Client *source, int parc, char *parv[])
 {
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
   struct Client *const target = client_find_user(source, parv[1]);

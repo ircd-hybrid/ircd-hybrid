@@ -44,7 +44,7 @@ _squit_get_reason(const struct Client *source, const char *reason)
   if (!string_is_empty(reason))
     return reason;
 
-  if (IsClient(source))
+  if (client_is_user(source))
     return source->name;
 
   return client_get_visible_server_name(source);
@@ -73,7 +73,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
   LIST_FOREACH(node, global_server_list.head)
   {
     struct Client *const tmp = node->data;
-    if (IsServer(tmp))
+    if (client_is_server(tmp))
     {
       if (match(name, tmp->name) == 0)
       {

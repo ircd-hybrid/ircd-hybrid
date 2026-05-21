@@ -44,7 +44,7 @@ _trace_get_dependent(uint32_t *const servers,
                      uint32_t *const clients, const struct Client *target)
 {
   (*servers)++;
-  (*clients) += list_length(&target->server->child_client_list);
+  (*clients) += list_length(&target->server->child_user_list);
 
   list_node_t *node;
   LIST_FOREACH(node, target->server->child_server_list.head)

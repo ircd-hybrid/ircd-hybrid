@@ -57,7 +57,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   {
     if (!aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)))
     {
-      if (IsClient(source))
+      if (client_is_user(source))
         sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the RESV",
                           ConfigGeneral.min_nonwildcard_simple);
       return;
@@ -67,7 +67,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
   if (resv)
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":A RESV has already been placed on: %s", resv->mask);
     return;
   }
@@ -80,7 +80,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   {
     resv->expires_at = resv->created_at + aline->duration;
 
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. RESV [%s]",
                         aline->duration / 60, resv->mask);
 
@@ -92,7 +92,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   }
   else
   {
-    if (IsClient(source))
+    if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added RESV [%s] [%s]",
                         resv->mask, resv->reason);
 

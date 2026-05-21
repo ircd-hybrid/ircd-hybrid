@@ -50,7 +50,7 @@ static hook_flow_t
 client_exit_hook(void *ctx_)
 {
   ircd_hook_client_exit_ctx *ctx = ctx_;
-  if (IsClient(ctx->client) && client_has_flag(ctx->client->uplink, FLAGS_EOB))
+  if (client_is_user(ctx->client) && client_has_flag(ctx->client->uplink, FLAGS_EOB))
     sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                    ctx->client->uplink->name, ctx->client->name, ctx->client->username, ctx->client->realhost,

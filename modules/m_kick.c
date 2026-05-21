@@ -47,7 +47,7 @@ _kick_get_reason(const struct Client *source, const char *reason)
   if (!string_is_empty(reason))
     return reason;
 
-  if (IsClient(source))
+  if (client_is_user(source))
     return source->name;
 
   return client_get_visible_server_name(source);
@@ -57,7 +57,7 @@ static void
 _kick_notify_channel_members(struct Client *source, const struct Channel *channel,
                              const struct Client *target, const char *reason)
 {
-  if (IsClient(source))
+  if (client_is_user(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
                          source->name, source->username, source->host,
                          channel->name, target->name, ConfigChannel.max_kick_length, reason);

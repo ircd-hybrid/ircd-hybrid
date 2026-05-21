@@ -51,7 +51,7 @@
 static void
 ms_tmode(struct Client *source, int parc, char *parv[])
 {
-  assert(!MyClient(source));
+  assert(!client_is_local_user(source));
 
   struct Channel *channel = hash_find_channel(parv[2]);
   if (channel == NULL)

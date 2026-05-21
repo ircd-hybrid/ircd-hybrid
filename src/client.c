@@ -112,7 +112,7 @@ client_reset_activity_timeout(struct Client *client)
     timeout_duration_ms = ConfigGeneral.registration_timeout * 1000ULL;
   else
   {
-    assert(IsClient(client) || IsServer(client));
+    assert(client_is_user(client) || client_is_server(client));
     timeout_duration_ms = client_get_ping_freq(client) * 1000ULL;
   }
 
@@ -268,7 +268,7 @@ struct Client *
 client_create_remote(struct Client *uplink)
 {
   assert(uplink);
-  assert(IsServer(uplink));
+  assert(client_is_server(uplink));
 
   struct Client *const client = io_calloc(sizeof(*client));
   /* Remote entity topology: Inherit the physical route (nexthop) from the logical parent (uplink). */
@@ -470,7 +470,7 @@ conf_try_ban(struct Client *client, int type, const char *reason)
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%c-line active for %s",
                  ban_type, client_get_name(client, HIDE_IP));
 
-  if (IsClient(client))
+  if (client_is_user(client))
     sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
 
   client_exit(client, reason);
@@ -492,7 +492,7 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
   if (!client_is_local(client))
     return client->name;
 
-  if (IsServer(client) || client_is_connecting(client) || client_is_handshake(client))
+  if (client_is_server(client) || client_is_connecting(client) || client_is_handshake(client))
     if (io_strcasecmp(client->name, client->host) == 0)
       return client->name;
 
@@ -523,7 +523,7 @@ const char *
 client_get_visible_server_name(const struct Client *client)
 {
   assert(client);
-  assert(IsServer(client) || client_is_me(client));
+  assert(client_is_server(client) || client_is_me(client));
 
   if (client_is_hidden(client) || ConfigServerHide.hide_servers)
     return me.name;
@@ -540,7 +540,7 @@ client_get_visible_server_name(const struct Client *client)
 const char *
 client_get_oper_name(const struct Client *client)
 {
-  if (IsServer(client))
+  if (client_is_server(client))
     return client->name;
 
   const char *oper_name;
@@ -635,7 +635,7 @@ _client_exit_teardown_connection(struct Client *client)
 static void
 _client_exit_notify_channel_members(struct Client *client, const char *reason)
 {
-  assert(client && IsClient(client));
+  assert(client && client_is_user(client));
   sendto_common_channels_local(client, false, 0, 0, ":%s!%s@%s QUIT :%s",
                                client->name, client->username, client->host, reason);
 }
@@ -643,11 +643,11 @@ _client_exit_notify_channel_members(struct Client *client, const char *reason)
 static void
 _client_exit_unwind_tree(struct Client *split_root, const char *reason)
 {
-  assert(split_root && IsServer(split_root));
+  assert(split_root && client_is_server(split_root));
   assert(split_root->server);
 
   list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_client_list.head)
+  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_user_list.head)
   {
     struct Client *const child_client = node->data;
     assert(!client_is_local(child_client));
@@ -666,7 +666,7 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
 static void
 _client_exit_notify_network(struct Client *client, const char *reason)
 {
-  if (IsServer(client))
+  if (client_is_server(client))
   {
     assert(client->server);
     assert(client->uplink);
@@ -692,7 +692,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
     /* Recursively handle the departure of all entities behind this server. */
     _client_exit_unwind_tree(client, split_reason);
   }
-  else if (IsClient(client))
+  else if (client_is_user(client))
   {
     assert(client->nexthop);
 
@@ -713,7 +713,7 @@ _client_exit_detach(struct Client *client)
   assert(list_find(&oper_list, client) == NULL);
   assert(list_find(&abort_list, client) == NULL);
 
-  if (IsClient(client))
+  if (client_is_user(client))
   {
     if (client_is_oper(client))
       --Count.oper;
@@ -730,15 +730,15 @@ _client_exit_detach(struct Client *client)
     monitor_notify_signoff(client);
   }
 
-  if (IsClient(client))
+  if (client_is_user(client))
   {
     assert(client->uplink && client->uplink->server);
-    assert(list_find(&client->uplink->server->child_client_list, client));
+    assert(list_find(&client->uplink->server->child_user_list, client));
 
     list_remove(&client->global_node, &global_client_list);
-    list_remove(&client->uplink_node, &client->uplink->server->child_client_list);
+    list_remove(&client->uplink_node, &client->uplink->server->child_user_list);
   }
-  else if (IsServer(client))
+  else if (client_is_server(client))
   {
     assert(client->uplink && client->uplink->server);
     assert(list_find(&client->uplink->server->child_server_list, client));
@@ -768,7 +768,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
 
-  if (IsClient(client))
+  if (client_is_user(client))
   {
     log_write(LOG_TYPE_USER,
               "SESSION END: nick=\"%s\" user=\"%s\" host=\"%s\" ip=\"%s\" "
@@ -784,7 +784,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
               client_get_class_name(client),
               client->connection->oper_name ? client->connection->oper_name : "-", reason);
   }
-  else if (IsServer(client))
+  else if (client_is_server(client))
   {
     log_write(LOG_TYPE_IRCD,
               "LINK END: name=\"%s\" ip=\"%s\" duration=\"%s\" "
@@ -804,7 +804,7 @@ static void
 _client_exit_cleanup_server_connection(struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
-  assert(IsServer(client));
+  assert(client_is_server(client));
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Link Closed: %s [ip=%s class=%s uptime=\"%s\" sent=%juKiB recv=%juKiB] (Reason: %s)",
@@ -831,7 +831,7 @@ static void
 _client_exit_cleanup_client_connection(struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   _client_exit_log_session(client, reason);
 
@@ -897,7 +897,7 @@ client_exit(struct Client *client, const char *reason)
   {
     assert(client == client->nexthop);
 
-    if (IsServer(client))
+    if (client_is_server(client))
     {
       server_schedule_reconnect(client);
 
@@ -925,9 +925,9 @@ client_exit(struct Client *client, const char *reason)
    */
   if (client_is_local(client))
   {
-    if (IsClient(client))
+    if (client_is_user(client))
       _client_exit_cleanup_client_connection(client, reason);
-    else if (IsServer(client))
+    else if (client_is_server(client))
       _client_exit_cleanup_server_connection(client, reason);
     else
       _client_exit_cleanup_unregistered_connection(client, reason);

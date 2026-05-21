@@ -195,7 +195,7 @@ _whowas_add(struct Whowas *whowas, struct Client *client, bool online)
 void
 whowas_add_history(struct Client *client, bool online)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   struct Whowas *const whowas = _whowas_create();
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);

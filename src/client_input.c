@@ -164,7 +164,7 @@ static void
 _client_input_process_recvq_server(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(client_is_connecting(client) || client_is_handshake(client) || IsServer(client));
+  assert(client_is_connecting(client) || client_is_handshake(client) || client_is_server(client));
 
   char line_buffer[IRCD_BUFSIZE];
 
@@ -185,7 +185,7 @@ static void
 _client_input_process_recvq_client(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   char line_buffer[IRCD_BUFSIZE];
   bool enforce_limits = true;
@@ -237,13 +237,13 @@ client_input_process_recvq(struct Client *client)
       return;
   }
 
-  if (IsClient(client))
+  if (client_is_user(client))
   {
     _client_input_process_recvq_client(client);
     return;
   }
 
-  assert(client_is_connecting(client) || client_is_handshake(client) || IsServer(client));
+  assert(client_is_connecting(client) || client_is_handshake(client) || client_is_server(client));
   _client_input_process_recvq_server(client);
 }
 
@@ -251,7 +251,7 @@ void
 client_input_flood_endgrace(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   if (client_has_flag(client, FLAGS_FLOODDONE))
     return;
@@ -269,7 +269,7 @@ client_input_flood_recalc(void *data_)
 {
   struct Client *const client = data_;
   assert(client && client_is_local(client));
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
   /*
    * This callback may still fire for a client that has already

@@ -24,23 +24,27 @@
  * \brief Includes required functions for processing the SVSNICK command.
  */
 
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
-#include "stdinc.h"
+#include "comm.h"
+#include "io_string.h"
+#include "module.h"
+
+#include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
 #include "ircd.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "send.h"
+#include "monitor.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
-#include "monitor.h"
 #include "whowas.h"
-#include "comm.h"
-
 
 /*! \brief SVSNICK command handler
  *

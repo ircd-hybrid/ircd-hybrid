@@ -24,20 +24,16 @@
  * \brief Includes required functions for processing the SVSMODE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stddef.h>
+#include <stdint.h>
+
+#include "module.h"
+
 #include "client.h"
 #include "client_find.h"
-#include "client_svstag.h"
-#include "ircd.h"
-#include "send.h"
-#include "channel.h"
-#include "channel_mode.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 #include "user_mode.h"
-#include "conf.h"
-
 
 /*! \brief SVSMODE command handler
  *

@@ -24,15 +24,15 @@
  * \brief Includes required functions for processing the SVSKILL command.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "module.h"
+
 #include "client.h"
 #include "client_find.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
-
+#include "send.h"
 
 /*! \brief SVSKILL command handler
  *

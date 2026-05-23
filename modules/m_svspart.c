@@ -23,17 +23,16 @@
  * \brief Includes required functions for processing the SVSPART command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
 #include "client.h"
 #include "client_find.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
 
 /*! \brief SVSPART command handler
  *

@@ -23,16 +23,19 @@
  * \brief Includes required functions for processing the SVSACCOUNT command.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "cap.h"
 #include "client.h"
 #include "client_find.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
-
+#include "send.h"
+#include "user.h"
 
 /*! \brief SVSACCOUNT command handler
  *

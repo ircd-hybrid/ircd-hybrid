@@ -23,17 +23,18 @@
  * \brief Includes required functions for processing the SVSTAG command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "client.h"
 #include "client_find.h"
 #include "client_svstag.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
-
+#include "send.h"
 
 /*! \brief SVSTAG command handler
  *

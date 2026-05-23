@@ -309,7 +309,7 @@ user_register_local(struct Client *client)
 
   hook_dispatch(ircd_hook_user_register_local, &(ircd_hook_user_register_ctx){ .client = client });
 
-  client_set_state(client, CLIENT_STATE_CLIENT);
+  client_set_state(client, CLIENT_STATE_USER);
   client_reset_activity_timeout(client);
 
   client->connection->last_privmsg_time = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -353,7 +353,7 @@ user_register_local(struct Client *client)
 
   user_mode_set_flag_exec(client, UMODE_CLOAK, USER_MODE_SOURCE_REGULAR);
 
-  user_mode_send(client, 0, USER_MODE_SEND_CLIENT);
+  user_mode_send(client, 0, USER_MODE_SEND_USER);
 
   user_introduce(client);
 }
@@ -380,7 +380,7 @@ user_register_remote(struct Client *client)
   if (client_is_service(client->uplink))
     client_set_flag(client, FLAGS_SERVICE);
 
-  client_set_state(client, CLIENT_STATE_CLIENT);
+  client_set_state(client, CLIENT_STATE_USER);
 
   list_add(client, &client->global_node, &global_client_list);
   list_add(client, &client->uplink_node, &client->uplink->server->child_user_list);

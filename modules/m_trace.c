@@ -81,7 +81,7 @@ _trace_send_status(struct Client *source, const struct Client *target)
       sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
                          class_name, name, target->sockhost, client_get_session_duration(target));
       break;
-    case CLIENT_STATE_CLIENT:
+    case CLIENT_STATE_USER:
       if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, name, target->sockhost, client_get_socket_idle_duration(target),

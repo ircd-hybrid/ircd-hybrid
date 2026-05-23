@@ -224,7 +224,7 @@ client_set_state(struct Client *client, enum client_state state)
     case CLIENT_STATE_SERVER:
       client->handler = SERVER_HANDLER;
       break;
-    case CLIENT_STATE_CLIENT:
+    case CLIENT_STATE_USER:
       client->handler = CLIENT_HANDLER;
       break;
     default:
@@ -649,10 +649,10 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, split_root->server->child_user_list.head)
   {
-    struct Client *const child_client = node->data;
-    assert(!client_is_local(child_client));
-    _client_exit_notify_channel_members(child_client, reason);
-    _client_exit_detach(child_client);
+    struct Client *const child_user = node->data;
+    assert(!client_is_local(child_user));
+    _client_exit_notify_channel_members(child_user, reason);
+    _client_exit_detach(child_user);
   }
 
   LIST_FOREACH_SAFE(node, node_next, split_root->server->child_server_list.head)

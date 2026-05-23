@@ -104,7 +104,7 @@ set_user_mode(struct Client *source, int parc, char *parv[])
    * servers to update correctly.
    */
   user_mode_send(source, mode_flags_old,
-                 (client_is_local(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
+                 (client_is_local(source) ? USER_MODE_SEND_USER : 0) | USER_MODE_SEND_SERVER);
 }
 
 /*! \brief MODE command handler

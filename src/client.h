@@ -72,7 +72,7 @@ enum client_state
   CLIENT_STATE_CONNECTING,  /**< Connecting to another server */
   CLIENT_STATE_HANDSHAKE,  /**< PASS, CAPAB, and SERVER sent */
   CLIENT_STATE_SERVER,  /**< Fully registered server */
-  CLIENT_STATE_CLIENT,  /**< Fully registered client */
+  CLIENT_STATE_USER,  /**< Fully registered user */
   CLIENT_STATE_ME,  /**< This is &me */
 };
 
@@ -110,25 +110,25 @@ enum
   FLAGS_CLOSING         = 1 <<  2,  /**< Set when closing to suppress errors */
   FLAGS_GOTID           = 1 <<  3,  /**< Successful ident lookup achieved */
   FLAGS_SENDQEX         = 1 <<  4,  /**< Sendq exceeded */
-  FLAGS_IPHASH          = 1 <<  5,  /**< Iphashed this client */
-  FLAGS_MARK            = 1 <<  6,  /**< Marked client */
-  FLAGS_CANFLOOD        = 1 <<  7,  /**< Client has the ability to flood */
-  FLAGS_EXEMPTKLINE     = 1 <<  8,  /**< Client is exempt from k-lines */
-  FLAGS_NOLIMIT         = 1 <<  9,  /**< Client is exempt from limits */
+  FLAGS_IPHASH          = 1 <<  5,  /**< Iphashed this user */
+  FLAGS_MARK            = 1 <<  6,  /**< Marked user */
+  FLAGS_CANFLOOD        = 1 <<  7,  /**< User has the ability to flood */
+  FLAGS_EXEMPTKLINE     = 1 <<  8,  /**< User is exempt from k-lines */
+  FLAGS_NOLIMIT         = 1 <<  9,  /**< User is exempt from limits */
   FLAGS_PING_COOKIE     = 1 << 10,  /**< PING Cookie */
   FLAGS_FLOODDONE       = 1 << 11,  /**< Flood grace period has been ended. */
   FLAGS_EOB             = 1 << 12,  /**< Server has sent us an EOB */
   FLAGS_HIDDEN          = 1 << 13,  /**< A hidden server. Not shown in /links */
   FLAGS_BLOCKED         = 1 << 14,  /**< Must wait for COMM_SELECT_WRITE */
-  FLAGS_EXEMPTRESV      = 1 << 15,  /**< Client is exempt from RESV */
+  FLAGS_EXEMPTRESV      = 1 << 15,  /**< User is exempt from RESV */
   FLAGS_GOTUSER         = 1 << 16,  /**< If we received a USER command */
   FLAGS_FLOOD_NOTICED   = 1 << 17,  /**< Notice to opers about this flooder has been sent */
-  FLAGS_SERVICE         = 1 << 18,  /**< Client/server is a network service */
+  FLAGS_SERVICE         = 1 << 18,  /**< User/server is a network service */
   FLAGS_TLS_HANDSHAKING = 1 << 19,  /**< The connection is actively negotiating a TLS handshake. */
   FLAGS_TLS_ACTIVE      = 1 << 20,  /**< The connection is secured with an active TLS session. */
   FLAGS_SQUIT           = 1 << 21,
-  FLAGS_EXEMPTXLINE     = 1 << 22,  /**< Client is exempt from x-lines */
-  FLAGS_CAP302          = 1 << 23,  /**< Client supports the IRCv3 CAP 302 extension */
+  FLAGS_EXEMPTXLINE     = 1 << 22,  /**< User is exempt from x-lines */
+  FLAGS_CAP302          = 1 << 23,  /**< User supports the IRCv3 CAP 302 extension */
   FLAGS_SPOOF           = 1 << 24,
   FLAGS_INTRODUCED      = 1 << 25,
 };
@@ -150,7 +150,7 @@ struct Connection
 {
   list_node_t node;
   uint32_t registration;
-  uint32_t cap;  /**< Bitmask of client-announced CAP features. */
+  uint32_t cap;  /**< Bitmask of user-announced CAP features. */
   uint32_t capab;  /**< Bitmask of server-announced CAPAB features. */
   uint32_t operflags;  /**< Bitmask of IRC Operator privilege flags. */
   uint32_t ping_cookie_token;  /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
@@ -165,8 +165,8 @@ struct Connection
   uintmax_t last_caller_id_time;  /**< Monotonic time */
   uintmax_t first_received_message_time;  /**< Monotonic time */
   uintmax_t last_privmsg_time;  /**< Last time we got a PRIVMSG; monotonic time */
-  uintmax_t last_join_time;  /**< When this client last joined a channel; monotonic time */
-  uintmax_t last_part_time;  /**< When this client last left a channel; monotonic time */
+  uintmax_t last_join_time;  /**< When this user last joined a channel; monotonic time */
+  uintmax_t last_part_time;  /**< When this user last left a channel; monotonic time */
   struct ListTask  *list_task;  /**< State for an in-progress /LIST command. */
   struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
   struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
@@ -179,7 +179,7 @@ struct Connection
 
   struct
   {
-    unsigned int count;  /**< How many AWAY/INVITE/KNOCK/NICK requests client has sent */
+    unsigned int count;  /**< How many AWAY/INVITE/KNOCK/NICK requests user has sent */
     uintmax_t last_attempt;  /**< Last time the AWAY/INVITE/KNOCK/NICK request was issued; monotonic time */
   } away, invite, knock, nick;
 
@@ -187,7 +187,7 @@ struct Connection
   struct ClassItem *oper_class;  /**< The class assigned on OPER. NULL if not an oper. */
   struct LookupRequest *lookup_request;  /**< State for the initial async DNS/ident lookup. */
   struct Listener *listener;  /**< The listener this connection was accepted from. */
-  list_t accept_list;  /**< Clients I'll allow to talk to me */
+  list_t accept_list;  /**< Users I'll allow to talk to me */
   list_t monitor_list;  /**< Chain of Monitor pointer blocks */
   list_t invite_list;  /**< Chain of invite pointer blocks */
 
@@ -195,11 +195,11 @@ struct Connection
 
   int input_parse_debt;  /**< Decaying parse debt that limits queued input processing. */
 
-  char *password;  /**< Password supplied by the client/server during handshake. */
+  char *password;  /**< Password supplied by the user/server during handshake. */
   char *oper_name;  /**< The name of the oper block, if opered up. */
   char *scheduled_exit_reason;  /**< Exit reason retained while the client is queued for deferred exit. */
   event_handle_t activity_timeout_event;  /**< Event handle for the client's activity (idle/ping) timeout. */
-  event_handle_t flood_recalc_event;  /**< Repeating event handle for the client's anti-flood timer. */
+  event_handle_t flood_recalc_event;  /**< Repeating event handle for the user's anti-flood timer. */
 };
 
 /** Client structure */
@@ -218,24 +218,24 @@ struct Client
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
   uint32_t hopcount;  /**< The number of server hops from here to the entity. */
   uint32_t flags;  /**< Client flags */
-  uint64_t umodes;  /**< User modes this client has set */
+  uint64_t umodes;  /**< User modes this user has set */
 
-  enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_CLIENT, CLIENT_STATE_SERVER). */
+  enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_USER, CLIENT_STATE_SERVER). */
   unsigned int handler;  /**< The dispatch index for the command handler table based on client state. */
 
-  list_t whowas_list;  /**< Historical records for this client's previous nicks. */
-  list_t channel_list;  /**< List of channels this client is a member of. */
+  list_t whowas_list;  /**< Historical records for this users's previous nicks. */
+  list_t channel_list;  /**< List of channels this user is a member of. */
   list_t svstag_list;  /**< List of ServicesTag items */
 
   struct io_addr addr;  /**< The binary IP address of the remote end of the connection. */
 
   char *tls_certfp;  /**< The fingerprint of the client's TLS certificate, if provided. */
   char *tls_cipher;  /**< The negotiated TLS cipher suite for the connection. */
-  char *away_message;  /**< The AWAY message set by this client, or NULL if not away. */
+  char *away_message;  /**< The AWAY message set by this user, or NULL if not away. */
 
-  char name[HOSTLEN + 1];  /**< The entity's nickname (for clients) or server name. */
-  char id[IDLEN + 1];  /**< The entity's unique ID (UID for clients, SID for servers). */
-  char account[ACCOUNTLEN + 1];  /**< The services account name this client is logged into; "*" if none. */
+  char name[HOSTLEN + 1];  /**< The entity's nickname (for users) or server name. */
+  char id[IDLEN + 1];  /**< The entity's unique ID (UID for users, SID for servers). */
+  char account[ACCOUNTLEN + 1];  /**< The services account name this user is logged into; "*" if none. */
 
   /** client->username is the username from ident or the USER message,
    * If the client is idented the USER message is ignored, otherwise
@@ -269,7 +269,7 @@ struct Client
 extern struct Client me;
 extern list_t global_client_list;
 extern list_t global_server_list;  /* global servers on the network */
-extern list_t local_client_list;  /* local clients only ON this server */
+extern list_t local_client_list;  /* local users only ON this server */
 extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
@@ -305,7 +305,6 @@ extern uint64_t UMODE_SPY;
 extern void check_conf_klines(void);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
-extern void client_init(void);
 extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
 extern void client_reset_activity_timeout(struct Client *);
 extern void client_schedule_exit(struct Client *, const char *);
@@ -420,7 +419,7 @@ client_is_server(const struct Client *client)
 static inline bool
 client_is_user(const struct Client *client)
 {
-  return client->state == CLIENT_STATE_CLIENT;
+  return client->state == CLIENT_STATE_USER;
 }
 
 static inline bool

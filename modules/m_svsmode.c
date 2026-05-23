@@ -86,7 +86,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
                  source->id, target->id, modes);
 
   if (client_is_local(target))
-    user_mode_send(target, mode_flags_old, USER_MODE_SEND_CLIENT);
+    user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
 }
 
 static struct Command command_table =

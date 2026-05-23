@@ -230,7 +230,7 @@ nick_change_local(struct Client *source, const char *nick)
     {
       const uint64_t mode_flags_old = source->umodes;
       user_mode_unset_flag(source, UMODE_REGISTERED);
-      user_mode_send(source, mode_flags_old, USER_MODE_SEND_CLIENT);
+      user_mode_send(source, mode_flags_old, USER_MODE_SEND_USER);
     }
   }
 

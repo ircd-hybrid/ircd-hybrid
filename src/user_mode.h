@@ -59,7 +59,7 @@ typedef enum
 
 typedef enum
 {
-  USER_MODE_SEND_CLIENT = 1 << 0,
+  USER_MODE_SEND_USER   = 1 << 0,
   USER_MODE_SEND_SERVER = 1 << 1,
 } user_mode_send_t;
 

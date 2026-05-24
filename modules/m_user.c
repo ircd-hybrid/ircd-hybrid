@@ -23,16 +23,17 @@
  * \brief Includes required functions for processing the USER command.
  */
 
-#include "stdinc.h"
-#include "client.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "user.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
-#include "listener.h"
+#include <assert.h>
+#include <stddef.h>
+#include <string.h>
 
+#include "io_string.h"
+#include "module.h"
+
+#include "client.h"
+#include "listener.h"
+#include "parse.h"
+#include "user.h"
 
 /*! \brief USER command handler
  *

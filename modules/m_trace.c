@@ -23,21 +23,24 @@
  * \brief Includes required functions for processing the TRACE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "module.h"
+
 #include "client.h"
-#include "io_string.h"
+#include "conf_class.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "parse.h"
-#include "module.h"
-#include "conf.h"
-#include "conf_class.h"
-
+#include "send.h"
+#include "server.h"
 
 static void
 _trace_get_dependent(uint32_t *const servers,

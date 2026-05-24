@@ -23,19 +23,23 @@
  * \brief Includes required functions for processing the ETRACE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "io_string.h"
+#include "io_time.h"
+#include "list.h"
+#include "module.h"
+
+#include "client.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "parse.h"
-#include "module.h"
-#include "conf.h"
-
+#include "send.h"
+#include "server.h"
 
 /* report_this_status()
  *

@@ -23,15 +23,18 @@
  * \brief Includes required functions for processing the CLOSE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
 #include "list.h"
 #include "module.h"
+
 #include "client.h"
 #include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
+#include "send.h"
 
 /*! \brief CLOSE command handler
  *

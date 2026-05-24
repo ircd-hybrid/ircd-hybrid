@@ -23,21 +23,22 @@
  * \brief Includes required functions for processing the OPME command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "list.h"
+#include "log.h"
+#include "module.h"
+
+#include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
+#include "conf_oper.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "log.h"
-#include "send.h"
-#include "io_string.h"
 #include "parse.h"
-#include "module.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "conf.h"
-
+#include "send.h"
 
 /*! \brief OPME command handler
  *

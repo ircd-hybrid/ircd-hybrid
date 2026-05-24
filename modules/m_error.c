@@ -23,15 +23,18 @@
  * \brief Includes required functions for processing the ERROR command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "io_string.h"
+#include "log.h"
+#include "module.h"
+
 #include "client.h"
 #include "ircd.h"
-#include "send.h"
-#include "module.h"
-#include "log.h"
 #include "parse.h"
-#include "io_string.h"
-
+#include "send.h"
 
 /*! \brief ERROR command handler
  *

@@ -23,20 +23,25 @@
  * \brief Includes required functions for processing the MONITOR command.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
+#include "list.h"
+#include "module.h"
+
 #include "client.h"
 #include "client_find.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
 #include "conf.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
-#include "user.h"
-#include "monitor.h"
+#include "ircd.h"
 #include "isupport.h"
-
+#include "monitor.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "user.h"
 
 static void
 monitor_add(struct Client *source, char *list)

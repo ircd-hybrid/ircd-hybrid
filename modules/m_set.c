@@ -23,16 +23,22 @@
  * \brief Includes required functions for processing the SET command.
  */
 
-#include "stdinc.h"
-#include "defaults.h"
-#include "client.h"
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "io_string.h"
+#include "module.h"
+
+#include "client.h"
+#include "conf.h"
+#include "defaults.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
-#include "conf.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 
 enum { SET_COMMAND_LIST_SIZE = 128 };
 

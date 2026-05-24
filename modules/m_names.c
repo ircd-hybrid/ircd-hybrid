@@ -23,17 +23,18 @@
  * \brief Includes required functions for processing the NAMES command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
 #include "client.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
+#include "send.h"
 
 /*! \brief NAMES command handler
  *

@@ -23,18 +23,20 @@
  * \brief Includes required functions for processing the LUSERS command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_time.h"
-#include "client.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "server.h"
-#include "user.h"
-#include "send.h"
-#include "conf.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
+#include "user.h"
 
 /*! \brief LUSERS command handler
  *

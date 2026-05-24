@@ -23,17 +23,21 @@
  * \brief Includes required functions for processing the SVINFO command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 #include "io_time.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "server.h"
-#include "conf.h"
 #include "log.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
 
 /*! \brief SVINFO command handler
  *

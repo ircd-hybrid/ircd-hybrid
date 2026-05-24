@@ -23,21 +23,25 @@
  * \brief Includes required functions for processing the KNOCK command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_time.h"
-#include "list.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "conf.h"
 #include "hash.h"
 #include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "conf.h"
-#include "parse.h"
-#include "module.h"
-#include "server_capab.h"
 #include "isupport.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server_capab.h"
 
 static void
 _knock_notify_channel_members(const struct Client *source, const struct Channel *channel)

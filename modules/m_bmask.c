@@ -23,19 +23,23 @@
  * \brief Includes required functions for processing the BMASK command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "list.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
-#include "conf.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
 
 /*! \brief BMASK command handler
  *

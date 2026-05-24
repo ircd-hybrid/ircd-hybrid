@@ -23,14 +23,15 @@
  * \brief Includes required functions for processing the LOCOPS command.
  */
 
-#include "io_string.h"
 #include "module.h"
-#include "stdinc.h"
+
+#include "io_string.h"
+
 #include "client.h"
-#include "ircd.h"
 #include "conf_cluster.h"
 #include "conf_oper.h"
 #include "conf_shared.h"
+#include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"

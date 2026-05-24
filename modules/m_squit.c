@@ -32,7 +32,6 @@
 
 #include "client.h"
 #include "client_find.h"
-#include "conf.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"

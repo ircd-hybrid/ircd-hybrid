@@ -23,24 +23,22 @@
  * \brief Includes required functions for processing the MODE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
-#include "client_svstag.h"
-#include "cloak.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "user_mode.h"
-#include "conf.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
+#include "user_mode.h"
 
 /* set_user_mode()
  *

@@ -23,15 +23,16 @@
  * \brief Includes required functions for processing the PASS command.
  */
 
-#include "stdinc.h"
-#include "client.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "parse.h"
-#include "module.h"
-#include "misc.h"
-#include "memory.h"
+#include <assert.h>
+#include <stddef.h>
 
+#include "io_string.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+
+#include "client.h"
+#include "parse.h"
 
 /*! \brief PASS command handler
  *

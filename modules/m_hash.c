@@ -23,16 +23,18 @@
  * \brief Includes required functions for processing the HASH command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "module.h"
+
+#include "channel.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "channel.h"
-
+#include "send.h"
 
 static void
 do_hash(struct Client *source, enum hash_type type)

@@ -23,21 +23,22 @@
  * \brief Includes required functions for processing the REHASH command.
  */
 
-#include "stdinc.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
 #include "ircd.h"
-#include "list.h"
-#include "numeric.h"
-#include "res.h"
+#include "log.h"
+#include "module.h"
+
+#include "client.h"
 #include "conf.h"
 #include "conf_shared.h"
-#include "log.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
 #include "motd.h"
-
+#include "numeric.h"
+#include "parse.h"
+#include "res.h"
+#include "send.h"
 
 /*! \brief REHASH CONF handler
  *         Attempts to reload server's configuration file(s)

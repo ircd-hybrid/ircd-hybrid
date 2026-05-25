@@ -23,33 +23,41 @@
  * \brief Includes required functions for processing the NICK command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "hash.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
+#include "misc.h"
+#include "module.h"
+
+#include "aline.h"
+#include "channel.h"
+#include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
 #include "client_id.h"
 #include "conf.h"
 #include "conf_resv.h"
+#include "extban.h"
+#include "hash.h"
+#include "ipcache.h"
+#include "ircd.h"
+#include "ircd_hook.h"
+#include "monitor.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
 #include "whowas.h"
-#include "send.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "parse.h"
-#include "module.h"
-#include "monitor.h"
-#include "misc.h"
-#include "ipcache.h"
-#include "extban.h"
-#include "ircd_hook.h"
-#include "comm.h"
-
 
 /* check_clean_nick()
  *

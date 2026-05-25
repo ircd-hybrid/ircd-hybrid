@@ -23,17 +23,18 @@
  * \brief Includes required functions for processing the TMODE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "hash.h"
-#include "ircd.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
 
 /*! \brief TMODE command handler
  *

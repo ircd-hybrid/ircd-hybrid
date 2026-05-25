@@ -23,19 +23,20 @@
  * \brief Includes required functions for processing the MOTD command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "list.h"
-#include "client.h"
-#include "motd.h"
-#include "ircd.h"
-#include "send.h"
-#include "numeric.h"
-#include "server.h"
-#include "parse.h"
-#include "module.h"
-#include "conf.h"
+#include <stddef.h>
+#include <stdint.h>
 
+#include "io_time.h"
+#include "module.h"
+
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "motd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
 
 /*! \brief Sends the "message of the day" and notifies irc-operators
  *         about the MOTD request

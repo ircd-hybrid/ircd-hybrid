@@ -24,26 +24,33 @@
  * \brief Includes required functions for processing the WHO command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "address.h"
-#include "list.h"
-#include "module.h"
 #include "io_string.h"
 #include "io_time.h"
+#include "list.h"
+#include "module.h"
+
 #include "cap.h"
-#include "client.h"
-#include "client_find.h"
 #include "channel.h"
 #include "channel_mode.h"
+#include "client.h"
+#include "client_find.h"
+#include "conf.h"
 #include "hash.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "isupport.h"
 #include "numeric.h"
+#include "parse.h"
 #include "send.h"
 #include "user_mode.h"
-#include "ircd_hook.h"
-#include "conf.h"
-#include "parse.h"
 
 /** Maximum number of lines to send in response to a /WHO. */
 enum { WHO_MAX_REPLIES = 500 };

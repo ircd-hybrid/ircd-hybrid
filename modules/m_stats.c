@@ -23,14 +23,25 @@
  * \brief Includes required functions for processing the STATS command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+
+#include "address.h"
+#include "event.h"
+#include "fdlist.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "misc.h"
+#include "module.h"
+#include "reslib.h"
+
+#include "channel.h"
+#include "channel_invite.h"
 #include "client.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "listener.h"
-#include "parse.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
@@ -39,24 +50,19 @@
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "address.h"
+#include "ipcache.h"
+#include "ircd.h"
+#include "listener.h"
+#include "monitor.h"
+#include "motd.h"
 #include "numeric.h"
+#include "parse.h"
 #include "send.h"
-#include "fdlist.h"
-#include "misc.h"
 #include "server.h"
 #include "server_capab.h"
-#include "user_mode.h"
-#include "event.h"
-#include "module.h"
-#include "whowas.h"
-#include "monitor.h"
-#include "reslib.h"
-#include "motd.h"
-#include "ipcache.h"
-#include "channel.h"
-#include "channel_invite.h"
 #include "stats.h"
+#include "user_mode.h"
+#include "whowas.h"
 
 static const char *
 oper_privs_as_string(uint32_t flags)

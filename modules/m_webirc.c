@@ -23,18 +23,22 @@
  * \brief Includes required functions for processing the WEBIRC command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "address.h"
 #include "io_string.h"
-#include "parse.h"
 #include "module.h"
+
+#include "client.h"
 #include "conf.h"
+#include "ircd.h"
+#include "parse.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
-
 
 /*! \brief WEBIRC command handler
  *

@@ -23,27 +23,33 @@
  * \brief Includes required functions for processing the DLINE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "address.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+
+#include "aline.h"
 #include "client.h"
-#include "io_string.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
-#include "address.h"
 #include "numeric.h"
-#include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
-
 
 static void
 dline_check(const struct AddressRec *arec)

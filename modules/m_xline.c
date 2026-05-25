@@ -23,26 +23,31 @@
  * \brief Includes required functions for processing the XLINE command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+
+#include "aline.h"
 #include "client.h"
-#include "io_string.h"
-#include "ircd.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
 #include "conf_shared.h"
+#include "ircd.h"
 #include "numeric.h"
-#include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
-
 
 static void
 xline_check(const struct GecosItem *gecos)

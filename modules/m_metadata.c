@@ -23,17 +23,16 @@
  * \brief Includes required functions for processing the METADATA command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "client_find.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
+#include <stddef.h>
+
+#include "io_string.h"
 #include "memory.h"
 #include "module.h"
-#include "io_string.h"
 
+#include "client.h"
+#include "client_find.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief METADATA command handler
  *

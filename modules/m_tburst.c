@@ -23,18 +23,21 @@
  * \brief Includes required functions for processing the TBURST command.
  */
 
-#include "stdinc.h"
-#include "module.h"
-#include "io_string.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "hash.h"
-#include "server_capab.h"
-#include "conf.h"
-#include "parse.h"
-#include "channel.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
 
+#include "io_string.h"
+#include "module.h"
+
+#include "channel.h"
+#include "client.h"
+#include "conf.h"
+#include "hash.h"
+#include "parse.h"
+#include "send.h"
+#include "server_capab.h"
 
 /*! \brief TBURST command handler
  *

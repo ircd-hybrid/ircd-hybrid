@@ -23,23 +23,28 @@
  * \brief Includes required functions for processing the SJOIN command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "list.h"
+#include "module.h"
+
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
-#include "hash.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
 #include "conf.h"
-#include "misc.h"
-
+#include "hash.h"
+#include "ircd.h"
+#include "parse.h"
+#include "send.h"
 
 /* set_final_mode
  *

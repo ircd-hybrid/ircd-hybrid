@@ -23,24 +23,28 @@
  * \brief Includes required functions for processing the JOIN command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "conf.h"
 #include "hash.h"
-#include "io_string.h"
 #include "ircd.h"
-#include "numeric.h"
+#include "parse.h"
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
-#include "conf.h"
-#include "parse.h"
-#include "module.h"
-
 
 /* set_final_mode
  *

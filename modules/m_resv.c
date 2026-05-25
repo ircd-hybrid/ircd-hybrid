@@ -23,23 +23,27 @@
  * \brief Includes required functions for processing the RESV command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
-#include "ircd.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_string.h"
-#include "numeric.h"
-#include "server_capab.h"
-#include "send.h"
-#include "parse.h"
+#include "io_time.h"
+#include "log.h"
 #include "module.h"
+
+#include "aline.h"
+#include "client.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
 #include "conf_shared.h"
-#include "log.h"
-#include "aline.h"
-
+#include "ircd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server_capab.h"
 
 /* parse_resv()
  *

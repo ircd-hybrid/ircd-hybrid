@@ -23,13 +23,20 @@
  * \brief Includes required functions for processing the PRIVMSG/NOTICE command.
  */
 
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "hook.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "misc.h"
 #include "module.h"
-#include "stdinc.h"
+
 #include "accept.h"
 #include "channel.h"
 #include "channel_mode.h"
@@ -43,8 +50,6 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "server.h"
-#include "user_mode.h"
 
 static const char *const command[] =
 {

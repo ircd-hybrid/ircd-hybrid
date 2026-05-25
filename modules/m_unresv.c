@@ -23,24 +23,24 @@
  * \brief Includes required functions for processing the UNRESV command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
+#include "log.h"
+#include "module.h"
+
+#include "aline.h"
+#include "client.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
 #include "conf_shared.h"
+#include "ircd.h"
 #include "numeric.h"
-#include "log.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
-
 
 static void
 resv_remove(struct Client *source, const struct aline_ctx *aline)

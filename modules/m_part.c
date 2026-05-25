@@ -23,13 +23,14 @@
  * \brief Includes required functions for processing the PART command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "module.h"
+
 #include "channel.h"
 #include "client.h"
 #include "parse.h"
-#include "module.h"
-
 
 /*! \brief PART command handler
  *

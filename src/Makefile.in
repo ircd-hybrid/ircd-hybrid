@@ -523,7 +523,6 @@ ircd_SOURCES = accept.c          \
                parse.h           \
                stats.c           \
                stats.h           \
-               stdinc.h          \
                send.c            \
                send.h            \
                server.c          \

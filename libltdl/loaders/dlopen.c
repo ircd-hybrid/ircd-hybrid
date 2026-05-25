@@ -223,7 +223,7 @@ vm_open (lt_user_data loader_data LT__UNUSED, const char *filename,
 	  return module;
 	}
 
-      sprintf (attempt, "%s%s", filename, member);
+      snprintf (attempt, len + strlen (member) + 1, "%s%s", filename, member);
       module = vm_open (loader_data, attempt, advise);
       FREE (attempt);
       return module;

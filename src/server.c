@@ -432,12 +432,12 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
   /* Create a socket for the server connection */
-  fde_t *new_fde = comm_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
+  fde_t *const new_fde = comm_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
   if (new_fde == NULL)
     return false;
 
   /* Create a local client */
-  struct Client *client = client_create_local();
+  struct Client *const client = client_create_local();
   client->connection->fd = new_fde;
 
   address_copy(&client->addr, &connect->remote_addr);
@@ -445,10 +445,10 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   strlcpy(client->host, connect->host, sizeof(client->host));
   strlcpy(client->sockhost, addr_str, sizeof(client->sockhost));
 
-  struct Server *server = server_get_or_create(client);
+  struct Server *const server = server_get_or_create(client);
   server_conf_set(client, connect);
 
-  const char *initiator_name = initiator ? initiator->name : "AutoConn.";
+  const char *const initiator_name = initiator ? initiator->name : "AutoConn.";
   server->initiator_name = io_strdup(initiator_name);
 
   client_set_state(client, CLIENT_STATE_CONNECTING);

@@ -48,7 +48,7 @@ class_get_list(void)
 struct ClassItem *
 class_create(void)
 {
-  struct ClassItem *klass = io_calloc(sizeof(*klass));
+  struct ClassItem *const klass = io_calloc(sizeof(*klass));
   klass->active = true;
   klass->con_freq = CLASS_DEFAULT_CONNECT_FREQ;
   klass->ping_freq = CLASS_DEFAULT_PING_FREQ;
@@ -97,9 +97,10 @@ class_find(const char *name, bool active)
 
   LIST_FOREACH(node, class_list.head)
   {
-    struct ClassItem *klass = node->data;
+    struct ClassItem *const klass = node->data;
     if (io_strcasecmp(klass->name, name))
       continue;
+
     if (active && klass->active == false)
       continue;
 
@@ -120,7 +121,7 @@ class_mark_all_inactive(void)
 
   LIST_FOREACH(node, class_list.head)
   {
-    struct ClassItem *klass = node->data;
+    struct ClassItem *const klass = node->data;
     if (klass == class_default)
       continue;
 
@@ -135,7 +136,7 @@ class_sweep_inactive(void)
 
   LIST_FOREACH_SAFE(node, node_next, class_list.head)
   {
-    struct ClassItem *klass = node->data;
+    struct ClassItem *const klass = node->data;
     if (klass->active == false && klass->ref_count == 0)
       class_destroy(klass);
   }
@@ -219,7 +220,7 @@ class_ip_limit_rebuild(struct ClassItem *klass)
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    const struct Client *client = node->data;
+    const struct Client *const client = node->data;
     if (client->connection->base_class == klass)
       class_ip_limit_add(klass, &client->addr, true);
   }

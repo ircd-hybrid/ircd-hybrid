@@ -153,7 +153,8 @@ client_activity_timeout_handler(void *data)
   /* Handle timeouts for any connection that is not yet fully registered or linked. */
   if (client_is_unknown(client) || client_is_connecting(client) || client_is_handshake(client))
   {
-    const char *reason = client_is_unknown(client) ? "Registration timed out" : "Timeout during server handshake";
+    const char *const reason =
+      client_is_unknown(client) ? "Registration timed out" : "Timeout during server handshake";
     client_exit(client, reason);
     return;
   }

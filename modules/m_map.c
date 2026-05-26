@@ -121,13 +121,13 @@ _map_send_flat(struct Client *client)
   list_node_t *node;
   LIST_FOREACH(node, cache->head)
   {
-    const links_cache_entry_t *entry = node->data;
+    const links_cache_entry_t *const entry = node->data;
     ++processed_server_count;
 
     _map_format_line(line_buffer, sizeof(line_buffer),
                      entry->name, NULL, 2, entry->user_count, snapshot_global_users);
 
-    const char *prefix = (processed_server_count == remote_server_count) ? "`-": "|-";
+    const char *const prefix = (processed_server_count == remote_server_count) ? "`-": "|-";
     sendto_one_numeric(client, &me, RPL_MAP, prefix, line_buffer);
   }
 }
@@ -169,14 +169,14 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
   list_node_t *node;
   LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
-    const struct Client *server = node->data;
+    const struct Client *const server = node->data;
     if (!_map_should_hide_server(server, client))
       ++visible_server_count;
   }
 
   LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
-    const struct Client *server = node->data;
+    const struct Client *const server = node->data;
     if (_map_should_hide_server(server, client))
       continue;
 

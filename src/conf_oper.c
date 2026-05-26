@@ -111,7 +111,7 @@ oper_assign_class(struct OperItem *oper, const char *class_name)
 }
 
 oper_auth_result_t
-oper_authenticate(const struct Client *client, const char *oper_name, const char *password, struct OperItem **oper_out)
+oper_authenticate(const struct Client *client, const char *oper_name, const char *password, const struct OperItem **oper_out)
 {
   assert(oper_out);
 
@@ -121,7 +121,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
   list_node_t *node;
   LIST_FOREACH(node, operator_items.head)
   {
-    struct OperItem *const oper = node->data;
+    const struct OperItem *const oper = node->data;
     if (io_strcasecmp(oper->name, oper_name))
       continue;
 

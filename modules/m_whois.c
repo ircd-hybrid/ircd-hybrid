@@ -149,7 +149,7 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
   list_node_t *node;
   LIST_FOREACH(node, target->channel_list.head)
   {
-    const struct ChannelMember *member = node->data;
+    const struct ChannelMember *const member = node->data;
     whois_channel_visibility_t vis = _whois_channel_visibility_get(member->channel, source, target);
 
     if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
@@ -196,7 +196,7 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
   {
     if (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))
     {
-      const struct ServicesTag *svstag = list_peek_head(&target->svstag_list);
+      const struct ServicesTag *const svstag = list_peek_head(&target->svstag_list);
       if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
       {
         const char *text;
@@ -214,7 +214,7 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
   list_node_t *node;
   LIST_FOREACH(node, target->svstag_list.head)
   {
-    const struct ServicesTag *svstag = node->data;
+    const struct ServicesTag *const svstag = node->data;
     if (svstag->numeric == RPL_WHOISOPERATOR)
       if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
         continue;
@@ -275,8 +275,7 @@ _whois_send(struct Client *source, struct Client *target)
 static void
 _whois_process(struct Client *source, const char *name)
 {
-  struct Client *target = client_find_user(source, name);
-
+  struct Client *const target = client_find_user(source, name);
   if (target)
     _whois_send(source, target);
   else

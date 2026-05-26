@@ -123,7 +123,7 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *member_target = channel_member_find(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(target, channel);
   if (member_target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);

@@ -483,7 +483,7 @@ mr_server(struct Client *source, int parc, char *parv[])
   connect_auth_result_t result = connect_authenticate_server(name, source, &connect);
   if (result != CONNECT_AUTH_SUCCESS)
   {
-    const char *reason = connect_auth_result_to_string(result);
+    const char *const reason = connect_auth_result_to_string(result);
 
     if (result == CONNECT_AUTH_FAIL_NAME && ConfigGeneral.warn_no_connect_block == 0)
       client_exit(source, reason);

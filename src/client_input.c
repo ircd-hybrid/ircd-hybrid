@@ -77,11 +77,11 @@ static size_t
 _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer)
 {
   size_t line_bytes = 0, eol_bytes = 0;
-  list_node_t *node;
 
+  list_node_t *node;
   LIST_FOREACH(node, queue->blocks.head)
   {
-    const struct dbuf_block *block = node->data;
+    const struct dbuf_block *const block = node->data;
     size_t idx;
 
     if (node == queue->blocks.head)
@@ -91,8 +91,7 @@ _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer)
 
     for (; idx < block->size; ++idx)
     {
-      char c = block->data[idx];
-
+      const char c = block->data[idx];
       if (IsEol(c))
       {
         ++eol_bytes;

@@ -125,7 +125,7 @@ m_oper(struct Client *source, int parc, char *parv[])
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
-  struct OperItem *oper = NULL;
+  const struct OperItem *oper = NULL;
   oper_auth_result_t result = oper_authenticate(source, opername, password, &oper);
   if (result == OPER_AUTH_SUCCESS)
   {

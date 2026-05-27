@@ -61,7 +61,7 @@ cluster_clear(void)
 {
   while (cluster_list.head)
   {
-    struct ClusterItem *cluster = cluster_list.head->data;
+    struct ClusterItem *const cluster = cluster_list.head->data;
     list_remove(&cluster->node, &cluster_list);
     io_free(cluster->server);
     io_free(cluster);
@@ -79,7 +79,7 @@ cluster_clear(void)
 struct ClusterItem *
 cluster_make(void)
 {
-  struct ClusterItem *cluster = io_calloc(sizeof(*cluster));
+  struct ClusterItem *const cluster = io_calloc(sizeof(*cluster));
   list_add(cluster, &cluster->node, &cluster_list);
 
   return cluster;
@@ -103,8 +103,8 @@ cluster_distribute(const void *client, const char *command, uint32_t capab, uint
                    const char *pattern, ...)
 {
   char buf[IRCD_BUFSIZE];
-
   va_list args;
+
   va_start(args, pattern);
   vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
@@ -112,7 +112,7 @@ cluster_distribute(const void *client, const char *command, uint32_t capab, uint
   list_node_t *node;
   LIST_FOREACH(node, cluster_list.head)
   {
-    const struct ClusterItem *cluster = node->data;
+    const struct ClusterItem *const cluster = node->data;
     if (cluster->type & type)
       sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab, "%s %s %s",
                          command, cluster->server, buf);

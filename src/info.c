@@ -98,7 +98,7 @@ info_register(const char *namespace, const char *name, info_output_type_t output
   if (info_find(namespace, name))
     return INFO_ALREADY_REGISTERED;
 
-  struct InfoEntry *info = io_calloc(sizeof(*info));
+  struct InfoEntry *const info = io_calloc(sizeof(*info));
   info->namespace = namespace ? strdup(namespace) : NULL;
   info->name = strdup(name);
   info->output_type = output_type;
@@ -124,7 +124,7 @@ info_register(const char *namespace, const char *name, info_output_type_t output
 info_result_t
 info_unregister(const char *namespace, const char *name)
 {
-  struct InfoEntry *info = info_find(namespace, name);
+  struct InfoEntry *const info = info_find(namespace, name);
   if (info == NULL)
     return INFO_NOT_FOUND;
 

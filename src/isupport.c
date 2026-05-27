@@ -131,7 +131,7 @@ _isupport_build_lines(void)
   list_node_t *node;
   LIST_FOREACH(node, isupport_list.head)
   {
-    const struct Isupport *support = node->data;
+    const struct Isupport *const support = node->data;
     size_t token_len = snprintf(NULL, 0, len ? " %s" : "%s", support->name);
     if (support->options)
       token_len += snprintf(NULL, 0, "=%s", support->options);
@@ -171,7 +171,7 @@ _isupport_find(const char *name)
 
   LIST_FOREACH(node, isupport_list.head)
   {
-    struct Isupport *support = node->data;
+    struct Isupport *const support = node->data;
     if (io_strcasecmp(support->name, name) == 0)
       return support;
   }
@@ -200,11 +200,11 @@ _isupport_cmp(const void *const a_, const void *const b_)
 static struct Isupport *
 _isupport_create(const char *name, const char *options)
 {
-  struct Isupport *support = io_calloc(sizeof(*support));
+  struct Isupport *const support = io_calloc(sizeof(*support));
   support->name = io_strdup(name);
   support->options = (options) ? io_strdup(options) : NULL;
-  list_add_sorted(support, &support->node, &isupport_list, _isupport_cmp);
 
+  list_add_sorted(support, &support->node, &isupport_list, _isupport_cmp);
   return support;
 }
 
@@ -249,7 +249,7 @@ isupport_add(const char *name, const char *format, ...)
     va_end(args);
   }
 
-  struct Isupport *support = _isupport_find(name);
+  struct Isupport *const support = _isupport_find(name);
   if (support)
     _isupport_destroy(support);
 
@@ -270,7 +270,7 @@ isupport_add(const char *name, const char *format, ...)
 void
 isupport_delete(const char *name)
 {
-  struct Isupport *support = _isupport_find(name);
+  struct Isupport *const support = _isupport_find(name);
   if (support == NULL)
     return;
 

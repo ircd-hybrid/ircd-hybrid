@@ -69,7 +69,7 @@ _server_route_find_match(const list_t *list, const char *mask, const struct Clie
 
   LIST_FOREACH(node, list->head)
   {
-    struct Client *target = node->data;
+    struct Client *const target = node->data;
     if (match(mask, target->name) == 0)
     {
       /* Anti-looping check: ensure the route is not back to the source's link. */

@@ -82,7 +82,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
 {
   assert(!client_is_local_user(source));
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = hash_find_channel(parv[2]);
   if (channel == NULL)
     return;
 

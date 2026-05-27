@@ -70,7 +70,7 @@ _lookup_check_complete(struct LookupRequest *lookup)
   if (lookup->dns_pending || lookup->ident_pending)
     return;
 
-  struct Client *client = lookup->client;
+  struct Client *const client = lookup->client;
   client->connection->lookup_request = NULL;
   io_free(lookup);
 
@@ -105,7 +105,7 @@ _lookup_verify_hostname(const char *hostname)
 static void
 _lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
-  struct LookupRequest *lookup = vptr;
+  struct LookupRequest *const lookup = vptr;
   lookup->dns_pending = false;
 
   if (name_length == 0)
@@ -128,7 +128,7 @@ _lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, s
 static void
 _lookup_ident_callback(void *user_data, const char *username)
 {
-  struct LookupRequest *lookup = user_data;
+  struct LookupRequest *const lookup = user_data;
   ident_delete(lookup->ident_request);
 
   lookup->ident_request = NULL;
@@ -173,7 +173,7 @@ lookup_start(struct Client *client)
   assert(client && client_is_local(client));
   assert(client->connection->lookup_request == NULL);
 
-  struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
+  struct LookupRequest *const lookup = io_calloc(sizeof(*lookup));
   lookup->client = client;
   client->connection->lookup_request = lookup;
 

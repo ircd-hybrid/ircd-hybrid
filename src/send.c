@@ -208,7 +208,7 @@ send_queued_write(struct Client *to)
   {
     ssize_t retlen;
     bool want_read = false;
-    const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
+    const struct dbuf_block *const first = to->connection->buf_sendq.blocks.head->data;
 
     if (tls_isusing(&to->connection->fd->tls))
     {
@@ -269,7 +269,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   if (!client_has_cap(to, CAP_STANDARD_REPLIES))
     return;
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s %s %s %s",
                client_get_id_or_name(from, to), type, command, code);
 
@@ -329,7 +329,7 @@ sendto_one(struct Client *to, const char *format, ...)
   if (client_is_dead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
 
   va_list args;
   va_start(args, format);
@@ -351,7 +351,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s %03d %s ", client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_list args;
@@ -381,7 +381,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s NOTICE %s ", client_get_id_or_name(from, to), dest);
 
   va_list args;
@@ -409,7 +409,7 @@ sendto_one_anywhere(struct Client *to, const struct Client *from, const char *co
   if (client_is_dead(to->nexthop))
     return;
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
   if (client_is_local_user(to) && client_is_user(from))
     dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
                  from->name, from->username, from->host, command, to->name);
@@ -479,7 +479,7 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
       assert(0);
   }
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
   dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
   va_list args;
@@ -487,11 +487,11 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
   send_format(buffer, format, args);
   va_end(args);
 
-  list_t *list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
+  list_t *const list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    struct Client *client = node->data;
+    struct Client *const client = node->data;
     if (client_is_dead(client))
       continue;
 
@@ -536,8 +536,8 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   assert(source);
   assert(filter_fn);
 
-  struct dbuf_block *buffer_local = dbuf_alloc();
-  struct dbuf_block *buffer_remote = dbuf_alloc();
+  struct dbuf_block *const buffer_local = dbuf_alloc();
+  struct dbuf_block *const buffer_remote = dbuf_alloc();
 
   if (client_is_user(source))
     dbuf_put_fmt(buffer_local, ":%s!%s@%s ", source->name, source->username, source->host);
@@ -560,7 +560,7 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *target = node->data;
+    struct Client *const target = node->data;
     if (client_is_dead(target))
       continue;
 
@@ -570,7 +570,7 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
 
   LIST_FOREACH(node, local_server_list.head)
   {
-    struct Client *target = node->data;
+    struct Client *const target = node->data;
     if (client_is_dead(target))
       continue;
 
@@ -606,7 +606,7 @@ void
 sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
                uint32_t excluded_capab, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
 
   va_list args;
   va_start(args, format);
@@ -616,9 +616,7 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
   list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
   {
-    struct Client *client = node->data;
-
-    /* If dead already skip */
+    struct Client *const client = node->data;
     if (client_is_dead(client))
       continue;
 
@@ -652,7 +650,7 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
 void
 sendto_match_servs(const struct Client *source, const char *mask, uint32_t required_capab, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
 
   dbuf_put_fmt(buffer, ":%s ", source->id);
 
@@ -666,8 +664,7 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {
-    struct Client *target = node->data;
-
+    struct Client *const target = node->data;
     if (client_is_dead(target->nexthop))
       continue;
 
@@ -708,7 +705,7 @@ void
 sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
                              uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
 
   va_list args;
   va_start(args, format);
@@ -720,14 +717,14 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   list_node_t *node, *node2;
   LIST_FOREACH(node, user->channel_list.head)
   {
-    const struct ChannelMember *member = node->data;
-    const struct Channel *channel = member->channel;
+    const struct ChannelMember *const member = node->data;
 
+    const struct Channel *const channel = member->channel;
     LIST_FOREACH(node2, channel->members_local.head)
     {
-      const struct ChannelMember *member2 = node2->data;
-      struct Client *target = member2->client;
+      const struct ChannelMember *const member2 = node2->data;
 
+      struct Client *const target = member2->client;
       if (client_is_dead(target))
         continue;
 
@@ -770,7 +767,7 @@ void
 sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
                      uint32_t required_cap, uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_alloc();
 
   va_list args;
   va_start(args, format);
@@ -780,9 +777,9 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
   list_node_t *node;
   LIST_FOREACH(node, channel->members_local.head)
   {
-    const struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    const struct ChannelMember *const member = node->data;
 
+    struct Client *const target = member->client;
     if (client_is_dead(target))
       continue;
 
@@ -819,8 +816,8 @@ void
 sendto_channel_butone(const struct Client *exclude_client, const struct Client *from, const struct Channel *channel,
                       int required_rank, const char *format, ...)
 {
-  struct dbuf_block *buffer_local = dbuf_alloc();
-  struct dbuf_block *buffer_remote = dbuf_alloc();
+  struct dbuf_block *const buffer_local = dbuf_alloc();
+  struct dbuf_block *const buffer_remote = dbuf_alloc();
 
   if (client_is_user(from))
     dbuf_put_fmt(buffer_local, ":%s!%s@%s ", from->name, from->username, from->host);
@@ -845,11 +842,9 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
-    const struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    const struct ChannelMember *const member = node->data;
 
-    assert(client_is_user(target));
-
+    struct Client *const target = member->client;
     if (client_is_dead(target->nexthop))
       continue;
 

@@ -65,7 +65,7 @@ service_clear(void)
 {
   while (service_list.head)
   {
-    struct ServiceItem *service = service_list.head->data;
+    struct ServiceItem *const service = service_list.head->data;
     list_remove(&service->node, &service_list);
     io_free(service->name);
     io_free(service);
@@ -83,7 +83,7 @@ service_clear(void)
 struct ServiceItem *
 service_make(void)
 {
-  struct ServiceItem *service = io_calloc(sizeof(*service));
+  struct ServiceItem *const service = io_calloc(sizeof(*service));
   list_add(service, &service->node, &service_list);
 
   return service;
@@ -108,7 +108,7 @@ service_find(const char *name, int (*compare)(const char *, const char *))
 
   LIST_FOREACH(node, service_list.head)
   {
-    const struct ServiceItem *service = node->data;
+    const struct ServiceItem *const service = node->data;
     if (compare(service->name, name) == 0)
       return service;
   }

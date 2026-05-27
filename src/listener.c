@@ -57,7 +57,7 @@ listener_get_list(void)
 static struct Listener *
 _listener_create(const struct io_addr *addr)
 {
-  struct Listener *listener = io_calloc(sizeof(*listener));
+  struct Listener *const listener = io_calloc(sizeof(*listener));
   address_copy(&listener->addr, addr);
 
   list_add(listener, &listener->node, &listener_list);

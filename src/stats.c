@@ -66,7 +66,7 @@ stats_register(unsigned char letter, stats_handler_func handler, uint64_t *requi
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;
 
-  struct StatsHandler *new = io_calloc(sizeof(*new));
+  struct StatsHandler *const new = io_calloc(sizeof(*new));
   new->letter = letter;
   new->handler = handler;
   new->required_modes = required_modes;
@@ -159,7 +159,7 @@ stats_find(unsigned char letter)
 stats_result_t
 stats_set_enabled(unsigned char letter)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 
@@ -178,7 +178,7 @@ stats_set_enabled(unsigned char letter)
 stats_result_t
 stats_set_disabled(unsigned char letter)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 
@@ -198,7 +198,7 @@ stats_set_disabled(unsigned char letter)
 stats_result_t
 stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 

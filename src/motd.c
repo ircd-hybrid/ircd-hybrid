@@ -65,7 +65,7 @@ static struct
 static struct Motd *
 _motd_create(const char *mask, const char *path)
 {
-  struct Motd *motd = io_calloc(sizeof(*motd));
+  struct Motd *const motd = io_calloc(sizeof(*motd));
 
   if (string_is_empty(mask))
     motd->type = MOTD_UNIVERSAL;
@@ -122,7 +122,7 @@ _motd_cache(struct Motd *motd)
     }
   }
 
-  int fd = open(motd->path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  const int fd = open(motd->path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
   if (fd == -1)
   {
     log_write(LOG_TYPE_IRCD, "Couldn't open \"%s\": %s", motd->path, strerror(errno));
@@ -146,7 +146,7 @@ _motd_cache(struct Motd *motd)
   }
 
   /* Gotta read in the file, now */
-  FILE *file = fdopen(fd, "r");
+  FILE *const file = fdopen(fd, "r");
   if (file == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Couldn't fdopen \"%s\": %s", motd->path, strerror(errno));
@@ -155,7 +155,7 @@ _motd_cache(struct Motd *motd)
   }
 
   /* Ok, allocate a structure; we'll realloc later to trim memory */
-  struct MotdCache *cache = io_calloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
+  struct MotdCache *const cache = io_calloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref_count = 1;
   cache->path = io_strdup(motd->path);
   cache->maxcount = motd->maxcount;
@@ -196,7 +196,7 @@ _motd_decache(struct Motd *motd)
   if (motd == NULL)
     return;
 
-  struct MotdCache *cache = motd->cache;
+  struct MotdCache *const cache = motd->cache;
   if (cache == NULL)  /* We can be called for records with no cache */
     return;
 
@@ -253,7 +253,7 @@ _motd_lookup(const struct Client *client)
     {
       case MOTD_CLASS:
       {
-        const char *class_name = client_get_class_name(client);
+        const char *const class_name = client_get_class_name(client);
         if (match(motd->mask, class_name) == 0)
           return motd;
         break;
@@ -319,7 +319,7 @@ motd_send(struct Client *client)
 void
 motd_signon(struct Client *client)
 {
-  const struct MotdCache *cache = _motd_cache(_motd_lookup(client));
+  const struct MotdCache *const cache = _motd_cache(_motd_lookup(client));
 
   if (ConfigGeneral.short_motd == 0 || cache == NULL)
     _motd_forward(client, cache);
@@ -391,7 +391,7 @@ motd_init(void)
 void
 motd_add(const char *mask, const char *path)
 {
-  struct Motd *motd = _motd_create(mask, path);  /* Create the motd */
+  struct Motd *const motd = _motd_create(mask, path);
   list_add(motd, &motd->node, &MotdList.other);
 }
 

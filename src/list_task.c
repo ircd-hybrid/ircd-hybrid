@@ -87,7 +87,7 @@ list_task_create(struct Client *client)
   assert(client_is_user(client));
   assert(client->connection->list_task == NULL);
 
-  struct ListTask *task = io_calloc(sizeof(*task));
+  struct ListTask *const task = io_calloc(sizeof(*task));
   task->client = client;
   task->users_max = UINT_MAX;
   task->creation_time_max = UINTMAX_MAX;

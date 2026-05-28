@@ -114,7 +114,7 @@ m_knock(struct Client *source, int parc, char *parv[])
   }
 
   const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
-  if ((source->connection->knock.last_attempt + ConfigChannel.knock_client_time) < now)
+  if (now - source->connection->knock.last_attempt > ConfigChannel.knock_client_time)
     source->connection->knock.count = 0;
 
   if (source->connection->knock.count > ConfigChannel.knock_client_count)
@@ -123,7 +123,7 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((channel->last_knock_time + ConfigChannel.knock_delay_channel) > now)
+  if (now - channel->last_knock_time < ConfigChannel.knock_delay_channel)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYKNOCK, channel->name, "channel");
     return;

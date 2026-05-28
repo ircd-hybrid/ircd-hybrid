@@ -57,10 +57,14 @@ _mlock_should_accept(const struct Client *source, const struct Channel *channel,
 }
 
 static void
-_mlock_apply(struct Client *source, struct Channel *channel, const char *mode_lock, uintmax_t mode_lock_ts)
+_mlock_commit(struct Client *source, struct Channel *channel, const char *mode_lock, uintmax_t mode_lock_ts)
 {
   channel_set_mode_lock(source, channel, mode_lock);
   channel->mode_lock_time = mode_lock_ts;
+
+  sendto_servers(source, 0, 0, ":%s MLOCK %ju %s %ju :%s",
+                 source->id, channel->creation_time, channel->name, channel->mode_lock_time,
+                 string_or_empty(channel->mode_lock));
 }
 
 /*! \brief MLOCK command handler
@@ -91,11 +95,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
   if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts))
     return;
 
-  _mlock_apply(source, channel, parv[4], mode_lock_ts);
-
-  sendto_servers(source, 0, 0, ":%s MLOCK %ju %s %ju :%s",
-                 source->id, channel->creation_time, channel->name, channel->mode_lock_time,
-                 string_or_empty(channel->mode_lock));
+  _mlock_commit(source, channel, parv[4], mode_lock_ts);
 }
 
 static struct Command command_table =

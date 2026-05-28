@@ -171,7 +171,7 @@ m_invite(struct Client *source, int parc, char *parv[])
   }
 
   const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
-  if ((source->connection->invite.last_attempt + ConfigChannel.invite_client_time) < now)
+  if (now - source->connection->invite.last_attempt > ConfigChannel.invite_client_time)
     source->connection->invite.count = 0;
 
   if (source->connection->invite.count > ConfigChannel.invite_client_count)
@@ -180,7 +180,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if ((channel->last_invite_time + ConfigChannel.invite_delay_channel) > now)
+  if (now - channel->last_invite_time < ConfigChannel.invite_delay_channel)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYINVITE, channel->name, "channel");
     return;

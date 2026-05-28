@@ -24,7 +24,9 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "io_string.h"
@@ -40,61 +42,85 @@
 #include "parse.h"
 #include "send.h"
 
-/*!
- *
- * \param source Pointer to client to set (un)away
- * \param message  Away message; can be NULL
- */
-static void
-do_away(struct Client *source, const char *message)
+static size_t
+_away_message_stored_length(const char *message)
 {
-  assert(client_is_user(source));
+  assert(message);
+  assert(ConfigGeneral.max_away_length > 0);
 
-  if (string_is_empty(message))
-  {
-    /* Marking as not away */
-    if (source->away_message)
-    {
-      io_free(source->away_message);
-      source->away_message = NULL;
+  size_t length = 0;
+  while (message[length] && length < ConfigGeneral.max_away_length)
+    ++length;
 
-      /* We now send this only if they were away before --is */
-      sendto_servers(source, 0, 0, ":%s AWAY", source->id);
-      sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                                   source->name, source->username, source->host);
-    }
+  return length;
+}
 
-    if (client_is_local(source))
-      sendto_one_numeric(source, &me, RPL_UNAWAY);
-    return;
-  }
+static bool
+_away_message_is_unchanged(const struct Client *source, const char *message)
+{
+  assert(!string_is_empty(message));
 
-  if (client_is_local(source))
-  {
-    if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
-      source->connection->away.count = 0;
+  if (source->away_message == NULL)
+    return false;
 
-    if (source->connection->away.count > ConfigGeneral.away_count)
-    {
-      sendto_one_numeric(source, &me, ERR_TOOMANYAWAY);
-      return;
-    }
+  const size_t stored_length = _away_message_stored_length(message);
+  if (strlen(source->away_message) != stored_length)
+    return false;
 
-    source->connection->away.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
-    source->connection->away.count++;
-    sendto_one_numeric(source, &me, RPL_NOWAWAY);
+  return memcmp(source->away_message, message, stored_length) == 0;
+}
 
-    if (source->away_message && strncmp(source->away_message, message, ConfigGeneral.max_away_length) == 0)
-      return;
-  }
+static void
+_away_send_unset(struct Client *source)
+{
+  sendto_servers(source, 0, 0, ":%s AWAY", source->id);
+  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
+                               source->name, source->username, source->host);
+}
 
-  io_free(source->away_message);
-  source->away_message = io_strndup(message, ConfigGeneral.max_away_length);
+static void
+_away_send_set(struct Client *source)
+{
+  assert(source->away_message);
 
   sendto_servers(source, 0, 0, ":%s AWAY :%s",
                  source->id, source->away_message);
   sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                                source->name, source->username, source->host, source->away_message);
+}
+
+static void
+_away_commit_unset(struct Client *source)
+{
+  if (source->away_message == NULL)
+    return;
+
+  io_free(source->away_message);
+  source->away_message = NULL;
+
+  _away_send_unset(source);
+}
+
+static void
+_away_commit_set(struct Client *source, const char *message)
+{
+  assert(!string_is_empty(message));
+
+  io_free(source->away_message);
+  source->away_message = io_strndup(message, ConfigGeneral.max_away_length);
+
+  _away_send_set(source);
+}
+
+static void
+_away_commit(struct Client *source, const char *message)
+{
+  assert(client_is_user(source));
+
+  if (string_is_empty(message))
+    _away_commit_unset(source);
+  else
+    _away_commit_set(source, message);
 }
 
 /*! \brief AWAY command handler
@@ -111,9 +137,45 @@ do_away(struct Client *source, const char *message)
 static void
 m_away(struct Client *source, int parc, char *parv[])
 {
-  const char *const message = parv[1];
+  assert(client_is_local_user(source));
 
-  do_away(source, message);
+  const char *const message = parv[1];
+  if (string_is_empty(message))
+  {
+    _away_commit_unset(source);
+
+    sendto_one_numeric(source, &me, RPL_UNAWAY);
+    return;
+  }
+
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - source->connection->away.last_attempt > ConfigGeneral.away_time)
+    source->connection->away.count = 0;
+
+  if (source->connection->away.count > ConfigGeneral.away_count)
+  {
+    sendto_one_numeric(source, &me, ERR_TOOMANYAWAY);
+    return;
+  }
+
+  source->connection->away.last_attempt = now;
+  source->connection->away.count++;
+
+  sendto_one_numeric(source, &me, RPL_NOWAWAY);
+
+  if (_away_message_is_unchanged(source, message))
+    return;
+
+  _away_commit_set(source, message);
+}
+
+static void
+ms_away(struct Client *source, int parc, char *parv[])
+{
+  assert(client_is_user(source));
+
+  const char *const message = parv[1];
+  _away_commit(source, message);
 }
 
 static struct Command command_table =
@@ -121,7 +183,7 @@ static struct Command command_table =
   .name = "AWAY",
   .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
   .handlers[CLIENT_HANDLER] = { .handler = m_away },
-  .handlers[SERVER_HANDLER] = { .handler = m_away },
+  .handlers[SERVER_HANDLER] = { .handler = ms_away },
   .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
   .handlers[OPER_HANDLER] = { .handler = m_away }
 };

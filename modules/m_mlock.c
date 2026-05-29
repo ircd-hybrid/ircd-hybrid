@@ -42,7 +42,8 @@
 
 static bool
 _mlock_should_accept(const struct Client *source, const struct Channel *channel,
-                     uintmax_t channel_ts, uintmax_t mode_lock_ts)
+                     uintmax_t channel_ts, uintmax_t mode_lock_ts,
+                     const char *mode_lock)
 {
   if (channel_ts > channel->creation_time)
     return false;
@@ -53,18 +54,24 @@ _mlock_should_accept(const struct Client *source, const struct Channel *channel,
   if (channel_ts < channel->creation_time)
     return true;
 
-  return mode_lock_ts >= channel->mode_lock_time;
+  if (mode_lock_ts > channel->mode_lock_time)
+    return true;
+
+  if (mode_lock_ts < channel->mode_lock_time)
+    return false;
+
+  return strcmp(string_or_empty(channel->mode_lock), mode_lock) == 0;
 }
 
 static void
-_mlock_commit(struct Client *source, struct Channel *channel, const char *mode_lock, uintmax_t mode_lock_ts)
+_mlock_commit(struct Client *source, struct Channel *channel, uintmax_t channel_ts, uintmax_t mode_lock_ts,
+              const char *mode_lock)
 {
   channel_set_mode_lock(source, channel, mode_lock);
   channel->mode_lock_time = mode_lock_ts;
 
   sendto_servers(source, 0, 0, ":%s MLOCK %ju %s %ju :%s",
-                 source->id, channel->creation_time, channel->name, channel->mode_lock_time,
-                 string_or_empty(channel->mode_lock));
+                 source->id, channel_ts, channel->name, mode_lock_ts, string_or_empty(channel->mode_lock));
 }
 
 /*! \brief MLOCK command handler
@@ -84,7 +91,8 @@ _mlock_commit(struct Client *source, struct Channel *channel, const char *mode_l
 static void
 ms_mlock(struct Client *source, int parc, char *parv[])
 {
-  assert(!client_is_local_user(source));
+  if (!client_is_service(source) && !client_is_server(source))
+    return;
 
   struct Channel *const channel = hash_find_channel(parv[2]);
   if (channel == NULL)
@@ -92,10 +100,11 @@ ms_mlock(struct Client *source, int parc, char *parv[])
 
   const uintmax_t channel_ts = strtoumax(parv[1], NULL, 10);
   const uintmax_t mode_lock_ts = strtoumax(parv[3], NULL, 10);
-  if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts))
+  const char *const mode_lock = parv[4];
+  if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts, mode_lock))
     return;
 
-  _mlock_commit(source, channel, parv[4], mode_lock_ts);
+  _mlock_commit(source, channel, channel_ts, mode_lock_ts, mode_lock);
 }
 
 static struct Command command_table =

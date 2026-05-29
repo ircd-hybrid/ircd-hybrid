@@ -117,7 +117,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   {
     const uint64_t mode_flags_old = target->umodes;
     user_mode_unset_flag(target, UMODE_REGISTERED);
-    user_mode_send(source, mode_flags_old, USER_MODE_SEND_USER);
+    user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
   }
 
   uintmax_t new_ts = strtoumax(parv[4], NULL, 10);

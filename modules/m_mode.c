@@ -129,7 +129,7 @@ m_mode(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *const channel = hash_find_channel(name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);

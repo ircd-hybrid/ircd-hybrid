@@ -39,6 +39,95 @@
 #include "send.h"
 #include "server_capab.h"
 
+static size_t
+_tburst_topic_stored_length(const char *topic)
+{
+  assert(topic);
+  assert(TOPICLEN > 0);
+
+  size_t length = 0;
+  while (topic[length] && length < TOPICLEN)
+    ++length;
+
+  return length;
+}
+
+static bool
+_tburst_topic_matches_current(const struct Channel *channel, const char *topic)
+{
+  const char *const current_topic = string_or_empty(channel->topic);
+  const size_t stored_length = _tburst_topic_stored_length(topic);
+
+  if (strlen(current_topic) != stored_length)
+    return false;
+
+  return memcmp(current_topic, topic, stored_length) == 0;
+}
+
+static bool
+_tburst_topic_is_unchanged(const struct Channel *channel, const char *topic_setter, const char *topic)
+{
+  if (!_tburst_topic_matches_current(channel, topic))
+    return false;
+
+  return strcmp(string_or_empty(channel->topic_info), topic_setter) == 0;
+}
+
+static bool
+_tburst_should_accept(const struct Client *source, const struct Channel *channel,
+                      uintmax_t channel_ts, uintmax_t topic_ts,
+                      const char *topic_setter, const char *topic)
+{
+  if (channel_ts > channel->creation_time)
+    return false;
+
+  if (client_is_service(source))
+    return true;
+
+  if (channel_ts < channel->creation_time)
+    return true;
+
+  if (topic_ts > channel->topic_time)
+    return true;
+
+  if (topic_ts < channel->topic_time)
+    return false;
+
+  /*
+   * Equal topic timestamps have no deterministic winner. Accept only an
+   * idempotent repeat of the exact effective topic state.
+   */
+  return _tburst_topic_is_unchanged(channel, topic_setter, topic);
+}
+
+static void
+_tburst_notify_channel_members(const struct Client *source, const struct Channel *channel)
+{
+  if (client_is_user(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+                         source->name, source->username, source->host,
+                         channel->name, string_or_empty(channel->topic));
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
+                         client_get_visible_server_name(source),
+                         channel->name, string_or_empty(channel->topic));
+}
+
+static void
+_tburst_commit(struct Client *source, struct Channel *channel, uintmax_t channel_ts, uintmax_t topic_ts,
+               const char *topic_setter, const char *topic)
+{
+  const bool topic_changed = !_tburst_topic_matches_current(channel, topic);
+
+  channel_set_topic(channel, topic, topic_setter, topic_ts, false);
+
+  sendto_servers(source, CAPAB_TBURST, 0, ":%s TBURST %ju %s %ju %s :%s",
+                 source->id, channel_ts, channel->name, topic_ts, topic_setter, string_or_empty(channel->topic));
+
+  if (topic_changed)
+    _tburst_notify_channel_members(source, channel);
+}
+
 /*! \brief TBURST command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -57,64 +146,21 @@
 static void
 ms_tburst(struct Client *source, int parc, char *parv[])
 {
-  uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
-  uintmax_t remote_topic_ts = strtoumax(parv[3], NULL, 10);
-  const char *topic = parv[5];
-  const char *setby = parv[4];
-
-  /*
-   * Do NOT test parv[5] for an empty string and return if true!
-   * parv[5] CAN be an empty string, i.e. if the other side wants
-   * to unset our topic.  Don't forget: an empty topic is also a
-   * valid topic.
-   */
-
+  if (!client_is_user(source) && !client_is_server(source))
+    return;
 
   struct Channel *const channel = hash_find_channel(parv[2]);
   if (channel == NULL)
     return;
 
-  /*
-   * The logic for accepting and rejecting channel topics was
-   * always a bit hairy, so now we got exactly 3 cases where
-   * we would accept a topic
-   *
-   * Case 1:
-   *        A services client/server wants to set a topic
-   * Case 2:
-   *        The TS of the remote channel is older than ours
-   * Case 3:
-   *        The TS of the remote channel is equal to ours AND
-   *        the TS of the remote topic is newer than ours
-   */
-  bool accept_remote = false;
-  if (client_is_service(source))
-    accept_remote = true;
-  else if (remote_channel_ts < channel->creation_time)
-    accept_remote = true;
-  else if (remote_channel_ts == channel->creation_time)
-    if (remote_topic_ts > channel->topic_time)
-      accept_remote = true;
+  const uintmax_t channel_ts = strtoumax(parv[1], NULL, 10);
+  const uintmax_t topic_ts = strtoumax(parv[3], NULL, 10);
+  const char *const topic_setter = parv[4];
+  const char *const topic = parv[5];  /* May be empty to clear the topic. */
+  if (!_tburst_should_accept(source, channel, channel_ts, topic_ts, topic_setter, topic))
+    return;
 
-  if (accept_remote)
-  {
-    bool topic_differs = strncmp(string_or_empty(channel->topic), topic, TOPICLEN);
-    channel_set_topic(channel, topic, setby, remote_topic_ts, false);
-
-    sendto_servers(source, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
-                   source->id, parv[1], parv[2], parv[3], setby, topic);
-
-    /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
-    if (topic_differs)
-    {
-      if (client_is_user(source))
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                             source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
-      else
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                             client_get_visible_server_name(source), channel->name, string_or_empty(channel->topic));
-    }
-  }
+  _tburst_commit(source, channel, channel_ts, topic_ts, topic_setter, topic);
 }
 
 static struct Command command_table =

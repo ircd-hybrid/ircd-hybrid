@@ -32,6 +32,14 @@
 #include "parse.h"
 #include "send.h"
 
+static void
+_globops_send(struct Client *source, const char *message)
+{
+  sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
+                 source->name, message);
+}
+
 /*! \brief GLOBOPS command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -53,9 +61,7 @@ mo_globops(struct Client *source, int parc, char *parv[])
   }
 
   const char *const message = parv[1];
-  sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
-                 source->name, message);
+  _globops_send(source, message);
 }
 
 /*! \brief GLOBOPS command handler
@@ -73,10 +79,7 @@ static void
 ms_globops(struct Client *source, int parc, char *parv[])
 {
   const char *const message = parv[1];
-
-  sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
-                 source->name, message);
+  _globops_send(source, message);
 }
 
 static struct Command command_table =

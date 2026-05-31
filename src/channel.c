@@ -945,25 +945,24 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
   }
   else
   {
-    const uintmax_t t_delta = io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_part_time;
-    if (t_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
+    const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+    const uintmax_t part_delta = now - client->connection->last_part_time;
+
+    if (part_delta > JOIN_LEAVE_COUNT_EXPIRE_TIME)
     {
-      const unsigned int decrement_count = (t_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME);
+      const unsigned int decrement_count = part_delta / JOIN_LEAVE_COUNT_EXPIRE_TIME;
       if (decrement_count > client->connection->join_part_count)
         client->connection->join_part_count = 0;
       else
         client->connection->join_part_count -= decrement_count;
     }
-    else
-    {
-      if ((io_time_get(IO_TIME_MONOTONIC_SEC) - client->connection->last_join_time) < GlobalSetOptions.spam_time)
-        ++client->connection->join_part_count;  /* It's a possible spambot */
-    }
+    else if (now - client->connection->last_join_time < GlobalSetOptions.spam_time)
+      ++client->connection->join_part_count;  /* It's a possible spambot */
 
     if (name)
-      client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+      client->connection->last_join_time = now;
     else
-      client->connection->last_part_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+      client->connection->last_part_time = now;
   }
 }
 

@@ -211,7 +211,8 @@ nick_change_local(struct Client *source, const char *nick)
   assert(source->name[0] && !string_is_empty(nick));
   assert(client_is_local_user(source));
 
-  if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - source->connection->nick.last_attempt > ConfigGeneral.max_nick_time)
     source->connection->nick.count = 0;
 
   if (ConfigGeneral.anti_nick_flood && !client_is_oper(source) &&
@@ -222,7 +223,7 @@ nick_change_local(struct Client *source, const char *nick)
     return;
   }
 
-  source->connection->nick.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->nick.last_attempt = now;
   source->connection->nick.count++;
 
   bool samenick = io_strcasecmp(source->name, nick) == 0;

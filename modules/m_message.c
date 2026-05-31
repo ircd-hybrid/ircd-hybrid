@@ -167,14 +167,15 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - target->connection->first_received_message_time > GlobalSetOptions.floodtime)
   {
     if (target->connection->received_privmsg_count)
       target->connection->received_privmsg_count = 0;
     else
       client_unset_flag(target, FLAGS_FLOOD_NOTICED);
 
-    target->connection->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    target->connection->first_received_message_time = now;
   }
 
   if (target->connection->received_privmsg_count >= GlobalSetOptions.floodcount)
@@ -216,14 +217,15 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (channel->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - channel->first_received_message_time > GlobalSetOptions.floodtime)
   {
     if (channel->received_privmsg_count)
       channel->received_privmsg_count = 0;
     else
       channel->sent_message_flood_notice = false;
 
-    channel->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    channel->first_received_message_time = now;
   }
 
   if (channel->received_privmsg_count >= GlobalSetOptions.floodcount)

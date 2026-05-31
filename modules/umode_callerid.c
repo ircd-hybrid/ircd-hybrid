@@ -54,15 +54,15 @@ msg_client_target_local_hook(void *ctx_)
     sendto_one_numeric(ctx->source, &me, RPL_TARGUMODEG,
                        ctx->target->name, callerid_mode.mode_char, "server side ignore");
 
-  if ((ctx->target->connection->last_caller_id_time +
-       ConfigGeneral.caller_id_wait) < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - ctx->target->connection->last_caller_id_time > ConfigGeneral.caller_id_wait)
   {
     if (ctx->notice == false)
       sendto_one_numeric(ctx->source, &me, RPL_TARGNOTIFY, ctx->target->name);
 
     sendto_one_numeric(ctx->target, &me, RPL_UMODEGMSG,
                        ctx->source->name, ctx->source->username, ctx->source->host, callerid_mode.mode_char);
-    ctx->target->connection->last_caller_id_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    ctx->target->connection->last_caller_id_time = now;
   }
 
   return HOOK_FLOW_STOP;

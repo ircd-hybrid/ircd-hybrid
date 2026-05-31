@@ -83,8 +83,7 @@ struct ListTask *
 list_task_create(struct Client *client)
 {
   assert(client);
-  assert(client_is_local(client));
-  assert(client_is_user(client));
+  assert(client_is_local_user(client));
   assert(client->connection->list_task == NULL);
 
   struct ListTask *const task = io_calloc(sizeof(*task));
@@ -121,7 +120,7 @@ _list_task_finish(struct ListTask *task)
 {
   assert(task);
   assert(task->client);
-  assert(client_is_local(task->client));
+  assert(client_is_local_user(task->client));
   assert(task->client->connection->list_task == task);
 
   struct Client *const client = task->client;
@@ -266,8 +265,7 @@ list_task_start(struct ListTask *task)
 {
   assert(task);
   assert(task->client);
-  assert(client_is_user(task->client));
-  assert(client_is_local(task->client));
+  assert(client_is_local_user(task->client));
   assert(task->is_queued == false);
 
   /* If the query is an exact match (e.g. /LIST #a,#b), run it instantly. */

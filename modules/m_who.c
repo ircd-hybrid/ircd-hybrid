@@ -43,7 +43,6 @@
 #include "client.h"
 #include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "isupport.h"
@@ -553,7 +552,7 @@ m_who(struct Client *source, int parc, char *parv[])
   if (IsChanPrefix(*mask))
   {
     /* List all users on a given channel */
-    struct Channel *channel = hash_find_channel(mask);
+    struct Channel *channel = channel_find(mask);
     if (channel)
       _who_on_channel(source, channel, who);
 

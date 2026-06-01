@@ -30,7 +30,6 @@
 
 #include "channel.h"
 #include "client.h"
-#include "hash.h"
 #include "ircd.h"
 #include "parse.h"
 #include "server_capab.h"
@@ -55,7 +54,7 @@ ms_resync(struct Client *source, int parc, char *parv[])
   if (!client_is_local(source) || !client_is_server(source))
     return;
 
-  struct Channel *const channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)
     return;
 

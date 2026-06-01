@@ -30,7 +30,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
 #include "extban.h"
 
 static enum extban_match
@@ -42,7 +41,7 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   if (rank != CHACCESS_PEON)
     ++name;
 
-  struct Channel *tmp = hash_find_channel(name);
+  struct Channel *const tmp = channel_find(name);
   if (tmp == NULL)
     return EXTBAN_NO_MATCH;
 

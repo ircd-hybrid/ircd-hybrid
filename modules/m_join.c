@@ -39,7 +39,6 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
@@ -190,7 +189,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = 0;
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *channel = channel_find(parv[2]);
   if (channel == NULL)
   {
     if (capab_has_flag(source->nexthop, CAPAB_RESYNC))

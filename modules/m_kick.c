@@ -34,7 +34,6 @@
 #include "client.h"
 #include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "list.h"
 #include "numeric.h"
@@ -96,7 +95,7 @@ _kick_commit(struct Client *source, struct Channel *channel,
 static void
 m_kick(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *const channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
@@ -162,7 +161,7 @@ m_kick(struct Client *source, int parc, char *parv[])
 static void
 ms_kick(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *const channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)
     return;
 

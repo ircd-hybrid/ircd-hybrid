@@ -35,7 +35,6 @@
 #include "client_id.h"
 #include "client_input.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "packet.h"
@@ -191,7 +190,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int 
    */
   if (IsChanPrefix(*name))
   {
-    const struct Channel *const channel = hash_find_channel(name);
+    const struct Channel *const channel = channel_find(name);
     if (channel == NULL)
       return;
 

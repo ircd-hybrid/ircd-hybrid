@@ -62,6 +62,15 @@ channel_get_list(void)
   return &channel_list;
 }
 
+struct Channel *
+channel_find(const char *name)
+{
+  if (string_is_empty(name))
+    return NULL;
+
+  return hash_find_channel(name);
+}
+
 static void
 _channel_track_join_flood(struct Channel *channel, struct Client *client, bool track_join)
 {
@@ -1054,7 +1063,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   }
 
   uint32_t flags = 0;
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *channel = channel_find(name);
   if (channel == NULL)
   {
     flags = CHFL_CHANOP;
@@ -1137,14 +1146,14 @@ channel_join_one(struct Client *client, const char *name, const char *key)
 void
 channel_part_one(struct Client *client, const char *name, const char *reason)
 {
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *const channel = channel_find(name);
   if (channel == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  struct ChannelMember *member = channel_member_find(client, channel);
+  struct ChannelMember *const member = channel_member_find(client, channel);
   if (member == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOTONCHANNEL, channel->name);

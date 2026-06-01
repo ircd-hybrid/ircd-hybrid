@@ -33,7 +33,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
 #include "parse.h"
 
 /*! \brief TMODE command handler
@@ -54,7 +53,7 @@ ms_tmode(struct Client *source, int parc, char *parv[])
 {
   assert(!client_is_local_user(source));
 
-  struct Channel *const channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 

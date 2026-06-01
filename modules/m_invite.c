@@ -42,7 +42,6 @@
 #include "client.h"
 #include "client_find.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -138,7 +137,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Channel *const channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
@@ -220,7 +219,7 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  struct Channel *const channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 

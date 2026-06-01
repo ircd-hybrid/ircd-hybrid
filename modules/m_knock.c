@@ -35,7 +35,6 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
-#include "hash.h"
 #include "ircd.h"
 #include "isupport.h"
 #include "numeric.h"
@@ -80,7 +79,7 @@ m_knock(struct Client *source, int parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
-  struct Channel *const channel = hash_find_channel(channel_name);
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
@@ -142,7 +141,7 @@ ms_knock(struct Client *source, int parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
-  struct Channel *const channel = hash_find_channel(channel_name);
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
     return;
 

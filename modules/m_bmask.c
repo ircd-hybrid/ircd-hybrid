@@ -36,7 +36,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
@@ -68,7 +67,7 @@ ms_bmask(struct Client *source, int parc, char *parv[])
   int modecount = 0;
   unsigned int type = 0;
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 

@@ -34,7 +34,6 @@
 #include "channel.h"
 #include "client.h"
 #include "conf.h"
-#include "hash.h"
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
@@ -149,7 +148,7 @@ ms_tburst(struct Client *source, int parc, char *parv[])
   if (!client_is_user(source) && !client_is_server(source))
     return;
 
-  struct Channel *const channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 

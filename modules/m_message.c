@@ -44,7 +44,6 @@
 #include "client_find.h"
 #include "conf.h"
 #include "conf_oper.h"
-#include "hash.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "numeric.h"
@@ -437,7 +436,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
   void *target;
   if (IsChanPrefix(*name))
   {
-    target = hash_find_channel(name);
+    target = channel_find(name);
     if (target)
     {
       target_handle_channel(source, target, access_rank);

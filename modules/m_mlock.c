@@ -34,7 +34,6 @@
 
 #include "channel.h"
 #include "client.h"
-#include "hash.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
@@ -94,7 +93,7 @@ ms_mlock(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !client_is_server(source))
     return;
 
-  struct Channel *const channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 

@@ -33,7 +33,6 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
-#include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -129,7 +128,7 @@ m_mode(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Channel *const channel = hash_find_channel(name);
+  struct Channel *const channel = channel_find(name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);

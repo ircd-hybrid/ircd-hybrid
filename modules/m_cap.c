@@ -231,23 +231,32 @@ cap_list(struct Client *source, const char *arg)
   send_caplist(source, &source->connection->cap, NULL, "LIST");
 }
 
-static struct subcmd
+struct CapSubcommand
 {
   const char *name;
-  void (*proc)(struct Client *, const char *);
-} cmdlist[] = {
-  { "END",  cap_end  },
-  { "LIST", cap_list },
-  { "LS",   cap_ls   },
-  { "REQ",  cap_req  }
+  void (*handler)(struct Client *, const char *);
 };
 
-static int
-subcmd_cmp(const void *const name_, const void *const elem_)
+static const struct CapSubcommand cap_subcommands[] =
 {
-  const char *const name = name_;
-  const struct subcmd *const elem = elem_;
-  return io_strcasecmp(name, elem->name);
+  /* Keep this table ordered by expected CAP negotiation frequency. */
+  { "LS",   cap_ls   },
+  { "REQ",  cap_req  },
+  { "END",  cap_end  },
+  { "LIST", cap_list }
+};
+
+static const struct CapSubcommand *
+_cap_subcommand_find(const char *name)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(cap_subcommands); ++i)
+  {
+    const struct CapSubcommand *const subcommand = &cap_subcommands[i];
+    if (io_strcasecmp(name, subcommand->name) == 0)
+      return subcommand;
+  }
+
+  return NULL;
 }
 
 /*! \brief CAP command handler
@@ -265,18 +274,17 @@ subcmd_cmp(const void *const name_, const void *const elem_)
 static void
 m_cap(struct Client *source, int parc, char *parv[])
 {
-  const char *subcmd = parv[1], *caplist = parv[2];
+  const char *const subcommand_name = parv[1];
+  const char *const caplist = parv[2];
 
-  /* Find the subcommand handler */
-  const struct subcmd *cmd = bsearch(subcmd, cmdlist, IO_ARRAY_LENGTH(cmdlist), sizeof(*cmd), subcmd_cmp);
-  if (cmd == NULL)
+  const struct CapSubcommand *const subcommand = _cap_subcommand_find(subcommand_name);
+  if (subcommand == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_INVALIDCAPCMD, subcmd);
+    sendto_one_numeric(source, &me, ERR_INVALIDCAPCMD, subcommand_name);
     return;
   }
 
-  /* Then execute it... */
-  cmd->proc(source, caplist);
+  subcommand->handler(source, caplist);
 }
 
 static struct Command command_table =

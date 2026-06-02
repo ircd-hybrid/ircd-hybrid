@@ -220,7 +220,7 @@ channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
  * side effects -
  */
 static void
-_channel_send_members(struct Client *client, const struct Channel *channel)
+_channel_send_sjoin(struct Client *client, const struct Channel *channel)
 {
   size_t len;
   char buf[IRCD_BUFSIZE];
@@ -288,41 +288,48 @@ _channel_send_mask_list(struct Client *client, const struct Channel *channel, co
   sendto_one(client, "%s", buf);
 }
 
+static void
+_channel_send_tburst(struct Client *target, const struct Channel *channel)
+{
+  /*
+   * Send TBURST even if the topic string is empty when topic_time is set.
+   * A non-zero topic_time represents topic state and is needed to synchronize
+   * topic removals correctly across equal channel timestamps.
+   */
+  if (channel->topic_time == 0)
+    return;
+
+  sendto_one(target, ":%s TBURST %ju %s %ju %s :%s",
+             me.id, channel->creation_time, channel->name, channel->topic_time,
+             channel->topic_info, string_or_empty(channel->topic));
+}
+
+static void
+_channel_send_mlock(struct Client *target, const struct Channel *channel)
+{
+  if (!capab_has_flag(target, CAPAB_MLOCK))
+    return;
+
+  sendto_one(target, ":%s MLOCK %ju %s %ju :%s",
+             me.id, channel->creation_time, channel->name,
+             channel->mode_lock_time, string_or_empty(channel->mode_lock));
+}
+
 /*! \brief Send "client" a full list of the modes for channel channel
  * \param client  Pointer to client client
  * \param channel Pointer to channel pointer
  */
 void
-channel_send_modes(struct Client *client, const struct Channel *channel)
+channel_send_state(struct Client *client, const struct Channel *channel)
 {
-  _channel_send_members(client, channel);
+  _channel_send_sjoin(client, channel);
 
   _channel_send_mask_list(client, channel, &channel->banlist, 'b');
   _channel_send_mask_list(client, channel, &channel->exceptlist, 'e');
   _channel_send_mask_list(client, channel, &channel->invexlist, 'I');
 
-  /*
-   * We may also send an empty topic here, but only if topic_time isn't 0,
-   * i.e. if we had a topic that got unset.  This is required for syncing
-   * topics properly.
-   *
-   * Imagine the following scenario: Our downlink introduces a channel
-   * to us with a TS that is equal to ours, but the channel topic on
-   * their side got unset while the servers were in splitmode, which means
-   * their 'topic' is newer.  They simply wanted to unset it, so we have to
-   * deal with it in a more sophisticated fashion instead of just resetting
-   * it to their old topic they had before.  Read m_tburst.c:ms_tburst
-   * for further information   -Michael
-   */
-  if (channel->topic_time)
-    sendto_one(client, ":%s TBURST %ju %s %ju %s :%s",
-               me.id, channel->creation_time, channel->name, channel->topic_time,
-               channel->topic_info, string_or_empty(channel->topic));
-
-  if (capab_has_flag(client, CAPAB_MLOCK))
-    sendto_one(client, ":%s MLOCK %ju %s %ju :%s",
-               me.id, channel->creation_time, channel->name, channel->mode_lock_time,
-               string_or_empty(channel->mode_lock));
+  _channel_send_tburst(client, channel);
+  _channel_send_mlock(client, channel);
 }
 
 /*! \brief Check channel name for invalid characters

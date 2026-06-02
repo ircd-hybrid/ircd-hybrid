@@ -47,7 +47,7 @@
 enum { WHOWAS_MAX_REPLIES = 20 };
 
 static void
-whowas_send(struct Client *source, const struct Whowas *whowas)
+_whowas_send_record(struct Client *source, const struct Whowas *whowas)
 {
   sendto_one_numeric(source, &me, RPL_WHOWASUSER,
                      whowas->name, whowas->username, whowas->hostname, whowas->realname);
@@ -78,14 +78,14 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
 }
 
 static void
-whowas_send_reply_cb(const struct Whowas *whowas, void *user_data)
+_whowas_send_record_cb(const struct Whowas *whowas, void *user_data)
 {
-  struct Client *source = user_data;
-  whowas_send(source, whowas);
+  struct Client *const source = user_data;
+  _whowas_send_record(source, whowas);
 }
 
 static void
-whowas_do(struct Client *source, const char *name, const char *limit_str)
+_whowas_process_request(struct Client *source, const char *name, const char *limit_str)
 {
   int reply_limit = -1;
 
@@ -95,7 +95,7 @@ whowas_do(struct Client *source, const char *name, const char *limit_str)
   if (!client_is_local(source) && (reply_limit <= 0 || reply_limit > WHOWAS_MAX_REPLIES))
     reply_limit = WHOWAS_MAX_REPLIES;
 
-  int records_found = whowas_query(name, reply_limit, whowas_send_reply_cb, source);
+  int records_found = whowas_query(name, reply_limit, _whowas_send_record_cb, source);
   if (records_found == 0)
     sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, name);
 
@@ -137,7 +137,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  whowas_do(source, parv[1], parv[2]);
+  _whowas_process_request(source, parv[1], parv[2]);
 }
 
 /*! \brief WHOWAS command handler
@@ -165,7 +165,7 @@ ms_whowas(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  whowas_do(source, parv[1], parv[2]);
+  _whowas_process_request(source, parv[1], parv[2]);
 }
 
 static struct Command command_table =

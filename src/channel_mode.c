@@ -1014,7 +1014,7 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
   int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
 
   if (client_is_local_user(client))
-    rank = member_highest_rank(channel_member_find(client, channel));
+    rank = channel_member_get_highest_rank(channel_member_find(client, channel));
 
   mode_count = 0;
   mode_limit = 0;

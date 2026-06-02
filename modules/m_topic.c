@@ -123,7 +123,7 @@ m_topic(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    if (channel_has_mode(channel, MODE_TOPICLIMIT) && member_highest_rank(member) < CHACCESS_HALFOP)
+    if (channel_has_mode(channel, MODE_TOPICLIMIT) && channel_member_get_highest_rank(member) < CHACCESS_HALFOP)
     {
       sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
       return;

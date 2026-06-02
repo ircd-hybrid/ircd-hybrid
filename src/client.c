@@ -721,7 +721,7 @@ _client_exit_detach(struct Client *client)
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    channel_member_clear_list(&client->channel_list);
+    channel_member_remove_list(&client->channel_list);
 
     svstag_clear_list(&client->svstag_list);
 

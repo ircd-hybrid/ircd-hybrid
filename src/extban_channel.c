@@ -37,7 +37,7 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
 {
   const char *name = ban->host;
 
-  int rank = channel_prefix_to_rank(*name);
+  int rank = channel_member_prefix_to_rank(*name);
   if (rank != CHACCESS_PEON)
     ++name;
 
@@ -55,7 +55,7 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   struct ChannelMember *member = channel_member_find(client, tmp);
   if (member)
   {
-    if (rank > member_highest_rank(member))
+    if (rank > channel_member_get_highest_rank(member))
       return EXTBAN_NO_MATCH;
     return EXTBAN_MATCH;
   }

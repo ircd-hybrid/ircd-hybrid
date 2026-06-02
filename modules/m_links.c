@@ -89,7 +89,7 @@ _links_send_live(struct Client *client, const char *mask)
  * \param source Pointer to client to report to
  */
 static void
-do_links(struct Client *source, char *parv[])
+_links_process_request(struct Client *source, char *parv[])
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
@@ -107,7 +107,7 @@ do_links(struct Client *source, char *parv[])
 static void
 mo_links(struct Client *source, int parc, char *parv[])
 {
-  do_links(source, parv);
+  _links_process_request(source, parv);
 }
 
 /*! \brief LINKS command handler
@@ -138,7 +138,7 @@ m_links(struct Client *source, int parc, char *parv[])
 
   last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  do_links(source, parv);
+  _links_process_request(source, parv);
 }
 
 static struct Command command_table =

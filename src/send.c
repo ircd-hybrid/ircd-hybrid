@@ -786,7 +786,7 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
     if (exclude_client && (target == exclude_client->nexthop))
       continue;
 
-    if (required_rank && member_highest_rank(member) < required_rank)
+    if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
     if (required_cap && (target->connection->cap & required_cap) != required_cap)
@@ -851,7 +851,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
     if (exclude_client && (target->nexthop == exclude_client->nexthop))
       continue;
 
-    if (required_rank && member_highest_rank(member) < required_rank)
+    if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
     if (user_mode_has_flag(target, UMODE_DEAF))

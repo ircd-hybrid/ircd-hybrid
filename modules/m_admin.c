@@ -40,7 +40,7 @@
  * \param source Pointer to client to report to
  */
 static void
-do_admin(struct Client *source)
+_admin_process_request(struct Client *source)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ADMIN requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
@@ -83,7 +83,7 @@ m_admin(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s ADMIN :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  do_admin(source);
+  _admin_process_request(source);
 }
 
 /*! \brief ADMIN command handler
@@ -103,7 +103,7 @@ ms_admin(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s ADMIN :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  do_admin(source);
+  _admin_process_request(source);
 }
 
 static struct Command command_table =

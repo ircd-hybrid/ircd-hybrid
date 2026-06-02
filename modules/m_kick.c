@@ -75,7 +75,7 @@ _kick_commit(struct Client *source, struct Channel *channel,
 
   _kick_notify_channel_members(source, channel, target, reason);
 
-  channel_remove_member(member_target);
+  channel_member_remove(member_target);
 }
 
 
@@ -109,7 +109,7 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (member_highest_rank(member_source) < CHACCESS_HALFOP)
+  if (channel_member_get_highest_rank(member_source) < CHACCESS_HALFOP)
   {
     sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
@@ -129,7 +129,8 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (member_highest_rank(member_source) < member_highest_rank(member_target))
+  if (channel_member_get_highest_rank(member_source) <
+      channel_member_get_highest_rank(member_target))
   {
     sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;

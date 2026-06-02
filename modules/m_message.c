@@ -276,7 +276,7 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 
   if (perm == CHANNEL_SEND_PERM_ELEVATED || !flood_attack_channel(notice, source, channel))
   {
-    const char *const prefix = channel_rank_to_prefix(rank);
+    const char *const prefix = channel_member_rank_to_prefix(rank);
     sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
                           command[notice], prefix, channel->name, text);
   }
@@ -420,7 +420,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
 
   for (; *name; ++name)
   {
-    unsigned int prefix_rank = channel_prefix_to_rank(*name);
+    unsigned int prefix_rank = channel_member_prefix_to_rank(*name);
     if (prefix_rank == CHACCESS_PEON)
       break;
     if (access_rank == 0 || prefix_rank < access_rank)

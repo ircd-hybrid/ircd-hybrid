@@ -654,7 +654,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   LIST_FOREACH(node, source->channel_list.head)
   {
     struct ChannelMember *member = node->data;
-    if (member_highest_rank(member) < CHACCESS_VOICE)
+    if (channel_member_get_highest_rank(member) < CHACCESS_VOICE)
     {
       if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
       {

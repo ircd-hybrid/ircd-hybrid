@@ -40,7 +40,7 @@
 #include "server.h"
 
 static void
-do_connect(struct Client *source, const char *name)
+_connect_process_request(struct Client *source, const char *name)
 {
   assert(client_is_user(source));
 
@@ -67,14 +67,14 @@ do_connect(struct Client *source, const char *name)
   }
 
   /* Notify all operators about connect requests. */
-  const char *const type_p = client_is_local(source) ? "Local" : "Remote";
+  const char *const request_origin = client_is_local(source) ? "Local" : "Remote";
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                 me.name, type_p, name, connect->port, client_get_oper_name(source));
+                 me.name, request_origin, name, connect->port, client_get_oper_name(source));
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                 me.id, type_p, name, connect->port, client_get_oper_name(source));
+                 me.id, request_origin, name, connect->port, client_get_oper_name(source));
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            type_p, name, connect->port, client_get_oper_name(source));
+            request_origin, name, connect->port, client_get_oper_name(source));
 
   /*
    * At this point we should be calling connect_server with a valid
@@ -131,7 +131,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
   }
 
   const char *const name = parv[1];
-  do_connect(source, name);
+  _connect_process_request(source, name);
 }
 
 /*! \brief CONNECT command handler
@@ -154,7 +154,7 @@ ms_connect(struct Client *source, int parc, char *parv[])
     return;
 
   const char *const name = parv[1];
-  do_connect(source, name);
+  _connect_process_request(source, name);
 }
 
 static struct Command command_table =

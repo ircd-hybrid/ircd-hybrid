@@ -44,7 +44,7 @@
  * \param source Pointer to client to report to
  */
 static void
-do_motd(struct Client *source)
+_motd_process_request(struct Client *source)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MOTD requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
@@ -79,7 +79,7 @@ m_motd(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s MOTD :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  do_motd(source);
+  _motd_process_request(source);
 }
 
 /*! \brief MOTD command handler
@@ -99,7 +99,7 @@ ms_motd(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s MOTD :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  do_motd(source);
+  _motd_process_request(source);
 }
 
 static struct Command command_table =

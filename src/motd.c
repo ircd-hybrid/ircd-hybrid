@@ -282,7 +282,7 @@ _motd_lookup(const struct Client *client)
  * \param cache  MOTD body to send to client.
  */
 static void
-_motd_forward(struct Client *client, const struct MotdCache *cache)
+_motd_send_cache(struct Client *client, const struct MotdCache *cache)
 {
   if (cache == NULL)  /* No motd to send */
   {
@@ -307,7 +307,7 @@ motd_send(struct Client *client)
 {
   assert(client);
 
-  _motd_forward(client, _motd_cache(_motd_lookup(client)));
+  _motd_send_cache(client, _motd_cache(_motd_lookup(client)));
 }
 
 /*! \brief Send the signon MOTD to a user.
@@ -322,7 +322,7 @@ motd_signon(struct Client *client)
   const struct MotdCache *const cache = _motd_cache(_motd_lookup(client));
 
   if (ConfigGeneral.short_motd == 0 || cache == NULL)
-    _motd_forward(client, cache);
+    _motd_send_cache(client, cache);
   else
   {
     sendto_one_notice(client, &me, ":*** Notice -- motd was last changed at %s",

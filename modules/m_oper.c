@@ -48,7 +48,7 @@
  * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *client, const struct OperItem *oper)
+_oper_commit(struct Client *client, const struct OperItem *oper)
 {
   client_set_class(client, oper->klass, CLIENT_CLASS_OPER);
 
@@ -94,7 +94,7 @@ oper_up(struct Client *client, const struct OperItem *oper)
  * \param reason   The reason why they have failed
  */
 static void
-failed_oper_notice(struct Client *client, const char *name, oper_auth_result_t result)
+_oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_result_t result)
 {
   const char *reason = oper_auth_result_to_string(result);
 
@@ -131,11 +131,11 @@ m_oper(struct Client *source, int parc, char *parv[])
   {
     assert(oper);
 
-    oper_up(source, oper);
+    _oper_commit(source, oper);
     return;
   }
 
-  failed_oper_notice(source, opername, result);
+  _oper_report_failed_attempt(source, opername, result);
 
   switch (result)
   {

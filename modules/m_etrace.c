@@ -50,7 +50,7 @@
  * side effects - NONE
  */
 static void
-trace_send_status(struct Client *source, const struct Client *target)
+_etrace_send_user_status(struct Client *source, const struct Client *target)
 {
   if (!client_is_user(target))
     return;
@@ -65,7 +65,7 @@ trace_send_status(struct Client *source, const struct Client *target)
  * do_etrace()
  */
 static void
-do_etrace(struct Client *source, const char *name)
+_etrace_process_request(struct Client *source, const char *name)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
@@ -83,7 +83,7 @@ do_etrace(struct Client *source, const char *name)
   {
     const struct Client *const target = node->data;
     if (doall || match(name, target->name) == 0)
-      trace_send_status(source, target);
+      _etrace_send_user_status(source, target);
   }
 
   sendto_one_numeric(source, &me, RPL_ETRACEEND, me.name);
@@ -116,7 +116,7 @@ mo_etrace(struct Client *source, int parc, char *parv[])
                          IRCD_VERSION, route->target->name, route->target->nexthop->name);
       break;
     case SERVER_ROUTE_ISME:
-      do_etrace(source, parv[1]);
+      _etrace_process_request(source, parv[1]);
       break;
     default:
       break;

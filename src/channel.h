@@ -114,15 +114,15 @@ struct Ban
   int type;
 };
 
-extern void channel_member_clear_list(const list_t *);
-extern void channel_add_member(struct Channel *, struct Client *, uint32_t, bool);
-extern void channel_demote_members(struct Channel *, const char *);
 extern void channel_destroy(struct Channel *);
+extern void channel_join(struct Client *, const char *, const char *);
 extern void channel_join_list(struct Client *, char *, char *);
-extern void channel_join_one(struct Client *, const char *, const char *);
+extern void channel_member_add(struct Channel *, struct Client *, uint32_t, bool);
+extern void channel_member_clear_prefixes(struct Channel *, const char *);
+extern void channel_member_remove(struct ChannelMember *);
+extern void channel_member_remove_list(list_t *);
+extern void channel_part(struct Client *, const char *, const char *);
 extern void channel_part_list(struct Client *, char *, const char *);
-extern void channel_part_one(struct Client *, const char *, const char *);
-extern void channel_remove_member(struct ChannelMember *);
 extern void channel_send_modes(struct Client *, const struct Channel *);
 extern void channel_send_namereply(struct Client *, struct Channel *);
 extern void channel_set_mode_lock(struct Client *, struct Channel *, const char *);
@@ -131,18 +131,18 @@ extern void remove_ban(struct Ban *, list_t *);
 extern bool channel_is_valid_name(const char *, bool);
 extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct Extban *);
 extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
-extern int channel_prefix_to_rank(const char);
-extern int member_highest_rank(const struct ChannelMember *);
-extern uint32_t channel_prefix_to_flag(const char);
-extern size_t member_get_prefix_len(const struct ChannelMember *, bool);
+extern int channel_member_get_highest_rank(const struct ChannelMember *);
+extern int channel_member_prefix_to_rank(const char);
+extern uint32_t channel_member_prefix_to_flag(const char);
+extern size_t channel_member_get_prefix_length(const struct ChannelMember *, bool);
 extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_create(const char *);
 extern struct Channel *channel_find(const char *);
 extern struct ChannelMember *channel_member_find(const struct Client *, const struct Channel *);
 extern const list_t *channel_get_list(void);
+extern const char *channel_member_get_prefix(const struct ChannelMember *, bool);
+extern const char *channel_member_rank_to_prefix(const int);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
-extern const char *channel_rank_to_prefix(const int);
-extern const char *member_get_prefix(const struct ChannelMember *, bool);
 
 static inline bool
 member_has_flags(const struct ChannelMember *member, uint32_t flags)

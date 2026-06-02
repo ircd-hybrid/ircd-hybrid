@@ -145,7 +145,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("serverinfo", "sid", INFO_OUTPUT_STRING, &ConfigServerInfo.sid, "Server ID")
 };
 
-static const char *const info_lines[] =
+static const char *const info_text_lines[] =
 {
   "ircd-hybrid --",
   "Based on the original code written by Jarkko Oikarinen",
@@ -216,7 +216,7 @@ static const char *const info_lines[] =
  * side effects	- birthdate and online time are sent
  */
 static void
-_send_birthdate_online_time(struct Client *client)
+_info_send_online_since(struct Client *client)
 {
   sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT, ":On-line since %s",
                      date(me.connection->created_real));
@@ -229,12 +229,12 @@ _send_birthdate_online_time(struct Client *client)
  * side effects - info text is sent to client
  */
 static void
-_send_info_text(struct Client *client)
+_info_process_request(struct Client *client)
 {
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
                  client->name, client->username, client->host, client->uplink->name);
 
-  for (const char *const *line_ptr = info_lines; *line_ptr; ++line_ptr)
+  for (const char *const *line_ptr = info_text_lines; *line_ptr; ++line_ptr)
   {
     const char *line = *line_ptr;
     if (*line == '\0')
@@ -251,7 +251,7 @@ _send_info_text(struct Client *client)
       sendto_one_numeric(client, &me, RPL_INFO, tls_get_version());
   }
 
-  _send_birthdate_online_time(client);
+  _info_send_online_since(client);
 
   sendto_one_numeric(client, &me, RPL_ENDOFINFO);
 }
@@ -284,7 +284,7 @@ m_info(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s INFO :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  _send_info_text(source);
+  _info_process_request(source);
 }
 
 /*! \brief INFO command handler
@@ -304,7 +304,7 @@ ms_info(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s INFO :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  _send_info_text(source);
+  _info_process_request(source);
 }
 
 static struct Command command_table =

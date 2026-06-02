@@ -43,15 +43,14 @@
 #include "server.h"
 
 static void
-_trace_get_dependent(uint32_t *const servers,
-                     uint32_t *const clients, const struct Client *target)
+_trace_count_server_dependents(uint32_t *const server_count, uint32_t *const user_count, const struct Client *target)
 {
-  (*servers)++;
-  (*clients) += list_length(&target->server->child_user_list);
+  (*server_count)++;
+  (*user_count) += list_length(&target->server->child_user_list);
 
   list_node_t *node;
   LIST_FOREACH(node, target->server->child_server_list.head)
-    _trace_get_dependent(servers, clients, node->data);
+    _trace_count_server_dependents(server_count, user_count, node->data);
 }
 
 /* report_this_status()
@@ -62,7 +61,7 @@ _trace_get_dependent(uint32_t *const servers,
  * side effects - NONE
  */
 static void
-_trace_send_status(struct Client *source, const struct Client *target)
+_trace_send_target_status(struct Client *source, const struct Client *target)
 {
   const char *class_name = client_get_class_name(target);
   const char *name = client_get_name(target, HIDE_IP);
@@ -96,15 +95,15 @@ _trace_send_status(struct Client *source, const struct Client *target)
       break;
     case CLIENT_STATE_SERVER:
     {
-      uint32_t servers = 0;
-      uint32_t clients = 0;
-      _trace_get_dependent(&servers, &clients, target);
+      uint32_t server_count = 0;
+      uint32_t user_count = 0;
+      _trace_count_server_dependents(&server_count, &user_count, target);
 
       if (!client_is_admin(source))
         name = client_get_name(target, MASK_IP);
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
-                         class_name, servers, clients, name,
+                         class_name, server_count, user_count, name,
                          target->server->initiator_name ? target->server->initiator_name : "*", "*",
                          me.name, client_get_socket_idle_duration(target));
       break;
@@ -118,7 +117,7 @@ _trace_send_status(struct Client *source, const struct Client *target)
 }
 
 static void
-_trace_do(struct Client *source, const char *name)
+_trace_process_request(struct Client *source, const char *name)
 {
   assert(client_is_oper(source));
 
@@ -142,7 +141,7 @@ _trace_do(struct Client *source, const char *name)
     {
       const struct Client *const target = node->data;
       if (doall || match(name, target->name) == 0)
-        _trace_send_status(source, target);
+        _trace_send_target_status(source, target);
     }
   }
 
@@ -202,7 +201,7 @@ mo_trace(struct Client *source, int parc, char *parv[])
                          IRCD_VERSION, route->target->name, route->target->nexthop->name);
       break;
     case SERVER_ROUTE_ISME:
-      _trace_do(source, parv[1]);
+      _trace_process_request(source, parv[1]);
       break;
     default:
       break;

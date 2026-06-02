@@ -151,7 +151,7 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (member_highest_rank(member) < CHACCESS_HALFOP)
+  if (channel_member_get_highest_rank(member) < CHACCESS_HALFOP)
   {
     sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;

@@ -190,27 +190,9 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
     *(p - 1) = '-';
 }
 
-/*! \brief MAP command handler
- *
- * \param source Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parc     Integer holding the number of supplied arguments.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *      - parv[0] = command
- */
 static void
-m_map(struct Client *source, int parc, char *parv[])
+_map_process_request(struct Client *source)
 {
-  static uintmax_t last_used = 0;
-
-  if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
-  {
-    sendto_one_numeric(source, &me, RPL_LOAD2HI, "MAP");
-    return;
-  }
-
   sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
                  source->name, source->username, source->host, source->uplink->name);
 
@@ -233,13 +215,36 @@ m_map(struct Client *source, int parc, char *parv[])
  *      - parv[0] = command
  */
 static void
+m_map(struct Client *source, int parc, char *parv[])
+{
+  static uintmax_t last_used = 0;
+
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((last_used + ConfigGeneral.pace_wait) > now)
+  {
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "MAP");
+    return;
+  }
+
+  last_used = now;
+
+  _map_process_request(source);
+}
+
+/*! \brief MAP command handler
+ *
+ * \param source Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ */
+static void
 mo_map(struct Client *source, int parc, char *parv[])
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
-
-  _map_send_live(source, &me, (char[MAP_PROMPT_BUFFER_SIZE]){ 0 }, 0);
-  sendto_one_numeric(source, &me, RPL_MAPEND);
+  _map_process_request(source);
 }
 
 static struct Command command_table =

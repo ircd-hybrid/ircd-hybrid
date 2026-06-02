@@ -79,7 +79,7 @@ typedef enum
  * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
 */
 static whois_channel_visibility_t
-_whois_channel_visibility_get(struct Channel *channel, struct Client *source, const struct Client *target)
+_whois_get_channel_visibility(struct Channel *channel, struct Client *source, const struct Client *target)
 {
   if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
@@ -99,7 +99,7 @@ _whois_channel_visibility_get(struct Channel *channel, struct Client *source, co
 }
 
 static const char *
-_whois_channel_visibility_get_prefix(whois_channel_visibility_t vis)
+_whois_get_channel_visibility_prefix(whois_channel_visibility_t vis)
 {
   switch (vis)
   {
@@ -150,20 +150,20 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
   LIST_FOREACH(node, target->channel_list.head)
   {
     const struct ChannelMember *const member = node->data;
-    whois_channel_visibility_t vis = _whois_channel_visibility_get(member->channel, source, target);
+    whois_channel_visibility_t vis = _whois_get_channel_visibility(member->channel, source, target);
 
     if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
       continue;
 
-    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + member_get_prefix_len(member, true) + len > sizeof(buf))
+    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + channel_member_get_prefix_length(member, true) + len > sizeof(buf))
     {
       sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
       bufptr = buf;
     }
 
-    const char *const channel_prefix = _whois_channel_visibility_get_prefix(vis);
+    const char *const channel_prefix = _whois_get_channel_visibility_prefix(vis);
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
-                       channel_prefix, member_get_prefix(member, true), member->channel->name);
+                       channel_prefix, channel_member_get_prefix(member, true), member->channel->name);
   }
 
   if (bufptr != buf)
@@ -243,7 +243,7 @@ _whois_send_idle_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-_whois_send(struct Client *source, struct Client *target)
+_whois_send_target_reply(struct Client *source, struct Client *target)
 {
   _whois_send_user_numeric(source, target);
 
@@ -273,11 +273,11 @@ _whois_send(struct Client *source, struct Client *target)
  * side effects - Does whois
  */
 static void
-_whois_process(struct Client *source, const char *name)
+_whois_process_request(struct Client *source, const char *name)
 {
   struct Client *const target = client_find_user(source, name);
   if (target)
-    _whois_send(source, target);
+    _whois_send_target_reply(source, target);
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 
@@ -331,7 +331,7 @@ m_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  _whois_process(source, parv[1]);
+  _whois_process_request(source, parv[1]);
 }
 
 /*! \brief WHOIS command handler
@@ -363,7 +363,7 @@ mo_whois(struct Client *source, int parc, char *parv[])
     parv[1] = parv[2];
   }
 
-  _whois_process(source, parv[1]);
+  _whois_process_request(source, parv[1]);
 }
 
 static struct Command command_table =

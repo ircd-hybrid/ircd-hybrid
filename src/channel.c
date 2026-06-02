@@ -112,7 +112,7 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
  * \param track_join Whether to count this join in flood calculations
  */
 void
-channel_add_member(struct Channel *channel, struct Client *client, uint32_t flags, bool track_join)
+channel_member_add(struct Channel *channel, struct Client *client, uint32_t flags, bool track_join)
 {
   assert(client_is_user(client));
 
@@ -135,7 +135,7 @@ channel_add_member(struct Channel *channel, struct Client *client, uint32_t flag
  * \param member Pointer to Membership struct
  */
 void
-channel_remove_member(struct ChannelMember *member)
+channel_member_remove(struct ChannelMember *member)
 {
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
@@ -154,12 +154,12 @@ channel_remove_member(struct ChannelMember *member)
 }
 
 void
-channel_member_clear_list(const list_t *list)
+channel_member_remove_list(list_t *list)
 {
   struct ChannelMember *member;
 
   while ((member = list_peek_head(list)))
-    channel_remove_member(member);
+    channel_member_remove(member);
 }
 
 /* remove_a_mode()
@@ -169,7 +169,7 @@ channel_member_clear_list(const list_t *list)
  * side effects - remove ONE mode from a channel
  */
 void
-channel_demote_members(struct Channel *channel, const char *source_name)
+channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
 {
   char modebuf[MAXMODEPARAMS + 1];
   char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
@@ -235,7 +235,7 @@ _channel_send_members(struct Client *client, const struct Channel *channel)
     const struct ChannelMember *member = node->data;
 
     len = strlen(member->client->id) + 1;  /* +1 for space */
-    len += member_get_prefix_len(member, true);
+    len += channel_member_get_prefix_length(member, true);
 
     if ((bufptr - buf) + len > sizeof(buf) - 2)
     {
@@ -244,7 +244,7 @@ _channel_send_members(struct Client *client, const struct Channel *channel)
     }
 
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s%s" : "%s%s",
-                       member_get_prefix(member, true), member->client->id);
+                       channel_member_get_prefix(member, true), member->client->id);
   }
 
   sendto_one(client, "%s", buf);
@@ -514,7 +514,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       else
         masklen = strlen(member->client->name) + 1;  /* +1 for space */
 
-      masklen += member_get_prefix_len(member, multi_prefix);
+      masklen += channel_member_get_prefix_length(member, multi_prefix);
 
       if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
@@ -525,11 +525,11 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
       if (uhnames)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
-                           member_get_prefix(member, multi_prefix),
+                           channel_member_get_prefix(member, multi_prefix),
                            member->client->name, member->client->username, member->client->host);
       else
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s" : "%s%s",
-                           member_get_prefix(member, multi_prefix), member->client->name);
+                           channel_member_get_prefix(member, multi_prefix), member->client->name);
     }
 
     if (bufptr != buf)
@@ -541,7 +541,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 }
 
 int
-channel_prefix_to_rank(const char prefix)
+channel_member_prefix_to_rank(const char prefix)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
     if (tab->prefix == prefix)
@@ -550,7 +550,7 @@ channel_prefix_to_rank(const char prefix)
 }
 
 const char *
-channel_rank_to_prefix(const int rank)
+channel_member_rank_to_prefix(const int rank)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
   {
@@ -568,7 +568,7 @@ channel_rank_to_prefix(const int rank)
 }
 
 uint32_t
-channel_prefix_to_flag(const char prefix)
+channel_member_prefix_to_flag(const char prefix)
 {
   for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
     if (tab->prefix == prefix)
@@ -576,7 +576,7 @@ channel_prefix_to_flag(const char prefix)
   return 0;
 }
 
-/* member_get_prefix()
+/* channel_member_get_prefix()
  *
  * inputs       - pointer to struct ChannelMember
  *              - YES if we can combine different flags
@@ -588,7 +588,7 @@ channel_prefix_to_flag(const char prefix)
  * (like in client_get_name)
  */
 const char *
-member_get_prefix(const struct ChannelMember *member, bool combine)
+channel_member_get_prefix(const struct ChannelMember *member, bool combine)
 {
   static char buf[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
   char *bufptr = buf;
@@ -603,7 +603,7 @@ member_get_prefix(const struct ChannelMember *member, bool combine)
 }
 
 size_t
-member_get_prefix_len(const struct ChannelMember *member, bool combine)
+channel_member_get_prefix_length(const struct ChannelMember *member, bool combine)
 {
   size_t len = 0;
 
@@ -616,7 +616,7 @@ member_get_prefix_len(const struct ChannelMember *member, bool combine)
 }
 
 int
-member_highest_rank(const struct ChannelMember *member)
+channel_member_get_highest_rank(const struct ChannelMember *member)
 {
   if (member == NULL)
     return CHACCESS_NOTONCHAN;
@@ -867,7 +867,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   }
 
   if (member || (member = channel_member_find(client, channel)))
-    if (member_highest_rank(member) > CHACCESS_PEON)
+    if (channel_member_get_highest_rank(member) > CHACCESS_PEON)
       return CHANNEL_SEND_PERM_ELEVATED;
 
   if (statusmsg)
@@ -1031,12 +1031,12 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     if (!string_is_empty(key_list) && (key_list = strchr(key = key_list, ',')))
       *key_list++ = '\0';
 
-    channel_join_one(client, name, key);
+    channel_join(client, name, key);
   }
 }
 
 void
-channel_join_one(struct Client *client, const char *name, const char *key)
+channel_join(struct Client *client, const char *name, const char *key)
 {
   if (!channel_is_valid_name(name, true))
   {
@@ -1086,7 +1086,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
   if (!client_is_oper(client))
     _channel_check_spambot_warning(client, channel->name);
 
-  channel_add_member(channel, client, flags, true);
+  channel_member_add(channel, client, flags, true);
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /*
@@ -1144,7 +1144,7 @@ channel_join_one(struct Client *client, const char *name, const char *key)
  * \param reason Part reason to show
  */
 void
-channel_part_one(struct Client *client, const char *name, const char *reason)
+channel_part(struct Client *client, const char *name, const char *reason)
 {
   struct Channel *const channel = channel_find(name);
   if (channel == NULL)
@@ -1193,7 +1193,7 @@ channel_part_one(struct Client *client, const char *name, const char *reason)
                          client->name, client->username, client->host, channel->name);
   }
 
-  channel_remove_member(member);
+  channel_member_remove(member);
 }
 
 void
@@ -1204,5 +1204,5 @@ channel_part_list(struct Client *client, char *list, const char *reason)
   char *p = NULL;
   for (const char *name = strtok_r(list, ",", &p); name;
                    name = strtok_r(NULL, ",", &p))
-    channel_part_one(client, name, reason);
+    channel_part(client, name, reason);
 }

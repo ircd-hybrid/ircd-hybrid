@@ -80,7 +80,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
   {
     const struct ChannelMember *tmp = node->data;
 
-    if (member_highest_rank(tmp) > CHACCESS_HALFOP)
+    if (channel_member_get_highest_rank(tmp) > CHACCESS_HALFOP)
     {
       sendto_one_notice(source, &me, ":Cannot use OPME on %s: channel is not opless",
                         channel->name);

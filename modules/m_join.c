@@ -226,7 +226,7 @@ ms_join(struct Client *source, int parc, char *parv[])
                          me.name, channel->name, channel->name, oldts, newts);
 
     const char *const origin_name = client_get_visible_server_name(source->uplink);
-    channel_demote_members(channel, origin_name);
+    channel_member_clear_prefixes(channel, origin_name);
 
     invite_clear_list(&channel->invites);
 
@@ -246,7 +246,7 @@ ms_join(struct Client *source, int parc, char *parv[])
 
   if (channel_member_find(source, channel) == NULL)
   {
-    channel_add_member(channel, source, 0, true);
+    channel_member_add(channel, source, 0, true);
 
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source->name, source->username, source->host, channel->name,

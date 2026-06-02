@@ -251,7 +251,7 @@ _parse_list_args(struct ListTask *task, char *args)
 }
 
 static void
-_do_list(struct Client *client, char *arg)
+_list_process_request(struct Client *client, char *arg)
 {
   if (client->connection->list_task)
   {
@@ -287,7 +287,7 @@ _do_list(struct Client *client, char *arg)
 static void
 m_list(struct Client *source, int parc, char *parv[])
 {
-  _do_list(source, parv[1]);
+  _list_process_request(source, parv[1]);
 }
 
 static struct Command command_table =

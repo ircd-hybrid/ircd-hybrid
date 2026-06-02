@@ -309,7 +309,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                          me.name, channel->name, channel->name, oldts, newts);
 
-    channel_demote_members(channel, origin_name);
+    channel_member_clear_prefixes(channel, origin_name);
 
     remove_ban_list(channel, origin_name, &channel->banlist, 'b');
     remove_ban_list(channel, origin_name, &channel->exceptlist, 'e');
@@ -346,7 +346,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                    s = strtok_r(NULL, " ", &p))
   {
     unsigned int ret, flags = 0;
-    while ((ret = channel_prefix_to_flag(*s)))
+    while ((ret = channel_member_prefix_to_flag(*s)))
     {
       flags |= ret;
       ++s;
@@ -365,7 +365,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     if (flags && keep_new_modes)
     {
       const struct ChannelMember member = { .flags = flags };
-      len_uid += strlcpy(uid_prefix, member_get_prefix(&member, true), sizeof(uid_prefix));
+      len_uid += strlcpy(uid_prefix, channel_member_get_prefix(&member, true), sizeof(uid_prefix));
     }
     else
       flags = 0;
@@ -381,7 +381,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     if (channel_member_find(target, channel) == NULL)
     {
       bool synced = client_has_flag(source, FLAGS_EOB);
-      channel_add_member(channel, target, flags, synced);
+      channel_member_add(channel, target, flags, synced);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target->name, target->username, target->host, channel->name,

@@ -56,6 +56,36 @@ pseudo_get_list(void)
   return &pseudo_list;
 }
 
+static struct Client *
+_pseudo_find_target(const struct PseudoItem *pseudo)
+{
+  struct Client *const target = client_find_user_by_name(pseudo->nick);
+  if (target == NULL)
+    return NULL;
+
+  const struct Client *const server = client_find_server_by_name(pseudo->server);  /* XXX: SID */
+  if (server == NULL)
+    return NULL;
+
+  if (client_is_me(server))
+    return NULL;
+
+  if (target->uplink != server)
+    return NULL;
+
+  return target;
+}
+
+static const char *
+_pseudo_format_message(const struct PseudoItem *pseudo, const char *message, char *buffer, size_t buffer_size)
+{
+  if (pseudo->prepend == NULL)
+    return message;
+
+  snprintf(buffer, buffer_size, "%s%s", pseudo->prepend, message);
+  return buffer;
+}
+
 /**
  * @brief Handles incoming pseudo messages and forwards them accordingly.
  *
@@ -69,34 +99,28 @@ pseudo_get_list(void)
 static void
 _pseudo_message_handler(struct Client *source, int parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
-  const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
-  const char *msg = parv[parc - 1];
+  const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];  /* XXX */
 
-  if (parc < 3 || string_is_empty(msg))
+  const char *const message = parv[parc - 1];
+  if (parc < 3 || string_is_empty(message))
   {
     sendto_one_numeric(source, &me, ERR_NOTEXTTOSEND);
     return;
   }
 
-  if (pseudo->prepend)
-  {
-    snprintf(buf, sizeof(buf), "%s%s", pseudo->prepend, msg);
-    msg = buf;
-  }
+  char message_buffer[IRCD_BUFSIZE];
+  const char *const dispatch_message =
+    _pseudo_format_message(pseudo, message, message_buffer, sizeof(message_buffer));
 
-  struct Client *target = client_find_user_by_name(pseudo->nick);
-  if (target)
+  struct Client *const target = _pseudo_find_target(pseudo);
+  if (target == NULL)
   {
-    const struct Client *const server = client_find_server_by_name(pseudo->server);  /* XXX: SID */
-    if (server == NULL || target->uplink != server || client_is_me(server))
-      target = NULL;
-  }
-
-  if (target)
-    sendto_one(target, ":%s PRIVMSG %s :%s", source->id, target->id, msg);
-  else
     sendto_one_numeric(source, &me, ERR_SERVICESDOWN, pseudo->name);
+    return;
+  }
+
+  sendto_one(target, ":%s PRIVMSG %s :%s",
+             source->id, target->id, dispatch_message);
 }
 
 /**

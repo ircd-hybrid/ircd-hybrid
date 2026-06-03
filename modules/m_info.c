@@ -34,6 +34,7 @@
 #include "conf.h"
 #include "info.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -231,8 +232,10 @@ _info_send_online_since(struct Client *client)
 static void
 _info_process_request(struct Client *client)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "INFO requested by %s (%s@%s) [%s]",
-                 client->name, client->username, client->host, client->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = client,
+    .command = "INFO"
+  });
 
   for (const char *const *line_ptr = info_text_lines; *line_ptr; ++line_ptr)
   {

@@ -30,6 +30,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -42,8 +43,10 @@
 static void
 _admin_process_request(struct Client *source)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ADMIN requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "ADMIN"
+  });
 
   sendto_one_numeric(source, &me, RPL_ADMINME, me.name);
 

@@ -52,6 +52,7 @@
 #include "conf_shared.h"
 #include "ipcache.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "listener.h"
 #include "monitor.h"
 #include "motd.h"
@@ -1187,8 +1188,11 @@ do_stats(struct Client *client, int parc, char *parv[])
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
-    sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "STATS %c requested by %s (%s@%s) [%s]",
-                   letter, client->name, client->username, client->host, client->uplink->name);
+    hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+      .source = client,
+      .command = "STATS",
+      .selector = (char)letter
+    });
   }
 
   sendto_one_numeric(client, &me, RPL_ENDOFSTATS, letter);

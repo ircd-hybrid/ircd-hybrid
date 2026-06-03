@@ -34,6 +34,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "links_cache.h"
 #include "numeric.h"
 #include "parse.h"
@@ -91,8 +92,10 @@ _links_send_live(struct Client *client, const char *mask)
 static void
 _links_process_request(struct Client *source, char *parv[])
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "LINKS requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "LINKS"
+  });
 
   if (ConfigServerHide.flatten_links && !client_is_oper(source))
   {

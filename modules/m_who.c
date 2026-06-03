@@ -401,6 +401,19 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
   }
 }
 
+static void
+_who_dispatch_oper_spy_request(struct Client *source, const struct WhoQuery *who)
+{
+  if ((who->bitsel & WHOSELECT_OPER) == 0)
+    return;
+
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "WHO",
+    .selector = 'o'
+  });
+}
+
 /*! \brief WHO command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -549,6 +562,8 @@ m_who(struct Client *source, int parc, char *parv[])
 
     who->token = token;
   }
+
+  _who_dispatch_oper_spy_request(source, who);
 
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))

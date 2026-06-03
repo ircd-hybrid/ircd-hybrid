@@ -37,6 +37,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "links_cache.h"
 #include "numeric.h"
 #include "parse.h"
@@ -193,8 +194,10 @@ _map_send_live(struct Client *client, const struct Client *current_server, char 
 static void
 _map_process_request(struct Client *source)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "MAP"
+  });
 
   if (ConfigServerHide.flatten_links && !client_is_oper(source))
     _map_send_flat(source);

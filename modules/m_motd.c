@@ -32,6 +32,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "motd.h"
 #include "numeric.h"
 #include "parse.h"
@@ -46,8 +47,11 @@
 static void
 _motd_process_request(struct Client *source)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MOTD requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "MOTD"
+  });
+
   motd_send(source);
 }
 

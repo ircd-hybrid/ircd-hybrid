@@ -36,6 +36,7 @@
 
 #include "client.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -67,8 +68,10 @@ _etrace_send_user_status(struct Client *source, const struct Client *target)
 static void
 _etrace_process_request(struct Client *source, const char *name)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ETRACE requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->uplink->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "ETRACE"
+  });
 
   bool doall = false;
   if (string_is_empty(name))

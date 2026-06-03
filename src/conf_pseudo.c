@@ -35,6 +35,7 @@
 #include "memory.h"
 
 #include "client.h"
+#include "client_id.h"
 #include "client_find.h"
 #include "conf_pseudo.h"
 #include "numeric.h"
@@ -57,13 +58,22 @@ pseudo_get_list(void)
 }
 
 static struct Client *
+_pseudo_find_target_server(const char *name)
+{
+  if (client_id_is_valid_sid(name))
+    return client_find_server_by_sid(name);
+
+  return client_find_server_by_name(name);
+}
+
+static struct Client *
 _pseudo_find_target(const struct PseudoItem *pseudo)
 {
   struct Client *const target = client_find_user_by_name(pseudo->nick);
   if (target == NULL)
     return NULL;
 
-  const struct Client *const server = client_find_server_by_name(pseudo->server);  /* XXX: SID */
+  const struct Client *const server = _pseudo_find_target_server(pseudo->server);
   if (server == NULL)
     return NULL;
 

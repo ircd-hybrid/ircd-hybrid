@@ -108,16 +108,16 @@ _pseudo_message_handler(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  char message_buffer[IRCD_BUFSIZE];
-  const char *const dispatch_message =
-    _pseudo_format_message(pseudo, message, message_buffer, sizeof(message_buffer));
-
   struct Client *const target = _pseudo_find_target(pseudo);
   if (target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_SERVICESDOWN, pseudo->name);
     return;
   }
+
+  char message_buffer[IRCD_BUFSIZE];
+  const char *const dispatch_message =
+    _pseudo_format_message(pseudo, message, message_buffer, sizeof(message_buffer));
 
   sendto_one(target, ":%s PRIVMSG %s :%s",
              source->id, target->id, dispatch_message);

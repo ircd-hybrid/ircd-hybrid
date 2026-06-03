@@ -177,7 +177,7 @@ connect_dns_lookup(struct ConnectItem *connect)
   connect->dns_pending = true;
   connect->dns_failed = false;
 
-  int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
+  const int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
   gethost_byname_type(_connect_dns_callback, connect, connect->host, query_type);
 }
 
@@ -192,6 +192,7 @@ connect_find(const char *name, bool active)
     struct ConnectItem *const connect = node->data;
     if (match(name, connect->name))
       continue;
+
     if (active && connect->active == false)
       continue;
 
@@ -283,6 +284,7 @@ connect_incref(struct ConnectItem *connect)
 {
   if (connect == NULL)
     return;
+
   connect->ref_count++;
 }
 

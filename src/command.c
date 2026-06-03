@@ -201,8 +201,10 @@ _command_tree_find(const char *name)
 
   struct CommandTree *tree = &command_tree;
   while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
+  {
     if (*++name == '\0')
       return tree->command;
+  }
 
   return NULL;
 }
@@ -308,6 +310,7 @@ command_report(struct Client *client)
       {
         if (top >= IO_ARRAY_LENGTH(stack))
           return;
+
         stack[top++] = ptr;
       }
     }

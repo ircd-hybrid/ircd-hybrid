@@ -58,7 +58,7 @@ ms_resync(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  channel_send_modes(source, channel);
+  channel_send_state(source, channel);
 }
 
 static struct Command command_table =

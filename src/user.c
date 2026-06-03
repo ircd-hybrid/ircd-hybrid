@@ -537,7 +537,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
     char *p = modebuf;
     int len = 0;
-    const struct ChannelMember *member = node->data;
+    const struct ChannelMember *const member = node->data;
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {

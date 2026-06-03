@@ -67,7 +67,7 @@ _monitor_find(const char *name)
 
   LIST_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
-    struct Monitor *monitor = node->data;
+    struct Monitor *const monitor = node->data;
     if (io_strcasecmp(monitor->name, name) == 0)
       return monitor;
   }
@@ -99,7 +99,7 @@ monitor_notify_signon(const struct Client *client)
 {
   assert(client_is_user(client));
 
-  struct Monitor *monitor = _monitor_find(client->name);
+  struct Monitor *const monitor = _monitor_find(client->name);
   if (monitor == NULL)
     return;  /* This name isn't on monitor */
 
@@ -121,7 +121,7 @@ monitor_notify_signoff(const struct Client *client)
 {
   assert(client_is_user(client));
 
-  struct Monitor *monitor = _monitor_find(client->name);
+  struct Monitor *const monitor = _monitor_find(client->name);
   if (monitor == NULL)
     return;  /* This name isn't on monitor */
 
@@ -167,7 +167,7 @@ monitor_unsubscribe(struct Client *client, const char *name)
 {
   assert(client_is_local(client));
 
-  struct Monitor *monitor = _monitor_find(name);
+  struct Monitor *const monitor = _monitor_find(name);
   if (monitor == NULL)
     return;  /* No header found for that name, i.e. it is not being monitored. */
 
@@ -199,7 +199,7 @@ monitor_clear_list(struct Client *client)
   while (client->connection->monitor_list.head)
   {
     list_node_t *node = client->connection->monitor_list.head;
-    struct Monitor *monitor = node->data;
+    struct Monitor *const monitor = node->data;
 
     list_remove(node, &client->connection->monitor_list);
     list_free_node(node);

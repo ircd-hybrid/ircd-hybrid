@@ -265,7 +265,7 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
   char *const prefix = ++ch;
   assert(prefix <= ctx->buffer_end);
 
-  size_t prefix_len = strcspn(prefix, " ");
+  const size_t prefix_len = strcspn(prefix, " ");
   char *prefix_end = prefix + prefix_len;
   assert(prefix_end <= ctx->buffer_end);
 
@@ -320,7 +320,7 @@ _parse_identify_command(parse_context_t *ctx)
   char *const token = ctx->buffer_cursor;
   ctx->command_numeric_str = token;
 
-  size_t token_len = strcspn(token, " ");
+  const size_t token_len = strcspn(token, " ");
   char *token_end = token + token_len;
 
   if (*token_end == ' ')
@@ -349,7 +349,7 @@ _parse_identify_command(parse_context_t *ctx)
     return false;
   }
 
-  size_t bytes = (ctx->buffer_cursor < ctx->buffer_end) ? (ctx->buffer_end - ctx->buffer_cursor) : 0;
+  const size_t bytes = (ctx->buffer_cursor < ctx->buffer_end) ? (ctx->buffer_end - ctx->buffer_cursor) : 0;
   ctx->command->bytes += bytes;
   ctx->parc_max = ctx->command->handlers[ctx->source->nexthop->handler].args_max;
 

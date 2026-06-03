@@ -205,9 +205,11 @@ info_find(const char *namespace, const char *name)
   {
     struct InfoEntry *const info = node->data;
     if (io_strcasecmp(info->name, name) == 0)
+    {
       if ((namespace == NULL && info->namespace == NULL) ||
           (namespace != NULL && info->namespace != NULL && io_strcasecmp(info->namespace, namespace) == 0))
         return info;
+    }
   }
 
   return NULL;

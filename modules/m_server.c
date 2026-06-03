@@ -382,7 +382,7 @@ _server_establish_burst(struct Client *client)
     if (list_length(&channel->members) == 0)
       continue;
 
-    channel_send_modes(client, channel);
+    channel_send_state(client, channel);
   }
 
   /* Always send a PING after connect burst is done. */

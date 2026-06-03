@@ -47,7 +47,7 @@ svstag_detach(list_t *list, unsigned int numeric)
 
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct ServicesTag *svstag = node->data;
+    struct ServicesTag *const svstag = node->data;
     if (svstag->numeric == numeric)
       svstag_free(svstag, list);
   }
@@ -59,13 +59,13 @@ svstag_attach(list_t *list, unsigned int numeric, const char *umodes, const char
   if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
     return;
 
-  struct ServicesTag *svstag = io_calloc(sizeof(*svstag));
+  struct ServicesTag *const svstag = io_calloc(sizeof(*svstag));
   svstag->numeric = numeric;
   svstag->tag = io_strdup(tag);
 
   for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)
   {
-    const struct UserMode *mode = user_mode_find(*m);
+    const struct UserMode *const mode = user_mode_find(*m);
     if (mode)
       svstag->umodes |= mode->mode_bit;
   }

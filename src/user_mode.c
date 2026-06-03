@@ -168,7 +168,7 @@ user_mode_get_oper_only(void)
 
   for (size_t i = 0; i < USER_MODE_CAPACITY; ++i)
   {
-    const struct UserMode *mode = user_mode_table[i];
+    const struct UserMode *const mode = user_mode_table[i];
     if (mode && (mode->policy & USER_MODE_POLICY_OPER_ONLY))
       mode_flags |= mode->mode_bit;
   }
@@ -191,7 +191,7 @@ user_mode_string_to_flags(const char *mode_string)
     const int index = _user_mode_char_to_index(*m);
     if (index >= 0)
     {
-      const struct UserMode *mode = user_mode_table[index];
+      const struct UserMode *const mode = user_mode_table[index];
       if (mode)
       {
         if (!(mode->policy & (USER_MODE_POLICY_INTERNAL_ONLY |
@@ -225,7 +225,7 @@ _user_mode_check_policy(const struct UserMode *mode, const struct Client *client
 user_mode_result_t
 user_mode_change(struct Client *client, char mode_char, user_mode_source_t source, user_mode_action_t action)
 {
-  struct UserMode *mode = user_mode_find(mode_char);
+  struct UserMode *const mode = user_mode_find(mode_char);
   if (mode == NULL)
     return USER_MODE_RESULT_MODE_NOT_FOUND;
 
@@ -304,7 +304,7 @@ user_mode_set_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_sou
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flag & mode_bit)
     {
-      const struct UserMode *mode = user_mode_table[i];
+      const struct UserMode *const mode = user_mode_table[i];
       if (mode == NULL)
         continue;
 
@@ -333,7 +333,7 @@ user_mode_unset_flag_exec(struct Client *client, uint64_t mode_flag, user_mode_s
     const uint64_t mode_bit = 1ULL << i;
     if (mode_flag & mode_bit)
     {
-      const struct UserMode *mode = user_mode_table[i];
+      const struct UserMode *const mode = user_mode_table[i];
       if (mode == NULL)
         continue;
 
@@ -432,7 +432,7 @@ user_mode_send_invalid(void)
 
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *client = node->data;
+    struct Client *const client = node->data;
     const uint64_t mode_flags_old = client->umodes;
     if (mode_flags_old != _user_mode_purge_invalid(client))
       user_mode_send(client, mode_flags_old, USER_MODE_SEND_USER | USER_MODE_SEND_SERVER);

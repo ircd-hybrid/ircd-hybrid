@@ -784,15 +784,21 @@ channel_member_find(const struct Client *client, const struct Channel *channel)
   {
     list_node_t *node;
     LIST_FOREACH(node, channel->members.head)
-      if (((struct ChannelMember *)node->data)->client == client)
-        return node->data;
+    {
+      struct ChannelMember *const member = node->data;
+      if (member->client == client)
+        return member;
+    }
   }
   else
   {
     list_node_t *node;
     LIST_FOREACH(node, client->channel_list.head)
-      if (((struct ChannelMember *)node->data)->channel == channel)
-        return node->data;
+    {
+      struct ChannelMember *const member = node->data;
+      if (member->channel == channel)
+        return member;
+    }
   }
 
   return NULL;

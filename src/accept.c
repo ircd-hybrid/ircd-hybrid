@@ -52,10 +52,11 @@
 void
 accept_add(const char *nick, const char *user, const char *host, list_t *list)
 {
-  struct AcceptItem *accept = io_calloc(sizeof(*accept));
+  struct AcceptItem *const accept = io_calloc(sizeof(*accept));
   accept->nick = io_strdup(nick);
   accept->user = io_strdup(user);
   accept->host = io_strdup(host);
+
   list_add(accept, &accept->node, list);
 }
 
@@ -63,6 +64,7 @@ void
 accept_del(struct AcceptItem *accept, list_t *list)
 {
   list_remove(&accept->node, list);
+
   io_free(accept->nick);
   io_free(accept->user);
   io_free(accept->host);
@@ -90,8 +92,7 @@ accept_find(const char *nick, const char *user, const char *host, list_t *list,
 
   LIST_FOREACH(node, list->head)
   {
-    struct AcceptItem *accept = node->data;
-
+    struct AcceptItem *const accept = node->data;
     if (compare(accept->nick, nick) == 0 &&
         compare(accept->user, user) == 0 &&
         compare(accept->host, host) == 0)

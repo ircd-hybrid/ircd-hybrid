@@ -231,6 +231,7 @@ class_incref(struct ClassItem *klass)
 {
   if (klass == NULL)
     return;
+
   klass->ref_count++;
 }
 

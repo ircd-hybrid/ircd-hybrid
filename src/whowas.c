@@ -137,7 +137,7 @@ _whowas_create(void)
       list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     _whowas_destroy(list_peek_tail(&whowas_list));  /* Free oldest item. */
 
-  struct Whowas *whowas = io_calloc(sizeof(*whowas));
+  struct Whowas *const whowas = io_calloc(sizeof(*whowas));
   return whowas;
 }
 
@@ -245,7 +245,7 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  const struct WhowasGroup *group = whowas_group_find(name);
+  const struct WhowasGroup *const group = whowas_group_find(name);
   if (group == NULL)
     return NULL;
 
@@ -265,7 +265,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 int
 whowas_query(const char *name, int max_results, whowas_callback_t callback, void *user_data)
 {
-  const struct WhowasGroup *group = whowas_group_find(name);
+  const struct WhowasGroup *const group = whowas_group_find(name);
   if (group == NULL)
     return 0;
 

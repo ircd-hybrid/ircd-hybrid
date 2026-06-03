@@ -32,6 +32,7 @@
 
 #include "io_string.h"
 #include "memory.h"
+
 #include "client.h"
 #include "ircd_defs.h"
 #include "server_capab.h"
@@ -68,7 +69,7 @@ capab_init(void)
 void
 capab_add(const char *name, uint32_t flag, bool active)
 {
-  struct Capability *cap = io_calloc(sizeof(*cap));
+  struct Capability *const cap = io_calloc(sizeof(*cap));
   cap->name = io_strdup(name);
   cap->flag = flag;
   cap->active = active;
@@ -90,8 +91,7 @@ capab_del(const char *name)
 
   LIST_FOREACH_SAFE(node, node_next, capab_list.head)
   {
-    struct Capability *cap = node->data;
-
+    struct Capability *const cap = node->data;
     if (io_strcasecmp(cap->name, name) == 0)
     {
       list_remove(node, &capab_list);
@@ -117,7 +117,7 @@ capab_find(const char *name)
 
   LIST_FOREACH(node, capab_list.head)
   {
-    const struct Capability *cap = node->data;
+    const struct Capability *const cap = node->data;
     if (io_strcasecmp(cap->name, name) == 0)
       return cap->flag;
   }
@@ -148,9 +148,10 @@ capab_get(const struct Client *client, bool active)
   list_node_t *node;
   LIST_FOREACH(node, capab_list.head)
   {
-    const struct Capability *cap = node->data;
+    const struct Capability *const cap = node->data;
     if (active && cap->active == false)
       continue;
+
     if (client && !capab_has_flag(client, cap->flag))
       continue;
 

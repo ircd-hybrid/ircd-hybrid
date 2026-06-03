@@ -43,12 +43,12 @@
 struct Invite *
 invite_find(struct Channel *channel, struct Client *client)
 {
-  list_t *list = list_get_shorter(&client->connection->invite_list, &channel->invites);
+  list_t *const list = list_get_shorter(&client->connection->invite_list, &channel->invites);
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Invite *invite = node->data;
+    struct Invite *const invite = node->data;
     if (ConfigChannel.invite_expire_time &&
         ConfigChannel.invite_expire_time + invite->when < io_time_get(IO_TIME_MONOTONIC_SEC))
       invite_del(invite);

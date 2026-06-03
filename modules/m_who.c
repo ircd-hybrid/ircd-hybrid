@@ -296,8 +296,8 @@ _who_on_common_channel(struct Client *source, struct Channel *channel,
 
   LIST_FOREACH(node, channel->members.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    struct ChannelMember *const member = node->data;
+    struct Client *const target = member->client;
 
     if (!user_mode_has_flag(target, UMODE_INVISIBLE) || client_has_flag(target, FLAGS_MARK))
       continue;
@@ -339,14 +339,14 @@ _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
   list_node_t *node;
   LIST_FOREACH(node, source->channel_list.head)
   {
-    struct ChannelMember *member = node->data;
+    struct ChannelMember *const member = node->data;
     _who_on_common_channel(source, member->channel, mask, who);
   }
 
   /* Second, list all matching visible clients */
   LIST_FOREACH(node, global_client_list.head)
   {
-    struct Client *target = node->data;
+    struct Client *const target = node->data;
     assert(client_is_user(target));
 
     if (user_mode_has_flag(target, UMODE_INVISIBLE))
@@ -384,15 +384,17 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    struct ChannelMember *const member = node->data;
+    struct Client *const target = member->client;
 
     if (is_member || !user_mode_has_flag(target, UMODE_INVISIBLE))
     {
       if ((who->bitsel & WHOSELECT_OPER))
+      {
         if (!client_is_oper(target) ||
             (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
           continue;
+      }
 
       _who_send(source, target, member, who);
     }

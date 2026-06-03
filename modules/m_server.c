@@ -258,7 +258,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   server_get_or_create(client);
   server_conf_set(client, connect);
 
-  if (service_find(client->name, io_strcasecmp))
+  if (service_find(client->name))
     client_set_flag(client, FLAGS_SERVICE);
 
   if (tls_isusing(&client->connection->fd->tls))
@@ -498,7 +498,7 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (service_find(name, io_strcasecmp) == NULL)
+  if (service_find(name) == NULL)
   {
     if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
         (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
@@ -680,7 +680,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   client_set_state(target, CLIENT_STATE_SERVER);
   _server_set_flags(target, parv[4]);
 
-  if (service_find(target->name, io_strcasecmp))
+  if (service_find(target->name))
     client_set_flag(target, FLAGS_SERVICE);
 
   list_add(target, &target->global_node, &global_server_list);

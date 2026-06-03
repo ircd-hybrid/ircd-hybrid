@@ -46,5 +46,5 @@ struct ServiceItem
 extern void service_clear(void);
 extern struct ServiceItem *service_make(void);
 extern const list_t *service_get_list(void);
-extern const struct ServiceItem *service_find(const char *, int (*)(const char *, const char *));
+extern const struct ServiceItem *service_find(const char *);
 #endif  /* INCLUDED_conf_service_h */

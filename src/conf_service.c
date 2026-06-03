@@ -24,6 +24,7 @@
  * @brief Implementation of service {} block configuration management.
  */
 
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
 
@@ -93,23 +94,21 @@ service_make(void)
  * @brief Find a service configuration by name.
  *
  * This function searches the service_list for a service configuration with
- * the specified name. It uses the provided compare function pointer to
- * perform the string comparison.
+ * the specified name.
  *
  * @param name The name of the service to find.
- * @param compare A function pointer for comparing two strings.
  *
  * @return A pointer to the found ServiceItem, or NULL if not found.
  */
 const struct ServiceItem *
-service_find(const char *name, int (*compare)(const char *, const char *))
+service_find(const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, service_list.head)
   {
     const struct ServiceItem *const service = node->data;
-    if (compare(service->name, name) == 0)
+    if (io_strcasecmp(service->name, name) == 0)
       return service;
   }
 

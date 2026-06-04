@@ -29,11 +29,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "misc.h"
 #include "module.h"
-#include "io_string.h"
-#include "io_time.h"
 
 #include "channel.h"
 #include "channel_mode.h"

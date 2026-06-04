@@ -31,6 +31,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "isupport.h"
 #include "numeric.h"
 #include "parse.h"
@@ -49,6 +50,18 @@ static const char serveropts[] =
   'w',
   '\0'
 };
+
+static void
+_version_process_request(struct Client *source)
+{
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "VERSION"
+  });
+
+  sendto_one_numeric(source, &me, RPL_VERSION, IRCD_VERSION, me.name, serveropts);
+  isupport_show(source);
+}
 
 /*! \brief VERSION command handler
  *
@@ -78,8 +91,7 @@ m_version(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  sendto_one_numeric(source, &me, RPL_VERSION, IRCD_VERSION, me.name, serveropts);
-  isupport_show(source);
+  _version_process_request(source);
 }
 
 /*! \brief VERSION command handler
@@ -99,8 +111,7 @@ ms_version(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  sendto_one_numeric(source, &me, RPL_VERSION, IRCD_VERSION, me.name, serveropts);
-  isupport_show(source);
+  _version_process_request(source);
 }
 
 static struct Command command_table =

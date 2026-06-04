@@ -46,6 +46,18 @@
 /** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
 enum { WHOWAS_MAX_REPLIES = 20 };
 
+static bool
+_whowas_should_hide_server(const struct Client *source, const struct Whowas *whowas)
+{
+  if (client_is_oper(source))
+    return false;
+
+  if (whowas->server_hidden || ConfigServerHide.hide_servers)
+    return true;
+
+  return ConfigServerHide.hide_services && service_find(whowas->servername);
+}
+
 static void
 _whowas_send_record(struct Client *source, const struct Whowas *whowas)
 {
@@ -60,21 +72,10 @@ _whowas_send_record(struct Client *source, const struct Whowas *whowas)
     sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
                        whowas->name, whowas->account, "was");
 
-  bool server_hidden = false;
-  if (!client_is_oper(source))
-  {
-    if (whowas->server_hidden || ConfigServerHide.hide_servers)
-      server_hidden = true;
-    else if (ConfigServerHide.hide_services && service_find(whowas->servername))
-      server_hidden = true;
-  }
-
-  if (server_hidden)
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
-  else
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       whowas->name, whowas->servername, date_ctime(whowas->logoff));
+  const char *const server_name =
+    _whowas_should_hide_server(source, whowas) ? ConfigServerInfo.network_name : whowas->servername;
+  sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                     whowas->name, server_name, date_ctime(whowas->logoff));
 }
 
 static void

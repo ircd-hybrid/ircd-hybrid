@@ -79,7 +79,7 @@ typedef enum
  * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
 */
 static whois_channel_visibility_t
-_whois_get_channel_visibility(struct Channel *channel, struct Client *source, const struct Client *target)
+_whois_get_channel_visibility(const struct Channel *channel, const struct Client *source, const struct Client *target)
 {
   if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;

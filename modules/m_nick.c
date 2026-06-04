@@ -348,7 +348,7 @@ uid_from_server(struct Client *source, int parc, char *parv[])
 
   if (address_from_string(client->sockhost, &client->addr))
   {
-    struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
+    struct ip_entry *const ipcache = ipcache_record_find_or_add(&client->addr);
     ++ipcache->count_remote;
     client_set_flag(client, FLAGS_IPHASH);
   }
@@ -359,7 +359,7 @@ uid_from_server(struct Client *source, int parc, char *parv[])
   /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
-    const struct UserMode *mode = user_mode_find(*m);
+    const struct UserMode *const mode = user_mode_find(*m);
     user_mode_set_mode_exec(client, mode, USER_MODE_SOURCE_REGULAR);
   }
 
@@ -587,7 +587,7 @@ mr_nick(struct Client *source, int parc, char *parv[])
   }
 
   /* Check if the nick is resv'd */
-  const struct ResvItem *resv = resv_find(nick, match);
+  const struct ResvItem *const resv = resv_find(nick, match);
   if (resv)
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
@@ -597,7 +597,7 @@ mr_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Client *target = client_find_entity_by_name(nick);
+  struct Client *const target = client_find_entity_by_name(nick);
   if (target == NULL || target == source)
     set_initial_nick(source, nick);
   else
@@ -653,7 +653,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, source->channel_list.head)
   {
-    struct ChannelMember *member = node->data;
+    struct ChannelMember *const member = node->data;
     if (channel_member_get_highest_rank(member) < CHACCESS_VOICE)
     {
       if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
@@ -670,7 +670,7 @@ m_nick(struct Client *source, int parc, char *parv[])
     }
   }
 
-  struct Client *target = client_find_entity_by_name(nick);
+  struct Client *const target = client_find_entity_by_name(nick);
   if (target == NULL)
     nick_change_local(source, nick);
   else if (target == source)
@@ -722,7 +722,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
     return;
 
   /* If the nick doesn't exist, allow it and process like normal */
-  struct Client *target = client_find_entity_by_name(parv[1]);
+  struct Client *const target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
     nick_change_remote(source, parv);
   else if (client_is_unknown(target))

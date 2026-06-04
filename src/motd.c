@@ -168,8 +168,8 @@ _motd_cache(struct Motd *motd)
     /* Copy over line, stopping when we overflow or hit line end */
     for (char *tmp = line; i < (MOTD_LINESIZE - 1) && *tmp && *tmp != '\r' && *tmp != '\n'; ++tmp, ++i)
       cache->motd[cache->count][i] = *tmp;
-
     cache->motd[cache->count][i] = '\0';
+
     cache->count++;
   }
 

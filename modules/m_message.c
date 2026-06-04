@@ -79,7 +79,7 @@ target_filter_host(const struct Client *client, void *context)
 static bool
 target_filter_server(const struct Client *client, void *context)
 {
-  const target_mask_ctx_t *ctx = context;
+  const target_mask_ctx_t *const ctx = context;
   return match(ctx->mask, client->uplink->name) == 0;
 }
 
@@ -370,7 +370,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
     return;
   }
 
-  const struct Client *exclude_uplink = client_is_server(source->nexthop) ? source->nexthop : NULL;
+  const struct Client *const exclude_uplink = client_is_server(source->nexthop) ? source->nexthop : NULL;
   target_mask_ctx_t ctx = { .mask = mask };
 
   sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);
@@ -379,7 +379,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
 static void
 target_handle_directed(struct Client *source, const char *nick, const char *text, bool notice)
 {
-  const char *server = strchr(nick, '@');
+  const char *const server = strchr(nick, '@');
   if (server == NULL)
     return;
 
@@ -505,7 +505,7 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
 
   for (unsigned int i = 0; i < target_count; ++i)
   {
-    struct Target *target = &target_list[i];
+    struct Target *const target = &target_list[i];
     switch (target->type)
     {
       case TARGET_ENTITY_CLIENT:

@@ -50,7 +50,7 @@ _spy_send_request_notice(const struct Client *source, const char *command, char 
 }
 
 static void
-_spy_send_whois_notice(const struct Client *source, const struct Client *target)
+_spy_send_whois_notice(const struct Client *source, struct Client *target)
 {
   sendto_one_notice(target, &me,
                     ":*** Notice -- SPY: WHOIS requested for you by %s (%s@%s) [%s]",
@@ -72,7 +72,7 @@ _spy_request_hook(void *ctx_)
 static hook_flow_t
 _spy_whois_send_hook(void *ctx_)
 {
-  const ircd_hook_whois_send_ctx *const ctx = ctx_;
+  ircd_hook_whois_send_ctx *const ctx = ctx_;
   assert(ctx);
   assert(ctx->source);
   assert(ctx->target);

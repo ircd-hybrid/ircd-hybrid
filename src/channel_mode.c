@@ -181,7 +181,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   if (string_is_empty(maskptr))
     return NULL;
 
-  struct Ban *ban = io_calloc(sizeof(*ban));
+  struct Ban *const ban = io_calloc(sizeof(*ban));
   ban->extban = extbans;
   ban->when = io_time_get(IO_TIME_REALTIME_SEC);
 
@@ -216,8 +216,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    const struct Ban *tmp = node->data;
-
+    const struct Ban *const tmp = node->data;
     if (io_strcasecmp(tmp->banstr, ban->banstr) == 0)
     {
       io_free(ban);
@@ -257,8 +256,7 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
   LIST_FOREACH(node, list->head)
   {
-    struct Ban *ban = node->data;
-
+    struct Ban *const ban = node->data;
     if (io_strcasecmp(banid, ban->banstr) == 0)
     {
       strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
@@ -363,7 +361,7 @@ clear_ban_cache_list(list_t *list)
 
   LIST_FOREACH(node, list->head)
   {
-    struct ChannelMember *member = node->data;
+    struct ChannelMember *const member = node->data;
     member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
   }
 }
@@ -546,7 +544,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     list_node_t *node;
     LIST_FOREACH(node, list->head)
     {
-      const struct Ban *ban = node->data;
+      const struct Ban *const ban = node->data;
       sendto_one_numeric(client, &me, rpl_list, channel->name, ban->banstr, ban->who, ban->when);
     }
 
@@ -600,7 +598,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
 
   const char *const target_name = parv[(*parn)++];
-  struct Client *client_target = client_find_user_with_history(client, target_name, NULL);
+  struct Client *const client_target = client_find_user_with_history(client, target_name, NULL);
   if (client_target == NULL)
   {
     if (client_is_local(client))
@@ -1032,8 +1030,7 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
         break;
       default:
       {
-        const struct chan_mode *mode = cmode_map[(unsigned char)*ml];
-
+        const struct chan_mode *const mode = cmode_map[(unsigned char)*ml];
         if (mode)
           mode->func(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, mode);
         else

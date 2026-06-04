@@ -165,8 +165,8 @@ remove_ban_list(struct Channel *channel, const char *origin_name, list_t *list, 
 
   while (list->head)
   {
-    struct Ban *ban = list->head->data;
-    int plen = ban->banstr_len + 2;  /* +2 = b and space */
+    struct Ban *const ban = list->head->data;
+    const int plen = ban->banstr_len + 2;  /* +2 = b and space */
 
     if (count >= MAXMODEPARAMS ||
         (cur_len + 1 /* space between */ + (plen - 1)) > sizeof(modebuf) - 2)

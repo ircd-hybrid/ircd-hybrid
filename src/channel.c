@@ -118,7 +118,7 @@ channel_member_add(struct Channel *channel, struct Client *client, uint32_t flag
 
   _channel_track_join_flood(channel, client, track_join);
 
-  struct ChannelMember *member = io_calloc(sizeof(*member));
+  struct ChannelMember *const member = io_calloc(sizeof(*member));
   member->client = client;
   member->channel = channel;
   member->flags = flags;
@@ -180,7 +180,7 @@ channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
-    struct ChannelMember *member = node->data;
+    struct ChannelMember *const member = node->data;
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
@@ -232,7 +232,7 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
   list_node_t *node;
   LIST_FOREACH(node, channel->members.head)
   {
-    const struct ChannelMember *member = node->data;
+    const struct ChannelMember *const member = node->data;
 
     len = strlen(member->client->id) + 1;  /* +1 for space */
     len += channel_member_get_prefix_length(member, true);
@@ -270,8 +270,8 @@ _channel_send_mask_list(struct Client *client, const struct Channel *channel, co
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    const struct Ban *ban = node->data;
-    size_t len = ban->banstr_len + 1;  /* +1 for space */
+    const struct Ban *const ban = node->data;
+    const size_t len = ban->banstr_len + 1;  /* +1 for space */
 
     /*
      * Send buffer and start over if we cannot fit another ban
@@ -381,7 +381,7 @@ _channel_free_mask_list(list_t *list)
 {
   while (list->head)
   {
-    struct Ban *ban = list->head->data;
+    struct Ban *const ban = list->head->data;
     remove_ban(ban, list);
   }
 }
@@ -396,7 +396,7 @@ channel_create(const char *name)
 {
   assert(!string_is_empty(name));
 
-  struct Channel *channel = io_calloc(sizeof(*channel));
+  struct Channel *const channel = io_calloc(sizeof(*channel));
   channel->hnextch = channel;
   /* Doesn't hurt to set it here */
   channel->creation_time = io_time_get(IO_TIME_REALTIME_SEC);
@@ -657,7 +657,7 @@ _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
   /* Is a matching extban, call custom match handler */
   if (ban->extban & extban_matching_mask())
   {
-    const struct Extban *extban = extban_find_flag(ban->extban & extban_matching_mask());
+    const struct Extban *const extban = extban_find_flag(ban->extban & extban_matching_mask());
     if (extban == NULL)
       return false;
 
@@ -696,7 +696,7 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
 
   LIST_FOREACH(node, list->head)
   {
-    struct Ban *ban = node->data;
+    struct Ban *const ban = node->data;
 
     /* Looking for a specific type of extban? */
     if (extban)
@@ -1137,7 +1137,7 @@ channel_join(struct Client *client, const char *name, const char *key)
     sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                          client->name, client->username, client->host, client->away_message);
 
-  struct Invite *invite = invite_find(channel, client);
+  struct Invite *const invite = invite_find(channel, client);
   if (invite)
     invite_del(invite);
 

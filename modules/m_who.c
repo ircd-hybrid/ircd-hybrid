@@ -178,7 +178,8 @@ _who_send(struct Client *source, const struct Client *target,
 
     if (member)
     {
-      const char *prefix = channel_member_get_prefix(member, who->fields || client_has_cap(source, CAP_MULTI_PREFIX));
+      const char *const prefix =
+        channel_member_get_prefix(member, who->fields || client_has_cap(source, CAP_MULTI_PREFIX));
       if (!string_is_empty(prefix))
         strlcat(status, prefix, sizeof(status));
     }

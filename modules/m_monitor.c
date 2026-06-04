@@ -87,8 +87,7 @@ monitor_add(struct Client *source, char *list)
     const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
     {
-      size_t masklen = strlen(name) + 1;  /* +1 for comma */
-
+      const size_t masklen = strlen(name) + 1;  /* +1 for comma */
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
@@ -99,9 +98,8 @@ monitor_add(struct Client *source, char *list)
     }
     else
     {
-      size_t masklen = strlen(target->name) + strlen(target->username) +
-                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
-
+      const size_t masklen = strlen(target->name) + strlen(target->username) +
+                             strlen(target->host) + 3;  /* +3 for ! + @ + comma */
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
@@ -145,8 +143,7 @@ monitor_list(struct Client *source)
   list_node_t *node;
   LIST_FOREACH(node, source->connection->monitor_list.head)
   {
-    const struct Monitor *monitor = node->data;
-
+    const struct Monitor *const monitor = node->data;
     if ((bufptr - buf) + strlen(monitor->name) + 1 /* +1 for comma */ + len > sizeof(buf))
     {
       sendto_one_numeric(source, &me, RPL_MONLIST, buf);
@@ -177,13 +174,12 @@ monitor_status(struct Client *source)
   list_node_t *node;
   LIST_FOREACH(node, source->connection->monitor_list.head)
   {
-    const struct Monitor *monitor = node->data;
+    const struct Monitor *const monitor = node->data;
 
     const struct Client *const target = client_find_user_by_name(monitor->name);
     if (target == NULL)
     {
-      size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */
-
+      const size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
@@ -194,9 +190,8 @@ monitor_status(struct Client *source)
     }
     else
     {
-      size_t masklen = strlen(target->name) + strlen(target->username) +
-                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
-
+      const size_t masklen = strlen(target->name) + strlen(target->username) +
+                             strlen(target->host) + 3;  /* +3 for ! + @ + comma */
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);

@@ -42,7 +42,7 @@ _extban_find_mask(void)
   list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    const struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     used |= extban->flag;
   }
 
@@ -77,7 +77,7 @@ extban_init(void)
 void
 extban_add(struct Extban *extban)
 {
-  uint32_t mask = _extban_find_mask();
+  const uint32_t mask = _extban_find_mask();
   if (mask == 0)
     return;
 
@@ -109,7 +109,7 @@ extban_find(unsigned char c)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    struct Extban *const extban = node->data;
     if (extban->character == c)
       return extban;
   }
@@ -124,7 +124,7 @@ extban_find_flag(uint32_t flag)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    struct Extban *const extban = node->data;
     if (extban->flag == flag)
       return extban;
   }
@@ -175,12 +175,12 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
 size_t
 extban_format(uint32_t e, char *buf)
 {
-  list_node_t *node;
   size_t written = 0;
 
+  list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    const struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     if (extban->type != EXTBAN_ACTING || !(extban->flag & e))
       continue;
 
@@ -199,7 +199,7 @@ extban_format(uint32_t e, char *buf)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    const struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     if (extban->type != EXTBAN_MATCHING || !(extban->flag & e))
       continue;
 
@@ -243,7 +243,7 @@ extban_get_isupport(void)
   list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    const struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     extban_chars[extban->character] = extban->character;
   }
 

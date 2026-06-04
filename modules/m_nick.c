@@ -59,18 +59,6 @@
 #include "user_mode.h"
 #include "whowas.h"
 
-/* check_clean_nick()
- *
- * input        - pointer to source
- *              -
- *              - nickname
- *              - truncated nickname
- *              - origin of client
- *              - pointer to server nick is coming from
- * output       - none
- * side effects - if nickname is erroneous, or a different length to
- *                truncated nickname, return 1
- */
 static bool
 check_clean_nick(struct Client *source, const char *nick)
 {
@@ -120,15 +108,6 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
   return false;
 }
 
-/* check_clean_user()
- *
- * input        - pointer to client sending data
- *              - nickname
- *              - username to check
- *              - origin of NICK
- * output       - none
- * side effects - if username is erroneous, return 1
- */
 static bool
 check_clean_user(struct Client *source, const char *nick, const char *user)
 {
@@ -147,15 +126,6 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
   return false;
 }
 
-/* check_clean_host()
- *
- * input        - pointer to client sending us data
- *              - nickname
- *              - hostname to check
- *              - source name
- * output       - none
- * side effects - if hostname is erroneous, return 1
- */
 static bool
 check_clean_host(struct Client *source, const char *nick, const char *host)
 {
@@ -174,15 +144,6 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
   return false;
 }
 
-/* set_initial_nick()
- *
- * inputs
- * output
- * side effects -
- *
- * This function is only called to set up an initially registering
- * client.
- */
 static void
 set_initial_nick(struct Client *source, const char *nick)
 {
@@ -197,14 +158,6 @@ set_initial_nick(struct Client *source, const char *nick)
     user_register_local(source);
 }
 
-/* change_local_nick()
- *
- * inputs       - pointer to server
- *              - pointer to client
- *              - nick
- * output       -
- * side effects - changes nick of a LOCAL user
- */
 static void
 nick_change_local(struct Client *source, const char *nick)
 {
@@ -575,18 +528,15 @@ mr_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  /* Copy the nick and terminate it */
   char nick[NICKLEN + 1];
   strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
-  /* Check the nickname is ok */
   if (!valid_nickname(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
     return;
   }
 
-  /* Check if the nick is resv'd */
   const struct ResvItem *const resv = resv_find(nick, match);
   if (resv)
   {
@@ -628,11 +578,9 @@ m_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  /* Terminate nick to NICKLEN */
   char nick[NICKLEN + 1];
   strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
-  /* Check the nickname is ok */
   if (!valid_nickname(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
@@ -677,10 +625,10 @@ m_nick(struct Client *source, int parc, char *parv[])
   {
     /*
      * If (target == source) the client is changing nicks between
-     * equivalent nicknames ie: nick -> nIcK
+     * equivalent nicknames ie: nick -> nIcK.
      */
 
-    /* Check the nick isn't exactly the same */
+    /* Check the nick isn't exactly the same. */
     if (strcmp(target->name, nick))
       nick_change_local(source, nick);
   }
@@ -688,7 +636,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   {
     /*
      * If the client that has the nick isn't registered yet (NICK but no
-     * USER) then drop the unregistered client
+     * USER) then drop the unregistered client.
      */
     client_exit(target, "Overridden by other sign on");
 
@@ -716,12 +664,12 @@ static void
 ms_nick(struct Client *source, int parc, char *parv[])
 {
   if (!client_is_user(source))
-    return;  /* Servers and unknown clients can't change nicks.. */
+    return;  /* Servers and unknown clients can't change nicks. */
 
   if (!check_clean_nick(source, parv[1]))
     return;
 
-  /* If the nick doesn't exist, allow it and process like normal */
+  /* If the nick doesn't exist, allow it and process like normal. */
   struct Client *const target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
     nick_change_remote(source, parv);

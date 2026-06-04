@@ -264,14 +264,6 @@ _whois_send_target_reply(struct Client *source, struct Client *target)
   _whois_send_idle_numeric(source, target);
 }
 
-/* do_whois()
- *
- * inputs       - pointer to /whois source
- *              - number of parameters
- *              - pointer to parameters array
- * output       - pointer to void
- * side effects - Does whois
- */
 static void
 _whois_process_request(struct Client *source, const char *name)
 {

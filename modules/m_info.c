@@ -210,12 +210,6 @@ static const char *const info_text_lines[] =
   NULL
 };
 
-/* send_birthdate_online_time()
- *
- * inputs	- client pointer to send to
- * output	- NONE
- * side effects	- birthdate and online time are sent
- */
 static void
 _info_send_online_since(struct Client *client)
 {
@@ -223,12 +217,6 @@ _info_send_online_since(struct Client *client)
                      date(me.connection->created_real));
 }
 
-/* send_info_text()
- *
- * inputs       - client pointer to send info text to
- * output       - NONE
- * side effects - info text is sent to client
- */
 static void
 _info_process_request(struct Client *client)
 {

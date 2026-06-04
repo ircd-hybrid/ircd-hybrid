@@ -85,7 +85,6 @@ fdlist_update_highest_fd(int fd, bool opening)
     --highest_fd;
 }
 
-/* Called to open a given filedescriptor */
 fde_t *
 fd_open(int fd, bool is_socket, const char *desc)
 {
@@ -113,7 +112,6 @@ fd_open(int fd, bool is_socket, const char *desc)
   return F;
 }
 
-/* Called to close a given filedescriptor */
 fde_t *
 fd_close(fde_t *F)
 {
@@ -142,12 +140,6 @@ fd_close(fde_t *F)
   return F;
 }
 
-/*
- * fd_note() - set the fd note
- *
- * Note: must be careful not to overflow fd_table[fd].desc when
- *       calling.
- */
 void
 fd_note(fde_t *F, const char *format, ...)
 {

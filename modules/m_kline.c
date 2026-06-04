@@ -83,12 +83,6 @@ kline_check(const struct AddressRec *arec)
   }
 }
 
-/* apply_tkline()
- *
- * inputs       -
- * output       - NONE
- * side effects - tkline as given is placed
- */
 static void
 kline_handle(struct Client *source, const struct aline_ctx *aline)
 {
@@ -178,15 +172,6 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   kline_check(add_conf_by_address(CONF_KLINE, conf));
 }
 
-/* mo_kline()
- *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - k line is added
- */
 static void
 mo_kline(struct Client *source, int parc, char *parv[])
 {

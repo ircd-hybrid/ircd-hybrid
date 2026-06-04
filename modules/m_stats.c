@@ -228,12 +228,6 @@ stats_gecos(struct Client *client, int parc, char *parv[])
   }
 }
 
-/*
- * inputs	- pointer to client requesting confitem report
- *		- ConfType to report
- * output	- none
- * side effects	-
- */
 static void
 stats_operator(struct Client *client, int parc, char *parv[])
 {
@@ -284,12 +278,6 @@ stats_connect(struct Client *client, int parc, char *parv[])
   }
 }
 
-/* report_resv()
- *
- * inputs       - pointer to client pointer to report to.
- * output       - NONE
- * side effects - report all resvs to client.
- */
 static void
 stats_resv(struct Client *client, int parc, char *parv[])
 {
@@ -319,18 +307,18 @@ stats_memory(struct Client *client, int parc, char *parv[])
   uint32_t channel_bans = 0;
   uint32_t channel_except = 0;
   uint32_t channel_invex = 0;
-  uint32_t number_ips_stored = 0;        /* number of ip addresses hashed */
+  uint32_t number_ips_stored = 0;
   size_t channel_ban_memory = 0;
   size_t channel_except_memory = 0;
   size_t channel_invex_memory = 0;
-  size_t mem_ips_stored = 0;        /* memory used by ip address hash */
+  size_t mem_ips_stored = 0;
   uint32_t local_client_count  = 0;
   uint32_t remote_client_count = 0;
   size_t local_client_memory_used  = 0;
   size_t remote_client_memory_used = 0;
-  uint32_t monitor_list_headers = 0;   /* monitorlist headers     */
-  uint32_t monitor_list_entries = 0;   /* monitorlist entries     */
-  size_t monitor_list_memory = 0; /* monitorlist memory used */
+  uint32_t monitor_list_headers = 0;
+  uint32_t monitor_list_entries = 0;
+  size_t monitor_list_memory = 0;
   uint32_t listener_count = 0;
   size_t listener_memory = 0;
 
@@ -458,12 +446,6 @@ stats_dns_servers(struct Client *client, int parc, char *parv[])
   }
 }
 
-/* stats_deny()
- *
- * input	- client to report to
- * output	- none
- * side effects - client is given dline list.
- */
 static void
 stats_deny(struct Client *client, int parc, char *parv[])
 {
@@ -487,12 +469,6 @@ stats_deny(struct Client *client, int parc, char *parv[])
   }
 }
 
-/* stats_tdeny()
- *
- * input        - client to report to
- * output       - none
- * side effects - client is given dline list.
- */
 static void
 stats_tdeny(struct Client *client, int parc, char *parv[])
 {
@@ -516,12 +492,6 @@ stats_tdeny(struct Client *client, int parc, char *parv[])
   }
 }
 
-/* stats_exempt()
- *
- * input        - client to report to
- * output       - none
- * side effects - client is given list of exempt blocks
- */
 static void
 stats_exempt(struct Client *client, int parc, char *parv[])
 {
@@ -620,15 +590,6 @@ stats_hubleaf(struct Client *client, int parc, char *parv[])
   }
 }
 
-/*
- * show_iline_prefix()
- *
- * inputs       - pointer to struct Client requesting output
- *              - pointer to struct MaskItem
- *              - name to which iline prefix will be prefixed to
- * output       - pointer to static string with prefixes listed in ascii form
- * side effects - NONE
- */
 static const char *
 show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
 {
@@ -696,17 +657,9 @@ stats_auth(struct Client *client, int parc, char *parv[])
   }
 }
 
-/* report_Klines()
- * Inputs: Client to report to,
- *         type(==0 for perm, !=0 for temporary)
- *         mask
- * Output: None
- * Side effects: Reports configured K(or k)-lines to client.
- */
 static void
 stats_kill(struct Client *client, int parc, char *parv[])
 {
-  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
@@ -737,7 +690,6 @@ stats_kill(struct Client *client, int parc, char *parv[])
 static void
 stats_tkill(struct Client *client, int parc, char *parv[])
 {
-  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
@@ -824,12 +776,6 @@ stats_operedup(struct Client *client, int parc, char *parv[])
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :%u OPER(s)", count);
 }
 
-/* show_ports()
- *
- * inputs       - pointer to client to show ports to
- * output       - none
- * side effects - send port listing to a client
- */
 static void
 stats_ports(struct Client *client, int parc, char *parv[])
 {
@@ -939,12 +885,6 @@ stats_shared(struct Client *client, int parc, char *parv[])
   report_cluster(client);
 }
 
-/* stats_servers()
- *
- * input	- client pointer
- * output	- none
- * side effects - client is shown lists of who connected servers
- */
 static void
 stats_servers(struct Client *client, int parc, char *parv[])
 {
@@ -1028,17 +968,6 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
                      (float)((float)((me.connection->recv.bytes) >> 10) / (float)uptime));
 }
 
-/* parse_stats_args()
- *
- * inputs       - arg count
- *              - args
- *              - doall flag
- *              - wild card or not
- * output       - pointer to name to use
- * side effects -
- * common parse routine for m_stats args
- *
- */
 static const char *
 parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, bool *wilds)
 {
@@ -1062,10 +991,6 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
 {
   list_node_t *node;
 
-  /*
-   * Send info about connections which match, or all if the
-   * mask matches from.
-   */
   LIST_FOREACH(node, list->head)
   {
     const struct Client *target = node->data;
@@ -1099,15 +1024,6 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
   }
 }
 
-/*
- * stats_L
- *
- * inputs       - pointer to client to report to
- *              - doall flag
- *              - wild card or not
- * output       - NONE
- * side effects -
- */
 static void
 stats_L(struct Client *client, const char *name, bool doall, bool wilds, unsigned char letter)
 {

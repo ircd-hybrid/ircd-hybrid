@@ -71,12 +71,6 @@ accept_del(struct AcceptItem *accept, list_t *list)
   io_free(accept);
 }
 
-/* del_all_accepts()
- *
- * inputs       - pointer to exiting client
- * output       - NONE
- * side effects - Walk through given clients acceptlist and remove all entries
- */
 void
 accept_clear_list(list_t *list)
 {
@@ -102,13 +96,6 @@ accept_find(const char *nick, const char *user, const char *host, list_t *list,
   return NULL;
 }
 
-/* accept_message()
- *
- * inputs       - pointer to source client
- *              - pointer to target client
- * output       - 1 if accept this message 0 if not
- * side effects - See if source is on target's allow list
- */
 bool
 accept_message(struct Client *source, struct Client *target)
 {

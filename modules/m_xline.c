@@ -65,12 +65,6 @@ xline_check(const struct GecosItem *gecos)
   }
 }
 
-/* xline_handle()
- *
- * inputs       - client taking credit for xline, gecos, reason, xline type
- * outputs      - none
- * side effects - when successful, adds an xline to the conf
- */
 static void
 xline_handle(struct Client *source, const struct aline_ctx *aline)
 {
@@ -137,16 +131,6 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
   xline_check(gecos);
 }
 
-/* mo_xline()
- *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - x line is added
- *
- */
 static void
 mo_xline(struct Client *source, int parc, char *parv[])
 {

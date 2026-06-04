@@ -45,15 +45,6 @@
 #include "send.h"
 #include "server_capab.h"
 
-/* parse_resv()
- *
- * inputs	- source
- *		- thing to resv
- *		- !0 if temporary
- *		- reason
- * outputs	- none
- * side effects	- parse resv, create if valid
- */
 static void
 resv_handle(struct Client *source, const struct aline_ctx *aline)
 {

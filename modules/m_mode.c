@@ -74,7 +74,6 @@ set_user_mode(struct Client *source, int parc, char *parv[])
   user_mode_action_t action = USER_MODE_ACTION_ADD;
   bool badmode = false;
 
-  /* Parse user mode change string */
   for (const char *m = parv[2]; *m; ++m)
   {
     switch (*m)
@@ -119,11 +118,9 @@ set_user_mode(struct Client *source, int parc, char *parv[])
 static void
 m_mode(struct Client *source, int parc, char *parv[])
 {
-  /* Now, try to find the channel in question */
   const char *const name = parv[1];
   if (!IsChanPrefix(*name))
   {
-    /* If here, it has to be a non-channel name */
     set_user_mode(source, parc, parv);
     return;
   }
@@ -135,7 +132,6 @@ m_mode(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  /* Now known the channel exists */
   if (parc < 3)
   {
     sendto_one_numeric(source, &me, RPL_CHANNELMODEIS,

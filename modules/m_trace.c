@@ -54,13 +54,6 @@ _trace_count_server_dependents(uint32_t *const server_count, uint32_t *const use
     _trace_count_server_dependents(server_count, user_count, node->data);
 }
 
-/* report_this_status()
- *
- * inputs       - pointer to client to report to
- *              - pointer to client to report about
- * output       - counter of number of hits
- * side effects - NONE
- */
 static void
 _trace_send_target_status(struct Client *source, const struct Client *target)
 {

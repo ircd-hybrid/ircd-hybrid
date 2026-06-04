@@ -42,11 +42,6 @@
 #include "send.h"
 #include "server_capab.h"
 
-/* static int remove_tdline_match(const char *host, const char *user)
- * Input: An ip to undline.
- * Output: returns YES on success, NO if no tdline removed.
- * Side effects: Any matching tdlines are removed.
- */
 static void
 dline_remove(struct Client *source, const struct aline_ctx *aline)
 {

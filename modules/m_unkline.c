@@ -42,11 +42,6 @@
 #include "send.h"
 #include "server_capab.h"
 
-/* static int remove_tkline_match(const char *host, const char *user)
- * Input: A hostname, a username to unkline.
- * Output: returns YES on success, NO if no tkline removed.
- * Side effects: Any matching tklines are removed.
- */
 static void
 kline_remove(struct Client *source, const struct aline_ctx *aline)
 {

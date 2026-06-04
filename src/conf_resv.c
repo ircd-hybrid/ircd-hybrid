@@ -80,14 +80,6 @@ resv_delete(struct ResvItem *resv, bool expired)
   io_free(resv);
 }
 
-/* create_resv()
- *
- * inputs	- name of nick to create resv for
- *		- reason for resv
- *		- 1 if from ircd.conf, 0 if from elsewhere
- * output	- pointer to struct ResvNick
- * side effects	-
- */
 struct ResvItem *
 resv_make(const char *mask, const char *reason, const list_t *elist)
 {

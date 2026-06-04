@@ -104,13 +104,6 @@ get_mask(const struct Ban *ban)
   return buf;
 }
 
-/*
- * Ban functions to work with mode +b/e/I
- */
-/* add the specified ID to the channel.
- *   -is 8/9/00
- */
-
 const char *
 add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
@@ -237,13 +230,6 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   return ban->banstr;
 }
 
-/*
- * inputs	- pointer to channel
- *		- pointer to ban id
- *		- type of ban, i.e. ban, exception, invex
- * output	- 0 for failure, 1 for success
- * side effects	-
- */
 static const char *
 del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
@@ -270,16 +256,6 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   return NULL;
 }
 
-/* channel_modes()
- *
- * inputs       - pointer to channel
- *              - pointer to client
- *              - pointer to mode buf
- *              - pointer to parameter buf
- * output       - NONE
- * side effects - write the "simple" list of channel modes for channel
- * channel onto buffer mbuf with the parameters in pbuf.
- */
 const char *
 channel_modes(const struct Channel *channel, const struct Client *client, bool params)
 {
@@ -323,14 +299,6 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   return buf;
 }
 
-/* fix_key()
- *
- * inputs       - pointer to key to clean up
- * output       - pointer to cleaned up key
- * side effects - input string is modified
- *
- * stolen from Undernet's ircd  -orabidoo
- */
 static char *
 fix_key(char *arg)
 {
@@ -349,11 +317,6 @@ fix_key(char *arg)
   return arg;
 }
 
-/*
- * inputs       - pointer to channel
- * output       - none
- * side effects - clear ban cache
- */
 void
 clear_ban_cache_list(list_t *list)
 {
@@ -728,13 +691,6 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
   }
 }
 
-/* send_mode_changes_server()
- * Input: the source client(client),
- *        the channel to send mode changes for(channel)
- * Output: None.
- * Side-effects: Sends the appropriate mode changes to servers.
- *
- */
 static void
 send_mode_changes_server(struct Client *client, struct Channel *channel)
 {
@@ -808,16 +764,6 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
     sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 }
 
-/* void send_mode_changes(struct Client *client,
- *                        struct Client *client,
- *                        struct Channel *channel)
- * Input: The client sending(client), the source client(client),
- *        the channel to send mode changes for(channel),
- *        mode change globals.
- * Output: None.
- * Side-effects: Sends the appropriate mode changes to other clients
- *               and propagates to servers.
- */
 static void
 send_mode_changes_client(struct Client *client, struct Channel *channel)
 {
@@ -994,22 +940,13 @@ channel_mode_init(void)
   capab_add("HOP", CAPAB_HOP, true);
 }
 
-/*
- * Input: The the client this originated
- *        from, the channel, the parameter count starting at the modes,
- *        the parameters, the channel name.
- * Output: None.
- * Side-effects: Changes the channel membership and modes appropriately,
- *               sends the appropriate MODE messages to the appropriate
- *               clients.
- */
 void
 channel_mode_set(struct Client *client, struct Channel *channel, int parc, char *parv[])
 {
   int dir = MODE_ADD;
   int parn = 1;
   int errors = 0;
-  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
+  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now. */
 
   if (client_is_local_user(client))
     rank = channel_member_get_highest_rank(channel_member_find(client, channel));

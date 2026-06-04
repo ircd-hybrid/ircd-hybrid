@@ -86,14 +86,6 @@ struct CommandTree
 
 static struct CommandTree command_tree;
 
-/* add_msg_element()
- *
- * inputs	- pointer to CommandTree
- *		- pointer to Message to add for given command
- *		- pointer to current portion of command being added
- * output	- NONE
- * side effects	- recursively build the Message Tree ;-)
- */
 /*
  * How this works.
  *
@@ -134,13 +126,6 @@ _command_tree_add_element(struct CommandTree *tree, struct Command *command, con
   }
 }
 
-/* del_msg_element()
- *
- * inputs	- Pointer to CommandTree to delete from
- *		- pointer to command name to delete
- * output	- NONE
- * side effects	- recursively deletes a token from the Message Tree ;-)
- */
 /*
  * How this works.
  *
@@ -187,13 +172,6 @@ _command_tree_del_element(struct CommandTree *tree, const char *const name)
   }
 }
 
-/* command_tree_find()
- *
- * inputs	- Pointer to command to find
- *		- Pointer to CommandTree root
- * output	- Find given command returning Message * if found NULL if not
- * side effects	- none
- */
 static struct Command *
 _command_tree_find(const char *name)
 {
@@ -209,12 +187,6 @@ _command_tree_find(const char *name)
   return NULL;
 }
 
-/* command_add()
- *
- * inputs	- pointer to struct Command
- * output	- none
- * side effects - load this one command name
- */
 void
 command_add(struct Command *command)
 {
@@ -226,12 +198,6 @@ command_add(struct Command *command)
     _command_tree_add_element(&command_tree, command, command->name);
 }
 
-/* command_del()
- *
- * inputs	- pointer to struct Command
- * output	- none
- * side effects - unload this one command name
- */
 void
 command_del(struct Command *command)
 {
@@ -262,24 +228,12 @@ command_del_array(struct Command *commands, size_t elements)
   }
 }
 
-/* find_command()
- *
- * inputs	- command name
- * output	- pointer to struct Command
- * side effects - none
- */
 struct Command *
 command_find(const char *name)
 {
   return _command_tree_find(name);
 }
 
-/* report_messages()
- *
- * inputs	- pointer to client to report to
- * output	- NONE
- * side effects	- client is shown list of commands
- */
 void
 command_report(struct Client *client)
 {

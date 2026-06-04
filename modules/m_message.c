@@ -100,16 +100,6 @@ struct Target
 static struct Target target_list[IRCD_BUFSIZE / 2];
 static unsigned int target_count;
 
-
-/* duplicate_ptr()
- *
- * inputs       - pointer to check
- *              - pointer to table of entities
- *              - number of valid entities so far
- * output       - YES if duplicate pointer in table, NO if not.
- *                note, this does the canonize using pointers
- * side effects - NONE
- */
 static bool
 target_is_duplicate(const void *const ptr)
 {
@@ -142,15 +132,6 @@ target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
     (struct Target){ .ptr = target_ptr, .type = target_type, .rank = access_rank };
 }
 
-/* flood_attack_client()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                say NOTICE must not auto reply
- *              - pointer to source Client
- *              - pointer to target Client
- * output       - 1 if target is under flood attack
- * side effects - check for flood attack on target target
- */
 static bool
 flood_attack_client(bool notice, struct Client *source, struct Client *target)
 {
@@ -195,15 +176,6 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   return false;
 }
 
-/* flood_attack_channel()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                says NOTICE must not auto reply
- *              - pointer to source Client
- *              - pointer to target channel
- * output       - 1 if target is under flood attack
- * side effects - check for flood attack on target channel
- */
 static bool
 flood_attack_channel(bool notice, struct Client *source, struct Channel *channel)
 {
@@ -248,17 +220,6 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   return false;
 }
 
-/* msg_channel_flags()
- *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
- *		  say NOTICE must not auto reply
- *		- pointer to source
- *		- pointer to channel
- *		- flags
- *		- pointer to text to send
- * output	- NONE
- * side effects	- message given channel either chanop or voice
- */
 static void
 msg_channel(bool notice, struct Client *source, struct Channel *channel,
             unsigned int rank, const char *text)
@@ -282,16 +243,6 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
   }
 }
 
-/* msg_client()
- *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
- *		  say NOTICE must not auto reply
- * 		- pointer to source source (struct Client *)
- *		- pointer to target target (struct Client *)
- *		- pointer to text
- * output	- NONE
- * side effects	- message given channel either chanop or voice
- */
 static void
 msg_client(bool notice, struct Client *source, struct Client *target, const char *text)
 {
@@ -479,11 +430,6 @@ target_process_list(struct Client *source, char *list, const char *text, bool no
   }
 }
 
-/*
- * inputs       - flag privmsg or notice
- *              - pointer to source
- *              - pointer to channel
- */
 static void
 m_message(struct Client *source, int parc, char *parv[], bool notice)
 {

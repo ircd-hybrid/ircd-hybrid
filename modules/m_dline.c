@@ -79,12 +79,6 @@ dline_check(const struct AddressRec *arec)
   }
 }
 
-/* dline_add()
- *
- * inputs	-
- * output	- NONE
- * side effects	- dline as given is placed
- */
 static void
 dline_handle(struct Client *source, const struct aline_ctx *aline)
 {
@@ -163,16 +157,6 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
   dline_check(add_conf_by_address(CONF_DLINE, conf));
 }
 
-/* mo_dline()
- *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - D line is added
- *
- */
 static void
 mo_dline(struct Client *source, int parc, char *parv[])
 {

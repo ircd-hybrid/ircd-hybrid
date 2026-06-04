@@ -42,14 +42,6 @@
 #include "send.h"
 #include "server.h"
 
-/* report_this_status()
- *
- * inputs       - pointer to client to report to
- *              - pointer to client to report about
- *              - flag full etrace or not
- * output       - NONE
- * side effects - NONE
- */
 static void
 _etrace_send_user_status(struct Client *source, const struct Client *target)
 {
@@ -62,9 +54,6 @@ _etrace_send_user_status(struct Client *source, const struct Client *target)
                      target->name, target->username, target->host, target->sockhost, target->info);
 }
 
-/*
- * do_etrace()
- */
 static void
 _etrace_process_request(struct Client *source, const char *name)
 {

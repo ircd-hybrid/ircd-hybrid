@@ -85,11 +85,6 @@ class_init(void)
   class_default->name = io_strdup(CLASS_DEFAULT_NAME);
 }
 
-/*
- * inputs       - Integer (Number of class)
- * output       - Pointer to ClassItem struct. Non-NULL expected
- * side effects - NONE
- */
 struct ClassItem *
 class_find(const char *name, bool active)
 {

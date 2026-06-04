@@ -299,31 +299,28 @@ _server_establish_report_link(struct Client *client)
 
   if (tls_isusing(&client->connection->fd->tls))
   {
-    /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
                    client_get_name(client, SHOW_IP), client->tls_cipher,
                    capab_get(client, true));
-
-    /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
                    client_get_name(client, MASK_IP), client->tls_cipher,
                    capab_get(client, true));
+
     log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
               client_get_name(client, SHOW_IP), client->tls_cipher,
               capab_get(client, true));
   }
   else
   {
-    /* Show the real host/IP to admins */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
                    client_get_name(client, SHOW_IP), capab_get(client, true));
-    /* Now show the masked hostname/IP to opers */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
                    client_get_name(client, MASK_IP), capab_get(client, true));
+
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
               client_get_name(client, SHOW_IP), capab_get(client, true));
   }
@@ -406,12 +403,6 @@ _server_establish_send_eobs(struct Client *client)
   }
 }
 
-/* server_estab()
- *
- * inputs       - pointer to a struct Client
- * output       -
- * side effects -
- */
 static void
 _server_establish(struct Client *client, struct ConnectItem *connect)
 {

@@ -698,12 +698,6 @@ conf_validate(void)
     ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
-/* conf_read()
- *
- * inputs       - file descriptor pointing to config file to use
- * output       - None
- * side effects	- Read configuration file.
- */
 static void
 conf_read(FILE *file)
 {
@@ -755,13 +749,6 @@ conf_rehash(bool sig)
   check_conf_klines();
 }
 
-/* conf_connect_allowed()
- *
- * inputs	- pointer to inaddr
- *		- int type ipv4 or ipv6
- * output	- BANNED or accepted
- * side effects	- none
- */
 int
 conf_connect_allowed(const struct io_addr *addr)
 {
@@ -790,13 +777,6 @@ conf_connect_allowed(const struct io_addr *addr)
   return 0;
 }
 
-/* cleanup_tklines()
- *
- * inputs       - NONE
- * output       - NONE
- * side effects - call function to expire temporary k/d lines
- *                This is an event started off in ircd.c
- */
 void
 cleanup_tklines(void *unused)
 {
@@ -805,12 +785,6 @@ cleanup_tklines(void *unused)
   resv_expire();
 }
 
-/* conf_clear()
- *
- * inputs       - none
- * output       - none
- * side effects - Clear out the old configuration
- */
 static void
 conf_clear(void)
 {
@@ -913,12 +887,6 @@ conf_handle_tls(bool cold)
   }
 }
 
-/* read_conf_files()
- *
- * inputs       - cold start YES or NO
- * output       - none
- * side effects - read all conf files needed, ircd.conf kline.conf etc.
- */
 void
 conf_read_files(bool cold)
 {
@@ -975,12 +943,6 @@ conf_read_files(bool cold)
   isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
 }
 
-/* conf_assign_class()
- *
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a class pointer to a conf
- */
 void
 conf_assign_class(struct MaskItem *conf, const char *name)
 {
@@ -995,12 +957,6 @@ conf_assign_class(struct MaskItem *conf, const char *name)
   }
 }
 
-/* yyerror()
- *
- * inputs	- message from parser
- * output	- NONE
- * side effects	- message to opers and log file entry is made
- */
 void
 yyerror(const char *msg)
 {
@@ -1024,13 +980,6 @@ conf_error_report(const char *msg)
             conf_file_name, conf_line_number, msg, p);
 }
 
-/* conf_match_password()
- *
- * inputs       - pointer to given password
- *              - pointer to Conf
- * output       - 1 or 0 if match
- * side effects - none
- */
 bool
 conf_match_password(const char *password, const struct MaskItem *conf)
 {

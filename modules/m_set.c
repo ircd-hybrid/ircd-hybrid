@@ -96,9 +96,6 @@ set_option(struct Client *source, struct SetStruct *option, int value_new)
   }
 }
 
-/*
- * list_quote_commands() sends the client all the available commands.
- */
 static void
 set_option_list(struct Client *source)
 {

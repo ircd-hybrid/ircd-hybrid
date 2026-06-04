@@ -162,12 +162,6 @@ channel_member_remove_list(list_t *list)
     channel_member_remove(member);
 }
 
-/* remove_a_mode()
- *
- * inputs       -
- * output       - NONE
- * side effects - remove ONE mode from a channel
- */
 void
 channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
 {
@@ -213,12 +207,6 @@ channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
   }
 }
 
-/* channel_send_members()
- *
- * inputs       -
- * output       - NONE
- * side effects -
- */
 static void
 _channel_send_sjoin(struct Client *client, const struct Channel *channel)
 {
@@ -370,12 +358,6 @@ remove_ban(struct Ban *ban, list_t *list)
   io_free(ban);
 }
 
-/* channel_free_mask_list()
- *
- * inputs       - pointer to list_t
- * output       - NONE
- * side effects -
- */
 static void
 _channel_free_mask_list(list_t *list)
 {
@@ -583,17 +565,6 @@ channel_member_prefix_to_flag(const char prefix)
   return 0;
 }
 
-/* channel_member_get_prefix()
- *
- * inputs       - pointer to struct ChannelMember
- *              - YES if we can combine different flags
- * output       - string either @, +, % or "" depending on whether
- *                chanop, voiced or user
- * side effects -
- *
- * NOTE: Returned string is usually a static buffer
- * (like in client_get_name)
- */
 const char *
 channel_member_get_prefix(const struct ChannelMember *member, bool combine)
 {

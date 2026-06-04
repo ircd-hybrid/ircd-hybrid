@@ -64,11 +64,6 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
       minimum_version > SERVER_TS_PROTOCOL_CURRENT)
   {
-    /*
-     * A server with the wrong TS version connected; since we're
-     * TS_ONLY we can't fall back to the non-TS protocol so
-     * we drop the link  -orabidoo
-     */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
               "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
               client_get_name(source, SHOW_IP), current_version, minimum_version);
@@ -83,9 +78,6 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  /*
-   * Since we're here, might as well set event_base->time.sec_real while we're at it
-   */
   io_time_update_cache();
 
   const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);

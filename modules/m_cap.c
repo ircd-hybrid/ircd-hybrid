@@ -44,6 +44,14 @@
 #include "send.h"
 #include "user.h"
 
+enum
+{
+  CAP_REPLY_LINE_LENGTH_MAX = IRCD_BUFSIZE - 2,
+  CAP_REPLY_COMMAND_LENGTH = sizeof("CAP") - 1,
+  CAP_REPLY_FINAL_SEPARATOR_LENGTH = sizeof(" :") - 1,
+  CAP_REPLY_CONTINUED_SEPARATOR_LENGTH = sizeof(" * :") - 1,
+};
+
 static const struct Cap *
 find_cap(const char **caplist_p, bool *negate_p)
 {
@@ -84,6 +92,108 @@ find_cap(const char **caplist_p, bool *negate_p)
   return cap_find(name);  /* And return the capability (if any) */
 }
 
+static const char *
+_cap_reply_get_destination(const struct Client *client)
+{
+  const char *const destination = client_get_id_or_name(client, client);
+  if (string_is_empty(destination))
+    return "*";
+
+  return destination;
+}
+
+static size_t
+_cap_reply_get_overhead(const struct Client *client, const char *subcommand, bool continued)
+{
+  assert(!string_is_empty(subcommand));
+  assert(strchr(subcommand, ' ') == NULL);
+
+  const char *const prefix = client_get_id_or_name(&me, client);
+  const char *const destination = _cap_reply_get_destination(client);
+
+  /*
+   * Final line:
+   *   :<prefix> CAP <destination> <subcommand> :<caplist>
+   *
+   * Continued line:
+   *   :<prefix> CAP <destination> <subcommand> * :<caplist>
+   *
+   * Return the number of bytes before <caplist>, excluding CRLF.
+   */
+  return 1 + strlen(prefix) +
+         1 + CAP_REPLY_COMMAND_LENGTH +
+         1 + strlen(destination) +
+         1 + strlen(subcommand) +
+         (continued ? CAP_REPLY_CONTINUED_SEPARATOR_LENGTH : CAP_REPLY_FINAL_SEPARATOR_LENGTH);
+}
+
+static size_t
+_cap_reply_get_caplist_limit(const struct Client *client, const char *subcommand)
+{
+  const size_t overhead = _cap_reply_get_overhead(client, subcommand, true);
+  assert(overhead < CAP_REPLY_LINE_LENGTH_MAX);
+
+  if (overhead >= CAP_REPLY_LINE_LENGTH_MAX)
+    return 0;
+
+  return CAP_REPLY_LINE_LENGTH_MAX - overhead;
+}
+
+static bool
+_cap_reply_should_include(const struct Cap *cap, uint32_t *const set, uint32_t *const rem)
+{
+  if (set == NULL && rem == NULL)
+    return true;
+  if (set && (*set & cap->flag))
+    return true;
+  if (rem && (*rem & cap->flag))
+    return true;
+
+  return false;
+}
+
+static bool
+_cap_reply_is_removed(const struct Cap *cap, uint32_t *const rem)
+{
+  return rem && (*rem & cap->flag);
+}
+
+static size_t
+_cap_reply_get_entry_length(size_t caplist_len, const struct Cap *cap, bool removed)
+{
+  return (caplist_len != 0) + removed + cap->name_len;
+}
+
+static void
+_cap_reply_append_entry(char *caplist, size_t *const caplist_len, const struct Cap *cap, bool removed)
+{
+  assert(caplist);
+  assert(caplist_len);
+  assert(cap);
+
+  if (*caplist_len != 0)
+    caplist[(*caplist_len)++] = ' ';
+
+  if (removed)
+    caplist[(*caplist_len)++] = '-';
+
+  memcpy(caplist + *caplist_len, cap->name, cap->name_len);
+  *caplist_len += cap->name_len;
+  caplist[*caplist_len] = '\0';
+}
+
+static void
+_cap_reply_send_line(struct Client *client, const char *subcommand, const char *caplist, bool continued)
+{
+  if (continued)
+  {
+    sendto_one_command(client, &me, "CAP", "%s * :%s", subcommand, caplist);
+    return;
+  }
+
+  sendto_one_command(client, &me, "CAP", "%s :%s", subcommand, caplist);
+}
+
 /** Send a CAP \a subcmd list of capability changes to \a source.
  * If more than one line is necessary, each line before the last has
  * an added "*" parameter before that line's capability list.
@@ -93,56 +203,41 @@ find_cap(const char **caplist_p, bool *negate_p)
  * @param[in] subcmd Name of capability subcommand.
  */
 static void
-send_caplist(struct Client *source, uint32_t *const set, uint32_t *const rem, const char *subcmd)
+_cap_reply_send_list(struct Client *client, uint32_t *const set,
+                     uint32_t *const rem, const char *subcommand)
 {
-  char capbuf[IRCD_BUFSIZE] = "";
-  char cmdbuf[IRCD_BUFSIZE] = "";
-  unsigned int loc = 0, len, clen;
+  assert(!string_is_empty(subcommand));
 
-  /* Set up the buffer for the final LS message... */
-  clen = snprintf(cmdbuf, sizeof(cmdbuf), ":%s CAP %s %s ",
-                  me.name, source->name[0] ? source->name : "*", subcmd);
+  char caplist[IRCD_BUFSIZE] = "";
+  size_t caplist_len = 0;
+  const size_t caplist_limit = _cap_reply_get_caplist_limit(client, subcommand);
 
   list_node_t *node;
   LIST_FOREACH(node, cap_get_list()->head)
   {
-    const struct Cap *cap = node->data;
-
-    /*
-     * This is a little bit subtle, but just involves applying de
-     * Morgan's laws to the obvious check: We must display the
-     * capability if (and only if) it is set in \a rem or \a set, or
-     * if both are null.
-     */
-    if (!(rem && (*rem & cap->flag)) &&
-        !(set && (*set & cap->flag)) && (rem || set))
+    const struct Cap *const cap = node->data;
+    if (!_cap_reply_should_include(cap, set, rem))
       continue;
 
-    /* Build the prefix (space separator and any modifiers needed). */
-    char pfx[4];
-    size_t pfx_len = 0;
+    const bool removed = _cap_reply_is_removed(cap, rem);
+    const size_t entry_len = _cap_reply_get_entry_length(caplist_len, cap, removed);
+    assert(entry_len <= caplist_limit);
 
-    if (loc)
-      pfx[pfx_len++] = ' ';
-    if (rem && (*rem & cap->flag))
-      pfx[pfx_len++] = '-';
+    if (entry_len > caplist_limit)
+      continue;
 
-    pfx[pfx_len] = '\0';
-
-    len = cap->name_len + pfx_len;  /* How much we'd add... */
-
-    if (sizeof(capbuf) < (clen + loc + len + 15))
+    if ((caplist_len != 0) && caplist_len + entry_len > caplist_limit)
     {
-      /* Would add too much; must flush */
-      sendto_one(source, "%s* :%s", cmdbuf, capbuf);
-      loc = 0;
-      capbuf[0] = '\0';  /* Re-terminate the buffer... */
+      _cap_reply_send_line(client, subcommand, caplist, true);
+
+      caplist[0] = '\0';
+      caplist_len = 0;
     }
 
-    loc += snprintf(capbuf + loc, sizeof(capbuf) - loc, "%s%s", pfx, cap->name);
+    _cap_reply_append_entry(caplist, &caplist_len, cap, removed);
   }
 
-  sendto_one(source, "%s:%s", cmdbuf, capbuf);
+  _cap_reply_send_line(client, subcommand, caplist, false);
 }
 
 static void
@@ -157,7 +252,7 @@ cap_ls(struct Client *source, const char *arg)
     client_set_flag(source, FLAGS_CAP302);
   }
 
-  send_caplist(source, NULL, NULL, "LS");  /* Send list of capabilities */
+  _cap_reply_send_list(source, NULL, NULL, "LS");  /* Send list of capabilities */
 }
 
 static void
@@ -204,7 +299,7 @@ cap_req(struct Client *source, const char *arg)
   }
 
   /* Notify client of accepted changes and copy over results. */
-  send_caplist(source, &set, &rem, "ACK");
+  _cap_reply_send_list(source, &set, &rem, "ACK");
 
   source->connection->cap = cs;
 }
@@ -227,7 +322,7 @@ static void
 cap_list(struct Client *source, const char *arg)
 {
   /* Send the list of the client's capabilities */
-  send_caplist(source, &source->connection->cap, NULL, "LIST");
+  _cap_reply_send_list(source, &source->connection->cap, NULL, "LIST");
 }
 
 struct CapSubcommand

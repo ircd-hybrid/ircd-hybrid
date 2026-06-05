@@ -44,6 +44,31 @@
 #include "user_mode.h"
 #include "whowas.h"
 
+static const struct Client *
+_kill_source_for_target(const struct Client *source, const struct Client *target)
+{
+  if (client_is_user(source))
+    return source;
+
+  if (client_is_oper(target))
+    return source;
+
+  return client_get_visible_server(source);
+}
+
+static void
+_kill_send_to_target(const struct Client *source, struct Client *target, const char *reason)
+{
+  assert(source);
+  assert(client_is_user(source) || client_is_server(source) || client_is_me(source));
+  assert(client_is_local_user(target));
+  assert(reason);
+
+  const struct Client *const visible_source =
+    _kill_source_for_target(source, target);
+  sendto_one_command(target, visible_source, "KILL", ":%.*s", REASONLEN, reason);
+}
+
 /*! \brief KILL command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -87,8 +112,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
 
   const char *const reason = string_default(parv[2], CONF_NOREASON);
   if (client_is_local(target))
-    sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
-               source->name, source->username, source->host, target->name, REASONLEN, reason);
+    _kill_send_to_target(source, target, reason);
 
   /*
    * Do not change the format of this message. There's no point in changing messages
@@ -121,15 +145,6 @@ mo_kill(struct Client *source, int parc, char *parv[])
   }
 
   client_exit_fmt(target, "Killed (%s (%.*s))", source->name, REASONLEN, reason);
-}
-
-static const char *
-_kill_source_name_for_target(const struct Client *source, const struct Client *target)
-{
-  if (client_is_oper(target))
-    return source->name;
-
-  return client_get_visible_server_name(source);
 }
 
 static const char *
@@ -170,14 +185,7 @@ ms_kill(struct Client *source, int parc, char *parv[])
     reason = def_reason;
 
   if (client_is_local(target))
-  {
-    if (client_is_user(source))
-      sendto_one(target, ":%s!%s@%s KILL %s :%s",
-                 source->name, source->username, source->host, target->name, reason);
-    else
-      sendto_one(target, ":%s KILL %s :%s",
-                 _kill_source_name_for_target(source, target), target->name, reason);
-  }
+    _kill_send_to_target(source, target, reason);
 
   /*
    * Be warned, this message must be From %s, or it confuses clients

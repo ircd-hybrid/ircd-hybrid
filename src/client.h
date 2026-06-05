@@ -322,6 +322,7 @@ extern struct Client *client_create_remote(struct Client *);
 extern const char *client_get_name(const struct Client *, enum addr_mask_type);
 extern const char *client_get_oper_name(const struct Client *);
 extern const char *client_get_visible_server_name(const struct Client *);
+extern const struct Client *client_get_visible_server(const struct Client *);
 
 static inline bool
 client_is_local(const struct Client *client)

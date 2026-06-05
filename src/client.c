@@ -520,16 +520,22 @@ client_get_name(const struct Client *client, enum addr_mask_type type)
   return buf;
 }
 
-const char *
-client_get_visible_server_name(const struct Client *client)
+const struct Client *
+client_get_visible_server(const struct Client *client)
 {
   assert(client);
   assert(client_is_server(client) || client_is_me(client));
 
   if (client_is_hidden(client) || ConfigServerHide.hide_servers)
-    return me.name;
+    return &me;
 
-  return client->name;
+  return client;
+}
+
+const char *
+client_get_visible_server_name(const struct Client *client)
+{
+  return client_get_visible_server(client)->name;
 }
 
 /*

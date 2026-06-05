@@ -483,8 +483,7 @@ user_mode_send(struct Client *client, uint64_t mode_flags_old, user_mode_send_t 
   assert(buf_add[0] != '\0' || buf_del[0] != '\0');
 
   if (send & USER_MODE_SEND_USER)
-    sendto_one(client, ":%s!%s@%s MODE %s :%s%s",
-               client->name, client->username, client->host, client->name, buf_add, buf_del);
+    sendto_one_command(client, client, "MODE", ":%s%s", buf_add, buf_del);
   if (send & USER_MODE_SEND_SERVER)
     sendto_servers(client, 0, 0, ":%s MODE %s :%s%s",
                    client->id, client->id, buf_add, buf_del);

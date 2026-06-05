@@ -129,8 +129,7 @@ _pseudo_message_handler(struct Client *source, int parc, char *parv[])
   const char *const dispatch_message =
     _pseudo_format_message(pseudo, message, message_buffer, sizeof(message_buffer));
 
-  sendto_one(target, ":%s PRIVMSG %s :%s",
-             source->id, target->id, dispatch_message);
+  sendto_one_command(target, source, "PRIVMSG", ":%s", dispatch_message);
 }
 
 /**

@@ -72,11 +72,12 @@ ms_svspart(struct Client *source, int parc, char *parv[])
   }
 
   if (string_is_empty(parv[3]))
-    sendto_one(target, ":%s SVSPART %s %s",
-               source->id, target->id, parv[2]);
-  else
-    sendto_one(target, ":%s SVSPART %s %s :%s",
-               source->id, target->id, parv[2], parv[3]);
+  {
+    sendto_one_command(target, source, "SVSPART", "%s", parv[2]);
+    return;
+  }
+
+  sendto_one_command(target, source, "SVSPART", "%s :%s", parv[2], parv[3]);
 }
 
 static struct Command command_table =

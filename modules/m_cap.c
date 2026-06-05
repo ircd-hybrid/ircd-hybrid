@@ -184,8 +184,7 @@ cap_req(struct Client *source, const char *arg)
 
     if (error)
     {
-      sendto_one(source, ":%s CAP %s NAK :%s", me.name,
-                 source->name[0] ? source->name : "*", arg);
+      sendto_one_command(source, &me, "CAP", "NAK :%s", arg);
       return;  /* Can't complete requested op... */
     }
 

@@ -266,7 +266,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
   }
 
-  sendto_one_anywhere(target, source, command[notice], ":%s", text);
+  sendto_one_command(target, source, command[notice], ":%s", text);
 }
 
 /* handle_special()

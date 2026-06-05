@@ -72,11 +72,12 @@ ms_svsjoin(struct Client *source, int parc, char *parv[])
   }
 
   if (string_is_empty(parv[3]))
-    sendto_one(target, ":%s SVSJOIN %s %s",
-               source->id, target->id, parv[2]);
-  else
-    sendto_one(target, ":%s SVSJOIN %s %s %s",
-               source->id, target->id, parv[2], parv[3]);
+  {
+    sendto_one_command(target, source, "SVSJOIN", "%s", parv[2]);
+    return;
+  }
+
+  sendto_one_command(target, source, "SVSJOIN", "%s %s", parv[2], parv[3]);
 }
 
 static struct Command command_table =

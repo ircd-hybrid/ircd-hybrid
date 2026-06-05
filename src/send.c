@@ -394,28 +394,24 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
   dbuf_ref_free(buffer);
 }
 
-/* sendto_anywhere()
- *
- * inputs	- pointer to dest client
- * 		- pointer to from client
- * 		- varags
- * output	- NONE
- * side effects	- less efficient than sendto_remote and sendto_one
- * 		  but useful when one does not know where target "lives"
- */
 void
-sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
+sendto_one_command(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
 {
   if (client_is_dead(to->nexthop))
     return;
 
+  const char *dest = client_get_id_or_name(to, to);
+  if (string_is_empty(dest))
+    dest = "*";
+
   struct dbuf_block *const buffer = dbuf_alloc();
+
   if (client_is_local_user(to) && client_is_user(from))
     dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
-                 from->name, from->username, from->host, command, to->name);
+                 from->name, from->username, from->host, command, dest);
   else
     dbuf_put_fmt(buffer, ":%s %s %s ",
-                 client_get_id_or_name(from, to), command, client_get_id_or_name(to, to));
+                 client_get_id_or_name(from, to), command, dest);
 
   va_list args;
   va_start(args, format);

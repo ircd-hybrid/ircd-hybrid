@@ -67,8 +67,7 @@ _invite_send_to_target(const struct Client *source, struct Client *target, struc
   if (!client_is_local(target))
     return;
 
-  sendto_one(target, ":%s!%s@%s INVITE %s :%s",
-             source->name, source->username, source->host, target->name, channel->name);
+  sendto_one_command(target, source, "INVITE", ":%s", channel->name);
 }
 
 static void

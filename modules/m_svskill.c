@@ -72,8 +72,7 @@ ms_svskill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  sendto_one(target, ":%s SVSKILL %s 0 :%s",
-             source->id, target->id, reason);
+  sendto_one_command(target, source, "SVSKILL", "0 :%s", reason);
 }
 
 static struct Command command_table =

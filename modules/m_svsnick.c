@@ -84,9 +84,8 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
-    sendto_one(target, ":%s SVSNICK %s 0 %s %ju",
-               source->id, target->id, new_nick, new_ts);
+    const uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
+    sendto_one_command(target, source, "SVSNICK", "0 %s %ju", new_nick, new_ts);
     return;
   }
 
@@ -120,7 +119,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
   }
 
-  uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
+  const uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
   sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
                  target->id, new_nick, new_ts);
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",

@@ -474,6 +474,10 @@ client_is_service(const struct Client *client)
 static inline const char *
 client_get_id_or_name(const struct Client *subject_client, const struct Client *context_client)
 {
+  assert(subject_client);
+  assert(context_client);
+  assert(context_client->nexthop);
+
   if (client_is_server(context_client->nexthop) && subject_client->id[0])
     return subject_client->id;
 

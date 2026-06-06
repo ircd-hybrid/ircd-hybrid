@@ -270,6 +270,8 @@ client_create_remote(struct Client *uplink)
 {
   assert(uplink);
   assert(client_is_server(uplink));
+  assert(uplink->server);
+  assert(uplink->nexthop);
 
   struct Client *const client = io_calloc(sizeof(*client));
   /* Remote entity topology: Inherit the physical route (nexthop) from the logical parent (uplink). */
@@ -326,6 +328,9 @@ _client_destroy(struct Client *client)
 
   if (client->server)
   {
+    assert(list_is_empty(&client->server->child_user_list));
+    assert(list_is_empty(&client->server->child_server_list));
+
     server_destroy(client->server);
     client->server = NULL;
   }

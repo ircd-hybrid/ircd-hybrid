@@ -60,7 +60,7 @@ static void
 _kill_send_to_target(const struct Client *source, struct Client *target, const char *reason)
 {
   assert(source);
-  assert(client_is_user(source) || client_is_server(source) || client_is_me(source));
+  assert(client_is_user(source) || client_is_server(source));
   assert(client_is_local_user(target));
   assert(reason);
 
@@ -97,7 +97,6 @@ mo_kill(struct Client *source, int parc, char *parv[])
     sendto_one_notice(source, &me, ":KILL changed from %s to %s",
                       parv[1], target->name);
 
-  assert(client_is_user(target));
   if (!client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill:remote");
@@ -176,7 +175,6 @@ ms_kill(struct Client *source, int parc, char *parv[])
   struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
-  assert(client_is_user(target));
 
   char *reason = strchr(parv[2], ' ');
   if (reason)

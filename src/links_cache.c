@@ -78,7 +78,7 @@ links_cache_set_timer(uintmax_t new_interval_seconds)
 {
   assert(live_cache_ptr == &cache_buffer_A || live_cache_ptr == &cache_buffer_B);
 
-  uintmax_t interval_ms = new_interval_seconds * 1000ULL;
+  const uintmax_t interval_ms = new_interval_seconds * 1000ULL;
   if (interval_ms > 0)
   {
     if (update_timer == NULL)
@@ -135,7 +135,7 @@ _links_cache_clear_buffer(list_t *buffer)
   list_node_t *node, *next_node;
   LIST_FOREACH_SAFE(node, next_node, buffer->head)
   {
-    links_cache_entry_t *entry = node->data;
+    links_cache_entry_t *const entry = node->data;
     list_remove(node, buffer);
     _links_cache_free_entry(entry);
   }
@@ -152,13 +152,13 @@ _links_cache_update(void *unused)
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {
-    const struct Client *server = node->data;
+    const struct Client *const server = node->data;
     if (client_is_hidden(server) || client_is_me(server))
       continue;
     if (client_is_service(server) && ConfigServerHide.hide_services)
       continue;
 
-    links_cache_entry_t *entry = io_calloc(sizeof(*entry));
+    links_cache_entry_t *const entry = io_calloc(sizeof(*entry));
     entry->name = io_strdup(server->name);
     entry->uplink_name = io_strdup(me.name);
     entry->description = io_strdup(server->info);
@@ -196,7 +196,7 @@ _links_cache_write_file(void)
   list_node_t *node;
   LIST_FOREACH(node, (*live_cache_ptr).head)
   {
-    const links_cache_entry_t *entry = node->data;
+    const links_cache_entry_t *const entry = node->data;
     json_error_t error;
     json_t *json_entry = json_pack_ex(&error, 0, "{s:s, s:s, s:s, s:i}",
                                       LINKS_CACHE_KEY_NAME, entry->name,
@@ -266,7 +266,7 @@ _links_cache_read_file(void)
       continue;
     }
 
-    links_cache_entry_t *entry = io_calloc(sizeof(*entry));
+    links_cache_entry_t *const entry = io_calloc(sizeof(*entry));
     entry->name = io_strdup(name);
     entry->uplink_name = io_strdup(uplink_name);
     entry->description = io_strdup(description);

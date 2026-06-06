@@ -149,7 +149,7 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   if (command_find(command))
     return;
 
-  struct PseudoItem *pseudo = io_calloc(sizeof(*pseudo));
+  struct PseudoItem *const pseudo = io_calloc(sizeof(*pseudo));
   pseudo->name = io_strdup(name);
   pseudo->nick = io_strdup(nick);
   pseudo->server = io_strdup(server);
@@ -181,7 +181,7 @@ pseudo_clear(void)
 {
   while (pseudo_list.head)
   {
-    struct PseudoItem *pseudo = pseudo_list.head->data;
+    struct PseudoItem *const pseudo = pseudo_list.head->data;
     assert(command_find(pseudo->command_struct.name));
 
     command_del(&pseudo->command_struct);

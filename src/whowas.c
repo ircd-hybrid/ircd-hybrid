@@ -73,7 +73,7 @@ whowas_group_find(const char *name)
 static struct WhowasGroup *
 _whowas_group_create(const char *name)
 {
-  struct WhowasGroup *group = io_calloc(sizeof(*group));
+  struct WhowasGroup *const group = io_calloc(sizeof(*group));
   group->name = io_strdup(name);
   list_add(group, &group->hash_node, &whowas_hash[hash_string(group->name)]);
 

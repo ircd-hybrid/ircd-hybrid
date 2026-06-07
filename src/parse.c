@@ -67,11 +67,12 @@ _parse_uid_is_routed_via_link(const struct Client *link, const char *uid)
   assert(client_id_is_valid_uid(uid));
 
   char sid[CLIENT_ID_SID_LENGTH + 1];
-  strlcpy(sid, uid, sizeof(sid));
+  memcpy(sid, uid, CLIENT_ID_SID_LENGTH);
+  sid[CLIENT_ID_SID_LENGTH] = '\0';
 
   /*
-   * A UID is only eligible for unknown-client cleanup if its server SID
-   * resolves to a server that is actually routed through the sending link.
+   * A UID is only eligible for unknown-client cleanup if its SID resolves
+   * to a server that is actually routed through the sending link.
    */
   const struct Client *const server = client_find_server_by_sid(sid);
   return server && server->nexthop == link;

@@ -47,6 +47,7 @@
 #include "ircd_defs.h"
 #include "list_task.h"
 #include "lookup.h"
+#include "server.h"
 #include "user_mode.h"
 
 /** Server ban types */
@@ -131,15 +132,6 @@ enum
   FLAGS_CAP302          = 1 << 23,  /**< User supports the IRCv3 CAP 302 extension */
   FLAGS_SPOOF           = 1 << 24,
   FLAGS_INTRODUCED      = 1 << 25,
-};
-
-/** Server structure */
-struct Server
-{
-  list_t child_server_list;  /**< List of servers that are directly connected to this server. */
-  list_t child_user_list;  /**< List of users that are directly connected to this server. */
-  char *initiator_name;  /**< The name of the oper who initiated an outbound link, or "AutoConn." */
-  struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
 };
 
 /** Connection structure

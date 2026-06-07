@@ -27,9 +27,10 @@
 #define INCLUDED_server_h
 #include <stdbool.h>
 
+#include "list.h"
+
 struct Client;
 struct ConnectItem;
-struct Server;
 
 /**
  * @enum server_ts_protocol_version_t
@@ -71,6 +72,15 @@ typedef struct
   server_route_result_t result;  /**< The result of the routing attempt. */
   struct Client *target;  /**< Pointer to the target client or server. */
 } server_route_t;
+
+/** Server structure */
+struct Server
+{
+  list_t child_server_list;  /**< List of servers that are directly connected to this server. */
+  list_t child_user_list;  /**< List of users that are directly connected to this server. */
+  char *initiator_name;  /**< The name of the oper who initiated an outbound link, or "AutoConn." */
+  struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
+};
 
 extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);

@@ -58,10 +58,9 @@ _client_id_is_valid_char(const char ch)
 static bool
 _client_id_is_valid(const char *id, size_t length)
 {
-  if (string_is_empty(id))
-    return false;
+  assert(length == CLIENT_ID_SID_LENGTH || length == CLIENT_ID_UID_LENGTH);
 
-  if (strlen(id) != length)
+  if (id == NULL)
     return false;
 
   /* Per TS6 specification, the first character must always be a digit. */
@@ -72,7 +71,7 @@ _client_id_is_valid(const char *id, size_t length)
     if (!_client_id_is_valid_char(id[i]))
       return false;
 
-  return true;
+  return id[length] == '\0';
 }
 
 bool

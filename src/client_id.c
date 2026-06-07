@@ -132,7 +132,7 @@ _client_id_hash_djb2_update_byte(uint32_t hash, unsigned char byte)
 }
 
 static void
-_client_id_generate_sid(const char *server_name, const char *server_description, char sid[CLIENT_ID_SID_LENGTH + 1])
+_client_id_derive_sid(const char *server_name, const char *server_description, char sid[CLIENT_ID_SID_LENGTH + 1])
 {
   static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -169,8 +169,8 @@ _client_id_generate_sid(const char *server_name, const char *server_description,
 }
 
 bool
-client_id_set_server_sid(struct Client *client, const char *configured_sid, const char *server_name,
-                         const char *server_description, bool *generated)
+client_id_init_local_server_sid(struct Client *client, const char *configured_sid, const char *server_name,
+                                const char *server_description, bool *generated)
 {
   assert(client);
   assert(string_is_empty(client->id));
@@ -192,7 +192,7 @@ client_id_set_server_sid(struct Client *client, const char *configured_sid, cons
   if (string_is_empty(server_name) || string_is_empty(server_description))
     return false;
 
-  _client_id_generate_sid(server_name, server_description, client->id);
+  _client_id_derive_sid(server_name, server_description, client->id);
 
   if (generated)
     *generated = true;

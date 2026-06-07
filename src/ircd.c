@@ -307,8 +307,8 @@ _ircd_init_me(void)
     log_write(LOG_TYPE_IRCD, "Generating server ID");
 
   bool sid_generated = false;
-  if (!client_id_set_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name,
-                                ConfigServerInfo.description, &sid_generated))
+  if (!client_id_init_local_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name,
+                                       ConfigServerInfo.description, &sid_generated))
   {
     log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize server ID.");
     exit(EXIT_FAILURE);

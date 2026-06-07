@@ -34,6 +34,13 @@
 
 struct Client;
 
+enum conf_ban_type
+{
+  CONF_BAN_TYPE_KLINE,
+  CONF_BAN_TYPE_DLINE,
+  CONF_BAN_TYPE_XLINE,
+};
+
 enum maskitem_type
 {
   CONF_CLIENT = 1,
@@ -282,6 +289,8 @@ extern struct config_admin_entry ConfigAdminInfo;
 
 extern void cleanup_tklines(void *);
 extern void conf_assign_class(struct MaskItem *, const char *);
+extern void conf_ban_apply(struct Client *, enum conf_ban_type, const char *);
+extern void conf_ban_check_clients(void);
 extern void conf_error_report(const char *);
 extern void conf_free(struct MaskItem *);
 extern void conf_read_files(bool);

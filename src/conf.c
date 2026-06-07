@@ -746,7 +746,7 @@ conf_rehash(bool sig)
 
   module_load_all(NULL);
 
-  check_conf_klines();
+  conf_ban_check_clients();
 }
 
 int
@@ -993,4 +993,105 @@ conf_match_password(const char *password, const struct MaskItem *conf)
     encr = password;
 
   return encr && strcmp(encr, conf->passwd) == 0;
+}
+
+void
+conf_ban_check_clients(void)
+{
+  list_node_t *node, *node_next;
+  const void *ptr;
+
+  LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
+  {
+    struct Client *const client = node->data;
+    /* If a client is already being exited */
+    if (client_is_dead(client))
+      continue;
+
+    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
+    {
+      const struct MaskItem *const conf = ptr;
+      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
+      continue;  /* and go examine next Client */
+    }
+
+    if ((ptr = find_conf_by_address(client->host, &client->addr, CONF_KLINE,
+                                    client->username, NULL, 1)))
+    {
+      const struct MaskItem *const conf = ptr;
+      conf_ban_apply(client, CONF_BAN_TYPE_KLINE, conf->reason);
+      continue;  /* and go examine next Client */
+    }
+
+    if ((ptr = gecos_find(client->info, match)))
+    {
+      const struct GecosItem *const conf = ptr;
+      conf_ban_apply(client, CONF_BAN_TYPE_XLINE, conf->reason);
+      continue;  /* and go examine next Client */
+    }
+  }
+
+  /* Also check the unknowns list for new dlines */
+  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
+  {
+    struct Client *const client = node->data;
+    /* If a client is already being exited */
+    if (client_is_dead(client))
+      continue;
+
+    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
+    {
+      const struct MaskItem *const conf = ptr;
+      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
+      continue;  /* and go examine next Client */
+    }
+  }
+}
+
+void
+conf_ban_apply(struct Client *client, enum conf_ban_type type, const char *reason)
+{
+  char ban_type = '?';
+
+  switch (type)
+  {
+    case CONF_BAN_TYPE_KLINE:
+      if (client_has_flag(client, FLAGS_EXEMPTKLINE))
+      {
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                       "KLINE over-ruled for %s, client is kline_exempt",
+                       client_get_name(client, HIDE_IP));
+        return;
+      }
+
+      ban_type = 'K';
+      break;
+    case CONF_BAN_TYPE_DLINE:
+      if (find_conf_by_address(NULL, &client->addr, CONF_EXEMPT, NULL, NULL, 1))
+        return;
+      ban_type = 'D';
+      break;
+    case CONF_BAN_TYPE_XLINE:
+      if (client_has_flag(client, FLAGS_EXEMPTXLINE))
+      {
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                       "XLINE over-ruled for %s, client is xline_exempt",
+                       client_get_name(client, HIDE_IP));
+        return;
+      }
+
+      ban_type = 'X';
+      break;
+    default:
+      assert(0);
+      break;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%c-line active for %s",
+                 ban_type, client_get_name(client, HIDE_IP));
+
+  if (client_is_user(client))
+    sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
+
+  client_exit(client, reason);
 }

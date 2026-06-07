@@ -61,7 +61,7 @@ xline_check(const struct GecosItem *gecos)
       continue;
 
     if (match(gecos->mask, client->info) == 0)
-      conf_try_ban(client, CLIENT_BAN_XLINE, gecos->reason);
+      conf_ban_apply(client, CONF_BAN_TYPE_XLINE, gecos->reason);
   }
 }
 

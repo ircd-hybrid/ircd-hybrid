@@ -50,14 +50,6 @@
 #include "server.h"
 #include "user_mode.h"
 
-/** Server ban types */
-enum
-{
-  CLIENT_BAN_KLINE,
-  CLIENT_BAN_DLINE,
-  CLIENT_BAN_XLINE
-};
-
 /** addr_mask_type enumeration */
 enum addr_mask_type
 {
@@ -294,7 +286,6 @@ extern uint64_t UMODE_SERVNOTICE;
 extern uint64_t UMODE_CLOAK;
 extern uint64_t UMODE_SPY;
 
-extern void check_conf_klines(void);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
@@ -305,7 +296,6 @@ extern void client_schedule_exit_on_io_failure(struct Client *, enum client_io_o
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_set_state(struct Client *, enum client_state);
 extern void client_update_name(struct Client *, const char *);
-extern void conf_try_ban(struct Client *, int, const char *);
 extern void exit_aborted_clients(void);
 extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);

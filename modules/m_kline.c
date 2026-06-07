@@ -70,12 +70,12 @@ kline_check(const struct AddressRec *arec)
       case HM_HOST:
         if (match(arec->Mask.hostname, client->realhost) == 0 ||
             match(arec->Mask.hostname, client->sockhost) == 0 || match(arec->Mask.hostname, client->host) == 0)
-          conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
+          conf_ban_apply(client, CONF_BAN_TYPE_KLINE, arec->conf->reason);
         break;
       case HM_IPV6:
       case HM_IPV4:
         if (address_match(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
-          conf_try_ban(client, CLIENT_BAN_KLINE, arec->conf->reason);
+          conf_ban_apply(client, CONF_BAN_TYPE_KLINE, arec->conf->reason);
         break;
       default:
         assert(0);

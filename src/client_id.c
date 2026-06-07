@@ -100,6 +100,20 @@ client_id_has_valid_uid(const struct Client *client)
   return client_id_is_valid_uid(client->id);
 }
 
+bool
+client_id_extract_sid_from_uid(const char *uid, char sid[CLIENT_ID_SID_LENGTH + 1])
+{
+  assert(sid);
+
+  if (!client_id_is_valid_uid(uid))
+    return false;
+
+  memcpy(sid, uid, CLIENT_ID_SID_LENGTH);
+  sid[CLIENT_ID_SID_LENGTH] = '\0';
+
+  return true;
+}
+
 static uint32_t
 _client_id_hash_djb2_update(uint32_t hash, const char *str)
 {

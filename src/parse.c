@@ -64,11 +64,10 @@ _parse_uid_is_routed_via_link(const struct Client *link, const char *uid)
 {
   assert(link);
   assert(client_is_server(link));
-  assert(client_id_is_valid_uid(uid));
 
   char sid[CLIENT_ID_SID_LENGTH + 1];
-  memcpy(sid, uid, CLIENT_ID_SID_LENGTH);
-  sid[CLIENT_ID_SID_LENGTH] = '\0';
+  if (!client_id_extract_sid_from_uid(uid, sid))
+    return false;
 
   /*
    * A UID is only eligible for unknown-client cleanup if its SID resolves

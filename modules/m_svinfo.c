@@ -33,11 +33,38 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
 #include "server.h"
+
+static void
+_svinfo_report_link_status(struct Client *link, bool write_log, const char *status_format, ...)
+{
+  char status[IRCD_BUFSIZE];
+
+  va_list args;
+  va_start(args, status_format);
+  vsnprintf(status, sizeof(status), status_format, args);
+  va_end(args);
+
+  client_format_name_buffer_t admin_name_buffer;
+  client_format_name_buffer_t oper_name_buffer;
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Link %s %s",
+                 client_format_name(link, CLIENT_FORMAT_NAME_ADMIN, &admin_name_buffer), status);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Link %s %s",
+                 client_format_name(link, CLIENT_FORMAT_NAME_OPER, &oper_name_buffer), status);
+
+  if (write_log)
+  {
+    client_format_name_buffer_t log_name_buffer;
+    log_write(LOG_TYPE_IRCD, "Link %s %s",
+              client_format_name(link, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), status);
+  }
+}
 
 /*! \brief SVINFO command handler
  *
@@ -64,15 +91,9 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
       minimum_version > SERVER_TS_PROTOCOL_CURRENT)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, SHOW_IP), current_version, minimum_version);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, MASK_IP), current_version, minimum_version);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, SHOW_IP), current_version, minimum_version);
+    _svinfo_report_link_status(source, true,
+                               "dropped, wrong TS protocol version (current: %d, minimum: %d)",
+                               current_version, minimum_version);
 
     client_exit(source, "Incompatible TS version");
     return;
@@ -86,29 +107,18 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
 
   if (abs_delta_ts > ConfigGeneral.ts_max_delta)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, abs_delta_ts);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
+    _svinfo_report_link_status(source, true,
+                               "dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+                               local_ts, remote_ts, abs_delta_ts);
 
     client_exit(source, "Excessive TS delta");
     return;
   }
 
   if (abs_delta_ts > ConfigGeneral.ts_warn_delta)
-  {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, abs_delta_ts);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, abs_delta_ts);
-  }
+    _svinfo_report_link_status(source, false,
+                               "notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+                               local_ts, remote_ts, abs_delta_ts);
 }
 
 static struct Command command_table =

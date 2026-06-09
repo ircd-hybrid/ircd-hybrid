@@ -34,6 +34,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "client_svstag.h"
 #include "conf.h"
 #include "ircd.h"
@@ -78,13 +79,18 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
                    me.id, client->id, RPL_WHOISOPERATOR, oper->whois_text);
   }
 
+  client_format_name_buffer_t client_name_buffer;
+  client_format_oper_name_buffer_t oper_name_buffer;
+  const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
+  const char *const oper_name = client_format_oper_name(client, &oper_name_buffer);
+
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-            oper->name, client_get_name(client, HIDE_IP));
+            oper->name, client_name);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
-                 client_get_oper_name(client));
+                 oper_name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                 me.id, client_get_oper_name(client));
+                 me.id, oper_name);
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled
@@ -96,15 +102,18 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
 static void
 _oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_result_t result)
 {
-  const char *reason = oper_auth_result_to_string(result);
+  const char *const reason = oper_auth_result_to_string(result);
+
+  client_format_name_buffer_t client_name_buffer;
+  const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
   if (ConfigGeneral.failed_oper_notice)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Failed OPER attempt as [%s] by %s (%s)",
-                   name, client_get_name(client, HIDE_IP), reason);
+                   name, client_name, reason);
 
   log_write(LOG_TYPE_OPER, "Failed OPER attempt as [%s] by %s (%s)",
-            name, client_get_name(client, HIDE_IP), reason);
+            name, client_name, reason);
 }
 
 /*! \brief OPER command handler

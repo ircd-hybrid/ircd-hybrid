@@ -35,6 +35,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
@@ -46,24 +47,47 @@
 #include "server_capab.h"
 
 static void
+_resv_report_added(struct Client *source, const struct ResvItem *resv, uintmax_t duration_minutes)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  if (duration_minutes)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary RESV added by %s for [%s] (%ju min) [%s]",
+                   source_name, resv->mask, duration_minutes, resv->reason);
+    log_write(LOG_TYPE_RESV,
+              "Temporary RESV added by %s for [%s] (%ju min) [%s]",
+              source_name, resv->mask, duration_minutes, resv->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "RESV added by %s for [%s] [%s]",
+                 source_name, resv->mask, resv->reason);
+  log_write(LOG_TYPE_RESV, "RESV added by %s for [%s] [%s]",
+            source_name, resv->mask, resv->reason);
+}
+
+static void
 resv_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!client_is_service(source))
+  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)))
   {
-    if (!aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)))
-    {
-      if (client_is_user(source))
-        sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the RESV",
-                          ConfigGeneral.min_nonwildcard_simple);
-      return;
-    }
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":Please include at least %u non-wildcard characters with the RESV",
+                        ConfigGeneral.min_nonwildcard_simple);
+    return;
   }
 
   struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
   if (resv)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":A RESV has already been placed on: %s", resv->mask);
+      sendto_one_notice(source, &me, ":A RESV has already been placed on [%s]",
+                        resv->mask);
     return;
   }
 
@@ -74,27 +98,21 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   if (aline->duration)
   {
     resv->expires_at = resv->created_at + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. RESV [%s]",
-                        aline->duration / 60, resv->mask);
+      sendto_one_notice(source, &me, ":Added temporary RESV [%s] (%ju min)",
+                        resv->mask, duration_minutes);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. RESV for [%s] [%s]",
-                   client_get_oper_name(source), aline->duration / 60, resv->mask, resv->reason);
-    log_write(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-              client_get_oper_name(source), aline->duration / 60, resv->mask, resv->reason);
+    _resv_report_added(source, resv, duration_minutes);
   }
   else
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added RESV [%s] [%s]",
-                        resv->mask, resv->reason);
+      sendto_one_notice(source, &me, ":Added RESV [%s]",
+                        resv->mask);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added RESV for [%s] [%s]",
-                   client_get_oper_name(source), resv->mask, resv->reason);
-    log_write(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
-              client_get_oper_name(source), resv->mask, resv->reason);
+    _resv_report_added(source, resv, 0);
   }
 }
 

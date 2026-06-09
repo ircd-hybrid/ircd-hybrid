@@ -31,6 +31,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "client_find.h"
 #include "conf_connect.h"
 #include "ircd.h"
@@ -38,6 +39,23 @@
 #include "parse.h"
 #include "send.h"
 #include "server.h"
+
+static void
+_connect_report_request(const struct Client *source, const struct ConnectItem *connect)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+  const char *const request_origin = client_is_local(source) ? "Local" : "Remote";
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
+                 "from %s: %s CONNECT %s %u from %s",
+                 me.name, request_origin, connect->name, connect->port, source_name);
+  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
+                 me.id, request_origin, connect->name, connect->port, source_name);
+
+  log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
+            request_origin, connect->name, connect->port, source_name);
+}
 
 static void
 _connect_process_request(struct Client *source, const char *name)
@@ -66,15 +84,7 @@ _connect_process_request(struct Client *source, const char *name)
     return;
   }
 
-  /* Notify all operators about connect requests. */
-  const char *const request_origin = client_is_local(source) ? "Local" : "Remote";
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                 me.name, request_origin, name, connect->port, client_get_oper_name(source));
-  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                 me.id, request_origin, name, connect->port, client_get_oper_name(source));
-
-  log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            request_origin, name, connect->port, client_get_oper_name(source));
+  _connect_report_request(source, connect);
 
   /*
    * At this point we should be calling connect_server with a valid

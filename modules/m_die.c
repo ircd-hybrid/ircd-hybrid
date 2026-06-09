@@ -30,6 +30,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "ircd.h"
 #include "ircd_exit.h"
 #include "numeric.h"
@@ -63,8 +64,9 @@ mo_die(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  ircd_exit_fmt(IRCD_EXIT_TERMINATE, "received DIE command from %s",
-                client_get_name(source, HIDE_IP));
+  client_format_name_buffer_t source_name_buffer;
+  ircd_exit_fmt(IRCD_EXIT_RESTART, "received DIE command from %s",
+                client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
 }
 
 static struct Command command_table =

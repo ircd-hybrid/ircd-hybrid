@@ -39,6 +39,7 @@
 #include "channel.h"
 #include "channel_invite.h"
 #include "client.h"
+#include "client_format.h"
 #include "client_svstag.h"
 #include "conf_gecos.h"
 #include "hash.h"
@@ -366,49 +367,6 @@ client_update_name(struct Client *client, const char *new_name)
     comm_socket_note(client->connection->fd, "Name: %s", client->name);
 }
 
-/*
- * client_get_name -  Return the name of the client
- *    for various tracking and
- *      admin purposes. The main purpose of this function is to
- *      return the "socket host" name of the client, if that
- *        differs from the advertised name (other than case).
- *        But, this can be used to any client structure.
- */
-const char *
-client_get_name(const struct Client *client, enum addr_mask_type type)
-{
-  static char buf[HOSTLEN * 2 + USERLEN + 4];  /* +4 for [,@,],\0 */
-
-  if (!client_is_local(client))
-    return client->name;
-
-  if (client_is_server(client) || client_is_connecting(client) || client_is_handshake(client))
-    if (io_strcasecmp(client->name, client->host) == 0)
-      return client->name;
-
-  /* And finally, let's get the host information, ip or name */
-  switch (type)
-  {
-    case SHOW_IP:
-      snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client->name, client->username, client->sockhost);
-      break;
-    case MASK_IP:
-      if (address_is_ipv4(&client->addr))
-        snprintf(buf, sizeof(buf), "%s[%s@255.255.255.255]",
-                 client->name, client->username);
-      else
-        snprintf(buf, sizeof(buf), "%s[%s@ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]",
-                 client->name, client->username);
-      break;
-    default:  /* HIDE_IP */
-      snprintf(buf, sizeof(buf), "%s[%s@%s]",
-               client->name, client->username, client->host);
-  }
-
-  return buf;
-}
-
 const struct Client *
 client_get_visible_server(const struct Client *client)
 {
@@ -425,30 +383,6 @@ const char *
 client_get_visible_server_name(const struct Client *client)
 {
   return client_get_visible_server(client)->name;
-}
-
-/*
- * Input: A client to find the active operator {} name for.
- * Output: The nick!user@host{oper} of the oper.
- *         "oper" is server name for remote opers
- * Side effects: None.
- */
-const char *
-client_get_oper_name(const struct Client *client)
-{
-  if (client_is_server(client))
-    return client->name;
-
-  const char *oper_name;
-  if (client_is_local(client) && client->connection->oper_name)
-    oper_name = client->connection->oper_name;
-  else
-    oper_name = client->uplink->name;
-
-  static char buf[IRCD_BUFSIZE];
-  snprintf(buf, sizeof(buf), "%s[%s@%s]{%s}",
-           client->name, client->username, client->host, oper_name);
-  return buf;
 }
 
 void
@@ -1026,8 +960,11 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
       comm_setselect(fd, 0, NULL, NULL);
 
       if (!tls_verify_certificate(&fd->tls, &client->tls_certfp))
-        log_write(LOG_TYPE_IRCD, "Client %s gave bad TLS client certificate",
-                  client_get_name(client, MASK_IP));
+      {
+        client_format_name_buffer_t client_name_buffer;
+        log_write(LOG_TYPE_IRCD, "Client %s presented an invalid TLS certificate.",
+                  client_format_name(client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
+      }
 
       lookup_start(client);
       return;

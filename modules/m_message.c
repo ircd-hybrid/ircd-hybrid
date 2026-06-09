@@ -42,6 +42,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_oper.h"
 #include "ircd.h"
@@ -162,8 +163,10 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
   {
     if (!client_has_flag(target, FLAGS_FLOOD_NOTICED))
     {
+      client_format_name_buffer_t source_name_buffer;
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->uplink->name, target->name);
+                     client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer),
+                     source->uplink->name, target->name);
       client_set_flag(target, FLAGS_FLOOD_NOTICED);
     }
 
@@ -203,8 +206,10 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
   {
     if (channel->sent_message_flood_notice == false)
     {
+      client_format_name_buffer_t source_name_buffer;
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->uplink->name, channel->name);
+                     client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer),
+                     source->uplink->name, channel->name);
       channel->sent_message_flood_notice = true;
     }
 

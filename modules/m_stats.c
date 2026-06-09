@@ -42,6 +42,7 @@
 #include "channel.h"
 #include "channel_invite.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
@@ -926,6 +927,8 @@ static void
 stats_servlinks(struct Client *client, int parc, char *parv[])
 {
   size_t send_bytes = 0, recv_bytes = 0;
+  const client_format_name_t target_name_format =
+    client_is_admin(client) ? CLIENT_FORMAT_NAME_ADMIN : CLIENT_FORMAT_NAME_OPER;
 
   list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
@@ -934,9 +937,13 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
     send_bytes += target->connection->send.bytes;
     recv_bytes += target->connection->recv.bytes;
 
+    client_format_name_buffer_t target_name_buffer;
+    const char *const target_name =
+      client_format_name(target, target_name_format, &target_name_buffer);
+
     /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
-                       client_get_name(target, client_is_admin(client) ? SHOW_IP : MASK_IP),
+                       target_name,
                        dbuf_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,
@@ -985,6 +992,22 @@ parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, boo
   return name;
 }
 
+static client_format_name_t
+_stats_l_get_target_name_format(const struct Client *source, const struct Client *target,
+                                unsigned char letter)
+{
+
+  if ((client_is_server(target) ||
+       client_is_connecting(target) ||
+       client_is_handshake(target)) && !client_is_admin(source))
+    return CLIENT_FORMAT_NAME_OPER;
+
+  if (IsUpper(letter))
+    return CLIENT_FORMAT_NAME_ADMIN;
+
+  return CLIENT_FORMAT_NAME_PUBLIC;
+}
+
 static void
 stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
              list_t *list, unsigned char letter)
@@ -993,26 +1016,18 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
 
   LIST_FOREACH(node, list->head)
   {
-    const struct Client *target = node->data;
-    enum addr_mask_type type;
-
+    const struct Client *const target = node->data;
     if (!doall && wilds && match(name, target->name))
       continue;
 
     if (!(doall || wilds) && io_strcasecmp(name, target->name))
       continue;
 
-    if (IsUpper(letter))
-      type = SHOW_IP;
-    else
-      type = HIDE_IP;
-
-    if (client_is_server(target) || client_is_connecting(target) || client_is_handshake(target))
-      if (!client_is_admin(client))
-        type = MASK_IP;
-
+    client_format_name_buffer_t target_name_buffer;
+    const char *const target_name =
+      client_format_name(target, _stats_l_get_target_name_format(client, target, letter), &target_name_buffer);
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
-                       client_get_name(target, type),
+                       target_name,
                        dbuf_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,

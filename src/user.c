@@ -24,6 +24,7 @@
  */
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +43,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_format.h"
 #include "client_id.h"
 #include "client_input.h"
 #include "cloak.h"
@@ -221,6 +223,41 @@ user_welcome(struct Client *client)
   motd_signon(client);
 }
 
+static void
+_user_register_report_rejection(struct Client *client, const char *reason_format, ...)
+{
+  char reason[IRCD_BUFSIZE];
+
+  va_list args;
+  va_start(args, reason_format);
+  vsnprintf(reason, sizeof(reason), reason_format, args);
+  va_end(args);
+
+  client_format_name_buffer_t client_name_buffer;
+  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Client registration rejected: %s (%s)",
+                 client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer), reason);
+}
+
+static void
+_user_register_reject_authorization(struct Client *client, enum conf_authorize_result result,
+                                    const char *failure_reason)
+{
+  assert(result != CONF_AUTHORIZE_SUCCESS);
+
+  if (string_is_empty(failure_reason))
+    failure_reason = "unknown reason";
+
+  if (result == CONF_AUTHORIZE_PASSWORD_MISMATCH)
+    sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
+
+  _user_register_report_rejection(client, "authorization failed: %s",
+                                  failure_reason);
+
+  client_exit_fmt(client, "Connection rejected - %s", failure_reason);
+  ++ServerStats.is_ref;
+}
+
 /*! \brief This function is called when both NICK and USER messages
  *      have been accepted for the client, in whatever order. Only
  *      after this, is the UID message propagated.
@@ -252,15 +289,22 @@ user_register_local(struct Client *client)
       return;
   }
 
-  const struct MaskItem *const conf = conf_authorize_client(client);
+  enum conf_authorize_result authorize_result = CONF_AUTHORIZE_SUCCESS;
+  const char *authorize_failure_reason = NULL;
+  const struct MaskItem *const conf =
+    conf_authorize_client(client, &authorize_result, &authorize_failure_reason);
   if (conf == NULL)
+  {
+    _user_register_reject_authorization(client, authorize_result, authorize_failure_reason);
     return;
+  }
 
   if (!valid_username(client->username, true))
   {
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Invalid username: %s (%s@%s)",
-                   client->name, client->username, client->host);
-    client_exit_fmt(client, "Invalid username [%s]", client->username);
+    _user_register_report_rejection(client, "invalid username: \"%s\"",
+                                    client->username);
+
+    client_exit(client, "Invalid username");
     ++ServerStats.is_ref;
     return;
   }
@@ -276,11 +320,14 @@ user_register_local(struct Client *client)
   unsigned int max_clients = GlobalSetOptions.maxclients;
   if (IsConfExemptLimits(conf))
     max_clients += MAX_BUFFER;
-  if (list_length(&local_client_list) >= max_clients)
+
+  const unsigned int local_client_count = list_length(&local_client_list);
+  if (local_client_count >= max_clients)
   {
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Too many clients, rejecting %s[%s].",
-                   client->name, client->host);
-    client_exit(client, "Sorry, server is full - try later");
+    _user_register_report_rejection(client, "server is full: %u/%u local clients",
+                                    local_client_count, max_clients);
+
+    client_exit(client, "Server is full - try again later");
     ++ServerStats.is_ref;
     return;
   }
@@ -290,9 +337,11 @@ user_register_local(struct Client *client)
     const struct GecosItem *gecos = gecos_find(client->info, match);
     if (gecos)
     {
-      sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "X-line Rejecting [%s] [%s], user %s [%s]",
-                     client->info, gecos->reason, client_get_name(client, HIDE_IP), client->sockhost);
-      client_exit(client, "Bad user info");
+      _user_register_report_rejection(client,
+                                      "X-line match: realname=\"%s\", reason=\"%s\", ip=\"%s\"",
+                                      client->info, gecos->reason, client->sockhost);
+
+      client_exit(client, "Bad user informatio");
       ++ServerStats.is_ref;
       return;
     }

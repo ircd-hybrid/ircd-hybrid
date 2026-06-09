@@ -39,6 +39,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
@@ -66,66 +67,82 @@ xline_check(const struct GecosItem *gecos)
 }
 
 static void
+_xline_report_added(struct Client *source, const struct GecosItem *gecos, uintmax_t duration_minutes)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  if (duration_minutes)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary X-line added by %s for [%s] (%ju min) [%s]",
+                   source_name, gecos->mask, duration_minutes, gecos->reason);
+    log_write(LOG_TYPE_XLINE,
+              "Temporary X-line added by %s for [%s] (%ju min) [%s]",
+              source_name, gecos->mask, duration_minutes, gecos->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "X-line added by %s for [%s] [%s]",
+                 source_name, gecos->mask, gecos->reason);
+  log_write(LOG_TYPE_XLINE, "X-line added by %s for [%s] [%s]",
+            source_name, gecos->mask, gecos->reason);
+}
+
+static void
 xline_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  char buf[IRCD_BUFSIZE];
-
-  if (!client_is_service(source))
+  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask))
   {
-    if (!aline_valid_mask_simple(aline->mask))
-    {
-      if (client_is_user(source))
-        sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the xline",
-                          ConfigGeneral.min_nonwildcard_simple);
-      return;
-    }
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":Please include at least %u non-wildcard characters with the X-line",
+                        ConfigGeneral.min_nonwildcard_simple);
+    return;
   }
 
   struct GecosItem *gecos = gecos_find(aline->mask, match);
   if (gecos)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":[%s] already X-Lined by [%s] - %s",
+      sendto_one_notice(source, &me, ":[%s] already X-lined by [%s] - %s",
                         aline->mask, gecos->mask, gecos->reason);
     return;
   }
 
+  char reason[IRCD_BUFSIZE];
   if (aline->duration)
-    snprintf(buf, sizeof(buf), "Temporary X-line %ju min. - %.*s (%s)",
+    snprintf(reason, sizeof(reason), "Temporary X-line %ju min. - %.*s (%s)",
              aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
+    snprintf(reason, sizeof(reason), "%.*s (%s)",
+             REASONLEN, aline->reason, date_iso8601(0));
 
   gecos = gecos_make();
   gecos->mask = io_strdup(aline->mask);
-  gecos->reason = io_strdup(buf);
+  gecos->reason = io_strdup(reason);
   gecos->created_at = io_time_get(IO_TIME_REALTIME_SEC);
   gecos->in_database = true;
 
   if (aline->duration)
   {
     gecos->expires_at = gecos->created_at + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. X-Line [%s]",
-                        aline->duration / 60, gecos->mask);
+      sendto_one_notice(source, &me, ":Added temporary X-line [%s] (%ju min)",
+                        gecos->mask, duration_minutes);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. X-Line for [%s] [%s]",
-                   client_get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
-    log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-              client_get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
+    _xline_report_added(source, gecos, duration_minutes);
   }
   else
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added X-Line [%s] [%s]",
-                        gecos->mask, gecos->reason);
+      sendto_one_notice(source, &me, ":Added X-line [%s]",
+                        gecos->mask);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added X-Line for [%s] [%s]",
-                   client_get_oper_name(source), gecos->mask, gecos->reason);
-    log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-              client_get_oper_name(source), gecos->mask, gecos->reason);
+    _xline_report_added(source, gecos, 0);
   }
 
   xline_check(gecos);

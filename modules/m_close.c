@@ -30,6 +30,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -63,8 +64,9 @@ mo_close(struct Client *source, int parc, char *parv[])
     /* An oper (source) can never be in the unknown_list. */
     assert(source != target);
 
+    client_format_name_buffer_t target_name_buffer;
     sendto_one_numeric(source, &me, RPL_CLOSING,
-                       client_get_name(target, SHOW_IP), target->state);
+                       client_format_name(target, CLIENT_FORMAT_NAME_ADMIN, &target_name_buffer), target->state);
     client_exit(target, "Oper Closing");
   }
 

@@ -36,6 +36,7 @@
 
 #include "client.h"
 #include "client_find.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_connect.h"
 #include "hash.h"
@@ -260,8 +261,11 @@ _server_handshake_tls_finish(struct Client *client)
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
   if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
+  {
+    client_format_name_buffer_t client_name_buffer;
     log_write(LOG_TYPE_IRCD, "Link %s presented an invalid TLS certificate.",
-              client_get_name(client, MASK_IP));
+              client_format_name(client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
+  }
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)

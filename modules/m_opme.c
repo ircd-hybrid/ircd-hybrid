@@ -33,6 +33,7 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf_oper.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -88,12 +89,15 @@ mo_opme(struct Client *source, int parc, char *parv[])
     }
   }
 
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
   log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
-            client_get_oper_name(source), channel->name);
+            source_name, channel->name);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
-                 me.name, client_get_oper_name(source), channel->name);
+                 me.name, source_name, channel->name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
-                 me.id, client_get_oper_name(source), channel->name);
+                 me.id, source_name, channel->name);
 
   member_set_flags(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",

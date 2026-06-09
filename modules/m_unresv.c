@@ -32,6 +32,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
@@ -43,31 +44,44 @@
 #include "server_capab.h"
 
 static void
-resv_remove(struct Client *source, const struct aline_ctx *aline)
+_unresv_report_removed(struct Client *source, const struct ResvItem *resv)
 {
-  struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "RESV removed by %s for [%s]",
+                 source_name, resv->mask);
+  log_write(LOG_TYPE_RESV, "RESV removed by %s for [%s]",
+            source_name, resv->mask);
+}
+
+static void
+_unresv_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct ResvItem *const resv = resv_find(aline->mask, io_strcasecmp);
   if (resv == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":No RESV for %s", aline->mask);
+      sendto_one_notice(source, &me, ":No RESV for [%s] found",
+                        aline->mask);
     return;
   }
 
   if (resv->in_database == false)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
+      sendto_one_notice(source, &me,
+                        ":RESV for [%s] is in the configuration file and must be removed by hand",
                         resv->mask);
     return;
   }
 
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":RESV for [%s] is removed", resv->mask);
+    sendto_one_notice(source, &me, ":Removed RESV [%s]",
+                      resv->mask);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the RESV for: [%s]",
-                 client_get_oper_name(source), resv->mask);
-  log_write(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-            client_get_oper_name(source), resv->mask);
+  _unresv_report_removed(source, resv);
 
   resv_delete(resv, false);
 }
@@ -111,7 +125,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, "%s",
                        aline.mask);
 
-  resv_remove(source, &aline);
+  _unresv_remove(source, &aline);
 }
 
 /*! \brief UNRESV command handler
@@ -145,7 +159,7 @@ ms_unresv(struct Client *source, int parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_UNRESV, source->uplink->name, source->username, source->host))
-    resv_remove(source, &aline);
+    _unresv_remove(source, &aline);
 }
 
 static struct Command command_table =

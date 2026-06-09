@@ -33,6 +33,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "defaults.h"
 #include "ircd.h"
@@ -80,12 +81,15 @@ set_option(struct Client *source, struct SetStruct *option, int value_new)
 
     *option->ptr = value_new;
 
+    client_format_oper_name_buffer_t source_name_buffer;
+    const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
     if (option->wants_bool)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %s",
-                     client_get_oper_name(source), option->name, status[*option->ptr != 0]);
+                     source_name, option->name, status[*option->ptr != 0]);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %i",
-                     client_get_oper_name(source), option->name, *option->ptr);
+                     source_name, option->name, *option->ptr);
   }
   else
   {

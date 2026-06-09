@@ -32,6 +32,7 @@
 #include "channel.h"
 #include "client.h"
 #include "client_find.h"
+#include "client_format.h"
 #include "client_id.h"
 #include "client_input.h"
 #include "conf.h"
@@ -78,10 +79,10 @@ _parse_uid_is_routed_via_link(const struct Client *link, const char *uid)
 }
 
 static void
-_parse_handle_unknown_prefix(struct Client *client, const char *prefix)
+_parse_handle_unknown_prefix(struct Client *link, const char *prefix)
 {
-  assert(client);
-  assert(client_is_server(client));
+  assert(link);
+  assert(client_is_server(link));
   assert(!string_is_empty(prefix));
 
   /*
@@ -91,29 +92,30 @@ _parse_handle_unknown_prefix(struct Client *client, const char *prefix)
    *   - digit-starting but otherwise invalid: invalid numeric prefix
    *   - everything else: nickname
    */
-  const char *const client_name = client_get_name(client, SHOW_IP);
+  client_format_name_buffer_t link_name_buffer;
+  const char *const link_name = client_format_name(link, CLIENT_FORMAT_NAME_LOG, &link_name_buffer);
 
   if (client_id_is_valid_sid(prefix) || strchr(prefix, '.'))
   {
-    sendto_one(client, ":%s SQUIT %s :Unknown server prefix",
+    sendto_one(link, ":%s SQUIT %s :Unknown server prefix",
                me.id, prefix);
     log_write(LOG_TYPE_DEBUG, "Received message with unknown server prefix '%s' from %s",
-              prefix, client_name);
+              prefix, link_name);
     return;
   }
 
   if (client_id_is_valid_uid(prefix))
   {
-    if (_parse_uid_is_routed_via_link(client, prefix))
+    if (_parse_uid_is_routed_via_link(link, prefix))
     {
-      sendto_one(client, ":%s KILL %s :%s (Unknown client ID)",
+      sendto_one(link, ":%s KILL %s :%s (Unknown client ID)",
                  me.id, prefix, me.name);
       log_write(LOG_TYPE_DEBUG, "Received message with unknown client ID '%s' from %s",
-                prefix, client_name);
+                prefix, link_name);
     }
     else
       log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
-                prefix, client_name);
+                prefix, link_name);
 
     return;
   }
@@ -121,14 +123,14 @@ _parse_handle_unknown_prefix(struct Client *client, const char *prefix)
   if (IsDigit(prefix[0]))
   {
     log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
-              prefix, client_name);
+              prefix, link_name);
     return;
   }
 
-  sendto_one(client, ":%s KILL %s :%s (Unknown nickname)",
+  sendto_one(link, ":%s KILL %s :%s (Unknown nickname)",
              me.id, prefix, me.name);
   log_write(LOG_TYPE_DEBUG, "Received message with unknown nickname '%s' from %s",
-            prefix, client_name);
+            prefix, link_name);
 }
 
 /*
@@ -244,9 +246,11 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
   {
     if (client_is_server(source->nexthop))
     {
+      client_format_name_buffer_t link_name_buffer;
       log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
                 command->name, handler->args_min, parc,
-                client_get_name(source->nexthop, SHOW_IP));
+                client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &link_name_buffer));
+
       client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %u, got %u)",
                       command->name, handler->args_min, parc);
     }
@@ -321,8 +325,11 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
     if (from->nexthop != ctx->client)
     {
       ++ServerStats.is_wrdi;
+
+      client_format_name_buffer_t client_name_buffer;
       log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-                from->name, from->nexthop->name, client_get_name(ctx->client, SHOW_IP));
+                from->name, from->nexthop->name,
+                client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
       return false;
     }
 
@@ -359,8 +366,11 @@ _parse_handle_unknown_command_token(parse_context_t *ctx)
   if (client_is_user(ctx->source))
     sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_token);
   else if (client_is_server(ctx->source))
+  {
+    client_format_name_buffer_t client_name_buffer;
     log_write(LOG_TYPE_DEBUG, "Unknown command from server: %s via %s",
-              ctx->command_token, client_get_name(ctx->client, SHOW_IP));
+              ctx->command_token, client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
+  }
 
   ++ServerStats.is_unco;
 }
@@ -378,8 +388,9 @@ _parse_identify_numeric(parse_context_t *ctx)
 
   if (ctx->numeric < 1 || ctx->numeric > 999)
   {
+    client_format_name_buffer_t client_name_buffer;
     log_write(LOG_TYPE_DEBUG, "Unknown numeric from server: %u via %s",
-              ctx->numeric, client_get_name(ctx->client, SHOW_IP));
+              ctx->numeric, client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
     return false;
   }
 

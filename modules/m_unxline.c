@@ -32,6 +32,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
@@ -43,31 +44,44 @@
 #include "server_capab.h"
 
 static void
-xline_remove(struct Client *source, const struct aline_ctx *aline)
+_unxline_report_removed(struct Client *source, const struct GecosItem *gecos)
 {
-  struct GecosItem *gecos = gecos_find(aline->mask, io_strcasecmp);
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "X-line removed by %s for [%s]",
+                 source_name, gecos->mask);
+  log_write(LOG_TYPE_XLINE, "X-line removed by %s for [%s]",
+            source_name, gecos->mask);
+}
+
+static void
+_unxline_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct GecosItem *const gecos = gecos_find(aline->mask, io_strcasecmp);
   if (gecos == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":No X-Line for %s", aline->mask);
+      sendto_one_notice(source, &me, ":No X-line for [%s] found",
+                        aline->mask);
     return;
   }
 
   if (gecos->in_database == false)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":The X-Line for %s is in the configuration file and must be removed by hand",
+      sendto_one_notice(source, &me,
+                        ":X-line for [%s] is in the configuration file and must be removed by hand",
                         gecos->mask);
     return;
   }
 
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":X-Line for [%s] is removed", gecos->mask);
+    sendto_one_notice(source, &me, ":Removed X-line [%s]",
+                      gecos->mask);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the X-Line for: [%s]",
-                 client_get_oper_name(source), gecos->mask);
-  log_write(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-            client_get_oper_name(source), gecos->mask);
+  _unxline_report_removed(source, gecos);
 
   gecos_delete(gecos, false);
 }
@@ -111,7 +125,7 @@ mo_unxline(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
                        aline.mask);
 
-  xline_remove(source, &aline);
+  _unxline_remove(source, &aline);
 }
 
 /*! \brief UNXLINE command handler
@@ -145,7 +159,7 @@ ms_unxline(struct Client *source, int parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_UNXLINE, source->uplink->name, source->username, source->host))
-    xline_remove(source, &aline);
+    _unxline_remove(source, &aline);
 }
 
 static struct Command command_table =

@@ -44,6 +44,7 @@
 #include "channel.h"
 #include "client.h"
 #include "client_find.h"
+#include "client_format.h"
 #include "client_id.h"
 #include "client_svstag.h"
 #include "conf.h"
@@ -90,65 +91,112 @@ static const char *const server_rejection_reason_strings[] =
 
 typedef struct server_rejection_context
 {
-  struct Client *exit_client;
-  const char *event_source_ip;
-  const char *event_source_name;
-  const char *reason_str;
-  const char *log_prefix;
+  struct Client *const exit_client;
+  const char *const admin_event_source;
+  const char *const oper_event_source;
+  const char *const log_event_source;
+  const char *const event_text;
+  const char *const reason_text;
 } server_rejection_context_t;
 
 static void
-_server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list ap)
+_server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list args)
 {
-  char detail_buf[IRCD_BUFSIZE];
-  char oper_msg[IRCD_BUFSIZE];
-  char exit_msg[IRCD_BUFSIZE];
+  char detail[IRCD_BUFSIZE];
+  char admin_message[IRCD_BUFSIZE];
+  char oper_message[IRCD_BUFSIZE];
+  char log_message[IRCD_BUFSIZE];
+  char exit_message[IRCD_BUFSIZE];
 
-  vsnprintf(detail_buf, sizeof(detail_buf), detail_fmt, ap);
+  vsnprintf(detail, sizeof(detail), detail_fmt, args);
 
-  snprintf(oper_msg, sizeof(oper_msg), "%s from %s: %s (%s)",
-           ctx->log_prefix, ctx->event_source_name, ctx->reason_str, detail_buf);
+  snprintf(admin_message, sizeof(admin_message), "%s from %s: %s (%s)",
+           ctx->event_text, ctx->admin_event_source, ctx->reason_text, detail);
+  snprintf(oper_message, sizeof(oper_message), "%s from %s: %s (%s)",
+           ctx->event_text, ctx->oper_event_source, ctx->reason_text, detail);
+  snprintf(log_message, sizeof(log_message), "%s from %s: %s (%s)",
+           ctx->event_text, ctx->log_event_source, ctx->reason_text, detail);
+  snprintf(exit_message, sizeof(exit_message), "%s: %s (%s)",
+           ctx->event_text, ctx->reason_text, detail);
 
-  snprintf(exit_msg, sizeof(exit_msg), "%s: %s (%s)",
-           ctx->log_prefix, ctx->reason_str, detail_buf);
+  log_write(LOG_TYPE_IRCD, "%s", log_message);
 
-  log_write(LOG_TYPE_IRCD, "%s", oper_msg);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                 "%s", admin_message);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
+                 "%s", oper_message);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", oper_msg);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "%s from %s: %s (%s)",
-                 ctx->log_prefix, ctx->event_source_ip, ctx->reason_str, detail_buf);
-
-  client_exit(ctx->exit_client, exit_msg);
+  client_exit(ctx->exit_client, exit_message);
 }
 
 static void
 _server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {
-  server_rejection_context_t ctx =
+  client_format_name_buffer_t admin_event_source_buffer;
+  client_format_name_buffer_t oper_event_source_buffer;
+  client_format_name_buffer_t log_event_source_buffer;
+
+  const char *const admin_event_source =
+    client_format_name(source, CLIENT_FORMAT_NAME_ADMIN, &admin_event_source_buffer);
+  const char *const oper_event_source =
+    client_format_name(source, CLIENT_FORMAT_NAME_OPER, &oper_event_source_buffer);
+  const char *const log_event_source =
+    client_format_name(source, CLIENT_FORMAT_NAME_LOG, &log_event_source_buffer);
+
+  const server_rejection_context_t ctx =
   {
     .exit_client = source,
-    .event_source_ip = client_get_name(source, MASK_IP),
-    .event_source_name = client_get_name(source, SHOW_IP),
-    .reason_str = server_rejection_reason_strings[reason],
-    .log_prefix = "Rejecting server link"
+    .admin_event_source = admin_event_source,
+    .oper_event_source = oper_event_source,
+    .log_event_source = log_event_source,
+    .event_text = "Server link rejected",
+    .reason_text = server_rejection_reason_strings[reason]
   };
 
-  va_list ap;
-  va_start(ap, detail_fmt);
-  _server_reject_internal(&ctx, detail_fmt, ap);
-  va_end(ap);
+  va_list args;
+  va_start(args, detail_fmt);
+  _server_reject_internal(&ctx, detail_fmt, args);
+  va_end(args);
+}
+
+static void
+_server_reject_format_introduction_event_source(const struct Client *introducer,
+                                                enum client_format_name link_name_format,
+                                                char *event_source, size_t event_source_size)
+{
+  client_format_name_buffer_t link_name_buffer;
+  const char *const link_name =
+    client_format_name(introducer->nexthop, link_name_format, &link_name_buffer);
+
+  if (introducer == introducer->nexthop)
+    strlcpy(event_source, link_name, event_source_size);
+  else
+    snprintf(event_source, event_source_size, "%s via %s",
+             introducer->name, link_name);
 }
 
 static void
 _server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {
-  server_rejection_context_t ctx =
+  char admin_event_source[IRCD_BUFSIZE];
+  char oper_event_source[IRCD_BUFSIZE];
+  char log_event_source[IRCD_BUFSIZE];
+
+  _server_reject_format_introduction_event_source(introducer, CLIENT_FORMAT_NAME_ADMIN,
+                                                  admin_event_source, sizeof(admin_event_source));
+  _server_reject_format_introduction_event_source(introducer, CLIENT_FORMAT_NAME_OPER,
+                                                  oper_event_source, sizeof(oper_event_source));
+  _server_reject_format_introduction_event_source(introducer, CLIENT_FORMAT_NAME_LOG,
+                                                  log_event_source, sizeof(log_event_source));
+
+  const server_rejection_context_t ctx =
   {
     .exit_client = introducer->nexthop,
-    .event_source_ip = introducer->nexthop->name,
-    .event_source_name = introducer->name,
-    .reason_str = server_rejection_reason_strings[reason],
-    .log_prefix = "Rejecting introduction"
+    .admin_event_source = admin_event_source,
+    .oper_event_source = oper_event_source,
+    .log_event_source = log_event_source,
+    .event_text = "Server introduction rejected",
+    .reason_text = server_rejection_reason_strings[reason]
   };
 
   va_list ap;
@@ -297,32 +345,37 @@ _server_establish_report_link(struct Client *client)
   assert(client && client_is_local(client));
   assert(client_is_server(client));
 
+  client_format_name_buffer_t admin_client_name_buffer;
+  client_format_name_buffer_t oper_client_name_buffer;
+  const char *const admin_client_name =
+    client_format_name(client, CLIENT_FORMAT_NAME_ADMIN, &admin_client_name_buffer);
+  const char *const oper_client_name =
+    client_format_name(client, CLIENT_FORMAT_NAME_OPER, &oper_client_name_buffer);
+  const char *const capabilities = capab_get(client, true);
+
   if (tls_isusing(&client->connection->fd->tls))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                   client_get_name(client, SHOW_IP), client->tls_cipher,
-                   capab_get(client, true));
+                   admin_client_name, client->tls_cipher, capabilities);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
-                   client_get_name(client, MASK_IP), client->tls_cipher,
-                   capab_get(client, true));
+                   oper_client_name, client->tls_cipher, capabilities);
 
     log_write(LOG_TYPE_IRCD, "Link with %s established: [TLS: %s] (Capabilities: %s)",
-              client_get_name(client, SHOW_IP), client->tls_cipher,
-              capab_get(client, true));
+              admin_client_name, client->tls_cipher, capabilities);
   }
   else
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
-                   client_get_name(client, SHOW_IP), capab_get(client, true));
+                   admin_client_name, capabilities);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
-                   client_get_name(client, MASK_IP), capab_get(client, true));
+                   oper_client_name, capabilities);
 
     log_write(LOG_TYPE_IRCD, "Link with %s established: (Capabilities: %s)",
-              client_get_name(client, SHOW_IP), capab_get(client, true));
+              admin_client_name, capabilities);
   }
 }
 

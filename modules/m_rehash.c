@@ -32,6 +32,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_shared.h"
 #include "motd.h"
@@ -40,6 +41,18 @@
 #include "res.h"
 #include "send.h"
 
+static void
+_rehash_report(struct Client *source, const char *option, const char *action)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_one_numeric(source, &me, RPL_REHASHING, option);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "%s is %s", source_name, action);
+  log_write(LOG_TYPE_IRCD, "REHASH %s from %s", option, source_name);
+}
+
 /*! \brief REHASH CONF handler
  *         Attempts to reload server's configuration file(s)
  * \param source Pointer to client issuing the command
@@ -47,12 +60,7 @@
 static void
 rehash_conf(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "CONF");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is rehashing configuration file(s)",
-                 client_get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
-            client_get_oper_name(source));
+  _rehash_report(source, "CONF", "rehashing configuration file(s)");
   conf_rehash(false);
 }
 
@@ -63,12 +71,7 @@ rehash_conf(struct Client *source)
 static void
 rehash_motd(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "MOTD");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is forcing re-reading of MOTD files",
-                 client_get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
-            client_get_oper_name(source));
+  _rehash_report(source, "MOTD", "forcing re-reading of MOTD files");
   motd_recache();
 }
 
@@ -79,12 +82,7 @@ rehash_motd(struct Client *source)
 static void
 rehash_dns(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "DNS");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is rehashing DNS",
-                 client_get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
-            client_get_oper_name(source));
+  _rehash_report(source, "DNS", "rehashing DNS");
   restart_resolver();
 }
 

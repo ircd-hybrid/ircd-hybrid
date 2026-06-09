@@ -41,6 +41,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_oper.h"
@@ -81,6 +82,30 @@ kline_check(const struct AddressRec *arec)
         assert(0);
     }
   }
+}
+
+static void
+_kline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_t duration_minutes)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  if (duration_minutes)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary K-line added by %s for [%s@%s] (%ju min) [%s]",
+                   source_name, conf->user, conf->host, duration_minutes, conf->reason);
+    log_write(LOG_TYPE_KLINE,
+              "Temporary K-line added by %s for [%s@%s] (%ju min) [%s]",
+              source_name, conf->user, conf->host, duration_minutes, conf->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "K-line added by %s for [%s@%s] [%s]",
+                 source_name, conf->user, conf->host, conf->reason);
+  log_write(LOG_TYPE_KLINE, "K-line added by %s for [%s@%s] [%s]",
+            source_name, conf->user, conf->host, conf->reason);
 }
 
 static void
@@ -146,16 +171,13 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   if (aline->duration)
   {
     conf->until = conf->setat + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",
-                        aline->duration / 60, conf->user, conf->host);
+                        duration_minutes, conf->user, conf->host);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-                   client_get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
-    log_write(LOG_TYPE_KLINE, "%s added temporary %ju min. K-Line for [%s@%s] [%s]",
-              client_get_oper_name(source), aline->duration / 60, conf->user, conf->host, conf->reason);
+    _kline_report_added(source, conf, duration_minutes);
   }
   else
   {
@@ -163,10 +185,7 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
       sendto_one_notice(source, &me, ":Added K-Line [%s@%s]",
                         conf->user, conf->host);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added K-Line for [%s@%s] [%s]",
-                   client_get_oper_name(source), conf->user, conf->host, conf->reason);
-    log_write(LOG_TYPE_KLINE, "%s added K-Line for [%s@%s] [%s]",
-              client_get_oper_name(source), conf->user, conf->host, conf->reason);
+    _kline_report_added(source, conf, 0);
   }
 
   kline_check(add_conf_by_address(CONF_KLINE, conf));

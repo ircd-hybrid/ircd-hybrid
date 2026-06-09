@@ -37,6 +37,7 @@
 #include "cap.h"
 #include "channel.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_class.h"
 #include "send.h"
@@ -109,9 +110,15 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
       client_set_flag(to, FLAGS_SENDQEX);
 
       if (client_is_server(to))
+      {
+        client_format_name_buffer_t server_name_buffer;
+        const char *const server_name =
+          client_format_name(to, CLIENT_FORMAT_NAME_PUBLIC, &server_name_buffer);
+
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Max SendQ limit exceeded for %s: %zu > %u",
-                       client_get_name(to, HIDE_IP), new_sendq_size, max_sendq);
+                       server_name, new_sendq_size, max_sendq);
+      }
 
       client_schedule_exit_fmt(to, "Max SendQ exceeded (%zu > %u)",
                                new_sendq_size, max_sendq);

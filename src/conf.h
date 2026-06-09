@@ -34,6 +34,19 @@
 
 struct Client;
 
+enum conf_authorize_result
+{
+  CONF_AUTHORIZE_SUCCESS,
+  CONF_AUTHORIZE_NO_AUTH_BLOCK,
+  CONF_AUTHORIZE_KLINE_MATCH,
+  CONF_AUTHORIZE_IDENT_REQUIRED,
+  CONF_AUTHORIZE_PASSWORD_MISMATCH,
+  CONF_AUTHORIZE_CLASS_TOTAL_LIMIT,
+  CONF_AUTHORIZE_CLASS_LOCAL_IP_LIMIT,
+  CONF_AUTHORIZE_CLASS_GLOBAL_IP_LIMIT,
+  CONF_AUTHORIZE_CLASS_CIDR_LIMIT,
+};
+
 enum conf_ban_type
 {
   CONF_BAN_TYPE_KLINE,
@@ -300,7 +313,7 @@ extern void yyerror(const char *);
 extern bool conf_match_password(const char *, const struct MaskItem *);
 extern int conf_connect_allowed(const struct io_addr *);
 extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
-extern struct MaskItem *conf_authorize_client(struct Client *);
+extern struct MaskItem *conf_authorize_client(struct Client *, enum conf_authorize_result *, const char **);
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
 extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);

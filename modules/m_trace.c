@@ -35,6 +35,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "conf_class.h"
 #include "ircd.h"
 #include "ircd_hook.h"
@@ -58,33 +59,36 @@ static void
 _trace_send_target_status(struct Client *source, const struct Client *target)
 {
   const char *class_name = client_get_class_name(target);
-  const char *name = client_get_name(target, HIDE_IP);
+
+  client_format_name_buffer_t target_name_buffer;
+  const char *const target_name =
+    client_format_name(target, CLIENT_FORMAT_NAME_PUBLIC, &target_name_buffer);
 
   switch (target->state)
   {
     case CLIENT_STATE_CONNECTING:
       sendto_one_numeric(source, &me, RPL_TRACECONNECTING,
-                         class_name, client_is_admin(source) ? name : target->name);
+                         class_name, client_is_admin(source) ? target_name : target->name);
       break;
     case CLIENT_STATE_HANDSHAKE:
       sendto_one_numeric(source, &me, RPL_TRACEHANDSHAKE,
-                         class_name, client_is_admin(source) ? name : target->name);
+                         class_name, client_is_admin(source) ? target_name : target->name);
       break;
     case CLIENT_STATE_ME:
       /* `&me` is not reported as a regular TRACE target here. */
       break;
     case CLIENT_STATE_UNKNOWN:
       sendto_one_numeric(source, &me, RPL_TRACEUNKNOWN,
-                         class_name, name, target->sockhost, client_get_session_duration(target));
+                         class_name, target_name, target->sockhost, client_get_session_duration(target));
       break;
     case CLIENT_STATE_USER:
       if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
-                           class_name, name, target->sockhost, client_get_socket_idle_duration(target),
+                           class_name, target_name, target->sockhost, client_get_socket_idle_duration(target),
                            client_get_idle_time(source, target));
       else
         sendto_one_numeric(source, &me, RPL_TRACEUSER,
-                           class_name, name, target->sockhost, client_get_socket_idle_duration(target),
+                           class_name, target_name, target->sockhost, client_get_socket_idle_duration(target),
                            client_get_idle_time(source, target));
       break;
     case CLIENT_STATE_SERVER:
@@ -93,11 +97,13 @@ _trace_send_target_status(struct Client *source, const struct Client *target)
       uint32_t user_count = 0;
       _trace_count_server_dependents(&server_count, &user_count, target);
 
-      if (!client_is_admin(source))
-        name = client_get_name(target, MASK_IP);
+      client_format_name_buffer_t masked_target_name_buffer;
+      const char *const visible_target_name =
+        client_is_admin(source) ?
+          target_name : client_format_name(target, CLIENT_FORMAT_NAME_OPER, &masked_target_name_buffer);
 
       sendto_one_numeric(source, &me, RPL_TRACESERVER,
-                         class_name, server_count, user_count, name,
+                         class_name, server_count, user_count, visible_target_name,
                          target->server->initiator_name ? target->server->initiator_name : "*", "*",
                          me.name, client_get_socket_idle_duration(target));
       break;
@@ -105,7 +111,7 @@ _trace_send_target_status(struct Client *source, const struct Client *target)
 
     default:
       assert(!"unexpected client state in TRACE");
-      sendto_one_numeric(source, &me, RPL_TRACENEWTYPE, name);
+      sendto_one_numeric(source, &me, RPL_TRACENEWTYPE, target_name);
       break;
   }
 }

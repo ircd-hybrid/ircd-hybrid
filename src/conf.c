@@ -45,6 +45,7 @@
 #include "res.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "cloak.h"
 #include "conf.h"
 #include "conf_class.h"
@@ -452,44 +453,60 @@ conf_free(struct MaskItem *conf)
   io_free(conf);
 }
 
+static void
+_conf_authorize_set_failure(enum conf_authorize_result *result_out, const char **failure_reason_out,
+                            enum conf_authorize_result result, const char *failure_reason)
+{
+  assert(result_out);
+  assert(failure_reason_out);
+  assert(result != CONF_AUTHORIZE_SUCCESS);
+  assert(!string_is_empty(failure_reason));
+
+  *result_out = result;
+  *failure_reason_out = failure_reason;
+}
+
 static struct MaskItem *
-conf_auth_verify_credentials(struct Client *client, const char **error_reason)
+conf_auth_verify_credentials(struct Client *client, enum conf_authorize_result *result_out,
+                             const char **failure_reason_out)
 {
   char username[USERLEN + 1] = "~";
-  *error_reason = "Invalid credentials or no matching auth {} block";
 
   if (client_has_flag(client, FLAGS_GOTID))
     strlcpy(username, client->username, sizeof(username));
   else
     strlcpy(username + 1, client->username, sizeof(username) - 1);
 
-  struct MaskItem *conf = find_address_conf(client->host, username, &client->addr,
-                                            client->connection->password);
+  struct MaskItem *const conf = find_address_conf(client->host, username, &client->addr,
+                                                  client->connection->password);
   if (conf == NULL)
+  {
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_NO_AUTH_BLOCK,
+                                "no matching auth block");
     return NULL;
+  }
 
   assert(IsConfClient(conf) || IsConfKill(conf));
 
   if (IsConfKill(conf))
   {
-    *error_reason = conf->reason;
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_KLINE_MATCH,
+                                string_default(conf->reason, "K-lined"));
     return NULL;
   }
 
   if (IsNeedIdentd(conf) && !client_has_flag(client, FLAGS_GOTID))
   {
-    *error_reason = "Identd is required and was not found";
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_IDENT_REQUIRED,
+                                "ident required");
     return NULL;
   }
 
-  if (!string_is_empty(conf->passwd))
+  if (!string_is_empty(conf->passwd) && !conf_match_password(client->connection->password, conf))
   {
-    if (!conf_match_password(client->connection->password, conf))
-    {
-      sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
-      *error_reason = "Bad Password";
-      return NULL;
-    }
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_PASSWORD_MISMATCH,
+                                "password mismatch");
+    return NULL;
   }
 
   if (!client_has_flag(client, FLAGS_GOTID) && !IsNoTilde(conf))
@@ -503,16 +520,14 @@ conf_auth_verify_credentials(struct Client *client, const char **error_reason)
     client_set_flag(client, FLAGS_SPOOF);
   }
 
-  *error_reason = NULL;
   return conf;
 }
 
 static bool
-conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_limits, const char **error_reason)
+conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_limits,
+                    enum conf_authorize_result *result_out, const char **failure_reason_out)
 {
-  *error_reason = NULL;
-
-  struct ip_entry *ipcache = ipcache_record_find_or_add(&client->addr);
+  struct ip_entry *const ipcache = ipcache_record_find_or_add(&client->addr);
   ++ipcache->count_local;
   client_set_flag(client, FLAGS_IPHASH);
 
@@ -521,25 +536,29 @@ conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_
 
   if (klass->max_total && klass->ref_count >= klass->max_total)
   {
-    *error_reason = "Connection class is full (total limit reached)";
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_TOTAL_LIMIT,
+                                "connection class full: total limit reached");
     return false;
   }
 
   if (klass->max_perip_local && ipcache->count_local > klass->max_perip_local)
   {
-    *error_reason = "Connection class is full (local per-IP limit reached)";
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_LOCAL_IP_LIMIT,
+                                "connection class full: local per-IP limit reached");
     return false;
   }
 
   if (klass->max_perip_global && (ipcache->count_local + ipcache->count_remote) > klass->max_perip_global)
   {
-    *error_reason = "Connection class is full (global per-IP limit reached)";
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_GLOBAL_IP_LIMIT,
+                                "connection class full: global per-IP limit reached");
     return false;
   }
 
-  if (class_ip_limit_add(klass, &client->addr, exempt_limits))
+  if (class_ip_limit_add(klass, &client->addr, false))
   {
-    *error_reason = "Connection class is full (CIDR subnet limit reached)";
+    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_CIDR_LIMIT,
+                                "connection class full: CIDR subnet limit reached");
     return false;
   }
 
@@ -547,34 +566,25 @@ conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_
 }
 
 struct MaskItem *
-conf_authorize_client(struct Client *client)
+conf_authorize_client(struct Client *client, enum conf_authorize_result *result_out,
+                      const char **failure_reason_out)
 {
-  const char *reason = NULL;
+  *result_out = CONF_AUTHORIZE_SUCCESS;
+  *failure_reason_out = NULL;
 
-  struct MaskItem *conf = conf_auth_verify_credentials(client, &reason);
+  struct MaskItem *const conf =
+    conf_auth_verify_credentials(client, result_out, failure_reason_out);
   if (conf == NULL)
-    goto fail;
+    return NULL;
 
-  if (!conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), &reason))
-    goto fail;
+  if (!conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), result_out, failure_reason_out))
+    return NULL;
 
   client_set_class(client, conf->klass, CLIENT_CLASS_BASE);
 
   io_free(client->connection->password);
   client->connection->password = NULL;
   return conf;
-
-fail:
-  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "Rejecting client connection from %s: %s",
-                 client_get_name(client, SHOW_IP), reason);
-
-  log_write(LOG_TYPE_IRCD, "Rejecting client connection from %s: %s",
-            client_get_name(client, SHOW_IP), reason);
-
-  client_exit_fmt(client, "Connection rejected - %s", reason);
-  ++ServerStats.is_ref;
-  return NULL;
 }
 
 /* conf_set_defaults()
@@ -995,103 +1005,160 @@ conf_match_password(const char *password, const struct MaskItem *conf)
   return encr && strcmp(encr, conf->passwd) == 0;
 }
 
-void
-conf_ban_check_clients(void)
+static const char *
+_conf_ban_type_get_name(enum conf_ban_type type)
 {
-  list_node_t *node, *node_next;
-  const void *ptr;
-
-  LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
+  switch (type)
   {
-    struct Client *const client = node->data;
-    /* If a client is already being exited */
-    if (client_is_dead(client))
-      continue;
-
-    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
-    {
-      const struct MaskItem *const conf = ptr;
-      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
-      continue;  /* and go examine next Client */
-    }
-
-    if ((ptr = find_conf_by_address(client->host, &client->addr, CONF_KLINE,
-                                    client->username, NULL, 1)))
-    {
-      const struct MaskItem *const conf = ptr;
-      conf_ban_apply(client, CONF_BAN_TYPE_KLINE, conf->reason);
-      continue;  /* and go examine next Client */
-    }
-
-    if ((ptr = gecos_find(client->info, match)))
-    {
-      const struct GecosItem *const conf = ptr;
-      conf_ban_apply(client, CONF_BAN_TYPE_XLINE, conf->reason);
-      continue;  /* and go examine next Client */
-    }
+    case CONF_BAN_TYPE_KLINE:
+      return "K-line";
+    case CONF_BAN_TYPE_DLINE:
+      return "D-line";
+    case CONF_BAN_TYPE_XLINE:
+      return "X-line";
   }
 
-  /* Also check the unknowns list for new dlines */
-  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
-  {
-    struct Client *const client = node->data;
-    /* If a client is already being exited */
-    if (client_is_dead(client))
-      continue;
+  assert(!"invalid conf ban type");
+  return "ban";
+}
 
-    if ((ptr = find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1)))
-    {
-      const struct MaskItem *const conf = ptr;
-      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
-      continue;  /* and go examine next Client */
-    }
-  }
+static void
+_conf_ban_report_active(struct Client *client, enum conf_ban_type type, const char *reason)
+{
+  client_format_name_buffer_t client_name_buffer;
+  const char *const client_name =
+    client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "%s active for %s (%s)",
+                 _conf_ban_type_get_name(type), client_name, reason);
+}
+
+static void
+_conf_ban_report_exempted(struct Client *client, enum conf_ban_type type, const char *exemption)
+{
+  client_format_name_buffer_t client_name_buffer;
+  const char *const client_name =
+    client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "%s exempted for %s (%s)",
+                 _conf_ban_type_get_name(type), client_name, exemption);
 }
 
 void
 conf_ban_apply(struct Client *client, enum conf_ban_type type, const char *reason)
 {
-  char ban_type = '?';
+  const char *const ban_reason = string_default(reason, "Banned");
 
   switch (type)
   {
     case CONF_BAN_TYPE_KLINE:
       if (client_has_flag(client, FLAGS_EXEMPTKLINE))
       {
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "KLINE over-ruled for %s, client is kline_exempt",
-                       client_get_name(client, HIDE_IP));
+        _conf_ban_report_exempted(client, type, "kline_exempt");
         return;
       }
 
-      ban_type = 'K';
       break;
     case CONF_BAN_TYPE_DLINE:
       if (find_conf_by_address(NULL, &client->addr, CONF_EXEMPT, NULL, NULL, 1))
         return;
-      ban_type = 'D';
       break;
     case CONF_BAN_TYPE_XLINE:
       if (client_has_flag(client, FLAGS_EXEMPTXLINE))
       {
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "XLINE over-ruled for %s, client is xline_exempt",
-                       client_get_name(client, HIDE_IP));
+        _conf_ban_report_exempted(client, type, "xline_exempt");
         return;
       }
 
-      ban_type = 'X';
       break;
     default:
-      assert(0);
-      break;
+      assert(!"invalid conf ban type");
+      return;
   }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%c-line active for %s",
-                 ban_type, client_get_name(client, HIDE_IP));
+  _conf_ban_report_active(client, type, ban_reason);
 
   if (client_is_user(client))
-    sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, reason);
+    sendto_one_numeric(client, &me, ERR_YOUREBANNEDCREEP, ban_reason);
 
-  client_exit(client, reason);
+  client_exit(client, ban_reason);
+}
+
+static bool
+_conf_ban_check_dline(struct Client *client)
+{
+  const struct MaskItem *const conf =
+    find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1);
+  if (conf == NULL)
+    return false;
+
+  conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
+  return true;
+}
+
+static bool
+_conf_ban_check_kline(struct Client *client)
+{
+  const struct MaskItem *const conf =
+    find_conf_by_address(client->host, &client->addr, CONF_KLINE, client->username, NULL, 1);
+  if (conf == NULL)
+    return false;
+
+  conf_ban_apply(client, CONF_BAN_TYPE_KLINE, conf->reason);
+  return true;
+}
+
+static bool
+_conf_ban_check_xline(struct Client *client)
+{
+  const struct GecosItem *const conf = gecos_find(client->info, match);
+  if (conf == NULL)
+    return false;
+
+  conf_ban_apply(client, CONF_BAN_TYPE_XLINE, conf->reason);
+  return true;
+}
+
+static void
+_conf_ban_check_registered_client(struct Client *client)
+{
+  if (client_is_dead(client))
+    return;
+
+  if (_conf_ban_check_dline(client))
+    return;
+
+  if (_conf_ban_check_kline(client))
+    return;
+
+  _conf_ban_check_xline(client);
+}
+
+static void
+_conf_ban_check_unknown_client(struct Client *client)
+{
+  if (client_is_dead(client))
+    return;
+
+  _conf_ban_check_dline(client);
+}
+
+void
+conf_ban_check_clients(void)
+{
+  list_node_t *node, *node_next;
+
+  LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
+  {
+    struct Client *const client = node->data;
+    _conf_ban_check_registered_client(client);
+  }
+
+  LIST_FOREACH_SAFE(node, node_next, unknown_list.head)
+  {
+    struct Client *const client = node->data;
+    _conf_ban_check_unknown_client(client);
+  }
 }

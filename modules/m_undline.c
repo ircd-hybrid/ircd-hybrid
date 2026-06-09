@@ -33,6 +33,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"
@@ -43,39 +44,51 @@
 #include "server_capab.h"
 
 static void
-dline_remove(struct Client *source, const struct aline_ctx *aline)
+_undline_report_removed(struct Client *source, const struct MaskItem *conf)
 {
-  struct io_addr iphost, *piphost;
-  struct MaskItem *conf;
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "D-line removed by %s for [%s]",
+                 source_name, conf->host);
+  log_write(LOG_TYPE_DLINE, "D-line removed by %s for [%s]",
+            source_name, conf->host);
+}
+
+static void
+_undline_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct io_addr iphost;
+  struct io_addr *piphost = NULL;
 
   if (address_parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
     piphost = &iphost;
-  else
-    piphost = NULL;
 
-  if ((conf = find_conf_by_address(NULL, piphost, CONF_DLINE, NULL, NULL, 0)) == NULL)
+  struct MaskItem *const conf =
+    find_conf_by_address(NULL, piphost, CONF_DLINE, NULL, NULL, 0);
+  if (conf == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":No D-Line for [%s] found", aline->host);
+      sendto_one_notice(source, &me, ":No D-line for [%s] found",
+                        aline->host);
     return;
   }
 
   if (!IsConfDatabase(conf))
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":The D-Line for [%s] is in the configuration file and must be removed by hand",
+      sendto_one_notice(source, &me,
+                        ":D-line for [%s] is in the configuration file and must be removed by hand",
                         conf->host);
     return;
   }
 
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":D-Line for [%s] is removed",
+    sendto_one_notice(source, &me, ":Removed D-line [%s]",
                       conf->host);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the D-Line for: [%s]",
-                 client_get_oper_name(source), conf->host);
-  log_write(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-            client_get_oper_name(source), conf->host);
+  _undline_report_removed(source, conf);
 
   delete_one_address_conf(aline->host, conf);
 }
@@ -119,7 +132,7 @@ mo_undline(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s",
                        aline.host);
 
-  dline_remove(source, &aline);
+  _undline_remove(source, &aline);
 }
 
 /*! \brief UNDLINE command handler
@@ -153,7 +166,7 @@ ms_undline(struct Client *source, int parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_UNDLINE, source->uplink->name, source->username, source->host))
-    dline_remove(source, &aline);
+    _undline_remove(source, &aline);
 }
 
 static struct Command command_table =

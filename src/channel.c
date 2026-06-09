@@ -37,6 +37,7 @@
 #include "channel_invite.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_oper.h"
 #include "conf_resv.h"
@@ -96,8 +97,14 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
     if (channel->sent_join_flood_notice == false)
     {
       channel->sent_join_flood_notice = true;
-      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Join Flooder %s on %s target: %s",
-                     client_get_name(client, HIDE_IP), client->uplink->name, channel->name);
+
+      client_format_name_buffer_t client_name_buffer;
+      const char *const client_name =
+        client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
+
+      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                     "Possible Join Flooder %s on %s target: %s",
+                     client_name, client->uplink->name, channel->name);
     }
   }
 
@@ -1028,14 +1035,18 @@ channel_join(struct Client *client, const char *name, const char *key)
     return;
   }
 
-  const struct ResvItem *resv;
-  if (!client_has_flag(client, FLAGS_EXEMPTRESV) &&
-      !(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)) &&
-      ((resv = resv_find(name, match)) && !resv_exempt_find(client, resv)))
+  const bool can_join_reserved_channel =
+    client_has_flag(client, FLAGS_EXEMPTRESV) ||
+    (client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV));
+  const struct ResvItem *const resv = can_join_reserved_channel ? NULL : resv_find(name, match);
+
+  if (resv && !resv_exempt_find(client, resv))
   {
     sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
+
+    client_format_name_buffer_t client_name_buffer;
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
-                   name, client_get_name(client, HIDE_IP));
+                   name, client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer));
     return;
   }
 

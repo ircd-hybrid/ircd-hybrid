@@ -32,6 +32,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
@@ -56,13 +57,17 @@ mr_error(struct Client *source, int parc, char *parv[])
     return;
 
   const char *const message = string_default(parv[1], "<>");
-  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-            client_get_name(source, SHOW_IP), message);
 
+  client_format_name_buffer_t log_name_buffer;
+  client_format_name_buffer_t public_name_buffer;
+  client_format_name_buffer_t oper_name_buffer;
+
+  log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
+            client_format_name(source, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                 client_get_name(source, HIDE_IP), message);
+                 client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &public_name_buffer), message);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                 client_get_name(source, MASK_IP), message);
+                 client_format_name(source, CLIENT_FORMAT_NAME_OPER, &oper_name_buffer), message);
 }
 
 /*! \brief ERROR command handler
@@ -80,15 +85,19 @@ static void
 ms_error(struct Client *source, int parc, char *parv[])
 {
   const char *const message = string_default(parv[1], "<>");
+
+  client_format_name_buffer_t log_name_buffer;
+  client_format_name_buffer_t link_name_buffer;
+
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
-            client_get_name(source, SHOW_IP), message);
+            client_format_name(source, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), message);
 
   if (client_is_local(source))
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
-                   client_get_name(source->nexthop, MASK_IP), message);
+                   client_format_name(source->nexthop, CLIENT_FORMAT_NAME_OPER, &link_name_buffer), message);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s via %s -- %s",
-                   source->name, client_get_name(source->nexthop, MASK_IP), message);
+                   source->name, client_format_name(source->nexthop, CLIENT_FORMAT_NAME_OPER, &link_name_buffer), message);
 }
 
 static struct Command command_table =

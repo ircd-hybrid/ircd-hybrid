@@ -41,6 +41,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_oper.h"
@@ -80,36 +81,64 @@ dline_check(const struct AddressRec *arec)
 }
 
 static void
-dline_handle(struct Client *source, const struct aline_ctx *aline)
+_dline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_t duration_minutes)
 {
-  char buf[IRCD_BUFSIZE];
-  struct io_addr addr;
-  int bits = 0;
-  unsigned int min_cidr = 0;
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  switch (address_parse_netmask(aline->host, &addr, &bits))
+  if (duration_minutes)
   {
-    case HM_IPV4:
-      min_cidr = ConfigGeneral.dline_min_cidr;
-      break;
-    case HM_IPV6:
-      min_cidr = ConfigGeneral.dline_min_cidr6;
-      break;
-    default:  /* HM_HOST */
-      if (client_is_user(source))
-        sendto_one_notice(source, &me, ":Invalid D-Line");
-      return;
-  }
-
-  if (min_cidr > 0 && !client_is_service(source) && (unsigned int)bits < min_cidr)
-  {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary D-line added by %s for [%s] (%ju min) [%s]",
+                   source_name, conf->host, duration_minutes, conf->reason);
+    log_write(LOG_TYPE_DLINE,
+              "Temporary D-line added by %s for [%s] (%ju min) [%s]",
+              source_name, conf->host, duration_minutes, conf->reason);
     return;
   }
 
-  struct MaskItem *conf;
-  if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, NULL, NULL, 1)))
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "D-line added by %s for [%s] [%s]",
+                 source_name, conf->host, conf->reason);
+  log_write(LOG_TYPE_DLINE, "D-line added by %s for [%s] [%s]",
+            source_name, conf->host, conf->reason);
+}
+
+static void
+dline_handle(struct Client *source, const struct aline_ctx *aline)
+{
+  char reason[IRCD_BUFSIZE];
+  struct io_addr parsed_addr;
+  int cidr_bits = 0;
+  unsigned int minimum_cidr_bits = 0;
+
+  switch (address_parse_netmask(aline->host, &parsed_addr, &cidr_bits))
+  {
+    case HM_IPV4:
+      minimum_cidr_bits = ConfigGeneral.dline_min_cidr;
+      break;
+
+    case HM_IPV6:
+      minimum_cidr_bits = ConfigGeneral.dline_min_cidr6;
+      break;
+
+    default:
+      if (client_is_user(source))
+        sendto_one_notice(source, &me, ":Invalid D-line");
+      return;
+  }
+
+  if (minimum_cidr_bits > 0 && !client_is_service(source) && (unsigned int)cidr_bits < minimum_cidr_bits)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":For safety, bitmasks less than %u require conf access.",
+                        minimum_cidr_bits);
+    return;
+  }
+
+  struct MaskItem *conf = find_conf_by_address(NULL, &parsed_addr, CONF_DLINE, NULL, NULL, 1);
+  if (conf)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":[%s] already D-lined by [%s] - %s",
@@ -118,40 +147,36 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
   }
 
   if (aline->duration)
-    snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
+    snprintf(reason, sizeof(reason), "Temporary D-line %ju min. - %.*s (%s)",
              aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
+    snprintf(reason, sizeof(reason), "%.*s (%s)",
+             REASONLEN, aline->reason, date_iso8601(0));
 
   conf = conf_make(CONF_DLINE);
   conf->host = io_strdup(aline->host);
-  conf->reason = io_strdup(buf);
+  conf->reason = io_strdup(reason);
   conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
   SetConfDatabase(conf);
 
   if (aline->duration)
   {
     conf->until = conf->setat + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s]",
-                        aline->duration / 60, conf->host);
+      sendto_one_notice(source, &me, ":Added temporary D-line [%s] (%ju min)",
+                        conf->host, duration_minutes);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. D-Line for [%s] [%s]",
-                   client_get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
-    log_write(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
-              client_get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
+    _dline_report_added(source, conf, duration_minutes);
   }
   else
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added D-Line [%s]", conf->host);
+      sendto_one_notice(source, &me, ":Added D-line [%s]",
+                        conf->host);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added D-Line for [%s] [%s]",
-                   client_get_oper_name(source), conf->host, conf->reason);
-    log_write(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
-              client_get_oper_name(source), conf->host, conf->reason);
+    _dline_report_added(source, conf, 0);
   }
 
   dline_check(add_conf_by_address(CONF_DLINE, conf));

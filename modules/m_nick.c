@@ -43,6 +43,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
+#include "client_format.h"
 #include "client_id.h"
 #include "conf.h"
 #include "conf_resv.h"
@@ -542,8 +543,9 @@ mr_nick(struct Client *source, int parc, char *parv[])
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
 
+    client_format_name_buffer_t source_name_buffer;
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
-                   nick, client_get_name(source, HIDE_IP));
+                   nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
     return;
   }
 
@@ -593,8 +595,9 @@ m_nick(struct Client *source, int parc, char *parv[])
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
 
+    client_format_name_buffer_t source_name_buffer;
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
-                   nick, client_get_name(source, HIDE_IP));
+                   nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
     return;
   }
 

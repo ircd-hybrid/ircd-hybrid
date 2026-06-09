@@ -33,6 +33,7 @@
 
 #include "aline.h"
 #include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_shared.h"
@@ -43,39 +44,51 @@
 #include "server_capab.h"
 
 static void
-kline_remove(struct Client *source, const struct aline_ctx *aline)
+_unkline_report_removed(struct Client *source, const struct MaskItem *conf)
 {
-  struct io_addr iphost, *piphost;
-  struct MaskItem *conf;
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "K-line removed by %s for [%s@%s]",
+                 source_name, conf->user, conf->host);
+  log_write(LOG_TYPE_KLINE, "K-line removed by %s for [%s@%s]",
+            source_name, conf->user, conf->host);
+}
+
+static void
+_unkline_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct io_addr iphost;
+  struct io_addr *piphost = NULL;
 
   if (address_parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
     piphost = &iphost;
-  else
-    piphost = NULL;
 
-  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)) == NULL)
+  struct MaskItem *const conf =
+    find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0);
+  if (conf == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":No K-Line for [%s@%s] found", aline->user, aline->host);
+      sendto_one_notice(source, &me, ":No K-line for [%s@%s] found",
+                        aline->user, aline->host);
     return;
   }
 
   if (!IsConfDatabase(conf))
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":The K-Line for [%s@%s] is in the configuration file and must be removed by hand",
+      sendto_one_notice(source, &me,
+                        ":K-line for [%s@%s] is in the configuration file and must be removed by hand",
                         conf->user, conf->host);
     return;
   }
 
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":K-Line for [%s@%s] is removed",
+    sendto_one_notice(source, &me, ":Removed K-line [%s@%s]",
                       conf->user, conf->host);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the K-Line for: [%s@%s]",
-                 client_get_oper_name(source), conf->user, conf->host);
-  log_write(LOG_TYPE_KLINE, "%s removed K-Line for [%s@%s]",
-            client_get_oper_name(source), conf->user, conf->host);
+  _unkline_report_removed(source, conf);
 
   delete_one_address_conf(aline->host, conf);
 }
@@ -119,7 +132,7 @@ mo_unkline(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNKLINE", CAPAB_UNKLN, CLUSTER_UNKLINE, "%s %s",
                        aline.user, aline.host);
 
-  kline_remove(source, &aline);
+  _unkline_remove(source, &aline);
 }
 
 /*! \brief UNKLINE command handler
@@ -155,7 +168,7 @@ ms_unkline(struct Client *source, int parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_UNKLINE, source->uplink->name, source->username, source->host))
-    kline_remove(source, &aline);
+    _unkline_remove(source, &aline);
 }
 
 static struct Command command_table =

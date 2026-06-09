@@ -31,6 +31,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "client_find.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -47,6 +48,34 @@ _squit_get_reason(const struct Client *source, const char *reason)
     return source->name;
 
   return client_get_visible_server_name(source);
+}
+
+static void
+_squit_report_local_request(const struct Client *source, const struct Client *target, const char *reason)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Received SQUIT %s from %s (%.*s)",
+                 target->name, source_name, REASONLEN, reason);
+  log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
+            target->name, source_name, REASONLEN, reason);
+}
+
+static void
+_squit_report_remote_request(const struct Client *source, const struct Client *target, const char *reason)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
+                 "from %s: Remote SQUIT %s from %s (%.*s)",
+                 me.name, target->name, source_name, REASONLEN, reason);
+  sendto_servers(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%.*s)",
+                 me.id, target->name, source_name, REASONLEN, reason);
+  log_write(LOG_TYPE_IRCD, "Remote SQUIT %s from %s (%.*s)",
+            target->name, source_name, REASONLEN, reason);
 }
 
 /*! \brief SQUIT command handler
@@ -103,10 +132,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
   const char *const reason = _squit_get_reason(source, parv[2]);
   if (client_is_local(target))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Received SQUIT %s from %s (%.*s)",
-                   target->name, client_get_oper_name(source), REASONLEN, reason);
-    log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
-              target->name, client_get_oper_name(source), REASONLEN, reason);
+    _squit_report_local_request(source, target, reason);
 
     /* To them, we are exiting */
     sendto_one(target, ":%s SQUIT %s :%.*s", source->id, me.id, REASONLEN, reason);
@@ -150,12 +176,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
   const char *const reason = _squit_get_reason(source, parv[2]);
   if (client_is_local(target))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: Remote SQUIT %s from %s (%s)",
-                   me.name, target->name, client_get_oper_name(source), reason);
-    sendto_servers(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%s)",
-                   me.id, target->name, client_get_oper_name(source), reason);
-    log_write(LOG_TYPE_IRCD, "Remote SQUIT %s from %s (%s)",
-              target->name, client_get_oper_name(source), reason);
+     _squit_report_remote_request(source, target, reason);
 
     /* To them, we are exiting */
     sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, reason);

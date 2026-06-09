@@ -50,14 +50,6 @@
 #include "server.h"
 #include "user_mode.h"
 
-/** addr_mask_type enumeration */
-enum addr_mask_type
-{
-  HIDE_IP,  /**< IP is hidden. Resolved hostname is shown instead */
-  SHOW_IP,  /**< IP is shown. No parts of it are hidden or masked */
-  MASK_IP   /**< IP is masked. 255.255.255.255 is shown instead */
-};
-
 /** Client connection states */
 enum client_state
 {
@@ -301,8 +293,6 @@ extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct Client *client_create_local(void);
 extern struct Client *client_create_remote(struct Client *);
-extern const char *client_get_name(const struct Client *, enum addr_mask_type);
-extern const char *client_get_oper_name(const struct Client *);
 extern const char *client_get_visible_server_name(const struct Client *);
 extern const struct Client *client_get_visible_server(const struct Client *);
 

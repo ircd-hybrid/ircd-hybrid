@@ -66,7 +66,7 @@ resv_delete(struct ResvItem *resv, bool expired)
 
   while (resv->exempt_list.head)
   {
-    struct ResvExemptItem *exempt = resv->exempt_list.head->data;
+    struct ResvExemptItem *const exempt = resv->exempt_list.head->data;
     list_remove(&exempt->node, &resv->exempt_list);
     io_free(exempt->name);
     io_free(exempt->user);
@@ -83,14 +83,8 @@ resv_delete(struct ResvItem *resv, bool expired)
 struct ResvItem *
 resv_make(const char *mask, const char *reason, const list_t *elist)
 {
-  list_t *list;
-
-  if (IsChanPrefix(*mask))
-    list = &resv_chan_list;
-  else
-    list = &resv_nick_list;
-
-  struct ResvItem *resv = io_calloc(sizeof(*resv));
+  list_t *const list = IsChanPrefix(*mask) ? &resv_chan_list : &resv_nick_list;
+  struct ResvItem *const resv = io_calloc(sizeof(*resv));
   resv->list = list;
   resv->mask = io_strdup(mask);
   resv->reason = io_strndup(reason, REASONLEN);
@@ -99,10 +93,9 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
   if (elist)
   {
     list_node_t *node;
-
     LIST_FOREACH(node, elist->head)
     {
-      char *s = node->data;
+      char *const s = node->data;
       char nick[NICKLEN + 1];
       char user[USERLEN + 1];
       char host[HOSTLEN + 1];
@@ -119,7 +112,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 
       nuh_split(&nuh);
 
-      struct ResvExemptItem *exempt = io_calloc(sizeof(*exempt));
+      struct ResvExemptItem *const exempt = io_calloc(sizeof(*exempt));
       exempt->name = io_strdup(nick);
       exempt->user = io_strdup(user);
       exempt->host = io_strdup(host);
@@ -134,12 +127,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
-  list_t *list;
-
-  if (IsChanPrefix(*name))
-    list = &resv_chan_list;
-  else
-    list = &resv_nick_list;
+  list_t *const list = IsChanPrefix(*name) ? &resv_chan_list : &resv_nick_list;
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)
@@ -162,7 +150,7 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 
   LIST_FOREACH(node, resv->exempt_list.head)
   {
-    const struct ResvExemptItem *exempt = node->data;
+    const struct ResvExemptItem *const exempt = node->data;
     if (match(exempt->name, client->name) == 0 && match(exempt->user, client->username) == 0)
     {
       switch (exempt->type)
@@ -197,7 +185,7 @@ resv_clear(void)
 
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
-      struct ResvItem *resv = node->data;
+      struct ResvItem *const resv = node->data;
       if (resv->in_database == false)
         resv_delete(resv, false);
     }
@@ -215,7 +203,7 @@ resv_expire(void)
 
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
-      struct ResvItem *resv = node->data;
+      struct ResvItem *const resv = node->data;
       if (resv->expires_at &&
           (resv->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
         resv_delete(resv, true);

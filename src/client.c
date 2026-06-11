@@ -1059,7 +1059,7 @@ client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
 
   ++ServerStats.is_ac;
 
-  struct Client *client =
+  struct Client *const client =
     _client_create_accepted_local_connection(client_fde, listener, remote_addr, remote_addr_str);
   _client_begin_local_connection_ingress(client);
 }

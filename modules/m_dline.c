@@ -107,7 +107,6 @@ _dline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_
 static void
 dline_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  char reason[IRCD_BUFSIZE];
   struct io_addr parsed_addr;
   int cidr_bits = 0;
   unsigned int minimum_cidr_bits = 0;
@@ -146,6 +145,7 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
+  char reason[IRCD_BUFSIZE];
   if (aline->duration)
     snprintf(reason, sizeof(reason), "Temporary D-line %ju min. - %.*s (%s)",
              aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));

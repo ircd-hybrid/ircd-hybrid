@@ -124,7 +124,7 @@ _isupport_build_lines(void)
   char *bufptr = buf;
   unsigned int tokens = 0;
   size_t len = 0;
-  size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
+  const size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
 
   _isupport_clear_lines();
 
@@ -133,6 +133,7 @@ _isupport_build_lines(void)
   {
     const struct Isupport *const support = node->data;
     size_t token_len = snprintf(NULL, 0, len ? " %s" : "%s", support->name);
+
     if (support->options)
       token_len += snprintf(NULL, 0, "=%s", support->options);
 

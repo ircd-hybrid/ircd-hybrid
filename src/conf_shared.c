@@ -54,7 +54,7 @@ shared_clear(void)
 struct SharedItem *
 shared_make(void)
 {
-  struct SharedItem *shared = io_calloc(sizeof(*shared));
+  struct SharedItem *const shared = io_calloc(sizeof(*shared));
   list_add(shared, &shared->node, &shared_list);
 
   return shared;

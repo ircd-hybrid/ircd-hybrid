@@ -270,7 +270,7 @@ cap_req(struct Client *source, const char *arg)
     /* Look up capability... */
     bool error = false;
     bool negate;
-    const struct Cap *cap = find_cap(&cl, &negate);
+    const struct Cap *const cap = find_cap(&cl, &negate);
 
     if (cap == NULL)
       error = true;
@@ -327,8 +327,8 @@ cap_list(struct Client *source, const char *arg)
 
 struct CapSubcommand
 {
-  const char *name;
-  void (*handler)(struct Client *, const char *);
+  const char *const name;
+  void (*const handler)(struct Client *, const char *);
 };
 
 static const struct CapSubcommand cap_subcommands[] =

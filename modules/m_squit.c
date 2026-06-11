@@ -176,7 +176,7 @@ ms_squit(struct Client *source, int parc, char *parv[])
   const char *const reason = _squit_get_reason(source, parv[2]);
   if (client_is_local(target))
   {
-     _squit_report_remote_request(source, target, reason);
+    _squit_report_remote_request(source, target, reason);
 
     /* To them, we are exiting */
     sendto_one(target, ":%s SQUIT %s :%s", source->id, me.id, reason);

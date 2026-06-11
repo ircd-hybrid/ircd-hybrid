@@ -334,14 +334,14 @@ user_register_local(struct Client *client)
 
   if (!IsConfExemptXline(conf))
   {
-    const struct GecosItem *gecos = gecos_find(client->info, match);
+    const struct GecosItem *const gecos = gecos_find(client->info, match);
     if (gecos)
     {
       _user_register_report_rejection(client,
                                       "X-line match: realname=\"%s\", reason=\"%s\", ip=\"%s\"",
                                       client->info, gecos->reason, client->sockhost);
 
-      client_exit(client, "Bad user informatio");
+      client_exit(client, "Bad user information");
       ++ServerStats.is_ref;
       return;
     }

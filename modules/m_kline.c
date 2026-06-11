@@ -111,11 +111,6 @@ _kline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_
 static void
 kline_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  char buf[IRCD_BUFSIZE];
-  int bits = 0;
-  unsigned int min_cidr = 0;
-  struct io_addr iphost, *piphost = NULL;
-
   if (!client_is_service(source) && !aline_valid_mask(2, aline->user, aline->host))
   {
     if (client_is_user(source))
@@ -125,29 +120,34 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  switch (address_parse_netmask(aline->host, &iphost, &bits))
+  struct io_addr parsed_addr;
+  int cidr_bits = 0;
+  unsigned int minimum_cidr_bits = 0;
+  struct io_addr *parsed_addr_ptr = NULL;
+  switch (address_parse_netmask(aline->host, &parsed_addr, &cidr_bits))
   {
     case HM_IPV4:
-      min_cidr = ConfigGeneral.kline_min_cidr;
-      piphost = &iphost;
+      minimum_cidr_bits = ConfigGeneral.kline_min_cidr;
+      parsed_addr_ptr = &parsed_addr;
       break;
     case HM_IPV6:
-      min_cidr = ConfigGeneral.kline_min_cidr6;
-      piphost = &iphost;
+      minimum_cidr_bits = ConfigGeneral.kline_min_cidr6;
+      parsed_addr_ptr = &parsed_addr;
       break;
     default:  /* HM_HOST */
       break;
   }
 
-  if (min_cidr > 0 && !client_is_service(source) && (unsigned int)bits < min_cidr)
+  if (minimum_cidr_bits > 0 && !client_is_service(source) && (unsigned int)cidr_bits < minimum_cidr_bits)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
+                        minimum_cidr_bits);
     return;
   }
 
   struct MaskItem *conf;
-  if ((conf = find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0)))
+  if ((conf = find_conf_by_address(aline->host, parsed_addr_ptr, CONF_KLINE, aline->user, NULL, 0)))
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
@@ -155,17 +155,18 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
+  char reason[IRCD_BUFSIZE];
   if (aline->duration)
-    snprintf(buf, sizeof(buf), "Temporary K-line %ju min. - %.*s (%s)",
+    snprintf(reason, sizeof(reason), "Temporary K-line %ju min. - %.*s (%s)",
              aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
+    snprintf(reason, sizeof(reason), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
 
   conf = conf_make(CONF_KLINE);
   conf->user = io_strdup(aline->user);
   conf->host = io_strdup(aline->host);
   conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
-  conf->reason = io_strdup(buf);
+  conf->reason = io_strdup(reason);
   SetConfDatabase(conf);
 
   if (aline->duration)

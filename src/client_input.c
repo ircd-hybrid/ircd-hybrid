@@ -66,67 +66,84 @@ _client_input_dispatch_line(struct Client *client, char *line_buffer, size_t lin
   parse_message(client, line_buffer, line_buffer + line_length);
 }
 
-/* extract_one_line()
+/**
+ * @brief Extracts one complete protocol message from a receive queue.
  *
- * inputs       - pointer to a dbuf queue
- *              - pointer to buffer to copy data to
- * output       - length of <buffer>
- * side effects - one line is copied and removed from the dbuf
+ * Copies the message text without its line terminator into line_buffer,
+ * NUL-terminates it, stores the copied length in line_length, and removes
+ * the full physical message including its terminator from the queue.
+ *
+ * Overlong messages are truncated in line_buffer, but still consumed completely.
+ * Empty messages are returned as complete messages with line_length set to 0.
+ *
+ * @param queue       The receive queue to extract from.
+ * @param line_buffer The destination buffer for the extracted message text.
+ * @param line_length Receives the number of copied message-text bytes.
+ * @return true if a complete message was consumed, false if no complete message is available.
  */
-static size_t
-_client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer)
+static bool
+_client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, size_t *line_length)
 {
-  size_t line_bytes = 0, eol_bytes = 0;
+  const size_t message_text_max = IRCD_BUFSIZE - 2;
+
+  size_t copied_bytes = 0;
+  size_t consumed_bytes = 0;
+  size_t eol_bytes = 0;
+
+  assert(queue);
+  assert(line_buffer);
+  assert(line_length);
+
+  *line_length = 0;
+  line_buffer[0] = '\0';
 
   list_node_t *node;
   LIST_FOREACH(node, queue->blocks.head)
   {
     const struct dbuf_block *const block = node->data;
-    size_t idx;
-
-    if (node == queue->blocks.head)
-      idx = queue->pos;
-    else
-      idx = 0;
+    size_t idx = (node == queue->blocks.head) ? queue->pos : 0;
 
     for (; idx < block->size; ++idx)
     {
       const char c = block->data[idx];
-      if (IsEol(c))
+      if (c == '\r' || c == '\n')
       {
+        ++consumed_bytes;
         ++eol_bytes;
 
-        /* Allow 2 eol bytes per message */
+        /*
+         * Consume at most two consecutive CR/LF bytes as the message terminator.
+         * Additional CR/LF bytes remain queued and are processed as subsequent
+         * empty messages.
+         */
         if (eol_bytes == 2)
-          goto out;
+          goto complete;
+
+        continue;
       }
-      else if (eol_bytes)
-        goto out;
-      else if (line_bytes < IRCD_BUFSIZE - 2)
-      {
-        ++line_bytes;
-        *line_buffer++ = c;
-      }
+
+      if (eol_bytes)
+        goto complete;
+
+      ++consumed_bytes;
+
+      if (copied_bytes < message_text_max)
+        line_buffer[copied_bytes++] = c;
     }
   }
 
-out:
+  if (eol_bytes == 0)
+    return false;
 
-  assert(line_bytes <= IRCD_BUFSIZE - 2);
+complete:
+  assert(consumed_bytes > 0);
+  assert(copied_bytes <= message_text_max);
 
-  /*
-   * Now, if we haven't found an EOL, ignore all line bytes
-   * that we have read, since this is a partial line case.
-   */
-  if (eol_bytes)
-    *line_buffer = '\0';
-  else
-    line_bytes = 0;
+  line_buffer[copied_bytes] = '\0';
+  *line_length = copied_bytes;
 
-  /* Remove what is now unnecessary */
-  dbuf_delete(queue, line_bytes + eol_bytes);
-
-  return IO_MIN(line_bytes, IRCD_BUFSIZE - 2);
+  dbuf_delete(queue, consumed_bytes);
+  return true;
 }
 
 static void
@@ -146,12 +163,16 @@ _client_input_process_recvq_unknown(struct Client *client)
     if (line_count >= CLIENT_INPUT_HANDSHAKE_LINE_LIMIT)
       return;
 
-    const size_t line_length = _client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer);
-    if (line_length == 0)
+    size_t line_length = 0;
+    if (!_client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer, &line_length))
       return;
 
-    _client_input_dispatch_line(client, line_buffer, line_length);
     ++line_count;
+
+    if (line_length == 0)
+      continue;
+
+    _client_input_dispatch_line(client, line_buffer, line_length);
 
     /* Registration commands may transition the connection out of the unknown state. */
     if (!client_is_unknown(client))
@@ -172,9 +193,12 @@ _client_input_process_recvq_server(struct Client *client)
     if (client_is_defunct(client))
       return;
 
-    const size_t line_length = _client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer);
-    if (line_length == 0)
+    size_t line_length = 0;
+    if (!_client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer, &line_length))
       return;
+
+    if (line_length == 0)
+      continue;
 
     _client_input_dispatch_line(client, line_buffer, line_length);
   }
@@ -220,12 +244,16 @@ _client_input_process_recvq_user(struct Client *client)
          CLIENT_INPUT_USER_BURST_LINE_BUDGET))
       return;
 
-    const size_t line_length = _client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer);
-    if (line_length == 0)
+    size_t line_length = 0;
+    if (!_client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer, &line_length))
       return;
 
-    _client_input_dispatch_line(client, line_buffer, line_length);
     ++client->connection->input_parse_debt;
+
+    if (line_length == 0)
+      continue;
+
+    _client_input_dispatch_line(client, line_buffer, line_length);
   }
 }
 

@@ -180,19 +180,28 @@ _client_input_process_recvq_server(struct Client *client)
   }
 }
 
+static bool
+_client_input_should_enforce_user_limits(const struct Client *client)
+{
+  assert(client && client_is_local(client));
+  assert(client_is_user(client));
+
+  if (ConfigGeneral.no_oper_flood && client_is_oper(client))
+    return false;
+
+  if (client_has_flag(client, FLAGS_CANFLOOD))
+    return false;
+
+  return true;
+}
+
 static void
-_client_input_process_recvq_client(struct Client *client)
+_client_input_process_recvq_user(struct Client *client)
 {
   assert(client && client_is_local(client));
   assert(client_is_user(client));
 
   char line_buffer[IRCD_BUFSIZE];
-  bool enforce_limits = true;
-
-  if (ConfigGeneral.no_oper_flood && client_is_oper(client))
-    enforce_limits = false;
-  else if (client_has_flag(client, FLAGS_CANFLOOD))
-    enforce_limits = false;
 
   while (true)
   {
@@ -204,6 +213,7 @@ _client_input_process_recvq_client(struct Client *client)
      * Once exhausted, stop processing until additional budget becomes
      * available.
      */
+    const bool enforce_limits = _client_input_should_enforce_user_limits(client);
     if (enforce_limits && client->connection->input_parse_debt >=
         (client_has_flag(client, FLAGS_FLOODDONE) ?
          CLIENT_INPUT_USER_LINE_BUDGET :
@@ -238,7 +248,7 @@ client_input_process_recvq(struct Client *client)
 
   if (client_is_user(client))
   {
-    _client_input_process_recvq_client(client);
+    _client_input_process_recvq_user(client);
     return;
   }
 

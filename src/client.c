@@ -476,18 +476,22 @@ _client_exit_unwind_tree(struct Client *split_root, const char *reason)
   assert(split_root && client_is_server(split_root));
   assert(split_root->server);
 
-  list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_user_list.head)
+  struct Client *child_user;
+  while ((child_user = list_peek_head(&split_root->server->child_user_list)))
   {
-    struct Client *const child_user = node->data;
     assert(!client_is_local(child_user));
+    assert(child_user->uplink == split_root);
+
     _client_exit_notify_channel_members(child_user, reason);
     _client_exit_detach(child_user);
   }
 
-  LIST_FOREACH_SAFE(node, node_next, split_root->server->child_server_list.head)
+  struct Client *child_server;
+  while ((child_server = list_peek_head(&split_root->server->child_server_list)))
   {
-    struct Client *const child_server = node->data;
+    assert(client_is_server(child_server));
+    assert(child_server->uplink == split_root);
+
     _client_exit_unwind_tree(child_server, reason);
     _client_exit_detach(child_server);
   }

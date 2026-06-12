@@ -58,9 +58,9 @@ mo_close(struct Client *source, int parc, char *parv[])
 
   const unsigned int closed_count = list_length(&unknown_list);
 
-  while (unknown_list.head)
+  struct Client *target;
+  while ((target = list_peek_head(&unknown_list)))
   {
-    struct Client *const target = unknown_list.head->data;
     /* An oper (source) can never be in the unknown_list. */
     assert(source != target);
 

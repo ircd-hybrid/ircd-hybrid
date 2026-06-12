@@ -390,11 +390,11 @@ free_exited_clients(void)
 {
   list_node_t *node;
 
-  while ((node = dead_list.head))
+  while ((node = list_pop_head(&dead_list)))
   {
     struct Client *const client = node->data;
+    assert(client);
 
-    list_remove(node, &dead_list);
     list_free_node(node);
 
     _client_destroy(client);
@@ -870,16 +870,15 @@ exit_aborted_clients(void)
 {
   list_node_t *node;
 
-  while ((node = abort_list.head))
+  while ((node = list_pop_head(&abort_list)))
   {
     struct Client *const client = node->data;
     assert(client && client_is_local(client));
     assert(client_is_dead(client));
 
-    list_remove(node, &abort_list);
     list_free_node(node);
 
-    const char *reason = client->connection->scheduled_exit_reason;
+    const char *const reason = client->connection->scheduled_exit_reason;
     client_exit(client, reason);
   }
 }

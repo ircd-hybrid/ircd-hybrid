@@ -196,27 +196,26 @@ monitor_clear_list(struct Client *client)
 {
   assert(client_is_local(client));
 
-  while (client->connection->monitor_list.head)
+  list_node_t *monitor_node;
+  while ((monitor_node = list_pop_head(&client->connection->monitor_list)))
   {
-    list_node_t *node = client->connection->monitor_list.head;
-    struct Monitor *const monitor = node->data;
+    struct Monitor *const monitor = monitor_node->data;
+    assert(monitor);
 
-    list_remove(node, &client->connection->monitor_list);
-    list_free_node(node);
+    list_free_node(monitor_node);
 
-    assert(list_find(&monitor->monitored_by, client));
+    list_node_t *const subscriber_node = list_find_remove(&monitor->monitored_by, client);
+    assert(subscriber_node);
 
-    list_node_t *temp = list_find_remove(&monitor->monitored_by, client);
-    if (temp)
-      list_free_node(temp);
+    if (subscriber_node)
+      list_free_node(subscriber_node);
 
     /* If this leaves a header without notifies, remove it. */
     if (list_is_empty(&monitor->monitored_by))
       _monitor_destroy(monitor);
   }
 
-  assert(client->connection->monitor_list.head == NULL);
-  assert(client->connection->monitor_list.tail == NULL);
+  assert(list_is_empty(&client->connection->monitor_list));
 }
 
 /*! \brief Counts up memory used by monitor list headers

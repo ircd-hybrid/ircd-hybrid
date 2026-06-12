@@ -23,6 +23,8 @@
  * \brief Implements shared {} block configuration management.
  */
 
+#include <assert.h>
+
 #include "io_string.h"
 #include "list.h"
 #include "memory.h"
@@ -40,10 +42,13 @@ shared_get_list(void)
 void
 shared_clear(void)
 {
-  while (shared_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&shared_list)))
   {
-    struct SharedItem *const shared = shared_list.head->data;
-    list_remove(&shared->node, &shared_list);
+    struct SharedItem *const shared = node->data;
+    assert(shared);
+
     io_free(shared->server);
     io_free(shared->user);
     io_free(shared->host);

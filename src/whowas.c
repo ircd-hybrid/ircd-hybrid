@@ -224,11 +224,18 @@ whowas_add_history(struct Client *client, bool online)
 void
 whowas_off_history(struct Client *client)
 {
-  while (client->whowas_list.head)
+  assert(client);
+
+  list_node_t *node;
+
+  while ((node = list_pop_head(&client->whowas_list)))
   {
-    struct Whowas *const whowas = client->whowas_list.head->data;
+    struct Whowas *const whowas = node->data;
+    assert(whowas);
+    assert(node == &whowas->client_list_node);
+    assert(whowas->client == client);
+
     whowas->client = NULL;
-    list_remove(&whowas->client_list_node, &client->whowas_list);
   }
 }
 

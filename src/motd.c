@@ -403,13 +403,15 @@ motd_add(const char *mask, const char *path)
 void
 motd_clear(void)
 {
-  _motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
+  _motd_decache(MotdList.local);
   _motd_decache(MotdList.remote);
 
-  while (MotdList.other.head)  /* Destroy other MOTDs */
+  list_node_t *node;
+  while ((node = list_pop_head(&MotdList.other)))
   {
-    struct Motd *const motd = MotdList.other.head->data;
-    list_remove(&motd->node, &MotdList.other);
+    struct Motd *const motd = node->data;
+    assert(motd);
+
     _motd_destroy(motd);
   }
 

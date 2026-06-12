@@ -132,11 +132,12 @@ _links_cache_clear_buffer(list_t *buffer)
 {
   assert(buffer);
 
-  list_node_t *node, *next_node;
-  LIST_FOREACH_SAFE(node, next_node, buffer->head)
+  list_node_t *node;
+  while ((node = list_pop_head(buffer)))
   {
     links_cache_entry_t *const entry = node->data;
-    list_remove(node, buffer);
+    assert(entry);
+
     _links_cache_free_entry(entry);
   }
 }

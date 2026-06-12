@@ -24,6 +24,8 @@
  * @brief Implementation of service {} block configuration management.
  */
 
+#include <assert.h>
+
 #include "io_string.h"
 #include "list.h"
 #include "memory.h"
@@ -64,10 +66,13 @@ service_get_list(void)
 void
 service_clear(void)
 {
-  while (service_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&service_list)))
   {
-    struct ServiceItem *const service = service_list.head->data;
-    list_remove(&service->node, &service_list);
+    struct ServiceItem *const service = node->data;
+    assert(service);
+
     io_free(service->name);
     io_free(service);
   }

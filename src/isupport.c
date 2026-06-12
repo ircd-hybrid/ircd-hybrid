@@ -101,10 +101,12 @@ static list_t isupport_list_lines;
 static void
 _isupport_clear_lines(void)
 {
-  while (isupport_list_lines.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&isupport_list_lines)))
   {
-    list_node_t *node = isupport_list_lines.head;
-    list_remove(node, &isupport_list_lines);
+    assert(node->data);
+
     io_free(node->data);
     list_free_node(node);
   }

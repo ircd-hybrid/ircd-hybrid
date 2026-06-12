@@ -179,13 +179,15 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
 void
 pseudo_clear(void)
 {
-  while (pseudo_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&pseudo_list)))
   {
-    struct PseudoItem *const pseudo = pseudo_list.head->data;
+    struct PseudoItem *const pseudo = node->data;
+    assert(pseudo);
     assert(command_find(pseudo->command_struct.name));
 
     command_del(&pseudo->command_struct);
-    list_remove(&pseudo->node, &pseudo_list);
 
     io_free(pseudo->name);
     io_free(pseudo->nick);

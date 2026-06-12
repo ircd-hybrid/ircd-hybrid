@@ -70,10 +70,13 @@ _list_task_dequeue(struct ListTask *task)
 static void
 _list_task_clear_masks(list_t *list)
 {
-  while (list->head)
+  assert(list);
+
+  list_node_t *node;
+  while ((node = list_pop_head(list)))
   {
-    list_node_t *node = list->head;
-    list_remove(node, list);
+    assert(node->data);
+
     io_free(node->data);
     list_free_node(node);
   }

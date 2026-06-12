@@ -64,10 +64,12 @@ resv_delete(struct ResvItem *resv, bool expired)
     sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Temporary RESV for [%s] expired",
                    resv->mask);
 
-  while (resv->exempt_list.head)
+  list_node_t *node;
+  while ((node = list_pop_head(&resv->exempt_list)))
   {
-    struct ResvExemptItem *const exempt = resv->exempt_list.head->data;
-    list_remove(&exempt->node, &resv->exempt_list);
+    struct ResvExemptItem *const exempt = node->data;
+    assert(exempt);
+
     io_free(exempt->name);
     io_free(exempt->user);
     io_free(exempt->host);

@@ -59,10 +59,13 @@ cluster_get_list(void)
 void
 cluster_clear(void)
 {
-  while (cluster_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&cluster_list)))
   {
-    struct ClusterItem *const cluster = cluster_list.head->data;
-    list_remove(&cluster->node, &cluster_list);
+    struct ClusterItem *const cluster = node->data;
+    assert(cluster);
+
     io_free(cluster->server);
     io_free(cluster);
   }

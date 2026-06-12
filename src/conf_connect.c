@@ -93,6 +93,21 @@ connect_create(void)
   return connect;
 }
 
+static void
+_connect_clear_mask_list(list_t *list)
+{
+  assert(list);
+
+  list_node_t *node;
+  while ((node = list_pop_head(list)))
+  {
+    assert(node->data);
+
+    io_free(node->data);
+    list_free_node(node);
+  }
+}
+
 void
 connect_destroy(struct ConnectItem *connect)
 {
@@ -109,20 +124,8 @@ connect_destroy(struct ConnectItem *connect)
   if (connect->send_password)
     memset(connect->send_password, 0, strlen(connect->send_password));
 
-  list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, connect->hub_masks.head)
-  {
-    io_free(node->data);
-    list_remove(node, &connect->hub_masks);
-    list_free_node(node);
-  }
-
-  LIST_FOREACH_SAFE(node, node_next, connect->leaf_masks.head)
-  {
-    io_free(node->data);
-    list_remove(node, &connect->leaf_masks);
-    list_free_node(node);
-  }
+  _connect_clear_mask_list(&connect->hub_masks);
+  _connect_clear_mask_list(&connect->leaf_masks);
 
   connect->klass = NULL;
 

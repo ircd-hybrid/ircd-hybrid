@@ -742,3 +742,33 @@ list_peek_tail(const list_t *list)
 {
   return list_is_empty(list) ? NULL : list->tail->data;
 }
+
+list_node_t *
+list_pop_head(list_t *list)
+{
+  assert(list);
+  assert((list->head == NULL) == (list->tail == NULL));
+
+  if (list_is_empty(list))
+    return NULL;
+
+  list_node_t *const node = list->head;
+  list_remove(node, list);
+
+  return node;
+}
+
+list_node_t *
+list_pop_tail(list_t *list)
+{
+  assert(list);
+  assert((list->head == NULL) == (list->tail == NULL));
+
+  if (list_is_empty(list))
+    return NULL;
+
+  list_node_t *const node = list->tail;
+  list_remove(node, list);
+
+  return node;
+}

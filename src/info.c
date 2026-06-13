@@ -99,11 +99,11 @@ info_register(const char *namespace, const char *name, info_output_type_t output
     return INFO_ALREADY_REGISTERED;
 
   struct InfoEntry *const info = io_calloc(sizeof(*info));
-  info->namespace = namespace ? strdup(namespace) : NULL;
-  info->name = strdup(name);
+  info->namespace = namespace ? io_strdup(namespace) : NULL;
+  info->name = io_strdup(name);
   info->output_type = output_type;
   info->option = option;
-  info->description = strdup(description);
+  info->description = io_strdup(description);
 
   list_node_t *node = list_make_node();
   list_add_sorted(info, node, &info_list, _info_compare);

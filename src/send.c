@@ -507,20 +507,14 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
   dbuf_ref_free(buffer);
 }
 
-/* ts_warn()
- *
- * inputs       - var args message
- * output       - NONE
- * side effects - Call sendto_clients, with some flood checking
- *                (at most 5 warnings every 5 seconds)
- */
 void
 sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
 {
-  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - *rate) < 20)
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((now - *rate) < 20)
     return;
 
-  *rate = io_time_get(IO_TIME_MONOTONIC_SEC);
+  *rate = now;
 
   char buffer[IRCD_BUFSIZE];
   va_list args;

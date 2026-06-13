@@ -584,14 +584,15 @@ res_readreply(fde_t *F, void *data)
 static void
 resolver_timeout(void *unused)
 {
-  list_node_t *node, *node_next;
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
 
+  list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    struct reslist *request = node->data;
-    uintmax_t timeout = request->sentat + request->timeout;
+    struct reslist *const request = node->data;
+    const uintmax_t timeout = request->sentat + request->timeout;
 
-    if (io_time_get(IO_TIME_MONOTONIC_SEC) >= timeout)
+    if (now >= timeout)
     {
       if (--request->retries <= 0)
       {
@@ -600,7 +601,7 @@ resolver_timeout(void *unused)
       }
       else
       {
-        request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
+        request->sentat = now;
         request->timeout += request->timeout;
         resend_query(request);
       }

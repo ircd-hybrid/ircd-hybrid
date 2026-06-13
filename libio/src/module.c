@@ -625,10 +625,11 @@ module_config_add(const char *name, bool resident, bool core)
 void
 module_config_clear(void)
 {
-  while (module_config_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&module_config_list)))
   {
-    struct ModuleConfig *const config = module_config_list.head->data;
-    list_remove(&config->node, &module_config_list);
+    struct ModuleConfig *const config = node->data;
     io_free(config->name);
     io_free(config);
   }

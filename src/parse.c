@@ -363,7 +363,7 @@ _parse_handle_unknown_command_token(parse_context_t *ctx)
    * incomplete registration states must not receive protocol replies here;
    * doing so could create noisy feedback loops.
    */
-  if (client_is_user(ctx->source))
+  if (client_is_local_user(ctx->source))
     sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, ctx->command_token);
   else if (client_is_server(ctx->source))
   {

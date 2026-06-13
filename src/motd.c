@@ -479,6 +479,6 @@ motd_memory_count(struct Client *client)
     motd_cache_bytes += cache->path ? strlen(cache->path) + 1 : 0;
   }
 
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Motds %u(%zu) Cache %u(%zu)",
+  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Motds %zu(%zu) Cache %zu(%zu)",
                      motd_count, motd_bytes, motd_cache_count, motd_cache_bytes);
 }

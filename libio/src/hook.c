@@ -92,12 +92,9 @@ hook_container_unregister(const char *name)
   if (container == NULL)
     return;
 
-  while (container->chain.head)
-  {
-    list_node_t *node = container->chain.head;
-    list_remove(node, &container->chain);
+  list_node_t *node;
+  while ((node = list_pop_head(&container->chain)))
     list_free_node(node);
-  }
 
   list_remove(&container->node, &hook_container_list);
   io_free(container->name);

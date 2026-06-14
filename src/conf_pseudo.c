@@ -165,7 +165,7 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
     .handlers[OPER_HANDLER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 
-  list_add(pseudo, &pseudo->node, &pseudo_list);
+  list_add_tail(pseudo, &pseudo->node, &pseudo_list);
 
   command_add(&pseudo->command_struct);
 }

@@ -541,7 +541,7 @@ valid_nickname(const char *nickname, bool local)
   /*
    * Nicks can't start with a digit or - or be 0 length.
    */
-  if (string_is_empty(p) || *p == '-' || (IsDigit(*p) && local))
+  if (string_is_empty(p) || *p == '-' || (local && IsDigit(*p)))
     return false;
 
   for (; *p; ++p)

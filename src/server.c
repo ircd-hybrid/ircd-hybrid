@@ -515,10 +515,10 @@ server_connect_auto(void *unused)
      * made one successfull connection... [this algorithm is
      * a bit fuzzy... -- msa >;) ]
      */
-    if (connect->autoconnect_hold_until > io_time_get(IO_TIME_MONOTONIC_SEC))
+    const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+    if (connect->autoconnect_hold_until > now)
       continue;
-
-    connect->autoconnect_hold_until = io_time_get(IO_TIME_MONOTONIC_SEC) + connect->klass->con_freq;
+    connect->autoconnect_hold_until = now + connect->klass->con_freq;
 
     if (connect->klass->ref_count >= connect->klass->max_total)
       continue;

@@ -65,7 +65,7 @@ struct OperItem *
 oper_create(void)
 {
   struct OperItem *const oper = io_calloc(sizeof(*oper));
-  list_add(oper, &oper->node, &operator_items);
+  list_add_tail(oper, &oper->node, &operator_items);
 
   return oper;
 }

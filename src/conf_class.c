@@ -56,7 +56,7 @@ class_create(void)
   klass->max_recvq = CLASS_DEFAULT_MAX_RECVQ;
   klass->ip_tree_v6 = patricia_new(PATRICIA_MAXBITS_IPV6);
   klass->ip_tree_v4 = patricia_new(PATRICIA_MAXBITS_IPV4);
-  list_add(klass, &klass->node, &class_list);
+  list_add_tail(klass, &klass->node, &class_list);
 
   return klass;
 }

@@ -29,6 +29,7 @@
  * handling and managing ISUPPORT messages within the ircd-hybrid server.
  */
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -187,7 +188,7 @@ _isupport_cmp(const void *const a_, const void *const b_)
 {
   const char *const a = ((const struct Isupport *)a_)->name;
   const char *const b = ((const struct Isupport *)b_)->name;
-  return strcmp(a, b);
+  return io_strcasecmp(a, b);
 }
 
 /**

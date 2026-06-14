@@ -53,13 +53,17 @@ ms_svspart(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !client_is_server(source))
     return;
 
-  struct Client *const target = client_find_user(source, parv[1]);
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user(source, target_name);
   if (target == NULL)
     return;
 
+  const char *const channel_name = parv[2];
+  const char *const reason = parv[3];
+
   if (client_is_local(target))
   {
-    channel_part(target, parv[2], parv[3]);
+    channel_part(target, channel_name, reason);
     return;
   }
 
@@ -71,13 +75,13 @@ ms_svspart(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (string_is_empty(parv[3]))
+  if (string_is_empty(reason))
   {
-    sendto_one_command(target, source, "SVSPART", "%s", parv[2]);
+    sendto_one_command(target, source, "SVSPART", "%s", channel_name);
     return;
   }
 
-  sendto_one_command(target, source, "SVSPART", "%s :%s", parv[2], parv[3]);
+  sendto_one_command(target, source, "SVSPART", "%s :%s", channel_name, reason);
 }
 
 static struct Command command_table =

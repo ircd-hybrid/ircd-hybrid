@@ -53,16 +53,18 @@ ms_svshost(struct Client *source, int parc, char *parv[])
   if (!client_is_service(source) && !client_is_server(source))
     return;
 
-  struct Client *const target = client_find_user(source, parv[1]);
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user(source, target_name);
   if (target == NULL)
     return;
 
-  if (!valid_hostname(parv[3]))
+  const char *const new_host = parv[3];
+  if (!valid_hostname(new_host))
     return;
 
-  user_set_hostmask(target, parv[3], false);
+  user_set_hostmask(target, new_host, false);
   sendto_servers(source, 0, 0, ":%s SVSHOST %s 0 %s",
-                 source->id, target->id, parv[3]);
+                 source->id, target->id, new_host);
 }
 
 static struct Command command_table =

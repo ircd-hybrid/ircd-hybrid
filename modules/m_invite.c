@@ -123,23 +123,25 @@ m_invite(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (string_is_empty(parv[2]))
+  const char *const channel_name = parv[2];
+  if (string_is_empty(channel_name))
   {
     sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "INVITE");
     return;
   }
 
-  struct Client *const target = client_find_user_by_name(parv[1]);
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user_by_name(target_name);
   if (target == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
     return;
   }
 
-  struct Channel *const channel = channel_find(parv[2]);
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[2]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
     return;
   }
 

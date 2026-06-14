@@ -222,11 +222,12 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   if (!client_is_server(source))
     return;
 
-  if (!channel_is_valid_name(parv[2], false))
+  const char *const channel_name = parv[2];
+  if (!channel_is_valid_name(channel_name, false))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
-                   source->name, source->nexthop->name, parv[2]);
+                   source->name, source->nexthop->name, channel_name);
     return;
   }
 
@@ -264,11 +265,11 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = 0;
 
-  struct Channel *channel = channel_find(parv[2]);
+  struct Channel *channel = channel_find(channel_name);
   if (channel == NULL)
   {
     isnew = true;
-    channel = channel_create(parv[2]);
+    channel = channel_create(channel_name);
     channel->creation_time = newts;
   }
   else if (newts < channel->creation_time)
@@ -303,7 +304,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   if (keep_our_modes == false)
   {
     /* Update channel name to be the correct case */
-    strlcpy(channel->name, parv[2], sizeof(channel->name));
+    strlcpy(channel->name, channel_name, sizeof(channel->name));
 
     sendto_channel_local(NULL, channel, 0, 0, 0,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",

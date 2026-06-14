@@ -134,34 +134,35 @@ mo_set(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (string_is_empty(parv[1]))
+  const char *const option_name = parv[1];
+  const char *const value_text = parv[2];
+
+  if (string_is_empty(option_name))
   {
     set_option_list(source);
     return;
   }
 
-  struct SetStruct *option = set_option_find(parv[1]);
+  struct SetStruct *option = set_option_find(option_name);
   if (option == NULL)
   {
-    sendto_one_notice(source, &me, ":Unknown setting '%s'. Use /QUOTE SET to list available options.", parv[1]);
+    sendto_one_notice(source, &me, ":Unknown setting '%s'. Use /QUOTE SET to list available options.", option_name);
     return;
   }
 
-  if (string_is_empty(parv[2]))
+  if (string_is_empty(value_text))
   {
     set_option(source, option, -1);
     return;
   }
 
   int value_new = -1;
-  const char *const arg = parv[2];
-  if (io_strcasecmp(arg, "yes") == 0 || io_strcasecmp(arg, "on") == 0)
+  if (io_strcasecmp(value_text, "yes") == 0 || io_strcasecmp(value_text, "on") == 0)
     value_new = 1;
-  else if (io_strcasecmp(arg, "no") == 0 || io_strcasecmp(arg, "off") == 0)
+  else if (io_strcasecmp(value_text, "no") == 0 || io_strcasecmp(value_text, "off") == 0)
     value_new = 0;
   else
-    value_new = atoi(arg);
-
+    value_new = atoi(value_text);
   if (value_new < 0)
   {
     sendto_one_notice(source, &me, ":Invalid value for '%s'. Please use a non-negative value.", option->name);

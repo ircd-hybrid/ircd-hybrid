@@ -86,16 +86,17 @@ mo_kill(struct Client *source, int parc, char *parv[])
 {
   bool from_history = false;
 
-  struct Client *const target = client_find_user_with_history(source, parv[1], &from_history);
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user_with_history(source, target_name, &from_history);
   if (target == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
     return;
   }
 
   if (from_history)
     sendto_one_notice(source, &me, ":KILL changed from %s to %s",
-                      parv[1], target->name);
+                      target_name, target->name);
 
   if (!client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL_REMOTE))
   {

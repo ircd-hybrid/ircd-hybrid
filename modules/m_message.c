@@ -124,8 +124,12 @@ target_check_limit_exceeded(struct Client *source, const char *name)
 }
 
 static void
-target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
+target_add_to_list(void *target_ptr, target_entity_t target_type, unsigned int access_rank)
 {
+  assert(target_ptr);
+  assert(target_type == TARGET_ENTITY_CHANNEL ||
+         target_type == TARGET_ENTITY_CLIENT);
+
   if (target_count >= IO_ARRAY_LENGTH(target_list))
     return;
 

@@ -89,7 +89,7 @@ connect_create(void)
   connect->active = true;
   connect->address_family = AF_INET;
 
-  list_add(connect, &connect->node, &connect_items);
+  list_add_tail(connect, &connect->node, &connect_items);
   return connect;
 }
 

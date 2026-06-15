@@ -72,7 +72,7 @@ struct GecosItem *
 gecos_make(void)
 {
   struct GecosItem *const gecos = io_calloc(sizeof(*gecos));
-  list_add(gecos, &gecos->node, &gecos_list);
+  list_add_tail(gecos, &gecos->node, &gecos_list);
 
   return gecos;
 }

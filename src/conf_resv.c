@@ -90,7 +90,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
   resv->list = list;
   resv->mask = io_strdup(mask);
   resv->reason = io_strndup(reason, REASONLEN);
-  list_add(resv, &resv->node, resv->list);
+  list_add_tail(resv, &resv->node, resv->list);
 
   if (elist)
   {
@@ -119,7 +119,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
       exempt->user = io_strdup(user);
       exempt->host = io_strdup(host);
       exempt->type = address_parse_netmask(host, &exempt->addr, &exempt->bits);
-      list_add(exempt, &exempt->node, &resv->exempt_list);
+      list_add_tail(exempt, &exempt->node, &resv->exempt_list);
     }
   }
 

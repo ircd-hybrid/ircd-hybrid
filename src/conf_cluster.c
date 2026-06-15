@@ -83,7 +83,7 @@ struct ClusterItem *
 cluster_make(void)
 {
   struct ClusterItem *const cluster = io_calloc(sizeof(*cluster));
-  list_add(cluster, &cluster->node, &cluster_list);
+  list_add_tail(cluster, &cluster->node, &cluster_list);
 
   return cluster;
 }

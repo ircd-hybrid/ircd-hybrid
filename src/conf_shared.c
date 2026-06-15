@@ -60,7 +60,7 @@ struct SharedItem *
 shared_make(void)
 {
   struct SharedItem *const shared = io_calloc(sizeof(*shared));
-  list_add(shared, &shared->node, &shared_list);
+  list_add_tail(shared, &shared->node, &shared_list);
 
   return shared;
 }

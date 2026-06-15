@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "event.h"
 #include "io_string.h"

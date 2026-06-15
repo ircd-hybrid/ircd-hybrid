@@ -24,6 +24,8 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "io_string.h"
 #include "log.h"

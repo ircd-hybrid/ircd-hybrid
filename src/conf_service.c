@@ -90,7 +90,7 @@ struct ServiceItem *
 service_make(void)
 {
   struct ServiceItem *const service = io_calloc(sizeof(*service));
-  list_add(service, &service->node, &service_list);
+  list_add_tail(service, &service->node, &service_list);
 
   return service;
 }

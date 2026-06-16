@@ -19,10 +19,13 @@
  *  USA
  */
 
-#include <jansson.h>  /**< Jansson JSON library. */
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
+
+#include <jansson.h>  /**< Jansson JSON library. */
 
 #include "event.h"
 #include "io_string.h"

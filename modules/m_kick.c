@@ -95,10 +95,12 @@ _kick_commit(struct Client *source, struct Channel *channel,
 static void
 m_kick(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *const channel = channel_find(parv[1]);
+  const char *const channel_name = parv[1];
+
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
     return;
   }
 
@@ -115,10 +117,11 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Client *const target = client_find_user_with_history(source, parv[2], NULL);
+  const char *const target_name = parv[2];
+  struct Client *const target = client_find_user_with_history(source, target_name, NULL);
   if (target == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[2]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
     return;
   }
 

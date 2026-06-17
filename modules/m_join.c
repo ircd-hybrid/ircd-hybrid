@@ -173,8 +173,6 @@ m_join(struct Client *source, int parc, char *parv[])
 static void
 ms_join(struct Client *source, int parc, char *parv[])
 {
-  bool keep_our_modes = true;
-
   if (!client_is_user(source))
     return;
 
@@ -189,6 +187,7 @@ ms_join(struct Client *source, int parc, char *parv[])
 
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = 0;
+  bool keep_our_modes = true;
 
   struct Channel *channel = channel_find(channel_name);
   if (channel == NULL)

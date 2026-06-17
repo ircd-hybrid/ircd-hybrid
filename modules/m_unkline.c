@@ -59,14 +59,14 @@ _unkline_report_removed(struct Client *source, const struct MaskItem *conf)
 static void
 _unkline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct io_addr iphost;
-  struct io_addr *piphost = NULL;
+  struct io_addr parsed_addr;
+  struct io_addr *parsed_addr_ptr = NULL;
 
-  if (address_parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
-    piphost = &iphost;
+  if (address_parse_netmask(aline->host, &parsed_addr, NULL) != HM_HOST)
+    parsed_addr_ptr = &parsed_addr;
 
   struct MaskItem *const conf =
-    find_conf_by_address(aline->host, piphost, CONF_KLINE, aline->user, NULL, 0);
+    find_conf_by_address(aline->host, parsed_addr_ptr, CONF_KLINE, aline->user, NULL, 0);
   if (conf == NULL)
   {
     if (client_is_user(source))

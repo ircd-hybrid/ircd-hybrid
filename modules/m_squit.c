@@ -93,7 +93,7 @@ _squit_report_remote_request(const struct Client *source, const struct Client *t
 static void
 mo_squit(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
+  const char *const target_name = parv[1];
   struct Client *target = NULL;
 
   /* The following allows wild cards in SQUIT. */
@@ -103,7 +103,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
     struct Client *const tmp = node->data;
     if (client_is_server(tmp))
     {
-      if (match(name, tmp->name) == 0)
+      if (match(target_name, tmp->name) == 0)
       {
         target = tmp;
         break;
@@ -113,7 +113,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
 
   if (target == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, target_name);
     return;
   }
 

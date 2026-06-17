@@ -106,10 +106,12 @@ _topic_send_current(struct Client *source, const struct Channel *channel)
 static void
 m_topic(struct Client *source, int parc, char *parv[])
 {
-  struct Channel *const channel = channel_find(parv[1]);
+  const char *const channel_name = parv[1];
+
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
     return;
   }
 

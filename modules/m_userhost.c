@@ -61,7 +61,7 @@ m_userhost(struct Client *source, int parc, char *parv[])
 
   /* :me.name 302 source->name :n1*=+u1@h1 n2=-u2@h2 ...\r\n */
   /* 1       23456            78                        9 0  */
-  size_t len = strlen(me.name) + strlen(source->name) + 10;
+  const size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   char *p = NULL;
   for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < RFC1459_MAX_USERHOST_LIST;

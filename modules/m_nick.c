@@ -287,7 +287,7 @@ nick_change_remote(struct Client *source, char *parv[])
 static void
 uid_from_server(struct Client *source, int parc, char *parv[])
 {
-  struct Client *client = client_create_remote(source);
+  struct Client *const client = client_create_remote(source);
   client->hopcount = atoi(parv[2]);
   client->tsinfo = strtoumax(parv[3], NULL, 10);
 
@@ -376,8 +376,8 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   }
 
   /* The timestamps are different */
-  bool sameuser = io_strcasecmp(target->username, parv[5]) == 0 &&
-                  io_strcasecmp(target->sockhost, parv[8]) == 0;
+  const bool sameuser = io_strcasecmp(target->username, parv[5]) == 0 &&
+                        io_strcasecmp(target->sockhost, parv[8]) == 0;
 
   /*
    * If the users are the same (loaded a client on a different server)
@@ -460,8 +460,8 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   }
 
   /* The timestamps are different */
-  bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
-                  io_strcasecmp(target->sockhost, source->sockhost) == 0;
+  const bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
+                        io_strcasecmp(target->sockhost, source->sockhost) == 0;
   if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
   {
     if (sameuser)
@@ -523,18 +523,21 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
 static void
 mr_nick(struct Client *source, int parc, char *parv[])
 {
-  if (string_is_empty(parv[1]))
+  assert(client_is_local(source));
+
+  const char *const new_nick = parv[1];
+  if (string_is_empty(new_nick))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
   char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+  strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   if (!valid_nickname(nick, true))
   {
-    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
+    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, new_nick, "Erroneous Nickname");
     return;
   }
 
@@ -570,18 +573,17 @@ mr_nick(struct Client *source, int parc, char *parv[])
 static void
 m_nick(struct Client *source, int parc, char *parv[])
 {
-  const struct ResvItem *resv = NULL;
-
   assert(client_is_local_user(source));
 
-  if (string_is_empty(parv[1]))
+  const char *const new_nick = parv[1];
+  if (string_is_empty(new_nick))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
   char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+  strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
   if (!valid_nickname(nick, true))
   {
@@ -589,6 +591,7 @@ m_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  const struct ResvItem *resv;
   if (!client_has_flag(source, FLAGS_EXEMPTRESV) &&
       !(client_is_oper(source) && client_has_oper_flag(source, OPER_FLAG_NICK_RESV)) &&
       (resv = resv_find(nick, match)))
@@ -669,11 +672,12 @@ ms_nick(struct Client *source, int parc, char *parv[])
   if (!client_is_user(source))
     return;  /* Servers and unknown clients can't change nicks. */
 
-  if (!check_clean_nick(source, parv[1]))
+  const char *const new_nick = parv[1];
+  if (!check_clean_nick(source, new_nick))
     return;
 
   /* If the nick doesn't exist, allow it and process like normal. */
-  struct Client *const target = client_find_entity_by_name(parv[1]);
+  struct Client *const target = client_find_entity_by_name(new_nick);
   if (target == NULL)
     nick_change_remote(source, parv);
   else if (client_is_unknown(target))
@@ -685,7 +689,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
   }
   else if (target == source)
   {
-    if (strcmp(target->name, parv[1]))
+    if (strcmp(target->name, new_nick))
       nick_change_remote(source, parv);
   }
   else if (perform_nick_change_collides(source, target, parc, parv))

@@ -494,7 +494,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     char *bufptr = buf;
     /* :me.name 353 client->name @ channel->name :+nick1 @nick2 %nick3 ...\r\n */
     /* 1       23456            789             01                        2 3  */
-    size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
+    const size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
     list_node_t *node;
     LIST_FOREACH(node, channel->members.head)

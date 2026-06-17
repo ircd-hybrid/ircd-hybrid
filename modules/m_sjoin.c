@@ -208,17 +208,6 @@ remove_ban_list(struct Channel *channel, const char *origin_name, list_t *list, 
 static void
 ms_sjoin(struct Client *source, int parc, char *parv[])
 {
-  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
-  int args = 0;
-  bool isnew = false;
-  bool keep_our_modes = true;
-  bool keep_new_modes = true;
-  char modebuf[MODEBUFLEN] = "";
-  char parabuf[MODEBUFLEN] = "";
-  char *mbuf = modebuf;
-  char *pbuf = parabuf;
-  unsigned int pargs = 0;
-
   if (!client_is_server(source))
     return;
 
@@ -231,6 +220,8 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     return;
   }
 
+  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
+  int args = 0;
   for (const char *modes = parv[3]; *modes; ++modes)
   {
     switch (*modes)
@@ -253,8 +244,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
       default:
       {
-        const struct chan_mode *cmode = cmode_map[(unsigned char)*modes];
-
+        const struct chan_mode *const cmode = cmode_map[(unsigned char)*modes];
         if (cmode)
           mode.mode |= cmode->mode;
         break;
@@ -264,7 +254,10 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
   uintmax_t newts = strtoumax(parv[1], NULL, 10);
   uintmax_t oldts = 0;
+  bool keep_our_modes = true;
+  bool keep_new_modes = true;
 
+  bool isnew = false;
   struct Channel *channel = channel_find(channel_name);
   if (channel == NULL)
   {
@@ -295,6 +288,8 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
       strlcpy(mode.key, oldmode->key, sizeof(mode.key));
   }
 
+  char modebuf[MODEBUFLEN] = "";
+  char parabuf[MODEBUFLEN] = "";
   set_final_mode(&mode, oldmode, modebuf, parabuf);
   channel->mode = mode;
 
@@ -333,6 +328,9 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin_name, channel->name, modebuf, parabuf);
 
+  char *mbuf = modebuf;
+  char *pbuf = parabuf;
+  unsigned int pargs = 0;
 
   char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
   const size_t buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
@@ -340,7 +338,6 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                                  channel_modes(channel, source, true));
   char *uid_ptr = uid_buf + buflen;
   char *const uid_buf_start = uid_ptr;
-
 
   char *list = parv[args + 4], *p = NULL;
   for (const char *s = strtok_r(list, " ", &p); s;

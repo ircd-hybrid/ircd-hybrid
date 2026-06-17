@@ -55,7 +55,7 @@ m_ison(struct Client *source, int parc, char *parv[])
 
   /* :me.name 303 source->name :nick1 nick2 ...      \r\n */
   /* 1       23456            78                     9 0  */
-  size_t len = strlen(me.name) + strlen(source->name) + 10;
+  const size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   char *p = NULL;
   for (const char *name = strtok_r(parv[1], " ", &p); name;

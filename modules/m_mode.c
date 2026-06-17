@@ -49,11 +49,13 @@
 static void
 set_user_mode(struct Client *source, int parc, char *parv[])
 {
-  const struct Client *const target = client_find_user(source, parv[1]);
+  const char *const target_name = parv[1];
+
+  const struct Client *const target = client_find_user(source, target_name);
   if (target == NULL)
   {
     if (client_is_local(source))
-      sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
+      sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, target_name);
     return;
   }
 

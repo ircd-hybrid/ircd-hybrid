@@ -409,7 +409,9 @@ chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, 
     return;
 
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one_numeric(client, &me, ERR_UNKNOWNMODE, c);
+
+  if (client_is_local_user(client))
+    sendto_one_numeric(client, &me, ERR_UNKNOWNMODE, c);
 }
 
 static void

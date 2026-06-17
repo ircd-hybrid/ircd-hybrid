@@ -180,6 +180,26 @@ _command_tree_del_element(struct CommandTree *tree, const char *const name)
   }
 }
 
+static bool
+_command_name_is_valid_char(unsigned char ch)
+{
+  return (ch >= 'A' && ch <= 'Z') ||
+         (ch >= 'a' && ch <= 'z');
+}
+
+static bool
+_command_name_is_valid(const char *name)
+{
+  if (string_is_empty(name))
+    return false;
+
+  for (const unsigned char *p = (const unsigned char *)name; *p; ++p)
+    if (!_command_name_is_valid_char(*p))
+      return false;
+
+  return true;
+}
+
 static struct Command *
 _command_tree_find(const char *name)
 {
@@ -190,7 +210,7 @@ _command_tree_find(const char *name)
 
   while (*name)
   {
-    if (!IsAlpha(*name))
+    if (!_command_name_is_valid_char(*name))
       return NULL;
 
     tree = tree->pointers[_command_trie_index(*name)];
@@ -209,6 +229,9 @@ command_add(struct Command *command)
   assert(command);
   assert(command->name);
 
+  if (!_command_name_is_valid(command->name))
+    return;
+
   /* Command already added? */
   if (_command_tree_find(command->name) == NULL)
     _command_tree_add_element(&command_tree, command, command->name);
@@ -219,6 +242,9 @@ command_del(struct Command *command)
 {
   assert(command);
   assert(command->name);
+
+  if (!_command_name_is_valid(command->name))
+    return;
 
   if (_command_tree_find(command->name))
     _command_tree_del_element(&command_tree, command->name);

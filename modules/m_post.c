@@ -27,6 +27,7 @@
 #include "module.h"
 
 #include "client.h"
+#include "client_format.h"
 #include "send.h"
 #include "parse.h"
 
@@ -43,9 +44,13 @@
 static void
 mr_dumb_proxy(struct Client *source, int parc, char *parv[])
 {
-  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "HTTP Proxy disconnected: [%s@%s]",
-                 source->username, source->host);
-  client_exit(source, "Client Exit");
+  client_format_name_buffer_t source_name_buffer;
+  const char *const source_name =
+    client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer);
+
+  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "HTTP request rejected from %s", source_name);
+  client_exit(source, "HTTP request on IRC port");
 }
 
 static struct Command command_table[] =

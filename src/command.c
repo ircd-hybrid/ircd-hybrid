@@ -50,12 +50,12 @@
  * BUGS (Limitations!)
  *
  * I designed this trie to parse ircd commands. Hence it currently
- * casefolds. This is trivial to fix by increasing MAXPTRLEN.
+ * casefolds. This is trivial to fix by increasing COMMAND_TRIE_CHILD_COUNT.
  * This trie also "folds" '{' etc. down. This means, the input to this
  * trie must be alpha tokens only. This again, is a limitation that
- * can be overcome by increasing MAXPTRLEN to include upper/lower case
+ * can be overcome by increasing COMMAND_TRIE_CHILD_COUNT to include upper/lower case
  * at the expense of more memory. At the extreme end, you could make
- * MAXPTRLEN 128.
+ * COMMAND_TRIE_CHILD_COUNT 128.
  *
  * This is also not a patricia trie. On short ircd tokens, this is
  * not likely going to matter.
@@ -66,14 +66,14 @@
 /*
  * Must be a power of 2, and larger than 26 [a-z]|[A-Z]. It's used to allocate
  * the set of pointers at each node of the tree.
- * There are MAXPTRLEN pointers at each node. Obviously, there have to be more
+ * There are COMMAND_TRIE_CHILD_COUNT pointers at each node. Obviously, there have to be more
  * pointers than ASCII letters. 32 is a nice number since there is then no need
  * to shift 'A'/'a' to base 0 index, at the expense of a few never used
  * pointers.
  * For a small parser like this, this is a good compromise and does
  * make it somewhat faster. - Dianora
  */
-enum { MAXPTRLEN = 32 };
+enum { COMMAND_TRIE_CHILD_COUNT = 32 };
 
 struct CommandTree
 {
@@ -81,10 +81,16 @@ struct CommandTree
               * used as reference count for deletion of _this_ node.
               */
   struct Command *command;
-  struct CommandTree *pointers[MAXPTRLEN];
+  struct CommandTree *pointers[COMMAND_TRIE_CHILD_COUNT];
 };
 
 static struct CommandTree command_tree;
+
+static unsigned int
+_command_trie_index(const char ch)
+{
+  return (unsigned char)ch & (COMMAND_TRIE_CHILD_COUNT - 1);
+}
 
 /*
  * How this works.
@@ -109,16 +115,17 @@ _command_tree_add_element(struct CommandTree *tree, struct Command *command, con
   else
   {
     /*
-     * *name & (MAXPTRLEN-1)
+     * *name & (COMMAND_TRIE_CHILD_COUNT - 1)
      * convert the char pointed to at *name from ASCII to an integer
-     * between 0 and MAXPTRLEN.
+     * between 0 and COMMAND_TRIE_CHILD_COUNT.
      * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
      */
-    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    const unsigned int index = _command_trie_index(*name);
+    struct CommandTree *current = tree->pointers[index];
     if (current == NULL)
     {
       current = io_calloc(sizeof(*current));
-      tree->pointers[*name & (MAXPTRLEN - 1)] = current;
+      tree->pointers[index] = current;
       tree->links++;  /* Have new pointer, so up ref count */
     }
 
@@ -157,14 +164,15 @@ _command_tree_del_element(struct CommandTree *tree, const char *const name)
   }
   else
   {
-    struct CommandTree *const current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    const unsigned int index = _command_trie_index(*name);
+    struct CommandTree *const current = tree->pointers[index];
     if (current)
     {
       _command_tree_del_element(current, name + 1);
 
       if (current->links == 0)
       {
-        tree->pointers[*name & (MAXPTRLEN - 1)] = NULL;
+        tree->pointers[index] = NULL;
         tree->links--;
         io_free(current);
       }
@@ -175,16 +183,24 @@ _command_tree_del_element(struct CommandTree *tree, const char *const name)
 static struct Command *
 _command_tree_find(const char *name)
 {
-  assert(!string_is_empty(name));
+  if (string_is_empty(name))
+    return NULL;
 
   struct CommandTree *tree = &command_tree;
-  while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
+
+  while (*name)
   {
-    if (*++name == '\0')
-      return tree->command;
+    if (!IsAlpha(*name))
+      return NULL;
+
+    tree = tree->pointers[_command_trie_index(*name)];
+    if (tree == NULL)
+      return NULL;
+
+    ++name;
   }
 
-  return NULL;
+  return tree->command;
 }
 
 void
@@ -257,7 +273,7 @@ command_report(struct Client *client)
                          current->command->ecount);
 
     /* Push non-null pointers onto the stack in descending order. */
-    for (int i = MAXPTRLEN - 1; i >= 0; --i)
+    for (int i = COMMAND_TRIE_CHILD_COUNT - 1; i >= 0; --i)
     {
       const struct CommandTree *const ptr = current->pointers[i];
       if (ptr)

@@ -27,6 +27,8 @@
 #define INCLUDED_channel_invite_h
 #include <stdint.h>
 
+#include "list.h"
+
 /** Invite structure */
 struct Invite
 {

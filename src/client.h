@@ -402,6 +402,12 @@ client_is_local_user(const struct Client *client)
 }
 
 static inline bool
+client_is_local_server(const struct Client *client)
+{
+  return client_is_local(client) && client_is_server(client);
+}
+
+static inline bool
 client_is_oper(const struct Client *client)
 {
   return user_mode_has_flag(client, UMODE_OPER);

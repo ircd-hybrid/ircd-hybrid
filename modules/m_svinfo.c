@@ -83,7 +83,7 @@ _svinfo_report_link_status(struct Client *link, bool write_log, const char *stat
 static void
 ms_svinfo(struct Client *source, int parc, char *parv[])
 {
-  if (!client_is_server(source) || !client_is_local(source))
+  if (!client_is_local_server(source))
     return;
 
   server_ts_protocol_version_t current_version = atoi(parv[1]);

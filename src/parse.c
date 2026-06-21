@@ -38,6 +38,7 @@
 #include "client_id.h"
 #include "client_input.h"
 #include "conf.h"
+#include "command.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "packet.h"
@@ -353,12 +354,6 @@ _parse_token_is_numeric(const char *token, size_t token_len)
   return token_len == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
 }
 
-enum
-{
-  PARSE_UNKNOWN_COMMAND_REPLY_MAX = 32,
-  PARSE_UNKNOWN_COMMAND_REPLY_SIZE = PARSE_UNKNOWN_COMMAND_REPLY_MAX + 1
-};
-
 static void
 _parse_handle_unknown_command_token(parse_context_t *ctx)
 {
@@ -377,7 +372,7 @@ _parse_handle_unknown_command_token(parse_context_t *ctx)
      * Bound the reflected token so an oversized unknown command cannot bloat
      * the ERR_UNKNOWNCOMMAND reply.
      */
-    char reply_token[PARSE_UNKNOWN_COMMAND_REPLY_SIZE];
+    char reply_token[COMMAND_NAME_BUFFER_SIZE];
     strlcpy(reply_token, ctx->command_token, sizeof(reply_token));
 
     sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNCOMMAND, reply_token);

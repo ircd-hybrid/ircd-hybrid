@@ -193,6 +193,9 @@ _command_name_is_valid(const char *name)
   if (string_is_empty(name))
     return false;
 
+  if (strlen(name) > COMMAND_NAME_LENGTH_MAX)
+    return false;
+
   for (const unsigned char *p = (const unsigned char *)name; *p; ++p)
     if (!_command_name_is_valid_char(*p))
       return false;

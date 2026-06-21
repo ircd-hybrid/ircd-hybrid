@@ -26,6 +26,11 @@
 
 struct Client;
 
+enum
+{
+  COMMAND_NAME_LENGTH_MAX = 32,
+  COMMAND_NAME_BUFFER_SIZE = COMMAND_NAME_LENGTH_MAX + 1
+};
 
 /*
  * m_functions execute protocol messages on this server:

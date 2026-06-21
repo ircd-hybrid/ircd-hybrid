@@ -48,17 +48,19 @@ struct Client;
  * note: it is guaranteed that parv[0]..parv[parc - 1] are all
  * non-NULL pointers.
  */
+typedef void (*command_handler_fn)(struct Client *source, int parc, char *parv[]);
+
 
 /** Enumerated type for client command handlers. */
-typedef enum HandlerType
+enum command_handler_type
 {
-  UNREGISTERED_HANDLER,  /**< Used for unregistered clients. */
-  CLIENT_HANDLER,  /**< Used for local users. */
-  SERVER_HANDLER,  /**< Used for server connections. */
-  ENCAP_HANDLER,  /**< Used for encapsulated commands (ENCAP). */
-  OPER_HANDLER,  /**< Used for IRC operators. */
-  LAST_HANDLER_TYPE,  /**< Number of handler types. */
-} HandlerType;
+  COMMAND_HANDLER_UNREGISTERED,  /**< Used for unregistered clients. */
+  COMMAND_HANDLER_USER,  /**< Used for local users. */
+  COMMAND_HANDLER_SERVER,  /**< Used for server connections. */
+  COMMAND_HANDLER_ENCAP,  /**< Used for encapsulated commands (ENCAP). */
+  COMMAND_HANDLER_OPER,  /**< Used for IRC operators. */
+  COMMAND_HANDLER_TYPE_COUNT,  /**< Number of handler types. */
+};
 
 struct CommandHandler
 {
@@ -68,7 +70,7 @@ struct CommandHandler
                                be sent to the user before the m_func is even called */
   unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
                                of the message will be put into this last parameter */
-  void (*handler)(struct Client *, int, char *[]);  /**< Command handler function. */
+  command_handler_fn handler;  /**< Command handler function. */
 };
 
 /*
@@ -86,7 +88,7 @@ struct Command
   /* handlers:
    * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
    */
-  struct CommandHandler handlers[LAST_HANDLER_TYPE];
+  struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];
 };
 
 extern void command_add(struct Command *);

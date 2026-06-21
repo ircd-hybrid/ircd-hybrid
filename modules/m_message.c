@@ -501,19 +501,19 @@ static struct Command command_table[] =
 {
   [0] = {
     .name = "PRIVMSG",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
-    .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_privmsg, .end_grace_period = true },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_privmsg },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_privmsg, .end_grace_period = true }
   },
   [1] = {
     .name = "NOTICE",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = m_notice },
-    .handlers[SERVER_HANDLER] = { .handler = m_notice },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_notice }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_notice },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_notice },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_notice }
   }
 };
 

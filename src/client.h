@@ -197,7 +197,7 @@ struct Client
   uint64_t umodes;  /**< User modes this user has set */
 
   enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_USER, CLIENT_STATE_SERVER). */
-  unsigned int handler;  /**< The dispatch index for the command handler table based on client state. */
+  enum command_handler_type handler;  /**< Command handler table index derived from the client's state. */
 
   list_t whowas_list;  /**< Historical records for this users's previous nicks. */
   list_t channel_list;  /**< List of channels this user is a member of. */

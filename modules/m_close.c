@@ -76,11 +76,11 @@ mo_close(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "CLOSE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_close }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_close }
 };
 
 static void

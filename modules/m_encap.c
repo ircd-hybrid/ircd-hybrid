@@ -78,7 +78,7 @@ ms_encap(struct Client *source, int parc, char *parv[])
   if (command == NULL)
     return;
 
-  const struct CommandHandler *const handler = &command->handlers[ENCAP_HANDLER];
+  const struct CommandHandler *const handler = &command->handlers[COMMAND_HANDLER_ENCAP];
   command->bytes += strlen(buf);
   command->ecount++;
 
@@ -96,11 +96,11 @@ ms_encap(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "ENCAP",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_encap, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_encap, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
 };
 
 static void

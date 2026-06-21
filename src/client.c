@@ -221,17 +221,17 @@ client_set_state(struct Client *client, enum client_state state)
     case CLIENT_STATE_CONNECTING:
     case CLIENT_STATE_HANDSHAKE:
     case CLIENT_STATE_ME:
-      client->handler = UNREGISTERED_HANDLER;
+      client->handler = COMMAND_HANDLER_UNREGISTERED;
       break;
     case CLIENT_STATE_SERVER:
-      client->handler = SERVER_HANDLER;
+      client->handler = COMMAND_HANDLER_SERVER;
       break;
     case CLIENT_STATE_USER:
-      client->handler = CLIENT_HANDLER;
+      client->handler = COMMAND_HANDLER_USER;
       break;
     default:
       assert(!"invalid client state");
-      client->handler = UNREGISTERED_HANDLER;
+      client->handler = COMMAND_HANDLER_UNREGISTERED;
       break;
   }
 }

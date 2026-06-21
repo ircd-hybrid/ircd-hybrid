@@ -174,11 +174,11 @@ ms_unkline(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "UNKLINE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_unkline, .args_min = 4 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_unkline, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_unkline, .args_min = 4 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_unkline, .args_min = 2 }
 };
 
 static void

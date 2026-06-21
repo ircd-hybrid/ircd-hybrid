@@ -57,27 +57,27 @@ static struct Command command_table[] =
 {
   [0] = {
     .name = "GET",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
   },
   [1] = {
     .name = "POST",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
   },
   [2] = {
     .name = "PUT",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
   }
 };
 

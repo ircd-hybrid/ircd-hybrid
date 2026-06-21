@@ -266,11 +266,11 @@ ms_join(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "JOIN",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_join, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = ms_join, .args_min = 4 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_join, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_join, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_join, .args_min = 4 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_join, .args_min = 2 }
 };
 
 static void

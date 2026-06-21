@@ -63,11 +63,11 @@ ms_resync(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "RESYNC",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered  },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_resync, .args_min = 2 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered  },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_resync, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
 };
 
 static void

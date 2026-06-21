@@ -361,11 +361,11 @@ mo_whois(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "WHOIS",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_whois },
-  .handlers[SERVER_HANDLER] = { .handler = mo_whois },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_whois }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_whois },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = mo_whois },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_whois }
 };
 
 static void

@@ -223,7 +223,7 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
   assert(command->name);
   assert(source);
   assert(source->nexthop);
-  assert(source->nexthop->handler < LAST_HANDLER_TYPE);
+  assert(source->nexthop->handler < COMMAND_HANDLER_TYPE_COUNT);
   assert(parv);
   assert(parc > 0);
   assert(parc <= PARSE_MAX_PARAMETERS + 1);
@@ -501,7 +501,7 @@ _parse_get_parameter_limit(const parse_context_t *ctx)
   assert(ctx->command);
   assert(ctx->source);
   assert(ctx->source->nexthop);
-  assert(ctx->source->nexthop->handler < LAST_HANDLER_TYPE);
+  assert(ctx->source->nexthop->handler < COMMAND_HANDLER_TYPE_COUNT);
 
   const struct CommandHandler *const handler = &ctx->command->handlers[ctx->source->nexthop->handler];
   if (handler->args_max == 0)
@@ -612,7 +612,7 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
   assert(*buffer_end == '\0');
   assert(client && client_is_local(client));
   assert(client->nexthop);
-  assert(client->handler < LAST_HANDLER_TYPE);
+  assert(client->handler < COMMAND_HANDLER_TYPE_COUNT);
   assert(client->connection->fd);
   assert(client->connection->fd->flags.open);
   assert(!client_is_dead(client));

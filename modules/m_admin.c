@@ -112,11 +112,11 @@ ms_admin(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "ADMIN",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_admin },
-  .handlers[SERVER_HANDLER] = { .handler = ms_admin },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = ms_admin }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_admin },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_admin },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = ms_admin }
 };
 
 static void

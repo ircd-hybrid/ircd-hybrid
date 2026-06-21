@@ -50,7 +50,6 @@ struct Client;
  */
 typedef void (*command_handler_fn)(struct Client *source, int parc, char *parv[]);
 
-
 /** Enumerated type for client command handlers. */
 enum command_handler_type
 {
@@ -84,11 +83,7 @@ struct Command
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
   size_t bytes;  /**< Bytes received for this command */
-
-  /* handlers:
-   * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
-   */
-  struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];
+  struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];  /**< Command dispatch handlers. */
 };
 
 extern void command_add(struct Command *);

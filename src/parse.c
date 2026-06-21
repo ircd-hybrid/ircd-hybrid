@@ -631,32 +631,3 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
 
   _parse_dispatch_handler(&ctx);
 }
-
-/* m_not_oper()
- * inputs	-
- * output	-
- * side effects	- just returns a nastyogram to given user
- */
-void
-m_not_oper(struct Client *source, int parc, char *parv[])
-{
-  sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
-}
-
-void
-m_unregistered(struct Client *source, int parc, char *parv[])
-{
-  sendto_one_numeric(source, &me, ERR_NOTREGISTERED);
-}
-
-void
-m_registered(struct Client *source, int parc, char *parv[])
-{
-  sendto_one_numeric(source, &me, ERR_ALREADYREGISTRED);
-}
-
-void
-m_ignore(struct Client *source, int parc, char *parv[])
-{
-  return;
-}

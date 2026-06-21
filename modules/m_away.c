@@ -181,10 +181,10 @@ ms_away(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "AWAY",
-  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
   .handlers[COMMAND_HANDLER_USER] = { .handler = m_away },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_away },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_OPER] = { .handler = m_away }
 };
 

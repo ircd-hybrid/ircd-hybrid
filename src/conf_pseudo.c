@@ -158,10 +158,10 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
     .extra = pseudo,
-    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
     .handlers[COMMAND_HANDLER_USER] = { .handler = _pseudo_message_handler, .args_max = 2 },
-    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
     .handlers[COMMAND_HANDLER_OPER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 

@@ -66,11 +66,11 @@ ms_tmode(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "TMODE",
-  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_tmode, .args_min = 4 },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
 static void

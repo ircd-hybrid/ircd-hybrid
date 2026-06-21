@@ -501,18 +501,18 @@ static struct Command command_table[] =
 {
   [0] = {
     .name = "PRIVMSG",
-    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
     .handlers[COMMAND_HANDLER_USER] = { .handler = m_privmsg, .end_grace_period = true },
     .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_privmsg },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
     .handlers[COMMAND_HANDLER_OPER] = { .handler = m_privmsg, .end_grace_period = true }
   },
   [1] = {
     .name = "NOTICE",
-    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
     .handlers[COMMAND_HANDLER_USER] = { .handler = m_notice },
     .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_notice },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
     .handlers[COMMAND_HANDLER_OPER] = { .handler = m_notice }
   }
 };

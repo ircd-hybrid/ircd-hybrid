@@ -315,3 +315,27 @@ command_report(struct Client *client)
     }
   }
 }
+
+void
+command_handler_reject_not_oper(struct Client *source, int parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
+}
+
+void
+command_handler_reject_not_registered(struct Client *source, int parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_NOTREGISTERED);
+}
+
+void
+command_handler_reject_already_registered(struct Client *source, int parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_ALREADYREGISTRED);
+}
+
+void
+command_handler_ignore(struct Client *source, int parc, char *parv[])
+{
+  return;
+}

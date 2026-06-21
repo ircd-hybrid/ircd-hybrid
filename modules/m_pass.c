@@ -59,10 +59,10 @@ static struct Command command_table =
 {
   .name = "PASS",
   .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_pass, .args_min = 2 },
-  .handlers[COMMAND_HANDLER_USER] = { .handler = m_registered },
-  .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_registered }
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_already_registered },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_reject_already_registered }
 };
 
 static void

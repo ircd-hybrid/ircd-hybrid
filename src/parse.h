@@ -31,10 +31,4 @@
 enum { PARSE_MAX_PARAMETERS = 15 };
 
 extern void parse_message(struct Client *, char *, const char *);
-
-/* generic handlers */
-extern void m_ignore(struct Client *, int, char *[]);
-extern void m_not_oper(struct Client *, int, char *[]);
-extern void m_registered(struct Client *, int, char *[]);
-extern void m_unregistered(struct Client *, int, char *[]);
 #endif  /* INCLUDED_parse_h */

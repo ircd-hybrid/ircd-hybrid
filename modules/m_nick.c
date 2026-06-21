@@ -770,16 +770,16 @@ static struct Command command_table[] =
     .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_nick },
     .handlers[COMMAND_HANDLER_USER] = { .handler = m_nick, .end_grace_period = true },
     .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_nick, .args_min = 3 },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
     .handlers[COMMAND_HANDLER_OPER] = { .handler = m_nick }
   },
   [1] = {
     .name = "UID",
-    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
     .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_uid, .args_min = 12 },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   }
 };
 

@@ -104,10 +104,10 @@ static struct Command command_table =
 {
   .name = "ERROR",
   .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_error },
-  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_error },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
 static void

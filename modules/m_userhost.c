@@ -105,10 +105,10 @@ m_userhost(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "USERHOST",
-  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
   .handlers[COMMAND_HANDLER_USER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 },
-  .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_OPER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 }
 };
 

@@ -301,10 +301,10 @@ ms_info(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "INFO",
-  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_unregistered },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
   .handlers[COMMAND_HANDLER_USER] = { .handler = m_info },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_info },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_OPER] = { .handler = ms_info }
 };
 

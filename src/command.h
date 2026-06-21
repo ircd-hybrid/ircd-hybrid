@@ -97,4 +97,8 @@ extern void command_del(struct Command *);
 extern void command_del_array(struct Command *, size_t);
 extern void command_report(struct Client *);
 extern struct Command *command_find(const char *);
+extern void command_handler_ignore(struct Client *, int, char *[]);
+extern void command_handler_reject_not_oper(struct Client *, int, char *[]);
+extern void command_handler_reject_not_registered(struct Client *, int, char *[]);
+extern void command_handler_reject_already_registered(struct Client *, int, char *[]);
 #endif  /* INCLUDED_command_h */

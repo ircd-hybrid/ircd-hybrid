@@ -58,26 +58,26 @@ static struct Command command_table[] =
   [0] = {
     .name = "GET",
     .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
-    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   },
   [1] = {
     .name = "POST",
     .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
-    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   },
   [2] = {
     .name = "PUT",
     .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
-    .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   }
 };
 

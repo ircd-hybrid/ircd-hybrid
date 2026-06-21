@@ -386,8 +386,8 @@ static struct Command command_table =
   .name = "CAP",
   .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_cap, .args_min = 2 },
   .handlers[COMMAND_HANDLER_USER] = { .handler = m_cap, .args_min = 2 },
-  .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_OPER] = { .handler = m_cap, .args_min = 2 }
 };
 

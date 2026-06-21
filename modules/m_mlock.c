@@ -109,11 +109,11 @@ ms_mlock(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "MLOCK",
-  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
-  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
 static void

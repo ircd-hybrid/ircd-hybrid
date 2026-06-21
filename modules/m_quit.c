@@ -79,7 +79,7 @@ static struct Command command_table =
   .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_quit },
   .handlers[COMMAND_HANDLER_USER] = { .handler = m_quit },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_quit },
-  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = m_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_OPER] = { .handler = m_quit }
 };
 

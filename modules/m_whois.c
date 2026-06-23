@@ -99,9 +99,9 @@ _whois_get_channel_visibility(const struct Channel *channel, const struct Client
 }
 
 static const char *
-_whois_get_channel_visibility_prefix(whois_channel_visibility_t vis)
+_whois_get_channel_visibility_prefix(whois_channel_visibility_t visibility)
 {
-  switch (vis)
+  switch (visibility)
   {
     case WHOIS_CHANNEL_VISIBILITY_LIMITED:
       return "?";
@@ -215,9 +215,9 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
   LIST_FOREACH(node, target->svstag_list.head)
   {
     const struct ServicesTag *const svstag = node->data;
-    if (svstag->numeric == RPL_WHOISOPERATOR)
-      if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
-        continue;
+    if (svstag->numeric == RPL_WHOISOPERATOR &&
+        user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+      continue;
 
     if (svstag->umodes == 0 || user_mode_has_flag(source, svstag->umodes))
       sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
@@ -236,30 +236,27 @@ _whois_send_modes_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_idle_numeric(struct Client *source, const struct Client *target)
 {
-  if (client_is_local(target))
-    if (!user_mode_has_flag(target, UMODE_HIDEIDLE) || client_is_oper(source) || source == target)
-      sendto_one_numeric(source, &me, RPL_WHOISIDLE,
-                         target->name, client_get_idle_time(source, target), target->connection->created_real);
+  if (!client_is_local(target))
+    return;
+
+  if (!user_mode_has_flag(target, UMODE_HIDEIDLE) || client_is_oper(source) || source == target)
+    sendto_one_numeric(source, &me, RPL_WHOISIDLE,
+                       target->name, client_get_idle_time(source, target), target->connection->created_real);
 }
 
 static void
 _whois_send_target_reply(struct Client *source, struct Client *target)
 {
   _whois_send_user_numeric(source, target);
-
   _whois_send_host_numeric(source, target);
-
   _whois_send_channels_numeric(source, target);
-
   _whois_send_server_numeric(source, target);
-
   _whois_send_away_numeric(source, target);
-
   _whois_send_operator_numeric(source, target);
-
   _whois_send_modes_numeric(source, target);
 
-  hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
+  hook_dispatch(ircd_hook_whois_send,
+                &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
 
   _whois_send_idle_numeric(source, target);
 }

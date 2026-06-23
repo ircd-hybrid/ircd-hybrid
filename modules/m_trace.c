@@ -45,20 +45,21 @@
 #include "server.h"
 
 static void
-_trace_count_server_dependents(uint32_t *const server_count, uint32_t *const user_count, const struct Client *target)
+_trace_count_server_dependents(const struct Client *target,
+                               uint32_t *const server_count, uint32_t *const user_count)
 {
   (*server_count)++;
   (*user_count) += list_length(&target->server->child_user_list);
 
   list_node_t *node;
   LIST_FOREACH(node, target->server->child_server_list.head)
-    _trace_count_server_dependents(server_count, user_count, node->data);
+    _trace_count_server_dependents(node->data, server_count, user_count);
 }
 
 static void
 _trace_send_target_status(struct Client *source, const struct Client *target)
 {
-  const char *class_name = client_get_class_name(target);
+  const char *const class_name = client_get_class_name(target);
 
   client_format_name_buffer_t target_name_buffer;
   const char *const target_name =
@@ -95,7 +96,7 @@ _trace_send_target_status(struct Client *source, const struct Client *target)
     {
       uint32_t server_count = 0;
       uint32_t user_count = 0;
-      _trace_count_server_dependents(&server_count, &user_count, target);
+      _trace_count_server_dependents(target, &server_count, &user_count);
 
       client_format_name_buffer_t masked_target_name_buffer;
       const char *const visible_target_name =

@@ -144,16 +144,18 @@ report_shared(struct Client *client)
   list_node_t *node;
   LIST_FOREACH(node, shared_get_list()->head)
   {
-    const struct SharedItem *shared = node->data;
+    const struct SharedItem *const shared = node->data;
     char *bufptr = buf;
 
     *bufptr++ = 'c';
 
     for (const struct shared_types *tab = flag_table; tab->type; ++tab)
+    {
       if (tab->type & shared->type)
         *bufptr++ = tab->letter;
       else
         *bufptr++ = io_ascii_to_lower(tab->letter);
+    }
 
     *bufptr = '\0';
 
@@ -187,16 +189,18 @@ report_cluster(struct Client *client)
   list_node_t *node;
   LIST_FOREACH(node, cluster_get_list()->head)
   {
-    const struct ClusterItem *cluster = node->data;
+    const struct ClusterItem *const cluster = node->data;
     char *bufptr = buf;
 
     *bufptr++ = 'C';
 
     for (const struct cluster_types *tab = flag_table; tab->type; ++tab)
+    {
       if (tab->type & cluster->type)
         *bufptr++ = tab->letter;
       else
         *bufptr++ = io_ascii_to_lower(tab->letter);
+    }
 
     *bufptr = '\0';
 
@@ -211,7 +215,7 @@ stats_service(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, service_get_list()->head)
   {
-    const struct ServiceItem *service = node->data;
+    const struct ServiceItem *const service = node->data;
     sendto_one_numeric(client, &me, RPL_STATSSERVICE, "*", service->name, 0, 0);
   }
 }
@@ -223,7 +227,7 @@ stats_gecos(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, gecos_get_list()->head)
   {
-    const struct GecosItem *gecos = node->data;
+    const struct GecosItem *const gecos = node->data;
     sendto_one_numeric(client, &me, RPL_STATSXLINE,
                        gecos->expires_at ? 'x' : 'X', gecos->mask, gecos->reason);
   }
@@ -241,7 +245,7 @@ stats_operator(struct Client *client, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, oper_get_list()->head)
   {
-    const struct OperItem *oper = node->data;
+    const struct OperItem *const oper = node->data;
     if (client_is_oper(client))  /* Don't allow non opers to see oper privs */
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
                          oper->name, oper_privs_as_string(oper->oper_privs),
@@ -261,8 +265,8 @@ stats_connect(struct Client *client, int parc, char *parv[])
   {
     char buf[8];
     char *bufptr = buf;
-    const struct ConnectItem *const connect = node->data;
 
+    const struct ConnectItem *const connect = node->data;
     if (connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
       *bufptr++ = 'A';
     if (connect->flags & CONNECT_FLAG_USE_TLS)
@@ -272,7 +276,8 @@ stats_connect(struct Client *client, int parc, char *parv[])
 
     *bufptr = '\0';
 
-    const char *visible_host = client_is_admin(client) ? connect->host : "*@127.0.0.1";
+    const char *const visible_host =
+      client_is_admin(client) ? connect->host : "*@127.0.0.1";
     sendto_one_numeric(client, &me, RPL_STATSCLINE,
                        'C', visible_host, buf, connect->name, connect->port, connect->klass->name,
                        connect->active ? "active" : "disabled");
@@ -286,14 +291,14 @@ stats_resv(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, resv_chan_get_list()->head)
   {
-    const struct ResvItem *resv = node->data;
+    const struct ResvItem *const resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expires_at ? 'q' : 'Q', resv->mask, resv->reason);
   }
 
   LIST_FOREACH(node, resv_nick_get_list()->head)
   {
-    const struct ResvItem *resv = node->data;
+    const struct ResvItem *const resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expires_at ? 'q' : 'Q', resv->mask, resv->reason);
   }
@@ -352,7 +357,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
   /* Count up all members, invites, ban lists, except lists, Invex lists */
   LIST_FOREACH(node, channel_get_list()->head)
   {
-    const struct Channel *channel = node->data;
+    const struct Channel *const channel = node->data;
     channel_members += list_length(&channel->members);
     channel_invites += list_length(&channel->invites);
 
@@ -455,12 +460,11 @@ stats_deny(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_DLINE)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       /* Don't report a temporary dline as permanent dline */
       if (conf->until)
         continue;
@@ -478,12 +482,11 @@ stats_tdeny(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_DLINE)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       /* Don't report a permanent dline as temporary dline */
       if (conf->until == 0)
         continue;
@@ -507,12 +510,11 @@ stats_exempt(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_EXEMPT)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       sendto_one_numeric(client, &me, RPL_STATSDLINE, 'e', conf->host, "");
     }
   }
@@ -564,8 +566,7 @@ stats_fdlist(struct Client *client, int parc, char *parv[])
 {
   for (int fd = 0; fd <= highest_fd; ++fd)
   {
-    const fde_t *F = &fd_table[fd];
-
+    const fde_t *const F = &fd_table[fd];
     if (F->flags.open)
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "F :fd %-5d desc '%s'",
                          F->fd, F->desc);
@@ -640,12 +641,11 @@ stats_auth(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_CLIENT)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       if (IsConfDoSpoofIp(conf) && !client_is_oper(client))
         continue;
 
@@ -672,12 +672,11 @@ stats_kill(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_KLINE)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       /* Don't report a temporary kline as permanent kline */
       if (conf->until)
         continue;
@@ -702,12 +701,11 @@ stats_tkill(struct Client *client, int parc, char *parv[])
     list_node_t *node;
     LIST_FOREACH(node, atable[i].head)
     {
-      const struct AddressRec *arec = node->data;
-
+      const struct AddressRec *const arec = node->data;
       if (arec->type != CONF_KLINE)
         continue;
 
-      const struct MaskItem *conf = arec->conf;
+      const struct MaskItem *const conf = arec->conf;
       /* Don't report a permanent kline as temporary kline */
       if (conf->until == 0)
         continue;
@@ -721,9 +719,12 @@ static void
 stats_messages(struct Client *client, int parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_m_oper_only)
+  {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-  else
-    command_report(client);
+    return;
+  }
+
+  command_report(client);
 }
 
 static void
@@ -733,7 +734,7 @@ stats_pseudo(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, pseudo_get_list()->head)
   {
-    const struct PseudoItem *pseudo = node->data;
+    const struct PseudoItem *const pseudo = node->data;
     sendto_one_numeric(client, &me, RPL_STATSPSEUDO,
                        pseudo->command, pseudo->name, pseudo->nick, pseudo->server, string_default(pseudo->prepend, "*"));
   }
@@ -753,8 +754,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, oper_list.head)
   {
-    const struct Client *target = node->data;
-
+    const struct Client *const target = node->data;
     if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(client))
       continue;
 
@@ -791,12 +791,13 @@ stats_ports(struct Client *client, int parc, char *parv[])
   {
     char buf[8];
     char *bufptr = buf;
-    const struct Listener *listener = node->data;
 
+    const struct Listener *const listener = node->data;
     if (listener_has_flag(listener, LISTENER_HIDDEN))
     {
       if (!client_is_admin(client))
         continue;
+
       *bufptr++ = 'H';
     }
 
@@ -810,7 +811,8 @@ stats_ports(struct Client *client, int parc, char *parv[])
       *bufptr++ = 'D';
     *bufptr = '\0';
 
-    const char *visible_host = client_is_admin(client) ? listener_get_name(listener) : me.name;
+    const char *const visible_host =
+      client_is_admin(client) ? listener_get_name(listener) : me.name;
     sendto_one_numeric(client, &me, RPL_STATSPLINE,
                        'P', listener_get_port(listener), visible_host, listener->ref_count, buf,
                        listener_is_active(listener) ? "active" : "disabled");
@@ -825,7 +827,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target = node->data;
+    const struct Client *const target = node->data;
     sp.is_sbs += target->connection->send.bytes;
     sp.is_sbr += target->connection->recv.bytes;
     sp.is_sti += client_get_session_duration(target);
@@ -834,7 +836,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, local_client_list.head)
   {
-    const struct Client *target = node->data;
+    const struct Client *const target = node->data;
     sp.is_cbs += target->connection->send.bytes;
     sp.is_cbr += target->connection->recv.bytes;
     sp.is_cti += client_get_session_duration(target);
@@ -868,15 +870,17 @@ static void
 stats_uptime(struct Client *client, int parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_u_oper_only)
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-  else
   {
-    sendto_one_numeric(client, &me, RPL_STATSUPTIME,
-                       time_format_duration(client_get_session_duration(&me)));
-    if (ConfigServerHide.disable_remote_commands == 0 || client_is_oper(client))
-       sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
-                          Count.max_loc, Count.totalrestartcount);
+    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
+    return;
   }
+
+  sendto_one_numeric(client, &me, RPL_STATSUPTIME,
+                     time_format_duration(client_get_session_duration(&me)));
+
+  if (ConfigServerHide.disable_remote_commands == 0 || client_is_oper(client))
+     sendto_one_numeric(client, &me, RPL_STATSCONN, Count.max_loc_con,
+                        Count.max_loc, Count.totalrestartcount);
 }
 
 static void
@@ -893,7 +897,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
 
   LIST_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target = node->data;
+    const struct Client *const target = node->data;
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "v :%s (%s!%s@%s) Idle: %s",
                        target->name, target->server->initiator_name ? target->server->initiator_name : "Remote.",
                        "*", "*", time_format_duration(client_get_socket_idle_duration(target)));
@@ -933,7 +937,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
   list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
   {
-    const struct Client *target = node->data;
+    const struct Client *const target = node->data;
     send_bytes += target->connection->send.bytes;
     recv_bytes += target->connection->recv.bytes;
 
@@ -1110,8 +1114,8 @@ static void
 do_stats(struct Client *client, int parc, char *parv[])
 {
   const unsigned char letter = *parv[1];
-  const struct StatsHandler *handler = stats_find(letter);
 
+  const struct StatsHandler *const handler = stats_find(letter);
   if (handler)
   {
     if (stats_allowed(handler, client->umodes))

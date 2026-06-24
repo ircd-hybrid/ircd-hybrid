@@ -356,42 +356,6 @@ module_config_find(const char *name)
 }
 
 /**
- * @brief Compares two modules by name.
- *
- * This function compares the names of two modules for sorting purposes.
- * It is used to maintain a sorted list of modules based on their names.
- *
- * @param a_ Pointer to the first module.
- * @param b_ Pointer to the second module.
- * @return Comparison result for sorting.
- */
-static int
-module_cmp(const void *const a_, const void *const b_)
-{
-  const char *const a = ((const struct Module *)a_)->name;
-  const char *const b = ((const struct Module *)b_)->name;
-  return strcmp(a, b);
-}
-
-/**
- * @brief Compares two module configurations by name.
- *
- * This function compares the names of two module configurations for sorting purposes.
- * It is used to maintain a sorted list of module configurations based on their names.
- *
- * @param a_ Pointer to the first module configuration.
- * @param b_ Pointer to the second module configuration.
- * @return Comparison result for sorting.
- */
-static int
-module_config_cmp(const void *const a_, const void *const b_)
-{
-  const char *const a = ((const struct ModuleConfig *)a_)->name;
-  const char *const b = ((const struct ModuleConfig *)b_)->name;
-  return strcmp(a, b);
-}
-
-/**
  * @brief Unloads a module by name.
  *
  * This function unloads the specified module, invoking its exit handler and
@@ -565,7 +529,7 @@ module_load(const char *name, bool manual, void *user_data)
   module->handle = handle;
   module->name = io_strdup(name);
 
-  list_add_sorted(module, &module->node, &module_list, module_cmp);
+  list_add_tail(module, &module->node, &module_list);
 
   /* Call the module's initialization handler, if present. */
   if (module->init_handler)
@@ -610,7 +574,7 @@ module_config_add(const char *name, bool resident, bool core)
   config->name = io_strdup(name);
   config->resident = resident;
   config->core = core;
-  list_add_sorted(config, &config->node, &module_config_list, module_config_cmp);
+  list_add_tail(config, &config->node, &module_config_list);
 
   return MODULE_SUCCESS;
 }

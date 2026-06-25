@@ -59,7 +59,7 @@ _rehash_report(struct Client *source, const char *option, const char *action)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_conf(struct Client *source)
+_rehash_conf(struct Client *source)
 {
   _rehash_report(source, "CONF", "rehashing configuration file(s)");
   conf_rehash(false);
@@ -70,7 +70,7 @@ rehash_conf(struct Client *source)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_motd(struct Client *source)
+_rehash_motd(struct Client *source)
 {
   _rehash_report(source, "MOTD", "forcing re-reading of MOTD files");
   motd_recache();
@@ -81,7 +81,7 @@ rehash_motd(struct Client *source)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_dns(struct Client *source)
+_rehash_dns(struct Client *source)
 {
   _rehash_report(source, "DNS", "rehashing DNS");
   restart_resolver();
@@ -95,9 +95,9 @@ struct RehashOption
 
 static const struct RehashOption rehash_options[] =
 {
-  { .name = "CONF", .handler = rehash_conf },
-  { .name = "MOTD", .handler = rehash_motd },
-  { .name = "DNS", .handler = rehash_dns }
+  { .name = "CONF", .handler = _rehash_conf },
+  { .name = "MOTD", .handler = _rehash_motd },
+  { .name = "DNS", .handler = _rehash_dns }
 };
 
 static const struct RehashOption *
@@ -132,7 +132,7 @@ static void
 mo_rehash(struct Client *source, int parc, char *parv[])
 {
   const char *option_name = NULL;
-  const char *server = NULL;
+  const char *server_mask = NULL;
 
   if (!string_is_empty(parv[2]))
   {
@@ -142,7 +142,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    server = parv[1];
+    server_mask = parv[1];
     option_name = parv[2];
   }
   else
@@ -164,10 +164,10 @@ mo_rehash(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!string_is_empty(server))
-    sendto_match_servs(source, server, 0, "REHASH %s %s", server, option_name);
+  if (!string_is_empty(server_mask))
+    sendto_match_servs(source, server_mask, 0, "REHASH %s %s", server_mask, option->name);
 
-  if (string_is_empty(server) || match(server, me.name) == 0)
+  if (string_is_empty(server_mask) || match(server_mask, me.name) == 0)
     option->handler(source);
 }
 
@@ -186,12 +186,12 @@ mo_rehash(struct Client *source, int parc, char *parv[])
 static void
 ms_rehash(struct Client *source, int parc, char *parv[])
 {
-  const char *const server = parv[1];
+  const char *const server_mask = parv[1];
   const char *const option_name = parv[2];
 
-  sendto_match_servs(source, server, 0, "REHASH %s %s", server, option_name);
+  sendto_match_servs(source, server_mask, 0, "REHASH %s %s", server_mask, option_name);
 
-  if (match(server, me.name))
+  if (match(server_mask, me.name))
     return;
 
   if (!shared_find(SHARED_REHASH, source->uplink->name, source->username, source->host))

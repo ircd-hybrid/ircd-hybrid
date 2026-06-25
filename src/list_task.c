@@ -281,7 +281,7 @@ list_task_start(struct ListTask *task)
 
   if (_list_task_execute_global(task) == LIST_TASK_RUN_PENDING)
   {
-    list_add(task, &task->node, &list_task_queue);
+    list_add_tail(task, &task->node, &list_task_queue);
     task->is_queued = true;
   }
 

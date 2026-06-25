@@ -29,6 +29,7 @@
 #include "io_string.h"
 #include "ircd.h"
 #include "log.h"
+#include "misc.h"
 #include "module.h"
 
 #include "client.h"
@@ -86,19 +87,31 @@ rehash_dns(struct Client *source)
   restart_resolver();
 }
 
-struct RehashStruct
+struct RehashOption
 {
-  const char *const option;
+  const char *const name;
   void (*const handler)(struct Client *);
 };
 
-static const struct RehashStruct rehash_cmd_table[] =
+static const struct RehashOption rehash_options[] =
 {
-  { .option = "CONF", .handler = rehash_conf },
-  { .option = "MOTD", .handler = rehash_motd },
-  { .option = "DNS", .handler = rehash_dns },
-  { .option = NULL }
+  { .name = "CONF", .handler = rehash_conf },
+  { .name = "MOTD", .handler = rehash_motd },
+  { .name = "DNS", .handler = rehash_dns }
 };
+
+static const struct RehashOption *
+_rehash_option_find(const char *name)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(rehash_options); ++i)
+  {
+    const struct RehashOption *const option = &rehash_options[i];
+    if (io_strcasecmp(name, option->name) == 0)
+      return option;
+  }
+
+  return NULL;
+}
 
 /*! \brief REHASH command handler
  *
@@ -118,7 +131,7 @@ static const struct RehashStruct rehash_cmd_table[] =
 static void
 mo_rehash(struct Client *source, int parc, char *parv[])
 {
-  const char *option = NULL;
+  const char *option_name = NULL;
   const char *server = NULL;
 
   if (!string_is_empty(parv[2]))
@@ -130,7 +143,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
     }
 
     server = parv[1];
-    option = parv[2];
+    option_name = parv[2];
   }
   else
   {
@@ -140,25 +153,22 @@ mo_rehash(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    option = parv[1];
+    option_name = parv[1];
   }
 
-  for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
+  const struct RehashOption *const option = _rehash_option_find(option_name);
+  if (option == NULL)
   {
-    if (io_strcasecmp(tab->option, option))
-      continue;
-
-    if (!string_is_empty(server))
-      sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
-
-    if (string_is_empty(server) || match(server, me.name) == 0)
-      tab->handler(source);
-
+    sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
+                      option_name);
     return;
   }
 
-  sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
-                    option);
+  if (!string_is_empty(server))
+    sendto_match_servs(source, server, 0, "REHASH %s %s", server, option_name);
+
+  if (string_is_empty(server) || match(server, me.name) == 0)
+    option->handler(source);
 }
 
 /*! \brief REHASH command handler
@@ -176,10 +186,10 @@ mo_rehash(struct Client *source, int parc, char *parv[])
 static void
 ms_rehash(struct Client *source, int parc, char *parv[])
 {
-  const char *const option = parv[2];
   const char *const server = parv[1];
+  const char *const option_name = parv[2];
 
-  sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
+  sendto_match_servs(source, server, 0, "REHASH %s %s", server, option_name);
 
   if (match(server, me.name))
     return;
@@ -187,14 +197,11 @@ ms_rehash(struct Client *source, int parc, char *parv[])
   if (!shared_find(SHARED_REHASH, source->uplink->name, source->username, source->host))
     return;
 
-  for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
-  {
-    if (io_strcasecmp(tab->option, option))
-      continue;
-
-    tab->handler(source);
+  const struct RehashOption *const option = _rehash_option_find(option_name);
+  if (option == NULL)
     return;
-  }
+
+  option->handler(source);
 }
 
 static struct Command command_table =

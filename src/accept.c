@@ -57,7 +57,7 @@ accept_add(const char *nick, const char *user, const char *host, list_t *list)
   accept->user = io_strdup(user);
   accept->host = io_strdup(host);
 
-  list_add(accept, &accept->node, list);
+  list_add_tail(accept, &accept->node, list);
 }
 
 void

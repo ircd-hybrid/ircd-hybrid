@@ -201,7 +201,7 @@ _parse_list_mask_filter(struct ListTask *task, const char *option)
   else if (has_channel_prefix == false)
     return false;  /* Exact matches must have a valid channel prefix. */
 
-  list_add(io_strdup(mask), list_make_node(), target_list);
+  list_add_tail(io_strdup(mask), list_make_node(), target_list);
   return true;
 }
 

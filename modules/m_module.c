@@ -31,6 +31,7 @@
 #include "io_string.h"
 #include "list.h"
 #include "log.h"
+#include "misc.h"
 #include "module.h"
 
 #include "client.h"
@@ -236,26 +237,38 @@ module_cmd_list(struct Client *source, const char *arg)
 }
 
 /**
- * @brief Module command table structure.
+ * @brief MODULE subcommand table entry.
  */
-struct ModuleStruct
+struct ModuleSubcommand
 {
-  const char *cmd;
-  void (*handler)(struct Client *, const char *);
-  bool arg_required;
+  const char *const name;
+  void (*const handler)(struct Client *, const char *);
+  bool argument_required;
 };
 
 /**
- * @brief Module command table.
+ * @brief MODULE subcommand table.
  */
-static const struct ModuleStruct module_cmd_table[] =
+static const struct ModuleSubcommand module_subcommands[] =
 {
-  { .cmd = "LOAD", .handler = module_cmd_load, .arg_required = true  },
-  { .cmd = "UNLOAD", .handler = module_cmd_unload, .arg_required = true  },
-  { .cmd = "RELOAD", .handler = module_cmd_reload, .arg_required = true  },
-  { .cmd = "LIST", .handler = module_cmd_list, .arg_required = false },
-  { .cmd = NULL }
+  { .name = "LOAD", .handler = module_cmd_load, .argument_required = true },
+  { .name = "UNLOAD", .handler = module_cmd_unload, .argument_required = true },
+  { .name = "RELOAD", .handler = module_cmd_reload, .argument_required = true },
+  { .name = "LIST", .handler = module_cmd_list, .argument_required = false }
 };
+
+static const struct ModuleSubcommand *
+_module_subcommand_find(const char *name)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(module_subcommands); ++i)
+  {
+    const struct ModuleSubcommand *const subcommand = &module_subcommands[i];
+    if (io_strcasecmp(name, subcommand->name) == 0)
+      return subcommand;
+  }
+
+  return NULL;
+}
 
 /*! \brief MODULE command handler
  *
@@ -272,32 +285,29 @@ static const struct ModuleStruct module_cmd_table[] =
 static void
 mo_module(struct Client *source, int parc, char *parv[])
 {
-  const char *const subcmd = parv[1];
-  const char *const module = parv[2];
-
   if (!client_has_oper_flag(source, OPER_FLAG_MODULE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "module");
     return;
   }
 
-  for (const struct ModuleStruct *tab = module_cmd_table; tab->handler; ++tab)
+  const char *const subcommand_name = parv[1];
+  const struct ModuleSubcommand *const subcommand = _module_subcommand_find(subcommand_name);
+  if (subcommand == NULL)
   {
-    if (io_strcasecmp(tab->cmd, subcmd))
-      continue;
-
-    if (tab->arg_required && string_is_empty(module))
-    {
-      sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MODULE");
-      return;
-    }
-
-    tab->handler(source, module);
+    sendto_one_notice(source, &me, ":%s is not a valid option. Choose from LOAD, UNLOAD, RELOAD, LIST",
+                      subcommand_name);
     return;
   }
 
-  sendto_one_notice(source, &me, ":%s is not a valid option. Choose from LOAD, UNLOAD, RELOAD, LIST",
-                    subcmd);
+  const char *const module_name = parv[2];
+  if (subcommand->argument_required && string_is_empty(module_name))
+  {
+    sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, "MODULE");
+    return;
+  }
+
+  subcommand->handler(source, module_name);
 }
 
 static struct Command command_table =

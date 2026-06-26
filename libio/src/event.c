@@ -74,34 +74,34 @@ _event_heap_precedes(const struct event_instance *a, const struct event_instance
 }
 
 static void
-_event_heap_swap(event_manager_t mgr, const size_t i, const size_t j)
+_event_heap_swap(event_manager_t manager, const size_t i, const size_t j)
 {
-  assert(mgr);
-  assert(i < mgr->heap_size);
-  assert(j < mgr->heap_size);
-  assert(mgr->heap_array[i]);
-  assert(mgr->heap_array[j]);
+  assert(manager);
+  assert(i < manager->heap_size);
+  assert(j < manager->heap_size);
+  assert(manager->heap_array[i]);
+  assert(manager->heap_array[j]);
 
-  struct event_instance *const event_i = mgr->heap_array[i];
-  struct event_instance *const event_j = mgr->heap_array[j];
-  mgr->heap_array[i] = event_j;
-  mgr->heap_array[j] = event_i;
+  struct event_instance *const event_i = manager->heap_array[i];
+  struct event_instance *const event_j = manager->heap_array[j];
+  manager->heap_array[i] = event_j;
+  manager->heap_array[j] = event_i;
 
   event_i->heap_index = j;
   event_j->heap_index = i;
 }
 
 static void
-_event_heap_sift_up(event_manager_t mgr, size_t idx)
+_event_heap_sift_up(event_manager_t manager, size_t idx)
 {
-  assert(idx < mgr->heap_size);
+  assert(idx < manager->heap_size);
 
   while (idx > 0)
   {
     size_t parent_idx = (idx - 1) / 2;
-    if (_event_heap_precedes(mgr->heap_array[idx], mgr->heap_array[parent_idx]))
+    if (_event_heap_precedes(manager->heap_array[idx], manager->heap_array[parent_idx]))
     {
-      _event_heap_swap(mgr, idx, parent_idx);
+      _event_heap_swap(manager, idx, parent_idx);
       idx = parent_idx;
     }
     else
@@ -110,9 +110,9 @@ _event_heap_sift_up(event_manager_t mgr, size_t idx)
 }
 
 static void
-_event_heap_sift_down(event_manager_t mgr, size_t idx)
+_event_heap_sift_down(event_manager_t manager, size_t idx)
 {
-  assert(idx < mgr->heap_size);
+  assert(idx < manager->heap_size);
 
   while (true)
   {
@@ -120,19 +120,19 @@ _event_heap_sift_down(event_manager_t mgr, size_t idx)
     size_t right_child_idx = 2 * idx + 2;
     size_t preferred_idx = idx;
 
-    assert(mgr->heap_array[idx] || mgr->heap_size == 0);
+    assert(manager->heap_array[idx] || manager->heap_size == 0);
 
-    if (left_child_idx < mgr->heap_size &&
-        _event_heap_precedes(mgr->heap_array[left_child_idx], mgr->heap_array[preferred_idx]))
+    if (left_child_idx < manager->heap_size &&
+        _event_heap_precedes(manager->heap_array[left_child_idx], manager->heap_array[preferred_idx]))
       preferred_idx = left_child_idx;
 
-    if (right_child_idx < mgr->heap_size &&
-        _event_heap_precedes(mgr->heap_array[right_child_idx], mgr->heap_array[preferred_idx]))
+    if (right_child_idx < manager->heap_size &&
+        _event_heap_precedes(manager->heap_array[right_child_idx], manager->heap_array[preferred_idx]))
       preferred_idx = right_child_idx;
 
     if (preferred_idx != idx)
     {
-      _event_heap_swap(mgr, idx, preferred_idx);
+      _event_heap_swap(manager, idx, preferred_idx);
       idx = preferred_idx;
     }
     else
@@ -141,78 +141,78 @@ _event_heap_sift_down(event_manager_t mgr, size_t idx)
 }
 
 static void
-_event_heap_resize(event_manager_t mgr, size_t new_capacity)
+_event_heap_resize(event_manager_t manager, size_t new_capacity)
 {
-  assert(mgr);
-  assert(new_capacity >= mgr->heap_size);
+  assert(manager);
+  assert(new_capacity >= manager->heap_size);
 
-  mgr->heap_array = io_realloc(mgr->heap_array, new_capacity * sizeof(*mgr->heap_array));
-  mgr->heap_capacity = new_capacity;
+  manager->heap_array = io_realloc(manager->heap_array, new_capacity * sizeof(*manager->heap_array));
+  manager->heap_capacity = new_capacity;
 }
 
 static void
-_event_heap_ensure_capacity(event_manager_t mgr)
+_event_heap_ensure_capacity(event_manager_t manager)
 {
-  assert(mgr);
+  assert(manager);
 
-  if (mgr->heap_size < mgr->heap_capacity)
+  if (manager->heap_size < manager->heap_capacity)
     return;
 
   const size_t new_capacity =
-    (mgr->heap_capacity == 0) ? EVENT_HEAP_MIN_CAPACITY : mgr->heap_capacity * 2;
-  _event_heap_resize(mgr, new_capacity);
+    (manager->heap_capacity == 0) ? EVENT_HEAP_MIN_CAPACITY : manager->heap_capacity * 2;
+  _event_heap_resize(manager, new_capacity);
 }
 
 static event_status_t
-_event_heap_insert(event_manager_t mgr, event_handle_t event)
+_event_heap_insert(event_manager_t manager, event_handle_t event)
 {
-  assert(mgr);
+  assert(manager);
   assert(event);
-  assert(event->manager == mgr);
+  assert(event->manager == manager);
   assert(!event_is_scheduled(event));
 
-  _event_heap_ensure_capacity(mgr);
+  _event_heap_ensure_capacity(manager);
 
-  mgr->heap_array[mgr->heap_size] = event;
-  event->heap_index = mgr->heap_size;
-  mgr->heap_size++;
+  manager->heap_array[manager->heap_size] = event;
+  event->heap_index = manager->heap_size;
+  manager->heap_size++;
 
-  _event_heap_sift_up(mgr, event->heap_index);
+  _event_heap_sift_up(manager, event->heap_index);
 
   assert(event_is_scheduled(event));
   return EVENT_SUCCESS;
 }
 
 static event_status_t
-_event_heap_remove(event_manager_t mgr, event_handle_t event)
+_event_heap_remove(event_manager_t manager, event_handle_t event)
 {
-  if (event->manager != mgr)
+  if (event->manager != manager)
     return EVENT_ERR_INVALID_ARG;
 
   assert(event_is_scheduled(event));
 
-  const size_t original_heap_size = mgr->heap_size;
+  const size_t original_heap_size = manager->heap_size;
   const size_t idx_to_remove = event->heap_index;
-  const size_t last_idx = mgr->heap_size - 1;
+  const size_t last_idx = manager->heap_size - 1;
 
   if (idx_to_remove < last_idx)
-    _event_heap_swap(mgr, idx_to_remove, last_idx);
+    _event_heap_swap(manager, idx_to_remove, last_idx);
 
-  mgr->heap_size--;
-  mgr->heap_array[mgr->heap_size] = NULL;
+  manager->heap_size--;
+  manager->heap_array[manager->heap_size] = NULL;
 
-  if (mgr->heap_size > 0 && idx_to_remove < mgr->heap_size)
+  if (manager->heap_size > 0 && idx_to_remove < manager->heap_size)
   {
     const size_t parent_idx = (idx_to_remove - 1) / 2;
-    if (idx_to_remove > 0 && _event_heap_precedes(mgr->heap_array[idx_to_remove], mgr->heap_array[parent_idx]))
-      _event_heap_sift_up(mgr, idx_to_remove);
+    if (idx_to_remove > 0 && _event_heap_precedes(manager->heap_array[idx_to_remove], manager->heap_array[parent_idx]))
+      _event_heap_sift_up(manager, idx_to_remove);
     else
-      _event_heap_sift_down(mgr, idx_to_remove);
+      _event_heap_sift_down(manager, idx_to_remove);
   }
 
   event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
-  assert(mgr->heap_size == original_heap_size - 1);
+  assert(manager->heap_size == original_heap_size - 1);
   return EVENT_SUCCESS;
 }
 
@@ -289,70 +289,70 @@ event_manager_create(const event_manager_config_t *config)
   if (config && config->initial_heap_capacity)
     initial_heap_capacity = config->initial_heap_capacity;
 
-  event_manager_t mgr = io_calloc(sizeof(*mgr));
-  _event_heap_resize(mgr, initial_heap_capacity);
+  event_manager_t manager = io_calloc(sizeof(*manager));
+  _event_heap_resize(manager, initial_heap_capacity);
 
-  assert(mgr->heap_array || initial_heap_capacity == 0);
-  assert(mgr->heap_capacity == initial_heap_capacity);
-  assert(mgr->heap_size == 0);
+  assert(manager->heap_array || initial_heap_capacity == 0);
+  assert(manager->heap_capacity == initial_heap_capacity);
+  assert(manager->heap_size == 0);
 
-  return mgr;
+  return manager;
 }
 
 event_status_t
-event_manager_destroy(event_manager_t mgr)
+event_manager_destroy(event_manager_t manager)
 {
-  if (mgr == NULL)
+  if (manager == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  if (mgr->is_running)
+  if (manager->is_running)
     return EVENT_ERR_BUSY;
 
-  assert(mgr->heap_array || mgr->heap_size == 0);
-  assert(mgr->dispatching_event == NULL);
+  assert(manager->heap_array || manager->heap_size == 0);
+  assert(manager->dispatching_event == NULL);
 
   event_handle_t event;
-  while ((event = list_peek_head(&mgr->event_list)))
+  while ((event = list_peek_head(&manager->event_list)))
   {
     assert(event);
-    assert(event->manager == mgr);
+    assert(event->manager == manager);
 
     event_status_t status = event_destroy(event);
     assert(status == EVENT_SUCCESS);
   }
 
-  assert(mgr->heap_size == 0);
-  assert(list_is_empty(&mgr->event_list));
+  assert(manager->heap_size == 0);
+  assert(list_is_empty(&manager->event_list));
 
-  io_free(mgr->heap_array);
-  mgr->heap_array = NULL;
-  io_free(mgr);
+  io_free(manager->heap_array);
+  manager->heap_array = NULL;
+  io_free(manager);
 
   return EVENT_SUCCESS;
 }
 
 uintmax_t
-event_manager_get_next_fire_time(event_manager_t mgr)
+event_manager_get_next_fire_time(event_manager_t manager)
 {
-  if (mgr == NULL || mgr->heap_size == 0)
+  if (manager == NULL || manager->heap_size == 0)
     return UINTMAX_MAX;
 
-  return mgr->heap_array[0]->next_fire_time_ms;
+  return manager->heap_array[0]->next_fire_time_ms;
 }
 
 size_t
-event_manager_get_scheduled_count(event_manager_t mgr)
+event_manager_get_scheduled_count(event_manager_t manager)
 {
-  return mgr ? mgr->heap_size : 0;
+  return manager ? manager->heap_size : 0;
 }
 
 event_status_t
-event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn callback, void *user_data)
+event_manager_for_each_snapshot(event_manager_t manager, event_snapshot_callback_fn callback, void *user_data)
 {
-  if (mgr == NULL || callback == NULL)
+  if (manager == NULL || callback == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  const size_t count = list_length(&mgr->event_list);
+  const size_t count = list_length(&manager->event_list);
   if (count == 0)
     return EVENT_SUCCESS;
 
@@ -361,11 +361,11 @@ event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn 
 
   size_t i = 0;
   list_node_t *node;
-  LIST_FOREACH(node, mgr->event_list.head)
+  LIST_FOREACH(node, manager->event_list.head)
   {
     event_handle_t event = node->data;
     assert(event);
-    assert(event->manager == mgr);
+    assert(event->manager == manager);
     assert(i < count);
 
     _event_snapshot_capture(&snapshots[i], event, current_time_ms);
@@ -385,13 +385,14 @@ event_manager_for_each_snapshot(event_manager_t mgr, event_snapshot_callback_fn 
 }
 
 event_handle_t
-event_create(event_manager_t mgr, const char *name, event_handler_fn handler, uintmax_t interval_ms, bool oneshot, void *data, event_cleanup_fn cleanup_handler)
+event_create(event_manager_t manager, const char *name, event_handler_fn handler, uintmax_t interval_ms,
+             bool oneshot, void *data, event_cleanup_fn cleanup_handler)
 {
-  if (mgr == NULL || handler == NULL || interval_ms == 0)
+  if (manager == NULL || handler == NULL || interval_ms == 0)
     return NULL;
 
   event_handle_t event = io_calloc(sizeof(*event));
-  event->manager = mgr;
+  event->manager = manager;
   event->name = name ? io_strdup(name) : NULL;
   event->handler = handler;
   event->interval_ms = interval_ms;
@@ -400,7 +401,7 @@ event_create(event_manager_t mgr, const char *name, event_handler_fn handler, ui
   event->cleanup_handler = cleanup_handler;
   event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
-  list_add(event, &event->node, &mgr->event_list);
+  list_add(event, &event->node, &manager->event_list);
   return event;
 }
 
@@ -660,24 +661,24 @@ event_get_data(event_handle_t event)
 }
 
 event_status_t
-event_manager_run(event_manager_t mgr)
+event_manager_run(event_manager_t manager)
 {
-  if (mgr == NULL)
+  if (manager == NULL)
     return EVENT_ERR_INVALID_ARG;
 
-  if (mgr->is_running)
+  if (manager->is_running)
     return EVENT_ERR_BUSY;
 
-  assert(mgr->heap_array || mgr->heap_size == 0);
-  assert(mgr->dispatching_event == NULL);
+  assert(manager->heap_array || manager->heap_size == 0);
+  assert(manager->dispatching_event == NULL);
 
-  mgr->is_running = true;
+  manager->is_running = true;
 
-  while (mgr->heap_size > 0)
+  while (manager->heap_size > 0)
   {
-    struct event_instance *const event = mgr->heap_array[0];
+    struct event_instance *const event = manager->heap_array[0];
     assert(event);
-    assert(event->manager == mgr);
+    assert(event->manager == manager);
     assert(event->handler);
     assert(event->interval_ms > 0);
     assert(event->heap_index == 0);
@@ -689,13 +690,13 @@ event_manager_run(event_manager_t mgr)
     if (event->next_fire_time_ms > current_time_ms)
       break;
 
-    event_status_t status = _event_heap_remove(mgr, event);
+    event_status_t status = _event_heap_remove(manager, event);
     assert(status == EVENT_SUCCESS);
     assert(event->heap_index == EVENT_HEAP_INVALID_INDEX);
 
-    mgr->dispatching_event = event;
+    manager->dispatching_event = event;
     event->handler(event->data);
-    mgr->dispatching_event = NULL;
+    manager->dispatching_event = NULL;
 
     if (event->destroy_pending)
     {
@@ -708,7 +709,7 @@ event_manager_run(event_manager_t mgr)
         event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
-      status = _event_heap_insert(mgr, event);
+      status = _event_heap_insert(manager, event);
       assert(status == EVENT_SUCCESS);
       assert(event_is_scheduled(event));
     }
@@ -716,9 +717,9 @@ event_manager_run(event_manager_t mgr)
     event->auto_reschedule_suppressed = false;
   }
 
-  mgr->is_running = false;
+  manager->is_running = false;
 
-  assert(mgr->dispatching_event == NULL);
-  assert(mgr->heap_size <= mgr->heap_capacity);
+  assert(manager->dispatching_event == NULL);
+  assert(manager->heap_size <= manager->heap_capacity);
   return EVENT_SUCCESS;
 }

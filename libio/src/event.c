@@ -33,7 +33,7 @@
 #include "memory.h"
 #include "rng_mt.h"
 
-#define EVENT_HEAP_INVALID_INDEX (SIZE_MAX - 1)
+#define EVENT_HEAP_INVALID_INDEX SIZE_MAX
 #define EVENT_HEAP_MIN_CAPACITY 8
 
 struct event_instance

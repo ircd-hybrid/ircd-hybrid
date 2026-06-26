@@ -29,7 +29,6 @@
 #include <string.h>
 
 #include "io_string.h"
-#include "list.h"
 #include "log.h"
 #include "module.h"
 
@@ -41,9 +40,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "server.h"
 #include "user_mode.h"
-#include "whowas.h"
 
 static const struct Client *
 _kill_source_for_target(const struct Client *source, const struct Client *target)

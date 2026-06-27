@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define EVENT_TIME_NEVER UINTMAX_MAX
+
 struct event_manager_instance;
 typedef struct event_manager_instance *event_manager_t;
 

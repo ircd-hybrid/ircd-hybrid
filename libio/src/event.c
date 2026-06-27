@@ -242,8 +242,8 @@ _event_snapshot_capture(event_snapshot_t *snapshot, event_handle_t event, uintma
   }
   else
   {
-    snapshot->next_fire_time_ms = UINTMAX_MAX;
-    snapshot->time_until_fire_ms = UINTMAX_MAX;
+    snapshot->next_fire_time_ms = EVENT_TIME_NEVER;
+    snapshot->time_until_fire_ms = EVENT_TIME_NEVER;
   }
 }
 
@@ -335,7 +335,7 @@ uintmax_t
 event_manager_get_next_fire_time(event_manager_t manager)
 {
   if (manager == NULL || manager->heap_size == 0)
-    return UINTMAX_MAX;
+    return EVENT_TIME_NEVER;
 
   return manager->heap_array[0]->next_fire_time_ms;
 }
@@ -552,14 +552,14 @@ event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
 uintmax_t
 event_get_next_fire_time(event_handle_t event)
 {
-  return event_is_scheduled(event) ? event->next_fire_time_ms : UINTMAX_MAX;
+  return event_is_scheduled(event) ? event->next_fire_time_ms : EVENT_TIME_NEVER;
 }
 
 uintmax_t
 event_get_time_until_fire(event_handle_t event)
 {
   if (!event_is_scheduled(event))
-    return UINTMAX_MAX;
+    return EVENT_TIME_NEVER;
 
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
   const uintmax_t next_fire_time_ms = event->next_fire_time_ms;

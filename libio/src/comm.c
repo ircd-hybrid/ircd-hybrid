@@ -182,7 +182,7 @@ int
 comm_get_select_timeout(event_manager_t mgr)
 {
   const uintmax_t next_fire_time_ms = event_manager_get_next_fire_time(mgr);
-  if (next_fire_time_ms == UINTMAX_MAX)
+  if (next_fire_time_ms == EVENT_TIME_NEVER)
     return COMM_DEFAULT_SELECT_TIMEOUT_MS;
 
   const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();

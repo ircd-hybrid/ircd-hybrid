@@ -46,7 +46,7 @@ set_callback(struct Client *client, user_mode_source_t source)
 
   if (client_is_local(client))
   {
-    client->handler = COMMAND_HANDLER_OPER;
+    client->command_handler = COMMAND_HANDLER_OPER;
     assert(list_find(&oper_list, client) == NULL);
     list_add(client, list_make_node(), &oper_list);
   }
@@ -65,7 +65,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
 
   if (client_is_local(client))
   {
-    client->handler = COMMAND_HANDLER_USER;
+    client->command_handler = COMMAND_HANDLER_USER;
     client_set_class(client, NULL, CLIENT_CLASS_OPER);
 
     io_free(client->connection->oper_name);

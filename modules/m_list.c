@@ -238,9 +238,9 @@ _parse_list_args(struct ListTask *task, char *args)
   task->exact_match = true;
 
   const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
-  char *save = NULL;
-  for (char *option = strtok_r(args, ",", &save); option;
-             option = strtok_r(NULL, ",", &save))
+  char *saveptr = NULL;
+  for (char *option = strtok_r(args, ",", &saveptr); option;
+             option = strtok_r(NULL, ",", &saveptr))
     if (!_parse_list_option(task, option, now))
       return false;
 

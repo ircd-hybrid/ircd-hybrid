@@ -235,7 +235,7 @@ _server_handshake_irc_start(struct Client *client)
   client_set_state(client, CLIENT_STATE_HANDSHAKE);
 
   /* Start the activity timer now that the link is ready for IRC traffic. */
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 
   sendto_one(client, "PASS %s", connect->send_password);
   sendto_one(client, "CAPAB :%s", capab_get(NULL, true));
@@ -334,7 +334,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
     tls_set_ciphers(&fde->tls, connect->cipher_list);
 
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 
   _server_handshake_tls_start(fde, client);
 }

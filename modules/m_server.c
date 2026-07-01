@@ -313,7 +313,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
     client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
 
   client_set_state(client, CLIENT_STATE_SERVER);
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 }
 
 static void

@@ -103,7 +103,7 @@ static void _client_exit_notify_network(struct Client *client, const char *reaso
 static void _client_exit_detach(struct Client *client);
 
 void
-client_reset_activity_timeout(struct Client *client)
+client_update_activity_timeout(struct Client *client)
 {
   assert(client && client_is_local(client));
   assert(client->connection->activity_timeout_event);
@@ -140,7 +140,7 @@ client_activity_timeout_handler(void *data)
   /*
    * The event is a one-shot timer. It has now fired and is no longer scheduled.
    * The event handle itself remains valid for the next call to
-   * client_reset_activity_timeout().
+   * client_update_activity_timeout().
    */
 
   if (client_has_flag(client, FLAGS_TLS_HANDSHAKING))
@@ -182,7 +182,7 @@ client_activity_timeout_handler(void *data)
      * PING reply. If the client remains silent, this handler will be called
      * again, but the `ping_sent_time > 0` condition will then be true.
      */
-    client_reset_activity_timeout(client);
+    client_update_activity_timeout(client);
   }
 }
 
@@ -221,17 +221,17 @@ client_set_state(struct Client *client, enum client_state state)
     case CLIENT_STATE_CONNECTING:
     case CLIENT_STATE_HANDSHAKE:
     case CLIENT_STATE_ME:
-      client->handler = COMMAND_HANDLER_UNREGISTERED;
+      client->command_handler = COMMAND_HANDLER_UNREGISTERED;
       break;
     case CLIENT_STATE_SERVER:
-      client->handler = COMMAND_HANDLER_SERVER;
+      client->command_handler = COMMAND_HANDLER_SERVER;
       break;
     case CLIENT_STATE_USER:
-      client->handler = COMMAND_HANDLER_USER;
+      client->command_handler = COMMAND_HANDLER_USER;
       break;
     default:
       assert(!"invalid client state");
-      client->handler = COMMAND_HANDLER_UNREGISTERED;
+      client->command_handler = COMMAND_HANDLER_UNREGISTERED;
       break;
   }
 }
@@ -386,7 +386,7 @@ client_get_visible_server_name(const struct Client *client)
 }
 
 void
-free_exited_clients(void)
+client_process_deferred_destroy(void)
 {
   list_node_t *node;
 
@@ -870,7 +870,7 @@ client_schedule_exit_on_io_failure(struct Client *client, enum client_io_operati
 }
 
 void
-exit_aborted_clients(void)
+client_process_scheduled_exits(void)
 {
   list_node_t *node;
 
@@ -992,7 +992,7 @@ _client_begin_local_connection_ingress(struct Client *client)
   assert(client->connection->fd);
   assert(client->connection->listener);
 
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 
   if (!listener_has_flag(client->connection->listener, LISTENER_TLS))
   {

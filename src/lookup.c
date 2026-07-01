@@ -80,7 +80,7 @@ _lookup_check_complete(struct LookupRequest *lookup)
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
 
   /* Start the registration timer; the client must now send NICK/USER. */
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 
   /* Hand the connection over to the main packet reader to begin processing IRC protocol commands. */
   read_packet(client->connection->fd, client);

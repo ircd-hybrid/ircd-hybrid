@@ -143,7 +143,7 @@ struct Connection
   uintmax_t last_privmsg_time;  /**< Last time we got a PRIVMSG; monotonic time */
   uintmax_t last_join_time;  /**< When this user last joined a channel; monotonic time */
   uintmax_t last_part_time;  /**< When this user last left a channel; monotonic time */
-  struct ListTask  *list_task;  /**< State for an in-progress /LIST command. */
+  struct ListTask *list_task;  /**< State for an in-progress /LIST command. */
   struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
   struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
 
@@ -197,9 +197,9 @@ struct Client
   uint64_t umodes;  /**< User modes this user has set */
 
   enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_USER, CLIENT_STATE_SERVER). */
-  enum command_handler_type handler;  /**< Command handler table index derived from the client's state. */
+  enum command_handler_type command_handler;  /**< Command handler table index derived from the client's state. */
 
-  list_t whowas_list;  /**< Historical records for this users's previous nicks. */
+  list_t whowas_list;  /**< Historical records for this user's previous nicks. */
   list_t channel_list;  /**< List of channels this user is a member of. */
   list_t svstag_list;  /**< List of ServicesTag items */
 
@@ -229,11 +229,7 @@ struct Client
    */
   char realhost[HOSTLEN + 1];  /**< The forward-confirmed reverse DNS hostname of the connection. */
 
-
-  /** client->info for unix clients will normally contain the info from the
-   * gcos field in /etc/passwd but anything can go here.
-   */
-  char info[REALLEN + 1];  /**< Free form additional client info */
+  char info[REALLEN + 1];  /** Free-form client information, usually the realname/gecos field. */
 
   /** client->sockhost contains the ip address gotten from the socket as a
    * string, this field should be considered read-only once the connection
@@ -281,15 +277,15 @@ extern uint64_t UMODE_SPY;
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
-extern void client_reset_activity_timeout(struct Client *);
+extern void client_process_deferred_destroy(void);
+extern void client_process_scheduled_exits(void);
+extern void client_update_activity_timeout(struct Client *);
 extern void client_schedule_exit(struct Client *, const char *);
 extern void client_schedule_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_schedule_exit_on_io_failure(struct Client *, enum client_io_operation, enum client_io_failure, int);
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_set_state(struct Client *, enum client_state);
 extern void client_update_name(struct Client *, const char *);
-extern void exit_aborted_clients(void);
-extern void free_exited_clients(void);
 extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct Client *client_create_local(void);
 extern struct Client *client_create_remote(struct Client *);

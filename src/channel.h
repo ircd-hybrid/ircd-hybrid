@@ -64,7 +64,7 @@ struct Channel
   struct Mode mode;
   char *mode_lock;
   char *topic;
-  char *topic_info;
+  char *topic_setter;
   uintmax_t creation_time;  /**< Time the channel has been created; real time */
   uintmax_t topic_time;  /**< Modification time of the topic; real time */
   uintmax_t mode_lock_time;  /**< Real time; this gets set by services only */

@@ -69,7 +69,7 @@ _tburst_topic_is_unchanged(const struct Channel *channel, const char *topic_sett
   if (!_tburst_topic_matches_current(channel, topic))
     return false;
 
-  return strcmp(string_or_empty(channel->topic_info), topic_setter) == 0;
+  return strcmp(string_or_empty(channel->topic_setter), topic_setter) == 0;
 }
 
 static bool

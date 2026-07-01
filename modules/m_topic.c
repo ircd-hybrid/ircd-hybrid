@@ -66,10 +66,10 @@ _topic_notify_channel_members(struct Client *source, const struct Channel *chann
 static void
 _topic_commit(struct Client *source, struct Channel *channel, const char *topic)
 {
-  char topic_info[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  _topic_format_setter_info(source, topic_info, sizeof(topic_info));
+  char topic_setter[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
+  _topic_format_setter_info(source, topic_setter, sizeof(topic_setter));
 
-  channel_set_topic(channel, topic, topic_info, io_time_get(IO_TIME_REALTIME_SEC), client_is_local_user(source));
+  channel_set_topic(channel, topic, topic_setter, io_time_get(IO_TIME_REALTIME_SEC), client_is_local_user(source));
 
   sendto_servers(source, 0, 0, ":%s TOPIC %s :%s",
                  source->id, channel->name, string_or_empty(channel->topic));
@@ -88,7 +88,7 @@ _topic_send_current(struct Client *source, const struct Channel *channel)
   sendto_one_numeric(source, &me, RPL_TOPIC,
                      channel->name, channel->topic);
   sendto_one_numeric(source, &me, RPL_TOPICWHOTIME,
-                     channel->name, channel->topic_info, channel->topic_time);
+                     channel->name, channel->topic_setter, channel->topic_time);
 }
 
 /*! \brief TOPIC command handler

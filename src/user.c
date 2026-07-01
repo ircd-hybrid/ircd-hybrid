@@ -359,7 +359,7 @@ user_register_local(struct Client *client)
   hook_dispatch(ircd_hook_user_register_local, &(ircd_hook_user_register_ctx){ .client = client });
 
   client_set_state(client, CLIENT_STATE_USER);
-  client_reset_activity_timeout(client);
+  client_update_activity_timeout(client);
 
   client->connection->last_privmsg_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 

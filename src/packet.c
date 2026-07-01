@@ -99,7 +99,7 @@ read_packet(fde_t *F, void *data_)
 
     client->connection->last_receive_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     client->connection->ping_sent_time = 0;
-    client_reset_activity_timeout(client);
+    client_update_activity_timeout(client);
 
     /* Attempt to parse what we have */
     client_input_process_recvq(client);

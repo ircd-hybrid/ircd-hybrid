@@ -55,9 +55,9 @@ monitor_add(struct Client *source, char *list)
   /* 1       23456            78                  9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
   {
     if (!valid_nickname(name, true))
       continue;
@@ -71,10 +71,10 @@ monitor_add(struct Client *source, char *list)
       if (ofbufptr != ofbuf)
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 
-      if (string_is_empty(p))
+      if (string_is_empty(saveptr))
         snprintf(buf, sizeof(buf), "%s", name);
       else
-        snprintf(buf, sizeof(buf), "%s,%s", name, p);
+        snprintf(buf, sizeof(buf), "%s,%s", name, saveptr);
 
       sendto_one_numeric(source, &me, ERR_MONLISTFULL,
                          ConfigGeneral.max_monitor, buf);
@@ -123,9 +123,9 @@ monitor_del(struct Client *source, char *list)
   if (list_is_empty(&source->connection->monitor_list))
     return;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
     if (!string_is_empty(name))
       monitor_unsubscribe(source, name);
 }

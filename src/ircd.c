@@ -192,8 +192,9 @@ _io_loop(void)
   while (true)
   {
     comm_select(comm_get_select_timeout(ircd_event_manager));
-    exit_aborted_clients();
-    free_exited_clients();
+
+    client_process_scheduled_exits();
+    client_process_deferred_destroy();
 
     io_time_update_cache();
     event_manager_run(ircd_event_manager);

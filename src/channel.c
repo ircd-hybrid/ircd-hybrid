@@ -296,7 +296,7 @@ _channel_send_tburst(struct Client *target, const struct Channel *channel)
 
   sendto_one(target, ":%s TBURST %ju %s %ju %s :%s",
              me.id, channel->creation_time, channel->name, channel->topic_time,
-             channel->topic_info, string_or_empty(channel->topic));
+             channel->topic_setter, string_or_empty(channel->topic));
 }
 
 static void
@@ -448,8 +448,8 @@ channel_destroy(struct Channel *channel)
 
   io_free(channel->topic);
   channel->topic = NULL;
-  io_free(channel->topic_info);
-  channel->topic_info = NULL;
+  io_free(channel->topic_setter);
+  channel->topic_setter = NULL;
   io_free(channel->mode_lock);
   channel->mode_lock = NULL;
   io_free(channel);
@@ -579,9 +579,15 @@ channel_member_get_prefix(const struct ChannelMember *member, bool combine)
   char *bufptr = buf;
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+  {
     if (member_has_flags(member, tab->flag))
-      if (*bufptr++ = tab->prefix, combine == false)
+    {
+      *bufptr++ = tab->prefix;
+
+      if (!combine)
         break;
+    }
+  }
 
   *bufptr = '\0';
   return buf;
@@ -593,9 +599,15 @@ channel_member_get_prefix_length(const struct ChannelMember *member, bool combin
   size_t len = 0;
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+  {
     if (member_has_flags(member, tab->flag))
-      if (++len, combine == false)
+    {
+      ++len;
+
+      if (!combine)
         break;
+    }
+  }
 
   return len;
 }
@@ -969,17 +981,17 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
 /*! \brief Sets the channel topic for a certain channel
  * \param channel    Pointer to struct Channel
  * \param topic      The topic string
- * \param topic_info n!u\@h formatted string of the topic setter
+ * \param topic_setter n!u\@h formatted string of the topic setter
  * \param topicts    Timestamp on the topic
  * \param local      Whether the topic is set by a local client
  */
 void
-channel_set_topic(struct Channel *channel, const char *topic, const char *topic_info, uintmax_t topicts, bool local)
+channel_set_topic(struct Channel *channel, const char *topic, const char *topic_setter, uintmax_t topicts, bool local)
 {
   io_free(channel->topic);
   channel->topic = NULL;
-  io_free(channel->topic_info);
-  channel->topic_info = NULL;
+  io_free(channel->topic_setter);
+  channel->topic_setter = NULL;
 
   if (!string_is_empty(topic))
   {
@@ -987,8 +999,8 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
     channel->topic = io_strndup(topic, max_length);
   }
 
-  if (!string_is_empty(topic_info))
-    channel->topic_info = io_strdup(topic_info);
+  if (!string_is_empty(topic_setter))
+    channel->topic_setter = io_strdup(topic_setter);
 
   channel->topic_time = topicts;
 }
@@ -1013,9 +1025,9 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
 {
   assert(client_is_local_user(client));
 
-  char *p = NULL;
-  for (const char *name = strtok_r(chan_list, ",", &p); name;
-                   name = strtok_r(NULL,      ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(chan_list, ",", &saveptr); name;
+                   name = strtok_r(NULL,      ",", &saveptr))
   {
     const char *key = NULL;
     /* If we have any more keys, take the first for this channel. */
@@ -1127,7 +1139,7 @@ channel_join(struct Client *client, const char *name, const char *key)
   {
     sendto_one_numeric(client, &me, RPL_TOPIC, channel->name, channel->topic);
     sendto_one_numeric(client, &me, RPL_TOPICWHOTIME,
-                       channel->name, channel->topic_info, channel->topic_time);
+                       channel->name, channel->topic_setter, channel->topic_time);
   }
 
   channel_send_namereply(client, channel);
@@ -1196,8 +1208,8 @@ channel_part_list(struct Client *client, char *list, const char *reason)
 {
   assert(client_is_user(client));
 
-  char *p = NULL;
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
     channel_part(client, name, reason);
 }

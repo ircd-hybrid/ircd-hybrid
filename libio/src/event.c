@@ -63,6 +63,12 @@ struct event_manager_instance
   event_handle_t dispatching_event;
 };
 
+static uintmax_t
+_event_now_ms(void)
+{
+  return io_time_get_monotonic_ms_total();
+}
+
 static bool
 _event_heap_precedes(const struct event_instance *a, const struct event_instance *b)
 {
@@ -357,7 +363,7 @@ event_manager_for_each_snapshot(event_manager_t manager, event_snapshot_callback
     return EVENT_SUCCESS;
 
   event_snapshot_t *snapshots = io_calloc(count * sizeof(*snapshots));
-  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t current_time_ms = _event_now_ms();
 
   size_t i = 0;
   list_node_t *node;
@@ -489,7 +495,7 @@ event_schedule(event_handle_t event)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
-  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t current_time_ms = _event_now_ms();
   const uintmax_t absolute_time_ms = current_time_ms + event->interval_ms;
 
   return _event_schedule_absolute(event, absolute_time_ms);
@@ -522,7 +528,7 @@ event_schedule_jittered(event_handle_t event)
       delay_ms = 1;
   }
 
-  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t current_time_ms = _event_now_ms();
   const uintmax_t absolute_time_ms = current_time_ms + delay_ms;
 
   return _event_schedule_absolute(event, absolute_time_ms);
@@ -543,7 +549,7 @@ event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending || new_delay_ms == 0)
     return EVENT_ERR_INVALID_ARG;
 
-  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t current_time_ms = _event_now_ms();
   const uintmax_t new_absolute_fire_time_ms = current_time_ms + new_delay_ms;
 
   return _event_schedule_absolute(event, new_absolute_fire_time_ms);
@@ -561,7 +567,7 @@ event_get_time_until_fire(event_handle_t event)
   if (!event_is_scheduled(event))
     return EVENT_TIME_NEVER;
 
-  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  const uintmax_t current_time_ms = _event_now_ms();
   const uintmax_t next_fire_time_ms = event->next_fire_time_ms;
 
   if (next_fire_time_ms <= current_time_ms)
@@ -686,7 +692,7 @@ event_manager_run(event_manager_t manager)
     assert(event->destroy_pending == false);
     assert(event->auto_reschedule_suppressed == false);
 
-    const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+    const uintmax_t current_time_ms = _event_now_ms();
     if (event->next_fire_time_ms > current_time_ms)
       break;
 

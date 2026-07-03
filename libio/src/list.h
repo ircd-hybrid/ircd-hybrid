@@ -65,9 +65,9 @@
  * This macro is used to iterate through a double-linked list in the backward direction.
  *
  * @param pos Node variable for iteration.
- * @param head List head.
+ * @param head List tail.
  */
-#define LIST_FOREACH_PREV(pos, head) for (pos = (head); pos != NULL; pos = pos->prev)
+#define LIST_FOREACH_PREV(pos, tail) for (pos = (tail); pos != NULL; pos = pos->prev)
 
 /**
  * @def list_length

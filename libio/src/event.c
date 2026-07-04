@@ -169,7 +169,7 @@ _event_heap_ensure_capacity(event_manager_t manager)
   _event_heap_resize(manager, new_capacity);
 }
 
-static event_status_t
+static void
 _event_heap_insert(event_manager_t manager, event_handle_t event)
 {
   assert(manager);
@@ -186,7 +186,6 @@ _event_heap_insert(event_manager_t manager, event_handle_t event)
   _event_heap_sift_up(manager, event->heap_index);
 
   assert(event_is_scheduled(event));
-  return EVENT_SUCCESS;
 }
 
 static event_status_t
@@ -284,7 +283,8 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
       return status;
   }
 
-  return _event_heap_insert(event->manager, event);
+  _event_heap_insert(event->manager, event);
+  return EVENT_SUCCESS;
 }
 
 event_manager_t
@@ -714,8 +714,7 @@ event_manager_run(event_manager_t manager)
         event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
     {
       event->next_fire_time_ms = current_time_ms + event->interval_ms;
-      status = _event_heap_insert(manager, event);
-      assert(status == EVENT_SUCCESS);
+      _event_heap_insert(manager, event);
       assert(event_is_scheduled(event));
     }
 

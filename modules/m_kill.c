@@ -108,7 +108,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *const reason = string_default(parv[2], CONF_NOREASON);
+  const char *const reason = string_or_default(parv[2], CONF_NOREASON);
   if (client_is_local(target))
     _kill_send_to_target(source, target, reason);
 

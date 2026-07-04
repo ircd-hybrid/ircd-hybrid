@@ -132,7 +132,7 @@ _who_send(struct Client *source, const struct Client *target,
    */
 
   if ((who->fields & WHO_FIELD_QTO))  /* Query token */
-    p += snprintf(p, sizeof(buf) - (p - buf), " %s", string_default(who->token, "0"));
+    p += snprintf(p, sizeof(buf) - (p - buf), " %s", string_or_default(who->token, "0"));
 
   if (who->fields == 0 || (who->fields & WHO_FIELD_CHA))
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", member ? member->channel->name : "*");
@@ -606,7 +606,7 @@ m_who(struct Client *source, int parc, char *parv[])
 
   if (who->maxmatches == 0)
     sendto_one_numeric(source, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
-  sendto_one_numeric(source, &me, RPL_ENDOFWHO, string_default(mask, "*"));
+  sendto_one_numeric(source, &me, RPL_ENDOFWHO, string_or_default(mask, "*"));
 }
 
 static struct Command command_table =

@@ -650,7 +650,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
         continue;
 
       sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
-                         string_default(conf->name, "*"),
+                         string_or_default(conf->name, "*"),
                          show_iline_prefix(client, conf),
                          conf->host, conf->port,
                          conf->klass->name);
@@ -736,7 +736,7 @@ stats_pseudo(struct Client *client, int parc, char *parv[])
   {
     const struct PseudoItem *const pseudo = node->data;
     sendto_one_numeric(client, &me, RPL_STATSPSEUDO,
-                       pseudo->command, pseudo->name, pseudo->nick, pseudo->server, string_default(pseudo->prepend, "*"));
+                       pseudo->command, pseudo->name, pseudo->nick, pseudo->server, string_or_default(pseudo->prepend, "*"));
   }
 }
 

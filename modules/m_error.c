@@ -56,7 +56,7 @@ mr_error(struct Client *source, int parc, char *parv[])
   if (!client_is_handshake(source) && !client_is_connecting(source))
     return;
 
-  const char *const message = string_default(parv[1], "<>");
+  const char *const message = string_or_default(parv[1], "<>");
 
   client_format_name_buffer_t log_name_buffer;
   client_format_name_buffer_t public_name_buffer;
@@ -84,7 +84,7 @@ mr_error(struct Client *source, int parc, char *parv[])
 static void
 ms_error(struct Client *source, int parc, char *parv[])
 {
-  const char *const message = string_default(parv[1], "<>");
+  const char *const message = string_or_default(parv[1], "<>");
 
   client_format_name_buffer_t log_name_buffer;
   client_format_name_buffer_t link_name_buffer;

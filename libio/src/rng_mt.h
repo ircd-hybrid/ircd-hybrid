@@ -42,10 +42,8 @@
 
 */
 
-
 #ifndef INCLUDED_rng_mt_h
 #define INCLUDED_rng_mt_h
-
 #include <stdint.h>
 
 extern void init_genrand(uint32_t);

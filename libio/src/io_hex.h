@@ -26,7 +26,6 @@
 
 #ifndef INCLUDED_io_hex_h
 #define INCLUDED_io_hex_h
-
 #include <stdbool.h>
 #include <stddef.h>
 

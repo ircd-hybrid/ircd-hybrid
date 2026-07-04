@@ -49,7 +49,8 @@
  * @param o The pointer to the value of the info entry.
  * @param d The description of the info entry.
  */
-#define INFO_ENTRY_INIT(ns, n, ot, o, d) { .namespace = ns, .name = n, .output_type = ot, .option = o, .description = d }
+#define INFO_ENTRY_INIT(ns, n, ot, o, d) \
+  { .namespace = ns, .name = n, .output_type = ot, .option = o, .description = d }
 
 /**
  * @enum info_output_type_t

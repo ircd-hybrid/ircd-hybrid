@@ -34,14 +34,13 @@
 
 #ifndef INCLUDED_patricia_h
 #define INCLUDED_patricia_h
-
 #include <stdbool.h>
-#include <netinet/in.h>  /* for struct in_addr */
-#include <sys/socket.h>  /* for AF_INET */
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-#define BIT_TEST(f, b)  ((f) & (b))
+#define BIT_TEST(f, b) ((f) & (b))
 
-#define PATRICIA_MAXBITS   (sizeof(struct in6_addr) * 8)
+#define PATRICIA_MAXBITS (sizeof(struct in6_addr) * 8)
 #define PATRICIA_MAXBITS_IPV4 (sizeof(struct in_addr) * 8)
 #define PATRICIA_MAXBITS_IPV6 (sizeof(struct in6_addr) * 8)
 

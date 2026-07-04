@@ -47,7 +47,8 @@
  * @param h The function to handle the stats command.
  * @param r The required user modes to access this stats command.
  */
-#define STATS_HANDLER_INIT(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
+#define STATS_HANDLER_INIT(l, h, r) \
+  { .letter = l, .handler = h, .required_modes = r, .enabled = true }
 
 /**
  * @enum stats_result_t

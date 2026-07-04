@@ -21,7 +21,6 @@
 
 #ifndef INCLUDED_io_h
 #define INCLUDED_io_h
-
 #include <limits.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>

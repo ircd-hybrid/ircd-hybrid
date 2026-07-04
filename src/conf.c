@@ -491,7 +491,7 @@ conf_auth_verify_credentials(struct Client *client, enum conf_authorize_result *
   if (IsConfKill(conf))
   {
     _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_KLINE_MATCH,
-                                string_default(conf->reason, "K-lined"));
+                                string_or_default(conf->reason, "K-lined"));
     return NULL;
   }
 
@@ -1049,7 +1049,7 @@ _conf_ban_report_exempted(struct Client *client, enum conf_ban_type type, const 
 void
 conf_ban_apply(struct Client *client, enum conf_ban_type type, const char *reason)
 {
-  const char *const ban_reason = string_default(reason, "Banned");
+  const char *const ban_reason = string_or_default(reason, "Banned");
 
   switch (type)
   {

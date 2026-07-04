@@ -53,9 +53,9 @@ connect_assign_class(struct ConnectItem *connect, const char *class_name)
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
-                   string_default(class_name, "<not specified>"), connect->name, connect->klass->name);
+                   string_or_default(class_name, "<not specified>"), connect->name, connect->klass->name);
     log_write(LOG_TYPE_IRCD, "Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
-              string_default(class_name, "<not specified>"), connect->name, connect->klass->name);
+              string_or_default(class_name, "<not specified>"), connect->name, connect->klass->name);
   }
 }
 

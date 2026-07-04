@@ -81,7 +81,7 @@ _links_send_live(struct Client *client, const char *mask)
                        server->name, server->uplink->name, server->hopcount, server->info);
   }
 
-  sendto_one_numeric(client, &me, RPL_ENDOFLINKS, string_default(mask, "*"));
+  sendto_one_numeric(client, &me, RPL_ENDOFLINKS, string_or_default(mask, "*"));
 }
 
 /*! \brief Shows a list of linked servers and notifies irc-operators
@@ -103,7 +103,7 @@ _links_process_request(struct Client *source, char *parv[])
     return;
   }
 
-  const char *const mask = string_default(parv[2], parv[1]);
+  const char *const mask = string_or_default(parv[2], parv[1]);
   _links_send_live(source, mask);
 }
 

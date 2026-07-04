@@ -43,7 +43,8 @@
  * @param pos Node variable for iteration.
  * @param head List head.
  */
-#define LIST_FOREACH(pos, head) for (pos = (head); pos != NULL; pos = pos->next)
+#define LIST_FOREACH(pos, head) \
+  for (pos = (head); pos != NULL; pos = pos->next)
 
 /**
  * @def LIST_FOREACH_SAFE
@@ -56,7 +57,8 @@
  * @param n Temporary list head for safe removal.
  * @param head List head.
  */
-#define LIST_FOREACH_SAFE(pos, n, head) for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
+#define LIST_FOREACH_SAFE(pos, n, head) \
+  for (pos = (head), n = pos ? pos->next : NULL; pos != NULL; pos = n, n = pos ? pos->next : NULL)
 
 /**
  * @def LIST_FOREACH_PREV
@@ -67,7 +69,8 @@
  * @param pos Node variable for iteration.
  * @param head List tail.
  */
-#define LIST_FOREACH_PREV(pos, tail) for (pos = (tail); pos != NULL; pos = pos->prev)
+#define LIST_FOREACH_PREV(pos, tail) \
+  for (pos = (tail); pos != NULL; pos = pos->prev)
 
 /**
  * @def list_length

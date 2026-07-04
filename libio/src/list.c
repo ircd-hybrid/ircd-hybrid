@@ -334,8 +334,10 @@ list_find(list_t *list, const void *data)
   list_node_t *node;
 
   LIST_FOREACH(node, list->head)
+  {
     if (node->data == data)
       return node;
+  }
 
   return NULL;
 }
@@ -377,8 +379,10 @@ list_find_cmp(const list_t *list, const void *data, int (*cmp)(const char *, con
   list_node_t *node;
 
   LIST_FOREACH(node, list->head)
+  {
     if (cmp(node->data, data) == 0)
       return node;
+  }
 
   return NULL;
 }

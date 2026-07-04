@@ -421,7 +421,7 @@ _event_cleanup_data(event_handle_t event)
     event->cleanup_handler(event->data);
 }
 
-static event_status_t
+static void
 _event_destroy_finalize(event_handle_t event)
 {
   assert(event);
@@ -438,8 +438,6 @@ _event_destroy_finalize(event_handle_t event)
   io_free(event->name);
   event->name = NULL;
   io_free(event);
-
-  return EVENT_SUCCESS;
 }
 
 event_status_t
@@ -464,7 +462,8 @@ event_destroy(event_handle_t event)
   if (event->manager->dispatching_event == event)
     return EVENT_SUCCESS;
 
-  return _event_destroy_finalize(event);
+  _event_destroy_finalize(event);
+  return EVENT_SUCCESS;
 }
 
 event_status_t
@@ -707,8 +706,7 @@ event_manager_run(event_manager_t manager)
 
     if (event->destroy_pending)
     {
-      status = _event_destroy_finalize(event);
-      assert(status == EVENT_SUCCESS);
+      _event_destroy_finalize(event);
       continue;
     }
 

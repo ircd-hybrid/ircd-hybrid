@@ -324,7 +324,8 @@ event_manager_destroy(event_manager_t manager)
     assert(event->manager == manager);
 
     event_status_t status = event_destroy(event);
-    assert(status == EVENT_SUCCESS);
+    if (status != EVENT_SUCCESS)
+      return status;
   }
 
   assert(manager->heap_size == 0);

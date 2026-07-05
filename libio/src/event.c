@@ -473,20 +473,12 @@ event_unschedule(event_handle_t event)
     return EVENT_ERR_INVALID_ARG;
 
   if (event->manager->dispatching_event == event)
-  {
     event->auto_reschedule_suppressed = true;
 
-    if (!event_is_scheduled(event))
-      return EVENT_SUCCESS;
-  }
-
   if (!event_is_scheduled(event))
-    return EVENT_ERR_NOT_FOUND;
+    return EVENT_SUCCESS;
 
-  event_status_t status = _event_heap_remove(event->manager, event);
-  assert(event->heap_index == EVENT_HEAP_INVALID_INDEX || status != EVENT_SUCCESS);
-
-  return status;
+  return _event_heap_remove(event->manager, event);
 }
 
 event_status_t

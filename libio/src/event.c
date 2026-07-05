@@ -449,18 +449,17 @@ event_destroy(event_handle_t event)
   if (event->destroy_pending)
     return EVENT_SUCCESS;
 
-  if (event_is_scheduled(event))
-  {
-    event_status_t status = event_unschedule(event);
-    if (status != EVENT_SUCCESS)
-      return status;
-  }
+  event_status_t status = event_unschedule(event);
+  if (status != EVENT_SUCCESS)
+    return status;
 
   event->destroy_pending = true;
-  event->auto_reschedule_suppressed = true;
 
   if (event->manager->dispatching_event == event)
+  {
+    event->auto_reschedule_suppressed = true;
     return EVENT_SUCCESS;
+  }
 
   _event_destroy_finalize(event);
   return EVENT_SUCCESS;

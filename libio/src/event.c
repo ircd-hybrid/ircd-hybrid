@@ -574,7 +574,8 @@ event_is_scheduled(event_handle_t event)
     return false;
 
   return event->heap_index != EVENT_HEAP_INVALID_INDEX &&
-         event->heap_index < event->manager->heap_size && event->manager->heap_array[event->heap_index] == event;
+         event->heap_index < event->manager->heap_size &&
+         event->manager->heap_array[event->heap_index] == event;
 }
 
 bool

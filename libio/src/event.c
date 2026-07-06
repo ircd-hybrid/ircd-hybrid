@@ -271,8 +271,6 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
   if (event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
-  event->next_fire_time_ms = absolute_time_ms;
-
   if (event->manager->dispatching_event == event)
     event->auto_reschedule_suppressed = true;
 
@@ -283,7 +281,9 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
       return status;
   }
 
+  event->next_fire_time_ms = absolute_time_ms;
   _event_heap_insert(event->manager, event);
+
   return EVENT_SUCCESS;
 }
 

@@ -78,8 +78,8 @@ extern event_handle_t event_create(event_manager_t, const char *, event_handler_
 extern event_manager_t event_get_manager(event_handle_t);
 extern event_manager_t event_manager_create(const event_manager_config_t *);
 extern event_status_t event_manager_destroy(event_manager_t);
+extern event_status_t event_manager_dispatch_due(event_manager_t);
 extern event_status_t event_manager_for_each_snapshot(event_manager_t, event_snapshot_callback_fn, void *);
-extern event_status_t event_manager_run(event_manager_t);
 extern event_status_t event_destroy(event_handle_t);
 extern event_status_t event_reschedule(event_handle_t, uintmax_t);
 extern event_status_t event_reset(event_handle_t);

@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include <stdlib.h>
 
 #include "event.h"
 #include "io_time.h"
@@ -34,7 +33,7 @@
 #include "rng_mt.h"
 
 #define EVENT_HEAP_INVALID_INDEX SIZE_MAX
-#define EVENT_HEAP_MIN_CAPACITY 8
+#define EVENT_HEAP_DEFAULT_CAPACITY 8
 
 struct event_instance
 {
@@ -165,7 +164,7 @@ _event_heap_ensure_capacity(event_manager_t manager)
     return;
 
   const size_t new_capacity =
-    (manager->heap_capacity == 0) ? EVENT_HEAP_MIN_CAPACITY : manager->heap_capacity * 2;
+    (manager->heap_capacity == 0) ? EVENT_HEAP_DEFAULT_CAPACITY : manager->heap_capacity * 2;
   _event_heap_resize(manager, new_capacity);
 }
 
@@ -290,7 +289,7 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
 event_manager_t
 event_manager_create(const event_manager_config_t *config)
 {
-  size_t initial_heap_capacity = EVENT_HEAP_MIN_CAPACITY;
+  size_t initial_heap_capacity = EVENT_HEAP_DEFAULT_CAPACITY;
 
   if (config && config->initial_heap_capacity)
     initial_heap_capacity = config->initial_heap_capacity;
@@ -659,7 +658,7 @@ event_get_data(event_handle_t event)
 }
 
 event_status_t
-event_manager_run(event_manager_t manager)
+event_manager_dispatch_due(event_manager_t manager)
 {
   if (manager == NULL)
     return EVENT_ERR_INVALID_ARG;

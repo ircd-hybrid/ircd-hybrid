@@ -197,7 +197,7 @@ _io_loop(void)
     client_process_deferred_destroy();
 
     io_time_update_cache();
-    event_manager_run(ircd_event_manager);
+    event_manager_dispatch_due(ircd_event_manager);
 
     /* Check to see whether we have to rehash the configuration. */
     if (dorehash)

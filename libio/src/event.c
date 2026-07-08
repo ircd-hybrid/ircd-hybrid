@@ -187,13 +187,16 @@ _event_heap_insert(event_manager_t manager, event_handle_t event)
   assert(event_is_scheduled(event));
 }
 
-static event_status_t
+static void
 _event_heap_remove(event_manager_t manager, event_handle_t event)
 {
-  if (event->manager != manager)
-    return EVENT_ERR_INVALID_ARG;
-
+  assert(manager);
+  assert(event);
+  assert(event->manager == manager);
   assert(event_is_scheduled(event));
+  assert(manager->heap_size > 0);
+  assert(event->heap_index < manager->heap_size);
+  assert(manager->heap_array[event->heap_index] == event);
 
   const size_t original_heap_size = manager->heap_size;
   const size_t idx_to_remove = event->heap_index;
@@ -217,7 +220,6 @@ _event_heap_remove(event_manager_t manager, event_handle_t event)
   event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
   assert(manager->heap_size == original_heap_size - 1);
-  return EVENT_SUCCESS;
 }
 
 static void
@@ -274,11 +276,7 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
     event->auto_reschedule_suppressed = true;
 
   if (event_is_scheduled(event))
-  {
-    event_status_t status = _event_heap_remove(event->manager, event);
-    if (status != EVENT_SUCCESS)
-      return status;
-  }
+    _event_heap_remove(event->manager, event);
 
   event->next_fire_time_ms = absolute_time_ms;
   _event_heap_insert(event->manager, event);
@@ -476,7 +474,8 @@ event_unschedule(event_handle_t event)
   if (!event_is_scheduled(event))
     return EVENT_SUCCESS;
 
-  return _event_heap_remove(event->manager, event);
+  _event_heap_remove(event->manager, event);
+  return EVENT_SUCCESS;
 }
 
 event_status_t
@@ -687,8 +686,7 @@ event_manager_dispatch_due(event_manager_t manager)
     if (event->next_fire_time_ms > current_time_ms)
       break;
 
-    event_status_t status = _event_heap_remove(manager, event);
-    assert(status == EVENT_SUCCESS);
+    _event_heap_remove(manager, event);
     assert(event->heap_index == EVENT_HEAP_INVALID_INDEX);
 
     manager->dispatching_event = event;

@@ -496,6 +496,9 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
+  if (absolute_time_ms == EVENT_TIME_NEVER)
+    return EVENT_ERR_INVALID_ARG;
+
   return _event_schedule_absolute(event, absolute_time_ms);
 }
 

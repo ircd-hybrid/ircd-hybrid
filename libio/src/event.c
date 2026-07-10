@@ -405,7 +405,7 @@ event_create(event_manager_t manager, const char *name, event_handler_fn handler
   event->cleanup_handler = cleanup_handler;
   event->heap_index = EVENT_HEAP_INVALID_INDEX;
 
-  list_add(event, &event->node, &manager->event_list);
+  list_add_tail(event, &event->node, &manager->event_list);
   return event;
 }
 

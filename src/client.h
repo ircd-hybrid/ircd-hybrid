@@ -229,7 +229,7 @@ struct Client
    */
   char realhost[HOSTLEN + 1];  /**< The forward-confirmed reverse DNS hostname of the connection. */
 
-  char info[REALLEN + 1];  /** Free-form client information, usually the realname/gecos field. */
+  char info[REALLEN + 1];  /**< Free-form client information, usually the realname/gecos field. */
 
   /** client->sockhost contains the ip address gotten from the socket as a
    * string, this field should be considered read-only once the connection

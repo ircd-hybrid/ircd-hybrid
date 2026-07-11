@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <stdint.h>
 #include <string.h>
 
 #include "io_string.h"
@@ -98,89 +97,16 @@ client_id_extract_sid_from_uid(const char *uid, char sid[CLIENT_ID_SID_LENGTH + 
   return true;
 }
 
-static uint32_t
-_client_id_hash_djb2_update(uint32_t hash, const char *str)
-{
-  assert(!string_is_empty(str));
-
-  for (const unsigned char *p = (const unsigned char *)str; *p; ++p)
-    hash = ((hash << 5) + hash) + *p;  /* hash * 33 + byte */
-
-  return hash;
-}
-
-static uint32_t
-_client_id_hash_djb2_update_byte(uint32_t hash, unsigned char byte)
-{
-  return ((hash << 5) + hash) + byte;  /* hash * 33 + byte */
-}
-
-static void
-_client_id_derive_sid(const char *server_name, const char *server_description, char sid[CLIENT_ID_SID_LENGTH + 1])
-{
-  static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-  assert(!string_is_empty(server_name));
-  assert(!string_is_empty(server_description));
-  assert(sid);
-
-  uint32_t hash = 5381U;
-  hash = _client_id_hash_djb2_update(hash, server_name);
-
-  /*
-   * Hash an explicit separator so the pair
-   *   ("ab", "c")
-   * does not collide with
-   *   ("a", "bc").
-   */
-  hash = _client_id_hash_djb2_update_byte(hash, '\0');
-  hash = _client_id_hash_djb2_update(hash, server_description);
-
-  /*
-   * The valid SID space is:
-   *   [0-9][A-Z0-9][A-Z0-9]
-   *
-   * This gives 10 * 36 * 36 distinct values.
-   */
-  uint32_t value = hash % (10U * 36U * 36U);
-  sid[0] = '0' + (value / (36U * 36U));
-  value %= (36U * 36U);
-  sid[1] = alphabet[value / 36U];
-  sid[2] = alphabet[value % 36U];
-  sid[3] = '\0';
-
-  assert(client_id_is_valid_sid(sid));
-}
-
 bool
-client_id_init_local_server_sid(struct Client *client, const char *configured_sid, const char *server_name,
-                                const char *server_description, bool *generated)
+client_id_set_local_sid(struct Client *client, const char *sid)
 {
-  assert(client);
-  assert(string_is_empty(client->id));
-  assert(sizeof(client->id) >= CLIENT_ID_SID_LENGTH + 1);
-
-  if (generated)
-    *generated = false;
-
-  /* A configured SID takes precedence. */
-  if (!string_is_empty(configured_sid))
-  {
-    if (!client_id_is_valid_sid(configured_sid))
-      return false;
-
-    strlcpy(client->id, configured_sid, sizeof(client->id));
-    return true;
-  }
-
-  if (string_is_empty(server_name) || string_is_empty(server_description))
+  if (client == NULL || !string_is_empty(client->id))
     return false;
 
-  _client_id_derive_sid(server_name, server_description, client->id);
+  if (!client_id_is_valid_sid(sid))
+    return false;
 
-  if (generated)
-    *generated = true;
-
+  memcpy(client->id, sid, CLIENT_ID_SID_LENGTH + 1);
   return true;
 }
 

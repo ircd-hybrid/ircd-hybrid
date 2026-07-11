@@ -274,7 +274,7 @@ _ircd_init_me(void)
 {
   if (string_is_empty(ConfigServerInfo.name))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server name configured.");
     exit(EXIT_FAILURE);
   }
 
@@ -282,29 +282,35 @@ _ircd_init_me(void)
 
   if (string_is_empty(ConfigServerInfo.description))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server description configured.");
     exit(EXIT_FAILURE);
   }
 
   strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
   if (string_is_empty(ConfigServerInfo.sid))
-    log_write(LOG_TYPE_IRCD, "Generating server ID");
-
-  bool sid_generated = false;
-  if (!client_id_init_local_server_sid(&me, ConfigServerInfo.sid, ConfigServerInfo.name,
-                                       ConfigServerInfo.description, &sid_generated))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize server ID.");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server ID configured.");
     exit(EXIT_FAILURE);
   }
 
-  if (sid_generated)
-    ConfigServerInfo.sid = io_strdup(me.id);
+  if (!client_id_is_valid_sid(ConfigServerInfo.sid))
+  {
+    log_write(LOG_TYPE_IRCD,
+              "ERROR: Invalid server ID configured; expected a TS6 SID in the "
+              "form [0-9][A-Z0-9][A-Z0-9].");
+    exit(EXIT_FAILURE);
+  }
+
+  if (!client_id_set_local_sid(&me, ConfigServerInfo.sid))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize local server ID.");
+    exit(EXIT_FAILURE);
+  }
 
   if (!client_id_init_generator(&me))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize client ID generator.");
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize local UID generator.");
     exit(EXIT_FAILURE);
   }
 

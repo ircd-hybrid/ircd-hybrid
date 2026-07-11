@@ -3,6 +3,8 @@
 * The `LIST` command now implements the standard ELIST `C<` and `C>` creation-time
   filters correctly: `C<num` matches channels created within the last `<num>` minutes,
   while `C>num` matches channels created more than `<num>` minutes ago.
+* The `serverinfo::sid` configuration directive is no longer optional. Server IDs are
+  no longer generated automatically.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

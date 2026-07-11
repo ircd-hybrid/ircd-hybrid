@@ -30,8 +30,8 @@ extern bool client_id_extract_sid_from_uid(const char *, char[CLIENT_ID_SID_LENG
 extern bool client_id_has_valid_sid(const struct Client *);
 extern bool client_id_has_valid_uid(const struct Client *);
 extern bool client_id_init_generator(const struct Client *);
-extern bool client_id_init_local_server_sid(struct Client *, const char *, const char *, const char *, bool *);
 extern bool client_id_is_valid_sid(const char *);
 extern bool client_id_is_valid_uid(const char *);
+extern bool client_id_set_local_sid(struct Client *, const char *);
 #endif  /* INCLUDED_client_id_h */
 

@@ -519,7 +519,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 147 "conf_parser.y"
+#line 131 "conf_parser.y"
 
   int number;
   char *string;

@@ -227,10 +227,7 @@ _info_process_request(struct Client *client)
 
   for (const char *const *line_ptr = info_text_lines; *line_ptr; ++line_ptr)
   {
-    const char *line = *line_ptr;
-    if (*line == '\0')
-      line = " ";
-
+    const char *const line = **line_ptr ? *line_ptr : " ";
     sendto_one_numeric(client, &me, RPL_INFO, line);
   }
 

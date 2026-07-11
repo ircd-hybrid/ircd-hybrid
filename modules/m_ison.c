@@ -57,9 +57,9 @@ m_ison(struct Client *source, int parc, char *parv[])
   /* 1       23456            78                     9 0  */
   const size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(parv[1], " ", &p); name;
-                   name = strtok_r(NULL,    " ", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(parv[1], " ", &saveptr); name;
+                   name = strtok_r(NULL,    " ", &saveptr))
   {
     const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)

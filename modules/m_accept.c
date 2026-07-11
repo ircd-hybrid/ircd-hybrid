@@ -115,9 +115,9 @@ m_accept(struct Client *source, int parc, char *parv[])
     .hostsize = sizeof(host)
   };
 
-  char *p = NULL;
-  for (mask = strtok_r(mask, ",", &p); mask;
-       mask = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (mask = strtok_r(mask, ",", &saveptr); mask;
+       mask = strtok_r(NULL, ",", &saveptr))
   {
     if (*mask == '-' && *++mask)
     {

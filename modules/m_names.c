@@ -49,17 +49,17 @@
 static void
 m_names(struct Client *source, int parc, char *parv[])
 {
-  const char *const name = parv[1];
-  if (string_is_empty(name))
+  const char *const channel_name = parv[1];
+  if (string_is_empty(channel_name))
   {
     sendto_one_numeric(source, &me, RPL_ENDOFNAMES, "*");
     return;
   }
 
-  struct Channel *const channel = channel_find(name);
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, RPL_ENDOFNAMES, name);
+    sendto_one_numeric(source, &me, RPL_ENDOFNAMES, channel_name);
     return;
   }
 

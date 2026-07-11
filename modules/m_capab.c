@@ -47,10 +47,10 @@ static void
 mr_capab(struct Client *source, int parc, char *parv[])
 {
   char *const list = parv[1];
-  char *p = NULL;
+  char *saveptr = NULL;
 
-  for (const char *name = strtok_r(list, " ", &p); name;
-                   name = strtok_r(NULL, " ", &p))
+  for (const char *name = strtok_r(list, " ", &saveptr); name;
+                   name = strtok_r(NULL, " ", &saveptr))
   {
     unsigned int flag = capab_find(name);
     if (flag)

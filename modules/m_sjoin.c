@@ -339,9 +339,9 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   char *uid_ptr = uid_buf + buflen;
   char *const uid_buf_start = uid_ptr;
 
-  char *list = parv[args + 4], *p = NULL;
-  for (const char *s = strtok_r(list, " ", &p); s;
-                   s = strtok_r(NULL, " ", &p))
+  char *list = parv[args + 4], *saveptr = NULL;
+  for (const char *s = strtok_r(list, " ", &saveptr); s;
+                   s = strtok_r(NULL, " ", &saveptr))
   {
     unsigned int ret, flags = 0;
     while ((ret = channel_member_prefix_to_flag(*s)))

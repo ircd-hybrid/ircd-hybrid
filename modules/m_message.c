@@ -426,12 +426,12 @@ target_process(struct Client *source, const char *name, const char *text, bool n
 static void
 target_process_list(struct Client *source, char *list, const char *text, bool notice)
 {
-  char *p = NULL;
+  char *saveptr = NULL;
 
   target_count = 0;
 
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
   {
     if (target_check_limit_exceeded(source, name))
       break;

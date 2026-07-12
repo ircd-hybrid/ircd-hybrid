@@ -926,8 +926,6 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
   struct Client *const client = data;
   assert(client && client_is_local(client));
   assert(client->connection);
-  assert(client->connection->fd);
-  assert(client->connection->fd == fd);
 
   /*
    * This callback may still fire for a client that has already
@@ -935,6 +933,9 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
    */
   if (client_is_defunct(client))
     return;
+
+  assert(client->connection->fd);
+  assert(client->connection->fd == fd);
 
   const char *tls_error = NULL;
   const tls_handshake_status_t status = tls_handshake(&fd->tls, TLS_ROLE_SERVER, &tls_error);

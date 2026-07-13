@@ -197,6 +197,7 @@ void
 server_destroy(struct Server *server)
 {
   assert(server);
+  assert(server->conf == NULL);
   assert(list_is_empty(&server->child_server_list));
   assert(server->child_server_list.head == NULL);
   assert(server->child_server_list.tail == NULL);

@@ -87,30 +87,21 @@ static void
 _server_reject_internal(const server_rejection_context_t *ctx, const char *detail_fmt, va_list args)
 {
   char detail[IRCD_BUFSIZE];
-  char admin_message[IRCD_BUFSIZE];
-  char oper_message[IRCD_BUFSIZE];
-  char log_message[IRCD_BUFSIZE];
-  char exit_message[IRCD_BUFSIZE];
 
   vsnprintf(detail, sizeof(detail), detail_fmt, args);
 
-  snprintf(admin_message, sizeof(admin_message), "%s from %s: %s (%s)",
-           ctx->event_text, ctx->admin_event_source, ctx->reason_text, detail);
-  snprintf(oper_message, sizeof(oper_message), "%s from %s: %s (%s)",
-           ctx->event_text, ctx->oper_event_source, ctx->reason_text, detail);
-  snprintf(log_message, sizeof(log_message), "%s from %s: %s (%s)",
-           ctx->event_text, ctx->log_event_source, ctx->reason_text, detail);
-  snprintf(exit_message, sizeof(exit_message), "%s: %s (%s)",
-           ctx->event_text, ctx->reason_text, detail);
-
-  log_write(LOG_TYPE_IRCD, "%s", log_message);
+  log_write(LOG_TYPE_IRCD, "%s from %s: %s (%s)",
+            ctx->event_text, ctx->log_event_source, ctx->reason_text, detail);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                 "%s", admin_message);
+                 "%s from %s: %s (%s)",
+                 ctx->event_text, ctx->admin_event_source, ctx->reason_text, detail);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-                 "%s", oper_message);
+                 "%s from %s: %s (%s)",
+                 ctx->event_text, ctx->oper_event_source, ctx->reason_text, detail);
 
-  client_exit(ctx->exit_client, exit_message);
+  client_exit_fmt(ctx->exit_client, "%s: %s (%s)",
+                  ctx->event_text, ctx->reason_text, detail);
 }
 
 static void

@@ -63,15 +63,15 @@ ms_bmask(struct Client *source, int parc, char *parv[])
   {
     case 'b':
       type = CHFL_BAN;
-      list = &channel->banlist;
+      list = &channel->ban_list;
       break;
     case 'e':
       type = CHFL_EXCEPTION;
-      list = &channel->exceptlist;
+      list = &channel->exception_list;
       break;
     case 'I':
       type = CHFL_INVEX;
-      list = &channel->invexlist;
+      list = &channel->invite_exception_list;
       break;
     default:
       return;

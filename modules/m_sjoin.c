@@ -40,13 +40,13 @@
  *		  but were not set in oldmode.
  */
 static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
+set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode, char *mbuf, char *pbuf)
 {
   int what = MODE_NONE;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    if (tab->mode && (tab->mode & mode->flags) && !(tab->mode & oldmode->flags))
     {
       if (what != MODE_ADD)
       {
@@ -60,7 +60,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    if (tab->mode && (tab->mode & oldmode->flags) && !(tab->mode & mode->flags))
     {
       if (what != MODE_DEL)
       {
@@ -204,7 +204,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
+  struct ChannelMode mode = { .flags = 0, .limit = 0, .key[0] = '\0' };
   int args = 0;
   for (const char *modes = parv[3]; *modes; ++modes)
   {
@@ -230,7 +230,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
       {
         const struct chan_mode *const cmode = cmode_map[(unsigned char)*modes];
         if (cmode)
-          mode.mode |= cmode->mode;
+          mode.flags |= cmode->mode;
         break;
       }
     }
@@ -258,13 +258,13 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   else if (newts > channel->creation_time)
     keep_new_modes = false;
 
-  struct Mode *oldmode = &channel->mode;
+  struct ChannelMode *oldmode = &channel->mode;
 
   if (keep_new_modes == false)
     mode = *oldmode;
   else if (keep_our_modes)
   {
-    mode.mode |= oldmode->mode;
+    mode.flags |= oldmode->flags;
 
     if (oldmode->limit > mode.limit)
       mode.limit = oldmode->limit;
@@ -291,12 +291,12 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     channel_member_clear_prefixes(channel, origin_name);
 
-    remove_ban_list(channel, origin_name, &channel->banlist, 'b');
-    remove_ban_list(channel, origin_name, &channel->exceptlist, 'e');
-    remove_ban_list(channel, origin_name, &channel->invexlist, 'I');
+    remove_ban_list(channel, origin_name, &channel->ban_list, 'b');
+    remove_ban_list(channel, origin_name, &channel->exception_list, 'e');
+    remove_ban_list(channel, origin_name, &channel->invite_exception_list, 'I');
 
-    clear_ban_cache_list(&channel->members_local);
-    invite_clear_list(&channel->invites);
+    clear_ban_cache_list(&channel->local_member_list);
+    channel_invite_remove_all(&channel->invite_list);
 
     channel_set_mode_lock(source, channel, NULL);
 
@@ -406,7 +406,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, "%s", uid_buf);
 
-  if (list_is_empty(&channel->members) && isnew)
+  if (list_is_empty(&channel->member_list) && isnew)
     channel_destroy(channel);
 }
 

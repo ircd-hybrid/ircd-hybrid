@@ -61,7 +61,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     const struct ChannelMember *tmp = node->data;
 

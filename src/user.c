@@ -557,14 +557,14 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   if (client_is_local(client))
   {
     sendto_one_numeric(client, &me, RPL_VISIBLEHOST, client->host);
-    clear_ban_cache_list(&client->channel_list);
+    clear_ban_cache_list(&client->channel_member_list);
   }
 
   if (ConfigGeneral.cycle_on_host_change == 0)
     return;
 
   list_node_t *node;
-  LIST_FOREACH(node, client->channel_list.head)
+  LIST_FOREACH(node, client->channel_member_list.head)
   {
     char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
     char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];

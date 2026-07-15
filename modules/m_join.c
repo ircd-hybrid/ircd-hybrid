@@ -40,13 +40,13 @@
  *                but were not set in oldmode.
  */
 static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
+set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode, char *mbuf, char *pbuf)
 {
   int what = MODE_NONE;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    if (tab->mode && (tab->mode & mode->flags) && !(tab->mode & oldmode->flags))
     {
       if (what != MODE_ADD)
       {
@@ -60,7 +60,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    if (tab->mode && (tab->mode & oldmode->flags) && !(tab->mode & mode->flags))
     {
       if (what != MODE_DEL)
       {
@@ -195,7 +195,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
+    struct ChannelMode mode = { .flags = 0, .limit = 0, .key[0] = '\0' };
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
 
@@ -212,7 +212,7 @@ ms_join(struct Client *source, int parc, char *parv[])
     const char *const origin_name = client_get_visible_server_name(source->uplink);
     channel_member_clear_prefixes(channel, origin_name);
 
-    invite_clear_list(&channel->invites);
+    channel_invite_remove_all(&channel->invite_list);
 
     channel_set_mode_lock(source->nexthop, channel, NULL);
 

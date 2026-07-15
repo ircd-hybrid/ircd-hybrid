@@ -342,17 +342,17 @@ stats_memory(struct Client *client, int parc, char *parv[])
   LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *const channel = node->data;
-    channel_members += list_length(&channel->members);
-    channel_invites += list_length(&channel->invites);
+    channel_members += list_length(&channel->member_list);
+    channel_invites += list_length(&channel->invite_list);
 
-    channel_bans += list_length(&channel->banlist);
-    channel_ban_memory += list_length(&channel->banlist) * sizeof(struct Ban);
+    channel_bans += list_length(&channel->ban_list);
+    channel_ban_memory += list_length(&channel->ban_list) * sizeof(struct Ban);
 
-    channel_except += list_length(&channel->exceptlist);
-    channel_except_memory += list_length(&channel->exceptlist) * sizeof(struct Ban);
+    channel_except += list_length(&channel->exception_list);
+    channel_except_memory += list_length(&channel->exception_list) * sizeof(struct Ban);
 
-    channel_invex += list_length(&channel->invexlist);
-    channel_invex_memory += list_length(&channel->invexlist) * sizeof(struct Ban);
+    channel_invex += list_length(&channel->invite_exception_list);
+    channel_invex_memory += list_length(&channel->invite_exception_list) * sizeof(struct Ban);
   }
 
   monitor_count_memory(&monitor_list_headers, &monitor_list_memory);
@@ -402,7 +402,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channel members %u(%zu) invites %u(%zu)",
                      channel_members, channel_members * sizeof(struct ChannelMember),
-                     channel_invites, channel_invites * sizeof(struct Invite));
+                     channel_invites, channel_invites * sizeof(struct ChannelInvite));
 
   uint32_t group_count, whowas_count;
   size_t group_bytes, whowas_bytes;

@@ -31,9 +31,9 @@ typedef enum
 struct Client;
 
 /** Mode structure for channels */
-struct Mode
+struct ChannelMode
 {
-  uint32_t mode;  /**< Simple modes */
+  uint32_t flags;  /**< Simple modes */
   uint32_t limit;  /**< +l userlimit */
   char key[KEYLEN + 1];  /**< +k key */
 };
@@ -45,7 +45,7 @@ struct Channel
   struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
   char name[CHANNELLEN + 1];  /**< Unique name of the channel */
   size_t name_len;  /**< Cached string length of Channel::name */
-  struct Mode mode;
+  struct ChannelMode mode;
   char *mode_lock;
   char *topic;
   char *topic_setter;
@@ -60,20 +60,20 @@ struct Channel
   float number_joined;
   bool sent_join_flood_notice;  /**< Indicates whether a server notice about a join flood event has been sent to IRC operators. */
   bool sent_message_flood_notice;  /**< Indicates whether a server notice about a message flood event has been sent to IRC operators. */
-  list_t members_local;  /**< List of local members on this channel */
-  list_t members;  /**< List of members on this channel */
-  list_t invites;  /**< List of invites on this channel */
-  list_t banlist;  /**< List of bans on this channel */
-  list_t exceptlist;  /**< List of ban exceptions on this channel */
-  list_t invexlist;  /**< List of invite exceptions on this channel */
+  list_t local_member_list;  /**< List of local members on this channel */
+  list_t member_list;  /**< List of members on this channel */
+  list_t invite_list;  /**< List of invites on this channel */
+  list_t ban_list;  /**< List of bans on this channel */
+  list_t exception_list;  /**< List of ban exceptions on this channel */
+  list_t invite_exception_list;  /**< List of invite exceptions on this channel */
 };
 
 /** ChannelMember structure */
 struct ChannelMember
 {
-  list_node_t locchannode;  /**< link to channel->members_local */
-  list_node_t channode;  /**< link to channel->members */
-  list_node_t usernode;  /**< link to client->channel */
+  list_node_t local_channel_node;  /**< link to channel->local_member_list */
+  list_node_t channel_node;  /**< link to channel->member_list */
+  list_node_t client_node;  /**< link to client->channel_member_list */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
   uint32_t flags;  /**< user/channel flags, e.g. CHFL_CHANOP */

@@ -280,7 +280,7 @@ _client_destroy_local(struct Client *client)
   assert(client->connection->flood_recalc_event == NULL);
   assert(list_is_empty(&client->connection->accept_list));
   assert(list_is_empty(&client->connection->monitor_list));
-  assert(list_is_empty(&client->connection->invite_list));
+  assert(list_is_empty(&client->connection->channel_invite_list));
   assert(dbuf_length(&client->connection->buf_recvq) == 0);
   assert(dbuf_length(&client->connection->buf_sendq) == 0);
   assert(client->connection->base_class == NULL);
@@ -308,7 +308,7 @@ _client_destroy(struct Client *client)
   assert(client->global_node.prev == NULL && client->global_node.next == NULL);
   assert(client->uplink_node.prev == NULL && client->uplink_node.next == NULL);
   assert(list_is_empty(&client->whowas_list));
-  assert(list_is_empty(&client->channel_list));
+  assert(list_is_empty(&client->channel_member_list));
   assert(list_is_empty(&client->svstag_list));
 
   if (client->server)
@@ -538,7 +538,7 @@ _client_exit_detach(struct Client *client)
     if (user_mode_has_flag(client, UMODE_INVISIBLE))
       --Count.invisi;
 
-    channel_member_remove_list(&client->channel_list);
+    channel_member_remove_list(&client->channel_member_list);
 
     svstag_clear_list(&client->svstag_list);
 
@@ -670,7 +670,7 @@ _client_exit_cleanup_client_connection(struct Client *client, const char *reason
       list_free_node(node);
   }
 
-  invite_clear_list(&client->connection->invite_list);
+  channel_invite_remove_all(&client->connection->channel_invite_list);
   accept_clear_list(&client->connection->accept_list);
   monitor_clear_list(client);
 

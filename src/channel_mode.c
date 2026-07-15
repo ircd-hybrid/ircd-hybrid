@@ -98,9 +98,9 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
   if (client_is_local_user(client))
   {
-    unsigned int num_mask = list_length(&channel->banlist) +
-                            list_length(&channel->exceptlist) +
-                            list_length(&channel->invexlist);
+    unsigned int num_mask = list_length(&channel->ban_list) +
+                            list_length(&channel->exception_list) +
+                            list_length(&channel->invite_exception_list);
 
     /* Don't let local clients overflow the b/e/I lists */
     if (num_mask >= ((channel_has_mode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
@@ -201,7 +201,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     }
   }
 
-  clear_ban_cache_list(&channel->members_local);
+  clear_ban_cache_list(&channel->local_member_list);
 
   if (client_is_user(client))
     snprintf(ban->who, sizeof(ban->who), "%s!%s@%s",
@@ -230,7 +230,7 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     if (io_strcasecmp(banid, ban->banstr) == 0)
     {
       strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
-      clear_ban_cache_list(&channel->members_local);
+      clear_ban_cache_list(&channel->local_member_list);
       remove_ban(ban, list);
 
       return mask;
@@ -463,19 +463,19 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   {
     case CHFL_BAN:
       errtype = SM_ERR_RPL_B;
-      list = &channel->banlist;
+      list = &channel->ban_list;
       rpl_list = RPL_BANLIST;
       rpl_endlist = RPL_ENDOFBANLIST;
       break;
     case CHFL_EXCEPTION:
       errtype = SM_ERR_RPL_E;
-      list = &channel->exceptlist;
+      list = &channel->exception_list;
       rpl_list = RPL_EXCEPTLIST;
       rpl_endlist = RPL_ENDOFEXCEPTLIST;
       break;
     case CHFL_INVEX:
       errtype = SM_ERR_RPL_I;
-      list = &channel->invexlist;
+      list = &channel->invite_exception_list;
       rpl_list = RPL_INVEXLIST;
       rpl_endlist = RPL_ENDOFINVEXLIST;
       break;

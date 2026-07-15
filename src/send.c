@@ -696,12 +696,12 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   ++broadcast_id;
 
   list_node_t *node, *node2;
-  LIST_FOREACH(node, user->channel_list.head)
+  LIST_FOREACH(node, user->channel_member_list.head)
   {
     const struct ChannelMember *const member = node->data;
 
     const struct Channel *const channel = member->channel;
-    LIST_FOREACH(node2, channel->members_local.head)
+    LIST_FOREACH(node2, channel->local_member_list.head)
     {
       const struct ChannelMember *const member2 = node2->data;
 
@@ -756,7 +756,7 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
   va_end(args);
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members_local.head)
+  LIST_FOREACH(node, channel->local_member_list.head)
   {
     const struct ChannelMember *const member = node->data;
 
@@ -821,7 +821,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
   ++broadcast_id;
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     const struct ChannelMember *const member = node->data;
 

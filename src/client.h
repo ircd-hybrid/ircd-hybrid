@@ -149,7 +149,7 @@ struct Connection
   struct Listener *listener;  /**< The listener this connection was accepted from. */
   list_t accept_list;  /**< Users I'll allow to talk to me */
   list_t monitor_list;  /**< Chain of Monitor pointer blocks */
-  list_t invite_list;  /**< Chain of invite pointer blocks */
+  list_t channel_invite_list;  /**< Chain of invite pointer blocks */
 
   fde_t *fd;  /**< Pointer to the file descriptor entry for the underlying socket. */
 
@@ -184,7 +184,7 @@ struct Client
   enum command_handler_type command_handler;  /**< Command handler table index derived from the client's state. */
 
   list_t whowas_list;  /**< Historical records for this user's previous nicks. */
-  list_t channel_list;  /**< List of channels this user is a member of. */
+  list_t channel_member_list;  /**< List of channels this user is a member of. */
   list_t svstag_list;  /**< List of ServicesTag items */
 
   struct io_addr addr;  /**< The binary IP address of the remote end of the connection. */

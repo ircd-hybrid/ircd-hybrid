@@ -169,7 +169,7 @@ nick_change_local(struct Client *source, const char *nick)
   {
     source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
 
-    clear_ban_cache_list(&source->channel_list);
+    clear_ban_cache_list(&source->channel_member_list);
 
     monitor_notify_signoff(source);
 
@@ -589,7 +589,7 @@ m_nick(struct Client *source, int parc, char *parv[])
   }
 
   list_node_t *node;
-  LIST_FOREACH(node, source->channel_list.head)
+  LIST_FOREACH(node, source->channel_member_list.head)
   {
     struct ChannelMember *const member = node->data;
     if (channel_member_get_highest_rank(member) < CHACCESS_VOICE)

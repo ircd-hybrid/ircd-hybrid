@@ -113,12 +113,12 @@ channel_member_add(struct Channel *channel, struct Client *client, uint32_t flag
   member->client = client;
   member->channel = channel;
   member->flags = flags;
-  list_add(member, &member->channode, &channel->members);
+  list_add(member, &member->channel_node, &channel->member_list);
 
   if (client_is_local(client))
-    list_add(member, &member->locchannode, &channel->members_local);
+    list_add(member, &member->local_channel_node, &channel->local_member_list);
 
-  list_add(member, &member->usernode, &client->channel_list);
+  list_add(member, &member->client_node, &client->channel_member_list);
 }
 
 /*! \brief Deletes an user from a channel by removing a link in the
@@ -131,16 +131,16 @@ channel_member_remove(struct ChannelMember *member)
   struct Client *const client = member->client;
   struct Channel *const channel = member->channel;
 
-  list_remove(&member->channode, &channel->members);
+  list_remove(&member->channel_node, &channel->member_list);
 
   if (client_is_local(client))
-    list_remove(&member->locchannode, &channel->members_local);
+    list_remove(&member->local_channel_node, &channel->local_member_list);
 
-  list_remove(&member->usernode, &client->channel_list);
+  list_remove(&member->client_node, &client->channel_member_list);
 
   io_free(member);
 
-  if (list_is_empty(&channel->members))
+  if (list_is_empty(&channel->member_list))
     channel_destroy(channel);
 }
 
@@ -163,7 +163,7 @@ channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
   unsigned int pargs = 0;
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     struct ChannelMember *const member = node->data;
 
@@ -209,7 +209,7 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
   char *const bufptr_start = bufptr;
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     const struct ChannelMember *const member = node->data;
 
@@ -303,9 +303,9 @@ channel_send_state(struct Client *client, const struct Channel *channel)
 {
   _channel_send_sjoin(client, channel);
 
-  _channel_send_mask_list(client, channel, &channel->banlist, 'b');
-  _channel_send_mask_list(client, channel, &channel->exceptlist, 'e');
-  _channel_send_mask_list(client, channel, &channel->invexlist, 'I');
+  _channel_send_mask_list(client, channel, &channel->ban_list, 'b');
+  _channel_send_mask_list(client, channel, &channel->exception_list, 'e');
+  _channel_send_mask_list(client, channel, &channel->invite_exception_list, 'I');
 
   _channel_send_tburst(client, channel);
   _channel_send_mlock(client, channel);
@@ -391,12 +391,12 @@ channel_create(const char *name)
 void
 channel_destroy(struct Channel *channel)
 {
-  invite_clear_list(&channel->invites);
+  channel_invite_remove_all(&channel->invite_list);
 
   /* Free ban/exception/invex lists */
-  _channel_free_mask_list(&channel->banlist);
-  _channel_free_mask_list(&channel->exceptlist);
-  _channel_free_mask_list(&channel->invexlist);
+  _channel_free_mask_list(&channel->ban_list);
+  _channel_free_mask_list(&channel->exception_list);
+  _channel_free_mask_list(&channel->invite_exception_list);
 
   list_remove(&channel->node, &channel_list);
   hash_del_channel(channel);
@@ -406,29 +406,29 @@ channel_destroy(struct Channel *channel)
   assert(channel->node.prev == NULL);
   assert(channel->node.next == NULL);
 
-  assert(list_length(&channel->members_local) == 0);
-  assert(channel->members_local.head == NULL);
-  assert(channel->members_local.tail == NULL);
+  assert(list_length(&channel->local_member_list) == 0);
+  assert(channel->local_member_list.head == NULL);
+  assert(channel->local_member_list.tail == NULL);
 
-  assert(list_length(&channel->members) == 0);
-  assert(channel->members.head == NULL);
-  assert(channel->members.tail == NULL);
+  assert(list_length(&channel->member_list) == 0);
+  assert(channel->member_list.head == NULL);
+  assert(channel->member_list.tail == NULL);
 
-  assert(list_length(&channel->invites) == 0);
-  assert(channel->invites.head == NULL);
-  assert(channel->invites.tail == NULL);
+  assert(list_length(&channel->invite_list) == 0);
+  assert(channel->invite_list.head == NULL);
+  assert(channel->invite_list.tail == NULL);
 
-  assert(list_length(&channel->banlist) == 0);
-  assert(channel->banlist.head == NULL);
-  assert(channel->banlist.tail == NULL);
+  assert(list_length(&channel->ban_list) == 0);
+  assert(channel->ban_list.head == NULL);
+  assert(channel->ban_list.tail == NULL);
 
-  assert(list_length(&channel->exceptlist) == 0);
-  assert(channel->exceptlist.head == NULL);
-  assert(channel->exceptlist.tail == NULL);
+  assert(list_length(&channel->exception_list) == 0);
+  assert(channel->exception_list.head == NULL);
+  assert(channel->exception_list.tail == NULL);
 
-  assert(list_length(&channel->invexlist) == 0);
-  assert(channel->invexlist.head == NULL);
-  assert(channel->invexlist.tail == NULL);
+  assert(list_length(&channel->invite_exception_list) == 0);
+  assert(channel->invite_exception_list.head == NULL);
+  assert(channel->invite_exception_list.tail == NULL);
 
   io_free(channel->topic);
   channel->topic = NULL;
@@ -481,7 +481,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     const size_t len = strlen(me.name) + strlen(client->name) + channel->name_len + 13;
 
     list_node_t *node;
-    LIST_FOREACH(node, channel->members.head)
+    LIST_FOREACH(node, channel->member_list.head)
     {
       const struct ChannelMember *const member = node->data;
       if (user_mode_has_flag(member->client, UMODE_INVISIBLE) && is_member == false)
@@ -706,8 +706,8 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
 bool
 is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 {
-  if (find_bmask(client, channel, &channel->banlist, extban))
-    return !find_bmask(client, channel, &channel->exceptlist, extban);
+  if (find_bmask(client, channel, &channel->ban_list, extban))
+    return !find_bmask(client, channel, &channel->exception_list, extban);
   return false;
 }
 
@@ -731,14 +731,14 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
     return ERR_OPERONLYCHAN;
 
   if (channel_has_mode(channel, MODE_INVITEONLY))
-    if (invite_find(channel, client) == NULL)
-      if (!find_bmask(client, channel, &channel->invexlist, NULL))
+    if (channel_invite_find(channel, client) == NULL)
+      if (!find_bmask(client, channel, &channel->invite_exception_list, NULL))
         return ERR_INVITEONLYCHAN;
 
   if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
-  if (channel->mode.limit && list_length(&channel->members) >= channel->mode.limit)
+  if (channel->mode.limit && list_length(&channel->member_list) >= channel->mode.limit)
     return ERR_CHANNELISFULL;
 
   if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))
@@ -754,10 +754,10 @@ channel_member_find(const struct Client *client, const struct Channel *channel)
     return NULL;
 
   /* Take the shortest of the two lists */
-  if (list_length(&channel->members) < list_length(&client->channel_list))
+  if (list_length(&channel->member_list) < list_length(&client->channel_member_list))
   {
     list_node_t *node;
-    LIST_FOREACH(node, channel->members.head)
+    LIST_FOREACH(node, channel->member_list.head)
     {
       struct ChannelMember *const member = node->data;
       if (member->client == client)
@@ -767,7 +767,7 @@ channel_member_find(const struct Client *client, const struct Channel *channel)
   else
   {
     list_node_t *node;
-    LIST_FOREACH(node, client->channel_list.head)
+    LIST_FOREACH(node, client->channel_member_list.head)
     {
       struct ChannelMember *const member = node->data;
       if (member->channel == channel)
@@ -1047,7 +1047,7 @@ channel_join(struct Client *client, const char *name, const char *key)
   }
 
   unsigned int max_channels = client_get_max_channels(client);
-  if (list_length(&client->channel_list) >= max_channels)
+  if (list_length(&client->channel_member_list) >= max_channels)
   {
     sendto_one_numeric(client, &me, ERR_TOOMANYCHANNELS, name);
     return;
@@ -1115,9 +1115,9 @@ channel_join(struct Client *client, const char *name, const char *key)
     sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                          client->name, client->username, client->host, client->away_message);
 
-  struct Invite *const invite = invite_find(channel, client);
+  struct ChannelInvite *const invite = channel_invite_find(channel, client);
   if (invite)
-    invite_del(invite);
+    channel_invite_remove(invite);
 
   if (!string_is_empty(channel->topic))
   {

@@ -22,20 +22,20 @@
  *         shortest invitation list, expired invitations are vaccumed automatically.
  * \param channel Pointer to channel block
  * \param client  Pointer to client
- * \return A struct Invite pointer or NULL
+ * \return A struct ChannelInvite pointer or NULL
  */
-struct Invite *
-invite_find(struct Channel *channel, struct Client *client)
+struct ChannelInvite *
+channel_invite_find(struct Channel *channel, struct Client *client)
 {
-  list_t *const list = list_get_shorter(&client->connection->invite_list, &channel->invites);
+  list_t *const list = list_get_shorter(&client->connection->channel_invite_list, &channel->invite_list);
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Invite *const invite = node->data;
+    struct ChannelInvite *const invite = node->data;
     if (ConfigChannel.invite_expire_time &&
         ConfigChannel.invite_expire_time + invite->when < io_time_get(IO_TIME_MONOTONIC_SEC))
-      invite_del(invite);
+      channel_invite_remove(invite);
     else if (invite->channel == channel && invite->client == client)
       return invite;
   }
@@ -48,11 +48,11 @@ invite_find(struct Channel *channel, struct Client *client)
  * \param client  Pointer to client to add invite to
  */
 void
-invite_add(struct Channel *channel, struct Client *client)
+channel_invite_add(struct Channel *channel, struct Client *client)
 {
-  struct Invite *invite = invite_find(channel, client);
+  struct ChannelInvite *invite = channel_invite_find(channel, client);
   if (invite)
-    invite_del(invite);
+    channel_invite_remove(invite);
 
   invite = io_calloc(sizeof(*invite));
   invite->client = client;
@@ -60,15 +60,15 @@ invite_add(struct Channel *channel, struct Client *client)
   invite->when = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Delete last link in chain if the list is max length */
-  while (list_length(&client->connection->invite_list) &&
-         list_length(&client->connection->invite_list) >= ConfigChannel.max_invites)
-    invite_del(list_peek_tail(&client->connection->invite_list));
+  while (list_length(&client->connection->channel_invite_list) &&
+         list_length(&client->connection->channel_invite_list) >= ConfigChannel.max_invites)
+    channel_invite_remove(list_peek_tail(&client->connection->channel_invite_list));
 
   /* Add client to channel invite list */
-  list_add(invite, &invite->chan_node, &channel->invites);
+  list_add(invite, &invite->channel_node, &channel->invite_list);
 
   /* Add channel to the end of the client invite list */
-  list_add(invite, &invite->user_node, &client->connection->invite_list);
+  list_add(invite, &invite->client_node, &client->connection->channel_invite_list);
 }
 
 /*! \brief Delete Invite block from channel invite list
@@ -76,10 +76,10 @@ invite_add(struct Channel *channel, struct Client *client)
  * \param invite Pointer to Invite struct
  */
 void
-invite_del(struct Invite *invite)
+channel_invite_remove(struct ChannelInvite *invite)
 {
-  list_remove(&invite->user_node, &invite->client->connection->invite_list);
-  list_remove(&invite->chan_node, &invite->channel->invites);
+  list_remove(&invite->client_node, &invite->client->connection->channel_invite_list);
+  list_remove(&invite->channel_node, &invite->channel->invite_list);
   io_free(invite);
 }
 
@@ -87,8 +87,8 @@ invite_del(struct Invite *invite)
  * \param list Pointer to a list_t
  */
 void
-invite_clear_list(list_t *list)
+channel_invite_remove_all(list_t *list)
 {
   while (list->head)
-    invite_del(list->head->data);
+    channel_invite_remove(list->head->data);
 }

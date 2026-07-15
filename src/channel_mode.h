@@ -145,19 +145,19 @@ extern const char *add_id(struct Client *, struct Channel *, const char *, list_
 static inline bool
 channel_has_mode(const struct Channel *channel, uint32_t mode)
 {
-  return (channel->mode.mode & mode) != 0;
+  return (channel->mode.flags & mode) != 0;
 }
 
 static inline void
 channel_set_mode(struct Channel *channel, uint32_t mode)
 {
-  channel->mode.mode |= mode;
+  channel->mode.flags |= mode;
 }
 
 static inline void
 channel_unset_mode(struct Channel *channel, uint32_t mode)
 {
-  channel->mode.mode &= ~mode;
+  channel->mode.flags &= ~mode;
 }
 
 static inline bool

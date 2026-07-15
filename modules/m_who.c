@@ -99,7 +99,7 @@ _who_send(struct Client *source, const struct Client *target,
     if (who->fields == 0 || (who->fields & (WHO_FIELD_CHA | WHO_FIELD_FLA)))
     {
       list_node_t *node;
-      LIST_FOREACH(node, target->channel_list.head)
+      LIST_FOREACH(node, target->channel_member_list.head)
       {
         member = node->data;
 
@@ -279,7 +279,7 @@ _who_on_common_channel(struct Client *source, struct Channel *channel,
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     struct ChannelMember *const member = node->data;
     struct Client *const target = member->client;
@@ -322,7 +322,7 @@ _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
 
   /* First, list all matching invisible clients on common channels */
   list_node_t *node;
-  LIST_FOREACH(node, source->channel_list.head)
+  LIST_FOREACH(node, source->channel_member_list.head)
   {
     struct ChannelMember *const member = node->data;
     _who_on_common_channel(source, member->channel, mask, who);
@@ -367,7 +367,7 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
     return;
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     struct ChannelMember *const member = node->data;
     struct Client *const target = member->client;

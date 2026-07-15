@@ -36,9 +36,9 @@ _invite_send_invite_list(struct Client *source)
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, source->connection->invite_list.head)
+  LIST_FOREACH(node, source->connection->channel_invite_list.head)
   {
-    const struct Invite *const invite = node->data;
+    const struct ChannelInvite *const invite = node->data;
     sendto_one_numeric(source, &me, RPL_INVITELIST, invite->channel->name);
   }
 
@@ -77,7 +77,7 @@ _invite_commit(const struct Client *source, struct Client *target, struct Channe
 
   const bool invite_only = channel_has_mode(channel, MODE_INVITEONLY);
   if (invite_only && client_is_local(target))
-    invite_add(channel, target);
+    channel_invite_add(channel, target);
 
   sendto_servers(source, 0, 0, ":%s INVITE %s %s %ju",
                  source->id, target->id, channel->name, channel->creation_time);

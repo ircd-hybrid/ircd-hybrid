@@ -116,7 +116,7 @@ _whois_send_host_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_channels_numeric(struct Client *source, const struct Client *target)
 {
-  if (list_is_empty(&target->channel_list))
+  if (list_is_empty(&target->channel_member_list))
     return;
 
   /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
@@ -131,7 +131,7 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
   char *bufptr = buf;
 
   list_node_t *node;
-  LIST_FOREACH(node, target->channel_list.head)
+  LIST_FOREACH(node, target->channel_member_list.head)
   {
     const struct ChannelMember *const member = node->data;
     whois_channel_visibility_t vis = _whois_get_channel_visibility(member->channel, source, target);

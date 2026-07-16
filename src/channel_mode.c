@@ -328,6 +328,7 @@ enum
   SM_ERR_NOTOPER      = 1 << 6,  /* Only irc-operators can change that mode */
   SM_ERR_ONLYSERVER   = 1 << 7,  /* Only servers or services can change that mode */
   SM_ERR_MLOCK        = 1 << 8,
+  SM_ERR_NOSUCHNICK   = 1 << 9,
 };
 
 static bool
@@ -547,20 +548,22 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
 
   const char *const target_name = parv[(*parn)++];
-  struct Client *const client_target = client_find_user_with_history(client, target_name, NULL);
-  if (client_target == NULL)
+  struct Client *const target = client_find_user_with_history(client, target_name, NULL);
+  if (target == NULL)
   {
-    if (client_is_local(client))
+    if (client_is_local_user(client) &&
+        !(*errors & SM_ERR_NOSUCHNICK))
       sendto_one_numeric(client, &me, ERR_NOSUCHNICK, target_name);
 
+    *errors |= SM_ERR_NOSUCHNICK;
     return;
   }
 
-  struct ChannelMember *member = channel_member_find(client_target, channel);
+  struct ChannelMember *member = channel_member_find(target, channel);
   if (member == NULL)
   {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(client, &me, ERR_USERNOTINCHANNEL, client_target->name, channel->name);
+    if (client_is_local_user(client) &&
+        !(*errors & SM_ERR_NOTONCHANNEL))
 
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
@@ -585,8 +588,8 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   }
 
   mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = client_target->name;
-  mode_changes[mode_count].id = client_target->id;
+  mode_changes[mode_count].arg = target->name;
+  mode_changes[mode_count].id = target->id;
   mode_changes[mode_count++].dir = dir;
 }
 

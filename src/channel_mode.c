@@ -209,7 +209,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   else
     strlcpy(ban->who, client_get_visible_server_name(client), sizeof(ban->who));
 
-  list_add(ban, &ban->node, list);
+  list_add_tail(ban, &ban->node, list);
 
   return ban->banstr;
 }

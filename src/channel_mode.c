@@ -564,6 +564,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   {
     if (client_is_local_user(client) &&
         !(*errors & SM_ERR_NOTONCHANNEL))
+      sendto_one_numeric(client, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);
 
     *errors |= SM_ERR_NOTONCHANNEL;
     return;

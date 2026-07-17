@@ -1078,6 +1078,8 @@ channel_join(struct Client *client, const char *name, const char *key)
     _channel_check_spambot_warning(client, channel->name);
 
   channel_member_add(channel, client, flags, true);
+  channel_invite_consume(channel, client);
+
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /*
@@ -1114,10 +1116,6 @@ channel_join(struct Client *client, const char *name, const char *key)
   if (client->away_message)
     sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
                          client->name, client->username, client->host, client->away_message);
-
-  struct ChannelInvite *const invite = channel_invite_find(channel, client);
-  if (invite)
-    channel_invite_remove(invite);
 
   if (!string_is_empty(channel->topic))
   {

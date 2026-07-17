@@ -26,5 +26,6 @@ struct ChannelInvite
 extern void channel_invite_add(struct Channel *, struct Client *);
 extern void channel_invite_remove(struct ChannelInvite *);
 extern void channel_invite_remove_all(list_t *);
+extern bool channel_invite_consume(struct Channel *, struct Client *);
 extern struct ChannelInvite *channel_invite_find(struct Channel *, struct Client *);
 #endif  /* INCLUDED_channel_invite_h */

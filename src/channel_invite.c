@@ -92,3 +92,17 @@ channel_invite_remove_all(list_t *list)
   while (list->head)
     channel_invite_remove(list->head->data);
 }
+
+bool
+channel_invite_consume(struct Channel *channel, struct Client *client)
+{
+  assert(channel);
+  assert(client_is_local_user(client));
+
+  struct ChannelInvite *const invite = channel_invite_find(channel, client);
+  if (invite == NULL)
+    return false;
+
+  channel_invite_remove(invite);
+  return true;
+}

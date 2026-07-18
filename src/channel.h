@@ -34,7 +34,7 @@ struct Client;
 struct ChannelMode
 {
   uint32_t flags;  /**< Simple modes */
-  uint32_t limit;  /**< +l userlimit */
+  uint32_t member_limit;  /**< +l userlimit */
   char key[KEYLEN + 1];  /**< +k key */
 };
 
@@ -42,7 +42,7 @@ struct ChannelMode
 struct Channel
 {
   list_node_t node;  /**< List node; linked into channel_list */
-  struct Channel *hnextch;  /**< Pointer to the next Channel with the same hash value */
+  struct Channel *hash_next;  /**< Pointer to the next Channel with the same hash value */
   char name[CHANNELLEN + 1];  /**< Unique name of the channel */
   size_t name_len;  /**< Cached string length of Channel::name */
   struct ChannelMode mode;

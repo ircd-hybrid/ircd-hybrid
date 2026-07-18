@@ -370,7 +370,7 @@ channel_create(const char *name)
   assert(!string_is_empty(name));
 
   struct Channel *const channel = io_calloc(sizeof(*channel));
-  channel->hnextch = channel;
+  channel->hash_next = channel;
   /* Doesn't hurt to set it here */
   channel->creation_time = io_time_get(IO_TIME_REALTIME_SEC);
   channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -401,7 +401,7 @@ channel_destroy(struct Channel *channel)
   list_remove(&channel->node, &channel_list);
   hash_del_channel(channel);
 
-  assert(channel->hnextch == channel);
+  assert(channel->hash_next == channel);
 
   assert(channel->node.prev == NULL);
   assert(channel->node.next == NULL);
@@ -738,7 +738,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
-  if (channel->mode.limit && list_length(&channel->member_list) >= channel->mode.limit)
+  if (channel->mode.member_limit && list_length(&channel->member_list) >= channel->mode.member_limit)
     return ERR_CHANNELISFULL;
 
   if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))

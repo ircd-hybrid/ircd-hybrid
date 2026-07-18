@@ -72,7 +72,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     }
   }
 
-  if (oldmode->limit && mode->limit == 0)
+  if (oldmode->member_limit && mode->member_limit == 0)
   {
     if (what != MODE_DEL)
     {
@@ -95,7 +95,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     pbuf += sprintf(pbuf, "%s ", oldmode->key);
   }
 
-  if (mode->limit && oldmode->limit != mode->limit)
+  if (mode->member_limit && oldmode->member_limit != mode->member_limit)
   {
     if (what != MODE_ADD)
     {
@@ -104,7 +104,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     }
 
     *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->limit);
+    pbuf += sprintf(pbuf, "%u ", mode->member_limit);
   }
 
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
@@ -195,7 +195,7 @@ ms_join(struct Client *source, int parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    struct ChannelMode mode = { .flags = 0, .limit = 0, .key[0] = '\0' };
+    struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
 

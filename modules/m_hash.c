@@ -44,7 +44,7 @@ do_hash(struct Client *source, enum hash_type type)
         else if (type == HASH_TYPE_ID)
           ptr = ((const struct Client *)ptr)->idhnext;
         else /* type == HASH_TYPE_CHANNEL */
-          ptr = ((const struct Channel *)ptr)->hnextch;
+          ptr = ((const struct Channel *)ptr)->hash_next;
 
         if (++len > max_chain)
           max_chain = len;

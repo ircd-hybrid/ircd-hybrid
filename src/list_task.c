@@ -197,7 +197,7 @@ _list_task_execute_global(struct ListTask *task)
       return LIST_TASK_RUN_PENDING;  /* Yield back to event loop. */
     }
 
-    for (struct Channel *channel = hash_get_bucket(HASH_TYPE_CHANNEL, i); channel; channel = channel->hnextch)
+    for (struct Channel *channel = hash_get_bucket(HASH_TYPE_CHANNEL, i); channel; channel = channel->hash_next)
     {
       if (_list_task_eval_channel(task, channel))
         _list_task_send_channel(task, channel);

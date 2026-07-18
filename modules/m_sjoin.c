@@ -72,7 +72,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     }
   }
 
-  if (oldmode->limit && mode->limit == 0)
+  if (oldmode->member_limit && mode->member_limit == 0)
   {
     if (what != MODE_DEL)
     {
@@ -95,7 +95,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     pbuf += sprintf(pbuf, "%s ", oldmode->key);
   }
 
-  if (mode->limit && oldmode->limit != mode->limit)
+  if (mode->member_limit && oldmode->member_limit != mode->member_limit)
   {
     if (what != MODE_ADD)
     {
@@ -104,7 +104,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
     }
 
     *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->limit);
+    pbuf += sprintf(pbuf, "%u ", mode->member_limit);
   }
 
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
@@ -204,7 +204,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMode mode = { .flags = 0, .limit = 0, .key[0] = '\0' };
+  struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
   int args = 0;
   for (const char *modes = parv[3]; *modes; ++modes)
   {
@@ -219,7 +219,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
         break;
 
       case 'l':
-        mode.limit = atoi(parv[4 + args]);
+        mode.member_limit = atoi(parv[4 + args]);
         ++args;
 
         if (parc < 5 + args)
@@ -266,8 +266,8 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   {
     mode.flags |= oldmode->flags;
 
-    if (oldmode->limit > mode.limit)
-      mode.limit = oldmode->limit;
+    if (oldmode->member_limit > mode.member_limit)
+      mode.member_limit = oldmode->member_limit;
     if (strcmp(mode.key, oldmode->key) < 0)
       strlcpy(mode.key, oldmode->key, sizeof(mode.key));
   }

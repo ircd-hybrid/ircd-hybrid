@@ -253,7 +253,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
     if (tab->mode && channel_has_mode(channel, tab->mode))
       *bufptr++ = tab->letter;
 
-  if (channel->mode.limit)
+  if (channel->mode.member_limit)
   {
     *bufptr++ = 'l';
 
@@ -273,8 +273,8 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
 
   if (server_or_member)
   {
-    if (channel->mode.limit)
-      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.limit);
+    if (channel->mode.member_limit)
+      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.member_limit);
     if (channel->mode.key[0])
       bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %s", channel->mode.key);
   }
@@ -621,14 +621,14 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count++].dir = dir;
 
-    channel->mode.limit = limit;
+    channel->mode.member_limit = limit;
   }
   else if (dir == MODE_DEL)
   {
-    if (channel->mode.limit == 0)
+    if (channel->mode.member_limit == 0)
       return;
 
-    channel->mode.limit = 0;
+    channel->mode.member_limit = 0;
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = NULL;

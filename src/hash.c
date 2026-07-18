@@ -113,7 +113,7 @@ hash_add_channel(struct Channel *channel)
 {
   const uint32_t hashv = hash_string(channel->name);
 
-  channel->hnextch = channelTable[hashv];
+  channel->hash_next = channelTable[hashv];
   channelTable[hashv] = channel;
 }
 
@@ -214,17 +214,17 @@ hash_del_channel(struct Channel *channel)
   {
     if (tmp == channel)
     {
-      channelTable[hashv] = channel->hnextch;
-      channel->hnextch = channel;
+      channelTable[hashv] = channel->hash_next;
+      channel->hash_next = channel;
     }
     else
     {
-      while (tmp->hnextch != channel)
-        if ((tmp = tmp->hnextch) == NULL)
+      while (tmp->hash_next != channel)
+        if ((tmp = tmp->hash_next) == NULL)
           return;
 
-      tmp->hnextch = tmp->hnextch->hnextch;
-      channel->hnextch = channel;
+      tmp->hash_next = tmp->hash_next->hash_next;
+      channel->hash_next = channel;
     }
   }
 }
@@ -327,12 +327,12 @@ hash_find_channel(const char *name)
     {
       struct Channel *prev;
 
-      while (prev = channel, (channel = channel->hnextch))
+      while (prev = channel, (channel = channel->hash_next))
       {
         if (io_strcasecmp(name, channel->name) == 0)
         {
-          prev->hnextch = channel->hnextch;
-          channel->hnextch = channelTable[hashv];
+          prev->hash_next = channel->hash_next;
+          channel->hash_next = channelTable[hashv];
           channelTable[hashv] = channel;
           break;
         }

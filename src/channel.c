@@ -531,7 +531,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
       if (!find_bmask(client, channel, &channel->invite_exception_list, NULL))
         return ERR_INVITEONLYCHAN;
 
-  if (channel->mode.key[0] && (string_is_empty(key) || strcmp(channel->mode.key, key)))
+  if (channel_has_key(channel) && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
   if (channel->mode.member_limit && list_length(&channel->member_list) >= channel->mode.member_limit)

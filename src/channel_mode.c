@@ -263,7 +263,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
         (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
   }
 
-  if (channel->mode.key[0])
+  if (channel_has_key(channel))
   {
     *bufptr++ = 'k';
 
@@ -276,7 +276,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   {
     if (channel->mode.member_limit)
       bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.member_limit);
-    if (channel->mode.key[0])
+    if (channel_has_key(channel))
       bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %s", channel->mode.key);
   }
 
@@ -670,7 +670,7 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
     if (parc > *parn)
       ++(*parn);
 
-    if (channel->mode.key[0] == '\0')
+    if (!channel_has_key(channel))
       return;
 
     channel->mode.key[0] = '\0';

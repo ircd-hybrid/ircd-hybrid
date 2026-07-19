@@ -113,4 +113,11 @@ channel_is_empty(const struct Channel *channel)
   assert(channel);
   return list_is_empty(&channel->member_list);
 }
+
+static inline bool
+channel_has_key(const struct Channel *channel)
+{
+  assert(channel);
+  return channel->mode.key[0] != '\0';
+}
 #endif  /* INCLUDED_channel_h */

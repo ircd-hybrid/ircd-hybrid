@@ -120,4 +120,11 @@ channel_has_key(const struct Channel *channel)
   assert(channel);
   return channel->mode.key[0] != '\0';
 }
+
+static inline bool
+channel_has_member_limit(const struct Channel *channel)
+{
+  assert(channel);
+  return channel->mode.member_limit != 0;
+}
 #endif  /* INCLUDED_channel_h */

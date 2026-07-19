@@ -534,7 +534,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel_has_key(channel) && (string_is_empty(key) || strcmp(channel->mode.key, key)))
     return ERR_BADCHANNELKEY;
 
-  if (channel->mode.member_limit && list_length(&channel->member_list) >= channel->mode.member_limit)
+  if (channel_has_member_limit(channel) && list_length(&channel->member_list) >= channel->mode.member_limit)
     return ERR_CHANNELISFULL;
 
   if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))

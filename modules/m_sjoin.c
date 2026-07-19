@@ -410,7 +410,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
   sendto_servers(source, 0, 0, "%s", uid_buf);
 
-  if (list_is_empty(&channel->member_list) && isnew)
+  if (isnew && channel_is_empty(channel))
     channel_destroy(channel);
 }
 

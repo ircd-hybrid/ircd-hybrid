@@ -403,8 +403,8 @@ _server_establish_burst(struct Client *client)
   LIST_FOREACH(node, channel_get_list()->head)
   {
     const struct Channel *const channel = node->data;
-    assert(list_length(&channel->member_list));
-    if (list_length(&channel->member_list) == 0)
+    assert(!channel_is_empty(channel));
+    if (channel_is_empty(channel))
       continue;
 
     channel_send_state(client, channel);

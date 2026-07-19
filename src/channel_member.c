@@ -40,7 +40,7 @@ channel_member_remove(struct ChannelMember *member)
 
   io_free(member);
 
-  if (list_is_empty(&channel->member_list))
+  if (channel_is_empty(channel))
     channel_destroy(channel);
 }
 

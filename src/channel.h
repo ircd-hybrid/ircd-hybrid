@@ -106,4 +106,11 @@ extern struct Channel *channel_create(const char *);
 extern struct Channel *channel_find(const char *);
 extern const list_t *channel_get_list(void);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
+
+static inline bool
+channel_is_empty(const struct Channel *channel)
+{
+  assert(channel);
+  return list_is_empty(&channel->member_list);
+}
 #endif  /* INCLUDED_channel_h */

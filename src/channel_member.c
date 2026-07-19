@@ -1,6 +1,5 @@
 #include <assert.h>
 
-#include "io_time.h"
 #include "list.h"
 #include "memory.h"
 
@@ -8,10 +7,6 @@
 #include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "client_format.h"
-#include "conf.h"
-#include "send.h"
-#include "user_mode.h"
 
 struct ChannelMember *
 channel_member_add(struct Channel *channel, struct Client *client, uint32_t flags)

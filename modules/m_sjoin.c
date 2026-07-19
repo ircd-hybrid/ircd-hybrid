@@ -362,7 +362,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     uid_ptr += snprintf(uid_ptr, sizeof(uid_buf) - (uid_ptr - uid_buf), uid_ptr != uid_buf_start ? " %s%s" : "%s%s", uid_prefix, target->id);
 
-    if (channel_member_find(target, channel) == NULL)
+    if (channel_member_find(channel, target) == NULL)
     {
       channel_member_add(channel, target, status_flags);
 

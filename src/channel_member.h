@@ -31,7 +31,7 @@ extern int channel_member_prefix_to_rank(char);
 extern uint32_t channel_member_prefix_to_flag(char);
 extern size_t channel_member_get_prefix_length(const struct ChannelMember *, bool);
 extern struct ChannelMember *channel_member_add(struct Channel *, struct Client *, uint32_t);
-extern struct ChannelMember *channel_member_find(const struct Client *, const struct Channel *);
+extern struct ChannelMember *channel_member_find(const struct Channel *, const struct Client *);
 extern const char *channel_member_get_prefix(const struct ChannelMember *, bool);
 extern const char *channel_member_rank_to_prefix(int);
 

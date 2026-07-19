@@ -122,7 +122,7 @@ static bool
 _list_task_eval_channel(const struct ListTask *task, const struct Channel *channel)
 {
   const struct Client *const client = task->client;
-  if (channel_is_secret(channel) && !(client_is_admin(client) || channel_member_find(client, channel)))
+  if (channel_is_secret(channel) && !(client_is_admin(client) || channel_member_find(channel, client)))
     return false;
 
   const unsigned int user_count = list_length(&channel->member_list);

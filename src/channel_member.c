@@ -154,7 +154,7 @@ channel_member_get_highest_rank(const struct ChannelMember *member)
 }
 
 struct ChannelMember *
-channel_member_find(const struct Client *client, const struct Channel *channel)
+channel_member_find(const struct Channel *channel, const struct Client *client)
 {
   if (!client_is_user(client))
     return NULL;

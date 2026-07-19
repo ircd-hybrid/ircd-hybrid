@@ -71,7 +71,7 @@ m_knock(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (channel_member_find(source, channel))
+  if (channel_member_find(channel, source))
   {
     sendto_one_numeric(source, &me, ERR_KNOCKONCHAN, channel->name);
     return;
@@ -129,7 +129,7 @@ ms_knock(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (channel_member_find(source, channel))
+  if (channel_member_find(channel, source))
     return;
 
   _knock_commit(source, channel, io_time_get(IO_TIME_MONOTONIC_SEC));

@@ -260,7 +260,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
 
     if (params)
       server_or_member =
-        (server_or_member == true || client_is_server(client) || channel_member_find(client, channel));
+        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
   }
 
   if (channel->mode.key[0])
@@ -269,7 +269,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
 
     if (params)
       server_or_member =
-        (server_or_member == true || client_is_server(client) || channel_member_find(client, channel));
+        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
   }
 
   if (server_or_member)
@@ -560,7 +560,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  struct ChannelMember *member = channel_member_find(target, channel);
+  struct ChannelMember *member = channel_member_find(channel, target);
   if (member == NULL)
   {
     if (client_is_local_user(client) &&
@@ -940,7 +940,7 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
   int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now. */
 
   if (client_is_local_user(client))
-    rank = channel_member_get_highest_rank(channel_member_find(client, channel));
+    rank = channel_member_get_highest_rank(channel_member_find(channel, client));
 
   mode_count = 0;
   mode_limit = 0;

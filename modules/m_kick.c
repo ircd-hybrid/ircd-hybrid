@@ -89,7 +89,7 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *const member_source = channel_member_find(source, channel);
+  struct ChannelMember *const member_source = channel_member_find(channel, source);
   if (member_source == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
@@ -110,7 +110,7 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  struct ChannelMember *const member_target = channel_member_find(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(channel, target);
   if (member_target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);
@@ -158,7 +158,7 @@ ms_kick(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  struct ChannelMember *const member_target = channel_member_find(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(channel, target);
   if (member_target == NULL)
     return;
 

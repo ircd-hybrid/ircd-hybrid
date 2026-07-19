@@ -364,7 +364,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 {
   assert(client_is_user(client));
 
-  const bool is_member = channel_member_find(client, channel) != NULL;
+  const bool is_member = channel_member_find(channel, client) != NULL;
   const bool multi_prefix = client_has_cap(client, CAP_MULTI_PREFIX);
   const bool uhnames = client_has_cap(client, CAP_UHNAMES);
 
@@ -618,7 +618,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     }
   }
 
-  if (member || (member = channel_member_find(client, channel)))
+  if (member || (member = channel_member_find(channel, client)))
     if (channel_member_get_highest_rank(member) > CHACCESS_PEON)
       return CHANNEL_SEND_PERM_ELEVATED;
 
@@ -827,7 +827,7 @@ channel_join(struct Client *client, const char *name, const char *key)
   }
   else
   {
-    if (channel_member_find(client, channel))
+    if (channel_member_find(channel, client))
       return;
 
     /* can_join() checks for +i, +l, key, bans, etc. */
@@ -908,7 +908,7 @@ channel_part(struct Client *client, const char *name, const char *reason)
     return;
   }
 
-  struct ChannelMember *const member = channel_member_find(client, channel);
+  struct ChannelMember *const member = channel_member_find(channel, client);
   if (member == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOTONCHANNEL, channel->name);

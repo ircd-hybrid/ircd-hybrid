@@ -26,18 +26,18 @@ extban_channel_matches(struct Client *client, struct Channel *channel, struct Ba
   if (rank != CHACCESS_PEON)
     ++name;
 
-  const struct Channel *const tmp = channel_find(name);
-  if (tmp == NULL)
+  const struct Channel *const referenced_channel = channel_find(name);
+  if (referenced_channel == NULL)
     return EXTBAN_NO_MATCH;
 
   /*
    * If the channel in question is either +s, or +p, only allow a match against
    * the source channel to prevent channel probing.
    */
-  if (!channel_is_public(tmp) && tmp != channel)
+  if (!channel_is_public(referenced_channel) && referenced_channel != channel)
     return EXTBAN_NO_MATCH;
 
-  const struct ChannelMember *const member = channel_member_find(tmp, client);
+  const struct ChannelMember *const member = channel_member_find(referenced_channel, client);
   if (member)
   {
     if (rank > channel_member_get_highest_rank(member))

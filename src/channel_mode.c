@@ -17,6 +17,7 @@
 #include "memory.h"
 
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
@@ -575,17 +576,17 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 
   if (dir == MODE_ADD)  /* setting + */
   {
-    if (member_has_flags(member, mode->flag))
+    if (channel_member_has_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
-    member_set_flags(member, mode->flag);
+    channel_member_set_flags(member, mode->flag);
   }
   else if (dir == MODE_DEL)  /* setting - */
   {
-    if (!member_has_flags(member, mode->flag))
+    if (!channel_member_has_flags(member, mode->flag))
       return;  /* No redundant mode changes */
 
-    member_unset_flags(member, mode->flag);
+    channel_member_unset_flags(member, mode->flag);
   }
 
   mode_changes[mode_count].letter = mode->letter;
@@ -973,4 +974,49 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
 
   send_mode_changes_client(client, channel);
   send_mode_changes_server(client, channel);
+}
+
+void
+channel_mode_clear_member_statuses(struct Channel *channel, const char *source_name)
+{
+  char modebuf[MAXMODEPARAMS + 1];
+  char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
+  char *mbuf = modebuf;
+  char *pbuf = parabuf;
+  unsigned int pargs = 0;
+
+  list_node_t *node;
+  LIST_FOREACH(node, channel->member_list.head)
+  {
+    struct ChannelMember *const member = node->data;
+
+    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    {
+      if (channel_member_has_flags(member, tab->flag))
+      {
+        member->flags &= ~tab->flag;
+        *mbuf++ = tab->letter;
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s",
+                         member->client->name);
+
+        if (++pargs >= MAXMODEPARAMS)
+        {
+          *mbuf = '\0';
+          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                               source_name, channel->name, modebuf, parabuf);
+
+          mbuf = modebuf;
+          pbuf = parabuf;
+          pargs = 0;
+        }
+      }
+    }
+  }
+
+  if (pargs)
+  {
+    *mbuf = '\0';
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                         source_name, channel->name, modebuf, parabuf);
+  }
 }

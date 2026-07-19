@@ -20,6 +20,7 @@
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
@@ -210,7 +211,7 @@ ms_join(struct Client *source, int parc, char *parv[])
                          me.name, channel->name, channel->name, oldts, newts);
 
     const char *const origin_name = client_get_visible_server_name(source->uplink);
-    channel_member_clear_prefixes(channel, origin_name);
+    channel_mode_clear_member_statuses(channel, origin_name);
 
     channel_invite_remove_all(&channel->invite_list);
 
@@ -230,7 +231,10 @@ ms_join(struct Client *source, int parc, char *parv[])
 
   if (channel_member_find(source, channel) == NULL)
   {
-    channel_member_add(channel, source, 0, true);
+    channel_member_add(channel, source, 0);
+
+    if (client_has_flag(source->nexthop, FLAGS_EOB))
+      channel_flood_record_join(channel, source);
 
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source->name, source->username, source->host, channel->name,

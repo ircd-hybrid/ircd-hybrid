@@ -21,6 +21,7 @@
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
@@ -289,7 +290,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                          me.name, channel->name, channel->name, oldts, newts);
 
-    channel_member_clear_prefixes(channel, origin_name);
+    channel_mode_clear_member_statuses(channel, origin_name);
 
     remove_ban_list(channel, origin_name, &channel->ban_list, 'b');
     remove_ban_list(channel, origin_name, &channel->exception_list, 'e');
@@ -312,6 +313,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
                          origin_name, channel->name, modebuf, parabuf);
 
+  const bool record_join_flood = client_has_flag(source, FLAGS_EOB);
   char *mbuf = modebuf;
   char *pbuf = parabuf;
   unsigned int pargs = 0;
@@ -327,10 +329,10 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   for (const char *s = strtok_r(list, " ", &saveptr); s;
                    s = strtok_r(NULL, " ", &saveptr))
   {
-    unsigned int ret, flags = 0;
+    unsigned int ret, status_flags = 0;
     while ((ret = channel_member_prefix_to_flag(*s)))
     {
-      flags |= ret;
+      status_flags |= ret;
       ++s;
     }
 
@@ -344,13 +346,13 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     size_t len_uid = strlen(target->id);
     char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
 
-    if (flags && keep_new_modes)
+    if (status_flags && keep_new_modes)
     {
-      const struct ChannelMember member = { .flags = flags };
+      const struct ChannelMember member = { .flags = status_flags };
       len_uid += strlcpy(uid_prefix, channel_member_get_prefix(&member, true), sizeof(uid_prefix));
     }
     else
-      flags = 0;
+      status_flags = 0;
 
     if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
     {
@@ -362,8 +364,10 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     if (channel_member_find(target, channel) == NULL)
     {
-      bool synced = client_has_flag(source, FLAGS_EOB);
-      channel_member_add(channel, target, flags, synced);
+      channel_member_add(channel, target, status_flags);
+
+      if (record_join_flood)
+        channel_flood_record_join(channel, target);
 
       sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                            target->name, target->username, target->host, channel->name,
@@ -378,7 +382,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      if (flags & tab->flag)
+      if (status_flags & tab->flag)
       {
         *mbuf++ = tab->letter;
         pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", target->name);

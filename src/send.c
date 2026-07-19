@@ -20,6 +20,7 @@
 
 #include "cap.h"
 #include "channel.h"
+#include "channel_member.h"
 #include "client.h"
 #include "client_format.h"
 #include "conf.h"

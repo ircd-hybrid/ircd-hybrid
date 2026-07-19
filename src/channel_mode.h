@@ -137,6 +137,7 @@ extern const struct chan_mode  cflag_tab[];
 extern char cmode_rpl04[][256];
 extern char cmode_class[][256];
 
+extern void channel_mode_clear_member_statuses(struct Channel *, const char *);
 extern void channel_mode_init(void);
 extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
 extern void clear_ban_cache_list(list_t *);

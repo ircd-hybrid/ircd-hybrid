@@ -25,6 +25,7 @@
 
 #include "cap.h"
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_format.h"
@@ -574,7 +575,7 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 
     for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
     {
-      if (member_has_flags(member, tab->flag))
+      if (channel_member_has_flags(member, tab->flag))
       {
         *p++ = tab->letter;
         len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);

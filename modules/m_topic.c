@@ -16,6 +16,7 @@
 #include "module.h"
 
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "ircd.h"

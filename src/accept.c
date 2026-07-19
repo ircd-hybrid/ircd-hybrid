@@ -11,6 +11,7 @@
 
 #include "accept.h"
 #include "channel.h"
+#include "channel_member.h"
 #include "client.h"
 #include "conf.h"
 #include "user_mode.h"

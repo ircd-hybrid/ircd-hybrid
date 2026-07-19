@@ -18,6 +18,8 @@ ircd_SOURCES = accept.c          \
                channel.h         \
                channel_invite.c  \
                channel_invite.h  \
+               channel_member.c  \
+               channel_member.h  \
                channel_mode.c    \
                channel_mode.h    \
                client.c          \

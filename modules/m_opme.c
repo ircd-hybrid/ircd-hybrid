@@ -15,6 +15,7 @@
 #include "module.h"
 
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_format.h"
@@ -83,7 +84,7 @@ mo_opme(struct Client *source, int parc, char *parv[])
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
                  me.id, source_name, channel->name);
 
-  member_set_flags(member, CHFL_CHANOP);
+  channel_member_set_flags(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
                        me.name, channel->name, source->name);
   sendto_servers(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,

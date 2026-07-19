@@ -19,6 +19,7 @@
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_format.h"
@@ -56,15 +57,13 @@ channel_find(const char *name)
   return hash_find_channel(name);
 }
 
-static void
-_channel_track_join_flood(struct Channel *channel, struct Client *client, bool track_join)
+void
+channel_flood_record_join(struct Channel *channel, struct Client *client)
 {
   if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;
 
-  if (track_join)
-    channel->number_joined += 1.0f;
-
+  channel->number_joined += 1.0f;
   channel->number_joined -=
     (float)(io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
     ((float)GlobalSetOptions.joinfloodcount / (float)GlobalSetOptions.joinfloodtime);
@@ -93,109 +92,6 @@ _channel_track_join_flood(struct Channel *channel, struct Client *client, bool t
   }
 
   channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
-}
-
-/*! \brief Adds a user to a channel by adding another link to the
- *         channels member chain.
- * \param channel    Pointer to channel to add client to
- * \param client     Pointer to client (who) to add
- * \param flags      Flags for chanops etc
- * \param track_join Whether to count this join in flood calculations
- */
-void
-channel_member_add(struct Channel *channel, struct Client *client, uint32_t flags, bool track_join)
-{
-  assert(client_is_user(client));
-
-  _channel_track_join_flood(channel, client, track_join);
-
-  struct ChannelMember *const member = io_calloc(sizeof(*member));
-  member->client = client;
-  member->channel = channel;
-  member->flags = flags;
-  list_add(member, &member->channel_node, &channel->member_list);
-
-  if (client_is_local(client))
-    list_add(member, &member->local_channel_node, &channel->local_member_list);
-
-  list_add(member, &member->client_node, &client->channel_member_list);
-}
-
-/*! \brief Deletes an user from a channel by removing a link in the
- *         channels member chain.
- * \param member Pointer to Membership struct
- */
-void
-channel_member_remove(struct ChannelMember *member)
-{
-  struct Client *const client = member->client;
-  struct Channel *const channel = member->channel;
-
-  list_remove(&member->channel_node, &channel->member_list);
-
-  if (client_is_local(client))
-    list_remove(&member->local_channel_node, &channel->local_member_list);
-
-  list_remove(&member->client_node, &client->channel_member_list);
-
-  io_free(member);
-
-  if (list_is_empty(&channel->member_list))
-    channel_destroy(channel);
-}
-
-void
-channel_member_remove_list(list_t *list)
-{
-  struct ChannelMember *member;
-
-  while ((member = list_peek_head(list)))
-    channel_member_remove(member);
-}
-
-void
-channel_member_clear_prefixes(struct Channel *channel, const char *source_name)
-{
-  char modebuf[MAXMODEPARAMS + 1];
-  char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
-  char *mbuf = modebuf;
-  char *pbuf = parabuf;
-  unsigned int pargs = 0;
-
-  list_node_t *node;
-  LIST_FOREACH(node, channel->member_list.head)
-  {
-    struct ChannelMember *const member = node->data;
-
-    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-    {
-      if (member_has_flags(member, tab->flag))
-      {
-        member->flags &= ~tab->flag;
-        *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s",
-                         member->client->name);
-
-        if (++pargs >= MAXMODEPARAMS)
-        {
-          *mbuf = '\0';
-          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                               source_name, channel->name, modebuf, parabuf);
-
-          mbuf = modebuf;
-          pbuf = parabuf;
-          pargs = 0;
-        }
-      }
-    }
-  }
-
-  if (pargs)
-  {
-    *mbuf = '\0';
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                         source_name, channel->name, modebuf, parabuf);
-  }
 }
 
 static void
@@ -520,106 +416,6 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
   sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
 }
 
-int
-channel_member_prefix_to_rank(const char prefix)
-{
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-    if (tab->prefix == prefix)
-      return tab->rank;
-  return CHACCESS_PEON;
-}
-
-const char *
-channel_member_rank_to_prefix(const int rank)
-{
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-  {
-    if (tab->rank == rank)
-    {
-      static char prefix[2];
-      prefix[0] = tab->prefix;
-      prefix[1] = '\0';  /* Just for safety */
-
-      return prefix;
-    }
-  }
-
-  return "";
-}
-
-uint32_t
-channel_member_prefix_to_flag(const char prefix)
-{
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-    if (tab->prefix == prefix)
-      return tab->flag;
-  return 0;
-}
-
-const char *
-channel_member_get_prefix(const struct ChannelMember *member, bool combine)
-{
-  static char buf[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
-  char *bufptr = buf;
-
-  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-  {
-    if (member_has_flags(member, tab->flag))
-    {
-      *bufptr++ = tab->prefix;
-
-      if (!combine)
-        break;
-    }
-  }
-
-  *bufptr = '\0';
-  return buf;
-}
-
-size_t
-channel_member_get_prefix_length(const struct ChannelMember *member, bool combine)
-{
-  size_t len = 0;
-
-  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-  {
-    if (member_has_flags(member, tab->flag))
-    {
-      ++len;
-
-      if (!combine)
-        break;
-    }
-  }
-
-  return len;
-}
-
-int
-channel_member_get_highest_rank(const struct ChannelMember *member)
-{
-  if (member == NULL)
-    return CHACCESS_NOTONCHAN;
-
-  if (member_has_flags(member, CHFL_CHANOWNER))
-    return CHACCESS_OWNER;
-
-  if (member_has_flags(member, CHFL_CHANADMIN))
-    return CHACCESS_ADMIN;
-
-  if (member_has_flags(member, CHFL_CHANOP))
-    return CHACCESS_OP;
-
-  if (member_has_flags(member, CHFL_HALFOP))
-    return CHACCESS_HALFOP;
-
-  if (member_has_flags(member, CHFL_VOICE))
-    return CHACCESS_VOICE;
-
-  return CHACCESS_PEON;
-}
-
 /*!
  * \param client Pointer to Client to check
  * \param list   Pointer to ban list to search
@@ -745,37 +541,6 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
     return ERR_BANNEDFROMCHAN;
 
   return 0;
-}
-
-struct ChannelMember *
-channel_member_find(const struct Client *client, const struct Channel *channel)
-{
-  if (!client_is_user(client))
-    return NULL;
-
-  /* Take the shortest of the two lists */
-  if (list_length(&channel->member_list) < list_length(&client->channel_member_list))
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, channel->member_list.head)
-    {
-      struct ChannelMember *const member = node->data;
-      if (member->client == client)
-        return member;
-    }
-  }
-  else
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, client->channel_member_list.head)
-    {
-      struct ChannelMember *const member = node->data;
-      if (member->channel == channel)
-        return member;
-    }
-  }
-
-  return NULL;
 }
 
 /*! Checks if a message contains control codes
@@ -1053,11 +818,11 @@ channel_join(struct Client *client, const char *name, const char *key)
     return;
   }
 
-  uint32_t flags = 0;
+  uint32_t status_flags = 0;
   struct Channel *channel = channel_find(name);
   if (channel == NULL)
   {
-    flags = CHFL_CHANOP;
+    status_flags = CHFL_CHANOP;
     channel = channel_create(name);
   }
   else
@@ -1077,7 +842,8 @@ channel_join(struct Client *client, const char *name, const char *key)
   if (!client_is_oper(client))
     _channel_check_spambot_warning(client, channel->name);
 
-  channel_member_add(channel, client, flags, true);
+  channel_member_add(channel, client, status_flags);
+  channel_flood_record_join(channel, client);
   channel_invite_consume(channel, client);
 
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
@@ -1085,7 +851,7 @@ channel_join(struct Client *client, const char *name, const char *key)
   /*
    * Set channel modes if appropriate, and propagate
    */
-  if (flags == CHFL_CHANOP)
+  if (status_flags == CHFL_CHANOP)
   {
     channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
 

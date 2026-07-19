@@ -20,8 +20,8 @@
 #include "rng_mt.h"
 
 #include "accept.h"
-#include "channel.h"
 #include "channel_invite.h"
+#include "channel_member.h"
 #include "client.h"
 #include "client_format.h"
 #include "client_svstag.h"

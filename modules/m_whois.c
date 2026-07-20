@@ -109,9 +109,11 @@ _whois_send_user_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_host_numeric(struct Client *source, const struct Client *target)
 {
-  if (client_is_oper(source) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
-                       target->name, target->username, target->realhost, target->sockhost);
+  if (!client_is_oper(source) && source != target)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
+                     target->name, target->username, target->realhost, target->sockhost);
 }
 
 static void
@@ -170,29 +172,31 @@ _whois_send_server_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_away_numeric(struct Client *source, const struct Client *target)
 {
-  if (target->away_message)
-    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
+  if (target->away_message == NULL)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 }
 
 static void
 _whois_send_operator_numeric(struct Client *source, const struct Client *target)
 {
-  if (client_is_oper(target) || client_is_service(target))
+  if (!client_is_oper(target) && !client_is_service(target))
+    return;
+
+  if (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))
   {
-    if (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))
+    const struct ServicesTag *const svstag = list_peek_head(&target->svstag_list);
+    if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
     {
-      const struct ServicesTag *const svstag = list_peek_head(&target->svstag_list);
-      if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
-      {
-        const char *text;
-        if (client_is_service(target))
-          text = "is a Network Service";
-        else if (client_is_admin(target))
-          text = "is a Server Administrator";
-        else  /* client_is_oper(target) == true */
-          text = "is an IRC Operator";
-        sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
-      }
+      const char *text;
+      if (client_is_service(target))
+        text = "is a Network Service";
+      else if (client_is_admin(target))
+        text = "is a Server Administrator";
+      else  /* client_is_oper(target) == true */
+        text = "is an IRC Operator";
+      sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
     }
   }
 
@@ -213,9 +217,11 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
 static void
 _whois_send_modes_numeric(struct Client *source, const struct Client *target)
 {
-  if (client_is_oper(source) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISMODES,
-                       target->name, user_mode_to_str(target->umodes));
+  if (!client_is_oper(source) && source != target)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_WHOISMODES,
+                     target->name, user_mode_to_str(target->umodes));
 }
 
 static void
@@ -224,9 +230,11 @@ _whois_send_idle_numeric(struct Client *source, const struct Client *target)
   if (!client_is_local(target))
     return;
 
-  if (!user_mode_has_flag(target, UMODE_HIDEIDLE) || client_is_oper(source) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISIDLE,
-                       target->name, client_get_idle_time(source, target), target->connection->created_real);
+  if (user_mode_has_flag(target, UMODE_HIDEIDLE) && !client_is_oper(source) && source != target)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_WHOISIDLE,
+                     target->name, client_get_idle_time(source, target), target->connection->created_real);
 }
 
 static void
@@ -247,15 +255,15 @@ _whois_send_target_reply(struct Client *source, struct Client *target)
 }
 
 static void
-_whois_process_request(struct Client *source, const char *name)
+_whois_process_request(struct Client *source, const char *target_name)
 {
-  struct Client *const target = client_find_user(source, name);
+  struct Client *const target = client_find_user(source, target_name);
   if (target)
     _whois_send_target_reply(source, target);
   else
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
 
-  sendto_one_numeric(source, &me, RPL_ENDOFWHOIS, name);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOIS, target_name);
 }
 
 /*! \brief WHOIS command handler
@@ -279,31 +287,31 @@ m_whois(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!string_is_empty(parv[2]))
+  if (string_is_empty(parv[2]))
   {
-    static uintmax_t last_used = 0;
-    /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
-      return;
-    }
-
-    last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-    /*
-     * if we have serverhide enabled, they can either ask the clients
-     * server, or our server.. I don't see why they would need to ask
-     * anything else for info about the client.. --fl_
-     */
-    if (ConfigServerHide.disable_remote_commands)
-      parv[1] = parv[2];
-
-    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
-      return;
-
-    parv[1] = parv[2];
+    _whois_process_request(source, parv[1]);
+    return;
   }
+
+  static uintmax_t last_used = 0;
+  if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  {
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
+    return;
+  }
+
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  /*
+   * if we have serverhide enabled, they can either ask the clients
+   * server, or our server.. I don't see why they would need to ask
+   * anything else for info about the client.. --fl_
+   */
+  if (ConfigServerHide.disable_remote_commands)
+    parv[1] = parv[2];
+
+  if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
+    return;
 
   _whois_process_request(source, parv[1]);
 }
@@ -329,15 +337,16 @@ mo_whois(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!string_is_empty(parv[2]))
+  if (string_is_empty(parv[2]))
   {
-    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
-      return;
-
-    parv[1] = parv[2];
+    _whois_process_request(source, parv[1]);
+    return;
   }
 
-  _whois_process_request(source, parv[1]);
+  if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
+    return;
+
+  _whois_process_request(source, parv[2]);
 }
 
 static struct Command command_table =

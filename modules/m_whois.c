@@ -313,7 +313,7 @@ m_whois(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  _whois_process_request(source, parv[1]);
+  _whois_process_request(source, parv[2]);
 }
 
 /*! \brief WHOIS command handler

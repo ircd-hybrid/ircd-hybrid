@@ -67,7 +67,7 @@ _lookup_check_complete(struct LookupRequest *lookup)
   client_update_activity_timeout(client);
 
   /* Hand the connection over to the main packet reader to begin processing IRC protocol commands. */
-  read_packet(client->connection->fd, client);
+  read_packet(client->connection->fde, client);
 }
 
 static bool
@@ -174,7 +174,7 @@ lookup_start(struct Client *client)
 
     const uintmax_t timeout_ms = ConfigGeneral.ident_timeout * 1000ULL;
     lookup->ident_request =
-      ident_start(&client->addr, client->connection->fd->fd, _lookup_ident_callback, lookup, timeout_ms);
+      ident_start(&client->addr, client->connection->fde->fd, _lookup_ident_callback, lookup, timeout_ms);
     if (lookup->ident_request)
       lookup->ident_pending = true;
     else

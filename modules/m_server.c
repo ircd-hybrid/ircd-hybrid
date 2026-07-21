@@ -213,7 +213,7 @@ _server_burst_send_client(struct Client *client, const struct Client *target)
   sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target->uplink->id,
              target->name, target->hopcount + 1,
-             target->tsinfo, user_mode_to_str(target->umodes),
+             target->tsinfo, user_mode_to_str(target->user_mode_flags),
              target->username, target->host, target->realhost,
              target->sockhost, target->id,
              target->account, target->info);
@@ -237,7 +237,7 @@ _server_burst_send_client(struct Client *client, const struct Client *target)
   {
     const struct ServicesTag *const svstag = node->data;
     sendto_one(client, ":%s SVSTAG %s 0 %u +%s :%s",
-               me.id, target->id, svstag->numeric, user_mode_to_str(svstag->umodes), svstag->tag);
+               me.id, target->id, svstag->numeric, user_mode_to_str(svstag->user_mode_flags), svstag->tag);
   }
 }
 
@@ -274,7 +274,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  comm_socket_note(client->connection->fd, "Server: %s", client->name);
+  comm_socket_note(client->connection->fde, "Server: %s", client->name);
 
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
 
@@ -284,8 +284,8 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   if (service_find(client->name))
     client_set_flag(client, FLAGS_SERVICE);
 
-  if (tls_isusing(&client->connection->fd->tls))
-    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
+  if (tls_isusing(&client->connection->fde->tls))
+    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fde->tls));
 
   client_set_state(client, CLIENT_STATE_SERVER);
   client_update_activity_timeout(client);
@@ -328,7 +328,7 @@ _server_establish_report_link(struct Client *client)
     client_format_name(client, CLIENT_FORMAT_NAME_OPER, &oper_client_name_buffer);
   const char *const capabilities = capab_get(client, true);
 
-  if (tls_isusing(&client->connection->fd->tls))
+  if (tls_isusing(&client->connection->fde->tls))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",

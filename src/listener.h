@@ -34,7 +34,7 @@ struct Listener
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   listener_flag_t flags;  /**< Listener flags (tls, hidden, server, client, defer) */
-  fde_t *fd;  /**< File descriptor (NULL if inactive) */
+  fde_t *fde;  /**< File descriptor (NULL if inactive) */
   uint32_t ref_count;  /**< Number of connection references */
 };
 
@@ -66,6 +66,6 @@ listener_has_flag(const struct Listener *listener, listener_flag_t flags)
 static inline bool
 listener_is_active(const struct Listener *listener)
 {
-  return listener->fd && listener->fd->flags.open;
+  return listener->fde && listener->fde->flags.open;
 }
 #endif  /* INCLUDED_listener_h */

@@ -78,7 +78,7 @@ static list_t dead_list, abort_list;
 
 static void _client_exit_teardown_connection(struct Client *client);
 static void _client_exit_log_session(const struct Client *client, const char *reason);
-static void _client_exit_cleanup_client_connection(struct Client *client, const char *reason);
+static void _client_exit_cleanup_user_connection(struct Client *client, const char *reason);
 static void _client_exit_cleanup_server_connection(struct Client *client, const char *reason);
 static void _client_exit_cleanup_unregistered_connection(struct Client *client, const char *reason);
 static void _client_exit_notify_channel_members(struct Client *client, const char *reason);
@@ -225,8 +225,8 @@ _client_init_base(struct Client *client)
 {
   client_set_state(client, CLIENT_STATE_UNKNOWN);
 
-  client->idhnext = client;
-  client->hnext = client;
+  client->id_hash_next = client;
+  client->name_hash_next = client;
   strcpy(client->username, "unknown");
   strcpy(client->account, "*");
 }
@@ -274,7 +274,7 @@ _client_destroy_local(struct Client *client)
   assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
   assert(client->connection->list_task == NULL);
   assert(client->connection->lookup_request == NULL);
-  assert(client->connection->fd == NULL);
+  assert(client->connection->fde == NULL);
   assert(client->connection->listener == NULL);
   assert(client->connection->activity_timeout_event == NULL);
   assert(client->connection->flood_recalc_event == NULL);
@@ -290,8 +290,8 @@ _client_destroy_local(struct Client *client)
 
   io_free(client->connection->password);
   client->connection->password = NULL;
-  io_free(client->connection->oper_name);
-  client->connection->oper_name = NULL;
+  io_free(client->connection->oper_auth_name);
+  client->connection->oper_auth_name = NULL;
   io_free(client->connection->scheduled_exit_reason);
   client->connection->scheduled_exit_reason = NULL;
 
@@ -303,8 +303,8 @@ static void
 _client_destroy(struct Client *client)
 {
   assert(client && !client_is_me(client));
-  assert(client->hnext == client);
-  assert(client->idhnext == client);
+  assert(client->name_hash_next == client);
+  assert(client->id_hash_next == client);
   assert(client->global_node.prev == NULL && client->global_node.next == NULL);
   assert(client->uplink_node.prev == NULL && client->uplink_node.next == NULL);
   assert(list_is_empty(&client->whowas_list));
@@ -347,8 +347,8 @@ client_update_name(struct Client *client, const char *new_name)
 
   hash_add_client(client);
 
-  if (client_is_local(client) && client->connection->fd)
-    comm_socket_note(client->connection->fd, "Name: %s", client->name);
+  if (client_is_local(client) && client->connection->fde)
+    comm_socket_note(client->connection->fde, "Name: %s", client->name);
 }
 
 const struct Client *
@@ -435,10 +435,10 @@ _client_exit_teardown_connection(struct Client *client)
     send_queued_write(client);
   }
 
-  if (client->connection->fd)
+  if (client->connection->fde)
   {
-    comm_socket_close(client->connection->fd);
-    client->connection->fd = NULL;
+    comm_socket_close(client->connection->fde);
+    client->connection->fde = NULL;
   }
 
   /* Free transport-level buffer memory now that the socket is gone. */
@@ -600,7 +600,7 @@ _client_exit_log_session(const struct Client *client, const char *reason)
               client->connection->send.messages,
               client->connection->recv.messages,
               client_get_class_name(client),
-              client->connection->oper_name ? client->connection->oper_name : "-", reason);
+              client->connection->oper_auth_name ? client->connection->oper_auth_name : "-", reason);
   }
   else if (client_is_server(client))
   {
@@ -646,7 +646,7 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
 }
 
 static void
-_client_exit_cleanup_client_connection(struct Client *client, const char *reason)
+_client_exit_cleanup_user_connection(struct Client *client, const char *reason)
 {
   assert(client && client_is_local(client));
   assert(client_is_user(client));
@@ -744,7 +744,7 @@ client_exit(struct Client *client, const char *reason)
   if (client_is_local(client))
   {
     if (client_is_user(client))
-      _client_exit_cleanup_client_connection(client, reason);
+      _client_exit_cleanup_user_connection(client, reason);
     else if (client_is_server(client))
       _client_exit_cleanup_server_connection(client, reason);
     else
@@ -921,7 +921,7 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
 }
 
 static void
-_client_tls_handshake_handler(fde_t *fd, void *data)
+_client_tls_handshake_handler(fde_t *fde, void *data)
 {
   struct Client *const client = data;
   assert(client && client_is_local(client));
@@ -934,20 +934,20 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fd);
-  assert(client->connection->fd == fd);
+  assert(client->connection->fde);
+  assert(client->connection->fde == fde);
 
   const char *tls_error = NULL;
-  const tls_handshake_status_t status = tls_handshake(&fd->tls, TLS_ROLE_SERVER, &tls_error);
+  const tls_handshake_status_t status = tls_handshake(&fde->tls, TLS_ROLE_SERVER, &tls_error);
 
   switch (status)
   {
     case TLS_HANDSHAKE_DONE:
       client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
       client_set_flag(client, FLAGS_TLS_ACTIVE);
-      comm_setselect(fd, 0, NULL, NULL);
+      comm_setselect(fde, 0, NULL, NULL);
 
-      if (!tls_verify_certificate(&fd->tls, &client->tls_certfp))
+      if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
       {
         client_format_name_buffer_t client_name_buffer;
         log_write(LOG_TYPE_IRCD, "Client %s presented an invalid TLS certificate.",
@@ -957,10 +957,10 @@ _client_tls_handshake_handler(fde_t *fd, void *data)
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(fd, COMM_SELECT_WRITE, _client_tls_handshake_handler, client);
+      comm_setselect(fde, COMM_SELECT_WRITE, _client_tls_handshake_handler, client);
       return;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(fd, COMM_SELECT_READ, _client_tls_handshake_handler, client);
+      comm_setselect(fde, COMM_SELECT_READ, _client_tls_handshake_handler, client);
       return;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
@@ -974,7 +974,7 @@ _client_begin_local_connection_ingress(struct Client *client)
 {
   assert(client && client_is_local(client));
   assert(client->connection);
-  assert(client->connection->fd);
+  assert(client->connection->fde);
   assert(client->connection->listener);
 
   client_update_activity_timeout(client);
@@ -985,7 +985,7 @@ _client_begin_local_connection_ingress(struct Client *client)
     return;
   }
 
-  if (!tls_new(&client->connection->fd->tls, client->connection->fd->fd, TLS_ROLE_SERVER))
+  if (!tls_new(&client->connection->fde->tls, client->connection->fde->fd, TLS_ROLE_SERVER))
   {
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
@@ -993,7 +993,7 @@ _client_begin_local_connection_ingress(struct Client *client)
   }
 
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-  _client_tls_handshake_handler(client->connection->fd, client);
+  _client_tls_handshake_handler(client->connection->fde, client);
 }
 
 static struct Client *
@@ -1006,7 +1006,7 @@ _client_create_accepted_local_connection(fde_t *client_fde, struct Listener *lis
   assert(remote_addr_str);
 
   struct Client *const client = client_create_local();
-  client->connection->fd = client_fde;
+  client->connection->fde = client_fde;
 
   address_copy(&client->addr, remote_addr);
 

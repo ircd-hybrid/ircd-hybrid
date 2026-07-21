@@ -42,7 +42,7 @@ ms_svsmode(struct Client *source, int parc, char *parv[])
   if (target == NULL)
     return;
 
-  const uint64_t mode_flags_old = target->umodes;
+  const uint64_t mode_flags_old = target->user_mode_flags;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
 
   const char *const modes = parv[3];

@@ -37,13 +37,13 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
 {
   client_set_class(client, oper->klass, CLIENT_CLASS_OPER);
 
-  assert(client->connection->oper_name == NULL);
-  io_free(client->connection->oper_name);
-  client->connection->oper_name = io_strdup(oper->name);
+  assert(client->connection->oper_auth_name == NULL);
+  io_free(client->connection->oper_auth_name);
+  client->connection->oper_auth_name = io_strdup(oper->name);
 
   client_set_oper_flag(client, oper->oper_privs);
 
-  uint64_t mode_flags_old = client->umodes;
+  uint64_t mode_flags_old = client->user_mode_flags;
   uint64_t mode_flags_add = UMODE_OPER | UMODE_ADMIN;
 
   if (oper->modes)

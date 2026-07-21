@@ -232,7 +232,7 @@ cap_ls(struct Client *source, const char *arg)
 
   if (arg && atoi(arg) >= 302)
   {
-    source->connection->cap |= CAP_CAP_NOTIFY;
+    source->connection->cap_flags |= CAP_CAP_NOTIFY;
     client_set_flag(source, FLAGS_CAP302);
   }
 
@@ -243,7 +243,7 @@ static void
 cap_req(struct Client *source, const char *arg)
 {
   uint32_t set = 0, rem = 0;
-  uint32_t cs = source->connection->cap;  /* Enabled capabilities */
+  uint32_t cs = source->connection->cap_flags;  /* Enabled capabilities */
 
   if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration |= REG_NEED_CAP;
@@ -285,7 +285,7 @@ cap_req(struct Client *source, const char *arg)
   /* Notify client of accepted changes and copy over results. */
   _cap_reply_send_list(source, &set, &rem, "ACK");
 
-  source->connection->cap = cs;
+  source->connection->cap_flags = cs;
 }
 
 static void
@@ -306,7 +306,7 @@ static void
 cap_list(struct Client *source, const char *arg)
 {
   /* Send the list of the client's capabilities */
-  _cap_reply_send_list(source, &source->connection->cap, NULL, "LIST");
+  _cap_reply_send_list(source, &source->connection->cap_flags, NULL, "LIST");
 }
 
 struct CapSubcommand

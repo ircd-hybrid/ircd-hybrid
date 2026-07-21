@@ -228,21 +228,21 @@ _server_handshake_irc_start(struct Client *client)
              me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client->connection->fd, client);
+  read_packet(client->connection->fde, client);
 }
 
 static void
 _server_handshake_tls_finish(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(client->connection->fd);
+  assert(client->connection->fde);
   assert(client_has_flag(client, FLAGS_TLS_HANDSHAKING));
   assert(!client_has_flag(client, FLAGS_TLS_ACTIVE));
 
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
   client_set_flag(client, FLAGS_TLS_ACTIVE);
 
-  fde_t *fde = client->connection->fd;
+  fde_t *fde = client->connection->fde;
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
   if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
@@ -276,8 +276,8 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fd);
-  assert(client->connection->fd == fde);
+  assert(client->connection->fde);
+  assert(client->connection->fde == fde);
 
   tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
@@ -305,8 +305,8 @@ static void
 _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
 {
   assert(client && client_is_local(client));
-  assert(client->connection->fd);
-  assert(client->connection->fd == fde);
+  assert(client->connection->fde);
+  assert(client->connection->fde == fde);
 
   if (!tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
   {
@@ -352,7 +352,7 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   }
 
   assert(fde);
-  assert(client->connection->fd == fde);
+  assert(client->connection->fde == fde);
 
   /* COMM_OK, so continue the connection procedure */
   /* Get the connect {} block */
@@ -427,7 +427,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   /* Create a local client */
   struct Client *const client = client_create_local();
-  client->connection->fd = new_fde;
+  client->connection->fde = new_fde;
 
   address_copy(&client->addr, &connect->remote_addr);
   strlcpy(client->name, connect->name, sizeof(client->name));
@@ -442,13 +442,13 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   client_set_state(client, CLIENT_STATE_CONNECTING);
 
-  comm_socket_note(client->connection->fd, "Server: %s", client->name);
+  comm_socket_note(client->connection->fde, "Server: %s", client->name);
 
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
   /* Now, initiate the connection */
-  comm_connect_tcp(client->connection->fd, &connect->remote_addr, connect->port, &connect->bind_addr,
+  comm_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, &connect->bind_addr,
                    _server_connect_callback, client, connect->timeout * 1000ULL);
 
   /*

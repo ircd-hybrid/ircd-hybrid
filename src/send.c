@@ -169,8 +169,8 @@ sendq_unblocked(fde_t *F, void *data)
   if (client_is_dead(client))
     return;
 
-  assert(client->connection->fd);
-  assert(client->connection->fd == F);
+  assert(client->connection->fde);
+  assert(client->connection->fde == F);
   assert(client_has_flag(client, FLAGS_BLOCKED));
 
   client_unset_flag(client, FLAGS_BLOCKED);
@@ -202,17 +202,17 @@ send_queued_write(struct Client *to)
     bool want_read = false;
     const struct dbuf_block *const first = to->connection->buf_sendq.blocks.head->data;
 
-    if (tls_isusing(&to->connection->fd->tls))
+    if (tls_isusing(&to->connection->fde->tls))
     {
-      retlen = tls_write(&to->connection->fd->tls, first->data + to->connection->buf_sendq.pos,
-                                                   first->size - to->connection->buf_sendq.pos, &want_read);
+      retlen = tls_write(&to->connection->fde->tls, first->data + to->connection->buf_sendq.pos,
+                                                    first->size - to->connection->buf_sendq.pos, &want_read);
 
       if (want_read)
         return;  /* Retry later, don't register for write events */
     }
     else
-      retlen = send(to->connection->fd->fd, first->data + to->connection->buf_sendq.pos,
-                                            first->size - to->connection->buf_sendq.pos, 0);
+      retlen = send(to->connection->fde->fd, first->data + to->connection->buf_sendq.pos,
+                                             first->size - to->connection->buf_sendq.pos, 0);
 
     if (retlen <= 0)
     {
@@ -221,7 +221,7 @@ send_queued_write(struct Client *to)
       {
         client_set_flag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
-        comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to);
+        comm_setselect(to->connection->fde, COMM_SELECT_WRITE, sendq_unblocked, to);
       }
       else
       {
@@ -716,10 +716,10 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
       if (target->connection->last_broadcast_id == broadcast_id)
         continue;
 
-      if (required_cap && (target->connection->cap & required_cap) != required_cap)
+      if (required_cap && (target->connection->cap_flags & required_cap) != required_cap)
         continue;
 
-      if (excluded_cap && (target->connection->cap & excluded_cap))
+      if (excluded_cap && (target->connection->cap_flags & excluded_cap))
         continue;
 
       target->connection->last_broadcast_id = broadcast_id;
@@ -729,8 +729,8 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
 
   if (touser && client_is_local(user) && !client_is_dead(user))
   {
-    if ((required_cap == 0 || (user->connection->cap & required_cap) == required_cap) &&
-        (excluded_cap == 0 || (user->connection->cap & excluded_cap) == 0))
+    if ((required_cap == 0 || (user->connection->cap_flags & required_cap) == required_cap) &&
+        (excluded_cap == 0 || (user->connection->cap_flags & excluded_cap) == 0))
       sendto_one_buffer(user, buffer);
   }
 
@@ -771,10 +771,10 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
     if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
-    if (required_cap && (target->connection->cap & required_cap) != required_cap)
+    if (required_cap && (target->connection->cap_flags & required_cap) != required_cap)
       continue;
 
-    if (excluded_cap && (target->connection->cap & excluded_cap))
+    if (excluded_cap && (target->connection->cap_flags & excluded_cap))
       continue;
 
     sendto_one_buffer(target, buffer);

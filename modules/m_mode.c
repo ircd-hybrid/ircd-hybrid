@@ -52,11 +52,11 @@ set_user_mode(struct Client *source, int parc, char *parv[])
   if (parc < 3)
   {
     sendto_one_numeric(source, &me, RPL_UMODEIS,
-                       user_mode_to_str(source->umodes));
+                       user_mode_to_str(source->user_mode_flags));
     return;
   }
 
-  const uint64_t mode_flags_old = source->umodes;
+  const uint64_t mode_flags_old = source->user_mode_flags;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
   bool badmode = false;
 

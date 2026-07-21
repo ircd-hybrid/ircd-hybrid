@@ -107,8 +107,8 @@ _client_format_get_oper_source(const struct Client *client)
   assert(client);
   assert(client_is_user(client));
 
-  if (client_is_local(client) && !string_is_empty(client->connection->oper_name))
-    return client->connection->oper_name;
+  if (client_is_local(client) && !string_is_empty(client->connection->oper_auth_name))
+    return client->connection->oper_auth_name;
 
   assert(client->uplink);
   return _client_format_get_entity_name(client->uplink);

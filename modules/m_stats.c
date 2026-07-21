@@ -750,7 +750,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
     if (client_is_local(client) && client_is_oper(client))
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
                          client_is_admin(target) ? 'A' : 'O',
-                         oper_privs_as_string(target->connection->operflags),
+                         oper_privs_as_string(target->connection->oper_flags),
                          target->name, target->username, target->host, duration);
     else
       sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
@@ -1103,7 +1103,7 @@ do_stats(struct Client *client, int parc, char *parv[])
   const struct StatsHandler *const handler = stats_find(letter);
   if (handler)
   {
-    if (stats_allowed(handler, client->umodes))
+    if (stats_allowed(handler, client->user_mode_flags))
       handler->handler(client, parc, parv);
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);

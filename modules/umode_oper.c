@@ -52,8 +52,8 @@ unset_callback(struct Client *client, user_mode_source_t source)
     client->command_handler = COMMAND_HANDLER_USER;
     client_set_class(client, NULL, CLIENT_CLASS_OPER);
 
-    io_free(client->connection->oper_name);
-    client->connection->oper_name = NULL;
+    io_free(client->connection->oper_auth_name);
+    client->connection->oper_auth_name = NULL;
 
     svstag_detach(&client->svstag_list, RPL_WHOISOPERATOR);
     client_clear_oper_flags(client);

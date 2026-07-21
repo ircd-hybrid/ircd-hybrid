@@ -97,7 +97,7 @@ hash_add_client(struct Client *client)
 {
   const uint32_t hashv = hash_string(client->name);
 
-  client->hnext = clientTable[hashv];
+  client->name_hash_next = clientTable[hashv];
   clientTable[hashv] = client;
 }
 
@@ -129,7 +129,7 @@ hash_add_id(struct Client *client)
 {
   const uint32_t hashv = hash_string(client->id);
 
-  client->idhnext = idTable[hashv];
+  client->id_hash_next = idTable[hashv];
   idTable[hashv] = client;
 }
 
@@ -150,17 +150,17 @@ hash_del_id(struct Client *client)
   {
     if (tmp == client)
     {
-      idTable[hashv] = client->idhnext;
-      client->idhnext = client;
+      idTable[hashv] = client->id_hash_next;
+      client->id_hash_next = client;
     }
     else
     {
-      while (tmp->idhnext != client)
-        if ((tmp = tmp->idhnext) == NULL)
+      while (tmp->id_hash_next != client)
+        if ((tmp = tmp->id_hash_next) == NULL)
           return;
 
-      tmp->idhnext = tmp->idhnext->idhnext;
-      client->idhnext = client;
+      tmp->id_hash_next = tmp->id_hash_next->id_hash_next;
+      client->id_hash_next = client;
     }
   }
 }
@@ -182,17 +182,17 @@ hash_del_client(struct Client *client)
   {
     if (tmp == client)
     {
-      clientTable[hashv] = client->hnext;
-      client->hnext = client;
+      clientTable[hashv] = client->name_hash_next;
+      client->name_hash_next = client;
     }
     else
     {
-      while (tmp->hnext != client)
-        if ((tmp = tmp->hnext) == NULL)
+      while (tmp->name_hash_next != client)
+        if ((tmp = tmp->name_hash_next) == NULL)
           return;
 
-      tmp->hnext = tmp->hnext->hnext;
-      client->hnext = client;
+      tmp->name_hash_next = tmp->name_hash_next->name_hash_next;
+      client->name_hash_next = client;
     }
   }
 }
@@ -251,12 +251,12 @@ hash_find_client(const char *name)
     {
       struct Client *prev;
 
-      while (prev = client, (client = client->hnext))
+      while (prev = client, (client = client->name_hash_next))
       {
         if (io_strcasecmp(name, client->name) == 0)
         {
-          prev->hnext = client->hnext;
-          client->hnext = clientTable[hashv];
+          prev->name_hash_next = client->name_hash_next;
+          client->name_hash_next = clientTable[hashv];
           clientTable[hashv] = client;
           break;
         }
@@ -289,12 +289,12 @@ hash_find_id(const char *name)
     {
       struct Client *prev;
 
-      while (prev = client, (client = client->idhnext))
+      while (prev = client, (client = client->id_hash_next))
       {
         if (strcmp(name, client->id) == 0)
         {
-          prev->idhnext = client->idhnext;
-          client->idhnext = idTable[hashv];
+          prev->id_hash_next = client->id_hash_next;
+          client->id_hash_next = idTable[hashv];
           idTable[hashv] = client;
           break;
         }

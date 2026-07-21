@@ -15,7 +15,7 @@ typedef void (*IdentCallback)(void *, const char *);
 
 struct IdentRequest
 {
-  fde_t *fd;
+  fde_t *fde;
   IdentCallback callback;
   void *user_data;
   uint16_t local_port;

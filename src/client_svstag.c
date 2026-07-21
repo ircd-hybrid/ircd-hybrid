@@ -51,7 +51,7 @@ svstag_attach(list_t *list, unsigned int numeric, const char *umodes, const char
   {
     const struct UserMode *const mode = user_mode_find(*m);
     if (mode)
-      svstag->umodes |= mode->mode_bit;
+      svstag->user_mode_flags |= mode->mode_bit;
   }
 
   if (numeric != RPL_WHOISOPERATOR)

@@ -176,7 +176,7 @@ nick_change_local(struct Client *source, const char *nick)
 
     if (user_mode_has_flag(source, UMODE_REGISTERED))
     {
-      const uint64_t mode_flags_old = source->umodes;
+      const uint64_t mode_flags_old = source->user_mode_flags;
       user_mode_unset_flag(source, UMODE_REGISTERED);
       user_mode_send(source, mode_flags_old, USER_MODE_SEND_USER);
     }

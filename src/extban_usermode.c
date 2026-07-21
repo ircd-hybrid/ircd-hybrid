@@ -46,8 +46,8 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
   }
 
 
-  if ((client->umodes & modes_add) == modes_add &&
-      (client->umodes & modes_del) == 0)
+  if ((client->user_mode_flags & modes_add) == modes_add &&
+      (client->user_mode_flags & modes_del) == 0)
     return EXTBAN_MATCH;
 
   return EXTBAN_NO_MATCH;

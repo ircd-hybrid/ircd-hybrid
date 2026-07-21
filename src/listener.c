@@ -79,9 +79,9 @@ _listener_accept_connection(fde_t *F, void *data_)
 {
   struct Listener *const listener = data_;
   assert(listener);
-  assert(listener->fd == F);
-  assert(listener->fd);
-  assert(listener->fd->flags.open);
+  assert(listener->fde == F);
+  assert(listener->fde);
+  assert(listener->fde->flags.open);
 
   const char *desc =
     listener_has_flag(listener, LISTENER_TLS) ? "Incoming TLS connection" : "Incoming connection";
@@ -90,7 +90,7 @@ _listener_accept_connection(fde_t *F, void *data_)
   {
     struct io_addr remote_addr;
 
-    fde_t *const client_fde = comm_accept(listener->fd, &remote_addr, desc);
+    fde_t *const client_fde = comm_accept(listener->fde, &remote_addr, desc);
     if (client_fde == NULL)
     {
       /*
@@ -117,7 +117,7 @@ _listener_accept_connection(fde_t *F, void *data_)
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fd, COMM_SELECT_READ, _listener_accept_connection, listener);
+  comm_setselect(listener->fde, COMM_SELECT_READ, _listener_accept_connection, listener);
 }
 
 /**
@@ -176,9 +176,9 @@ _listener_finalize(struct Listener *listener)
   }
 #endif
 
-  listener->fd = new_fde;
+  listener->fde = new_fde;
   /* Listen completion events are READ events .. */
-  _listener_accept_connection(listener->fd, listener);
+  _listener_accept_connection(listener->fde, listener);
   return true;
 }
 
@@ -210,12 +210,12 @@ _listener_find(const struct io_addr *addr)
 static void
 _listener_close(struct Listener *listener)
 {
-  if (listener->fd)
+  if (listener->fde)
   {
-    assert(listener->fd->flags.open);
+    assert(listener->fde->flags.open);
 
-    comm_socket_close(listener->fd);
-    listener->fd = NULL;
+    comm_socket_close(listener->fde);
+    listener->fde = NULL;
   }
 
   if (listener->ref_count)

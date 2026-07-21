@@ -40,9 +40,9 @@ do_hash(struct Client *source, enum hash_type type)
       while (ptr)
       {
         if (type == HASH_TYPE_CLIENT)
-          ptr = ((const struct Client *)ptr)->hnext;
+          ptr = ((const struct Client *)ptr)->name_hash_next;
         else if (type == HASH_TYPE_ID)
-          ptr = ((const struct Client *)ptr)->idhnext;
+          ptr = ((const struct Client *)ptr)->id_hash_next;
         else /* type == HASH_TYPE_CHANNEL */
           ptr = ((const struct Channel *)ptr)->hash_next;
 

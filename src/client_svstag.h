@@ -16,7 +16,7 @@ struct ServicesTag
   list_node_t node;
   char *tag;
   unsigned int numeric;
-  uint64_t umodes;
+  uint64_t user_mode_flags;
 };
 
 extern void svstag_attach(list_t *, unsigned int, const char *, const char *);

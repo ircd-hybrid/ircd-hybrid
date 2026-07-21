@@ -42,8 +42,8 @@ read_packet(fde_t *F, void *data_)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fd);
-  assert(client->connection->fd == F);
+  assert(client->connection->fde);
+  assert(client->connection->fde == F);
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but

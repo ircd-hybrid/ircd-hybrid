@@ -110,9 +110,9 @@ struct Connection
 {
   list_node_t node;
   uint32_t registration;
-  uint32_t cap;  /**< Bitmask of user-announced CAP features. */
-  uint32_t capab;  /**< Bitmask of server-announced CAPAB features. */
-  uint32_t operflags;  /**< Bitmask of IRC Operator privilege flags. */
+  uint32_t cap_flags;  /**< Bitmask of user-announced CAP features. */
+  uint32_t capab_flags;  /**< Bitmask of server-announced CAPAB features. */
+  uint32_t oper_flags;  /**< Bitmask of IRC Operator privilege flags. */
   uint32_t ping_cookie_token;  /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
   uint32_t join_part_count;  /**< Count of JOIN/PART in less than MIN_JOIN_LEAVE_TIME seconds */
   uint32_t oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
@@ -151,12 +151,12 @@ struct Connection
   list_t monitor_list;  /**< Chain of Monitor pointer blocks */
   list_t channel_invite_list;  /**< Chain of invite pointer blocks */
 
-  fde_t *fd;  /**< Pointer to the file descriptor entry for the underlying socket. */
+  fde_t *fde;  /**< Pointer to the file descriptor entry for the underlying socket. */
 
   int input_parse_debt;  /**< Decaying parse debt that limits queued input processing. */
 
   char *password;  /**< Password supplied by the user/server during handshake. */
-  char *oper_name;  /**< The name of the oper block, if opered up. */
+  char *oper_auth_name;  /**< The name of the oper block, if opered up. */
   char *scheduled_exit_reason;  /**< Exit reason retained while the client is queued for deferred exit. */
   event_handle_t activity_timeout_event;  /**< Event handle for the client's activity (idle/ping) timeout. */
   event_handle_t flood_recalc_event;  /**< Repeating event handle for the user's anti-flood timer. */
@@ -169,8 +169,8 @@ struct Client
   list_node_t uplink_node;  /**< Node for membership in an uplink's child_*_list. */
 
   struct Connection *connection;  /**< Connection structure associated with this client */
-  struct Client *hnext;  /**< Next entry in the nickname/servername hash table bucket. */
-  struct Client *idhnext;  /**< Next entry in the UID/SID hash table bucket. */
+  struct Client *name_hash_next;  /**< Next entry in the nickname/servername hash table bucket. */
+  struct Client *id_hash_next;  /**< Next entry in the UID/SID hash table bucket. */
   struct Server *server;  /**< If non-NULL, points to server-specific data. */
   struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
   struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
@@ -178,7 +178,7 @@ struct Client
   uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
   uint32_t hopcount;  /**< The number of server hops from here to the entity. */
   uint32_t flags;  /**< Client flags */
-  uint64_t umodes;  /**< User modes this user has set */
+  uint64_t user_mode_flags;  /**< User modes this user has set */
 
   enum client_state state;  /**< The client's current state (e.g., CLIENT_STATE_USER, CLIENT_STATE_SERVER). */
   enum command_handler_type command_handler;  /**< Command handler table index derived from the client's state. */
@@ -285,7 +285,7 @@ client_is_local(const struct Client *client)
 static inline bool
 client_has_cap(const struct Client *client, uint32_t cap_flag)
 {
-  return client_is_local(client) && ((client->connection->cap & cap_flag));
+  return client_is_local(client) && ((client->connection->cap_flags & cap_flag));
 }
 
 static inline bool
@@ -309,28 +309,28 @@ client_unset_flag(struct Client *client, uint32_t flags)
 static inline bool
 client_has_oper_flag(const struct Client *client, uint32_t flag)
 {
-  return client_is_local(client) && ((client->connection->operflags & flag));
+  return client_is_local(client) && ((client->connection->oper_flags & flag));
 }
 
 static inline void
 client_set_oper_flag(struct Client *client, uint32_t flag)
 {
   if (client_is_local(client))
-    client->connection->operflags |= flag;
+    client->connection->oper_flags |= flag;
 }
 
 static inline void
 client_unset_oper_flag(struct Client *client, uint32_t flag)
 {
   if (client_is_local(client))
-    client->connection->operflags &= ~flag;
+    client->connection->oper_flags &= ~flag;
 }
 
 static inline void
 client_clear_oper_flags(struct Client *client)
 {
   if (client_is_local(client))
-    client->connection->operflags = 0;
+    client->connection->oper_flags = 0;
 }
 
 static inline bool

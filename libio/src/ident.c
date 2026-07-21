@@ -152,23 +152,23 @@ ident_delete(ident_request_t *request)
     request->reply_timeout_event = NULL;
   }
 
-  if (request->fd)
+  if (request->fde)
   {
-    comm_socket_close(request->fd);
-    request->fd = NULL;
+    comm_socket_close(request->fde);
+    request->fde = NULL;
   }
 
   io_free(request);
 }
 
 static void
-ident_read_reply(fde_t *F, void *data)
+ident_read_reply(fde_t *fde, void *data)
 {
   ident_request_t *request = data;
-  assert(F);
+  assert(fde);
   assert(request);
-  assert(request->fd == F);
-  assert(F->flags.open);
+  assert(request->fde == fde);
+  assert(fde->flags.open);
 
   /* If callback is NULL, the owner is tearing down the request. Abort. */
   if (request->callback == NULL)
@@ -182,7 +182,7 @@ ident_read_reply(fde_t *F, void *data)
   }
 
   char buf[IDENT_BUFSIZE + 1];
-  ssize_t len = recv(F->fd, buf, sizeof(buf) - 1, 0);
+  ssize_t len = recv(fde->fd, buf, sizeof(buf) - 1, 0);
   if (len > 0)
   {
     buf[len] = '\0';
@@ -194,7 +194,7 @@ ident_read_reply(fde_t *F, void *data)
 }
 
 static void
-ident_connect_callback(fde_t *F, int error, void *data)
+ident_connect_callback(fde_t *fde, int error, void *data)
 {
   ident_request_t *request = data;
 
@@ -211,7 +211,7 @@ ident_connect_callback(fde_t *F, int error, void *data)
   char buf[16];
   ssize_t len = snprintf(buf, sizeof(buf), "%hu,%hu\r\n", request->remote_port, request->local_port);
 
-  if (send(F->fd, buf, len, 0) != len)
+  if (send(fde->fd, buf, len, 0) != len)
   {
     log_write(LOG_TYPE_IRCD, "Failed to send Ident query: %s",
               strerror(errno));
@@ -224,7 +224,7 @@ ident_connect_callback(fde_t *F, int error, void *data)
    * read handler to wait for the response.
    */
   event_schedule(request->reply_timeout_event);
-  comm_setselect(F, COMM_SELECT_READ, ident_read_reply, request);
+  comm_setselect(fde, COMM_SELECT_READ, ident_read_reply, request);
 }
 
 static void
@@ -265,7 +265,7 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
     return NULL;
   }
 
-  request->fd = new_fde;
+  request->fde = new_fde;
 
   struct io_addr local_addr;
   struct io_addr remote_addr;
@@ -289,6 +289,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   address_strip_ipv4(&bind_addr);
   address_set_port(&bind_addr, 0);
 
-  comm_connect_tcp(request->fd, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout_ms);
+  comm_connect_tcp(request->fde, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout_ms);
   return request;
 }

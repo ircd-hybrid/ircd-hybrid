@@ -107,7 +107,7 @@ _whois_send_user_numeric(struct Client *source, const struct Client *target)
 }
 
 static void
-_whois_send_host_numeric(struct Client *source, const struct Client *target)
+_whois_send_actual_host_numeric(struct Client *source, const struct Client *target)
 {
   if (!client_is_oper(source) && source != target)
     return;
@@ -208,7 +208,7 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
         user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
       continue;
 
-    if (svstag->umodes == 0 || user_mode_has_flag(source, svstag->umodes))
+    if (svstag->user_mode_flags == 0 || user_mode_has_flag(source, svstag->user_mode_flags))
       sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
                          target->name, svstag->tag);
   }
@@ -221,7 +221,7 @@ _whois_send_modes_numeric(struct Client *source, const struct Client *target)
     return;
 
   sendto_one_numeric(source, &me, RPL_WHOISMODES,
-                     target->name, user_mode_to_str(target->umodes));
+                     target->name, user_mode_to_str(target->user_mode_flags));
 }
 
 static void
@@ -241,7 +241,7 @@ static void
 _whois_send_target_reply(struct Client *source, struct Client *target)
 {
   _whois_send_user_numeric(source, target);
-  _whois_send_host_numeric(source, target);
+  _whois_send_actual_host_numeric(source, target);
   _whois_send_channels_numeric(source, target);
   _whois_send_server_numeric(source, target);
   _whois_send_away_numeric(source, target);

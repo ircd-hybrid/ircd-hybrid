@@ -98,7 +98,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
 
   if (user_mode_has_flag(target, UMODE_REGISTERED))
   {
-    const uint64_t mode_flags_old = target->umodes;
+    const uint64_t mode_flags_old = target->user_mode_flags;
     user_mode_unset_flag(target, UMODE_REGISTERED);
     user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
   }

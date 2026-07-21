@@ -77,7 +77,7 @@ extern const char *capab_get(const struct Client *, bool);
 static inline bool
 capab_has_flag(const struct Client *client, uint32_t flag)
 {
-  return (client->connection->capab & flag) != 0;
+  return (client->connection->capab_flags & flag) != 0;
 }
 
 /**
@@ -89,7 +89,7 @@ capab_has_flag(const struct Client *client, uint32_t flag)
 static inline void
 capab_set_flag(struct Client *client, uint32_t flag)
 {
-  client->connection->capab |= flag;
+  client->connection->capab_flags |= flag;
 }
 
 /**
@@ -101,6 +101,6 @@ capab_set_flag(struct Client *client, uint32_t flag)
 static inline void
 capab_unset_flag(struct Client *client, uint32_t flag)
 {
-  client->connection->capab &= ~flag;
+  client->connection->capab_flags &= ~flag;
 }
 #endif  /* INCLUDED_server_capab_h */

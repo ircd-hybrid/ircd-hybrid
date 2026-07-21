@@ -152,7 +152,7 @@ user_introduce(struct Client *client)
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->uplink->id, client->name, client->hopcount + 1,
-                 client->tsinfo, user_mode_to_str(client->umodes),
+                 client->tsinfo, user_mode_to_str(client->user_mode_flags),
                  client->username, client->host, client->realhost,
                  client->sockhost, client->id, client->account, client->info);
 
@@ -185,7 +185,7 @@ user_welcome(struct Client *client)
   {
     user_mode_set_flag(client, UMODE_SECURE);
 
-    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fd->tls));
+    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fde->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
 

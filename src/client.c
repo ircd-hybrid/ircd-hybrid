@@ -848,9 +848,7 @@ client_schedule_exit_on_io_failure(struct Client *client, enum client_io_operati
       break;
   }
 
-  char reason[IRCD_BUFSIZE];
-  snprintf(reason, sizeof(reason), "%s failed: %s", operation_name, failure_reason);
-  client_schedule_exit(client, reason);
+  client_schedule_exit_fmt(client, "%s failed: %s", operation_name, failure_reason);
 }
 
 void

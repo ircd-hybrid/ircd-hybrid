@@ -123,7 +123,7 @@ _parse_list_topic_filter(struct ListTask *task, char modifier, const char *value
       return false;
 
     io_free(task->topic);
-    task->topic = io_strndup(value_text, TOPICLEN);
+    task->topic = io_strdup(value_text);
     return true;
   }
 

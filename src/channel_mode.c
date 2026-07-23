@@ -135,7 +135,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     uint32_t extban_acting = extbans & extban_acting_mask();
     if (extban_acting)
     {
-      const struct Extban *extban = extban_find_flag(extban_acting);
+      const struct Extban *const extban = extban_find_flag(extban_acting);
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -146,7 +146,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     uint32_t extban_matching = extbans & extban_matching_mask();
     if (extban_matching)
     {
-      const struct Extban *extban = extban_find_flag(extban_matching);
+      const struct Extban *const extban = extban_find_flag(extban_matching);
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -251,8 +251,10 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   *bufptr++ = '+';
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
     if (tab->mode && channel_has_mode(channel, tab->mode))
       *bufptr++ = tab->letter;
+  }
 
   if (channel_has_member_limit(channel))
   {
@@ -560,7 +562,7 @@ chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  struct ChannelMember *member = channel_member_find(channel, target);
+  struct ChannelMember *const member = channel_member_find(channel, target);
   if (member == NULL)
   {
     if (client_is_local_user(client) &&
@@ -614,8 +616,10 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
 
     /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
+    {
       if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
+    }
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = lstr;
@@ -657,8 +661,10 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
 
     /* If somebody does MODE #channel +kk a b, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
+    {
       if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
+    }
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = key;
@@ -700,12 +706,7 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
     if (mode_changes[i].letter == 0)
       continue;
 
-    const char *arg;
-    if (mode_changes[i].id)
-      arg = mode_changes[i].id;
-    else
-      arg = mode_changes[i].arg;
-
+    const char *const arg = mode_changes[i].id ? mode_changes[i].id : mode_changes[i].arg;
     if (arg)
       arglen = strlen(arg);
     else
@@ -776,7 +777,7 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
     if (mode_changes[i].letter == 0)
       continue;
 
-    const char *arg = mode_changes[i].arg;
+    const char *const arg = mode_changes[i].arg;
     if (arg)
       arglen = strlen(arg);
     else

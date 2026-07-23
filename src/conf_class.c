@@ -17,7 +17,6 @@
 #include "client.h"
 #include "conf.h"
 #include "conf_class.h"
-#include "defaults.h"
 
 static list_t class_list;
 

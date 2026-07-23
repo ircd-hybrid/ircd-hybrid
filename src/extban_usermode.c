@@ -33,7 +33,7 @@ extban_usermode_matches(struct Client *client, struct Channel *channel, struct B
         continue;
       default:
       {
-        const struct UserMode *mode = user_mode_find(*m);
+        const struct UserMode *const mode = user_mode_find(*m);
         if (mode == NULL)
           continue;
 

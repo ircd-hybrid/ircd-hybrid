@@ -88,7 +88,7 @@ struct Ban
 };
 
 extern void channel_destroy(struct Channel *);
-extern void channel_flood_record_join(struct Channel *, struct Client *);
+extern void channel_flood_record_join(struct Channel *, const struct Client *);
 extern void channel_join(struct Client *, const char *, const char *);
 extern void channel_join_list(struct Client *, char *, char *);
 extern void channel_part(struct Client *, const char *, const char *);

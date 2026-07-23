@@ -58,7 +58,7 @@ channel_find(const char *name)
 }
 
 void
-channel_flood_record_join(struct Channel *channel, struct Client *client)
+channel_flood_record_join(struct Channel *channel, const struct Client *client)
 {
   if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;

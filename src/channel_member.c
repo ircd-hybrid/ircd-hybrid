@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
 #include <assert.h>
 
 #include "list.h"
@@ -11,7 +16,6 @@
 struct ChannelMember *
 channel_member_add(struct Channel *channel, struct Client *client, uint32_t flags)
 {
-
   struct ChannelMember *const member = io_calloc(sizeof(*member));
   member->client = client;
   member->channel = channel;
@@ -159,11 +163,14 @@ channel_member_find(const struct Channel *channel, const struct Client *client)
   if (!client_is_user(client))
     return NULL;
 
-  /* Take the shortest of the two lists */
-  if (list_length(&channel->member_list) < list_length(&client->channel_member_list))
+  const list_t *channel_list = &channel->member_list;
+  if (client_is_local(client))
+    channel_list = &channel->local_member_list;
+
+  if (list_length(channel_list) < list_length(&client->channel_member_list))
   {
     list_node_t *node;
-    LIST_FOREACH(node, channel->member_list.head)
+    LIST_FOREACH(node, channel_list->head)
     {
       struct ChannelMember *const member = node->data;
       if (member->client == client)

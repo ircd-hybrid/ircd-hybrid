@@ -190,7 +190,7 @@ _parse_list_mask_filter(struct ListTask *task, const char *option)
 }
 
 static bool
-_parse_list_option(struct ListTask *task, char *option, uintmax_t now)
+_parse_list_option(struct ListTask *task, const char *option, uintmax_t now)
 {
   if (string_is_empty(option))
     return false;
@@ -225,8 +225,10 @@ _parse_list_args(struct ListTask *task, char *args)
   char *saveptr = NULL;
   for (char *option = strtok_r(args, ",", &saveptr); option;
              option = strtok_r(NULL, ",", &saveptr))
+  {
     if (!_parse_list_option(task, option, now))
       return false;
+  }
 
   if (list_is_empty(&task->include_masks))
     task->exact_match = false;

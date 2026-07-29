@@ -48,7 +48,10 @@ dbuf_block_create(void)
 void
 dbuf_block_unref(struct dbuf_block *block)
 {
-  if (--block->ref_count <= 0)
+  assert(block);
+  assert(block->ref_count > 0);
+
+  if (--block->ref_count == 0)
     io_free(block);
 }
 

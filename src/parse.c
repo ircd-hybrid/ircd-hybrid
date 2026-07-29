@@ -25,7 +25,6 @@
 #include "command.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "packet.h"
 #include "parse.h"
 #include "send.h"
 #include "user_mode.h"
@@ -290,37 +289,37 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
    */
   if (*prefix && client_is_server(ctx->client))
   {
-    struct Client *const from = client_find_entity(ctx->client, prefix);
+    struct Client *const source = client_find_entity(ctx->client, prefix);
 
     /*
      * Server prefixes must resolve to a known entity. Unknown prefixes are
      * handled conservatively because they indicate stale state or bad routing.
      */
-    if (from == NULL)
+    if (source == NULL)
     {
       ++ServerStats.is_unpf;
       _parse_handle_unknown_prefix(ctx->client, prefix);
       return false;
     }
 
-    assert(from->nexthop);
+    assert(source->nexthop);
 
     /*
      * A prefixed source must be routed through the link that delivered the
      * message. Anything else is a fake-direction violation and is dropped.
      */
-    if (from->nexthop != ctx->client)
+    if (source->nexthop != ctx->client)
     {
       ++ServerStats.is_wrdi;
 
       client_format_name_buffer_t client_name_buffer;
       log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-                from->name, from->nexthop->name,
+                source->name, source->nexthop->name,
                 client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
       return false;
     }
 
-    ctx->source = from;
+    ctx->source = source;
   }
 
   while (*ch == ' ')

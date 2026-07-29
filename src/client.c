@@ -281,8 +281,8 @@ _client_destroy_local(struct Client *client)
   assert(list_is_empty(&client->connection->accept_list));
   assert(list_is_empty(&client->connection->monitor_list));
   assert(list_is_empty(&client->connection->channel_invite_list));
-  assert(dbuf_length(&client->connection->buf_recvq) == 0);
-  assert(dbuf_length(&client->connection->buf_sendq) == 0);
+  assert(dbuf_queue_length(&client->connection->buf_recvq) == 0);
+  assert(dbuf_queue_length(&client->connection->buf_sendq) == 0);
   assert(client->connection->base_class == NULL);
   assert(client->connection->oper_class == NULL);
   assert(server_conf_get(client) == NULL);
@@ -442,8 +442,8 @@ _client_exit_teardown_connection(struct Client *client)
   }
 
   /* Free transport-level buffer memory now that the socket is gone. */
-  dbuf_clear(&client->connection->buf_sendq);
-  dbuf_clear(&client->connection->buf_recvq);
+  dbuf_queue_clear(&client->connection->buf_sendq);
+  dbuf_queue_clear(&client->connection->buf_recvq);
 }
 
 static void
@@ -785,8 +785,8 @@ client_schedule_exit(struct Client *client, const char *reason)
   io_free(client->connection->scheduled_exit_reason);
   client->connection->scheduled_exit_reason = io_strdup(reason);
 
-  dbuf_clear(&client->connection->buf_recvq);
-  dbuf_clear(&client->connection->buf_sendq);
+  dbuf_queue_clear(&client->connection->buf_recvq);
+  dbuf_queue_clear(&client->connection->buf_sendq);
 
   assert(list_find(&abort_list, client) == NULL);
   list_add_tail(client, list_make_node(), &abort_list);

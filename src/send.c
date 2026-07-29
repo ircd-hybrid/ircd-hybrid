@@ -63,13 +63,13 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
    * continuation message lines.  See section 7 for more details about
    * current implementations.
    */
-  dbuf_put_args(buffer, format, args);
+  dbuf_block_append_vfmt(buffer, format, args);
 
-  if (buffer->size > IRCD_BUFSIZE - 2)
-    buffer->size = IRCD_BUFSIZE - 2;
+  if (buffer->length > IRCD_BUFSIZE - 2)
+    buffer->length = IRCD_BUFSIZE - 2;
 
-  buffer->data[buffer->size++] = '\r';
-  buffer->data[buffer->size++] = '\n';
+  buffer->data[buffer->length++] = '\r';
+  buffer->data[buffer->length++] = '\n';
 }
 
 /*
@@ -87,7 +87,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
     return;
 
   const unsigned int max_sendq = client_get_max_sendq(to);
-  const size_t new_sendq_size = dbuf_length(&to->connection->buf_sendq) + buffer->size;
+  const size_t new_sendq_size = dbuf_queue_length(&to->connection->buf_sendq) + buffer->length;
   if (new_sendq_size > max_sendq)
   {
     if (!client_has_flag(to, FLAGS_SENDQEX))
@@ -112,7 +112,7 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
     return;
   }
 
-  dbuf_add(&to->connection->buf_sendq, buffer);
+  dbuf_queue_append_block(&to->connection->buf_sendq, buffer);
 
   /*
    * Update statistics. The following is slightly incorrect because
@@ -196,23 +196,23 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  while (dbuf_length(&to->connection->buf_sendq))
+  while (dbuf_queue_length(&to->connection->buf_sendq))
   {
     ssize_t retlen;
     bool want_read = false;
-    const struct dbuf_block *const first = to->connection->buf_sendq.blocks.head->data;
+    const struct dbuf_block *const first = to->connection->buf_sendq.block_list.head->data;
 
     if (tls_isusing(&to->connection->fde->tls))
     {
-      retlen = tls_write(&to->connection->fde->tls, first->data + to->connection->buf_sendq.pos,
-                                                    first->size - to->connection->buf_sendq.pos, &want_read);
+      retlen = tls_write(&to->connection->fde->tls, first->data + to->connection->buf_sendq.head_offset,
+                                                    first->length - to->connection->buf_sendq.head_offset, &want_read);
 
       if (want_read)
         return;  /* Retry later, don't register for write events */
     }
     else
-      retlen = send(to->connection->fde->fd, first->data + to->connection->buf_sendq.pos,
-                                             first->size - to->connection->buf_sendq.pos, 0);
+      retlen = send(to->connection->fde->fd, first->data + to->connection->buf_sendq.head_offset,
+                                             first->length - to->connection->buf_sendq.head_offset, 0);
 
     if (retlen <= 0)
     {
@@ -233,7 +233,7 @@ send_queued_write(struct Client *to)
       return;
     }
 
-    dbuf_delete(&to->connection->buf_sendq, retlen);
+    dbuf_queue_consume(&to->connection->buf_sendq, retlen);
 
     /* We have some data written .. update counters */
     to->connection->send.bytes += retlen;
@@ -261,21 +261,21 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
   if (!client_has_cap(to, CAP_STANDARD_REPLIES))
     return;
 
-  struct dbuf_block *const buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s %s %s %s",
+  struct dbuf_block *const buffer = dbuf_block_create();
+  dbuf_block_append_fmt(buffer, ":%s %s %s %s",
                client_get_id_or_name(from, to), type, command, code);
 
   for (size_t i = 0; i < context_len; ++i)
   {
     assert(context[i] != NULL && strchr(context[i], ' ') == NULL);
-    dbuf_put_fmt(buffer, " %s", context[i]);
+    dbuf_block_append_fmt(buffer, " %s", context[i]);
   }
 
-  dbuf_put_fmt(buffer, " :");
+  dbuf_block_append_fmt(buffer, " :");
   send_format(buffer, format, args);
 
   sendto_one_buffer(to->nexthop, buffer);
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 void
@@ -321,7 +321,7 @@ sendto_one(struct Client *to, const char *format, ...)
   if (client_is_dead(to->nexthop))
     return;  /* This socket has already been marked as dead */
 
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
@@ -330,7 +330,7 @@ sendto_one(struct Client *to, const char *format, ...)
 
   sendto_one_buffer(to->nexthop, buffer);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 void
@@ -343,8 +343,8 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *const buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s %03d %s ", client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
+  struct dbuf_block *const buffer = dbuf_block_create();
+  dbuf_block_append_fmt(buffer, ":%s %03d %s ", client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_list args;
   va_start(args, numeric);
@@ -360,7 +360,7 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
 
   sendto_one_buffer(to->nexthop, buffer);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 void
@@ -373,8 +373,8 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *const buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE %s ", client_get_id_or_name(from, to), dest);
+  struct dbuf_block *const buffer = dbuf_block_create();
+  dbuf_block_append_fmt(buffer, ":%s NOTICE %s ", client_get_id_or_name(from, to), dest);
 
   va_list args;
   va_start(args, format);
@@ -383,7 +383,7 @@ sendto_one_notice(struct Client *to, const struct Client *from, const char *form
 
   sendto_one_buffer(to->nexthop, buffer);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 void
@@ -396,13 +396,13 @@ sendto_one_command(struct Client *to, const struct Client *from, const char *com
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
   if (client_is_local_user(to) && client_is_user(from))
-    dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
+    dbuf_block_append_fmt(buffer, ":%s!%s@%s %s %s ",
                  from->name, from->username, from->host, command, dest);
   else
-    dbuf_put_fmt(buffer, ":%s %s %s ",
+    dbuf_block_append_fmt(buffer, ":%s %s %s ",
                  client_get_id_or_name(from, to), command, dest);
 
   va_list args;
@@ -415,7 +415,7 @@ sendto_one_command(struct Client *to, const struct Client *from, const char *com
   else
     sendto_one_buffer_remote(to->nexthop, from, buffer);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 static bool
@@ -467,8 +467,8 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
       assert(0);
   }
 
-  struct dbuf_block *const buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
+  struct dbuf_block *const buffer = dbuf_block_create();
+  dbuf_block_append_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
   va_list args;
   va_start(args, format);
@@ -489,7 +489,7 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
     sendto_one_buffer(client, buffer);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 void
@@ -518,15 +518,15 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   assert(source);
   assert(filter_fn);
 
-  struct dbuf_block *const buffer_local = dbuf_alloc();
-  struct dbuf_block *const buffer_remote = dbuf_alloc();
+  struct dbuf_block *const buffer_local = dbuf_block_create();
+  struct dbuf_block *const buffer_remote = dbuf_block_create();
 
   if (client_is_user(source))
-    dbuf_put_fmt(buffer_local, ":%s!%s@%s ", source->name, source->username, source->host);
+    dbuf_block_append_fmt(buffer_local, ":%s!%s@%s ", source->name, source->username, source->host);
   else
-    dbuf_put_fmt(buffer_local, ":%s ", source->name);
+    dbuf_block_append_fmt(buffer_local, ":%s ", source->name);
 
-  dbuf_put_fmt(buffer_remote, ":%s ", source->id);
+  dbuf_block_append_fmt(buffer_remote, ":%s ", source->id);
 
   va_list args;
   va_start(args, format);
@@ -562,8 +562,8 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
     sendto_one_buffer_remote(target, source, buffer_remote);
   }
 
-  dbuf_ref_free(buffer_local);
-  dbuf_ref_free(buffer_remote);
+  dbuf_block_unref(buffer_local);
+  dbuf_block_unref(buffer_remote);
 }
 
 /* sendto_servers()
@@ -588,7 +588,7 @@ void
 sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
                uint32_t excluded_capab, const char *format, ...)
 {
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
@@ -617,7 +617,7 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
     sendto_one_buffer(client, buffer);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 /* sendto_match_servs()
@@ -632,9 +632,9 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
 void
 sendto_match_servs(const struct Client *source, const char *mask, uint32_t required_capab, const char *format, ...)
 {
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
-  dbuf_put_fmt(buffer, ":%s ", source->id);
+  dbuf_block_append_fmt(buffer, ":%s ", source->id);
 
   va_list args;
   va_start(args, format);
@@ -671,7 +671,7 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
     sendto_one_buffer_remote(target->nexthop, source, buffer);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 /* sendto_common_channels_local()
@@ -687,7 +687,7 @@ void
 sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
                              uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
@@ -734,7 +734,7 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
       sendto_one_buffer(user, buffer);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 /*! \brief Send a message to members of a channel that are locally connected to this server.
@@ -749,7 +749,7 @@ void
 sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
                      uint32_t required_cap, uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *const buffer = dbuf_alloc();
+  struct dbuf_block *const buffer = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
@@ -780,7 +780,7 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
     sendto_one_buffer(target, buffer);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(buffer);
 }
 
 /* sendto_channel_butone()
@@ -798,15 +798,15 @@ void
 sendto_channel_butone(const struct Client *exclude_client, const struct Client *from, const struct Channel *channel,
                       int required_rank, const char *format, ...)
 {
-  struct dbuf_block *const buffer_local = dbuf_alloc();
-  struct dbuf_block *const buffer_remote = dbuf_alloc();
+  struct dbuf_block *const buffer_local = dbuf_block_create();
+  struct dbuf_block *const buffer_remote = dbuf_block_create();
 
   if (client_is_user(from))
-    dbuf_put_fmt(buffer_local, ":%s!%s@%s ", from->name, from->username, from->host);
+    dbuf_block_append_fmt(buffer_local, ":%s!%s@%s ", from->name, from->username, from->host);
   else
-    dbuf_put_fmt(buffer_local, ":%s ", from->name);
+    dbuf_block_append_fmt(buffer_local, ":%s ", from->name);
 
-  dbuf_put_fmt(buffer_remote, ":%s ", from->id);
+  dbuf_block_append_fmt(buffer_remote, ":%s ", from->id);
 
   va_list args;
   va_start(args, format);
@@ -847,6 +847,6 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
     target->nexthop->connection->last_broadcast_id = broadcast_id;
   }
 
-  dbuf_ref_free(buffer_local);
-  dbuf_ref_free(buffer_remote);
+  dbuf_block_unref(buffer_local);
+  dbuf_block_unref(buffer_remote);
 }

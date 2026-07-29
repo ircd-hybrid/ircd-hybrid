@@ -933,7 +933,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
     /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
                        target_name,
-                       dbuf_length(&target->connection->buf_sendq),
+                       dbuf_queue_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,
@@ -1017,7 +1017,7 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
       client_format_name(target, _stats_l_get_target_name_format(client, target, letter), &target_name_buffer);
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
                        target_name,
-                       dbuf_length(&target->connection->buf_sendq),
+                       dbuf_queue_length(&target->connection->buf_sendq),
                        target->connection->send.messages,
                        target->connection->send.bytes >> 10,
                        target->connection->recv.messages,

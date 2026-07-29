@@ -96,12 +96,12 @@ _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, si
   *line_length = 0;
 
   list_node_t *node;
-  LIST_FOREACH(node, queue->blocks.head)
+  LIST_FOREACH(node, queue->block_list.head)
   {
     const struct dbuf_block *const block = node->data;
-    size_t index = (node == queue->blocks.head) ? queue->pos : 0;
+    size_t index = (node == queue->block_list.head) ? queue->head_offset : 0;
 
-    for (; index < block->size; ++index)
+    for (; index < block->length; ++index)
     {
       const char byte = block->data[index];
       ++consumed_length;
@@ -111,7 +111,7 @@ _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, si
         line_buffer[message_length] = '\0';
         *line_length = message_length;
 
-        dbuf_delete(queue, consumed_length);
+        dbuf_queue_consume(queue, consumed_length);
         return CLIENT_INPUT_LINE_COMPLETE;
       }
 

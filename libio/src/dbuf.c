@@ -29,7 +29,7 @@
  * @return A pointer to the newly allocated `dbuf_block` structure.
  */
 struct dbuf_block *
-dbuf_alloc(void)
+dbuf_block_create(void)
 {
   struct dbuf_block *const block = io_calloc(sizeof(*block));
   block->ref_count = 1;
@@ -46,7 +46,7 @@ dbuf_alloc(void)
  * @param block A pointer to the `dbuf_block` structure whose reference count is to be decreased.
  */
 void
-dbuf_ref_free(struct dbuf_block *block)
+dbuf_block_unref(struct dbuf_block *block)
 {
   if (--block->ref_count <= 0)
     io_free(block);
@@ -63,11 +63,11 @@ dbuf_ref_free(struct dbuf_block *block)
  * @param block A pointer to the `dbuf_block` structure to be added to the queue.
  */
 void
-dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
+dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
 {
   block->ref_count++;
-  list_add_tail(block, list_make_node(), &queue->blocks);
-  queue->total_size += block->size;
+  list_add_tail(block, list_make_node(), &queue->block_list);
+  queue->length += block->length;
 }
 
 /**
@@ -81,30 +81,30 @@ dbuf_add(struct dbuf_queue *queue, struct dbuf_block *block)
  * @param count The number of bytes to be removed from the queue.
  */
 void
-dbuf_delete(struct dbuf_queue *queue, size_t count)
+dbuf_queue_consume(struct dbuf_queue *queue, size_t count)
 {
-  while (count > 0 && dbuf_length(queue) > 0)
+  while (count > 0 && dbuf_queue_length(queue) > 0)
   {
-    list_node_t *const node = queue->blocks.head;
+    list_node_t *const node = queue->block_list.head;
     struct dbuf_block *const block = node->data;
 
-    const size_t avail = block->size - queue->pos;
+    const size_t avail = block->length - queue->head_offset;
     if (count >= avail)
     {
       count -= avail;
-      queue->total_size -= avail;
+      queue->length -= avail;
 
-      dbuf_ref_free(block);
+      dbuf_block_unref(block);
 
-      list_remove(node, &queue->blocks);
+      list_remove(node, &queue->block_list);
       list_free_node(node);
 
-      queue->pos = 0;
+      queue->head_offset = 0;
     }
     else
     {
-      queue->pos += count;
-      queue->total_size -= count;
+      queue->head_offset += count;
+      queue->length -= count;
 
       count = 0;
     }
@@ -123,13 +123,13 @@ dbuf_delete(struct dbuf_queue *queue, size_t count)
  * @param ... Additional arguments to be formatted according to the format.
  */
 void
-dbuf_put_fmt(struct dbuf_block *block, const char *format, ...)
+dbuf_block_append_fmt(struct dbuf_block *block, const char *format, ...)
 {
   assert(block->ref_count == 1);
 
   va_list args;
   va_start(args, format);
-  dbuf_put_args(block, format, args);
+  dbuf_block_append_vfmt(block, format, args);
   va_end(args);
 }
 
@@ -141,19 +141,19 @@ dbuf_put_fmt(struct dbuf_block *block, const char *format, ...)
  * a reference count of 1 before modifying its contents.
  *
  * @param block A pointer to the `dbuf_block` where the formatted data is to be stored.
- * @param data The format string for the data.
+ * @param format The format string for the data.
  * @param args A variable argument list containing the data to be formatted.
  */
 void
-dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
+dbuf_block_append_vfmt(struct dbuf_block *block, const char *format, va_list args)
 {
   assert(block->ref_count == 1);
 
-  block->size += vsnprintf(block->data + block->size, sizeof(block->data) - block->size, data, args);
+  block->length += vsnprintf(block->data + block->length, sizeof(block->data) - block->length, format, args);
 
   /* As per C99, (v)snprintf returns the length the resulting string would be */
-  if (block->size > sizeof(block->data))
-    block->size = sizeof(block->data);
+  if (block->length > sizeof(block->data))
+    block->length = sizeof(block->data);
 }
 
 /**
@@ -167,25 +167,25 @@ dbuf_put_args(struct dbuf_block *block, const char *data, va_list args)
  * @param length The length of the raw data to be added.
  */
 void
-dbuf_put(struct dbuf_queue *queue, const char *buf, size_t length)
+dbuf_queue_append(struct dbuf_queue *queue, const char *buf, size_t length)
 {
   while (length > 0)
   {
-    struct dbuf_block *block = dbuf_length(queue) ? queue->blocks.tail->data : NULL;
-    if (block == NULL || sizeof(block->data) - block->size == 0)
+    struct dbuf_block *block = dbuf_queue_length(queue) ? queue->block_list.tail->data : NULL;
+    if (block == NULL || sizeof(block->data) - block->length == 0)
     {
-      block = dbuf_alloc();
-      list_add_tail(block, list_make_node(), &queue->blocks);
+      block = dbuf_block_create();
+      list_add_tail(block, list_make_node(), &queue->block_list);
     }
 
-    size_t avail = sizeof(block->data) - block->size;
+    size_t avail = sizeof(block->data) - block->length;
     if (avail > length)
       avail = length;
 
-    memcpy(&block->data[block->size], buf, avail);
-    block->size += avail;
+    memcpy(&block->data[block->length], buf, avail);
+    block->length += avail;
 
-    queue->total_size += avail;
+    queue->length += avail;
 
     length -= avail;
     buf += avail;

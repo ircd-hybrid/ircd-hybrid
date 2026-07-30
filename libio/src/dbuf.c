@@ -94,43 +94,52 @@ dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
 }
 
 /**
- * @brief Remove data from a dynamic buffer queue.
+ * @brief Consume data from the head of a dynamic buffer queue.
  *
- * This function removes data from the specified `dbuf_queue` until the specified `count` of bytes
- * is deleted or the queue becomes empty. It adjusts the total size of the queue and handles the
- * reference counting and freeing of the blocks as needed.
+ * This function removes exactly `length` bytes from the front of the specified
+ * `dbuf_queue`. It updates the queue length and head offset, removes fully
+ * consumed blocks, and releases their references as needed.
  *
- * @param queue A pointer to the `dbuf_queue` from which data is to be removed.
- * @param count The number of bytes to be removed from the queue.
+ * @param queue A pointer to the `dbuf_queue` from which data is to be consumed.
+ * @param length The number of bytes to consume from the queue.
  */
 void
-dbuf_queue_consume(struct dbuf_queue *queue, size_t count)
+dbuf_queue_consume(struct dbuf_queue *queue, size_t length)
 {
-  while (count > 0 && !dbuf_queue_is_empty(queue))
+  assert(queue);
+  assert(length <= queue->length);
+
+  size_t remaining_length = length;
+  while (remaining_length > 0)
   {
     list_node_t *const node = queue->block_list.head;
+    assert(node);
+
     struct dbuf_block *const block = node->data;
 
-    const size_t avail = block->length - queue->head_offset;
-    if (count >= avail)
+    assert(block);
+    assert(block->ref_count > 0);
+    assert(block->length > 0);
+    assert(queue->head_offset < block->length);
+
+    const size_t available_length = block->length - queue->head_offset;
+    if (remaining_length < available_length)
     {
-      count -= avail;
-      queue->length -= avail;
-
-      dbuf_block_unref(block);
-
-      list_remove(node, &queue->block_list);
-      list_free_node(node);
-
-      queue->head_offset = 0;
+      queue->head_offset += remaining_length;
+      queue->length -= remaining_length;
+      return;
     }
-    else
-    {
-      queue->head_offset += count;
-      queue->length -= count;
 
-      count = 0;
-    }
+    remaining_length -= available_length;
+    queue->length -= available_length;
+    queue->head_offset = 0;
+
+    list_node_t *const removed_node = list_pop_head(&queue->block_list);
+    assert(removed_node == node);
+    assert(removed_node->data == block);
+
+    dbuf_block_unref(block);
+    list_free_node(node);
   }
 }
 

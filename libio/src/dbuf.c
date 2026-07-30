@@ -114,6 +114,27 @@ dbuf_queue_consume(struct dbuf_queue *queue, size_t count)
   }
 }
 
+bool
+dbuf_block_append(struct dbuf_block *block, const void *data, size_t length)
+{
+  assert(block);
+  assert(data || length == 0);
+  assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  if (length == 0)
+    return true;
+
+  const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
+  if (length > available_capacity)
+    return false;
+
+  memcpy(block->data + block->length, data, length);
+  block->length += length;
+
+  return true;
+}
+
 /**
  * @brief Format a string and store it in a dynamic buffer block.
  *

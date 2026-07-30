@@ -68,8 +68,7 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
   if (buffer->length > IRCD_BUFSIZE - 2)
     buffer->length = IRCD_BUFSIZE - 2;
 
-  buffer->data[buffer->length++] = '\r';
-  buffer->data[buffer->length++] = '\n';
+  dbuf_block_append(buffer, "\r\n", 2);
 }
 
 /*

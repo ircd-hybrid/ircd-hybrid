@@ -49,6 +49,7 @@ struct dbuf_queue
 };
 
 extern void dbuf_queue_append_block(struct dbuf_queue *, struct dbuf_block *);
+extern void dbuf_queue_clear(struct dbuf_queue *);
 extern void dbuf_queue_consume(struct dbuf_queue *, size_t);
 extern void dbuf_queue_append(struct dbuf_queue *, const char *, size_t);
 extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...);
@@ -72,15 +73,5 @@ static inline size_t
 dbuf_queue_length(const struct dbuf_queue *queue)
 {
   return queue->length;
-}
-
-/**
- * @brief Remove all data from a dbuf queue.
- * @param queue Pointer to the dbuf_queue.
- */
-static inline void
-dbuf_queue_clear(struct dbuf_queue *queue)
-{
-  dbuf_queue_consume(queue, dbuf_queue_length(queue));
 }
 #endif  /* INCLUDED_dbuf_h */

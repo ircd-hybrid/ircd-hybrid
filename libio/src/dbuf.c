@@ -55,6 +55,26 @@ dbuf_block_unref(struct dbuf_block *block)
     io_free(block);
 }
 
+void
+dbuf_queue_clear(struct dbuf_queue *queue)
+{
+  assert(queue);
+
+  list_node_t *node;
+  while ((node = list_pop_head(&queue->block_list)))
+  {
+    struct dbuf_block *const block = node->data;
+    assert(block);
+    assert(block->ref_count > 0);
+
+    dbuf_block_unref(block);
+    list_free_node(node);
+  }
+
+  queue->length = 0;
+  queue->head_offset = 0;
+}
+
 /**
  * @brief Add a dynamic buffer block to a buffer queue.
  *

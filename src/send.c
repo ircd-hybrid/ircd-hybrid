@@ -196,7 +196,7 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   /* Next, lets try to write some data */
-  while (dbuf_queue_length(&to->connection->buf_sendq))
+  while (!dbuf_queue_is_empty(&to->connection->buf_sendq))
   {
     ssize_t retlen;
     bool want_read = false;

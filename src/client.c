@@ -281,8 +281,8 @@ _client_destroy_local(struct Client *client)
   assert(list_is_empty(&client->connection->accept_list));
   assert(list_is_empty(&client->connection->monitor_list));
   assert(list_is_empty(&client->connection->channel_invite_list));
-  assert(dbuf_queue_length(&client->connection->buf_recvq) == 0);
-  assert(dbuf_queue_length(&client->connection->buf_sendq) == 0);
+  assert(dbuf_queue_is_empty(&client->connection->buf_recvq));
+  assert(dbuf_queue_is_empty(&client->connection->buf_sendq));
   assert(client->connection->base_class == NULL);
   assert(client->connection->oper_class == NULL);
   assert(server_conf_get(client) == NULL);

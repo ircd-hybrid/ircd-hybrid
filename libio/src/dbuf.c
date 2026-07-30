@@ -86,7 +86,7 @@ dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
 void
 dbuf_queue_consume(struct dbuf_queue *queue, size_t count)
 {
-  while (count > 0 && dbuf_queue_length(queue) > 0)
+  while (count > 0 && !dbuf_queue_is_empty(queue))
   {
     list_node_t *const node = queue->block_list.head;
     struct dbuf_block *const block = node->data;

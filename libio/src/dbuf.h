@@ -55,6 +55,12 @@ extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
 extern void dbuf_block_unref(struct dbuf_block *);
 extern struct dbuf_block *dbuf_block_create(void);
 
+static inline bool
+dbuf_queue_is_empty(const struct dbuf_queue *queue)
+{
+  return queue->length == 0;
+}
+
 /**
  * @brief Get the total length of data available in the dbuf queue.
  * @param queue Pointer to the dbuf_queue.

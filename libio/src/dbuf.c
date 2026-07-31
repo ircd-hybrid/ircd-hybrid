@@ -98,6 +98,12 @@ dbuf_queue_clear(struct dbuf_queue *queue)
 void
 dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
 {
+  assert(queue);
+  assert(block);
+  assert(block->ref_count > 0);
+  assert(block->length > 0);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
   dbuf_block_ref(block);
 
   list_add_tail(block, list_make_node(), &queue->block_list);

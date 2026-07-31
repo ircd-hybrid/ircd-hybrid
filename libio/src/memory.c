@@ -66,6 +66,20 @@ io_calloc(size_t size)
   return ret;
 }
 
+void *
+io_malloc(size_t size)
+{
+  void *ret = malloc(size);
+
+  if (ret == NULL)
+  {
+    outofmemory();
+    return NULL;
+  }
+
+  return ret;
+}
+
 /**
  * @brief Reallocates memory using realloc.
  *

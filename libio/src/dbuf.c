@@ -37,6 +37,15 @@ dbuf_block_create(void)
   return block;
 }
 
+void
+dbuf_block_ref(struct dbuf_block *block)
+{
+  assert(block);
+  assert(block->ref_count > 0);
+
+  ++block->ref_count;
+}
+
 /**
  * @brief Decrease the reference count of a dynamic buffer block and free it if the count reaches zero.
  *
@@ -54,6 +63,7 @@ dbuf_block_unref(struct dbuf_block *block)
   if (--block->ref_count == 0)
     io_free(block);
 }
+
 
 void
 dbuf_queue_clear(struct dbuf_queue *queue)
@@ -88,7 +98,8 @@ dbuf_queue_clear(struct dbuf_queue *queue)
 void
 dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
 {
-  block->ref_count++;
+  dbuf_block_ref(block);
+
   list_add_tail(block, list_make_node(), &queue->block_list);
   queue->length += block->length;
 }

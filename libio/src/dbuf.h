@@ -32,7 +32,7 @@ enum { DBUF_BLOCK_CAPACITY = 1024 };
  */
 struct dbuf_block
 {
-  int ref_count;  /**< Reference count for the data block. */
+  unsigned int ref_count;  /**< Reference count for the data block. */
   size_t length;  /**< Size of the data block. */
   char data[DBUF_BLOCK_CAPACITY];  /**< Actual data stored in the block. */
 };
@@ -54,6 +54,7 @@ extern void dbuf_queue_consume(struct dbuf_queue *, size_t);
 extern void dbuf_queue_append(struct dbuf_queue *, const char *, size_t);
 extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...);
 extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
+extern void dbuf_block_ref(struct dbuf_block *);
 extern void dbuf_block_unref(struct dbuf_block *);
 extern bool dbuf_block_append(struct dbuf_block *, const void *, size_t);
 extern struct dbuf_block *dbuf_block_create(void);

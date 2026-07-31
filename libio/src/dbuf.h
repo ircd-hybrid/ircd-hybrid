@@ -51,7 +51,7 @@ struct dbuf_queue
 extern void dbuf_queue_append_block(struct dbuf_queue *, struct dbuf_block *);
 extern void dbuf_queue_clear(struct dbuf_queue *);
 extern void dbuf_queue_consume(struct dbuf_queue *, size_t);
-extern void dbuf_queue_append(struct dbuf_queue *, const char *, size_t);
+extern void dbuf_queue_append(struct dbuf_queue *, const void *, size_t);
 extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...);
 extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
 extern void dbuf_block_ref(struct dbuf_block *);

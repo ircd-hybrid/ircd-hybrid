@@ -14,6 +14,7 @@
  */
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -64,7 +65,6 @@ dbuf_block_unref(struct dbuf_block *block)
   if (--block->ref_count == 0)
     io_free(block);
 }
-
 
 void
 dbuf_queue_clear(struct dbuf_queue *queue)
@@ -235,31 +235,40 @@ dbuf_block_append_vfmt(struct dbuf_block *block, const char *format, va_list arg
  * as necessary and updates the total size of the queue to reflect the added data.
  *
  * @param queue A pointer to the `dbuf_queue` to which the data is to be added.
- * @param buf A pointer to the raw data to be added.
+ * @param data A pointer to the raw data to be added.
  * @param length The length of the raw data to be added.
  */
 void
-dbuf_queue_append(struct dbuf_queue *queue, const char *buf, size_t length)
+dbuf_queue_append(struct dbuf_queue *queue, const void *data, size_t length)
 {
-  while (length > 0)
+  assert(queue);
+  assert(data || length == 0);
+  assert(length <= SIZE_MAX - queue->length);
+
+  const unsigned char *data_cursor = data;
+
+  size_t remaining_length = length;
+  while (remaining_length > 0)
   {
-    struct dbuf_block *block = dbuf_queue_length(queue) ? queue->block_list.tail->data : NULL;
-    if (block == NULL || sizeof(block->data) - block->length == 0)
+    struct dbuf_block *block = list_peek_tail(&queue->block_list);
+    if (block == NULL || block->ref_count != 1 || block->length == DBUF_BLOCK_CAPACITY)
     {
       block = dbuf_block_create();
       list_add_tail(block, list_make_node(), &queue->block_list);
     }
 
-    size_t avail = sizeof(block->data) - block->length;
-    if (avail > length)
-      avail = length;
+    assert(block->ref_count == 1);
+    assert(block->length < DBUF_BLOCK_CAPACITY);
 
-    memcpy(&block->data[block->length], buf, avail);
-    block->length += avail;
+    const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
+    const size_t append_length =
+      remaining_length < available_capacity ? remaining_length : available_capacity;
 
-    queue->length += avail;
+    const bool appended = dbuf_block_append(block, data_cursor, append_length);
+    assert(appended);
 
-    length -= avail;
-    buf += avail;
+    queue->length += append_length;
+    data_cursor += append_length;
+    remaining_length -= append_length;
   }
 }

@@ -120,6 +120,7 @@ dbuf_queue_consume(struct dbuf_queue *queue, size_t length)
     assert(block);
     assert(block->ref_count > 0);
     assert(block->length > 0);
+    assert(block->length <= DBUF_BLOCK_CAPACITY);
     assert(queue->head_offset < block->length);
 
     const size_t available_length = block->length - queue->head_offset;

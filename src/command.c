@@ -141,7 +141,7 @@ _command_trie_del_element(struct CommandTrieNode *node, const char *const name)
    * check that there is a command pointer here, else links-- goes -ve
    * -db
    */
-  if (*name== '\0' && node->command)
+  if (*name == '\0' && node->command)
   {
     node->command = NULL;
     node->link_count--;

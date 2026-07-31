@@ -31,8 +31,9 @@
 struct dbuf_block *
 dbuf_block_create(void)
 {
-  struct dbuf_block *const block = io_calloc(sizeof(*block));
+  struct dbuf_block *const block = io_malloc(sizeof(*block));
   block->ref_count = 1;
+  block->length = 0;
 
   return block;
 }

@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "list.h"
+#include "dbuf.h"
 #include "misc.h"
 
 #include "client.h"
@@ -83,33 +83,41 @@ enum client_input_line_result
 static enum client_input_line_result
 _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, size_t *line_length)
 {
+  assert(queue);
+  assert(line_buffer);
+  assert(line_length);
+
   const size_t message_length_max = IRCD_BUFSIZE - 2;
   size_t message_length = 0;
   size_t consumed_length = 0;
   bool trailing_cr = false;
 
-  assert(queue);
-  assert(line_buffer);
-  assert(line_length);
-
   line_buffer[0] = '\0';
   *line_length = 0;
 
-  list_node_t *node;
-  LIST_FOREACH(node, queue->block_list.head)
-  {
-    const struct dbuf_block *const block = node->data;
-    size_t index = (node == queue->block_list.head) ? queue->head_offset : 0;
+  struct dbuf_queue_iterator iterator;
+  dbuf_queue_iterator_init(queue, &iterator);
 
-    for (; index < block->length; ++index)
+  struct dbuf_view view;
+
+  while (dbuf_queue_iterator_next(&iterator, &view))
+  {
+    assert(view.data);
+    assert(view.length > 0);
+
+    const char *const data = view.data;
+
+    for (size_t index = 0; index < view.length; ++index)
     {
-      const char byte = block->data[index];
+      const char byte = data[index];
       ++consumed_length;
 
       if (byte == '\n')
       {
         line_buffer[message_length] = '\0';
         *line_length = message_length;
+
+        assert(consumed_length <= dbuf_queue_length(queue));
 
         dbuf_queue_consume(queue, consumed_length);
         return CLIENT_INPUT_LINE_COMPLETE;
@@ -121,7 +129,10 @@ _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, si
         return CLIENT_INPUT_LINE_MALFORMED;
       }
 
-      /* A CR is valid only when immediately followed by LF. */
+      /*
+       * A CR is valid only when immediately followed by LF. This state
+       * intentionally persists across queue-view boundaries.
+       */
       if (byte == '\r')
       {
         trailing_cr = true;
@@ -144,7 +155,10 @@ _client_input_extract_recvq_line(struct dbuf_queue *queue, char *line_buffer, si
     }
   }
 
-  /* A final CR may still become part of a subsequent CRLF terminator. */
+  /*
+   * A final CR may still become part of a subsequent CRLF terminator.
+   * No queued data is consumed until a complete valid line is found.
+   */
   line_buffer[0] = '\0';
   return CLIENT_INPUT_LINE_INCOMPLETE;
 }

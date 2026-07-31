@@ -305,3 +305,50 @@ dbuf_queue_peek_head(const struct dbuf_queue *queue, struct dbuf_view *view)
 
   return true;
 }
+
+void
+dbuf_queue_iterator_init(const struct dbuf_queue *queue, struct dbuf_queue_iterator *iterator)
+{
+  assert(queue);
+  assert(iterator);
+  assert((queue->length == 0) == list_is_empty(&queue->block_list));
+  assert((queue->block_list.head == NULL) == (queue->block_list.tail == NULL));
+
+  iterator->queue = queue;
+  iterator->cursor = queue->block_list.head;
+}
+
+bool
+dbuf_queue_iterator_next(struct dbuf_queue_iterator *iterator, struct dbuf_view *view)
+{
+  assert(iterator);
+  assert(iterator->queue);
+  assert(view);
+
+  view->data = NULL;
+  view->length = 0;
+
+  const list_node_t *const node = iterator->cursor;
+  if (node == NULL)
+    return false;
+
+  const struct dbuf_block *const block = node->data;
+  assert(block);
+  assert(block->ref_count > 0);
+  assert(block->length > 0);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  const size_t offset = node == iterator->queue->block_list.head ? iterator->queue->head_offset : 0;
+  assert(offset < block->length);
+
+  view->data = block->data + offset;
+  view->length = block->length - offset;
+
+  assert(view->data);
+  assert(view->length > 0);
+  assert(view->length <= iterator->queue->length);
+
+  iterator->cursor = node->next;
+
+  return true;
+}

@@ -272,3 +272,36 @@ dbuf_queue_append(struct dbuf_queue *queue, const void *data, size_t length)
     remaining_length -= append_length;
   }
 }
+
+bool
+dbuf_queue_peek_head(const struct dbuf_queue *queue, struct dbuf_view *view)
+{
+  assert(queue);
+  assert(view);
+  assert((queue->length == 0) == list_is_empty(&queue->block_list));
+  assert((queue->block_list.head == NULL) == (queue->block_list.tail == NULL));
+
+  view->data = NULL;
+  view->length = 0;
+
+  if (queue->length == 0)
+  {
+    assert(queue->head_offset == 0);
+    return false;
+  }
+
+  const struct dbuf_block *const block = list_peek_head(&queue->block_list);
+  assert(block);
+  assert(block->ref_count > 0);
+  assert(block->length > 0);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+  assert(queue->head_offset < block->length);
+
+  view->data = block->data + queue->head_offset;
+  view->length = block->length - queue->head_offset;
+
+  assert(view->length > 0);
+  assert(view->length <= queue->length);
+
+  return true;
+}

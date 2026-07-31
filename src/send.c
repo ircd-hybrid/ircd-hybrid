@@ -194,24 +194,24 @@ send_queued_write(struct Client *to)
   if (client_is_dead(to) || client_has_flag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
 
-  /* Next, lets try to write some data */
-  while (!dbuf_queue_is_empty(&to->connection->buf_sendq))
+  struct dbuf_view view;
+  while (dbuf_queue_peek_head(&to->connection->buf_sendq, &view))
   {
     ssize_t retlen;
     bool want_read = false;
-    const struct dbuf_block *const first = to->connection->buf_sendq.block_list.head->data;
+
+    assert(view.data);
+    assert(view.length > 0);
 
     if (tls_isusing(&to->connection->fde->tls))
     {
-      retlen = tls_write(&to->connection->fde->tls, first->data + to->connection->buf_sendq.head_offset,
-                                                    first->length - to->connection->buf_sendq.head_offset, &want_read);
+      retlen = tls_write(&to->connection->fde->tls, view.data, view.length, &want_read);
 
       if (want_read)
-        return;  /* Retry later, don't register for write events */
+        return;  /* Retry later, don't register for write events. */
     }
     else
-      retlen = send(to->connection->fde->fd, first->data + to->connection->buf_sendq.head_offset,
-                                             first->length - to->connection->buf_sendq.head_offset, 0);
+      retlen = send(to->connection->fde->fd, view.data, view.length, 0);
 
     if (retlen <= 0)
     {
@@ -231,6 +231,8 @@ send_queued_write(struct Client *to)
 
       return;
     }
+
+    assert((size_t)retlen <= view.length);
 
     dbuf_queue_consume(&to->connection->buf_sendq, retlen);
 

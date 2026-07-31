@@ -48,6 +48,12 @@ struct dbuf_queue
   size_t head_offset;  /**< Current position within the dynamic buffer. */
 };
 
+struct dbuf_view
+{
+  const void *data;
+  size_t length;
+};
+
 extern void dbuf_queue_append_block(struct dbuf_queue *, struct dbuf_block *);
 extern void dbuf_queue_clear(struct dbuf_queue *);
 extern void dbuf_queue_consume(struct dbuf_queue *, size_t);
@@ -57,6 +63,7 @@ extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
 extern void dbuf_block_ref(struct dbuf_block *);
 extern void dbuf_block_unref(struct dbuf_block *);
 extern bool dbuf_block_append(struct dbuf_block *, const void *, size_t);
+extern bool dbuf_queue_peek_head(const struct dbuf_queue *, struct dbuf_view *);
 extern struct dbuf_block *dbuf_block_create(void);
 
 static inline bool

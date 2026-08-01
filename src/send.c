@@ -264,7 +264,7 @@ _sendto_one_stdreply(struct Client *to, const struct Client *from, const char *t
 
   struct dbuf_block *const buffer = dbuf_block_create();
   dbuf_block_append_fmt(buffer, ":%s %s %s %s",
-               client_get_id_or_name(from, to), type, command, code);
+                        client_get_id_or_name(from, to), type, command, code);
 
   for (size_t i = 0; i < context_len; ++i)
   {
@@ -345,7 +345,8 @@ sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numeri
     dest = "*";
 
   struct dbuf_block *const buffer = dbuf_block_create();
-  dbuf_block_append_fmt(buffer, ":%s %03d %s ", client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
+  dbuf_block_append_fmt(buffer, ":%s %03d %s ",
+                        client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_list args;
   va_start(args, numeric);
@@ -401,10 +402,10 @@ sendto_one_command(struct Client *to, const struct Client *from, const char *com
 
   if (client_is_local_user(to) && client_is_user(from))
     dbuf_block_append_fmt(buffer, ":%s!%s@%s %s %s ",
-                 from->name, from->username, from->host, command, dest);
+                          from->name, from->username, from->host, command, dest);
   else
     dbuf_block_append_fmt(buffer, ":%s %s %s ",
-                 client_get_id_or_name(from, to), command, dest);
+                          client_get_id_or_name(from, to), command, dest);
 
   va_list args;
   va_start(args, format);

@@ -66,24 +66,121 @@ dbuf_block_unref(struct dbuf_block *block)
     io_free(block);
 }
 
+bool
+dbuf_block_append(struct dbuf_block *block, const void *data, size_t length)
+{
+  assert(block);
+  assert(data || length == 0);
+  assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  if (length == 0)
+    return true;
+
+  const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
+  if (length > available_capacity)
+    return false;
+
+  memcpy(block->data + block->length, data, length);
+  block->length += length;
+
+  return true;
+}
+
+/**
+ * @brief Store formatted data in a dynamic buffer block using a variable argument list.
+ *
+ * This function formats data according to the provided format string and variable argument list,
+ * and stores the result in the specified `dbuf_block`. The function ensures that the block has
+ * a reference count of 1 before modifying its contents.
+ *
+ * @param block A pointer to the `dbuf_block` where the formatted data is to be stored.
+ * @param format The format string for the data.
+ * @param args A variable argument list containing the data to be formatted.
+ */
 void
-dbuf_queue_clear(struct dbuf_queue *queue)
+dbuf_block_append_vfmt(struct dbuf_block *block, const char *format, va_list args)
+{
+  assert(block);
+  assert(format);
+  assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  block->length += vsnprintf(block->data + block->length, sizeof(block->data) - block->length, format, args);
+
+  /* As per C99, (v)snprintf returns the length the resulting string would be */
+  if (block->length > sizeof(block->data))
+    block->length = sizeof(block->data);
+}
+
+/**
+ * @brief Format a string and store it in a dynamic buffer block.
+ *
+ * This function formats a string using a printf-like format specifier and stores the result
+ * in the given `dbuf_block`. The function ensures that the block has a reference count of 1
+ * before modifying its contents.
+ *
+ * @param block A pointer to the `dbuf_block` where the formatted string is to be stored.
+ * @param format The format string for the data.
+ * @param ... Additional arguments to be formatted according to the format.
+ */
+void
+dbuf_block_append_fmt(struct dbuf_block *block, const char *format, ...)
+{
+  assert(block);
+  assert(format);
+  assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  va_list args;
+  va_start(args, format);
+  dbuf_block_append_vfmt(block, format, args);
+  va_end(args);
+}
+
+/**
+ * @brief Add raw data to a dynamic buffer queue.
+ *
+ * This function adds raw data to the specified `dbuf_queue`. It allocates new `dbuf_block`s
+ * as necessary and updates the total size of the queue to reflect the added data.
+ *
+ * @param queue A pointer to the `dbuf_queue` to which the data is to be added.
+ * @param data A pointer to the raw data to be added.
+ * @param length The length of the raw data to be added.
+ */
+void
+dbuf_queue_append(struct dbuf_queue *queue, const void *data, size_t length)
 {
   assert(queue);
+  assert(data || length == 0);
+  assert(length <= SIZE_MAX - queue->length);
 
-  list_node_t *node;
-  while ((node = list_pop_head(&queue->block_list)))
+  const unsigned char *data_cursor = data;
+
+  size_t remaining_length = length;
+  while (remaining_length > 0)
   {
-    struct dbuf_block *const block = node->data;
-    assert(block);
-    assert(block->ref_count > 0);
+    struct dbuf_block *block = list_peek_tail(&queue->block_list);
+    if (block == NULL || block->ref_count != 1 || block->length == DBUF_BLOCK_CAPACITY)
+    {
+      block = dbuf_block_create();
+      list_add_tail(block, list_make_node(), &queue->block_list);
+    }
 
-    dbuf_block_unref(block);
-    list_free_node(node);
+    assert(block->ref_count == 1);
+    assert(block->length < DBUF_BLOCK_CAPACITY);
+
+    const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
+    const size_t append_length =
+      remaining_length < available_capacity ? remaining_length : available_capacity;
+
+    const bool appended = dbuf_block_append(block, data_cursor, append_length);
+    assert(appended);
+
+    queue->length += append_length;
+    data_cursor += append_length;
+    remaining_length -= append_length;
   }
-
-  queue->length = 0;
-  queue->head_offset = 0;
 }
 
 /**
@@ -163,121 +260,24 @@ dbuf_queue_consume(struct dbuf_queue *queue, size_t length)
   }
 }
 
-bool
-dbuf_block_append(struct dbuf_block *block, const void *data, size_t length)
-{
-  assert(block);
-  assert(data || length == 0);
-  assert(block->ref_count == 1);
-  assert(block->length <= DBUF_BLOCK_CAPACITY);
-
-  if (length == 0)
-    return true;
-
-  const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
-  if (length > available_capacity)
-    return false;
-
-  memcpy(block->data + block->length, data, length);
-  block->length += length;
-
-  return true;
-}
-
-/**
- * @brief Format a string and store it in a dynamic buffer block.
- *
- * This function formats a string using a printf-like format specifier and stores the result
- * in the given `dbuf_block`. The function ensures that the block has a reference count of 1
- * before modifying its contents.
- *
- * @param block A pointer to the `dbuf_block` where the formatted string is to be stored.
- * @param format The format string for the data.
- * @param ... Additional arguments to be formatted according to the format.
- */
 void
-dbuf_block_append_fmt(struct dbuf_block *block, const char *format, ...)
-{
-  assert(block);
-  assert(format);
-  assert(block->ref_count == 1);
-  assert(block->length <= DBUF_BLOCK_CAPACITY);
-
-  va_list args;
-  va_start(args, format);
-  dbuf_block_append_vfmt(block, format, args);
-  va_end(args);
-}
-
-/**
- * @brief Store formatted data in a dynamic buffer block using a variable argument list.
- *
- * This function formats data according to the provided format string and variable argument list,
- * and stores the result in the specified `dbuf_block`. The function ensures that the block has
- * a reference count of 1 before modifying its contents.
- *
- * @param block A pointer to the `dbuf_block` where the formatted data is to be stored.
- * @param format The format string for the data.
- * @param args A variable argument list containing the data to be formatted.
- */
-void
-dbuf_block_append_vfmt(struct dbuf_block *block, const char *format, va_list args)
-{
-  assert(block);
-  assert(format);
-  assert(block->ref_count == 1);
-  assert(block->length <= DBUF_BLOCK_CAPACITY);
-
-  block->length += vsnprintf(block->data + block->length, sizeof(block->data) - block->length, format, args);
-
-  /* As per C99, (v)snprintf returns the length the resulting string would be */
-  if (block->length > sizeof(block->data))
-    block->length = sizeof(block->data);
-}
-
-/**
- * @brief Add raw data to a dynamic buffer queue.
- *
- * This function adds raw data to the specified `dbuf_queue`. It allocates new `dbuf_block`s
- * as necessary and updates the total size of the queue to reflect the added data.
- *
- * @param queue A pointer to the `dbuf_queue` to which the data is to be added.
- * @param data A pointer to the raw data to be added.
- * @param length The length of the raw data to be added.
- */
-void
-dbuf_queue_append(struct dbuf_queue *queue, const void *data, size_t length)
+dbuf_queue_clear(struct dbuf_queue *queue)
 {
   assert(queue);
-  assert(data || length == 0);
-  assert(length <= SIZE_MAX - queue->length);
 
-  const unsigned char *data_cursor = data;
-
-  size_t remaining_length = length;
-  while (remaining_length > 0)
+  list_node_t *node;
+  while ((node = list_pop_head(&queue->block_list)))
   {
-    struct dbuf_block *block = list_peek_tail(&queue->block_list);
-    if (block == NULL || block->ref_count != 1 || block->length == DBUF_BLOCK_CAPACITY)
-    {
-      block = dbuf_block_create();
-      list_add_tail(block, list_make_node(), &queue->block_list);
-    }
+    struct dbuf_block *const block = node->data;
+    assert(block);
+    assert(block->ref_count > 0);
 
-    assert(block->ref_count == 1);
-    assert(block->length < DBUF_BLOCK_CAPACITY);
-
-    const size_t available_capacity = DBUF_BLOCK_CAPACITY - block->length;
-    const size_t append_length =
-      remaining_length < available_capacity ? remaining_length : available_capacity;
-
-    const bool appended = dbuf_block_append(block, data_cursor, append_length);
-    assert(appended);
-
-    queue->length += append_length;
-    data_cursor += append_length;
-    remaining_length -= append_length;
+    dbuf_block_unref(block);
+    list_free_node(node);
   }
+
+  queue->length = 0;
+  queue->head_offset = 0;
 }
 
 bool

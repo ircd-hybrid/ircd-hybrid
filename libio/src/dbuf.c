@@ -104,6 +104,7 @@ dbuf_queue_append_block(struct dbuf_queue *queue, struct dbuf_block *block)
   assert(block->ref_count > 0);
   assert(block->length > 0);
   assert(block->length <= DBUF_BLOCK_CAPACITY);
+  assert(block->length <= SIZE_MAX - queue->length);
 
   dbuf_block_ref(block);
 
@@ -197,7 +198,10 @@ dbuf_block_append(struct dbuf_block *block, const void *data, size_t length)
 void
 dbuf_block_append_fmt(struct dbuf_block *block, const char *format, ...)
 {
+  assert(block);
+  assert(format);
   assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
 
   va_list args;
   va_start(args, format);
@@ -219,7 +223,10 @@ dbuf_block_append_fmt(struct dbuf_block *block, const char *format, ...)
 void
 dbuf_block_append_vfmt(struct dbuf_block *block, const char *format, va_list args)
 {
+  assert(block);
+  assert(format);
   assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
 
   block->length += vsnprintf(block->data + block->length, sizeof(block->data) - block->length, format, args);
 

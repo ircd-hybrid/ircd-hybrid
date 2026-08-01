@@ -74,12 +74,6 @@ extern bool dbuf_queue_iterator_next(struct dbuf_queue_iterator *, struct dbuf_v
 extern bool dbuf_queue_peek_head(const struct dbuf_queue *, struct dbuf_view *);
 extern struct dbuf_block *dbuf_block_create(void);
 
-static inline bool
-dbuf_queue_is_empty(const struct dbuf_queue *queue)
-{
-  return queue->length == 0;
-}
-
 /**
  * @brief Get the total length of data available in the dbuf queue.
  * @param queue Pointer to the dbuf_queue.
@@ -89,5 +83,11 @@ static inline size_t
 dbuf_queue_length(const struct dbuf_queue *queue)
 {
   return queue->length;
+}
+
+static inline bool
+dbuf_queue_is_empty(const struct dbuf_queue *queue)
+{
+  return dbuf_queue_length(queue) == 0;
 }
 #endif  /* INCLUDED_dbuf_h */

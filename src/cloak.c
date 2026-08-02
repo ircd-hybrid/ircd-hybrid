@@ -230,15 +230,11 @@ _cloak_mac_and_compose(const struct io_addr *addr)
     addr_len = sizeof(struct in_addr);
   }
 
-  /* Create input buffer by concatenating the secret key and address. */
-  unsigned char input[config->secret_len + addr_len];
-  memcpy(input, config->secret, config->secret_len);
-  memcpy(input + config->secret_len, addr_ptr, addr_len);
-
   /* Compute SHA3 hash. */
   sha3_context_t ctx_sha3;
   sha3_init512(&ctx_sha3);
-  sha3_update(&ctx_sha3, input, config->secret_len + addr_len);
+  sha3_update(&ctx_sha3, config->secret, config->secret_len);
+  sha3_update(&ctx_sha3, addr_ptr, addr_len);
   const uint8_t *const digest_sha3 = sha3_finalize(&ctx_sha3);
 
   /* Encode the hash in base32. */

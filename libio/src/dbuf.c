@@ -228,11 +228,7 @@ dbuf_queue_consume(struct dbuf_queue *queue, size_t length)
   size_t remaining_length = length;
   while (remaining_length > 0)
   {
-    list_node_t *const node = queue->block_list.head;
-    assert(node);
-
-    struct dbuf_block *const block = node->data;
-
+    struct dbuf_block *const block = list_peek_head(&queue->block_list);
     assert(block);
     assert(block->ref_count > 0);
     assert(block->length > 0);
@@ -251,9 +247,9 @@ dbuf_queue_consume(struct dbuf_queue *queue, size_t length)
     queue->length -= available_length;
     queue->head_offset = 0;
 
-    list_node_t *const removed_node = list_pop_head(&queue->block_list);
-    assert(removed_node == node);
-    assert(removed_node->data == block);
+    list_node_t *const node = list_pop_head(&queue->block_list);
+    assert(node);
+    assert(node->data == block);
 
     dbuf_block_unref(block);
     list_free_node(node);

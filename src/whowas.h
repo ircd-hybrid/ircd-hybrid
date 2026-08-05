@@ -68,5 +68,4 @@ extern void whowas_off_history(struct Client *);
 extern void whowas_count_memory(uint32_t *const, size_t *const, uint32_t *const, size_t *const);
 extern int whowas_query(const char *, int, whowas_callback_t, void *);
 extern struct Client *whowas_get_history(const char *, uintmax_t);
-extern struct WhowasGroup *whowas_group_find(const char *);
 #endif  /* INCLUDED_whowas_h */

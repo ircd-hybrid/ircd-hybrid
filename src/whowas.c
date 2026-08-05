@@ -33,8 +33,8 @@ static list_t whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entr
  * @param name The nickname string.
  * @return A pointer to the WhowasGroup struct if found, or NULL if not found.
  */
-struct WhowasGroup *
-whowas_group_find(const char *name)
+static struct WhowasGroup *
+_whowas_group_find(const char *name)
 {
   list_node_t *node;
 
@@ -151,7 +151,7 @@ whowas_trim(void)
 static void
 _whowas_add(struct Whowas *whowas, struct Client *client, bool online)
 {
-  whowas->group = whowas_group_find(whowas->name);
+  whowas->group = _whowas_group_find(whowas->name);
   if (whowas->group == NULL)
     whowas->group = _whowas_group_create(whowas->name);
 
@@ -236,7 +236,7 @@ whowas_off_history(struct Client *client)
 struct Client *
 whowas_get_history(const char *name, uintmax_t timelimit)
 {
-  const struct WhowasGroup *const group = whowas_group_find(name);
+  const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return NULL;
 
@@ -256,7 +256,7 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 int
 whowas_query(const char *name, int max_results, whowas_callback_t callback, void *user_data)
 {
-  const struct WhowasGroup *const group = whowas_group_find(name);
+  const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return 0;
 

@@ -184,33 +184,29 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
   if (!client_is_oper(target) && !client_is_service(target))
     return;
 
-  if (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))
+  if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+    return;
+
+  if (list_is_empty(&target->svstag_list))
   {
-    const struct ServicesTag *const svstag = list_peek_head(&target->svstag_list);
-    if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
-    {
-      const char *text;
-      if (client_is_service(target))
-        text = "is a Network Service";
-      else if (client_is_admin(target))
-        text = "is a Server Administrator";
-      else  /* client_is_oper(target) == true */
-        text = "is an IRC Operator";
-      sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
-    }
+    const char *text;
+
+    if (client_is_service(target))
+      text = "is a Network Service";
+    else if (client_is_admin(target))
+      text = "is a Server Administrator";
+    else
+      text = "is an IRC Operator";
+
+    sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
+    return;
   }
 
   list_node_t *node;
   LIST_FOREACH(node, target->svstag_list.head)
   {
     const struct ServicesTag *const svstag = node->data;
-    if (svstag->numeric == RPL_WHOISOPERATOR &&
-        user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
-      continue;
-
-    if (svstag->user_mode_flags == 0 || user_mode_has_flag(source, svstag->user_mode_flags))
-      sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
-                         target->name, svstag->tag);
+    sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, svstag->text);
   }
 }
 

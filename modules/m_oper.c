@@ -56,12 +56,9 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
 
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
-  if (!string_is_empty(oper->whois_text))
-  {
-    svstag_attach(&client->svstag_list, RPL_WHOISOPERATOR, "+", oper->whois_text);
+  if (!string_is_empty(oper->whois_text) && svstag_attach(&client->svstag_list, oper->whois_text))
     sendto_servers(NULL, 0, 0, ":%s SVSTAG %s 0 %u + :%s",
                    me.id, client->id, RPL_WHOISOPERATOR, oper->whois_text);
-  }
 
   client_format_name_buffer_t client_name_buffer;
   client_format_oper_name_buffer_t oper_name_buffer;

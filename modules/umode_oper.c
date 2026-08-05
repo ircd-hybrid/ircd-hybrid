@@ -47,6 +47,8 @@ unset_callback(struct Client *client, user_mode_source_t source)
   --Count.oper;
   user_mode_unset_flag(client, user_mode_get_oper_only());
 
+  svstag_clear_list(&client->svstag_list);
+
   if (client_is_local(client))
   {
     client->command_handler = COMMAND_HANDLER_USER;
@@ -55,7 +57,6 @@ unset_callback(struct Client *client, user_mode_source_t source)
     io_free(client->connection->oper_auth_name);
     client->connection->oper_auth_name = NULL;
 
-    svstag_detach(&client->svstag_list, RPL_WHOISOPERATOR);
     client_clear_oper_flags(client);
 
     list_node_t *node = list_find_remove(&oper_list, client);

@@ -9,60 +9,36 @@
 
 #include <stddef.h>
 
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
 
 #include "client_svstag.h"
-#include "numeric.h"
-#include "user_mode.h"
 
 static void
-svstag_free(struct ServicesTag *svstag, list_t *list)
+_svstag_free(struct ServicesTag *svstag, list_t *list)
 {
   list_remove(&svstag->node, list);
-  io_free(svstag->tag);
+  io_free(svstag->text);
   io_free(svstag);
 }
 
-void
-svstag_detach(list_t *list, unsigned int numeric)
+bool
+svstag_attach(list_t *list, const char *text)
 {
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, list->head)
-  {
-    struct ServicesTag *const svstag = node->data;
-    if (svstag->numeric == numeric)
-      svstag_free(svstag, list);
-  }
-}
-
-void
-svstag_attach(list_t *list, unsigned int numeric, const char *umodes, const char *tag)
-{
-  if (numeric >= ERR_LAST_ERR_MSG || *umodes != '+')
-    return;
+  if (string_is_empty(text))
+    return false;
 
   struct ServicesTag *const svstag = io_calloc(sizeof(*svstag));
-  svstag->numeric = numeric;
-  svstag->tag = io_strdup(tag);
+  svstag->text = io_strdup(text);
 
-  for (const char *m = umodes + 1  /* + 1 to skip the '+' */; *m; ++m)
-  {
-    const struct UserMode *const mode = user_mode_find(*m);
-    if (mode)
-      svstag->user_mode_flags |= mode->mode_bit;
-  }
-
-  if (numeric != RPL_WHOISOPERATOR)
-    list_add_tail(svstag, &svstag->node, list);
-  else
-    list_add(svstag, &svstag->node, list);
+  list_add_tail(svstag, &svstag->node, list);
+  return true;
 }
 
 void
 svstag_clear_list(list_t *list)
 {
   while (list->head)
-    svstag_free(list->head->data, list);
+    _svstag_free(list->head->data, list);
 }

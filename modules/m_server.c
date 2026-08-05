@@ -228,16 +228,12 @@ _server_burst_send_client(struct Client *client, const struct Client *target)
   if (target->away_message)
     sendto_one(client, ":%s AWAY :%s", target->id, target->away_message);
 
-  /*
-   * Replay SVSTAGs in reverse insertion order so the receiving server applies
-   * them in the original effective order.
-   */
   list_node_t *node;
-  LIST_FOREACH_PREV(node, target->svstag_list.tail)
+  LIST_FOREACH(node, target->svstag_list.head)
   {
     const struct ServicesTag *const svstag = node->data;
-    sendto_one(client, ":%s SVSTAG %s 0 %u +%s :%s",
-               me.id, target->id, svstag->numeric, user_mode_to_str(svstag->user_mode_flags), svstag->tag);
+    sendto_one(client, ":%s SVSTAG %s 0 %u + :%s",
+               me.id, target->id, RPL_WHOISOPERATOR, svstag->text);
   }
 }
 

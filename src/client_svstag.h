@@ -9,17 +9,16 @@
 
 #ifndef INCLUDED_client_svstag_h
 #define INCLUDED_client_svstag_h
-#include <stdint.h>
+#include <stdbool.h>
+
+#include "list.h"
 
 struct ServicesTag
 {
   list_node_t node;
-  char *tag;
-  unsigned int numeric;
-  uint64_t user_mode_flags;
+  char *text;
 };
 
-extern void svstag_attach(list_t *, unsigned int, const char *, const char *);
 extern void svstag_clear_list(list_t *);
-extern void svstag_detach(list_t *, unsigned int);
+extern bool svstag_attach(list_t *, const char *);
 #endif  /* INCLUDED_client_svstag_h */

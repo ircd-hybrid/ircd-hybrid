@@ -424,6 +424,164 @@ _who_dispatch_oper_spy_request(struct Client *source, const struct WhoQuery *who
   });
 }
 
+static void
+_who_parse_selector(struct WhoQuery *who, char selector)
+{
+  switch (selector)
+  {
+    case 'o':
+    case 'O':
+      who->bitsel |= WHOSELECT_OPER;
+      break;
+    case 'n':
+    case 'N':
+      who->matchsel |= WHO_FIELD_NIC;
+      break;
+    case 'u':
+    case 'U':
+      who->matchsel |= WHO_FIELD_UID;
+      break;
+    case 'h':
+    case 'H':
+      who->matchsel |= WHO_FIELD_HOS;
+      break;
+    case 'i':
+    case 'I':
+      who->matchsel |= WHO_FIELD_NIP;
+      break;
+    case 's':
+    case 'S':
+      who->matchsel |= WHO_FIELD_SER;
+      break;
+    case 'r':
+    case 'R':
+      who->matchsel |= WHO_FIELD_REN;
+      break;
+    case 'a':
+    case 'A':
+      who->matchsel |= WHO_FIELD_ACC;
+      break;
+    default:
+      break;
+  }
+}
+
+static void
+_who_parse_reply_field(struct WhoQuery *who, char field)
+{
+  switch (field)
+  {
+    case 'c':
+    case 'C':
+      who->fields |= WHO_FIELD_CHA;
+      break;
+    case 'd':
+    case 'D':
+      who->fields |= WHO_FIELD_DIS;
+      break;
+    case 'f':
+    case 'F':
+      who->fields |= WHO_FIELD_FLA;
+      break;
+    case 'h':
+    case 'H':
+      who->fields |= WHO_FIELD_HOS;
+      break;
+    case 'i':
+    case 'I':
+      who->fields |= WHO_FIELD_NIP;
+      break;
+    case 'l':
+    case 'L':
+      who->fields |= WHO_FIELD_IDL;
+      break;
+    case 'n':
+    case 'N':
+      who->fields |= WHO_FIELD_NIC;
+      break;
+    case 'r':
+    case 'R':
+      who->fields |= WHO_FIELD_REN;
+      break;
+    case 's':
+    case 'S':
+      who->fields |= WHO_FIELD_SER;
+      break;
+    case 't':
+    case 'T':
+      who->fields |= WHO_FIELD_QTO;
+      break;
+    case 'u':
+    case 'U':
+      who->fields |= WHO_FIELD_UID;
+      break;
+    case 'a':
+    case 'A':
+      who->fields |= WHO_FIELD_ACC;
+      break;
+    case 'o':
+    case 'O':
+      who->fields |= WHO_FIELD_OPL;
+      break;
+    default:
+      break;
+  }
+}
+
+static const char *
+_who_parse_query_token(const struct WhoQuery *who, char *token)
+{
+  if (token == NULL || (who->fields & WHO_FIELD_QTO) == 0)
+    return NULL;
+
+  char *p = token;
+  unsigned int digits = 0;
+
+  while (digits < 3 && *p >= '0' && *p <= '9')
+  {
+    ++p;
+    ++digits;
+  }
+
+  *p = '\0';
+
+  return digits > 0 ? token : NULL;
+}
+
+static void
+_who_parse_options(struct WhoQuery *who, char *options)
+{
+  if (string_is_empty(options))
+    return;
+
+  char ch = '\0';
+  char *p = options;
+
+  while ((ch = *p++))
+  {
+    if (ch == '%' || ch == ',')
+      break;
+
+    _who_parse_selector(who, ch);
+  }
+
+  if (ch == '%')
+  {
+    who->whox = true;
+
+    while ((ch = *p++))
+    {
+      if (ch == ',')
+        break;
+
+      _who_parse_reply_field(who, ch);
+    }
+  }
+
+  if (ch == ',')
+    who->token = _who_parse_query_token(who, p);
+}
+
 /*! \brief WHO command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -443,139 +601,11 @@ static void
 m_who(struct Client *source, int parc, char *parv[])
 {
   char *mask = parv[1];
-  char *options = parv[2];
-  char *token = NULL;
-  struct WhoQuery w = { .maxmatches = WHO_MAX_REPLIES }, *who = &w;
+  struct WhoQuery who = { .maxmatches = WHO_MAX_REPLIES };
 
-  if (!string_is_empty(options))
-  {
-    char ch;
-    char *p = options;
+  _who_parse_options(&who, parv[2]);
 
-    while ((ch = *p++) && (ch != '%') && (ch != ','))
-    {
-      switch (ch)
-      {
-        case 'o':
-        case 'O':
-          who->bitsel |= WHOSELECT_OPER;
-          break;
-        case 'n':
-        case 'N':
-          who->matchsel |= WHO_FIELD_NIC;
-          break;
-        case 'u':
-        case 'U':
-          who->matchsel |= WHO_FIELD_UID;
-          break;
-        case 'h':
-        case 'H':
-          who->matchsel |= WHO_FIELD_HOS;
-          break;
-        case 'i':
-        case 'I':
-          who->matchsel |= WHO_FIELD_NIP;
-          break;
-        case 's':
-        case 'S':
-          who->matchsel |= WHO_FIELD_SER;
-          break;
-        case 'r':
-        case 'R':
-          who->matchsel |= WHO_FIELD_REN;
-          break;
-        case 'a':
-        case 'A':
-          who->matchsel |= WHO_FIELD_ACC;
-          break;
-      }
-    }
-
-    if (ch == '%')
-    {
-      who->whox = true;
-
-      while ((ch = *p++) && (ch != ','))
-      {
-        switch (ch)
-        {
-          case 'c':
-          case 'C':
-            who->fields |= WHO_FIELD_CHA;
-            break;
-          case 'd':
-          case 'D':
-            who->fields |= WHO_FIELD_DIS;
-            break;
-          case 'f':
-          case 'F':
-            who->fields |= WHO_FIELD_FLA;
-            break;
-          case 'h':
-          case 'H':
-            who->fields |= WHO_FIELD_HOS;
-            break;
-          case 'i':
-          case 'I':
-            who->fields |= WHO_FIELD_NIP;
-            break;
-          case 'l':
-          case 'L':
-            who->fields |= WHO_FIELD_IDL;
-            break;
-          case 'n':
-          case 'N':
-            who->fields |= WHO_FIELD_NIC;
-            break;
-          case 'r':
-          case 'R':
-            who->fields |= WHO_FIELD_REN;
-            break;
-          case 's':
-          case 'S':
-            who->fields |= WHO_FIELD_SER;
-            break;
-          case 't':
-          case 'T':
-            who->fields |= WHO_FIELD_QTO;
-            break;
-          case 'u':
-          case 'U':
-            who->fields |= WHO_FIELD_UID;
-            break;
-          case 'a':
-          case 'A':
-            who->fields |= WHO_FIELD_ACC;
-            break;
-          case 'o':
-          case 'O':
-            who->fields |= WHO_FIELD_OPL;
-            break;
-        }
-      }
-    }
-
-    if (ch)
-      token = p;
-
-    if (token && (who->fields & WHO_FIELD_QTO))
-    {
-      p = token;
-      if (!((*p > '9') || (*p < '0')))
-        p++;
-      if (!((*p > '9') || (*p < '0')))
-        p++;
-      if (!((*p > '9') || (*p < '0')))
-        p++;
-      *p = '\0';
-    }
-    else
-      token = NULL;
-
-    who->token = token;
-  }
-
-  _who_dispatch_oper_spy_request(source, who);
+  _who_dispatch_oper_spy_request(source, &who);
 
   /* '/who #some_channel' */
   if (IsChanPrefix(*mask))
@@ -583,20 +613,20 @@ m_who(struct Client *source, int parc, char *parv[])
     /* List all users on a given channel */
     struct Channel *channel = channel_find(mask);
     if (channel)
-      _who_on_channel(source, channel, who);
+      _who_on_channel(source, channel, &who);
 
     sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
     return;
   }
 
   /* '/who nick' */
-  if (who->matchsel == 0 || (who->matchsel & WHO_FIELD_NIC))
+  if (who.matchsel == 0 || (who.matchsel & WHO_FIELD_NIC))
   {
     const struct Client *const target = client_find_user_by_name(mask);
     if (target)
     {
-      if (_who_matches_oper_selection(source, target, who))
-        _who_send(source, target, NULL, who);
+      if (_who_matches_oper_selection(source, target, &who))
+        _who_send(source, target, NULL, &who);
 
       sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
       return;
@@ -608,12 +638,12 @@ m_who(struct Client *source, int parc, char *parv[])
       strcmp(mask, "*") == 0)
     mask = NULL;
 
-  if (who->matchsel == 0)
-    who->matchsel = WHO_FIELD_DEF;
+  if (who.matchsel == 0)
+    who.matchsel = WHO_FIELD_DEF;
 
-  _who_global(source, mask, who);
+  _who_global(source, mask, &who);
 
-  if (who->maxmatches == 0)
+  if (who.maxmatches == 0)
     sendto_one_numeric(source, &me, ERR_WHOLIMEXCEED, WHO_MAX_REPLIES, "WHO");
   sendto_one_numeric(source, &me, RPL_ENDOFWHO, string_or_default(mask, "*"));
 }

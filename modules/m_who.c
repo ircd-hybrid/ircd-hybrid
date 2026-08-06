@@ -582,6 +582,37 @@ _who_parse_options(struct WhoQuery *who, char *options)
     who->token = _who_parse_query_token(who, p);
 }
 
+static bool
+_who_handle_channel_query(struct Client *source, const char *mask, const struct WhoQuery *who)
+{
+  if (!IsChanPrefix(*mask))
+    return false;
+
+  struct Channel *const channel = channel_find(mask);
+  if (channel)
+    _who_on_channel(source, channel, who);
+
+  sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
+  return true;
+}
+
+static bool
+_who_handle_nick_query(struct Client *source, const char *mask, const struct WhoQuery *who)
+{
+  if (who->matchsel && (who->matchsel & WHO_FIELD_NIC) == 0)
+    return false;
+
+  const struct Client *const target = client_find_user_by_name(mask);
+  if (target == NULL)
+    return false;
+
+  if (_who_matches_oper_selection(source, target, who))
+    _who_send(source, target, NULL, who);
+
+  sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
+  return true;
+}
+
 /*! \brief WHO command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -607,31 +638,13 @@ m_who(struct Client *source, int parc, char *parv[])
 
   _who_dispatch_oper_spy_request(source, &who);
 
-  /* '/who #some_channel' */
-  if (IsChanPrefix(*mask))
-  {
-    /* List all users on a given channel */
-    struct Channel *channel = channel_find(mask);
-    if (channel)
-      _who_on_channel(source, channel, &who);
-
-    sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
+ /* '/who #some_channel' */
+  if (_who_handle_channel_query(source, mask, &who))
     return;
-  }
 
   /* '/who nick' */
-  if (who.matchsel == 0 || (who.matchsel & WHO_FIELD_NIC))
-  {
-    const struct Client *const target = client_find_user_by_name(mask);
-    if (target)
-    {
-      if (_who_matches_oper_selection(source, target, &who))
-        _who_send(source, target, NULL, &who);
-
-      sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);
-      return;
-    }
-  }
+  if (_who_handle_nick_query(source, mask, &who))
+    return;
 
   collapse(mask);
   if (strcmp(mask, "0") == 0 ||

@@ -222,6 +222,21 @@ _who_send(struct Client *source, const struct Client *target,
   sendto_one_numeric(source, &me, who->whox ? RPL_WHOSPCRPL : RPL_WHOREPLY, buf + 1);
 }
 
+static bool
+_who_matches_oper_selection(const struct Client *source, const struct Client *target, const struct WhoQuery *who)
+{
+  if ((who->bitsel & WHOSELECT_OPER) == 0)
+    return true;
+
+  if (!client_is_oper(target))
+    return false;
+
+  if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+    return false;
+
+  return true;
+}
+
 /*!
  * \param source Pointer to client requesting who.
  * \param target Pointer to client to do who on.
@@ -233,10 +248,8 @@ static bool
 _who_matches(struct Client *source, const struct Client *target,
              const char *mask, const struct WhoQuery *who)
 {
-  if ((who->bitsel & WHOSELECT_OPER))
-    if (!client_is_oper(target) ||
-        (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
-      return false;
+  if (!_who_matches_oper_selection(source, target, who))
+    return false;
 
   if (mask == NULL)
     return true;
@@ -390,12 +403,8 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
 
     if (is_member || !user_mode_has_flag(target, UMODE_INVISIBLE))
     {
-      if ((who->bitsel & WHOSELECT_OPER))
-      {
-        if (!client_is_oper(target) ||
-            (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source)))
-          continue;
-      }
+      if (!_who_matches_oper_selection(source, target, who))
+        continue;
 
       _who_send(source, target, member, who);
     }
@@ -586,9 +595,7 @@ m_who(struct Client *source, int parc, char *parv[])
     const struct Client *const target = client_find_user_by_name(mask);
     if (target)
     {
-      if (!(who->bitsel & WHOSELECT_OPER) ||
-          (client_is_oper(target) &&
-           (!user_mode_has_flag(target, UMODE_HIDDEN) || client_is_oper(source))))
+      if (_who_matches_oper_selection(source, target, who))
         _who_send(source, target, NULL, who);
 
       sendto_one_numeric(source, &me, RPL_ENDOFWHO, mask);

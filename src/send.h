@@ -53,7 +53,7 @@ struct Client;
 typedef bool (*send_filter_fn)(const struct Client *client, void *context);
 
 /* send.c prototypes */
-extern void sendq_unblocked(fde_t *, void *);
+extern void send_write_ready(fde_t *, void *);
 extern void send_queued_write(struct Client *);
 
 extern void sendto_one_fail(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);

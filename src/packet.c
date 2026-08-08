@@ -30,7 +30,7 @@ enum { READBUF_SIZE = 16384 };
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
-read_packet(fde_t *F, void *data_)
+read_packet(fde_t *fde, void *data_)
 {
   struct Client *const client = data_;
   ssize_t length = 0;
@@ -43,7 +43,7 @@ read_packet(fde_t *F, void *data_)
     return;
 
   assert(client->connection->fde);
-  assert(client->connection->fde == F);
+  assert(client->connection->fde == fde);
 
   /*
    * Read some data. We *used to* do anti-flood protection here, but
@@ -52,16 +52,16 @@ read_packet(fde_t *F, void *data_)
    */
   while (true)
   {
-    if (tls_isusing(&F->tls))
+    if (tls_isusing(&fde->tls))
     {
       bool want_write = false;
-      length = tls_read(&F->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
+      length = tls_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
 
       if (want_write)
-        comm_setselect(F, COMM_SELECT_WRITE, sendq_unblocked, client);
+        comm_setselect(fde, COMM_SELECT_WRITE, send_write_ready, client);
     }
     else
-      length = recv(F->fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
+      length = recv(fde->fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
     if (length <= 0)
     {
@@ -71,7 +71,7 @@ read_packet(fde_t *F, void *data_)
        */
       const int error_code = length < 0 ? errno : 0;
       if (length < 0 && comm_errno_is_recoverable(error_code))
-        comm_setselect(F, COMM_SELECT_READ, read_packet, client);
+        comm_setselect(fde, COMM_SELECT_READ, read_packet, client);
       else
         client_schedule_exit_on_io_failure(client, CLIENT_IO_OPERATION_READ,
                                            length == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED

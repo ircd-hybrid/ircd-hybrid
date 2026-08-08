@@ -66,6 +66,24 @@ dbuf_block_unref(struct dbuf_block *block)
     io_free(block);
 }
 
+size_t
+dbuf_block_length(const struct dbuf_block *block)
+{
+  assert(block);
+  return block->length;
+}
+
+void
+dbuf_block_truncate(struct dbuf_block *block, size_t length)
+{
+  assert(block);
+  assert(block->ref_count == 1);
+  assert(block->length <= DBUF_BLOCK_CAPACITY);
+
+  if (block->length > length)
+    block->length = length;
+}
+
 bool
 dbuf_block_append(struct dbuf_block *block, const void *data, size_t length)
 {

@@ -63,6 +63,7 @@ struct dbuf_queue_iterator
 extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...);
 extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
 extern void dbuf_block_ref(struct dbuf_block *);
+extern void dbuf_block_truncate(struct dbuf_block *, size_t);
 extern void dbuf_block_unref(struct dbuf_block *);
 extern void dbuf_queue_append(struct dbuf_queue *, const void *, size_t);
 extern void dbuf_queue_append_block(struct dbuf_queue *, struct dbuf_block *);
@@ -72,6 +73,7 @@ extern void dbuf_queue_iterator_init(const struct dbuf_queue *, struct dbuf_queu
 extern bool dbuf_block_append(struct dbuf_block *, const void *, size_t);
 extern bool dbuf_queue_iterator_next(struct dbuf_queue_iterator *, struct dbuf_view *);
 extern bool dbuf_queue_peek_head(const struct dbuf_queue *, struct dbuf_view *);
+extern size_t dbuf_block_length(const struct dbuf_block *);
 extern struct dbuf_block *dbuf_block_create(void);
 
 /**

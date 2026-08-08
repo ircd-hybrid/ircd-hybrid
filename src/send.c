@@ -49,7 +49,7 @@ static uintmax_t broadcast_id;
  * side effects	- modifies sendbuf
  */
 static void
-send_format(struct dbuf_block *buffer, const char *format, va_list args)
+send_format(struct dbuf_block *block, const char *format, va_list args)
 {
   /*
    * from rfc1459
@@ -63,12 +63,9 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
    * continuation message lines.  See section 7 for more details about
    * current implementations.
    */
-  dbuf_block_append_vfmt(buffer, format, args);
-
-  if (buffer->length > IRCD_BUFSIZE - 2)
-    buffer->length = IRCD_BUFSIZE - 2;
-
-  dbuf_block_append(buffer, "\r\n", 2);
+  dbuf_block_append_vfmt(block, format, args);
+  dbuf_block_truncate(block, IRCD_BUFSIZE - 2);
+  dbuf_block_append(block, "\r\n", 2);
 }
 
 /*
@@ -77,7 +74,7 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
  **      sendq.
  */
 static void
-sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
+sendto_one_buffer(struct Client *to, struct dbuf_block *block)
 {
   assert(to && client_is_local(to));
   assert(!client_is_me(to));
@@ -85,8 +82,10 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   if (client_is_dead(to))
     return;
 
-  const unsigned int max_sendq = client_get_max_sendq(to);
-  const size_t new_sendq_size = dbuf_queue_length(&to->connection->buf_sendq) + buffer->length;
+  struct dbuf_queue *const sendq = &to->connection->buf_sendq;
+
+  const size_t max_sendq = client_get_max_sendq(to);
+  const size_t new_sendq_size = dbuf_queue_length(sendq) + dbuf_block_length(block);
   if (new_sendq_size > max_sendq)
   {
     if (!client_has_flag(to, FLAGS_SENDQEX))
@@ -100,18 +99,18 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
           client_format_name(to, CLIENT_FORMAT_NAME_PUBLIC, &server_name_buffer);
 
         sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                       "Max SendQ limit exceeded for %s: %zu > %u",
+                       "Max SendQ limit exceeded for %s: %zu > %zu",
                        server_name, new_sendq_size, max_sendq);
       }
 
-      client_schedule_exit_fmt(to, "Max SendQ exceeded (%zu > %u)",
+      client_schedule_exit_fmt(to, "Max SendQ exceeded (%zu > %zu)",
                                new_sendq_size, max_sendq);
     }
 
     return;
   }
 
-  dbuf_queue_append_block(&to->connection->buf_sendq, buffer);
+  dbuf_queue_append_block(sendq, block);
 
   /*
    * Update statistics. The following is slightly incorrect because

@@ -20,18 +20,6 @@
 #include "ircd.h"
 #include "parse.h"
 
-/*
- * client_dopacket - copy packet to client buf and parse it
- *      client - pointer to client structure for which the buffer data
- *             applies.
- *      buffer - pointer to the buffer containing the newly read data
- *      length - number of valid bytes of data in the buffer
- *
- * Note:
- *      It is implicitly assumed that client_dopacket() is called only
- *      with client of "local" variation, which contains all the
- *      necessary fields (buffer etc..)
- */
 static void
 _client_input_dispatch_line(struct Client *client, char *line_buffer, size_t line_length)
 {

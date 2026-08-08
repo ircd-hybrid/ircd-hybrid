@@ -177,7 +177,7 @@ _listener_finalize(struct Listener *listener)
 #endif
 
   listener->fde = new_fde;
-  /* Listen completion events are READ events .. */
+
   _listener_accept_connection(listener->fde, listener);
   return true;
 }
@@ -204,9 +204,6 @@ _listener_find(const struct io_addr *addr)
   return last_closed;
 }
 
-/*
- * close_listener - close a single listener
- */
 static void
 _listener_close(struct Listener *listener)
 {
@@ -224,15 +221,11 @@ _listener_close(struct Listener *listener)
   _listener_destroy(listener);
 }
 
-/*
- * listener_close_marked - close and free all listeners that are not being used
- */
 void
 listener_close_marked(void)
 {
   list_node_t *node, *node_next;
 
-  /* close all 'extra' listening ports we have */
   LIST_FOREACH_SAFE(node, node_next, listener_list.head)
     _listener_close(node->data);
 }
@@ -253,16 +246,9 @@ listener_retain(struct Listener *listener)
   ++listener->ref_count;
 }
 
-/*
- * listener_add- create a new listener
- * port - the port number to listen on
- * vhost_ip - if non-null must contain a valid IP address string in
- * the format "255.255.255.255"
- */
 void
 listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
 {
-  /* If no or invalid port in conf line, don't bother. */
   if (port == 0)
     return;
 

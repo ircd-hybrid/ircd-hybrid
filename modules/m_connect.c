@@ -46,9 +46,6 @@ _connect_process_request(struct Client *source, const char *name)
 {
   assert(client_is_user(source));
 
-  /*
-   * Try to find the name. If it fails, notify and bail.
-   */
   struct ConnectItem *const connect = connect_find(name, true);
   if (connect == NULL)
   {

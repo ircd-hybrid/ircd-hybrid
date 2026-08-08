@@ -16,12 +16,6 @@
 #include "numeric.h"
 #include "send.h"
 
-/* valid_wild_card_simple()
- *
- * inputs       - data to check for sufficient non-wildcard characters
- * outputs      - 1 if valid, else 0
- * side effects - none
- */
 bool
 aline_valid_mask_simple(const char *data)
 {
@@ -49,14 +43,6 @@ aline_valid_mask_simple(const char *data)
   return wild == 0;
 }
 
-/* valid_wild_card()
- *
- * input        - pointer to client
- *		- int flag, 0 for no warning oper 1 for warning oper
- *		- count of following varargs to check
- * output       - 0 if not valid, 1 if valid
- * side effects - NOTICE is given to client if warn is 1
- */
 bool
 aline_valid_mask(int count, ...)
 {
@@ -87,10 +73,6 @@ aline_valid_mask(int count, ...)
     {
       if (!IsKWildChar(tmpch))
       {
-        /*
-         * If we find enough non-wild characters, we can
-         * break - no point in searching further.
-         */
         if (++nonwild >= ConfigGeneral.min_nonwildcard)
         {
           va_end(args);
@@ -129,35 +111,6 @@ _aline_valid_time(const char *data)
   return result;
 }
 
-/* parse_aline
- *
- * input        - pointer to cmd name being used
- *              - pointer to client using cmd
- *              - parc parameter count
- *              - parv[] list of parameters to parse
- *		- parse_flags bit map of things to test
- *		- pointer to user or string to parse into
- *              - pointer to host or NULL to parse into if non NULL
- *              - pointer to optional tkline time or NULL
- *              - pointer to target_server to parse into if non NULL
- *              - pointer to reason to parse into
- *
- * output       - 1 if valid, 0 if not valid
- * side effects - A generalised k/d/x etc. line parser,
- *               "ALINE [time] user@host|string [ON] target :reason"
- *                will parse returning a parsed user, host if
- *                h_p pointer is non NULL, string otherwise.
- *                if tkline_time pointer is non NULL a tk line will be set
- *                to non zero if found.
- *                if tkline_time pointer is NULL and tk line is found,
- *                error is reported.
- *                if target_server is NULL and an "ON" is found error
- *                is reported.
- *                if reason pointer is NULL ignore pointer,
- *                this allows use of parse_a_line in unkline etc.
- *
- * - Dianora
- */
 bool
 aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], struct aline_ctx *aline)
 {

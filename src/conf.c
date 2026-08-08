@@ -55,7 +55,6 @@
 
 extern int yyparse();  /* Defined in conf_parser.c */
 
-/* Hashtable stuff...now external as it's used in m_stats.c */
 list_t atable[ADDRESS_HASHSIZE];
 
 struct config_channel_entry ConfigChannel;
@@ -189,12 +188,6 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
   return hprec;
 }
 
-/* struct MaskItem* find_address_conf(const char*, const char*,
- * 	                               struct io_addr*, int, char *);
- * Input: The hostname, username, address, address family.
- * Output: The applicable MaskItem.
- * Side-effects: None
- */
 struct MaskItem *
 find_address_conf(const char *host, const char *user, const struct io_addr *addr, const char *password)
 {
@@ -221,12 +214,6 @@ find_address_conf(const char *host, const char *user, const struct io_addr *addr
   return authcnf;
 }
 
-/* struct MaskItem* find_dline_conf(struct io_addr*, int)
- *
- * Input:	An address, an address family.
- * Output:	The best matching D-line or exempt line.
- * Side effects: None.
- */
 struct MaskItem *
 find_dline_conf(const struct io_addr *addr)
 {
@@ -239,11 +226,6 @@ find_dline_conf(const struct io_addr *addr)
   return find_conf_by_address(NULL, addr, CONF_DLINE, NULL, NULL, 1);
 }
 
-/* void add_conf_by_address(int, struct MaskItem *aconf)
- * Input:
- * Output: None
- * Side-effects: Adds this entry to the hash table.
- */
 struct AddressRec *
 add_conf_by_address(const unsigned int type, struct MaskItem *conf)
 {
@@ -283,12 +265,6 @@ add_conf_by_address(const unsigned int type, struct MaskItem *conf)
   return arec;
 }
 
-/* void delete_one_address(const char*, struct MaskItem*)
- * Input: An address string, the associated MaskItem.
- * Output: None
- * Side effects: Deletes an address record. Frees the MaskItem if there
- *               is nothing referencing it, sets it as illegal otherwise.
- */
 void
 delete_one_address_conf(const char *address, struct MaskItem *conf)
 {
@@ -329,13 +305,6 @@ delete_one_address_conf(const char *address, struct MaskItem *conf)
   }
 }
 
-/* void clear_out_address_conf(void)
- * Input: None
- * Output: None
- * Side effects: Clears out all address records in the hash table,
- *               frees them, and frees the MaskItems if nothing references
- *               them, otherwise sets them as illegal.
- */
 static void
 clear_out_address_conf(void)
 {
@@ -571,15 +540,6 @@ conf_authorize_client(struct Client *client, enum conf_authorize_result *result_
   return conf;
 }
 
-/* conf_set_defaults()
- *
- * inputs	- NONE
- * output	- NONE
- * side effects	- Set default values here.
- *		  This is called **PRIOR** to parsing the
- *		  configuration file.  If you want to do some validation
- *		  of values later, put them in validate_conf().
- */
 static void
 conf_set_defaults(void)
 {

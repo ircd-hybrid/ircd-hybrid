@@ -49,12 +49,6 @@
 #include "user.h"
 #include "user_mode.h"
 
-/* show_lusers()
- *
- * inputs       - pointer to client
- * output       - NONE
- * side effects - display to client user counts etc.
- */
 void
 show_lusers(struct Client *client)
 {
@@ -89,14 +83,6 @@ show_lusers(struct Client *client)
   }
 }
 
-/* report_and_set_user_flags()
- *
- * inputs       - pointer to client
- *              - pointer to conf for this user
- * output       - NONE
- * side effects - Report to user any special flags
- *                they are getting, and set them.
- */
 static void
 report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 {
@@ -137,14 +123,6 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
   }
 }
 
-/* introduce_client()
- *
- * inputs       - client
- * output       - NONE
- * side effects - This common function introduces a client to the rest
- *                of the net, either from a local client connect or
- *                from a remote connect.
- */
 static void
 user_introduce(struct Client *client)
 {
@@ -166,12 +144,6 @@ user_introduce(struct Client *client)
   monitor_notify_signon(client);
 }
 
-/* user_welcome()
- *
- * inputs       - client pointer to client to welcome
- * output       - NONE
- * side effects -
- */
 static void
 user_welcome(struct Client *client)
 {
@@ -392,16 +364,6 @@ user_register_local(struct Client *client)
   user_introduce(client);
 }
 
-/* register_remote_user()
- *
- * inputs       - client remote or directly connected client
- *              - username to register as
- *              - host name to register as
- *              - server name
- * output	- NONE
- * side effects	- This function is called when a remote client
- *		  is introduced by a server.
- */
 void
 user_register_remote(struct Client *client)
 {
@@ -427,15 +389,6 @@ user_register_remote(struct Client *client)
   user_introduce(client);
 }
 
-/* valid_hostname()
- *
- * Inputs       - pointer to hostname
- * Output       - 1 if valid, 0 if not
- * Side effects - check hostname for validity
- *
- * NOTE: this doesn't allow a hostname to begin with a dot and
- * will not allow more dots than chars.
- */
 bool
 valid_hostname(const char *hostname)
 {
@@ -453,17 +406,6 @@ valid_hostname(const char *hostname)
   return p - hostname <= HOSTLEN;
 }
 
-/* valid_username()
- *
- * Inputs       - pointer to user
- * Output       - 1 if valid, 0 if not
- * Side effects - check username for validity
- *
- * Absolutely always reject any '*' '!' '?' '@' in an user name
- * reject any odd control characters names.
- * Allow '.' in username to allow for "first.last"
- * style of username
- */
 bool
 valid_username(const char *username, bool local)
 {
@@ -509,13 +451,6 @@ valid_username(const char *username, bool local)
   return p - username <= USERLEN;
 }
 
-/* clean_nick_name()
- *
- * input        - nickname
- *              - whether it's a local nick (1) or remote (0)
- * output       - none
- * side effects - walks through the nickname, returning 0 if erroneous
- */
 bool
 valid_nickname(const char *nickname, bool local)
 {
@@ -523,9 +458,6 @@ valid_nickname(const char *nickname, bool local)
 
   assert(p);
 
-  /*
-   * Nicks can't start with a digit or - or be 0 length.
-   */
   if (string_is_empty(p) || *p == '-' || (local && IsDigit(*p)))
     return false;
 

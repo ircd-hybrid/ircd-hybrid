@@ -39,15 +39,6 @@
  */
 static uintmax_t broadcast_id;
 
-/* _send_finalize_message()
- *
- * inputs
- *		- block
- *		- format format to use
- *		- var args
- * output	- number of bytes formatted output
- * side effects	- modifies sendbuf
- */
 static void
 _send_finalize_message(struct dbuf_block *block, const char *format, va_list args)
 {
@@ -68,11 +59,6 @@ _send_finalize_message(struct dbuf_block *block, const char *format, va_list arg
   dbuf_block_append(block, "\r\n", 2);
 }
 
-/*
- ** send_message
- **      Internal utility which appends given block to the sockets
- **      sendq.
- */
 static void
 _send_block_to_client(struct Client *to, struct dbuf_block *block)
 {
@@ -123,16 +109,6 @@ _send_block_to_client(struct Client *to, struct dbuf_block *block)
   send_queued_write(to);
 }
 
-/* send_message_remote()
- *
- * inputs	- pointer to client from message is being sent
- * 		- pointer to client to send to
- *		- pointer to block
- * output	- none
- * side effects	- Despite the function name, this only sends to directly
- *		  connected clients.
- *
- */
 static void
 _send_block_to_server(struct Client *to, const struct Client *from, struct dbuf_block *block)
 {
@@ -151,10 +127,6 @@ _send_block_to_server(struct Client *to, const struct Client *from, struct dbuf_
     _send_block_to_client(to, block);
 }
 
-/*
- ** sendq_unblocked
- **      Called when a socket is ready for writing.
- */
 void
 send_write_ready(fde_t *fde, void *data)
 {
@@ -175,12 +147,6 @@ send_write_ready(fde_t *fde, void *data)
   send_queued_write(client);
 }
 
-/*
- ** send_queued_write
- **      This is called when there is a chance that some output would
- **      be possible. This attempts to empty the send queue as far as
- **      possible, and then if any data is left, a write is rescheduled.
- */
 void
 send_queued_write(struct Client *to)
 {
@@ -308,13 +274,6 @@ sendto_one_note(struct Client *to, const struct Client *from, const char *comman
   va_end(args);
 }
 
-/* sendto_one()
- *
- * inputs	- pointer to destination client
- *		- var args message
- * output	- NONE
- * side effects	- send message to single client
- */
 void
 sendto_one(struct Client *to, const char *format, ...)
 {
@@ -440,14 +399,6 @@ sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recip
   }
 }
 
-/* sendto_clients()
- *
- * inputs	- flag types of messages to show to real opers
- *		- flag indicating opers/admins
- *		- var args input message
- * output	- NONE
- * side effects	- Send to *local* ops only but NOT +s nonopers.
- */
 void
 sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, const char *format, ...)
 {
@@ -567,24 +518,6 @@ sendto_filtered_butone(const struct Client *exclude_client, const struct Client 
   dbuf_block_unref(server_block);
 }
 
-/* sendto_servers()
- *
- * inputs       - pointer to client to NOT send to
- *              - pointer to channel
- *              - capabs or'd together which must ALL be present
- *              - capabs or'd together which must ALL NOT be present
- *              - printf style format string
- *              - args to format string
- * output       - NONE
- * side effects - Send a message to all connected servers, except the
- *                client 'one' (if non-NULL), as long as the servers
- *                support ALL capabs in 'capab', and NO capabs in 'nocapab'.
- *
- * This function was written in an attempt to merge together the other
- * billion sendto_*serv*() functions, which sprung up with capabs,
- * lazylinks, uids, etc.
- * -davidt
- */
 void
 sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
                uint32_t excluded_capab, const char *format, ...)
@@ -621,15 +554,6 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
   dbuf_block_unref(block);
 }
 
-/* sendto_match_servs()
- *
- * inputs       - source client
- *              - mask to send to
- *              - capab needed
- *              - data
- * outputs	- none
- * side effects	- data sent to servers matching with capab
- */
 void
 sendto_match_servs(const struct Client *source, const char *mask, uint32_t required_capab, const char *format, ...)
 {
@@ -675,15 +599,6 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
   dbuf_block_unref(block);
 }
 
-/* sendto_common_channels_local()
- *
- * inputs	- pointer to client
- *		- format to send
- * output	- NONE
- * side effects	- Sends a message to all people on local server who are
- * 		  in same channel with user.
- *		  used by m_nick.c and exit_one_client.
- */
 void
 sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
                              uint32_t excluded_cap, const char *format, ...)
@@ -738,14 +653,6 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   dbuf_block_unref(block);
 }
 
-/*! \brief Send a message to members of a channel that are locally connected to this server.
- * \param one      Client to skip; can be NULL
- * \param channel    Destination channel
- * \param rank     Minimum channel member rank clients must have
- * \param poscap   Positive client capabilities flags (CAP)
- * \param negcap   Negative client capabilities flags (CAP)
- * \param format  Format string for command arguments
- */
 void
 sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
                      uint32_t required_cap, uint32_t excluded_cap, const char *format, ...)
@@ -784,17 +691,6 @@ sendto_channel_local(const struct Client *exclude_client, const struct Channel *
   dbuf_block_unref(block);
 }
 
-/* sendto_channel_butone()
- *
- * inputs	- pointer to client(server) to NOT send message to
- *		- pointer to client that is sending this message
- *		- pointer to channel being sent to
- *		- vargs message
- * output	- NONE
- * side effects	- message as given is sent to given channel members.
- *
- * WARNING - +D clients are ignored
- */
 void
 sendto_channel_butone(const struct Client *exclude_client, const struct Client *from, const struct Channel *channel,
                       int required_rank, const char *format, ...)

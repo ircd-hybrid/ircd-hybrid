@@ -177,13 +177,6 @@ server_is_valid_name(const char *name)
   return dot_count > 0;
 }
 
-/* server_make()
- *
- * inputs       - pointer to client struct
- * output       - pointer to struct Server
- * side effects - add's an Server information block to a client
- *                if it was not previously allocated.
- */
 struct Server *
 server_get_or_create(struct Client *client)
 {
@@ -324,14 +317,6 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
   _server_handshake_tls_start(fde, client);
 }
 
-/* server_connect_callback() - complete a server connection.
- *
- * This routine is called after the server connection attempt has
- * completed. If unsucessful, an error is sent to ops and the client
- * is closed. If sucessful, it goes through the initialisation/check
- * procedures, the capabilities are sent, and the socket is then
- * marked for reading.
- */
 static void
 _server_connect_callback(fde_t *fde, int status, void *data_)
 {
@@ -370,22 +355,6 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
     _server_handshake_irc_start(client);
 }
 
-/* server_connect() - initiate a server connection
- *
- * inputs	- pointer to conf
- *		- pointer to client doing the connect
- * output	-
- * side effects	-
- *
- * This code initiates a connection to a server. It first checks to make
- * sure the given server exists. If this is the case, it creates a socket,
- * creates a client, saves the socket information in the client, and
- * initiates a connection to the server through comm_connect_tcp(). The
- * completion of this goes through serv_completed_connection().
- *
- * We return 1 if the connection is attempted, since we don't know whether
- * it suceeded or not, and 0 if it fails in here somewhere.
- */
 bool
 server_connect(struct ConnectItem *connect, const struct Client *initiator)
 {
@@ -461,16 +430,6 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   return true;
 }
 
-/* server_connect_auto()
- *
- * inputs	- void pointer which is not used
- * output	- NONE
- * side effects	-
- * scan through configuration and try new connections.
- * Returns the calendar time when the next call to this
- * function should be made latest. (No harm done if this
- * is called earlier or later...)
- */
 void
 server_connect_auto(void *unused)
 {
@@ -489,7 +448,6 @@ server_connect_auto(void *unused)
     assert(!string_is_empty(connect->name));
     assert(!string_is_empty(connect->host));
 
-    /* Also when already connecting! (update holdtimes) --SRB */
     if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
       continue;
 

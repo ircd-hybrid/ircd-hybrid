@@ -34,15 +34,6 @@ _ipcache_get_trie(const void *addr)
     return ipcache_trie_v4;
 }
 
-/* ipcache_find_or_add_address()
- *
- * inputs       - pointer to struct io_addr
- * output       - pointer to a struct ip_entry
- * side effects -
- *
- * If the ip # was not found, a new struct ip_entry is created, and the ip
- * count set to 0.
- */
 struct ip_entry *
 ipcache_record_find_or_add(const void *addr)
 {
@@ -76,12 +67,6 @@ _ipcache_record_delete(patricia_node_t *pnode)
   }
 }
 
-/* ipcache_remove_expired_entries()
- *
- * input        - NONE
- * output       - NONE
- * side effects - free up all ip entries with no connections
- */
 static void
 _ipcache_remove_expired_records(void *unused)
 {
@@ -91,15 +76,6 @@ _ipcache_remove_expired_records(void *unused)
     _ipcache_record_delete(node->data);
 }
 
-/* ipcache_remove_addres()
- *
- * inputs        - unsigned long IP address value
- * output        - NONE
- * side effects  - The ip address given, is looked up in ip hash table
- *                 and number of ip#'s for that ip decremented.
- *                 If ip # count reaches 0 and has expired,
- *                 the struct ip_entry is returned to the ip_entry_heap
- */
 void
 ipcache_record_remove(const void *addr, bool local)
 {
@@ -118,16 +94,6 @@ ipcache_record_remove(const void *addr, bool local)
   _ipcache_record_delete(pnode);
 }
 
-/* ipcache_get_stats()
- *
- * inputs        - pointer to counter of number of ips hashed
- *               - pointer to memory used for ip hash
- * output        - returned via pointers input
- * side effects  - NONE
- *
- * number of hashed ip #'s is counted up, plus the amount of memory
- * used in the hash.
- */
 void
 ipcache_get_stats(uint32_t *const number_ips_stored, size_t *const mem_ips_stored)
 {

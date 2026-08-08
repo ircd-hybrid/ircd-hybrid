@@ -26,9 +26,6 @@
 
 enum { READBUF_SIZE = 16384 };
 
-/*
- * read_packet - Read a 'packet' of data from a connection and process it.
- */
 void
 read_packet(fde_t *fde, void *data_)
 {
@@ -45,11 +42,6 @@ read_packet(fde_t *fde, void *data_)
   assert(client->connection->fde);
   assert(client->connection->fde == fde);
 
-  /*
-   * Read some data. We *used to* do anti-flood protection here, but
-   * I personally think it makes the code too hairy to make sane.
-   *     -- adrian
-   */
   while (true)
   {
     if (tls_isusing(&fde->tls))

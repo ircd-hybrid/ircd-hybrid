@@ -286,7 +286,7 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
    * Prefixes from local clients are parsed but not trusted. Only server links
    * may identify a different logical source.
    */
-  if (*prefix && client_is_server(ctx->client))
+  if (client_is_server(ctx->client))
   {
     struct Client *const source = client_find_entity(ctx->client, prefix);
 

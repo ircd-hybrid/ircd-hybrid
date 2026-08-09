@@ -275,8 +275,8 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
   char *const prefix = ++ch;
   assert(prefix <= ctx->buffer_end);
 
-  const size_t prefix_len = strcspn(prefix, " ");
-  char *prefix_end = prefix + prefix_len;
+  const size_t prefix_length = strcspn(prefix, " ");
+  char *prefix_end = prefix + prefix_length;
   assert(prefix_end <= ctx->buffer_end);
 
   if (*prefix_end == ' ')
@@ -331,10 +331,10 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
 }
 
 static bool
-_parse_token_is_numeric(const char *token, size_t token_len)
+_parse_token_is_numeric(const char *token, size_t token_length)
 {
   assert(token);
-  return token_len == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
+  return token_length == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
 }
 
 static void
@@ -394,12 +394,12 @@ _parse_identify_numeric(parse_context_t *ctx)
 }
 
 static bool
-_parse_identify_command(parse_context_t *ctx, size_t token_len)
+_parse_identify_command(parse_context_t *ctx, size_t token_length)
 {
   assert(ctx);
   assert(ctx->command_token);
   assert(ctx->command_token[0]);
-  assert(token_len > 0);
+  assert(token_length > 0);
 
   ctx->command = command_find(ctx->command_token);
   if (ctx->command == NULL)
@@ -415,10 +415,10 @@ _parse_identify_command(parse_context_t *ctx, size_t token_len)
      * separator was replaced with NUL while extracting the command token, so
      * add it back to account for the full command payload.
      */
-    ctx->command->bytes += token_len + 1 + (size_t)(ctx->buffer_end - ctx->buffer_cursor);
+    ctx->command->bytes += token_length + 1 + (size_t)(ctx->buffer_end - ctx->buffer_cursor);
   }
   else
-    ctx->command->bytes += token_len;
+    ctx->command->bytes += token_length;
 
   return true;
 }
@@ -437,12 +437,12 @@ _parse_identify_command_token(parse_context_t *ctx)
   }
 
   char *const token = ctx->buffer_cursor;
-  const size_t token_len = strcspn(token, " ");
-  char *token_end = token + token_len;
+  const size_t token_length = strcspn(token, " ");
+  char *token_end = token + token_length;
 
   assert(token_end <= ctx->buffer_end);
 
-  if (token_len == 0)
+  if (token_length == 0)
   {
     ++ServerStats.is_empt;
     return false;
@@ -454,10 +454,10 @@ _parse_identify_command_token(parse_context_t *ctx)
   ctx->command_token = token;
   ctx->buffer_cursor = token_end;
 
-  if (_parse_token_is_numeric(ctx->command_token, token_len))
+  if (_parse_token_is_numeric(ctx->command_token, token_length))
     return _parse_identify_numeric(ctx);
 
-  return _parse_identify_command(ctx, token_len);
+  return _parse_identify_command(ctx, token_length);
 }
 
 static unsigned int

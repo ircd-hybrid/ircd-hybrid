@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "io.h"
 #include "list.h"
 
 struct dbuf_block;
@@ -45,7 +46,7 @@ struct dbuf_queue_iterator
   const void *cursor;
 };
 
-extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...);
+extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...) IO_AFP(2,3);
 extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
 extern void dbuf_block_ref(struct dbuf_block *);
 extern void dbuf_block_truncate(struct dbuf_block *, size_t);

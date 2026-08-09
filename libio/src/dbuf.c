@@ -22,6 +22,23 @@
 #include "dbuf.h"
 
 /**
+ * @var DBUF_BLOCK_CAPACITY
+ * @brief Size of each data block within the dynamic buffer.
+ */
+enum { DBUF_BLOCK_CAPACITY = 1024 };
+
+/**
+ * @struct dbuf_block
+ * @brief Structure representing a block of data within the dynamic buffer.
+ */
+struct dbuf_block
+{
+  unsigned int ref_count;  /**< Reference count for the data block. */
+  size_t length;  /**< Size of the data block. */
+  char data[DBUF_BLOCK_CAPACITY];  /**< Actual data stored in the block. */
+};
+
+/**
  * @brief Allocate a new dynamic buffer block.
  *
  * This function allocates memory for a new `dbuf_block` structure and initializes

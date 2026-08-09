@@ -81,7 +81,7 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
   client_format_name_buffer_t link_name_buffer;
   const char *const link_name = client_format_name(link, CLIENT_FORMAT_NAME_LOG, &link_name_buffer);
 
-  if (client_id_is_valid_sid(prefix) || strchr(prefix, '.'))
+  if (client_id_is_valid_sid(prefix) || server_is_valid_name(prefix))
   {
     sendto_one(link, ":%s SQUIT %s :Unknown server prefix",
                me.id, prefix);

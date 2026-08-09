@@ -27,6 +27,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user.h"
 #include "user_mode.h"
 
 typedef struct parse_context
@@ -71,16 +72,14 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
   assert(client_is_server(link));
   assert(!string_is_empty(prefix));
 
-  /*
-   * Unknown prefixes are classified as follows:
-   *   - valid SID or dotted server name: server prefix
-   *   - valid UID from this server path: client ID
-   *   - digit-starting but otherwise invalid: invalid numeric prefix
-   *   - everything else: nickname
-   */
   client_format_name_buffer_t link_name_buffer;
-  const char *const link_name = client_format_name(link, CLIENT_FORMAT_NAME_LOG, &link_name_buffer);
+  const char *const link_name =
+    client_format_name(link, CLIENT_FORMAT_NAME_LOG, &link_name_buffer);
 
+  /*
+   * Only syntactically valid entity prefixes are eligible for
+   * desynchronization recovery. Malformed prefixes are dropped.
+   */
   if (client_id_is_valid_sid(prefix) || server_is_valid_name(prefix))
   {
     sendto_one(link, ":%s SQUIT %s :Unknown server prefix",
@@ -109,6 +108,13 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
   if (IsDigit(prefix[0]))
   {
     log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
+              prefix, link_name);
+    return;
+  }
+
+  if (!valid_nickname(prefix, false))
+  {
+    log_write(LOG_TYPE_DEBUG, "Received message with invalid source prefix '%s' from %s",
               prefix, link_name);
     return;
   }

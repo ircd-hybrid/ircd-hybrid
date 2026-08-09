@@ -268,20 +268,19 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
     return true;
   }
 
-  /*
-   * Copy the prefix to 'prefix' assuming it terminates
-   * with SPACE (or NULL, which is an error, though).
-   */
   char *const prefix = ++ch;
   assert(prefix <= ctx->buffer_end);
 
   const size_t prefix_length = strcspn(prefix, " ");
-  char *prefix_end = prefix + prefix_length;
+  char *const prefix_end = prefix + prefix_length;
   assert(prefix_end <= ctx->buffer_end);
 
-  if (*prefix_end == ' ')
-    *prefix_end++ = '\0';
-  ch = prefix_end;
+  /* A prefixed message requires a non-empty prefix followed by SPACE. */
+  if (prefix_length == 0 || *prefix_end != ' ')
+    return false;
+
+  *prefix_end = '\0';
+  ch = prefix_end + 1;
 
   /*
    * Prefixes from local clients are parsed but not trusted. Only server links

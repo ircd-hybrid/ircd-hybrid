@@ -32,7 +32,6 @@
 
 typedef struct parse_context
 {
-  char *const buffer;
   const char *const buffer_end;
   char *buffer_cursor;
 
@@ -607,7 +606,6 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
   {
     .client = client,
     .source = client,
-    .buffer = buffer,
     .buffer_end = buffer_end,
     .buffer_cursor = buffer
   };

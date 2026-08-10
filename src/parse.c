@@ -384,6 +384,8 @@ _parse_identify_numeric(parse_context_t *ctx)
 {
   assert(ctx);
   assert(ctx->command_token);
+  assert(ctx->source);
+  assert(client_is_server(ctx->source));
 
   const char *const token = ctx->command_token;
   ctx->numeric = (token[0] - '0') * 100 +

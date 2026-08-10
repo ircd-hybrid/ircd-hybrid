@@ -261,18 +261,18 @@ _parse_extract_prefix(parse_context_t *ctx)
   assert(ctx->buffer_cursor);
   assert(ctx->buffer_cursor <= ctx->buffer_end);
 
-  char *ch = ctx->buffer_cursor;
-  while (*ch == ' ')
-    ++ch;
-  assert(ch <= ctx->buffer_end);
+  char *cursor = ctx->buffer_cursor;
+  while (*cursor == ' ')
+    ++cursor;
+  assert(cursor <= ctx->buffer_end);
 
-  if (*ch != ':')
+  if (*cursor != ':')
   {
-    ctx->buffer_cursor = ch;
+    ctx->buffer_cursor = cursor;
     return true;
   }
 
-  char *const prefix = ++ch;
+  char *const prefix = ++cursor;
   assert(prefix <= ctx->buffer_end);
 
   const size_t prefix_length = strcspn(prefix, " ");
@@ -284,14 +284,14 @@ _parse_extract_prefix(parse_context_t *ctx)
     return false;
 
   *prefix_end = '\0';
-  ch = prefix_end + 1;
+  cursor = prefix_end + 1;
 
-  while (*ch == ' ')
-    ++ch;
-  assert(ch <= ctx->buffer_end);
+  while (*cursor == ' ')
+    ++cursor;
+  assert(cursor <= ctx->buffer_end);
 
   ctx->prefix = prefix;
-  ctx->buffer_cursor = ch;
+  ctx->buffer_cursor = cursor;
   return true;
 }
 
@@ -556,24 +556,24 @@ _parse_split_parameters(parse_context_t *ctx)
     ctx->parv[ctx->parc++] = ctx->command->extra;
   }
 
-  char *s = ctx->buffer_cursor;
-  while (*s == ' ')
-    *s++ = '\0';
-  assert(s <= ctx->buffer_end);
+  char *cursor = ctx->buffer_cursor;
+  while (*cursor == ' ')
+    *cursor++ = '\0';
+  assert(cursor <= ctx->buffer_end);
 
-  while (*s && _parse_get_parameter_count(ctx) < parameter_limit)
+  while (*cursor && _parse_get_parameter_count(ctx) < parameter_limit)
   {
-    assert(s <= ctx->buffer_end);
+    assert(cursor <= ctx->buffer_end);
     assert(ctx->parc < IO_ARRAY_LENGTH(ctx->parv) - 1);
 
-    if (*s == ':')
+    if (*cursor == ':')
     {
       /* The rest is single parameter--can include blanks also. */
-      ctx->parv[ctx->parc++] = s + (ctx->numeric == 0);  /* Keep the colon if it's a numeric */
+      ctx->parv[ctx->parc++] = cursor + (ctx->numeric == 0);  /* Keep the colon if it's a numeric */
       break;
     }
 
-    ctx->parv[ctx->parc++] = s;
+    ctx->parv[ctx->parc++] = cursor;
 
     /*
      * If this is the final permitted parameter slot, leave the rest of
@@ -582,13 +582,13 @@ _parse_split_parameters(parse_context_t *ctx)
     if (_parse_get_parameter_count(ctx) >= parameter_limit)
       break;
 
-    while (*s && *s != ' ')
-      ++s;
-    assert(s <= ctx->buffer_end);
+    while (*cursor && *cursor != ' ')
+      ++cursor;
+    assert(cursor <= ctx->buffer_end);
 
-    while (*s == ' ')
-      *s++ = '\0';
-    assert(s <= ctx->buffer_end);
+    while (*cursor == ' ')
+      *cursor++ = '\0';
+    assert(cursor <= ctx->buffer_end);
   }
 
   _parse_assert_parameters_valid(ctx);

@@ -593,8 +593,9 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
 {
   assert(buffer && buffer_end);
   assert(buffer_end >= buffer);
-  assert((buffer_end - buffer) < IRCD_BUFSIZE);
+  assert((size_t)(buffer_end - buffer) < IRCD_BUFSIZE);
   assert(*buffer_end == '\0');
+  assert(memchr(buffer, '\0', (size_t)(buffer_end - buffer)) == NULL);
   assert(client && client_is_local(client));
   assert(client->nexthop);
   assert(client->command_handler < COMMAND_HANDLER_TYPE_COUNT);

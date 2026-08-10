@@ -264,7 +264,7 @@ _parse_token_is_numeric(const char *token)
 }
 
 static void
-_parse_handle_unknown_command_token(parse_context_t *ctx)
+_parse_handle_unknown_command_token(const parse_context_t *ctx)
 {
   assert(ctx);
   assert(ctx->command_token);

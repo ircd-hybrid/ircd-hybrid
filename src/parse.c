@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "io_string.h"
 #include "log.h"
@@ -39,8 +40,9 @@ typedef struct parse_context
   struct Client *source;
   struct Command *command;
 
-  unsigned int numeric;
+  const char *prefix;
   char *command_token;
+  unsigned int numeric;
 
   unsigned int parc;
   char *parv[PARSE_MAX_PARAMETERS + 2];  /* <command> + <parameters> + NULL */
@@ -253,12 +255,11 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
 }
 
 static bool
-_parse_extract_and_validate_prefix(parse_context_t *ctx)
+_parse_extract_prefix(parse_context_t *ctx)
 {
   assert(ctx);
   assert(ctx->buffer_cursor);
   assert(ctx->buffer_cursor <= ctx->buffer_end);
-  assert(ctx->client);
 
   char *ch = ctx->buffer_cursor;
   while (*ch == ' ')
@@ -285,64 +286,109 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
   *prefix_end = '\0';
   ch = prefix_end + 1;
 
-  /*
-   * Prefixes from local clients are parsed but not trusted. Only server links
-   * may identify a different logical source.
-   */
-  if (client_is_server(ctx->client))
-  {
-    struct Client *const source = client_find_entity(ctx->client, prefix);
-
-    /*
-     * Server prefixes must resolve to a known entity. Unknown prefixes are
-     * handled conservatively because they indicate stale state or bad routing.
-     */
-    if (source == NULL)
-    {
-      ++ServerStats.is_unpf;
-      _parse_handle_unknown_prefix(ctx->client, prefix);
-      return false;
-    }
-
-    assert(source->nexthop);
-
-    /*
-     * A prefixed source must be routed through the link that delivered the
-     * message. Anything else is a fake-direction violation and is dropped.
-     */
-    if (source->nexthop != ctx->client)
-    {
-      ++ServerStats.is_wrdi;
-
-      client_format_name_buffer_t expected_link_name_buffer;
-      client_format_name_buffer_t actual_link_name_buffer;
-      const char *const expected_link_name =
-        client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &expected_link_name_buffer);
-      const char *const actual_link_name =
-        client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &actual_link_name_buffer);
-
-      log_write(LOG_TYPE_DEBUG,
-                "Dropped fake-direction message with source '%s': expected via %s, received via %s",
-                source->name, expected_link_name, actual_link_name);
-      return false;
-    }
-
-    ctx->source = source;
-  }
-
   while (*ch == ' ')
     ++ch;
   assert(ch <= ctx->buffer_end);
 
+  ctx->prefix = prefix;
   ctx->buffer_cursor = ch;
   return true;
 }
 
 static bool
-_parse_token_is_numeric(const char *token, size_t token_length)
+_parse_resolve_source(parse_context_t *ctx)
+{
+  assert(ctx);
+  assert(ctx->client);
+  assert(ctx->source == ctx->client);
+  assert(ctx->command_token);
+  assert(ctx->command_token[0]);
+
+  /*
+   * Prefixes from local clients are parsed but not trusted. Only server links
+   * may identify a different logical source.
+   */
+  if (ctx->prefix == NULL || !client_is_server(ctx->client))
+    return true;
+
+  struct Client *const source = client_find_entity(ctx->client, ctx->prefix);
+
+  /*
+   * Server prefixes must resolve to a known entity. Unknown prefixes are
+   * handled conservatively because they indicate stale state or bad routing.
+   */
+  if (source == NULL)
+  {
+    ++ServerStats.is_unpf;
+    _parse_handle_unknown_prefix(ctx->client, ctx->prefix);
+    return false;
+  }
+
+  assert(source->nexthop);
+
+  /*
+   * A prefixed source must be routed through the link that delivered the
+   * message. Anything else is a fake-direction violation and is dropped.
+   */
+  if (source->nexthop != ctx->client)
+  {
+    ++ServerStats.is_wrdi;
+
+    client_format_name_buffer_t expected_link_name_buffer;
+    client_format_name_buffer_t actual_link_name_buffer;
+    const char *const expected_link_name =
+      client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &expected_link_name_buffer);
+    const char *const actual_link_name =
+      client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &actual_link_name_buffer);
+
+    log_write(LOG_TYPE_DEBUG,
+              "Dropped fake-direction message with source '%s': expected via %s, received via %s",
+              source->name, expected_link_name, actual_link_name);
+    return false;
+  }
+
+  ctx->source = source;
+  return true;
+}
+
+static bool
+_parse_extract_command_token(parse_context_t *ctx)
+{
+  assert(ctx);
+  assert(ctx->buffer_cursor);
+  assert(ctx->buffer_cursor <= ctx->buffer_end);
+
+  if (*ctx->buffer_cursor == '\0')
+  {
+    ++ServerStats.is_empt;
+    return false;
+  }
+
+  char *const token = ctx->buffer_cursor;
+  const size_t token_length = strcspn(token, " ");
+  char *token_end = token + token_length;
+
+  assert(token_end <= ctx->buffer_end);
+
+  if (token_length == 0)
+  {
+    ++ServerStats.is_empt;
+    return false;
+  }
+
+  if (*token_end == ' ')
+    *token_end++ = '\0';
+
+  ctx->command_token = token;
+  ctx->buffer_cursor = token_end;
+  return true;
+}
+
+static bool
+_parse_token_is_numeric(const char *token)
 {
   assert(token);
-  return token_length == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
+  return strlen(token) == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
 }
 
 static void
@@ -425,34 +471,11 @@ static bool
 _parse_identify_command_token(parse_context_t *ctx)
 {
   assert(ctx);
-  assert(ctx->buffer_cursor);
-  assert(ctx->buffer_cursor <= ctx->buffer_end);
+  assert(ctx->command_token);
+  assert(ctx->command_token[0]);
+  assert(ctx->source);
 
-  if (*ctx->buffer_cursor == '\0')
-  {
-    ++ServerStats.is_empt;
-    return false;
-  }
-
-  char *const token = ctx->buffer_cursor;
-  const size_t token_length = strcspn(token, " ");
-  char *token_end = token + token_length;
-
-  assert(token_end <= ctx->buffer_end);
-
-  if (token_length == 0)
-  {
-    ++ServerStats.is_empt;
-    return false;
-  }
-
-  if (*token_end == ' ')
-    *token_end++ = '\0';
-
-  ctx->command_token = token;
-  ctx->buffer_cursor = token_end;
-
-  if (_parse_token_is_numeric(ctx->command_token, token_length))
+  if (_parse_token_is_numeric(ctx->command_token))
   {
     if (!client_is_server(ctx->source))
     {
@@ -610,7 +633,13 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
     .buffer_cursor = buffer
   };
 
-  if (!_parse_extract_and_validate_prefix(&ctx))
+  if (!_parse_extract_prefix(&ctx))
+    return;
+
+  if (!_parse_extract_command_token(&ctx))
+    return;
+
+  if (!_parse_resolve_source(&ctx))
     return;
 
   if (!_parse_identify_command_token(&ctx))

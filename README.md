@@ -4,6 +4,11 @@ ircd-hybrid
 [![Build status](https://img.shields.io/github/actions/workflow/status/ircd-hybrid/ircd-hybrid/ci.yml?branch=8.2.x&color=425158&style=flat-square)](https://github.com/ircd-hybrid/ircd-hybrid/actions/workflows/ci.yml)
 [![Coverity scan](https://img.shields.io/coverity/scan/ircd-hybrid-ircd-hybrid?color=425158&style=flat-square)](https://scan.coverity.com/projects/ircd-hybrid-ircd-hybrid)
 =====
+
+<!-- hy-mt2-i18n:start -->
+**English** &middot; [中文](./README_zh-CN.md) &middot; [日本語](./README_ja.md) &middot; [Español](./README_es.md)
+<!-- hy-mt2-i18n:end -->
+
 A lightweight, high-performance internet relay chat daemon. Designed to be fast and reliable. Powering irc networks since 1997.
 
 

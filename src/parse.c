@@ -317,10 +317,16 @@ _parse_extract_and_validate_prefix(parse_context_t *ctx)
     {
       ++ServerStats.is_wrdi;
 
-      client_format_name_buffer_t client_name_buffer;
-      log_write(LOG_TYPE_DEBUG, "Fake direction: dropped message from %s[%s] via %s",
-                source->name, source->nexthop->name,
-                client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
+      client_format_name_buffer_t expected_link_name_buffer;
+      client_format_name_buffer_t actual_link_name_buffer;
+      const char *const expected_link_name =
+        client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &expected_link_name_buffer);
+      const char *const actual_link_name =
+        client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &actual_link_name_buffer);
+
+      log_write(LOG_TYPE_DEBUG,
+                "Dropped fake-direction message with source '%s': expected via %s, received via %s",
+                source->name, expected_link_name, actual_link_name);
       return false;
     }
 

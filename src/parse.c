@@ -49,6 +49,80 @@ typedef struct parse_context
 } parse_context_t;
 
 static bool
+_parse_extract_prefix(parse_context_t *ctx)
+{
+  assert(ctx);
+  assert(ctx->buffer_cursor);
+  assert(ctx->buffer_cursor <= ctx->buffer_end);
+
+  char *cursor = ctx->buffer_cursor;
+  while (*cursor == ' ')
+    ++cursor;
+  assert(cursor <= ctx->buffer_end);
+
+  if (*cursor != ':')
+  {
+    ctx->buffer_cursor = cursor;
+    return true;
+  }
+
+  char *const prefix = ++cursor;
+  assert(prefix <= ctx->buffer_end);
+
+  const size_t prefix_length = strcspn(prefix, " ");
+  char *const prefix_end = prefix + prefix_length;
+  assert(prefix_end <= ctx->buffer_end);
+
+  /* A prefixed message requires a non-empty prefix followed by SPACE. */
+  if (prefix_length == 0 || *prefix_end != ' ')
+    return false;
+
+  *prefix_end = '\0';
+  cursor = prefix_end + 1;
+
+  while (*cursor == ' ')
+    ++cursor;
+  assert(cursor <= ctx->buffer_end);
+
+  ctx->prefix = prefix;
+  ctx->buffer_cursor = cursor;
+  return true;
+}
+
+static bool
+_parse_extract_command_token(parse_context_t *ctx)
+{
+  assert(ctx);
+  assert(ctx->buffer_cursor);
+  assert(ctx->buffer_cursor <= ctx->buffer_end);
+
+  if (*ctx->buffer_cursor == '\0')
+  {
+    ++ServerStats.is_empt;
+    return false;
+  }
+
+  char *const token = ctx->buffer_cursor;
+  const size_t token_length = strcspn(token, " ");
+  char *token_end = token + token_length;
+
+  assert(token_end <= ctx->buffer_end);
+
+  if (token_length == 0)
+  {
+    ++ServerStats.is_empt;
+    return false;
+  }
+
+  if (*token_end == ' ')
+    *token_end++ = '\0';
+
+  ctx->command_token = token;
+  ctx->buffer_cursor = token_end;
+  return true;
+}
+
+static bool
 _parse_uid_is_routed_via_link(const struct Client *link, const char *uid)
 {
   assert(link);
@@ -126,175 +200,6 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
             prefix, link_name);
 }
 
-/*
- *
- *      parc    number of arguments ('command name' counted as one!)
- *      parv[0] pointer to 'command name' (may point to empty string) (not used)
- *      parv[1]..parv[parc-1]
- *              pointers to additional parameters, this is a NULL
- *              terminated list (parv[parc] == NULL).
- *
- * *WARNING*
- *      Numerics are mostly error reports. If there is something
- *      wrong with the message, just *DROP* it! Don't even think of
- *      sending back a neat error message -- big danger of creating
- *      a ping pong error message...
- *
- * Rewritten by Nemesi, Jan 1999, to support numeric nicks in parv[1]
- *
- * Called when we get a numeric message from a remote _server_ and we are
- * supposed to forward it somewhere. Note that we always ignore numerics sent
- * to 'me' and simply drop the message if we can't handle with this properly:
- * the savvy approach is NEVER generate an error in response to an... error :)
- */
-static void
-_parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
-{
-  assert(source);
-  assert(client_is_server(source));
-  assert(parv);
-  assert(parc > 0);
-  assert(parc <= PARSE_MAX_PARAMETERS + 1);
-  assert(parv[0]);
-  assert(parv[parc] == NULL);
-
-  if (parc < 2 || string_is_empty(parv[1]))
-    return;
-
-  assert(source->nexthop);
-
-  /*
-   * Numerics below 100 talk about the current 'connection', you're not
-   * connected to a remote server so it doesn't make sense to send them
-   * remotely - but the information they contain may be useful, so we
-   * remap them up. Weird, but true.  -- Isomer
-   */
-  if (numeric < 100)
-    numeric += 100;
-
-  const char *const name = parv[1];
-  const char *const text = (parc > 2) ? string_or_empty(parv[2]) : "";
-
-  /*
-   * Who should receive this message ? Will we do something with it ?
-   * Note that we use findUser functions, so the target can't be neither
-   * a server, nor a channel (?) nor a list of targets (?) .. u2.10
-   * should never generate numeric replies to non-users anyway
-   * Ahem... it can be a channel actually, csc bots use it :\ --Nem
-   */
-  if (IsChanPrefix(*name))
-  {
-    const struct Channel *const channel = channel_find(name);
-    if (channel == NULL)
-      return;
-
-    sendto_channel_butone(source, source, channel, 0, "%u %s %s", numeric, channel->name, text);
-  }
-  else
-  {
-    struct Client *const target = client_find_user(source, name);
-    if (target == NULL || target->nexthop == source->nexthop)
-      return;
-
-    /* Fake it for server hiding, if it's our client */
-    const bool hide_source =
-      client_is_local(target) &&
-      !client_is_oper(target) &&
-      (ConfigServerHide.hide_servers || client_is_hidden(source));
-    sendto_one_numeric(target, hide_source ? &me : source, numeric | SND_EXPLICIT, "%s", text);
-  }
-}
-
-static void
-_parse_handle_command(struct Command *command, struct Client *source, unsigned int parc, char *parv[])
-{
-  assert(command);
-  assert(command->name);
-  assert(source);
-  assert(source->nexthop);
-  assert(source->nexthop->command_handler < COMMAND_HANDLER_TYPE_COUNT);
-  assert(parv);
-  assert(parc > 0);
-  assert(parc <= PARSE_MAX_PARAMETERS + 1);
-  assert(parv[0]);
-  assert(parv[parc] == NULL);
-
-  ++command->count;
-  if (client_is_server(source->nexthop))
-    ++command->rcount;
-
-  const struct CommandHandler *const handler = &command->handlers[source->nexthop->command_handler];
-  assert(handler->handler);
-  assert(handler->args_min <= PARSE_MAX_PARAMETERS + 1);
-  assert(handler->args_max == 0 || handler->args_max <= PARSE_MAX_PARAMETERS);
-
-  if (handler->end_grace_period && client_is_local_user(source))
-    client_input_flood_endgrace(source);
-
-  if (handler->args_min &&
-      ((parc < handler->args_min) ||
-       (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
-  {
-    if (client_is_server(source->nexthop))
-    {
-      client_format_name_buffer_t link_name_buffer;
-      log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
-                command->name, handler->args_min, parc,
-                client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &link_name_buffer));
-
-      client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %u, got %u)",
-                      command->name, handler->args_min, parc);
-    }
-    else
-      sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
-
-    return;
-  }
-
-  handler->handler(source, parc, parv);
-}
-
-static bool
-_parse_extract_prefix(parse_context_t *ctx)
-{
-  assert(ctx);
-  assert(ctx->buffer_cursor);
-  assert(ctx->buffer_cursor <= ctx->buffer_end);
-
-  char *cursor = ctx->buffer_cursor;
-  while (*cursor == ' ')
-    ++cursor;
-  assert(cursor <= ctx->buffer_end);
-
-  if (*cursor != ':')
-  {
-    ctx->buffer_cursor = cursor;
-    return true;
-  }
-
-  char *const prefix = ++cursor;
-  assert(prefix <= ctx->buffer_end);
-
-  const size_t prefix_length = strcspn(prefix, " ");
-  char *const prefix_end = prefix + prefix_length;
-  assert(prefix_end <= ctx->buffer_end);
-
-  /* A prefixed message requires a non-empty prefix followed by SPACE. */
-  if (prefix_length == 0 || *prefix_end != ' ')
-    return false;
-
-  *prefix_end = '\0';
-  cursor = prefix_end + 1;
-
-  while (*cursor == ' ')
-    ++cursor;
-  assert(cursor <= ctx->buffer_end);
-
-  ctx->prefix = prefix;
-  ctx->buffer_cursor = cursor;
-  return true;
-}
-
 static bool
 _parse_resolve_source(parse_context_t *ctx)
 {
@@ -348,39 +253,6 @@ _parse_resolve_source(parse_context_t *ctx)
   }
 
   ctx->source = source;
-  return true;
-}
-
-static bool
-_parse_extract_command_token(parse_context_t *ctx)
-{
-  assert(ctx);
-  assert(ctx->buffer_cursor);
-  assert(ctx->buffer_cursor <= ctx->buffer_end);
-
-  if (*ctx->buffer_cursor == '\0')
-  {
-    ++ServerStats.is_empt;
-    return false;
-  }
-
-  char *const token = ctx->buffer_cursor;
-  const size_t token_length = strcspn(token, " ");
-  char *token_end = token + token_length;
-
-  assert(token_end <= ctx->buffer_end);
-
-  if (token_length == 0)
-  {
-    ++ServerStats.is_empt;
-    return false;
-  }
-
-  if (*token_end == ' ')
-    *token_end++ = '\0';
-
-  ctx->command_token = token;
-  ctx->buffer_cursor = token_end;
   return true;
 }
 
@@ -592,6 +464,134 @@ _parse_split_parameters(parse_context_t *ctx)
   }
 
   _parse_assert_parameters_valid(ctx);
+}
+
+static void
+_parse_handle_command(struct Command *command, struct Client *source, unsigned int parc, char *parv[])
+{
+  assert(command);
+  assert(command->name);
+  assert(source);
+  assert(source->nexthop);
+  assert(source->nexthop->command_handler < COMMAND_HANDLER_TYPE_COUNT);
+  assert(parv);
+  assert(parc > 0);
+  assert(parc <= PARSE_MAX_PARAMETERS + 1);
+  assert(parv[0]);
+  assert(parv[parc] == NULL);
+
+  ++command->count;
+  if (client_is_server(source->nexthop))
+    ++command->rcount;
+
+  const struct CommandHandler *const handler = &command->handlers[source->nexthop->command_handler];
+  assert(handler->handler);
+  assert(handler->args_min <= PARSE_MAX_PARAMETERS + 1);
+  assert(handler->args_max == 0 || handler->args_max <= PARSE_MAX_PARAMETERS);
+
+  if (handler->end_grace_period && client_is_local_user(source))
+    client_input_flood_endgrace(source);
+
+  if (handler->args_min &&
+      ((parc < handler->args_min) ||
+       (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
+  {
+    if (client_is_server(source->nexthop))
+    {
+      client_format_name_buffer_t link_name_buffer;
+      log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
+                command->name, handler->args_min, parc,
+                client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &link_name_buffer));
+
+      client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %u, got %u)",
+                      command->name, handler->args_min, parc);
+    }
+    else
+      sendto_one_numeric(source, &me, ERR_NEEDMOREPARAMS, command->name);
+
+    return;
+  }
+
+  handler->handler(source, parc, parv);
+}
+
+/*
+ *
+ *      parc    number of arguments ('command name' counted as one!)
+ *      parv[0] pointer to 'command name' (may point to empty string) (not used)
+ *      parv[1]..parv[parc-1]
+ *              pointers to additional parameters, this is a NULL
+ *              terminated list (parv[parc] == NULL).
+ *
+ * *WARNING*
+ *      Numerics are mostly error reports. If there is something
+ *      wrong with the message, just *DROP* it! Don't even think of
+ *      sending back a neat error message -- big danger of creating
+ *      a ping pong error message...
+ *
+ * Rewritten by Nemesi, Jan 1999, to support numeric nicks in parv[1]
+ *
+ * Called when we get a numeric message from a remote _server_ and we are
+ * supposed to forward it somewhere. Note that we always ignore numerics sent
+ * to 'me' and simply drop the message if we can't handle with this properly:
+ * the savvy approach is NEVER generate an error in response to an... error :)
+ */
+static void
+_parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
+{
+  assert(source);
+  assert(client_is_server(source));
+  assert(parv);
+  assert(parc > 0);
+  assert(parc <= PARSE_MAX_PARAMETERS + 1);
+  assert(parv[0]);
+  assert(parv[parc] == NULL);
+
+  if (parc < 2 || string_is_empty(parv[1]))
+    return;
+
+  assert(source->nexthop);
+
+  /*
+   * Numerics below 100 talk about the current 'connection', you're not
+   * connected to a remote server so it doesn't make sense to send them
+   * remotely - but the information they contain may be useful, so we
+   * remap them up. Weird, but true.  -- Isomer
+   */
+  if (numeric < 100)
+    numeric += 100;
+
+  const char *const name = parv[1];
+  const char *const text = (parc > 2) ? string_or_empty(parv[2]) : "";
+
+  /*
+   * Who should receive this message ? Will we do something with it ?
+   * Note that we use findUser functions, so the target can't be neither
+   * a server, nor a channel (?) nor a list of targets (?) .. u2.10
+   * should never generate numeric replies to non-users anyway
+   * Ahem... it can be a channel actually, csc bots use it :\ --Nem
+   */
+  if (IsChanPrefix(*name))
+  {
+    const struct Channel *const channel = channel_find(name);
+    if (channel == NULL)
+      return;
+
+    sendto_channel_butone(source, source, channel, 0, "%u %s %s", numeric, channel->name, text);
+  }
+  else
+  {
+    struct Client *const target = client_find_user(source, name);
+    if (target == NULL || target->nexthop == source->nexthop)
+      return;
+
+    /* Fake it for server hiding, if it's our client */
+    const bool hide_source =
+      client_is_local(target) &&
+      !client_is_oper(target) &&
+      (ConfigServerHide.hide_servers || client_is_hidden(source));
+    sendto_one_numeric(target, hide_source ? &me : source, numeric | SND_EXPLICIT, "%s", text);
+  }
 }
 
 static void

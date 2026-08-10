@@ -82,46 +82,46 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
    */
   if (client_id_is_valid_sid(prefix) || server_is_valid_name(prefix))
   {
-    sendto_one(link, ":%s SQUIT %s :Unknown server prefix",
+    sendto_one(link, ":%s SQUIT %s :Unknown source server",
                me.id, prefix);
-    log_write(LOG_TYPE_DEBUG, "Received message with unknown server prefix '%s' from %s",
+    log_write(LOG_TYPE_DEBUG, "Sent SQUIT for unknown source server '%s' via %s",
               prefix, link_name);
     return;
   }
 
   if (client_id_is_valid_uid(prefix))
   {
-    if (_parse_uid_is_routed_via_link(link, prefix))
+    if (!_parse_uid_is_routed_via_link(link, prefix))
     {
-      sendto_one(link, ":%s KILL %s :%s (Unknown client ID)",
-                 me.id, prefix, me.name);
-      log_write(LOG_TYPE_DEBUG, "Received message with unknown client ID '%s' from %s",
+      log_write(LOG_TYPE_DEBUG, "Dropped unroutable source client ID '%s' via %s",
                 prefix, link_name);
+      return;
     }
-    else
-      log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
-                prefix, link_name);
 
+    sendto_one(link, ":%s KILL %s :%s (Unknown source client ID)",
+               me.id, prefix, me.name);
+    log_write(LOG_TYPE_DEBUG, "Sent KILL for unknown source client ID '%s' via %s",
+              prefix, link_name);
     return;
   }
 
   if (IsDigit(prefix[0]))
   {
-    log_write(LOG_TYPE_DEBUG, "Received message with invalid numeric prefix '%s' from %s",
+    log_write(LOG_TYPE_DEBUG, "Dropped invalid numeric source prefix '%s' via %s",
               prefix, link_name);
     return;
   }
 
   if (!valid_nickname(prefix, false))
   {
-    log_write(LOG_TYPE_DEBUG, "Received message with invalid source prefix '%s' from %s",
+    log_write(LOG_TYPE_DEBUG, "Dropped invalid source prefix '%s' via %s",
               prefix, link_name);
     return;
   }
 
-  sendto_one(link, ":%s KILL %s :%s (Unknown nickname)",
+  sendto_one(link, ":%s KILL %s :%s (Unknown source nickname)",
              me.id, prefix, me.name);
-  log_write(LOG_TYPE_DEBUG, "Received message with unknown nickname '%s' from %s",
+  log_write(LOG_TYPE_DEBUG, "Sent KILL for unknown source nickname '%s' via %s",
             prefix, link_name);
 }
 

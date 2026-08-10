@@ -405,12 +405,11 @@ _parse_identify_numeric(parse_context_t *ctx)
 }
 
 static bool
-_parse_identify_command(parse_context_t *ctx, size_t token_length)
+_parse_identify_command(parse_context_t *ctx)
 {
   assert(ctx);
   assert(ctx->command_token);
   assert(ctx->command_token[0]);
-  assert(token_length > 0);
 
   ctx->command = command_find(ctx->command_token);
   if (ctx->command == NULL)
@@ -419,18 +418,7 @@ _parse_identify_command(parse_context_t *ctx, size_t token_length)
     return false;
   }
 
-  if (ctx->buffer_cursor < ctx->buffer_end)
-  {
-    /*
-     * buffer_cursor points after the first command/parameter separator. That
-     * separator was replaced with NUL while extracting the command token, so
-     * add it back to account for the full command payload.
-     */
-    ctx->command->bytes += token_length + 1 + (size_t)(ctx->buffer_end - ctx->buffer_cursor);
-  }
-  else
-    ctx->command->bytes += token_length;
-
+  ctx->command->bytes += (size_t)(ctx->buffer_end - ctx->command_token);
   return true;
 }
 
@@ -476,7 +464,7 @@ _parse_identify_command_token(parse_context_t *ctx)
     return _parse_identify_numeric(ctx);
   }
 
-  return _parse_identify_command(ctx, token_length);
+  return _parse_identify_command(ctx);
 }
 
 static unsigned int

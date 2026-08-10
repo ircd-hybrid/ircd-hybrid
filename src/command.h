@@ -71,7 +71,7 @@ struct Command
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
-  size_t bytes;  /**< Bytes received for this command */
+  size_t bytes;  /**< Bytes received from the command token through the end of the message. */
   struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];  /**< Command dispatch handlers. */
 };
 

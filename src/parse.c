@@ -150,16 +150,14 @@ static void
 _parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
 {
   assert(source);
+  assert(client_is_server(source));
   assert(parv);
   assert(parc > 0);
   assert(parc <= PARSE_MAX_PARAMETERS + 1);
   assert(parv[0]);
   assert(parv[parc] == NULL);
 
-  /*
-   * Avoid trash, we need it to come from a server and have a target
-   */
-  if (!client_is_server(source) || parc < 2 || string_is_empty(parv[1]))
+  if (parc < 2 || string_is_empty(parv[1]))
     return;
 
   assert(source->nexthop);
@@ -392,11 +390,11 @@ _parse_identify_numeric(parse_context_t *ctx)
                  (token[1] - '0') * 10 +
                  (token[2] - '0');
 
-  if (ctx->numeric < 1 || ctx->numeric > 999)
+  if (ctx->numeric == 0)
   {
     client_format_name_buffer_t client_name_buffer;
-    log_write(LOG_TYPE_DEBUG, "Unknown numeric from server: %u via %s",
-              ctx->numeric, client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
+    log_write(LOG_TYPE_DEBUG, "Dropped invalid numeric '%s' via %s",
+              token, client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
     return false;
   }
 
@@ -466,7 +464,15 @@ _parse_identify_command_token(parse_context_t *ctx)
   ctx->buffer_cursor = token_end;
 
   if (_parse_token_is_numeric(ctx->command_token, token_length))
+  {
+    if (!client_is_server(ctx->source))
+    {
+      _parse_handle_unknown_command_token(ctx);
+      return false;
+    }
+
     return _parse_identify_numeric(ctx);
+  }
 
   return _parse_identify_command(ctx, token_length);
 }

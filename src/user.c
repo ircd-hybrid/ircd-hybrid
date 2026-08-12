@@ -39,7 +39,6 @@
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "isupport.h"
-#include "listener.h"
 #include "monitor.h"
 #include "motd.h"
 #include "numeric.h"

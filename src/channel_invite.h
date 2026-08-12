@@ -9,6 +9,7 @@
 
 #ifndef INCLUDED_channel_invite_h
 #define INCLUDED_channel_invite_h
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "list.h"

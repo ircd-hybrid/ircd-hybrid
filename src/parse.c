@@ -105,7 +105,6 @@ _parse_extract_command_token(parse_context_t *ctx)
   char *const token = ctx->buffer_cursor;
   const size_t token_length = strcspn(token, " ");
   char *token_end = token + token_length;
-
   assert(token_end <= ctx->buffer_end);
 
   if (token_length == 0)

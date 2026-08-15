@@ -321,7 +321,6 @@ static void
 _server_connect_callback(fde_t *fde, int status, void *data_)
 {
   struct Client *const client = data_;
-  assert(fde);
   assert(client && client_is_local(client));
   assert(client_is_connecting(client));
 
@@ -336,11 +335,9 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
     return;
   }
 
+  /* COMM_OK, so continue the connection procedure */
   assert(fde);
   assert(client->connection->fde == fde);
-
-  /* COMM_OK, so continue the connection procedure */
-  /* Get the connect {} block */
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)

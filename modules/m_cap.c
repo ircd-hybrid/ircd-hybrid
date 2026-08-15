@@ -228,7 +228,7 @@ static void
 cap_ls(struct Client *source, const char *arg)
 {
   if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
-    source->connection->registration |= REG_NEED_CAP;
+    source->connection->registration_flags |= REG_NEED_CAP;
 
   if (arg && atoi(arg) >= 302)
   {
@@ -246,7 +246,7 @@ cap_req(struct Client *source, const char *arg)
   uint32_t cs = source->connection->cap_flags;  /* Enabled capabilities */
 
   if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
-    source->connection->registration |= REG_NEED_CAP;
+    source->connection->registration_flags |= REG_NEED_CAP;
 
   /* Walk through the capabilities list... */
   for (const char *cl = arg; cl; )
@@ -295,10 +295,10 @@ cap_end(struct Client *source, const char *arg)
     return;  /* So just ignore the message... */
 
   /* Capability negotiation is now done... */
-  source->connection->registration &= ~REG_NEED_CAP;
+  source->connection->registration_flags &= ~REG_NEED_CAP;
 
   /* If client is now done... */
-  if (source->connection->registration == 0)
+  if (source->connection->registration_flags == 0)
     user_register_local(source);
 }
 

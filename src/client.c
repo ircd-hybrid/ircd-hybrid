@@ -176,20 +176,20 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
   assert(client && client_is_local(client));
   assert(type == CLIENT_CLASS_BASE || type == CLIENT_CLASS_OPER);
 
-  struct ClassItem **class_ptr_location = NULL;
+  struct ClassItem **class_slot = NULL;
   if (type == CLIENT_CLASS_BASE)
-    class_ptr_location = &client->connection->base_class;
+    class_slot = &client->connection->base_class;
   else
-    class_ptr_location = &client->connection->oper_class;
+    class_slot = &client->connection->oper_class;
 
-  struct ClassItem *const old_class = *class_ptr_location;
+  struct ClassItem *const old_class = *class_slot;
   if (old_class == new_class)
     return;
 
   class_incref(new_class);
   class_decref(old_class);
 
-  *class_ptr_location = new_class;
+  *class_slot = new_class;
 }
 
 void
@@ -239,7 +239,7 @@ client_create_local(void)
   client->connection->last_receive_time = \
   client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  client->connection->registration = REG_INIT;
+  client->connection->registration_flags = REG_INIT;
   client->connection->activity_timeout_event =
     event_create(ircd_event_manager, "client_activity_timeout", client_activity_timeout_handler, 1, true, client, NULL);
   /* Local entity topology: The logical parent is this server; the entity is its own nexthop. */
@@ -281,8 +281,8 @@ _client_destroy_local(struct Client *client)
   assert(list_is_empty(&client->connection->accept_list));
   assert(list_is_empty(&client->connection->monitor_list));
   assert(list_is_empty(&client->connection->channel_invite_list));
-  assert(dbuf_queue_is_empty(&client->connection->buf_recvq));
-  assert(dbuf_queue_is_empty(&client->connection->buf_sendq));
+  assert(dbuf_queue_is_empty(&client->connection->recv_queue));
+  assert(dbuf_queue_is_empty(&client->connection->send_queue));
   assert(client->connection->base_class == NULL);
   assert(client->connection->oper_class == NULL);
   assert(server_conf_get(client) == NULL);
@@ -442,8 +442,8 @@ _client_exit_teardown_connection(struct Client *client)
   }
 
   /* Free transport-level buffer memory now that the socket is gone. */
-  dbuf_queue_clear(&client->connection->buf_sendq);
-  dbuf_queue_clear(&client->connection->buf_recvq);
+  dbuf_queue_clear(&client->connection->send_queue);
+  dbuf_queue_clear(&client->connection->recv_queue);
 }
 
 static void
@@ -785,8 +785,8 @@ client_schedule_exit(struct Client *client, const char *reason)
   io_free(client->connection->scheduled_exit_reason);
   client->connection->scheduled_exit_reason = io_strdup(reason);
 
-  dbuf_queue_clear(&client->connection->buf_recvq);
-  dbuf_queue_clear(&client->connection->buf_sendq);
+  dbuf_queue_clear(&client->connection->recv_queue);
+  dbuf_queue_clear(&client->connection->send_queue);
 
   assert(list_find(&abort_list, client) == NULL);
   list_add_tail(client, list_make_node(), &abort_list);

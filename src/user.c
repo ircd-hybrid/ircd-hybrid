@@ -129,7 +129,7 @@ user_introduce(struct Client *client)
 
   sendto_servers(client, 0, 0, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
                  client->uplink->id, client->name, client->hopcount + 1,
-                 client->tsinfo, user_mode_to_str(client->user_mode_flags),
+                 client->nick_timestamp, user_mode_to_str(client->user_mode_flags),
                  client->username, client->host, client->realhost,
                  client->sockhost, client->id, client->account, client->info);
 
@@ -221,7 +221,7 @@ void
 user_register_local(struct Client *client)
 {
   assert(client == client->nexthop);
-  assert(client->connection->registration == 0);
+  assert(client->connection->registration_flags == 0);
   assert(client_is_local(client));
   assert(client_is_unknown(client));
   assert(list_find(&unknown_list, client));

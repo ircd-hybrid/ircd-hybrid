@@ -68,7 +68,7 @@ _send_block_to_client(struct Client *to, struct dbuf_block *block)
   if (client_is_dead(to))
     return;
 
-  struct dbuf_queue *const sendq = &to->connection->buf_sendq;
+  struct dbuf_queue *const sendq = &to->connection->send_queue;
 
   const size_t max_sendq = client_get_max_sendq(to);
   const size_t new_sendq_size = dbuf_queue_length(sendq) + dbuf_block_length(block);
@@ -160,7 +160,7 @@ send_queued_write(struct Client *to)
     return;  /* no use calling send() now */
 
   struct dbuf_view view;
-  while (dbuf_queue_peek_head(&to->connection->buf_sendq, &view))
+  while (dbuf_queue_peek_head(&to->connection->send_queue, &view))
   {
     assert(view.data);
     assert(view.length > 0);
@@ -199,7 +199,7 @@ send_queued_write(struct Client *to)
 
     assert((size_t)retlen <= view.length);
 
-    dbuf_queue_consume(&to->connection->buf_sendq, retlen);
+    dbuf_queue_consume(&to->connection->send_queue, retlen);
 
     /* We have some data written .. update counters */
     to->connection->send.bytes += retlen;

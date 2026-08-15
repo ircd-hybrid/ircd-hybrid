@@ -160,7 +160,7 @@ _client_input_read_next_line(struct Client *client, char *line_buffer, size_t *l
   assert(line_length);
 
   const enum client_input_line_result result =
-    _client_input_extract_recvq_line(&client->connection->buf_recvq, line_buffer, line_length);
+    _client_input_extract_recvq_line(&client->connection->recv_queue, line_buffer, line_length);
 
   switch (result)
   {

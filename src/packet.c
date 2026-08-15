@@ -71,7 +71,7 @@ read_packet(fde_t *fde, void *data_)
       return;
     }
 
-    dbuf_queue_append(&client->connection->buf_recvq, raw_receive_buffer, length);
+    dbuf_queue_append(&client->connection->recv_queue, raw_receive_buffer, length);
 
     client->connection->last_receive_time = io_time_get(IO_TIME_MONOTONIC_SEC);
     client->connection->ping_sent_time = 0;
@@ -85,7 +85,7 @@ read_packet(fde_t *fde, void *data_)
 
     /* Check to make sure we're not flooding */
     const unsigned int max_recvq = client_get_max_recvq(client);
-    const size_t current_recvq = dbuf_queue_length(&client->connection->buf_recvq);
+    const size_t current_recvq = dbuf_queue_length(&client->connection->recv_queue);
     if (current_recvq > max_recvq)
     {
       client_exit_fmt(client, "Max RecvQ exceeded (%zu > %u)", current_recvq, max_recvq);

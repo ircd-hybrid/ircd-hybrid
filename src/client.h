@@ -110,7 +110,7 @@ enum
 struct Connection
 {
   list_node_t node;
-  uint32_t registration;
+  uint32_t registration_flags;
   uint32_t cap_flags;  /**< Bitmask of user-announced CAP features. */
   uint32_t capab_flags;  /**< Bitmask of server-announced CAPAB features. */
   uint32_t oper_flags;  /**< Bitmask of IRC Operator privilege flags. */
@@ -129,8 +129,8 @@ struct Connection
   uintmax_t last_join_time;  /**< When this user last joined a channel; monotonic time */
   uintmax_t last_part_time;  /**< When this user last left a channel; monotonic time */
   struct ListTask *list_task;  /**< State for an in-progress /LIST command. */
-  struct dbuf_queue buf_sendq;  /**< The queue of data waiting to be written to the socket. */
-  struct dbuf_queue buf_recvq;  /**< The queue of data received from the socket, awaiting parsing. */
+  struct dbuf_queue send_queue;  /**< The queue of data waiting to be written to the socket. */
+  struct dbuf_queue recv_queue;  /**< The queue of data received from the socket, awaiting parsing. */
 
   struct
   {
@@ -145,7 +145,7 @@ struct Connection
   } away, invite, knock, nick;
 
   struct ClassItem *base_class;  /**< The class assigned on initial connection. */
-  struct ClassItem *oper_class;  /**< The class assigned on OPER. NULL if not an oper. */
+  struct ClassItem *oper_class;  /**< Operator class currently overriding the base class, or NULL. */
   struct LookupRequest *lookup_request;  /**< State for the initial async DNS/ident lookup. */
   struct Listener *listener;  /**< The listener this connection was accepted from. */
   list_t accept_list;  /**< Users I'll allow to talk to me */
@@ -169,14 +169,14 @@ struct Client
   list_node_t global_node;  /**< Node for membership in global_client_list or global_server_list. */
   list_node_t uplink_node;  /**< Node for membership in an uplink's child_*_list. */
 
-  struct Connection *connection;  /**< Connection structure associated with this client */
+  struct Connection *connection;  /**< Local connection state, or NULL for remote entities. */
   struct Client *name_hash_next;  /**< Next entry in the nickname/servername hash table bucket. */
   struct Client *id_hash_next;  /**< Next entry in the UID/SID hash table bucket. */
   struct Server *server;  /**< If non-NULL, points to server-specific data. */
   struct Client *uplink;  /**< The server this entity is directly connected to. For local clients, this is &me. */
   struct Client *nexthop;   /**< The directly-connected server through which traffic for this entity flows. */
 
-  uintmax_t tsinfo;  /**< Timestamp on this nick; real time */
+  uintmax_t nick_timestamp;  /**< Timestamp associated with the current nickname. */
   uint32_t hopcount;  /**< The number of server hops from here to the entity. */
   uint32_t flags;  /**< Client flags */
   uint64_t user_mode_flags;  /**< User modes this user has set */
@@ -215,12 +215,7 @@ struct Client
   char realhost[HOSTLEN + 1];  /**< The forward-confirmed reverse DNS hostname of the connection. */
 
   char info[REALLEN + 1];  /**< Free-form client information, usually the realname/gecos field. */
-
-  /** client->sockhost contains the ip address gotten from the socket as a
-   * string, this field should be considered read-only once the connection
-   * has been made. (set in s_bsd.c only)
-   */
-  char sockhost[HOSTIPLEN + 1];  /**< This is the host name from the socket ip address as string */
+  char sockhost[HOSTIPLEN + 1];  /**< Numeric address of the connection represented as text. */
 };
 
 extern struct Client me;

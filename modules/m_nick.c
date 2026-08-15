@@ -135,12 +135,12 @@ set_initial_nick(struct Client *source, const char *nick)
 {
   bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
-    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
+    source->nick_timestamp = io_time_get(IO_TIME_REALTIME_SEC);
 
   client_update_name(source, nick);
 
-  source->connection->registration &= ~REG_NEED_NICK;
-  if (source->connection->registration == 0)
+  source->connection->registration_flags &= ~REG_NEED_NICK;
+  if (source->connection->registration_flags == 0)
     user_register_local(source);
 }
 
@@ -168,7 +168,7 @@ nick_change_local(struct Client *source, const char *nick)
   bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
   {
-    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
+    source->nick_timestamp = io_time_get(IO_TIME_REALTIME_SEC);
 
     clear_ban_cache_list(&source->channel_member_list);
 
@@ -188,7 +188,7 @@ nick_change_local(struct Client *source, const char *nick)
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, nick, source->tsinfo);
+                 source->id, nick, source->nick_timestamp);
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, nick);
 
@@ -223,8 +223,8 @@ nick_change_remote(struct Client *source, char *parv[])
   bool samenick = io_strcasecmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
-    source->tsinfo = strtoumax(parv[2], NULL, 10);
-    assert(source->tsinfo);
+    source->nick_timestamp = strtoumax(parv[2], NULL, 10);
+    assert(source->nick_timestamp);
 
     user_mode_unset_flag(source, UMODE_REGISTERED);
 
@@ -237,7 +237,7 @@ nick_change_remote(struct Client *source, char *parv[])
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, new_nick, source->tsinfo);
+                 source->id, new_nick, source->nick_timestamp);
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, new_nick);
 
@@ -274,7 +274,7 @@ uid_from_server(struct Client *source, int parc, char *parv[])
 {
   struct Client *const client = client_create_remote(source);
   client->hopcount = atoi(parv[2]);
-  client->tsinfo = strtoumax(parv[3], NULL, 10);
+  client->nick_timestamp = strtoumax(parv[3], NULL, 10);
 
   strlcpy(client->name, parv[1], sizeof(client->name));
   strlcpy(client->username, parv[5], sizeof(client->username));
@@ -340,7 +340,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   /* Server introducing new nick */
 
   /* If their TS's are the same, kill both */
-  if (newts == target->tsinfo)
+  if (newts == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(both killed)",
@@ -369,7 +369,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
    * and the new users ts is older, or the users are different and the
    * new users ts is newer, ignore the new client and let it do the kill
    */
-  if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
+  if ((sameuser && newts < target->nick_timestamp) || (sameuser == false && newts > target->nick_timestamp))
   {
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -421,7 +421,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   assert(newts);
 
   /* It's a client changing nick and causing a collide */
-  if (newts == target->tsinfo)
+  if (newts == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick change collision from %s to %s(%s <- %s)(both killed)",
@@ -447,7 +447,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   /* The timestamps are different */
   const bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
                         io_strcasecmp(target->sockhost, source->sockhost) == 0;
-  if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
+  if ((sameuser && newts < target->nick_timestamp) || (sameuser == false && newts > target->nick_timestamp))
   {
     if (sameuser)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,

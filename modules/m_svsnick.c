@@ -110,7 +110,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
                                target->name, target->username, target->host, new_nick);
 
   client_update_name(target, new_nick);
-  target->tsinfo = new_ts;
+  target->nick_timestamp = new_ts;
 
   monitor_notify_signon(target);
 }

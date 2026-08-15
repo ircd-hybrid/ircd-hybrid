@@ -85,7 +85,7 @@ mr_pong(struct Client *source, int parc, char *parv[])
 
   client_set_flag(source, FLAGS_PING_COOKIE);
 
-  if (source->connection->registration == 0)
+  if (source->connection->registration_flags == 0)
     user_register_local(source);
 }
 

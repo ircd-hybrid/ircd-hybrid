@@ -40,7 +40,7 @@ static inline bool
 _list_task_is_congested(const struct ListTask *task)
 {
   const unsigned int max_sendq = client_get_max_sendq(task->client);
-  return dbuf_queue_length(&task->client->connection->buf_sendq) > (max_sendq / 2);
+  return dbuf_queue_length(&task->client->connection->send_queue) > (max_sendq / 2);
 }
 
 static void

@@ -213,7 +213,7 @@ _server_burst_send_client(struct Client *client, const struct Client *target)
   sendto_one(client, ":%s UID %s %u %ju %s %s %s %s %s %s %s :%s",
              target->uplink->id,
              target->name, target->hopcount + 1,
-             target->tsinfo, user_mode_to_str(target->user_mode_flags),
+             target->nick_timestamp, user_mode_to_str(target->user_mode_flags),
              target->username, target->host, target->realhost,
              target->sockhost, target->id,
              target->account, target->info);

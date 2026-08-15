@@ -57,9 +57,9 @@ mr_user(struct Client *source, int parc, char *parv[])
   }
 
   strlcpy(source->info, realname, sizeof(source->info));
-  source->connection->registration &= ~REG_NEED_USER;
+  source->connection->registration_flags &= ~REG_NEED_USER;
 
-  if (source->connection->registration == 0)
+  if (source->connection->registration_flags == 0)
     user_register_local(source);
 }
 

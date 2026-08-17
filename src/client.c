@@ -176,12 +176,9 @@ client_set_class(struct Client *client, struct ClassItem *new_class, enum client
   assert(client && client_is_local(client));
   assert(type == CLIENT_CLASS_BASE || type == CLIENT_CLASS_OPER);
 
-  struct ClassItem **class_slot = NULL;
-  if (type == CLIENT_CLASS_BASE)
-    class_slot = &client->connection->base_class;
-  else
-    class_slot = &client->connection->oper_class;
-
+  struct ClassItem **const class_slot =
+    (type == CLIENT_CLASS_BASE) ? &client->connection->base_class :
+                                  &client->connection->oper_class;
   struct ClassItem *const old_class = *class_slot;
   if (old_class == new_class)
     return;

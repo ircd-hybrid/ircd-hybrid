@@ -45,18 +45,13 @@ static void _links_cache_read_file(void);
 static void _links_cache_clear_buffer(list_t *buffer);
 
 static void
-_links_cache_free_entry(void *data)
+_links_cache_destroy_entry(links_cache_entry_t *entry)
 {
-  if (data == NULL)
-    return;
+  assert(entry);
 
-  links_cache_entry_t *entry = data;
   io_free(entry->name);
-  entry->name = NULL;
   io_free(entry->uplink_name);
-  entry->uplink_name = NULL;
   io_free(entry->description);
-  entry->description = NULL;
   io_free(entry);
 }
 
@@ -125,7 +120,7 @@ _links_cache_clear_buffer(list_t *buffer)
     links_cache_entry_t *const entry = node->data;
     assert(entry);
 
-    _links_cache_free_entry(entry);
+    _links_cache_destroy_entry(entry);
   }
 }
 

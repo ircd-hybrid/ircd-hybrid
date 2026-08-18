@@ -42,6 +42,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include "io_parse.h"
 #include "memory.h"
 #include "patricia.h"
 
@@ -153,16 +154,22 @@ ascii2prefix(int family, const char *string)
     if (length >= sizeof(save))
       return NULL;
 
-    bitlen = atoi(cp + 1);
+    unsigned int parsed_bitlen;
+    const io_parse_status_t status = io_parse_uint(cp + 1, &parsed_bitlen);
+    if (status == IO_PARSE_RANGE)
+      bitlen = maxbitlen;
+    else if (status != IO_PARSE_OK)
+      return NULL;
+    else if (parsed_bitlen > (unsigned int)maxbitlen)
+      bitlen = maxbitlen;
+    else
+      bitlen = (int)parsed_bitlen;
 
     /* Copy the string to save. Avoid destroying the string */
     memcpy(save, string, length);
     save[length] = '\0';
 
     string = save;
-
-    if (bitlen < 0 || bitlen > maxbitlen)
-      bitlen = maxbitlen;
   }
   else
     bitlen = maxbitlen;

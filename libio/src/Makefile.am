@@ -30,6 +30,8 @@ libio_la_SOURCES =  address.c     \
                     io_getopt.h   \
                     io_hex.c      \
                     io_hex.h      \
+                    io_parse.c    \
+                    io_parse.h    \
                     io_pidfile.c  \
                     io_pidfile.h  \
                     io_rlimit.c   \

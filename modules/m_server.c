@@ -63,7 +63,7 @@ static const char *const server_rejection_reason_strings[] =
 {
   [SERVER_REJECT_INVALID_NAME] = "Invalid server name",
   [SERVER_REJECT_INVALID_SID] = "Invalid server ID",
-  [SERVER_REJECT_INVALID_HOPCOUNT] = "Invalid hopcount on connect",
+  [SERVER_REJECT_INVALID_HOPCOUNT] = "Invalid hopcount",
   [SERVER_REJECT_HOPS_MISMATCH] = "Hopcount mismatch in introduction",
   [SERVER_REJECT_NAME_MISMATCH] = "Name mismatch with local configuration",
   [SERVER_REJECT_NAME_COLLISION] = "Server name collision",
@@ -620,7 +620,7 @@ ms_sid(struct Client *source, int parc, char *parv[])
   uint32_t hopcount;
   if (io_parse_uint32(parv[2], &hopcount) != IO_PARSE_OK)
   {
-    _server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Invalid hopcount '%s'", parv[2]);
+    _server_reject_introduction(source, SERVER_REJECT_INVALID_HOPCOUNT, "'%s'", parv[2]);
     return;
   }
 

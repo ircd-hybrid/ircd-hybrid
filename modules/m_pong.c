@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "module.h"
 
@@ -75,8 +76,9 @@ mr_pong(struct Client *source, int parc, char *parv[])
   if (ConfigGeneral.ping_cookie == 0 || source->connection->ping_cookie_token == 0)
     return;
 
-  unsigned int received_cookie = strtoul(parv[1], NULL, 10);
-  if (source->connection->ping_cookie_token != received_cookie)
+  unsigned int received_cookie;
+  if (io_parse_uint(parv[1], &received_cookie) != IO_PARSE_OK ||
+      received_cookie != source->connection->ping_cookie_token)
   {
     sendto_one_numeric(source, &me, ERR_WRONGPONG,
                        source->connection->ping_cookie_token);

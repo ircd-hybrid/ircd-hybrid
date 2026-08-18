@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "comm.h"
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -487,10 +488,16 @@ mr_server(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const int hopcount = atoi(parv[2]);
+  uint32_t hopcount;
+  if (io_parse_uint32(parv[2], &hopcount) != IO_PARSE_OK)
+  {
+    _server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "'%s'", parv[2]);
+    return;
+  }
+
   if (hopcount != 1)
   {
-    _server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %d", hopcount);
+    _server_reject_connection(source, SERVER_REJECT_INVALID_HOPCOUNT, "Expected 1, got %u", hopcount);
     return;
   }
 
@@ -610,10 +617,17 @@ ms_sid(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const int hopcount = atoi(parv[2]);
-  if (hopcount != (int)source->hopcount + 1)
+  uint32_t hopcount;
+  if (io_parse_uint32(parv[2], &hopcount) != IO_PARSE_OK)
   {
-    _server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Introducer hopcount: %d, New server hopcount: %d",
+    _server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Invalid hopcount '%s'", parv[2]);
+    return;
+  }
+
+  const uint32_t expected_hopcount = source->hopcount + 1U;
+  if (hopcount != expected_hopcount)
+  {
+    _server_reject_introduction(source, SERVER_REJECT_HOPS_MISMATCH, "Introducer hopcount: %u, New server hopcount: %u",
                                 source->hopcount, hopcount);
     return;
   }

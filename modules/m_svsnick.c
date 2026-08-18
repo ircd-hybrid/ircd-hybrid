@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "comm.h"
+#include "io_parse.h"
 #include "io_string.h"
 #include "module.h"
 
@@ -58,6 +58,10 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
   if (!valid_nickname(new_nick, true))
     return;
 
+  uintmax_t new_nick_timestamp;
+  if (io_parse_uintmax(parv[4], &new_nick_timestamp) != IO_PARSE_OK)
+    return;
+
   if (!client_is_local(target))
   {
     if (target->nexthop == source->nexthop)
@@ -68,8 +72,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
       return;
     }
 
-    const uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
-    sendto_one_command(target, source, "SVSNICK", "0 %s %ju", new_nick, new_ts);
+    sendto_one_command(target, source, "SVSNICK", "0 %s %ju", new_nick, new_nick_timestamp);
     return;
   }
 
@@ -103,14 +106,13 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
   }
 
-  const uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
   sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
-                 target->id, new_nick, new_ts);
+                 target->id, new_nick, new_nick_timestamp);
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
                                target->name, target->username, target->host, new_nick);
 
   client_update_name(target, new_nick);
-  target->nick_timestamp = new_ts;
+  target->nick_timestamp = new_nick_timestamp;
 
   monitor_notify_signon(target);
 }

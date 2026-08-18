@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "misc.h"
 #include "module.h"
@@ -30,6 +31,7 @@
 
 enum
 {
+  CAP_LS_VERSION_302 = 302,
   CAP_REPLY_LINE_LENGTH_MAX = IRCD_BUFSIZE - 2,
   CAP_REPLY_COMMAND_LENGTH = sizeof("CAP") - 1,
   CAP_REPLY_FINAL_SEPARATOR_LENGTH = sizeof(" :") - 1,
@@ -224,13 +226,25 @@ _cap_reply_send_list(struct Client *client, uint32_t *const set,
   _cap_reply_send_line(client, subcommand, caplist, false);
 }
 
+static bool
+_cap_ls_supports_302(const char *arg)
+{
+  unsigned int version;
+
+  const io_parse_status_t status = io_parse_uint(arg, &version);
+  if (status == IO_PARSE_RANGE)
+    return true;
+
+  return status == IO_PARSE_OK && version >= CAP_LS_VERSION_302;
+}
+
 static void
 cap_ls(struct Client *source, const char *arg)
 {
   if (client_is_unknown(source))  /* Registration hasn't completed; suspend it... */
     source->connection->registration_flags |= REG_NEED_CAP;
 
-  if (arg && atoi(arg) >= 302)
+  if (_cap_ls_supports_302(arg))
   {
     source->connection->cap_flags |= CAP_CAP_NOTIFY;
     client_set_flag(source, FLAGS_CAP302);

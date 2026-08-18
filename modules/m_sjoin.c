@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "list.h"
 #include "module.h"
@@ -220,11 +221,20 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
         break;
 
       case 'l':
-        mode.member_limit = atoi(parv[4 + args]);
+        const char *const limit_text = parv[4 + args];
         ++args;
 
         if (parc < 5 + args)
           return;
+
+        unsigned int parsed_limit;
+        const io_parse_status_t status = io_parse_uint(limit_text, &parsed_limit);
+        if (status == IO_PARSE_RANGE)
+          mode.member_limit = INT_MAX;
+        else if (status != IO_PARSE_OK)
+          return;
+        else
+          mode.member_limit = parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
         break;
 
       default:
@@ -237,7 +247,10 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
     }
   }
 
-  uintmax_t newts = strtoumax(parv[1], NULL, 10);
+  uintmax_t newts;
+  if (io_parse_uintmax(parv[1], &newts) != IO_PARSE_OK)
+    return;
+
   uintmax_t oldts = 0;
   bool keep_our_modes = true;
   bool keep_new_modes = true;

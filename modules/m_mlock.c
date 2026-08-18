@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "list.h"
 #include "module.h"
@@ -81,8 +82,14 @@ ms_mlock(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  const uintmax_t channel_ts = strtoumax(parv[1], NULL, 10);
-  const uintmax_t mode_lock_ts = strtoumax(parv[3], NULL, 10);
+  uintmax_t channel_ts;
+  if (io_parse_uintmax(parv[1], &channel_ts) != IO_PARSE_OK)
+    return;
+
+  uintmax_t mode_lock_ts;
+  if (io_parse_uintmax(parv[3], &mode_lock_ts) != IO_PARSE_OK)
+    return;
+
   const char *const mode_lock = parv[4];
   if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts, mode_lock))
     return;

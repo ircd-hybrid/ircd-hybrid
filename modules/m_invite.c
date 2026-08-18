@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -212,7 +213,11 @@ ms_invite(struct Client *source, int parc, char *parv[])
   if (channel_member_find(channel, target))
     return;
 
-  if (strtoumax(parv[3], NULL, 10) > channel->creation_time)
+  uintmax_t channel_timestamp;
+  if (io_parse_uintmax(parv[3], &channel_timestamp) != IO_PARSE_OK)
+    return;
+
+  if (channel_timestamp > channel->creation_time)
     return;
 
   _invite_commit(source, target, channel, io_time_get(IO_TIME_MONOTONIC_SEC));

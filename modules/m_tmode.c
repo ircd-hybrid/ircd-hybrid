@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "io_parse.h"
 #include "module.h"
 
 #include "channel.h"
@@ -41,7 +42,11 @@ ms_tmode(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
+  uintmax_t channel_timestamp;
+  if (io_parse_uintmax(parv[1], &channel_timestamp) != IO_PARSE_OK)
+    return;
+
+  if (channel_timestamp > channel->creation_time)
     return;
 
   channel_mode_set(source, channel, parc - 3, parv + 3);

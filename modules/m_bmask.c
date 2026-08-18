@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "list.h"
 #include "module.h"
@@ -55,8 +56,12 @@ ms_bmask(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
+  uintmax_t channel_timestamp;
+  if (io_parse_uintmax(parv[1], &channel_timestamp) != IO_PARSE_OK)
+    return;
+
   /* Their TS is higher, drop it. */
-  if (strtoumax(parv[1], NULL, 10) > channel->creation_time)
+  if (channel_timestamp > channel->creation_time)
     return;
 
   switch (*parv[3])

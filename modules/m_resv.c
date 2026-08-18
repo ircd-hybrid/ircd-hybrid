@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "log.h"
@@ -150,6 +151,10 @@ mo_resv(struct Client *source, int parc, char *parv[])
 static void
 ms_resv(struct Client *source, int parc, char *parv[])
 {
+  uintmax_t duration;
+  if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)
+    return;
+
   struct aline_ctx aline =
   {
     .add = true,
@@ -157,7 +162,7 @@ ms_resv(struct Client *source, int parc, char *parv[])
     .mask = parv[3],
     .reason = parv[4],
     .server = parv[1],
-    .duration = strtoumax(parv[2], NULL, 10)
+    .duration = duration
   };
 
   sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",

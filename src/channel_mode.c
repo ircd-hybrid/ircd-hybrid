@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "address.h"
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -607,12 +608,19 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
   if (dir == MODE_ADD && parc > *parn)
   {
     char *const lstr = parv[(*parn)++];
-    int limit = 0;
 
-    if (string_is_empty(lstr) || (limit = atoi(lstr)) <= 0)
+    unsigned int parsed_limit;
+    const io_parse_status_t status = io_parse_uint(lstr, &parsed_limit);
+
+    if (status != IO_PARSE_OK && status != IO_PARSE_RANGE)
       return;
 
-    sprintf(lstr, "%d", limit);
+    if (status == IO_PARSE_OK && parsed_limit == 0)
+      return;
+
+    const unsigned int limit =
+      status == IO_PARSE_RANGE || parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
+    snprintf(lstr, strlen(lstr) + 1, "%u", limit);
 
     /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)

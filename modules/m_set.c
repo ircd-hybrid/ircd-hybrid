@@ -7,13 +7,16 @@
  * \brief Includes required functions for processing the SET command.
  */
 
+#include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
+#include "misc.h"
 #include "module.h"
 
 #include "client.h"
@@ -25,88 +28,166 @@
 #include "parse.h"
 #include "send.h"
 
-enum { SET_COMMAND_LIST_SIZE = 128 };
+enum SetOptionType
+{
+  SET_OPTION_BOOL,
+  SET_OPTION_UINT,
+};
 
-struct SetStruct
+struct SetOption
 {
   const char *const name;
-  unsigned int *const ptr;
-  const bool wants_bool;
-  const int value_min;
-  const int value_max;
+  enum SetOptionType type;
+  unsigned int *const value;
+  unsigned int value_min;
+  unsigned int value_max;
 };
 
-static struct SetStruct set_cmd_table[] =
+static const struct SetOption set_options[] =
 {
-  { .name = "AUTOCONNECT", .ptr = &GlobalSetOptions.autoconnect, .wants_bool = true, .value_max = 1 },
-  { .name = "FLOODCOUNT", .ptr = &GlobalSetOptions.floodcount, .value_max = INT_MAX },
-  { .name = "FLOODTIME", .ptr = &GlobalSetOptions.floodtime, .value_max = INT_MAX },
-  { .name = "MAX", .ptr = &GlobalSetOptions.maxclients, .value_min = 1, .value_max = INT_MAX },
-  { .name = "SPAMNUM", .ptr = &GlobalSetOptions.spam_num, .value_min = MIN_SPAM_NUM, .value_max = INT_MAX },
-  { .name = "SPAMTIME", .ptr = &GlobalSetOptions.spam_time, .value_min = MIN_SPAM_TIME, .value_max = INT_MAX },
-  { .name = "JFLOODTIME", .ptr = &GlobalSetOptions.joinfloodtime, .value_max = INT_MAX },
-  { .name = "JFLOODCOUNT", .ptr = &GlobalSetOptions.joinfloodcount, .value_max = INT_MAX },
-  { .name = NULL }
+  {
+    .name = "AUTOCONNECT",
+    .type = SET_OPTION_BOOL,
+    .value = &GlobalSetOptions.autoconnect
+  },
+  {
+    .name = "FLOODCOUNT",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.floodcount,
+    .value_min = 0,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "FLOODTIME",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.floodtime,
+    .value_min = 0,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "MAX",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.maxclients,
+    .value_min = 1,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "SPAMNUM",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.spam_num,
+    .value_min = MIN_SPAM_NUM,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "SPAMTIME",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.spam_time,
+    .value_min = MIN_SPAM_TIME,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "JFLOODTIME",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.joinfloodtime,
+    .value_min = 0,
+    .value_max = INT_MAX
+  },
+  {
+    .name = "JFLOODCOUNT",
+    .type = SET_OPTION_UINT,
+    .value = &GlobalSetOptions.joinfloodcount,
+    .value_min = 0,
+    .value_max = INT_MAX
+  }
 };
 
-static void
-set_option(struct Client *source, struct SetStruct *option, int value_new)
+static const struct SetOption *
+_set_option_find(const char *name)
 {
-  static const char *const status[] = { "OFF", "ON" };
-
-  if (value_new >= 0)
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(set_options); ++i)
   {
-    if (value_new < option->value_min || value_new > option->value_max)
-    {
-      sendto_one_notice(source, &me, ":Value for %s must be between %i and %i",
-                        option->name, option->value_min, option->value_max);
-      return;
-    }
-
-    *option->ptr = value_new;
-
-    client_format_oper_name_buffer_t source_name_buffer;
-    const char *const source_name = client_format_oper_name(source, &source_name_buffer);
-
-    if (option->wants_bool)
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %s",
-                     source_name, option->name, status[*option->ptr != 0]);
-    else
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has changed %s to %i",
-                     source_name, option->name, *option->ptr);
+    const struct SetOption *const option = &set_options[i];
+    if (io_strcasecmp(name, option->name) == 0)
+      return option;
   }
-  else
-  {
-    if (option->wants_bool)
-      sendto_one_notice(source, &me, ":%s is currently %s", option->name, status[*option->ptr != 0]);
-    else
-      sendto_one_notice(source, &me, ":%s is currently %i", option->name, *option->ptr);
-  }
-}
-
-static void
-set_option_list(struct Client *source)
-{
-  char command_list[SET_COMMAND_LIST_SIZE] = "";
-
-  for (const struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
-  {
-    strlcat(command_list, tab->name, sizeof(command_list));
-    if ((tab + 1)->name)
-      strlcat(command_list, " ", sizeof(command_list));
-  }
-
-  sendto_one_notice(source, &me, ":Available QUOTE SET commands: %s", command_list);
-}
-
-static struct SetStruct *
-set_option_find(const char *name)
-{
-  for (struct SetStruct *tab = set_cmd_table; tab->name; ++tab)
-    if (io_strcasecmp(tab->name, name) == 0)
-      return tab;
 
   return NULL;
+}
+
+static io_parse_status_t
+_set_option_parse_value(const struct SetOption *option, const char *text, unsigned int *value_out)
+{
+  switch (option->type)
+  {
+    case SET_OPTION_BOOL:
+    {
+      bool value;
+      const io_parse_status_t status = io_parse_bool(text, &value);
+      if (status != IO_PARSE_OK)
+        return status;
+
+      *value_out = value;
+      return IO_PARSE_OK;
+    }
+
+    case SET_OPTION_UINT:
+      assert(option->value_min <= option->value_max);
+      return io_parse_uint_range(text, option->value_min, option->value_max, value_out);
+  }
+
+  assert(0);
+  return IO_PARSE_INVALID;
+}
+
+static void
+_set_option_report(struct Client *source, const struct SetOption *option)
+{
+  assert(source);
+  assert(option);
+  assert(option->name);
+  assert(option->value);
+
+  switch (option->type)
+  {
+    case SET_OPTION_BOOL:
+      sendto_one_notice(source, &me, ":%s is currently %s",
+                        option->name, *option->value ? "true" : "false");
+      return;
+    case SET_OPTION_UINT:
+      sendto_one_notice(source, &me, ":%s is currently %u",
+                        option->name, *option->value);
+      return;
+  }
+
+  assert(0);
+}
+
+static void
+_set_option_report_change(struct Client *source, const struct SetOption *option)
+{
+  assert(source);
+  assert(option);
+  assert(option->name);
+  assert(option->value);
+
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  switch (option->type)
+  {
+    case SET_OPTION_BOOL:
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                     "%s has changed %s to %s",
+                     source_name, option->name, *option->value ? "true" : "false");
+      return;
+    case SET_OPTION_UINT:
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                     "%s has changed %s to %u",
+                     source_name, option->name, *option->value);
+      return;
+  }
+
+  assert(0);
 }
 
 static void
@@ -119,41 +200,46 @@ mo_set(struct Client *source, int parc, char *parv[])
   }
 
   const char *const option_name = parv[1];
-  const char *const value_text = parv[2];
-
-  if (string_is_empty(option_name))
-  {
-    set_option_list(source);
-    return;
-  }
-
-  struct SetStruct *option = set_option_find(option_name);
+  const struct SetOption *const option = _set_option_find(option_name);
   if (option == NULL)
   {
-    sendto_one_notice(source, &me, ":Unknown setting '%s'. Use /QUOTE SET to list available options.", option_name);
+    sendto_one_notice(source, &me, ":Invalid SET option: %s", option_name);
     return;
   }
 
+  const char *const value_text = parv[2];
   if (string_is_empty(value_text))
   {
-    set_option(source, option, -1);
+    _set_option_report(source, option);
     return;
   }
 
-  int value_new = -1;
-  if (io_strcasecmp(value_text, "yes") == 0 || io_strcasecmp(value_text, "on") == 0)
-    value_new = 1;
-  else if (io_strcasecmp(value_text, "no") == 0 || io_strcasecmp(value_text, "off") == 0)
-    value_new = 0;
-  else
-    value_new = atoi(value_text);
-  if (value_new < 0)
+  unsigned int value;
+  const io_parse_status_t status = _set_option_parse_value(option, value_text, &value);
+  if (status != IO_PARSE_OK)
   {
-    sendto_one_notice(source, &me, ":Invalid value for '%s'. Please use a non-negative value.", option->name);
+    if (option->type == SET_OPTION_BOOL)
+    {
+      sendto_one_notice(source, &me, ":Value for %s must be either true or false",
+                        option->name);
+      return;
+    }
+
+    if (status == IO_PARSE_RANGE)
+    {
+      sendto_one_notice(source, &me, ":Value for %s must be between %u and %u",
+                        option->name, option->value_min, option->value_max);
+      return;
+    }
+
+    sendto_one_notice(source, &me, ":Value for %s must be an unsigned decimal integer",
+                      option->name);
     return;
   }
 
-  set_option(source, option, value_new);
+  *option->value = value;
+  _set_option_report_change(source, option);
+
 }
 
 static struct Command command_table =
@@ -163,7 +249,7 @@ static struct Command command_table =
   .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
   .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
   .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
-  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_set }
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_set, .args_min = 2 }
 };
 
 static void

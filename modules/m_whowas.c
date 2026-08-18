@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "misc.h"
@@ -69,18 +70,37 @@ _whowas_send_record_cb(const struct Whowas *whowas, void *user_data)
   _whowas_send_record(source, whowas);
 }
 
+static unsigned int
+_whowas_parse_max_results(const char *text)
+{
+  if (string_is_empty(text))
+    return 0;
+
+  const bool negative = *text == '-';
+  const char *const magnitude = negative ? text + 1 : text;
+
+  unsigned int value;
+  const io_parse_status_t status = io_parse_uint(magnitude, &value);
+
+  if (status == IO_PARSE_RANGE)
+    return negative ? 0 : UINT_MAX;
+
+  if (status != IO_PARSE_OK || negative)
+    return 0;
+
+  return value;
+}
+
 static void
 _whowas_process_request(struct Client *source, const char *name, const char *limit_str)
 {
-  int reply_limit = -1;
+  unsigned int max_results = _whowas_parse_max_results(limit_str);
+  if (!client_is_local(source) &&
+      (max_results == 0 || max_results > WHOWAS_MAX_REPLIES))
+    max_results = WHOWAS_MAX_REPLIES;
 
-  if (!string_is_empty(limit_str))
-    reply_limit = atoi(limit_str);
-
-  if (!client_is_local(source) && (reply_limit <= 0 || reply_limit > WHOWAS_MAX_REPLIES))
-    reply_limit = WHOWAS_MAX_REPLIES;
-
-  int records_found = whowas_query(name, reply_limit, _whowas_send_record_cb, source);
+  const unsigned int records_found =
+    whowas_query(name, max_results, _whowas_send_record_cb, source);
   if (records_found == 0)
     sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, name);
 

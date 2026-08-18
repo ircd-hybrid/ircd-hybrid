@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "module.h"
 
@@ -136,8 +137,14 @@ ms_tburst(struct Client *source, int parc, char *parv[])
   if (channel == NULL)
     return;
 
-  const uintmax_t channel_ts = strtoumax(parv[1], NULL, 10);
-  const uintmax_t topic_ts = strtoumax(parv[3], NULL, 10);
+  uintmax_t channel_ts;
+  if (io_parse_uintmax(parv[1], &channel_ts) != IO_PARSE_OK)
+    return;
+
+  uintmax_t topic_ts;
+  if (io_parse_uintmax(parv[3], &topic_ts) != IO_PARSE_OK)
+    return;
+
   const char *const topic_setter = parv[4];
   const char *const topic = parv[5];  /* May be empty to clear the topic. */
   if (!_tburst_should_accept(source, channel, channel_ts, topic_ts, topic_setter, topic))

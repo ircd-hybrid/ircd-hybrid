@@ -7,7 +7,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "io_parse.h"
 #include "io_string.h"
+
 #include "aline.h"
 #include "client.h"
 #include "conf.h"
@@ -15,6 +17,11 @@
 #include "nuh.h"
 #include "numeric.h"
 #include "send.h"
+
+enum
+{
+  ALINE_MAX_DURATION_MINUTES = 24 * 60 * 360
+};
 
 bool
 aline_valid_mask_simple(const char *data)
@@ -86,29 +93,20 @@ aline_valid_mask(int count, ...)
   return false;
 }
 
-static intmax_t
-_aline_valid_time(const char *data)
+static bool
+_aline_parse_duration(const char *text, uintmax_t *duration_out)
 {
-  static const unsigned int max_aline_time = 24*60*360;
-  const unsigned char *p = (const unsigned char *)data;
-  unsigned char tmpch = '\0';
-  intmax_t result = 0;
+  uintmax_t minutes;
 
-  while ((tmpch = *p++))
-  {
-    if (!IsDigit(tmpch))
-      return -1;
+  const io_parse_status_t status =
+    io_parse_uintmax_range(text, 0, ALINE_MAX_DURATION_MINUTES, &minutes);
+  if (status == IO_PARSE_RANGE)
+    minutes = ALINE_MAX_DURATION_MINUTES;
+  else if (status != IO_PARSE_OK)
+    return false;
 
-    result *= 10;
-    result += (tmpch & 0xF);
-  }
-
-  if (result > max_aline_time)
-    result = max_aline_time;
-
-  result = result * 60;  /* Turn it into seconds */
-
-  return result;
+  *duration_out = minutes * 60U;
+  return true;
 }
 
 bool
@@ -117,16 +115,21 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];
   static char host[HOSTLEN * 2 + 1];
-  intmax_t duration;
 
   ++parv;
   --parc;
 
-  if (aline->add && (duration = _aline_valid_time(*parv)) >= 0)
+  if (aline->add)
   {
-    aline->duration = duration;
-    ++parv;
-    --parc;
+    aline->duration = 0;
+
+    uintmax_t duration;
+    if (parc > 0 && _aline_parse_duration(*parv, &duration))
+    {
+      aline->duration = duration;
+      ++parv;
+      --parc;
+    }
   }
 
   if (parc == 0 || string_is_empty(*parv))

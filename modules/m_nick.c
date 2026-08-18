@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -211,23 +212,20 @@ nick_change_local(struct Client *source, const char *nick)
  *      - parv[2] = timestamp
  */
 static void
-nick_change_remote(struct Client *source, char *parv[])
+nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_timestamp)
 {
-  const char *const new_nick = parv[1];
-
   assert(!string_is_empty(new_nick));
   assert(client_is_user(source));
   assert(source->name[0]);
 
   /* Client changing their nick */
-  bool samenick = io_strcasecmp(source->name, new_nick) == 0;
+  const bool samenick = io_strcasecmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
-    source->nick_timestamp = strtoumax(parv[2], NULL, 10);
-    assert(source->nick_timestamp);
+    assert(nick_timestamp);
+    source->nick_timestamp = nick_timestamp;
 
     user_mode_unset_flag(source, UMODE_REGISTERED);
-
     monitor_notify_signoff(source);
   }
 
@@ -270,11 +268,11 @@ nick_change_remote(struct Client *source, char *parv[])
  *      - parv[11] = ircname (gecos)
  */
 static void
-uid_from_server(struct Client *source, int parc, char *parv[])
+uid_from_server(struct Client *source, int parc, char *parv[], uint32_t hopcount, uintmax_t nick_timestamp)
 {
   struct Client *const client = client_create_remote(source);
-  client->hopcount = atoi(parv[2]);
-  client->nick_timestamp = strtoumax(parv[3], NULL, 10);
+  client->hopcount = hopcount;
+  client->nick_timestamp = nick_timestamp;
 
   strlcpy(client->name, parv[1], sizeof(client->name));
   strlcpy(client->username, parv[5], sizeof(client->username));
@@ -329,10 +327,9 @@ uid_from_server(struct Client *source, int parc, char *parv[])
  */
 static bool
 perform_uid_introduction_collides(struct Client *source, struct Client *target,
-                                  int parc, char *parv[])
+                                  int parc, char *parv[], uintmax_t nick_timestamp)
 {
   const char *uid = parv[9];
-  uintmax_t newts = strtoumax(parv[3], NULL, 10);
 
   assert(client_is_server(source));
   assert(client_is_user(target));
@@ -340,7 +337,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   /* Server introducing new nick */
 
   /* If their TS's are the same, kill both */
-  if (newts == target->nick_timestamp)
+  if (nick_timestamp == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(both killed)",
@@ -369,7 +366,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
    * and the new users ts is older, or the users are different and the
    * new users ts is newer, ignore the new client and let it do the kill
    */
-  if ((sameuser && newts < target->nick_timestamp) || (sameuser == false && newts > target->nick_timestamp))
+  if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
   {
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -411,17 +408,14 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
  *      - parv[2] = timestamp
  */
 static bool
-perform_nick_change_collides(struct Client *source, struct Client *target,
-                             int parc, char *parv[])
+perform_nick_change_collides(struct Client *source, struct Client *target, uintmax_t nick_timestamp)
 {
-  uintmax_t newts = strtoumax(parv[2], NULL, 10);
-
   assert(client_is_user(source));
   assert(client_is_user(target));
-  assert(newts);
+  assert(nick_timestamp);
 
   /* It's a client changing nick and causing a collide */
-  if (newts == target->nick_timestamp)
+  if (nick_timestamp == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick change collision from %s to %s(%s <- %s)(both killed)",
@@ -447,7 +441,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
   /* The timestamps are different */
   const bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
                         io_strcasecmp(target->sockhost, source->sockhost) == 0;
-  if ((sameuser && newts < target->nick_timestamp) || (sameuser == false && newts > target->nick_timestamp))
+  if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
   {
     if (sameuser)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -661,24 +655,30 @@ ms_nick(struct Client *source, int parc, char *parv[])
   if (!check_clean_nick(source, new_nick))
     return;
 
-  /* If the nick doesn't exist, allow it and process like normal. */
   struct Client *const target = client_find_entity_by_name(new_nick);
+  if (target == source)
+  {
+    if (strcmp(target->name, new_nick))
+      nick_change_remote(source, new_nick, source->nick_timestamp);
+
+    return;
+  }
+
+  uintmax_t new_nick_timestamp;
+  if (io_parse_uintmax(parv[2], &new_nick_timestamp) != IO_PARSE_OK || new_nick_timestamp == 0)
+    return;
+
   if (target == NULL)
-    nick_change_remote(source, parv);
+    nick_change_remote(source, new_nick, new_nick_timestamp);
   else if (client_is_unknown(target))
   {
     /* We're not living in the past anymore, an unknown client is local only. */
     client_exit(target, "Overridden by other sign on");
 
-    nick_change_remote(source, parv);
+    nick_change_remote(source, new_nick, new_nick_timestamp);
   }
-  else if (target == source)
-  {
-    if (strcmp(target->name, new_nick))
-      nick_change_remote(source, parv);
-  }
-  else if (perform_nick_change_collides(source, target, parc, parv))
-    nick_change_remote(source, parv);
+  else if (perform_nick_change_collides(source, target, new_nick_timestamp))
+    nick_change_remote(source, new_nick, new_nick_timestamp);
 }
 
 /*! \brief UID command handler
@@ -713,6 +713,24 @@ ms_uid(struct Client *source, int parc, char *parv[])
       check_clean_uid(source, parv[1], parv[9]) == false)
     return;
 
+  uint32_t hopcount;
+  const io_parse_status_t hopcount_status = io_parse_uint32(parv[2], &hopcount);
+  uintmax_t nick_timestamp;
+  const io_parse_status_t nick_timestamp_status = io_parse_uintmax(parv[3], &nick_timestamp);
+
+  if (hopcount_status != IO_PARSE_OK || nick_timestamp_status != IO_PARSE_OK)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Malformed UID introduction for %s (%s) from %s(via %s): hopcount='%s', timestamp='%s'",
+                   parv[1], parv[9], source->name, source->nexthop->name,
+                   parv[2], parv[3]);
+
+    sendto_one(source, ":%s KILL %s :%s (Malformed UID introduction)",
+               me.id, parv[9], me.name);
+    ++ServerStats.is_kill;
+    return;
+  }
+
   /*
    * If there is an ID collision, kill our client, and kill theirs.
    * This may generate 401's, but it ensures that both clients always
@@ -737,15 +755,15 @@ ms_uid(struct Client *source, int parc, char *parv[])
 
   target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
-    uid_from_server(source, parc, parv);
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
   else if (client_is_unknown(target))
   {
     client_exit(target, "Overridden by other sign on");
 
-    uid_from_server(source, parc, parv);
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
   }
-  else if (perform_uid_introduction_collides(source, target, parc, parv))
-    uid_from_server(source, parc, parv);
+  else if (perform_uid_introduction_collides(source, target, parc, parv, nick_timestamp))
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
 }
 
 static struct Command command_table[] =

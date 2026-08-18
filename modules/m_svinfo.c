@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "io_parse.h"
 #include "io_time.h"
 #include "log.h"
 #include "module.h"
@@ -24,6 +25,7 @@
 #include "send.h"
 #include "server.h"
 
+static void _svinfo_report_link_status(struct Client *, bool, const char *, ...) IO_AFP(3, 4);
 static void
 _svinfo_report_link_status(struct Client *link, bool write_log, const char *status_format, ...)
 {
@@ -70,22 +72,47 @@ ms_svinfo(struct Client *source, int parc, char *parv[])
   if (!client_is_local_server(source))
     return;
 
-  server_ts_protocol_version_t current_version = atoi(parv[1]);
-  server_ts_protocol_version_t minimum_version = atoi(parv[2]);
+  uintmax_t current_version;
+  uintmax_t minimum_version;
+  if (io_parse_uintmax(parv[1], &current_version) != IO_PARSE_OK ||
+      io_parse_uintmax(parv[2], &minimum_version) != IO_PARSE_OK)
+  {
+    _svinfo_report_link_status(source, true, "dropped, malformed TS protocol version");
+    client_exit(source, "Malformed TS protocol version");
+    return;
+  }
+
+  if (minimum_version > current_version)
+  {
+    _svinfo_report_link_status(source, true,
+                               "dropped, invalid TS protocol version range (current=%ju, minimum=%ju)",
+                               current_version, minimum_version);
+
+    client_exit(source, "Invalid TS protocol version range");
+    return;
+  }
+
   if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
       minimum_version > SERVER_TS_PROTOCOL_CURRENT)
   {
     _svinfo_report_link_status(source, true,
-                               "dropped, wrong TS protocol version (current: %d, minimum: %d)",
+                               "dropped, incompatible TS protocol version (current=%ju, minimum=%ju)",
                                current_version, minimum_version);
 
-    client_exit(source, "Incompatible TS version");
+    client_exit(source, "Incompatible TS protocol version");
+    return;
+  }
+
+  uintmax_t remote_ts;
+  if (io_parse_uintmax(parv[4], &remote_ts) != IO_PARSE_OK)
+  {
+    _svinfo_report_link_status(source, true, "dropped, malformed timestamp");
+    client_exit(source, "Malformed timestamp");
     return;
   }
 
   io_time_update_cache();
 
-  const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);
   const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);
   const uintmax_t abs_delta_ts = (remote_ts > local_ts) ? (remote_ts - local_ts) : (local_ts - remote_ts);
 

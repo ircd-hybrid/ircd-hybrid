@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "module.h"
 
@@ -170,7 +171,10 @@ ms_join(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  uintmax_t newts = strtoumax(parv[1], NULL, 10);
+  uintmax_t newts;
+  if (io_parse_uintmax(parv[1], &newts) != IO_PARSE_OK)
+    return;
+
   uintmax_t oldts = 0;
   bool keep_our_modes = true;
 

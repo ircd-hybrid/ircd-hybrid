@@ -253,18 +253,19 @@ whowas_get_history(const char *name, uintmax_t timelimit)
   return NULL;
 }
 
-int
-whowas_query(const char *name, int max_results, whowas_callback_t callback, void *user_data)
+unsigned int
+whowas_query(const char *name, unsigned int max_results, whowas_callback_t callback, void *user_data)
 {
   const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return 0;
 
-  int count = 0;
+  unsigned int count = 0;
+
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
-    if (max_results > 0 && count >= max_results)
+    if (max_results && count >= max_results)
       break;
 
     const struct Whowas *const whowas = node->data;

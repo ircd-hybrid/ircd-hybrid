@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "address.h"
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -212,6 +213,10 @@ mo_dline(struct Client *source, int parc, char *parv[])
 static void
 ms_dline(struct Client *source, int parc, char *parv[])
 {
+  uintmax_t duration;
+  if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)
+    return;
+
   struct aline_ctx aline =
   {
     .add = true,
@@ -219,7 +224,7 @@ ms_dline(struct Client *source, int parc, char *parv[])
     .host = parv[3],
     .reason = parv[4],
     .server = parv[1],
-    .duration = strtoumax(parv[2], NULL, 10)
+    .duration = duration
   };
 
   sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",

@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -29,30 +30,6 @@
 #include "parse.h"
 #include "send.h"
 
-static bool
-_parse_list_uint(const char *text, unsigned int *value_out)
-{
-  if (string_is_empty(text))
-    return false;
-
-  unsigned int value = 0;
-  for (const char *p = text; *p; ++p)
-  {
-    const unsigned char ch = (unsigned char)*p;
-    if (!IsDigit(ch))
-      return false;
-
-    const unsigned int digit = (unsigned int)(ch - '0');
-    if (value > (UINT_MAX - digit) / 10U)
-      return false;
-
-    value = (value * 10U) + digit;
-  }
-
-  *value_out = value;
-  return true;
-}
-
 static uintmax_t
 _list_age_filter_cutoff(uintmax_t now, unsigned int minutes)
 {
@@ -65,9 +42,7 @@ _parse_list_user_count_filter(struct ListTask *task, char modifier, const char *
 {
   assert(modifier == '<' || modifier == '>');
 
-  unsigned int value = 0;
-  if (!_parse_list_uint(value_text, &value))
-    return false;
+  unsigned int value;
 
   /*
    * ELIST <val matches channels with less than val users.
@@ -75,17 +50,20 @@ _parse_list_user_count_filter(struct ListTask *task, char modifier, const char *
    */
   if (modifier == '<')
   {
-    if (value == 0)
+    if (io_parse_uint_range(value_text, 1, UINT_MAX, &value) != IO_PARSE_OK)
       return false;
 
     task->users_max = value - 1;
     return true;
   }
+  else
+  {
+    if (io_parse_uint_range(value_text, 0, UINT_MAX - 1U, &value) != IO_PARSE_OK)
+      return false;
 
-  if (value == UINT_MAX)
-    return false;
+    task->users_min = value + 1;
+  }
 
-  task->users_min = value + 1;
   return true;
 }
 
@@ -95,8 +73,8 @@ _parse_list_creation_time_filter(struct ListTask *task, char modifier, const cha
   if (modifier != '<' && modifier != '>')
     return false;
 
-  unsigned int minutes = 0;
-  if (!_parse_list_uint(value_text, &minutes))
+  unsigned int minutes;
+  if (io_parse_uint(value_text, &minutes) != IO_PARSE_OK)
     return false;
 
   const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);
@@ -130,8 +108,8 @@ _parse_list_topic_filter(struct ListTask *task, char modifier, const char *value
   if (modifier != '<' && modifier != '>')
     return false;
 
-  unsigned int minutes = 0;
-  if (!_parse_list_uint(value_text, &minutes))
+  unsigned int minutes;
+  if (io_parse_uint(value_text, &minutes) != IO_PARSE_OK)
     return false;
 
   const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);

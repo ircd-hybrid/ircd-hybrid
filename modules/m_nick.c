@@ -535,6 +535,34 @@ mr_nick(struct Client *source, int parc, char *parv[])
     sendto_one_numeric(source, &me, ERR_NICKNAMEINUSE, target->name);
 }
 
+static bool
+_nick_change_check_channel_policy(struct Client *source)
+{
+  assert(client_is_local_user(source));
+
+  list_node_t *node;
+  LIST_FOREACH(node, source->channel_member_list.head)
+  {
+    const struct ChannelMember *const member = node->data;
+    if (channel_member_get_highest_rank(member) >= CHACCESS_VOICE)
+      continue;
+
+    if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
+    {
+      sendto_one_numeric(source, &me, ERR_NONICKCHANGE, member->channel->name);
+      return false;
+    }
+
+    if (is_banned(member->channel, source, &extban_nick))
+    {
+      sendto_one_numeric(source, &me, ERR_BANNICKCHANGE, member->channel->name);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /*! \brief NICK command handler
  *
  * \param source Pointer to allocated Client struct from which the message
@@ -580,25 +608,8 @@ m_nick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  list_node_t *node;
-  LIST_FOREACH(node, source->channel_member_list.head)
-  {
-    struct ChannelMember *const member = node->data;
-    if (channel_member_get_highest_rank(member) < CHACCESS_VOICE)
-    {
-      if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
-      {
-        sendto_one_numeric(source, &me, ERR_NONICKCHANGE, member->channel->name);
-        return;
-      }
-
-      if (is_banned(member->channel, source, &extban_nick))
-      {
-        sendto_one_numeric(source, &me, ERR_BANNICKCHANGE, member->channel->name);
-        return;
-      }
-    }
-  }
+  if (!_nick_change_check_channel_policy(source))
+    return;
 
   struct Client *const target = client_find_entity_by_name(nick);
   if (target == NULL)

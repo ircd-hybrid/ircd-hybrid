@@ -11,8 +11,6 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "io_parse.h"
 #include "io_string.h"

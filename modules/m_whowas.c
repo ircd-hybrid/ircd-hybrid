@@ -60,7 +60,7 @@ _whowas_send_record(struct Client *source, const struct Whowas *whowas)
   const char *const server_name =
     _whowas_should_hide_server(source, whowas) ? ConfigServerInfo.network_name : whowas->servername;
   sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                     whowas->name, server_name, date_ctime(whowas->logoff));
+                     whowas->name, server_name, date_ctime(whowas->recorded_at));
 }
 
 static void

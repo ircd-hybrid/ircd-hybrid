@@ -185,7 +185,7 @@ whowas_add_history(struct Client *client, bool online)
     return;
 
   struct Whowas *const whowas = _whowas_create();
-  whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
+  whowas->recorded_at = io_time_get(IO_TIME_REALTIME_SEC);
   whowas->server_hidden = client_is_hidden(client->uplink);
   whowas->name = io_strdup(client->name);
   whowas->username = io_strdup(client->username);
@@ -237,19 +237,19 @@ whowas_off_history(struct Client *client)
  * @return A pointer to the Client struct representing the most recent user of the specified nickname within the time limit, or NULL if not found.
  */
 struct Client *
-whowas_get_history(const char *name, uintmax_t timelimit)
+whowas_find_recent_client(const char *name, uintmax_t max_age)
 {
   const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return NULL;
 
-  timelimit = io_time_get(IO_TIME_REALTIME_SEC) - timelimit;
+  max_age = io_time_get(IO_TIME_REALTIME_SEC) - max_age;
 
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
     struct Whowas *const whowas = node->data;
-    if (whowas->logoff >= timelimit)
+    if (whowas->recorded_at >= max_age)
       return whowas->client;
   }
 
@@ -257,26 +257,26 @@ whowas_get_history(const char *name, uintmax_t timelimit)
 }
 
 unsigned int
-whowas_query(const char *name, unsigned int max_results, whowas_callback_t callback, void *user_data)
+whowas_query(const char *name, unsigned int max_results, whowas_query_callback_t callback, void *user_data)
 {
   const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return 0;
 
-  unsigned int count = 0;
+  unsigned int result_count = 0;
 
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
-    if (max_results && count >= max_results)
+    if (max_results && result_count >= max_results)
       break;
 
     const struct Whowas *const whowas = node->data;
     callback(whowas, user_data);
-    ++count;
+    ++result_count;
   }
 
-  return count;
+  return result_count;
 }
 
 /**

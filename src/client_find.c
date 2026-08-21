@@ -119,7 +119,7 @@ client_find_user_with_history(const struct Client *source, const char *token, bo
   if (client)
     return client;
 
-  client = whowas_get_history(token, ConfigGeneral.kill_chase_time_limit);
+  client = whowas_find_recent_client(token, ConfigGeneral.kill_chase_time_limit);
   if (client && from_history)
     *from_history = true;
 

@@ -48,7 +48,7 @@ struct Whowas
   list_node_t group_list_node;  /**< List node; linked into WhowasGroup::whowas_records. */
   struct Client *client;  /**< Pointer to the current client or NULL if offline. */
   struct WhowasGroup *group;  /**< Pointer to the WhowasGroup this record belongs to. */
-  uintmax_t logoff;  /**< Time when the client logged off; real time. */
+  uintmax_t recorded_at;  /**< Time when the client logged off; real time. */
   bool server_hidden;  /**< Indicates if the client's server is hidden. */
   char *name;  /**< Client's nickname. */
   char *username;  /**< Client's username. */
@@ -60,12 +60,12 @@ struct Whowas
   char *servername;  /**< Name of the server the client is using. */
 };
 
-typedef void (*whowas_callback_t)(const struct Whowas *, void *);
+typedef void (*whowas_query_callback_t)(const struct Whowas *, void *);
 
 extern void whowas_trim(void);
 extern void whowas_add_history(struct Client *, bool);
 extern void whowas_off_history(struct Client *);
 extern void whowas_count_memory(uint32_t *const, size_t *const, uint32_t *const, size_t *const);
-extern unsigned int whowas_query(const char *, unsigned int, whowas_callback_t, void *);
-extern struct Client *whowas_get_history(const char *, uintmax_t);
+extern unsigned int whowas_query(const char *, unsigned int, whowas_query_callback_t, void *);
+extern struct Client *whowas_find_recent_client(const char *, uintmax_t);
 #endif  /* INCLUDED_whowas_h */

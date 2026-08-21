@@ -137,8 +137,7 @@ _whowas_create(void)
 void
 whowas_trim(void)
 {
-  while (list_length(&whowas_list) &&
-         list_length(&whowas_list) > ConfigGeneral.whowas_history_length)
+  while (list_length(&whowas_list) > ConfigGeneral.whowas_history_length)
     _whowas_destroy(list_peek_tail(&whowas_list));
 }
 

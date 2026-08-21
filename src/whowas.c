@@ -117,8 +117,9 @@ _whowas_destroy(struct Whowas *whowas)
 static struct Whowas *
 _whowas_create(void)
 {
-  if (list_length(&whowas_list) &&
-      list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+  assert(ConfigGeneral.whowas_history_length > 0);
+
+  while (list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
     _whowas_destroy(list_peek_tail(&whowas_list));  /* Free oldest item. */
 
   struct Whowas *const whowas = io_calloc(sizeof(*whowas));
@@ -180,6 +181,9 @@ void
 whowas_add_history(struct Client *client, bool online)
 {
   assert(client_is_user(client));
+
+  if (ConfigGeneral.whowas_history_length == 0)
+    return;
 
   struct Whowas *const whowas = _whowas_create();
   whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);

@@ -501,25 +501,26 @@ get_mask_hash(const char *text)
 }
 
 bool
-address_from_string(const char *str, struct io_addr *addr)
+address_from_string(const char *str, struct io_addr *addr_out)
 {
-  address_clear(addr);
+  struct io_addr addr = { 0 };
 
   if (strchr(str, ':'))
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
     v6->sin6_family = AF_INET6;
     if (inet_pton(AF_INET6, str, &v6->sin6_addr) == 1)
       return true;
   }
   else
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
     v4->sin_family = AF_INET;
     if (inet_pton(AF_INET, str, &v4->sin_addr) == 1)
       return true;
   }
 
+  *addr_out = addr;
   return false;
 }
 
@@ -544,24 +545,25 @@ address_to_string(const struct io_addr *addr, char *buf, size_t buflen)
 }
 
 bool
-address_from_bytes(struct io_addr *addr, int family, const void *bytes, size_t len)
+address_from_bytes(struct io_addr *addr_out, int family, const void *bytes, size_t len)
 {
-  address_clear(addr);
+  struct io_addr addr = { 0 };
 
   if (family == AF_INET && len == sizeof(struct in_addr))
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
     v4->sin_family = AF_INET;
     memcpy(&v4->sin_addr, bytes, sizeof(v4->sin_addr));
     return true;
   }
   else if (family == AF_INET6 && len == sizeof(struct in6_addr))
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
     v6->sin6_family = AF_INET6;
     memcpy(&v6->sin6_addr, bytes, sizeof(v6->sin6_addr));
     return true;
   }
 
+  *addr_out = addr;
   return false;
 }

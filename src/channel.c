@@ -327,11 +327,8 @@ channel_destroy(struct Channel *channel)
   assert(channel->invite_exception_list.tail == NULL);
 
   io_free(channel->topic);
-  channel->topic = NULL;
   io_free(channel->topic_setter);
-  channel->topic_setter = NULL;
   io_free(channel->mode_lock);
-  channel->mode_lock = NULL;
   io_free(channel);
 }
 

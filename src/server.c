@@ -199,7 +199,6 @@ server_destroy(struct Server *server)
   assert(server->child_user_list.tail == NULL);
 
   io_free(server->initiator_name);
-  server->initiator_name = NULL;
   io_free(server);
 }
 

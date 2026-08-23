@@ -1504,8 +1504,8 @@ Optional Packages:
   --with-included-ltdl    use the GNU ltdl sources included here
   --with-ltdl-include=DIR use the ltdl headers installed in DIR
   --with-ltdl-lib=DIR     use the libltdl.la installed in DIR
-  --with-tls              Enables TLS with specified library. Options:
-                          'openssl', 'wolfssl', 'gnutls' or 'none'
+  --with-tls=LIB          use TLS library LIB: openssl, gnutls, wolfssl, none,
+                          or auto [default=auto]
   --with-strftime-minus-e Control the check for GNU strftime %-e support
                           [auto/yes/no]
 
@@ -1950,201 +1950,6 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_run
-
-# ac_fn_c_compute_int LINENO EXPR VAR INCLUDES
-# --------------------------------------------
-# Tries to find the compile-time value of EXPR in a program that includes
-# INCLUDES, setting VAR accordingly. Returns whether the value could be
-# computed
-ac_fn_c_compute_int ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  if test "$cross_compiling" = yes; then
-    # Depending upon the size, compute the lo and hi bounds.
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main (void)
-{
-static int test_array [1 - 2 * !(($2) >= 0)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_lo=0 ac_mid=0
-  while :; do
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main (void)
-{
-static int test_array [1 - 2 * !(($2) <= $ac_mid)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_hi=$ac_mid; break
-else case e in #(
-  e) as_fn_arith $ac_mid + 1 && ac_lo=$as_val
-			if test $ac_lo -le $ac_mid; then
-			  ac_lo= ac_hi=
-			  break
-			fi
-			as_fn_arith 2 '*' $ac_mid + 1 && ac_mid=$as_val ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  done
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main (void)
-{
-static int test_array [1 - 2 * !(($2) < 0)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_hi=-1 ac_mid=-1
-  while :; do
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main (void)
-{
-static int test_array [1 - 2 * !(($2) >= $ac_mid)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_lo=$ac_mid; break
-else case e in #(
-  e) as_fn_arith '(' $ac_mid ')' - 1 && ac_hi=$as_val
-			if test $ac_mid -le $ac_hi; then
-			  ac_lo= ac_hi=
-			  break
-			fi
-			as_fn_arith 2 '*' $ac_mid && ac_mid=$as_val ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  done
-else case e in #(
-  e) ac_lo= ac_hi= ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-# Binary search between lo and hi bounds.
-while test "x$ac_lo" != "x$ac_hi"; do
-  as_fn_arith '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo && ac_mid=$as_val
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main (void)
-{
-static int test_array [1 - 2 * !(($2) <= $ac_mid)];
-test_array [0] = 0;
-return test_array [0];
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_hi=$ac_mid
-else case e in #(
-  e) as_fn_arith '(' $ac_mid ')' + 1 && ac_lo=$as_val ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-done
-case $ac_lo in #((
-?*) eval "$3=\$ac_lo"; ac_retval=0 ;;
-'') ac_retval=1 ;;
-esac
-  else
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-static long int longval (void) { return $2; }
-static unsigned long int ulongval (void) { return $2; }
-#include <stdio.h>
-#include <stdlib.h>
-int
-main (void)
-{
-
-  FILE *f = fopen ("conftest.val", "w");
-  if (! f)
-    return 1;
-  if (($2) < 0)
-    {
-      long int i = longval ();
-      if (i != ($2))
-	return 1;
-      fprintf (f, "%ld", i);
-    }
-  else
-    {
-      unsigned long int i = ulongval ();
-      if (i != ($2))
-	return 1;
-      fprintf (f, "%lu", i);
-    }
-  /* Do not output a trailing newline, as this causes \r\n confusion
-     on some platforms.  */
-  return ferror (f) || fclose (f) != 0;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"
-then :
-  echo >>conftest.val; read $3 <conftest.val; ac_retval=0
-else case e in #(
-  e) ac_retval=1 ;;
-esac
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-rm -f conftest.val
-
-  fi
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_c_compute_int
 ac_configure_args_raw=
 for ac_arg
 do
@@ -19575,6 +19380,8 @@ fi
 
 
 
+
+
 # Check whether --with-tls was given.
 if test ${with_tls+y}
 then :
@@ -19585,317 +19392,238 @@ esac
 fi
 
 
-if test "$with_tls" = "openssl" ||
-   test "$with_tls" = "auto"; then
-    ac_fn_c_check_header_compile "$LINENO" "openssl/opensslv.h" "ac_cv_header_openssl_opensslv_h" "$ac_includes_default"
-if test "x$ac_cv_header_openssl_opensslv_h" = xyes
+  case $with_tls in #(
+  yes) :
+    with_tls=auto ;; #(
+  no) :
+    with_tls=none ;; #(
+  auto|openssl|gnutls|wolfssl|none) :
+     ;; #(
+  *) :
+    as_fn_error $? "invalid value '$with_tls' for --with-tls; expected openssl, gnutls, wolfssl, none, or auto" "$LINENO" 5 ;;
+esac
+
+  ax_tls_backend=none
+
+    if test "x$with_tls" = xopenssl || test "x$with_tls" = xauto
 then :
 
-      if ac_fn_c_compute_int "$LINENO" "OPENSSL_VERSION_NUMBER" "OPENSSL_VERSION_NUMBER"        "#include <openssl/opensslv.h>"
-then :
+    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable OpenSSL 3.0.0 or newer" >&5
+printf %s "checking for usable OpenSSL 3.0.0 or newer... " >&6; }
 
-fi
+    ax_tls_openssl=no
+    ax_tls_save_LIBS=$LIBS
+    LIBS="-lssl -lcrypto $LIBS"
 
-      if test "$OPENSSL_VERSION_NUMBER" -ge $((0x1010100f))
-then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for RSA_free in -lcrypto" >&5
-printf %s "checking for RSA_free in -lcrypto... " >&6; }
-if test ${ac_cv_lib_crypto_RSA_free+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcrypto  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
+
+#include <openssl/opensslv.h>
+#include <openssl/crypto.h>
+#include <openssl/ssl.h>
+
+#if defined(LIBRESSL_VERSION_NUMBER)
+# error LibreSSL is not supported by the OpenSSL backend
 #endif
-char RSA_free (void);
+
+#if !defined(OPENSSL_VERSION_MAJOR)
+# error OpenSSL 3.0.0 or newer is required
+#elif OPENSSL_VERSION_MAJOR < 3
+# error OpenSSL 3.0.0 or newer is required
+#endif
+
 int
 main (void)
 {
-return RSA_free ();
+
+volatile unsigned int version = OPENSSL_version_major();
+SSL_CTX *ctx = SSL_CTX_new(TLS_method());
+
+(void)version;
+SSL_CTX_free(ctx);
+
   ;
   return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_crypto_RSA_free=yes
+  ax_tls_openssl=yes
 else case e in #(
-  e) ac_cv_lib_crypto_RSA_free=no ;;
+  e) ax_tls_openssl=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_RSA_free" >&5
-printf '%s\n' "$ac_cv_lib_crypto_RSA_free" >&6; }
-if test "x$ac_cv_lib_crypto_RSA_free" = xyes
+
+    LIBS=$ax_tls_save_LIBS
+    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ax_tls_openssl" >&5
+printf '%s\n' "$ax_tls_openssl" >&6; }
+
+    if test "x$ax_tls_openssl" = xyes
 then :
-  printf '%s\n' "#define HAVE_LIBCRYPTO 1" >>confdefs.h
 
-  LIBS="-lcrypto $LIBS"
+      LIBS="-lssl -lcrypto $LIBS"
+      ax_tls_backend=openssl
+
+
+printf '%s\n' "#define HAVE_LIBCRYPTO 1" >>confdefs.h
+
+
+printf '%s\n' "#define HAVE_LIBSSL 1" >>confdefs.h
+
 
 fi
 
 fi
 
-fi
-
-
-    if test "$ac_cv_lib_crypto_RSA_free" = "yes"
+    if test "x$ax_tls_backend" = xnone
 then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for SSL_connect in -lssl" >&5
-printf %s "checking for SSL_connect in -lssl... " >&6; }
-if test ${ac_cv_lib_ssl_SSL_connect+y}
+
+    if test "x$with_tls" = xgnutls || test "x$with_tls" = xauto
 then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_check_lib_save_LIBS=$LIBS
-LIBS="-lssl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable GnuTLS 3.6.5 or newer" >&5
+printf %s "checking for usable GnuTLS 3.6.5 or newer... " >&6; }
+
+      ax_tls_gnutls=no
+      ax_tls_save_LIBS=$LIBS
+      LIBS="-lgnutls $LIBS"
+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
+
+#include <gnutls/gnutls.h>
+
+#if GNUTLS_VERSION_NUMBER < 0x030605
+# error GnuTLS 3.6.5 or newer is required
 #endif
-char SSL_connect (void);
+
 int
 main (void)
 {
-return SSL_connect ();
+
+gnutls_session_t session;
+
+if (gnutls_init(&session, GNUTLS_CLIENT) != GNUTLS_E_SUCCESS)
+  return 1;
+
+gnutls_deinit(session);
+
   ;
   return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_ssl_SSL_connect=yes
+  ax_tls_gnutls=yes
 else case e in #(
-  e) ac_cv_lib_ssl_SSL_connect=no ;;
+  e) ax_tls_gnutls=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_connect" >&5
-printf '%s\n' "$ac_cv_lib_ssl_SSL_connect" >&6; }
-if test "x$ac_cv_lib_ssl_SSL_connect" = xyes
+
+      LIBS=$ax_tls_save_LIBS
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ax_tls_gnutls" >&5
+printf '%s\n' "$ax_tls_gnutls" >&6; }
+
+      if test "x$ax_tls_gnutls" = xyes
 then :
-  printf '%s\n' "#define HAVE_LIBSSL 1" >>confdefs.h
 
-  LIBS="-lssl $LIBS"
+        LIBS="-lgnutls $LIBS"
+        ax_tls_backend=gnutls
 
-fi
 
-fi
+printf '%s\n' "#define HAVE_LIBGNUTLS 1" >>confdefs.h
 
-    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for LibreSSL, or OpenSSL 1.1.1 and above" >&5
-printf %s "checking for LibreSSL, or OpenSSL 1.1.1 and above... " >&6; }
-    if test "$ac_cv_lib_ssl_SSL_connect" = "yes"
-then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: found" >&5
-printf '%s\n' "found" >&6; }
-else case e in #(
-  e) { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: no - LibreSSL/OpenSSL support disabled" >&5
-printf '%s\n' "no - LibreSSL/OpenSSL support disabled" >&6; } ;;
-esac
+
 fi
 
 fi
 
-if test "$with_tls" = "gnutls" ||
-   test "$with_tls" = "auto"; then
-  if test "$ac_cv_lib_ssl_SSL_connect" != "yes"; then
-
-    ac_fn_c_check_header_compile "$LINENO" "gnutls/gnutls.h" "ac_cv_header_gnutls_gnutls_h" "$ac_includes_default"
-if test "x$ac_cv_header_gnutls_gnutls_h" = xyes
-then :
-
-      if ac_fn_c_compute_int "$LINENO" "GNUTLS_VERSION_NUMBER" "GNUTLS_VERSION_NUMBER"        "#include <gnutls/gnutls.h>"
-then :
-
 fi
 
-      if test "$GNUTLS_VERSION_NUMBER" -ge $((0x030605))
+    if test "x$ax_tls_backend" = xnone
 then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for gnutls_init in -lgnutls" >&5
-printf %s "checking for gnutls_init in -lgnutls... " >&6; }
-if test ${ac_cv_lib_gnutls_gnutls_init+y}
+
+    if test "x$with_tls" = xwolfssl || test "x$with_tls" = xauto
 then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgnutls  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility" >&5
+printf %s "checking for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility... " >&6; }
+
+      ax_tls_wolfssl=no
+      ax_tls_save_LIBS=$LIBS
+      LIBS="-lwolfssl $LIBS"
+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
+
+#include <wolfssl/ssl.h>
+#include <wolfssl/version.h>
+
+#if LIBWOLFSSL_VERSION_HEX < 0x04003000
+# error wolfSSL 4.3.0 or newer is required
 #endif
-char gnutls_init (void);
+
 int
 main (void)
 {
-return gnutls_init ();
+
+(void)wolfSSL_X509_digest(NULL, NULL, NULL, NULL);
+
   ;
   return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_gnutls_gnutls_init=yes
+  ax_tls_wolfssl=yes
 else case e in #(
-  e) ac_cv_lib_gnutls_gnutls_init=no ;;
+  e) ax_tls_wolfssl=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gnutls_gnutls_init" >&5
-printf '%s\n' "$ac_cv_lib_gnutls_gnutls_init" >&6; }
-if test "x$ac_cv_lib_gnutls_gnutls_init" = xyes
-then :
-  printf '%s\n' "#define HAVE_LIBGNUTLS 1" >>confdefs.h
 
-  LIBS="-lgnutls $LIBS"
+      LIBS=$ax_tls_save_LIBS
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ax_tls_wolfssl" >&5
+printf '%s\n' "$ax_tls_wolfssl" >&6; }
 
-fi
-
-fi
-
-fi
-
-
-    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for GnuTLS 3.6.5 and above" >&5
-printf %s "checking for GnuTLS 3.6.5 and above... " >&6; }
-    if test "$ac_cv_lib_gnutls_gnutls_init" = "yes"
-then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: found" >&5
-printf '%s\n' "found" >&6; }
-else case e in #(
-  e) { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: no - GnuTLS support disabled" >&5
-printf '%s\n' "no - GnuTLS support disabled" >&6; } ;;
-esac
-fi
-
-  fi
-fi
-
-if test "$with_tls" = "wolfssl" ||
-   test "$with_tls" = "auto"; then
-  if test "$ac_cv_lib_ssl_SSL_connect" != "yes" &&
-     test "$ac_cv_lib_gnutls_gnutls_init" != "yes"; then
-
-    ac_fn_c_check_header_compile "$LINENO" "wolfssl/ssl.h" "ac_cv_header_wolfssl_ssl_h" "$ac_includes_default"
-if test "x$ac_cv_header_wolfssl_ssl_h" = xyes
+      if test "x$ax_tls_wolfssl" = xyes
 then :
 
-      if ac_fn_c_compute_int "$LINENO" "LIBWOLFSSL_VERSION_HEX" "LIBWOLFSSL_VERSION_HEX"        "#include <wolfssl/version.h>"
+        LIBS="-lwolfssl $LIBS"
+        ax_tls_backend=wolfssl
+
+
+printf '%s\n' "#define HAVE_LIBWOLFSSL 1" >>confdefs.h
+
+
+fi
+
+fi
+
+fi
+
+  if test "x$with_tls" != xauto &&
+         test "x$with_tls" != xnone &&
+         test "x$ax_tls_backend" = xnone
 then :
 
-fi
-
-      if test "$LIBWOLFSSL_VERSION_HEX" -ge $((0x04003000))
-then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for wolfSSL_X509_digest in -lwolfssl" >&5
-printf %s "checking for wolfSSL_X509_digest in -lwolfssl... " >&6; }
-if test ${ac_cv_lib_wolfssl_wolfSSL_X509_digest+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_check_lib_save_LIBS=$LIBS
-LIBS="-lwolfssl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char wolfSSL_X509_digest (void);
-int
-main (void)
-{
-return wolfSSL_X509_digest ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_lib_wolfssl_wolfSSL_X509_digest=yes
-else case e in #(
-  e) ac_cv_lib_wolfssl_wolfSSL_X509_digest=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_wolfssl_wolfSSL_X509_digest" >&5
-printf '%s\n' "$ac_cv_lib_wolfssl_wolfSSL_X509_digest" >&6; }
-if test "x$ac_cv_lib_wolfssl_wolfSSL_X509_digest" = xyes
-then :
-  printf '%s\n' "#define HAVE_LIBWOLFSSL 1" >>confdefs.h
-
-  LIBS="-lwolfssl $LIBS"
+    as_fn_error $? "requested TLS library '$with_tls' is unavailable or does not meet the minimum version requirements" "$LINENO" 5
 
 fi
 
-fi
-
-fi
-
-
-    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for wolfSSL 4.3.0 and above built with extended/full OpenSSL compatibility layer" >&5
-printf %s "checking for wolfSSL 4.3.0 and above built with extended/full OpenSSL compatibility layer... " >&6; }
-    if test "$ac_cv_lib_wolfssl_wolfSSL_X509_digest" = "yes"
-then :
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: found" >&5
-printf '%s\n' "found" >&6; }
-else case e in #(
-  e) { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: no - wolfSSL support disabled" >&5
-printf '%s\n' "no - wolfSSL support disabled" >&6; } ;;
-esac
-fi
-
-  fi
-fi
-
+  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: TLS backend: $ax_tls_backend" >&5
+printf '%s\n' "$as_me: TLS backend: $ax_tls_backend" >&6;}
 
 
 

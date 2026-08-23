@@ -85,7 +85,7 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the 'crypto' library (-lcrypto). */
+/* Define to 1 if OpenSSL libcrypto is available. */
 #undef HAVE_LIBCRYPTO
 
 /* Define if you have the libdl library or equivalent. */
@@ -94,13 +94,13 @@
 /* Define if libdlloader will be built on this platform */
 #undef HAVE_LIBDLLOADER
 
-/* Define to 1 if you have the 'gnutls' library (-lgnutls). */
+/* Define to 1 if GnuTLS is available. */
 #undef HAVE_LIBGNUTLS
 
-/* Define to 1 if you have the 'ssl' library (-lssl). */
+/* Define to 1 if OpenSSL libssl is available. */
 #undef HAVE_LIBSSL
 
-/* Define to 1 if you have the 'wolfssl' library (-lwolfssl). */
+/* Define to 1 if wolfSSL is available. */
 #undef HAVE_LIBWOLFSSL
 
 /* Define this if a modern libltdl is already installed */

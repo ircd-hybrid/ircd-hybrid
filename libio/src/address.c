@@ -505,7 +505,7 @@ address_from_string(const char *str, struct io_addr *addr_out)
 {
   struct io_addr addr = { 0 };
 
-  struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
+  struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr.ss;
   if (inet_pton(AF_INET, str, &v4->sin_addr) == 1)
   {
     v4->sin_family = AF_INET;
@@ -513,7 +513,7 @@ address_from_string(const char *str, struct io_addr *addr_out)
     return true;
   }
 
-  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
+  struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr.ss;
   if (inet_pton(AF_INET6, str, &v6->sin6_addr) == 1)
   {
     v6->sin6_family = AF_INET6;
@@ -554,16 +554,20 @@ address_from_bytes(struct io_addr *addr_out, int family, const void *bytes, size
     struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
     v4->sin_family = AF_INET;
     memcpy(&v4->sin_addr, bytes, sizeof(v4->sin_addr));
+
+    *addr_out = addr;
     return true;
   }
-  else if (family == AF_INET6 && len == sizeof(struct in6_addr))
+
+  if (family == AF_INET6 && len == sizeof(struct in6_addr))
   {
     struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
     v6->sin6_family = AF_INET6;
     memcpy(&v6->sin6_addr, bytes, sizeof(v6->sin6_addr));
+
+    *addr_out = addr;
     return true;
   }
 
-  *addr_out = addr;
   return false;
 }

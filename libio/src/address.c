@@ -505,22 +505,22 @@ address_from_string(const char *str, struct io_addr *addr_out)
 {
   struct io_addr addr = { 0 };
 
-  if (strchr(str, ':'))
+  struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
+  if (inet_pton(AF_INET, str, &v4->sin_addr) == 1)
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
-    v6->sin6_family = AF_INET6;
-    if (inet_pton(AF_INET6, str, &v6->sin6_addr) == 1)
-      return true;
-  }
-  else
-  {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
     v4->sin_family = AF_INET;
-    if (inet_pton(AF_INET, str, &v4->sin_addr) == 1)
-      return true;
+    *addr_out = addr;
+    return true;
   }
 
-  *addr_out = addr;
+  struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
+  if (inet_pton(AF_INET6, str, &v6->sin6_addr) == 1)
+  {
+    v6->sin6_family = AF_INET6;
+    *addr_out = addr;
+    return true;
+  }
+
   return false;
 }
 

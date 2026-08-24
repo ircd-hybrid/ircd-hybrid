@@ -88,6 +88,59 @@ tls_init(void)
   SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
+static bool
+_set_server_dh_parameters(SSL_CTX *ctx, const char *filename)
+{
+  if (filename)
+  {
+    BIO *file = BIO_new_file(filename, "r");
+    EVP_PKEY *params = NULL;
+
+    if (file)
+    {
+      params = PEM_read_bio_Parameters(file, NULL);
+      BIO_free(file);
+    }
+
+    if (params)
+    {
+      /*
+       * Custom parameters and automatic parameter selection are mutually
+       * exclusive policies. Ownership of params is transferred to ctx only
+       * when SSL_CTX_set0_tmp_dh_pkey() succeeds.
+       */
+      if (SSL_CTX_set_dh_auto(ctx, 0) == 1 && SSL_CTX_set0_tmp_dh_pkey(ctx, params) == 1)
+        return true;
+
+      EVP_PKEY_free(params);
+    }
+  }
+
+  /*
+   * Any errors from loading or applying custom parameters are deliberately
+   * ignored when falling back to OpenSSL's automatic parameter selection.
+   */
+  ERR_clear_error();
+
+  return SSL_CTX_set_dh_auto(ctx, 1) == 1;
+}
+
+static tls_md_t
+_fetch_message_digest(const char *name)
+{
+  if (name)
+  {
+    tls_md_t md = EVP_MD_fetch(NULL, name, NULL);
+    if (md)
+      return md;
+
+    /* Expected/recoverable failure: discard its errors. */
+    ERR_clear_error();
+  }
+
+  return EVP_MD_fetch(NULL, "SHA256", NULL);
+}
+
 bool
 tls_new_credentials(void)
 {
@@ -117,76 +170,19 @@ tls_new_credentials(void)
     return false;
   }
 
-  if (ConfigServerInfo.tls_dh_param_file)
-  {
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-    BIO *file = BIO_new_file(ConfigServerInfo.tls_dh_param_file, "r");
+  if (!_set_server_dh_parameters(tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file))
+    return false;
 
-    if (file)
-    {
-      DH *dh = PEM_read_bio_DHparams(file, NULL, NULL, NULL);
-
-      BIO_free(file);
-
-      if (dh)
-      {
-        SSL_CTX_set_tmp_dh(tls_ctx.server_ctx, dh);
-        DH_free(dh);
-      }
-    }
-    else
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-#else
-    EVP_PKEY *dhpkey = NULL;
-    OSSL_STORE_CTX *ctx = OSSL_STORE_open(ConfigServerInfo.tls_dh_param_file, NULL, NULL, NULL, NULL);
-    if (ctx)
-    {
-      if (OSSL_STORE_expect(ctx, OSSL_STORE_INFO_PARAMS))
-      {
-        while (OSSL_STORE_eof(ctx) == 0)
-        {
-          OSSL_STORE_INFO *info = OSSL_STORE_load(ctx);
-          if (info)
-          {
-            dhpkey = OSSL_STORE_INFO_get1_PARAMS(info);
-            OSSL_STORE_INFO_free(info);
-
-            if (dhpkey)
-            {
-              if (EVP_PKEY_is_a(dhpkey, "DH"))
-                if (SSL_CTX_set0_tmp_dh_pkey(tls_ctx.server_ctx, dhpkey))
-                  break;
-
-              EVP_PKEY_free(dhpkey);
-              dhpkey = NULL;
-            }
-          }
-        }
-      }
-
-      OSSL_STORE_close(ctx);
-    }
-
-    if (dhpkey == NULL)
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-#endif
-  }
-
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (SSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
-  {
-    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
+  if (ConfigServerInfo.tls_supported_groups &&
+      SSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
 
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = EVP_sha256();
-  else if ((message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
-  {
-    message_digest_algorithm = EVP_sha256();
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-  }
+  tls_md_t md = _fetch_message_digest(ConfigServerInfo.tls_message_digest_algorithm);
+  if (md == NULL)
+    return false;
+
+  EVP_MD_free(message_digest_algorithm);
+  message_digest_algorithm = md;
 
   if (ConfigServerInfo.tls_cipher_list == NULL)
     SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
@@ -196,15 +192,9 @@ tls_new_credentials(void)
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
-#ifndef LIBRESSL_VERSION_NUMBER
-  if (ConfigServerInfo.tls_cipher_suites == NULL)
-    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
-  else if (SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
-  {
-    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
+  if (ConfigServerInfo.tls_cipher_suites &&
+      SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
-  }
-#endif
 
   TLS_initialized = true;
   return true;
@@ -250,30 +240,33 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
   ERR_clear_error();
 
   SSL *ssl = *tls_data;
-  ssize_t ret = SSL_read(ssl, buf, bufsize);
-  /* Translate openssl error codes, sigh */
-  if (ret < 0)
-  {
-    switch (SSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_WRITE:
-        /* OpenSSL wants to write, we signal this to the caller and do nothing about that here */
-        *want_write = true;
-        break;
-      case SSL_ERROR_WANT_READ:
-        errno = EWOULDBLOCK;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;
-    }
-  }
+  size_t nread = 0;
+  const int ret = SSL_read_ex(ssl, buf, bufsize, &nread);
+  if (ret == 1)
+    return (ssize_t)nread;
 
-  return ret;
+  const int saved_errno = errno;
+
+  switch (SSL_get_error(ssl, ret))
+  {
+    case SSL_ERROR_WANT_READ:
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_WANT_WRITE:
+      *want_write = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case SSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    case SSL_ERROR_SSL:
+    default:
+      errno = EPROTO;
+      return -1;
+  }
 }
 
 ssize_t
@@ -282,30 +275,33 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
   ERR_clear_error();
 
   SSL *ssl = *tls_data;
-  ssize_t ret = SSL_write(ssl, buf, bufsize);
-  /* Translate openssl error codes, sigh */
-  if (ret < 0)
-  {
-    switch (SSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_READ:
-        *want_read = true;
-        break;  /* Retry later, don't register for write events */
-      case SSL_ERROR_WANT_WRITE:
-        errno = EWOULDBLOCK;
-        break;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;  /* Either an SSL-specific error or EOF */
-    }
-  }
+  size_t nwritten = 0;
+  const int ret = SSL_write_ex(ssl, buf, bufsize, &nwritten);
+  if (ret == 1)
+    return (ssize_t)nwritten;
 
-  return ret;
+  const int saved_errno = errno;
+
+  switch (SSL_get_error(ssl, ret))
+  {
+    case SSL_ERROR_WANT_WRITE:
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_WANT_READ:
+      *want_read = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case SSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    case SSL_ERROR_SSL:
+    default:
+      errno = EPROTO;
+      return -1;
+  }
 }
 
 void
@@ -324,63 +320,87 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   if (TLS_initialized == false)
     return false;
 
-  SSL *ssl;
-  if (role == TLS_ROLE_SERVER)
-    ssl = SSL_new(tls_ctx.server_ctx);
-  else
-    ssl = SSL_new(tls_ctx.client_ctx);
-
-  if (ssl == NULL)
+  SSL_CTX *ctx;
+  switch (role)
   {
-    log_write(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
-              ERR_error_string(ERR_get_error(), NULL));
+    case TLS_ROLE_SERVER:
+      ctx = tls_ctx.server_ctx;
+      break;
+    case TLS_ROLE_CLIENT:
+      ctx = tls_ctx.client_ctx;
+      break;
+    default:
+      return false;
+  }
+
+  SSL *ssl = SSL_new(ctx);
+  if (ssl == NULL)
+    return false;
+
+  if (role == TLS_ROLE_SERVER)
+    SSL_set_accept_state(ssl);
+  else
+    SSL_set_connect_state(ssl);
+
+  if (SSL_set_fd(ssl, fd) != 1)
+  {
+    SSL_free(ssl);
     return false;
   }
 
   *tls_data = ssl;
-  SSL_set_fd(ssl, fd);
   return true;
 }
 
 bool
 tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 {
-  SSL_set_cipher_list(*tls_data, cipher_list);
-  return true;
+  return SSL_set_cipher_list(*tls_data, cipher_list) == 1;
 }
 
 tls_handshake_status_t
 tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 {
-  SSL *ssl = *tls_data;
-  int ret;
+  if (errstr)
+    *errstr = NULL;
 
   ERR_clear_error();
 
-  if (role == TLS_ROLE_SERVER)
-    ret = SSL_accept(ssl);
-  else
-    ret = SSL_connect(ssl);
-
-  if (ret > 0)
+  SSL *ssl = *tls_data;
+  const int ret = SSL_do_handshake(ssl);
+  if (ret == 1)
     return TLS_HANDSHAKE_DONE;
 
   switch (SSL_get_error(ssl, ret))
   {
-    case SSL_ERROR_WANT_WRITE:
-      return TLS_HANDSHAKE_WANT_WRITE;
     case SSL_ERROR_WANT_READ:
       return TLS_HANDSHAKE_WANT_READ;
-    default:
-    {
-      const char *error = ERR_error_string(ERR_get_error(), NULL);
-
+    case SSL_ERROR_WANT_WRITE:
+      return TLS_HANDSHAKE_WANT_WRITE;
+    case SSL_ERROR_ZERO_RETURN:
       if (errstr)
-        *errstr = error;
+        *errstr = "TLS connection closed during handshake";
+      break;
+    case SSL_ERROR_SYSCALL:
+      if (errstr)
+        *errstr = "System I/O error during TLS handshake";
+      break;
+    case SSL_ERROR_SSL:
+      if (errstr)
+      {
+        const unsigned long code = ERR_peek_last_error();
+        const char *const reason = code ? ERR_reason_error_string(code) : NULL;
 
-      return TLS_HANDSHAKE_ERROR;
-    }
+        *errstr = reason ? reason : "TLS protocol error during handshake";
+      }
+      break;
+    default:
+      if (errstr)
+        *errstr = "TLS handshake failed";
+      break;
   }
+
+  return TLS_HANDSHAKE_ERROR;
 }
 
 bool
@@ -388,42 +408,34 @@ tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 {
   SSL *ssl = *tls_data;
 
+  io_free(*fingerprint);
+  *fingerprint = NULL;
+
   /* Accept NULL return from SSL_get_peer_certificate */
-  X509 *cert = SSL_get_peer_certificate(ssl);
+  const X509 *cert = SSL_get0_peer_certificate(ssl);
   if (cert == NULL)
     return true;
 
-  bool ret = false;
   switch (SSL_get_verify_result(ssl))
   {
     case X509_V_OK:
     case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
     case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
     case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-    {
-      ret = true;
-
-      unsigned int digest_len = 0;
-      unsigned char digest[EVP_MAX_MD_SIZE];
-      char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
-
-      if (X509_digest(cert, message_digest_algorithm, digest, &digest_len))
-      {
-        if (io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
-        {
-          io_free(*fingerprint);
-          *fingerprint = io_strdup(hex_digest);
-        }
-      }
-
       break;
-    }
-
     default:
-      break;
+      return false;
   }
 
-  X509_free(cert);
-  return ret;
+  unsigned char digest[EVP_MAX_MD_SIZE];
+  unsigned int digest_len = 0;
+  if (X509_digest(cert, message_digest_algorithm, digest, &digest_len) != 1)
+    return true;
+
+  char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
+  if (io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+    *fingerprint = io_strdup(hex_digest);
+
+  return true;
 }
 #endif  /* HAVE_TLS_OPENSSL */

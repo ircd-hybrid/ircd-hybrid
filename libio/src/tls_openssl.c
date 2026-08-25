@@ -239,6 +239,7 @@ ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   ERR_clear_error();
+  errno = 0;
 
   SSL *ssl = *tls_data;
   size_t nread = 0;
@@ -274,6 +275,7 @@ ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   ERR_clear_error();
+  errno = 0;
 
   SSL *ssl = *tls_data;
   size_t nwritten = 0;

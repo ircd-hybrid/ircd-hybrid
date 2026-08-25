@@ -19554,8 +19554,8 @@ then :
     if test "x$with_tls" = xwolfssl || test "x$with_tls" = xauto
 then :
 
-      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility" >&5
-printf %s "checking for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility... " >&6; }
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable wolfSSL 5.6.0 or newer with OpenSSL compatibility" >&5
+printf %s "checking for usable wolfSSL 5.6.0 or newer with OpenSSL compatibility... " >&6; }
 
       ax_tls_wolfssl=no
       ax_tls_save_LIBS=$LIBS
@@ -19565,18 +19565,66 @@ printf %s "checking for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility
 /* end confdefs.h.  */
 
 
+#include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/version.h>
+#include <wolfssl/openssl/evp.h>
 
-#if LIBWOLFSSL_VERSION_HEX < 0x04003000
-# error wolfSSL 4.3.0 or newer is required
+#if !defined(LIBWOLFSSL_VERSION_HEX)
+# error Could not determine wolfSSL version
+#elif LIBWOLFSSL_VERSION_HEX < 0x05006000
+# error wolfSSL 5.6.0 or newer is required
+#endif
+
+#if !defined(OPENSSL_EXTRA)
+# error wolfSSL must be built with OpenSSL compatibility enabled
 #endif
 
 int
 main (void)
 {
 
-(void)wolfSSL_X509_digest(NULL, NULL, NULL, NULL);
+unsigned char byte = 0;
+unsigned int digest_len = 0;
+
+(void)wolfSSL_Init();
+
+WOLFSSL_CTX *server_ctx = wolfSSL_CTX_new(wolfTLS_server_method());
+WOLFSSL_CTX *client_ctx = wolfSSL_CTX_new(wolfTLS_client_method());
+
+(void)wolfSSL_CTX_SetMinVersion(server_ctx, WOLFSSL_TLSV1_2);
+(void)wolfSSL_CTX_set_session_cache_mode(server_ctx, WOLFSSL_SESS_CACHE_OFF);
+wolfSSL_CTX_set_verify(server_ctx, WOLFSSL_VERIFY_PEER, NULL);
+
+(void)wolfSSL_CTX_use_certificate_chain_file(server_ctx, "");
+(void)wolfSSL_CTX_use_PrivateKey_file(server_ctx, "", WOLFSSL_FILETYPE_PEM);
+(void)wolfSSL_CTX_check_private_key(server_ctx);
+(void)wolfSSL_CTX_SetTmpDH_file(server_ctx, "", WOLFSSL_FILETYPE_PEM);
+(void)wolfSSL_CTX_set_cipher_list(server_ctx, "");
+
+WOLFSSL *ssl = wolfSSL_new(client_ctx);
+
+wolfSSL_set_accept_state(ssl);
+wolfSSL_set_connect_state(ssl);
+wolfSSL_set_using_nonblock(ssl, 1);
+
+(void)wolfSSL_set_fd(ssl, -1);
+(void)wolfSSL_negotiate(ssl);
+(void)wolfSSL_read(ssl, &byte, 1);
+(void)wolfSSL_write(ssl, &byte, 1);
+(void)wolfSSL_shutdown(ssl);
+(void)wolfSSL_get_error(ssl, WOLFSSL_FATAL_ERROR);
+
+(void)wolfSSL_EVP_get_digestbyname("SHA256");
+(void)wolfSSL_X509_digest(NULL, wolfSSL_EVP_sha256(), NULL, &digest_len);
+
+WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ssl);
+(void)wolfSSL_get_verify_result(ssl);
+wolfSSL_X509_free(cert);
+
+wolfSSL_free(ssl);
+wolfSSL_CTX_free(client_ctx);
+wolfSSL_CTX_free(server_ctx);
 
   ;
   return 0;
@@ -19618,7 +19666,7 @@ fi
          test "x$ax_tls_backend" = xnone
 then :
 
-    as_fn_error $? "requested TLS library '$with_tls' is unavailable or does not meet the minimum version requirements" "$LINENO" 5
+    as_fn_error $? "requested TLS library '$with_tls' is unavailable, too old, or lacks required features" "$LINENO" 5
 
 fi
 

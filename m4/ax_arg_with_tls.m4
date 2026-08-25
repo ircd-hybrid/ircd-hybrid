@@ -105,10 +105,10 @@ gnutls_deinit(session);
     ])
   ])
 
-  dnl wolfSSL >= 4.3.0 with the extended/full OpenSSL compatibility layer.
+  dnl wolfSSL >= 5.6.0 with the extended/full OpenSSL compatibility layer.
   AS_IF([test "x$ax_tls_backend" = xnone], [
     AS_IF([test "x$with_tls" = xwolfssl || test "x$with_tls" = xauto], [
-      AC_MSG_CHECKING([for usable wolfSSL 4.3.0 or newer with OpenSSL compatibility])
+      AC_MSG_CHECKING([for usable wolfSSL 5.6.0 or newer with OpenSSL compatibility])
 
       ax_tls_wolfssl=no
       ax_tls_save_LIBS=$LIBS
@@ -116,14 +116,62 @@ gnutls_deinit(session);
 
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
+#include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/version.h>
+#include <wolfssl/openssl/evp.h>
 
-#if LIBWOLFSSL_VERSION_HEX < 0x04003000
-# error wolfSSL 4.3.0 or newer is required
+#if !defined(LIBWOLFSSL_VERSION_HEX)
+# error Could not determine wolfSSL version
+#elif LIBWOLFSSL_VERSION_HEX < 0x05006000
+# error wolfSSL 5.6.0 or newer is required
+#endif
+
+#if !defined(OPENSSL_EXTRA)
+# error wolfSSL must be built with OpenSSL compatibility enabled
 #endif
         ]], [[
-(void)wolfSSL_X509_digest(NULL, NULL, NULL, NULL);
+unsigned char byte = 0;
+unsigned int digest_len = 0;
+
+(void)wolfSSL_Init();
+
+WOLFSSL_CTX *server_ctx = wolfSSL_CTX_new(wolfTLS_server_method());
+WOLFSSL_CTX *client_ctx = wolfSSL_CTX_new(wolfTLS_client_method());
+
+(void)wolfSSL_CTX_SetMinVersion(server_ctx, WOLFSSL_TLSV1_2);
+(void)wolfSSL_CTX_set_session_cache_mode(server_ctx, WOLFSSL_SESS_CACHE_OFF);
+wolfSSL_CTX_set_verify(server_ctx, WOLFSSL_VERIFY_PEER, NULL);
+
+(void)wolfSSL_CTX_use_certificate_chain_file(server_ctx, "");
+(void)wolfSSL_CTX_use_PrivateKey_file(server_ctx, "", WOLFSSL_FILETYPE_PEM);
+(void)wolfSSL_CTX_check_private_key(server_ctx);
+(void)wolfSSL_CTX_SetTmpDH_file(server_ctx, "", WOLFSSL_FILETYPE_PEM);
+(void)wolfSSL_CTX_set_cipher_list(server_ctx, "");
+
+WOLFSSL *ssl = wolfSSL_new(client_ctx);
+
+wolfSSL_set_accept_state(ssl);
+wolfSSL_set_connect_state(ssl);
+wolfSSL_set_using_nonblock(ssl, 1);
+
+(void)wolfSSL_set_fd(ssl, -1);
+(void)wolfSSL_negotiate(ssl);
+(void)wolfSSL_read(ssl, &byte, 1);
+(void)wolfSSL_write(ssl, &byte, 1);
+(void)wolfSSL_shutdown(ssl);
+(void)wolfSSL_get_error(ssl, WOLFSSL_FATAL_ERROR);
+
+(void)wolfSSL_EVP_get_digestbyname("SHA256");
+(void)wolfSSL_X509_digest(NULL, wolfSSL_EVP_sha256(), NULL, &digest_len);
+
+WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ssl);
+(void)wolfSSL_get_verify_result(ssl);
+wolfSSL_X509_free(cert);
+
+wolfSSL_free(ssl);
+wolfSSL_CTX_free(client_ctx);
+wolfSSL_CTX_free(server_ctx);
         ]])
       ],
       [ax_tls_wolfssl=yes],
@@ -145,7 +193,7 @@ gnutls_deinit(session);
   AS_IF([test "x$with_tls" != xauto &&
          test "x$with_tls" != xnone &&
          test "x$ax_tls_backend" = xnone], [
-    AC_MSG_ERROR([requested TLS library '$with_tls' is unavailable or does not meet the minimum version requirements])
+    AC_MSG_ERROR([requested TLS library '$with_tls' is unavailable, too old, or lacks required features])
   ])
 
   AC_MSG_NOTICE([TLS backend: $ax_tls_backend])

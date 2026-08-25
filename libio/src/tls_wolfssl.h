@@ -19,6 +19,7 @@
 
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
+#include <wolfssl/openssl/evp.h>
 
 typedef WOLFSSL * tls_data_t;
 typedef const WOLFSSL_EVP_MD * tls_md_t;

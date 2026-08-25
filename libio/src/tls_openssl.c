@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "conf.h"  /* XXX: decouple */
 #include "io_hex.h"
@@ -411,7 +412,6 @@ tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
   io_free(*fingerprint);
   *fingerprint = NULL;
 
-  /* Accept NULL return from SSL_get_peer_certificate */
   const X509 *cert = SSL_get0_peer_certificate(ssl);
   if (cert == NULL)
     return true;
@@ -428,9 +428,12 @@ tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
   }
 
   unsigned char digest[EVP_MAX_MD_SIZE];
-  unsigned int digest_len = 0;
+  unsigned int digest_len;
   if (X509_digest(cert, message_digest_algorithm, digest, &digest_len) != 1)
+  {
+    ERR_clear_error();
     return true;
+  }
 
   char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
   if (io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))

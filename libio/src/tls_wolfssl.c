@@ -16,8 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <wolfssl/version.h>
-
 #include "conf.h"  /* XXX: decouple */
 #include "io_hex.h"
 #include "log.h"

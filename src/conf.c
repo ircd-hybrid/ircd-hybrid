@@ -783,8 +783,6 @@ conf_clear(void)
   ConfigServerInfo.rsa_private_key_file = NULL;
   io_free(ConfigServerInfo.tls_certificate_file);
   ConfigServerInfo.tls_certificate_file = NULL;
-  io_free(ConfigServerInfo.tls_message_digest_algorithm);
-  ConfigServerInfo.tls_message_digest_algorithm = NULL;
   io_free(ConfigServerInfo.motd_file);
   ConfigServerInfo.motd_file = NULL;
 

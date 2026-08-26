@@ -259,23 +259,22 @@ extern int yydebug;
     TLS_CERTIFICATE_FILE = 460,    /* TLS_CERTIFICATE_FILE  */
     TLS_CERTIFICATE_FINGERPRINT = 461, /* TLS_CERTIFICATE_FINGERPRINT  */
     TLS_CONNECTION_REQUIRED = 462, /* TLS_CONNECTION_REQUIRED  */
-    TLS_MESSAGE_DIGEST_ALGORITHM = 463, /* TLS_MESSAGE_DIGEST_ALGORITHM  */
-    TS_MAX_DELTA = 464,            /* TS_MAX_DELTA  */
-    TS_WARN_DELTA = 465,           /* TS_WARN_DELTA  */
-    TWODOTS = 466,                 /* TWODOTS  */
-    TYPE = 467,                    /* TYPE  */
-    UNKLINE = 468,                 /* UNKLINE  */
-    USE_LOGGING = 469,             /* USE_LOGGING  */
-    USER = 470,                    /* USER  */
-    VHOST = 471,                   /* VHOST  */
-    VHOST6 = 472,                  /* VHOST6  */
-    WARN_NO_CONNECT_BLOCK = 473,   /* WARN_NO_CONNECT_BLOCK  */
-    WHOIS = 474,                   /* WHOIS  */
-    WHOWAS_HISTORY_LENGTH = 475,   /* WHOWAS_HISTORY_LENGTH  */
-    XLINE = 476,                   /* XLINE  */
-    XLINE_EXEMPT = 477,            /* XLINE_EXEMPT  */
-    QSTRING = 478,                 /* QSTRING  */
-    NUMBER = 479                   /* NUMBER  */
+    TS_MAX_DELTA = 463,            /* TS_MAX_DELTA  */
+    TS_WARN_DELTA = 464,           /* TS_WARN_DELTA  */
+    TWODOTS = 465,                 /* TWODOTS  */
+    TYPE = 466,                    /* TYPE  */
+    UNKLINE = 467,                 /* UNKLINE  */
+    USE_LOGGING = 468,             /* USE_LOGGING  */
+    USER = 469,                    /* USER  */
+    VHOST = 470,                   /* VHOST  */
+    VHOST6 = 471,                  /* VHOST6  */
+    WARN_NO_CONNECT_BLOCK = 472,   /* WARN_NO_CONNECT_BLOCK  */
+    WHOIS = 473,                   /* WHOIS  */
+    WHOWAS_HISTORY_LENGTH = 474,   /* WHOWAS_HISTORY_LENGTH  */
+    XLINE = 475,                   /* XLINE  */
+    XLINE_EXEMPT = 476,            /* XLINE_EXEMPT  */
+    QSTRING = 477,                 /* QSTRING  */
+    NUMBER = 478                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -489,23 +488,22 @@ extern int yydebug;
 #define TLS_CERTIFICATE_FILE 460
 #define TLS_CERTIFICATE_FINGERPRINT 461
 #define TLS_CONNECTION_REQUIRED 462
-#define TLS_MESSAGE_DIGEST_ALGORITHM 463
-#define TS_MAX_DELTA 464
-#define TS_WARN_DELTA 465
-#define TWODOTS 466
-#define TYPE 467
-#define UNKLINE 468
-#define USE_LOGGING 469
-#define USER 470
-#define VHOST 471
-#define VHOST6 472
-#define WARN_NO_CONNECT_BLOCK 473
-#define WHOIS 474
-#define WHOWAS_HISTORY_LENGTH 475
-#define XLINE 476
-#define XLINE_EXEMPT 477
-#define QSTRING 478
-#define NUMBER 479
+#define TS_MAX_DELTA 463
+#define TS_WARN_DELTA 464
+#define TWODOTS 465
+#define TYPE 466
+#define UNKLINE 467
+#define USE_LOGGING 468
+#define USER 469
+#define VHOST 470
+#define VHOST6 471
+#define WARN_NO_CONNECT_BLOCK 472
+#define WHOIS 473
+#define WHOWAS_HISTORY_LENGTH 474
+#define XLINE 475
+#define XLINE_EXEMPT 476
+#define QSTRING 477
+#define NUMBER 478
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -516,7 +514,7 @@ union YYSTYPE
   int number;
   char *string;
 
-#line 520 "conf_parser.h"
+#line 518 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

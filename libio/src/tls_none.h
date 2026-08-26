@@ -11,6 +11,5 @@
 #define INCLUDED_tls_none_h
 
 typedef void * tls_data_t;
-typedef void * tls_md_t;
 typedef void * tls_context_t;
 #endif  /* INCLUDED_tls_none_h */

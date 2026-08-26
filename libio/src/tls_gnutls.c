@@ -30,7 +30,6 @@ static const char tls_default_priority_string[] =
   "!VERS-SSL3.0";
 
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
 
 bool
 tls_is_initialized(void)
@@ -94,19 +93,6 @@ tls_new_credentials(void)
     gnutls_priority_deinit(context->priorities);
     io_free(context);
     return false;
-  }
-
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = GNUTLS_DIG_SHA256;
-  else
-  {
-    message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.tls_message_digest_algorithm);
-
-    if (message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
-    {
-      message_digest_algorithm = GNUTLS_DIG_SHA256;
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-    }
   }
 
   _tls_context_ref(context);
@@ -342,30 +328,16 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
   if (cert_list == NULL || cert_list_size == 0)
     return false;
 
-  const unsigned int digest_size = gnutls_hash_get_len(message_digest_algorithm);
-  if (digest_size == 0)
+  unsigned char digest[32];
+  size_t digest_len = sizeof(digest);
+  if (gnutls_fingerprint(GNUTLS_DIG_SHA256, &cert_list[0], digest, &digest_len) != GNUTLS_E_SUCCESS)
     return false;
 
-  unsigned char *const digest = io_calloc(digest_size);
-  size_t digest_len = digest_size;
-  const int ret = gnutls_fingerprint(message_digest_algorithm, &cert_list[0], digest, &digest_len);
-  if (ret < 0)
-  {
-    io_free(digest);
+  char hex_digest[(sizeof(digest) * 2) + 1];
+  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
     return false;
-  }
 
-  char *const hex_digest = io_calloc((digest_len * 2) + 1);
-  if (!io_bytes_to_hex(digest, digest_len, hex_digest, (digest_len * 2) + 1))
-  {
-    io_free(hex_digest);
-    io_free(digest);
-    return false;
-  }
-
-  io_free(digest);
-
-  *fingerprint = hex_digest;
+  *fingerprint = io_strdup(hex_digest);
   return true;
 }
 #endif  /* HAVE_TLS_GNUTLS */

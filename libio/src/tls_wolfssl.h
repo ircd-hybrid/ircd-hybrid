@@ -21,9 +21,9 @@
 #include <wolfssl/ssl.h>
 #include <wolfssl/version.h>
 #include <wolfssl/openssl/evp.h>
+#include <wolfssl/wolfcrypt/sha256.h>
 
 typedef WOLFSSL * tls_data_t;
-typedef const WOLFSSL_EVP_MD * tls_md_t;
 
 typedef struct
 {

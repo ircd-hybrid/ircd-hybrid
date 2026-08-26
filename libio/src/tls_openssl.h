@@ -21,7 +21,6 @@
 #include <openssl/err.h>
 
 typedef SSL * tls_data_t;
-typedef EVP_MD * tls_md_t;
 
 typedef struct
 {

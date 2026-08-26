@@ -328,7 +328,6 @@ reset_block_state(void)
 %token  TLS_CERTIFICATE_FILE
 %token  TLS_CERTIFICATE_FINGERPRINT
 %token  TLS_CONNECTION_REQUIRED
-%token  TLS_MESSAGE_DIGEST_ALGORITHM
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  TWODOTS
@@ -458,7 +457,6 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_rsa_private_key_file |
                         serverinfo_sid |
                         serverinfo_tls_certificate_file |
-                        serverinfo_tls_message_digest_algorithm |
                         error ';' ;
 
 
@@ -479,15 +477,6 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
     ConfigServerInfo.rsa_private_key_file = io_strdup(yylval.string);
   }
 };
-
-serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_message_digest_algorithm);
-    ConfigServerInfo.tls_message_digest_algorithm = io_strdup(yylval.string);
-  }
-}
 
 serverinfo_name: NAME '=' QSTRING ';'
 {

@@ -320,7 +320,6 @@ tls                         { return T_TLS; }
 tls_certificate_file        { return TLS_CERTIFICATE_FILE; }
 tls_certificate_fingerprint { return TLS_CERTIFICATE_FINGERPRINT; }
 tls_connection_required     { return TLS_CONNECTION_REQUIRED; }
-tls_message_digest_algorithm { return TLS_MESSAGE_DIGEST_ALGORITHM; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }

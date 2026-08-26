@@ -24,7 +24,6 @@
 #ifdef HAVE_TLS_OPENSSL
 static bool TLS_initialized;
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -88,22 +87,6 @@ tls_init(void)
   SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
-static tls_md_t
-_fetch_message_digest(const char *name)
-{
-  if (name)
-  {
-    tls_md_t md = EVP_MD_fetch(NULL, name, NULL);
-    if (md)
-      return md;
-
-    /* Expected/recoverable failure: discard its errors. */
-    ERR_clear_error();
-  }
-
-  return EVP_MD_fetch(NULL, "SHA256", NULL);
-}
-
 bool
 tls_new_credentials(void)
 {
@@ -132,13 +115,6 @@ tls_new_credentials(void)
     report_crypto_errors();
     return false;
   }
-
-  tls_md_t md = _fetch_message_digest(ConfigServerInfo.tls_message_digest_algorithm);
-  if (md == NULL)
-    return false;
-
-  EVP_MD_free(message_digest_algorithm);
-  message_digest_algorithm = md;
 
   TLS_initialized = true;
   return true;
@@ -361,7 +337,7 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 
   unsigned char digest[EVP_MAX_MD_SIZE];
   unsigned int digest_len;
-  if (X509_digest(cert, message_digest_algorithm, digest, &digest_len) != 1)
+  if (X509_digest(cert, EVP_sha256(), digest, &digest_len) != 1)
   {
     ERR_clear_error();
     return false;

@@ -17,11 +17,9 @@
 #define HAVE_TLS
 #define HAVE_TLS_GNUTLS
 
-#include <gnutls/crypto.h>
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
-typedef gnutls_digest_algorithm_t tls_md_t;
 typedef struct gnutls_context * tls_context_t;
 
 struct gnutls_context

@@ -25,7 +25,6 @@
 #ifdef HAVE_TLS_WOLFSSL
 static bool TLS_initialized;
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -112,14 +111,6 @@ tls_new_credentials(void)
   {
     report_crypto_errors();
     return false;
-  }
-
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = wolfSSL_EVP_sha256();
-  else if ((message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
-  {
-    message_digest_algorithm = wolfSSL_EVP_sha256();
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
   }
 
   TLS_initialized = true;
@@ -347,17 +338,23 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
   if (cert == NULL)
     return false;
 
-  unsigned char digest[EVP_MAX_MD_SIZE];
-  unsigned int digest_len;
-  if (wolfSSL_X509_digest(cert, message_digest_algorithm, digest, &digest_len) != WOLFSSL_SUCCESS)
+  int der_len;
+  const unsigned char *const der = wolfSSL_X509_get_der(cert, &der_len);
+  if (der == NULL || der_len <= 0)
   {
-    wolfSSL_ERR_clear_error();
     wolfSSL_X509_free(cert);
     return false;
   }
 
-  char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
-  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+  unsigned char digest[WC_SHA256_DIGEST_SIZE];
+  if (wc_Sha256Hash(der, (word32)der_len, digest))
+  {
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  char hex_digest[(WC_SHA256_DIGEST_SIZE * 2) + 1];
+  if (!io_bytes_to_hex(digest, sizeof(digest), hex_digest, sizeof(hex_digest)))
   {
     wolfSSL_X509_free(cert);
     return false;

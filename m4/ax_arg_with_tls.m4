@@ -64,10 +64,10 @@ SSL_CTX_free(ctx);
     ])
   ])
 
-  dnl GnuTLS >= 3.6.5.
+  dnl GnuTLS >= 3.8.0.
   AS_IF([test "x$ax_tls_backend" = xnone], [
     AS_IF([test "x$with_tls" = xgnutls || test "x$with_tls" = xauto], [
-      AC_MSG_CHECKING([for usable GnuTLS 3.6.5 or newer])
+      AC_MSG_CHECKING([for usable GnuTLS 3.8.0 or newer])
 
       ax_tls_gnutls=no
       ax_tls_save_LIBS=$LIBS
@@ -77,15 +77,15 @@ SSL_CTX_free(ctx);
         AC_LANG_PROGRAM([[
 #include <gnutls/gnutls.h>
 
-#if GNUTLS_VERSION_NUMBER < 0x030605
-# error GnuTLS 3.6.5 or newer is required
+#if !defined(GNUTLS_VERSION_NUMBER)
+# error Could not determine GnuTLS version
+#elif GNUTLS_VERSION_NUMBER < 0x030800
+# error GnuTLS 3.8.0 or newer is required
 #endif
         ]], [[
-gnutls_session_t session;
+gnutls_session_t session = NULL;
 
-if (gnutls_init(&session, GNUTLS_CLIENT) != GNUTLS_E_SUCCESS)
-  return 1;
-
+(void)gnutls_init(&session, GNUTLS_CLIENT);
 gnutls_deinit(session);
         ]])
       ],

@@ -19485,8 +19485,8 @@ then :
     if test "x$with_tls" = xgnutls || test "x$with_tls" = xauto
 then :
 
-      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable GnuTLS 3.6.5 or newer" >&5
-printf %s "checking for usable GnuTLS 3.6.5 or newer... " >&6; }
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for usable GnuTLS 3.8.0 or newer" >&5
+printf %s "checking for usable GnuTLS 3.8.0 or newer... " >&6; }
 
       ax_tls_gnutls=no
       ax_tls_save_LIBS=$LIBS
@@ -19498,19 +19498,19 @@ printf %s "checking for usable GnuTLS 3.6.5 or newer... " >&6; }
 
 #include <gnutls/gnutls.h>
 
-#if GNUTLS_VERSION_NUMBER < 0x030605
-# error GnuTLS 3.6.5 or newer is required
+#if !defined(GNUTLS_VERSION_NUMBER)
+# error Could not determine GnuTLS version
+#elif GNUTLS_VERSION_NUMBER < 0x030800
+# error GnuTLS 3.8.0 or newer is required
 #endif
 
 int
 main (void)
 {
 
-gnutls_session_t session;
+gnutls_session_t session = NULL;
 
-if (gnutls_init(&session, GNUTLS_CLIENT) != GNUTLS_E_SUCCESS)
-  return 1;
-
+(void)gnutls_init(&session, GNUTLS_CLIENT);
 gnutls_deinit(session);
 
   ;

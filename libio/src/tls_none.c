@@ -93,7 +93,7 @@ tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   return false;
 }

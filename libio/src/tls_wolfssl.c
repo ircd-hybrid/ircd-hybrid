@@ -194,6 +194,8 @@ tls_free(tls_data_t *tls_data)
 ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
+  *want_write = false;
+
   WOLFSSL *ssl = *tls_data;
   const int size = bufsize > INT_MAX ? INT_MAX : (int)bufsize;
 
@@ -235,6 +237,8 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
+  *want_read = false;
+
   WOLFSSL *ssl = *tls_data;
   const int size = bufsize > INT_MAX ? INT_MAX : (int)bufsize;
 
@@ -369,7 +373,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   WOLFSSL *ssl = *tls_data;
 
@@ -378,30 +382,25 @@ tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
 
   WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ssl);
   if (cert == NULL)
-    return true;
-
-  switch (wolfSSL_get_verify_result(ssl))
-  {
-    case X509_V_OK:
-    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-    case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-    case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-      break;
-    default:
-      wolfSSL_X509_free(cert);
-      return false;
-  }
+    return false;
 
   unsigned char digest[EVP_MAX_MD_SIZE];
   unsigned int digest_len;
-  if (wolfSSL_X509_digest(cert, message_digest_algorithm, digest, &digest_len) == WOLFSSL_SUCCESS)
+  if (wolfSSL_X509_digest(cert, message_digest_algorithm, digest, &digest_len) != WOLFSSL_SUCCESS)
   {
-    char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
-    if (io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
-      *fingerprint = io_strdup(hex_digest);
-  }
-  else
     wolfSSL_ERR_clear_error();
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
+  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+  {
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  *fingerprint = io_strdup(hex_digest);
 
   wolfSSL_X509_free(cert);
   return true;

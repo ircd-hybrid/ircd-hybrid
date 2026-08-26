@@ -940,14 +940,9 @@ _client_tls_handshake_handler(fde_t *fde, void *data)
     case TLS_HANDSHAKE_DONE:
       client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
       client_set_flag(client, FLAGS_TLS_ACTIVE);
-      comm_setselect(fde, 0, NULL, NULL);
 
-      if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
-      {
-        client_format_name_buffer_t client_name_buffer;
-        log_write(LOG_TYPE_IRCD, "Client %s presented an invalid TLS certificate.",
-                  client_format_name(client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
-      }
+      comm_setselect(fde, 0, NULL, NULL);
+      tls_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
       lookup_start(client);
       return;

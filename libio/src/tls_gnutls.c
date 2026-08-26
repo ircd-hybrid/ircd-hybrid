@@ -306,7 +306,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   unsigned int cert_list_size = 0;
   const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, &cert_list_size);

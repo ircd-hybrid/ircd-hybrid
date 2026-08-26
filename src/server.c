@@ -237,12 +237,7 @@ _server_handshake_tls_finish(struct Client *client)
   fde_t *fde = client->connection->fde;
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
-  if (!tls_verify_certificate(&fde->tls, &client->tls_certfp))
-  {
-    client_format_name_buffer_t client_name_buffer;
-    log_write(LOG_TYPE_IRCD, "Link %s presented an invalid TLS certificate.",
-              client_format_name(client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
-  }
+  tls_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)

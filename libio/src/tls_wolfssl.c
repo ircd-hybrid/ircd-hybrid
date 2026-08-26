@@ -346,14 +346,14 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
     return false;
   }
 
-  unsigned char digest[WC_SHA256_DIGEST_SIZE];
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
   if (wc_Sha256Hash(der, (word32)der_len, digest))
   {
     wolfSSL_X509_free(cert);
     return false;
   }
 
-  char hex_digest[(WC_SHA256_DIGEST_SIZE * 2) + 1];
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
   if (!io_bytes_to_hex(digest, sizeof(digest), hex_digest, sizeof(hex_digest)))
   {
     wolfSSL_X509_free(cert);

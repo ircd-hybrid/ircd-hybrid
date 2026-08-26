@@ -26,6 +26,12 @@
 #include "tls_none.h"
 #endif
 
+enum
+{
+  TLS_CERTFP_DIGEST_SIZE = 32,
+  TLS_CERTFP_STRING_SIZE = (TLS_CERTFP_DIGEST_SIZE * 2) + 1
+};
+
 typedef enum _tls_role
 {
   TLS_ROLE_SERVER,

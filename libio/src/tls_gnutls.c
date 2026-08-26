@@ -328,12 +328,12 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
   if (cert_list == NULL || cert_list_size == 0)
     return false;
 
-  unsigned char digest[32];
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
   size_t digest_len = sizeof(digest);
   if (gnutls_fingerprint(GNUTLS_DIG_SHA256, &cert_list[0], digest, &digest_len) != GNUTLS_E_SUCCESS)
     return false;
 
-  char hex_digest[(sizeof(digest) * 2) + 1];
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
   if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
     return false;
 

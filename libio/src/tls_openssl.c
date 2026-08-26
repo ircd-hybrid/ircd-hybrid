@@ -335,7 +335,7 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
   if (cert == NULL)
     return false;
 
-  unsigned char digest[EVP_MAX_MD_SIZE];
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
   unsigned int digest_len;
   if (X509_digest(cert, EVP_sha256(), digest, &digest_len) != 1)
   {
@@ -343,7 +343,7 @@ tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
     return false;
   }
 
-  char hex_digest[(EVP_MAX_MD_SIZE * 2) + 1];
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
   if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
     return false;
 

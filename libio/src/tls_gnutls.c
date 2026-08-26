@@ -300,12 +300,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
     *errstr = NULL;
 
   gnutls_session_t session = tls_data->session;
-  int ret;
-
-  do
-    ret = gnutls_handshake(session);
-  while (ret == GNUTLS_E_WARNING_ALERT_RECEIVED);
-
+  const int ret = gnutls_handshake(session);
   if (ret == GNUTLS_E_SUCCESS)
     return TLS_HANDSHAKE_DONE;
 
@@ -319,7 +314,7 @@ tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
 
   if (errstr)
   {
-    if (ret == GNUTLS_E_FATAL_ALERT_RECEIVED)
+    if (ret == GNUTLS_E_WARNING_ALERT_RECEIVED || ret == GNUTLS_E_FATAL_ALERT_RECEIVED)
     {
       const gnutls_alert_description_t alert = gnutls_alert_get(session);
       const char *const reason = gnutls_alert_get_name(alert);

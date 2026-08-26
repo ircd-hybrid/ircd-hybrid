@@ -130,14 +130,15 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_get_library_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "OpenSSL version: library: %s, header: %s",
-           OpenSSL_version(OPENSSL_VERSION), OPENSSL_VERSION_TEXT);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "OpenSSL",
+    .runtime_version = OpenSSL_version(OPENSSL_VERSION),
+    .compile_version = OPENSSL_VERSION_TEXT
+  };
 }
 
 bool

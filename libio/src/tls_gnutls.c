@@ -120,14 +120,15 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_get_library_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "GnuTLS version: library: %s, header: %s",
-           gnutls_check_version(NULL), GNUTLS_VERSION);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "GnuTLS",
+    .runtime_version = gnutls_check_version(NULL),
+    .compile_version = GNUTLS_VERSION
+  };
 }
 
 bool

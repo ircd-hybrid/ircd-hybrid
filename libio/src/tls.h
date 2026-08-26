@@ -46,6 +46,13 @@ typedef enum _tls_handshake_status
   TLS_HANDSHAKE_ERROR
 } tls_handshake_status_t;
 
+typedef struct
+{
+  const char *name;
+  const char *runtime_version;
+  const char *compile_version;
+} tls_library_info_t;
+
 extern void tls_free(tls_data_t *);
 extern void tls_init(void);
 extern void tls_shutdown(tls_data_t *);
@@ -57,6 +64,6 @@ extern bool tls_get_peer_certificate_fingerprint(tls_data_t *, char **);
 extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
 extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);
 extern tls_handshake_status_t tls_handshake(tls_data_t *, const char **);
+extern tls_library_info_t tls_get_library_info(void);
 extern const char *tls_get_cipher(const tls_data_t *);
-extern const char *tls_get_version(void);
 #endif  /* INCLUDED_tls_h */

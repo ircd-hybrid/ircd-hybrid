@@ -127,14 +127,15 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_get_library_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "wolfSSL version: library: %s, header: %s",
-           wolfSSL_lib_version(), LIBWOLFSSL_VERSION_STRING);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "wolfSSL",
+    .runtime_version = wolfSSL_lib_version(),
+    .compile_version = LIBWOLFSSL_VERSION_STRING
+  };
 }
 
 bool

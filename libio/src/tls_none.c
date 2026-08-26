@@ -40,10 +40,10 @@ tls_get_cipher(const tls_data_t *tls_data)
   return NULL;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_get_library_info(void)
 {
-  return NULL;
+  return (tls_library_info_t){ 0 };
 }
 
 bool
@@ -60,12 +60,14 @@ tls_free(tls_data_t *tls_data)
 ssize_t
 tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
+  *want_write = false;
   return -1;
 }
 
 ssize_t
 tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
+  *want_read = false;
   return -1;
 }
 
@@ -83,13 +85,10 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 tls_handshake_status_t
 tls_handshake(tls_data_t *tls_data, const char **errstr)
 {
-  return 0;
-}
+  if (errstr)
+    *errstr = NULL;
 
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  return false;
+  return TLS_HANDSHAKE_ERROR;
 }
 
 bool

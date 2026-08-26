@@ -933,7 +933,7 @@ _client_tls_handshake_handler(fde_t *fde, void *data)
   assert(client->connection->fde == fde);
 
   const char *tls_error = NULL;
-  const tls_handshake_status_t status = tls_handshake(&fde->tls, TLS_ROLE_SERVER, &tls_error);
+  const tls_handshake_status_t status = tls_handshake(&fde->tls, &tls_error);
 
   switch (status)
   {

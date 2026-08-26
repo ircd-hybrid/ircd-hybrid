@@ -279,7 +279,7 @@ fail:
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
+tls_handshake(tls_data_t *tls_data, const char **errstr)
 {
   if (errstr)
     *errstr = NULL;

@@ -266,7 +266,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   assert(client->connection->fde);
   assert(client->connection->fde == fde);
 
-  tls_handshake_status_t ret = tls_handshake(&fde->tls, TLS_ROLE_CLIENT, NULL);
+  tls_handshake_status_t ret = tls_handshake(&fde->tls, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
   {
     _server_handshake_tls_finish(client);

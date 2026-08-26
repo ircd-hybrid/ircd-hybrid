@@ -276,7 +276,6 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   if (ret != GNUTLS_E_SUCCESS)
     goto fail;
 
-  gnutls_dh_set_prime_bits(session, 1024);
   gnutls_transport_set_int(session, fd);
 
   if (role == TLS_ROLE_SERVER)

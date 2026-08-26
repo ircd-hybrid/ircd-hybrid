@@ -72,7 +72,6 @@ tls_init(void)
   SSL_CTX_set_options(tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
   SSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
   SSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
   if ((tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
   {

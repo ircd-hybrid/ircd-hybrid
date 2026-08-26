@@ -72,7 +72,6 @@ tls_init(void)
   wolfSSL_CTX_SetMinVersion(tls_ctx.server_ctx, WOLFSSL_TLSV1_2);
   wolfSSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
   wolfSSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
 
   if ((tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
   {

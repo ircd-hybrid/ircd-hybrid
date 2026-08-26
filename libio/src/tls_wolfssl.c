@@ -70,8 +70,8 @@ tls_init(void)
   }
 
   wolfSSL_CTX_SetMinVersion(tls_ctx.server_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(tls_ctx.server_ctx, WOLFSSL_VERIFY_PEER|WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
 
   if ((tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
   {
@@ -81,8 +81,8 @@ tls_init(void)
   }
 
   wolfSSL_CTX_SetMinVersion(tls_ctx.client_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(tls_ctx.client_ctx, WOLFSSL_VERIFY_PEER|WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
 }
 
 bool
@@ -93,22 +93,22 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  if (wolfSSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS)
+  if (wolfSSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+  if (wolfSSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_check_private_key(tls_ctx.server_ctx) != SSL_SUCCESS ||
-      wolfSSL_CTX_check_private_key(tls_ctx.client_ctx) != SSL_SUCCESS)
+  if (wolfSSL_CTX_check_private_key(tls_ctx.server_ctx) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_check_private_key(tls_ctx.client_ctx) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;

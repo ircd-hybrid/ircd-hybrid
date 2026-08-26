@@ -16,7 +16,6 @@
 #include "tls.h"
 
 #ifndef HAVE_TLS
-
 bool
 tls_is_initialized(void)
 {
@@ -29,9 +28,14 @@ tls_init(void)
 }
 
 bool
-tls_new_credentials(void)
+tls_configure(const tls_config_t *config)
 {
-  return true;
+  return false;
+}
+
+void
+tls_clear_credentials(void)
+{
 }
 
 const char *

@@ -16,14 +16,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "conf.h"  /* XXX: decouple */
 #include "io_hex.h"
 #include "log.h"
 #include "memory.h"
 #include "tls.h"
 
 #ifdef HAVE_TLS_WOLFSSL
-static bool TLS_initialized;
 static tls_context_t tls_ctx;
 
 static void
@@ -71,87 +69,115 @@ always_accept_verify_cb(int preverify_ok, WOLFSSL_X509_STORE_CTX *x509_ctx)
 bool
 tls_is_initialized(void)
 {
-  return TLS_initialized;
+  return tls_ctx != NULL;
 }
 
-/* tls_init()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups SSL context.
- */
 void
-tls_init(void)
+tls_clear_credentials(void)
 {
-  wolfSSL_Init();
+  tls_context_t context = tls_ctx;
 
+  tls_ctx = NULL;
+
+  if (context)
+    _tls_context_unref(context);
+}
+
+static tls_context_t
+_tls_context_new(void)
+{
   tls_context_t context = io_calloc(sizeof(*context));
   _tls_context_ref(context);
 
+  wolfSSL_ERR_clear_error();
+
   context->server_ctx = wolfSSL_CTX_new(wolfTLS_server_method());
   if (context->server_ctx == NULL)
-  {
-    log_write(LOG_TYPE_IRCD,
-              "ERROR: Could not initialize the TLS server context -- wolfSSL_CTX_new failed");
+    goto fail;
 
-    _tls_context_unref(context);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
+  if (wolfSSL_CTX_SetMinVersion(context->server_ctx, WOLFSSL_TLSV1_2) != WOLFSSL_SUCCESS)
+    goto fail;
 
-  wolfSSL_CTX_SetMinVersion(tls_ctx->server_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx->server_ctx, WOLFSSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx->server_ctx, WOLFSSL_VERIFY_PEER|WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_session_cache_mode(context->server_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(context->server_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
 
   context->client_ctx = wolfSSL_CTX_new(wolfTLS_client_method());
   if (context->client_ctx == NULL)
-  {
-    log_write(LOG_TYPE_IRCD,
-              "ERROR: Could not initialize the TLS client context -- wolfSSL_CTX_new failed");
+    goto fail;
 
-    _tls_context_unref(context);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
+  if (wolfSSL_CTX_SetMinVersion(context->client_ctx, WOLFSSL_TLSV1_2) != WOLFSSL_SUCCESS)
+    goto fail;
+
+  wolfSSL_CTX_set_session_cache_mode(context->client_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(context->client_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+
+  return context;
+
+fail:
+  report_crypto_errors();
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  wolfSSL_ERR_clear_error();
+
+  if (wolfSSL_CTX_use_certificate_chain_file(context->server_ctx, config->certificate_file) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_certificate_chain_file(context->client_ctx, config->certificate_file) != WOLFSSL_SUCCESS)
+  {
+    report_crypto_errors();
+    return false;
   }
 
-  wolfSSL_CTX_SetMinVersion(tls_ctx->client_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx->client_ctx, WOLFSSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx->client_ctx, WOLFSSL_VERIFY_PEER|WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  if (wolfSSL_CTX_use_PrivateKey_file(context->server_ctx, config->private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_PrivateKey_file(context->client_ctx, config->private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
+  {
+    report_crypto_errors();
+    return false;
+  }
 
-  tls_ctx = context;
+  if (wolfSSL_CTX_check_private_key(context->server_ctx) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_check_private_key(context->client_ctx) != WOLFSSL_SUCCESS)
+  {
+    report_crypto_errors();
+    return false;
+  }
+
+  return true;
 }
 
 bool
-tls_new_credentials(void)
+tls_configure(const tls_config_t *config)
 {
-  TLS_initialized = false;
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
 
-  if (wolfSSL_CTX_use_certificate_chain_file(tls_ctx->server_ctx, ConfigServerInfo.tls_certificate_file) != WOLFSSL_SUCCESS ||
-      wolfSSL_CTX_use_certificate_chain_file(tls_ctx->client_ctx, ConfigServerInfo.tls_certificate_file) != WOLFSSL_SUCCESS)
+  if (!_tls_context_load_credentials(context, config))
   {
-    report_crypto_errors();
+    _tls_context_unref(context);
     return false;
   }
 
-  if (wolfSSL_CTX_use_PrivateKey_file(tls_ctx->server_ctx, ConfigServerInfo.rsa_private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS ||
-      wolfSSL_CTX_use_PrivateKey_file(tls_ctx->client_ctx, ConfigServerInfo.rsa_private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
-  {
-    report_crypto_errors();
-    return false;
-  }
+  tls_context_t old_context = tls_ctx;
+  tls_ctx = context;
 
-  if (wolfSSL_CTX_check_private_key(tls_ctx->server_ctx) != WOLFSSL_SUCCESS ||
-      wolfSSL_CTX_check_private_key(tls_ctx->client_ctx) != WOLFSSL_SUCCESS)
-  {
-    report_crypto_errors();
-    return false;
-  }
+  if (old_context)
+    _tls_context_unref(old_context);
 
-  TLS_initialized = true;
   return true;
+}
+
+void
+tls_init(void)
+{
+  if (wolfSSL_Init() != WOLFSSL_SUCCESS)
+    exit(EXIT_FAILURE);
 }
 
 const char *
@@ -296,7 +322,7 @@ tls_shutdown(tls_data_t *tls_data)
 bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  if (TLS_initialized == false)
+  if (tls_ctx == NULL)
     return false;
 
   tls_context_t context = tls_ctx;

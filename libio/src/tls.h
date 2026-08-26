@@ -48,14 +48,22 @@ typedef enum _tls_handshake_status
 
 typedef struct
 {
+  const char *certificate_file;
+  const char *private_key_file;
+} tls_config_t;
+
+typedef struct
+{
   const char *name;
   const char *runtime_version;
   const char *compile_version;
 } tls_library_info_t;
 
+extern void tls_clear_credentials(void);
 extern void tls_free(tls_data_t *);
 extern void tls_init(void);
 extern void tls_shutdown(tls_data_t *);
+extern bool tls_configure(const tls_config_t *);
 extern bool tls_is_initialized(void);
 extern bool tls_isusing(tls_data_t *);
 extern bool tls_new(tls_data_t *, int, tls_role_t);

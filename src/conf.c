@@ -812,23 +812,48 @@ conf_clear(void)
   listener_close_marked();
 }
 
+static bool
+_conf_apply_tls(void)
+{
+  const char *const certificate_file = ConfigServerInfo.tls_certificate_file;
+  const char *const private_key_file = ConfigServerInfo.rsa_private_key_file;
+
+  if (certificate_file == NULL && private_key_file == NULL)
+  {
+    tls_clear_credentials();
+    return true;
+  }
+
+  if (certificate_file == NULL || private_key_file == NULL)
+  {
+    log_write(LOG_TYPE_IRCD,
+              "TLS configuration requires both a certificate and private key");
+    return false;
+  }
+
+  const tls_config_t config =
+  {
+    .certificate_file = certificate_file,
+    .private_key_file = private_key_file
+  };
+
+  return tls_configure(&config);
+}
+
 static void
 conf_handle_tls(bool cold)
 {
-  if (!tls_new_credentials())
+  if (_conf_apply_tls())
+    return;
+
+  if (cold)
   {
-    if (cold)
-    {
-      log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      /* Failed to load new settings/certs, old ones remain active */
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Error reloading TLS settings, check the ircd log"); // report_crypto_errors logs this
-    }
+    log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
+    exit(EXIT_FAILURE);
   }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Error reloading TLS settings, check the ircd log");
 }
 
 void

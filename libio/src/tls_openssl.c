@@ -15,14 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "conf.h"  /* XXX: decouple */
 #include "io_hex.h"
 #include "log.h"
 #include "memory.h"
 #include "tls.h"
 
 #ifdef HAVE_TLS_OPENSSL
-static bool TLS_initialized;
 static tls_context_t tls_ctx;
 
 static void
@@ -70,87 +68,115 @@ always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 bool
 tls_is_initialized(void)
 {
-  return TLS_initialized;
+  return tls_ctx != NULL;
 }
 
-/* tls_init()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups SSL context.
- */
 void
-tls_init(void)
+tls_clear_credentials(void)
+{
+  tls_context_t context = tls_ctx;
+
+  tls_ctx = NULL;
+
+  if (context)
+    _tls_context_unref(context);
+}
+
+static tls_context_t
+_tls_context_new(void)
 {
   tls_context_t context = io_calloc(sizeof(*context));
   _tls_context_ref(context);
 
+  ERR_clear_error();
+
   context->server_ctx = SSL_CTX_new(TLS_server_method());
   if (context->server_ctx == NULL)
-  {
-    const char *s = ERR_lib_error_string(ERR_get_error());
+    goto fail;
 
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
+  if (SSL_CTX_set_min_proto_version(context->server_ctx, TLS1_2_VERSION) != 1)
+    goto fail;
 
-    _tls_context_unref(context);
-    exit(EXIT_FAILURE);
-  }
-
-  SSL_CTX_set_min_proto_version(tls_ctx->server_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx->server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx->server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx->server_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_options(context->server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(context->server_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(context->server_ctx, SSL_SESS_CACHE_OFF);
 
   context->client_ctx = SSL_CTX_new(TLS_client_method());
   if (context->client_ctx == NULL)
+    goto fail;
+
+  if (SSL_CTX_set_min_proto_version(context->client_ctx, TLS1_2_VERSION) != 1)
+    goto fail;
+
+  SSL_CTX_set_options(context->client_ctx, SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(context->client_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(context->client_ctx, SSL_SESS_CACHE_OFF);
+
+  return context;
+
+fail:
+  report_crypto_errors();
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  ERR_clear_error();
+
+  if (SSL_CTX_use_certificate_chain_file(context->server_ctx, config->certificate_file) != 1 ||
+      SSL_CTX_use_certificate_chain_file(context->client_ctx, config->certificate_file) != 1)
   {
-    const char *s = ERR_lib_error_string(ERR_get_error());
-
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
-
-    _tls_context_unref(context);
-    exit(EXIT_FAILURE);
+    report_crypto_errors();
+    return false;
   }
 
-  SSL_CTX_set_min_proto_version(tls_ctx->client_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx->client_ctx, SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx->client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx->client_ctx, SSL_SESS_CACHE_OFF);
+  if (SSL_CTX_use_PrivateKey_file(context->server_ctx, config->private_key_file, SSL_FILETYPE_PEM) != 1 ||
+      SSL_CTX_use_PrivateKey_file(context->client_ctx, config->private_key_file, SSL_FILETYPE_PEM) != 1)
+  {
+    report_crypto_errors();
+    return false;
+  }
 
-  tls_ctx = context;
+  if (SSL_CTX_check_private_key(context->server_ctx) != 1 ||
+      SSL_CTX_check_private_key(context->client_ctx) != 1)
+  {
+    report_crypto_errors();
+    return false;
+  }
+
+  return true;
 }
 
 bool
-tls_new_credentials(void)
+tls_configure(const tls_config_t *config)
 {
-  TLS_initialized = false;
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
 
-  if (SSL_CTX_use_certificate_chain_file(tls_ctx->server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
-      SSL_CTX_use_certificate_chain_file(tls_ctx->client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
+  if (!_tls_context_load_credentials(context, config))
   {
-    report_crypto_errors();
+    _tls_context_unref(context);
     return false;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(tls_ctx->server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
-      SSL_CTX_use_PrivateKey_file(tls_ctx->client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
-  {
-    report_crypto_errors();
-    return false;
-  }
+  tls_context_t old_context = tls_ctx;
+  tls_ctx = context;
 
-  if (SSL_CTX_check_private_key(tls_ctx->server_ctx) != 1 ||
-      SSL_CTX_check_private_key(tls_ctx->client_ctx) != 1)
-  {
-    report_crypto_errors();
-    return false;
-  }
+  if (old_context)
+    _tls_context_unref(old_context);
 
-  TLS_initialized = true;
   return true;
+}
+
+void
+tls_init(void)
+{
 }
 
 const char *
@@ -285,7 +311,7 @@ tls_shutdown(tls_data_t *tls_data)
 bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  if (TLS_initialized == false)
+  if (tls_ctx == NULL)
     return false;
 
   tls_context_t context = tls_ctx;

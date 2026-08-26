@@ -14,33 +14,19 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "conf.h"  /* XXX: decouple */
 #include "io_hex.h"
 #include "log.h"
 #include "memory.h"
 #include "tls.h"
 
 #ifdef HAVE_TLS_GNUTLS
-static bool TLS_initialized;
-static const char tls_default_priority_string[] =
-  "NORMAL:"
-  "%SERVER_PRECEDENCE:"
-  "!VERS-TLS1.1:"
-  "!VERS-TLS1.0:"
-  "!VERS-SSL3.0";
+static const char tls_priority_append[] =
+  "-VERS-SSL3.0:"
+  "-VERS-TLS1.0:"
+  "-VERS-TLS1.1:"
+  "%SERVER_PRECEDENCE";
 
 static tls_context_t tls_ctx;
-
-bool
-tls_is_initialized(void)
-{
-  return TLS_initialized;
-}
-
-void
-tls_init(void)
-{
-}
 
 static void
 _tls_context_free(tls_context_t context)
@@ -65,37 +51,91 @@ _tls_context_unref(tls_context_t context)
 }
 
 bool
-tls_new_credentials(void)
+tls_is_initialized(void)
 {
-  TLS_initialized = false;
+  return tls_ctx != NULL;
+}
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
+void
+tls_clear_credentials(void)
+{
+  tls_context_t context = tls_ctx;
 
-  struct tls_context *const context = io_calloc(sizeof(*context));
+  tls_ctx = NULL;
+
+  if (context)
+    _tls_context_unref(context);
+}
+
+void
+tls_init(void)
+{
+}
+
+static void
+_tls_report_error(const char *operation, int error)
+{
+  log_write(LOG_TYPE_IRCD, "GnuTLS error: %s: %s", operation, gnutls_strerror(error));
+}
+
+static tls_context_t
+_tls_context_new(void)
+{
+  tls_context_t context = io_calloc(sizeof(*context));
+  _tls_context_ref(context);
 
   int ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
-    io_free(context);
-    return false;
+    _tls_report_error("Could not allocate certificate credentials", ret);
+    goto fail;
   }
 
-  gnutls_priority_init(&context->priorities, tls_default_priority_string, NULL);
-
-  ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
+  ret = gnutls_priority_init2(&context->priorities, tls_priority_append, NULL, GNUTLS_PRIORITY_INIT_DEF_APPEND);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    log_write(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
+    _tls_report_error("Could not initialize TLS priorities", ret);
+    goto fail;
+  }
 
-    gnutls_certificate_free_credentials(context->x509_cred);
-    gnutls_priority_deinit(context->priorities);
-    io_free(context);
+  return context;
+
+fail:
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  const int ret =
+    gnutls_certificate_set_x509_key_file(context->x509_cred,
+                                         config->certificate_file,
+                                         config->private_key_file, GNUTLS_X509_FMT_PEM);
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    _tls_report_error("Could not load TLS certificate/private key", ret);
     return false;
   }
 
-  _tls_context_ref(context);
+  return true;
+}
+
+bool
+tls_configure(const tls_config_t *config)
+{
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
+
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
+
+  if (!_tls_context_load_credentials(context, config))
+  {
+    _tls_context_unref(context);
+    return false;
+  }
 
   tls_context_t old_context = tls_ctx;
   tls_ctx = context;
@@ -103,7 +143,6 @@ tls_new_credentials(void)
   if (old_context)
     _tls_context_unref(old_context);
 
-  TLS_initialized = true;
   return true;
 }
 
@@ -230,7 +269,7 @@ tls_shutdown(tls_data_t *tls_data)
 bool
 tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  if (TLS_initialized == false || tls_ctx == NULL)
+  if (tls_ctx == NULL)
     return false;
 
   unsigned int flags;

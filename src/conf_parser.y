@@ -69,7 +69,6 @@ static struct
     addr,
     bind,
     file,
-    ciph,
     cert,
     rpass,
     spass,
@@ -328,12 +327,8 @@ reset_block_state(void)
 %token  TIMEOUT
 %token  TLS_CERTIFICATE_FILE
 %token  TLS_CERTIFICATE_FINGERPRINT
-%token  TLS_CIPHER_LIST
-%token  TLS_CIPHER_SUITES
 %token  TLS_CONNECTION_REQUIRED
-%token  TLS_DH_PARAM_FILE
 %token  TLS_MESSAGE_DIGEST_ALGORITHM
-%token  TLS_SUPPORTED_GROUPS
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  TWODOTS
@@ -460,13 +455,9 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
                         serverinfo_motd_file |
-                        serverinfo_tls_dh_param_file |
-                        serverinfo_tls_supported_groups |
                         serverinfo_rsa_private_key_file |
                         serverinfo_sid |
                         serverinfo_tls_certificate_file |
-                        serverinfo_tls_cipher_list |
-                        serverinfo_tls_cipher_suites |
                         serverinfo_tls_message_digest_algorithm |
                         error ';' ;
 
@@ -489,33 +480,6 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   }
 };
 
-serverinfo_tls_dh_param_file: TLS_DH_PARAM_FILE '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_dh_param_file);
-    ConfigServerInfo.tls_dh_param_file = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_cipher_list);
-    ConfigServerInfo.tls_cipher_list = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_cipher_suites: TLS_CIPHER_SUITES '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_cipher_suites);
-    ConfigServerInfo.tls_cipher_suites = io_strdup(yylval.string);
-  }
-};
-
 serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
@@ -524,15 +488,6 @@ serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRIN
     ConfigServerInfo.tls_message_digest_algorithm = io_strdup(yylval.string);
   }
 }
-
-serverinfo_tls_supported_groups: TLS_SUPPORTED_GROUPS '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_supported_groups);
-    ConfigServerInfo.tls_supported_groups = io_strdup(yylval.string);
-  }
-};
 
 serverinfo_name: NAME '=' QSTRING ';'
 {
@@ -1883,9 +1838,6 @@ connect_entry: CONNECT
   if (block_state.cert.buf[0])
     connect->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
 
-  if (block_state.ciph.buf[0])
-    connect->cipher_list = io_strdup(block_state.ciph.buf);
-
   list_concat(&connect->hub_masks, &block_state.hub.list);
   list_concat(&connect->leaf_masks, &block_state.leaf.list);
 
@@ -1907,7 +1859,6 @@ connect_item:   connect_name |
                 connect_tls_certificate_fingerprint |
                 connect_aftype |
                 connect_port |
-                connect_tls_cipher_list |
                 connect_flags |
                 connect_hub_mask |
                 connect_leaf_mask |
@@ -2030,17 +1981,6 @@ connect_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
-};
-
-connect_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
-{
-#ifdef HAVE_TLS
-  if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.ciph.buf, yylval.string, sizeof(block_state.ciph.buf));
-#else
-  if (conf_parser_ctx.pass == 2)
-    conf_error_report("Ignoring connect::tls_cipher_list -- no TLS support");
-#endif
 };
 
 

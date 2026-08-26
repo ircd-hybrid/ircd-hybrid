@@ -47,7 +47,6 @@ static void
 _tls_context_free(tls_context_t context)
 {
   gnutls_priority_deinit(context->priorities);
-  gnutls_dh_params_deinit(context->dh_params);
   gnutls_certificate_free_credentials(context->x509_cred);
 
   io_free(context);
@@ -84,8 +83,6 @@ tls_new_credentials(void)
     return false;
   }
 
-  /* TBD: set ciphers based on serverinfo::tls_cipher_list */
-
   gnutls_priority_init(&context->priorities, tls_default_priority_string, NULL);
 
   ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
@@ -97,34 +94,6 @@ tls_new_credentials(void)
     gnutls_priority_deinit(context->priorities);
     io_free(context);
     return false;
-  }
-
-  ret = gnutls_dh_params_init(&context->dh_params);
-  if (ret != GNUTLS_E_SUCCESS)
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
-    io_free(context);
-    return false;
-  }
-
-  if (ConfigServerInfo.tls_dh_param_file)
-  {
-    gnutls_datum_t data;
-
-    ret = gnutls_load_file(ConfigServerInfo.tls_dh_param_file, &data);
-    if (ret != GNUTLS_E_SUCCESS)
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
-    else
-    {
-      ret = gnutls_dh_params_import_pkcs3(context->dh_params, &data, GNUTLS_X509_FMT_PEM);
-      if (ret != GNUTLS_E_SUCCESS)
-        log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
-      else
-        /* TBR once 3.6 is our minimum supported version */
-        gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
-
-      gnutls_free(data.data);
-    }
   }
 
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
@@ -322,26 +291,6 @@ fail:
   gnutls_deinit(session);
   _tls_context_unref(context);
   return false;
-}
-
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  const char *prioerror;
-
-  gnutls_priority_deinit(tls_data->context->priorities);
-
-  int ret = gnutls_priority_init(&tls_data->context->priorities, cipher_list, &prioerror);
-  if (ret != GNUTLS_E_SUCCESS)
-  {
-    /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    log_write(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
-              cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
-    gnutls_priority_init(&tls_data->context->priorities, tls_default_priority_string, NULL);
-    return false;
-  }
-
-  return true;
 }
 
 tls_handshake_status_t

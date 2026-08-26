@@ -783,14 +783,6 @@ conf_clear(void)
   ConfigServerInfo.rsa_private_key_file = NULL;
   io_free(ConfigServerInfo.tls_certificate_file);
   ConfigServerInfo.tls_certificate_file = NULL;
-  io_free(ConfigServerInfo.tls_dh_param_file);
-  ConfigServerInfo.tls_dh_param_file = NULL;
-  io_free(ConfigServerInfo.tls_supported_groups);
-  ConfigServerInfo.tls_supported_groups = NULL;
-  io_free(ConfigServerInfo.tls_cipher_list);
-  ConfigServerInfo.tls_cipher_list = NULL;
-  io_free(ConfigServerInfo.tls_cipher_suites);
-  ConfigServerInfo.tls_cipher_suites = NULL;
   io_free(ConfigServerInfo.tls_message_digest_algorithm);
   ConfigServerInfo.tls_message_digest_algorithm = NULL;
   io_free(ConfigServerInfo.motd_file);

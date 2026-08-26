@@ -89,43 +89,6 @@ tls_init(void)
   SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
 }
 
-static bool
-_set_server_dh_parameters(SSL_CTX *ctx, const char *filename)
-{
-  if (filename)
-  {
-    BIO *file = BIO_new_file(filename, "r");
-    EVP_PKEY *params = NULL;
-
-    if (file)
-    {
-      params = PEM_read_bio_Parameters(file, NULL);
-      BIO_free(file);
-    }
-
-    if (params)
-    {
-      /*
-       * Custom parameters and automatic parameter selection are mutually
-       * exclusive policies. Ownership of params is transferred to ctx only
-       * when SSL_CTX_set0_tmp_dh_pkey() succeeds.
-       */
-      if (SSL_CTX_set_dh_auto(ctx, 0) == 1 && SSL_CTX_set0_tmp_dh_pkey(ctx, params) == 1)
-        return true;
-
-      EVP_PKEY_free(params);
-    }
-  }
-
-  /*
-   * Any errors from loading or applying custom parameters are deliberately
-   * ignored when falling back to OpenSSL's automatic parameter selection.
-   */
-  ERR_clear_error();
-
-  return SSL_CTX_set_dh_auto(ctx, 1) == 1;
-}
-
 static tls_md_t
 _fetch_message_digest(const char *name)
 {
@@ -171,31 +134,12 @@ tls_new_credentials(void)
     return false;
   }
 
-  if (!_set_server_dh_parameters(tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file))
-    return false;
-
-  if (ConfigServerInfo.tls_supported_groups &&
-      SSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-
   tls_md_t md = _fetch_message_digest(ConfigServerInfo.tls_message_digest_algorithm);
   if (md == NULL)
     return false;
 
   EVP_MD_free(message_digest_algorithm);
   message_digest_algorithm = md;
-
-  if (ConfigServerInfo.tls_cipher_list == NULL)
-    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (SSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
-  {
-    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
-  }
-
-  if (ConfigServerInfo.tls_cipher_suites &&
-      SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
 
   TLS_initialized = true;
   return true;
@@ -357,12 +301,6 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 
   *tls_data = ssl;
   return true;
-}
-
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  return SSL_set_cipher_list(*tls_data, cipher_list) == 1;
 }
 
 tls_handshake_status_t

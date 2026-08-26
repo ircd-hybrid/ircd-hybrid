@@ -28,7 +28,6 @@ struct gnutls_context
 {
   gnutls_certificate_credentials_t x509_cred;
   gnutls_priority_t priorities;
-  gnutls_dh_params_t dh_params;
   unsigned int refs;
 };
 

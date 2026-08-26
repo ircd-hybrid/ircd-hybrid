@@ -222,10 +222,6 @@ struct config_serverinfo_entry
   char *network_description;
   char *rsa_private_key_file;
   char *tls_certificate_file;
-  char *tls_dh_param_file;
-  char *tls_supported_groups;
-  char *tls_cipher_list;
-  char *tls_cipher_suites;
   char *tls_message_digest_algorithm;
   unsigned int hub;
   unsigned int default_max_clients;

@@ -319,12 +319,8 @@ timeout                     { return TIMEOUT; }
 tls                         { return T_TLS; }
 tls_certificate_file        { return TLS_CERTIFICATE_FILE; }
 tls_certificate_fingerprint { return TLS_CERTIFICATE_FINGERPRINT; }
-tls_cipher_list             { return TLS_CIPHER_LIST; }
-tls_cipher_suites           { return TLS_CIPHER_SUITES; }
 tls_connection_required     { return TLS_CONNECTION_REQUIRED; }
-tls_dh_param_file           { return TLS_DH_PARAM_FILE; }
 tls_message_digest_algorithm { return TLS_MESSAGE_DIGEST_ALGORITHM; }
-tls_supported_groups        { return TLS_SUPPORTED_GROUPS; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }
 type                        { return TYPE; }

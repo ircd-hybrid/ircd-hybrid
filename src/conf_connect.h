@@ -39,7 +39,6 @@ struct ConnectItem
   char *accept_password;
   char *send_password;
   char *tls_cert_fingerprint;
-  char *cipher_list;
   struct io_addr remote_addr;
   struct io_addr bind_addr;
   list_t hub_masks;

@@ -115,42 +115,12 @@ tls_new_credentials(void)
     return false;
   }
 
-  if (ConfigServerInfo.tls_dh_param_file)
-    if (wolfSSL_CTX_SetTmpDH_file(tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
-       log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-
-#ifdef SSL_CTX_set1_groups_list
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
-#else
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
-#endif
-
   if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
     message_digest_algorithm = wolfSSL_EVP_sha256();
   else if ((message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
   {
     message_digest_algorithm = wolfSSL_EVP_sha256();
     log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-  }
-
-  if (ConfigServerInfo.tls_cipher_list == NULL)
-    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
   }
 
   TLS_initialized = true;
@@ -325,12 +295,6 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
 
   *tls_data = ssl;
   return true;
-}
-
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  return wolfSSL_set_cipher_list(*tls_data, cipher_list) == WOLFSSL_SUCCESS;
 }
 
 tls_handshake_status_t

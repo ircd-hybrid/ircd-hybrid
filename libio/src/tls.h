@@ -47,7 +47,6 @@ extern bool tls_is_initialized(void);
 extern bool tls_isusing(tls_data_t *);
 extern bool tls_new(tls_data_t *, int, tls_role_t);
 extern bool tls_new_credentials(void);
-extern bool tls_set_ciphers(tls_data_t *, const char *);
 extern bool tls_get_peer_certificate_fingerprint(tls_data_t *, char **);
 extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
 extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);

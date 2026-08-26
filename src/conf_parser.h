@@ -258,28 +258,24 @@ extern int yydebug;
     TIMEOUT = 459,                 /* TIMEOUT  */
     TLS_CERTIFICATE_FILE = 460,    /* TLS_CERTIFICATE_FILE  */
     TLS_CERTIFICATE_FINGERPRINT = 461, /* TLS_CERTIFICATE_FINGERPRINT  */
-    TLS_CIPHER_LIST = 462,         /* TLS_CIPHER_LIST  */
-    TLS_CIPHER_SUITES = 463,       /* TLS_CIPHER_SUITES  */
-    TLS_CONNECTION_REQUIRED = 464, /* TLS_CONNECTION_REQUIRED  */
-    TLS_DH_PARAM_FILE = 465,       /* TLS_DH_PARAM_FILE  */
-    TLS_MESSAGE_DIGEST_ALGORITHM = 466, /* TLS_MESSAGE_DIGEST_ALGORITHM  */
-    TLS_SUPPORTED_GROUPS = 467,    /* TLS_SUPPORTED_GROUPS  */
-    TS_MAX_DELTA = 468,            /* TS_MAX_DELTA  */
-    TS_WARN_DELTA = 469,           /* TS_WARN_DELTA  */
-    TWODOTS = 470,                 /* TWODOTS  */
-    TYPE = 471,                    /* TYPE  */
-    UNKLINE = 472,                 /* UNKLINE  */
-    USE_LOGGING = 473,             /* USE_LOGGING  */
-    USER = 474,                    /* USER  */
-    VHOST = 475,                   /* VHOST  */
-    VHOST6 = 476,                  /* VHOST6  */
-    WARN_NO_CONNECT_BLOCK = 477,   /* WARN_NO_CONNECT_BLOCK  */
-    WHOIS = 478,                   /* WHOIS  */
-    WHOWAS_HISTORY_LENGTH = 479,   /* WHOWAS_HISTORY_LENGTH  */
-    XLINE = 480,                   /* XLINE  */
-    XLINE_EXEMPT = 481,            /* XLINE_EXEMPT  */
-    QSTRING = 482,                 /* QSTRING  */
-    NUMBER = 483                   /* NUMBER  */
+    TLS_CONNECTION_REQUIRED = 462, /* TLS_CONNECTION_REQUIRED  */
+    TLS_MESSAGE_DIGEST_ALGORITHM = 463, /* TLS_MESSAGE_DIGEST_ALGORITHM  */
+    TS_MAX_DELTA = 464,            /* TS_MAX_DELTA  */
+    TS_WARN_DELTA = 465,           /* TS_WARN_DELTA  */
+    TWODOTS = 466,                 /* TWODOTS  */
+    TYPE = 467,                    /* TYPE  */
+    UNKLINE = 468,                 /* UNKLINE  */
+    USE_LOGGING = 469,             /* USE_LOGGING  */
+    USER = 470,                    /* USER  */
+    VHOST = 471,                   /* VHOST  */
+    VHOST6 = 472,                  /* VHOST6  */
+    WARN_NO_CONNECT_BLOCK = 473,   /* WARN_NO_CONNECT_BLOCK  */
+    WHOIS = 474,                   /* WHOIS  */
+    WHOWAS_HISTORY_LENGTH = 475,   /* WHOWAS_HISTORY_LENGTH  */
+    XLINE = 476,                   /* XLINE  */
+    XLINE_EXEMPT = 477,            /* XLINE_EXEMPT  */
+    QSTRING = 478,                 /* QSTRING  */
+    NUMBER = 479                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -492,39 +488,35 @@ extern int yydebug;
 #define TIMEOUT 459
 #define TLS_CERTIFICATE_FILE 460
 #define TLS_CERTIFICATE_FINGERPRINT 461
-#define TLS_CIPHER_LIST 462
-#define TLS_CIPHER_SUITES 463
-#define TLS_CONNECTION_REQUIRED 464
-#define TLS_DH_PARAM_FILE 465
-#define TLS_MESSAGE_DIGEST_ALGORITHM 466
-#define TLS_SUPPORTED_GROUPS 467
-#define TS_MAX_DELTA 468
-#define TS_WARN_DELTA 469
-#define TWODOTS 470
-#define TYPE 471
-#define UNKLINE 472
-#define USE_LOGGING 473
-#define USER 474
-#define VHOST 475
-#define VHOST6 476
-#define WARN_NO_CONNECT_BLOCK 477
-#define WHOIS 478
-#define WHOWAS_HISTORY_LENGTH 479
-#define XLINE 480
-#define XLINE_EXEMPT 481
-#define QSTRING 482
-#define NUMBER 483
+#define TLS_CONNECTION_REQUIRED 462
+#define TLS_MESSAGE_DIGEST_ALGORITHM 463
+#define TS_MAX_DELTA 464
+#define TS_WARN_DELTA 465
+#define TWODOTS 466
+#define TYPE 467
+#define UNKLINE 468
+#define USE_LOGGING 469
+#define USER 470
+#define VHOST 471
+#define VHOST6 472
+#define WARN_NO_CONNECT_BLOCK 473
+#define WHOIS 474
+#define WHOWAS_HISTORY_LENGTH 475
+#define XLINE 476
+#define XLINE_EXEMPT 477
+#define QSTRING 478
+#define NUMBER 479
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 131 "conf_parser.y"
+#line 129 "conf_parser.y"
 
   int number;
   char *string;
 
-#line 528 "conf_parser.h"
+#line 520 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -118,7 +118,6 @@ connect_destroy(struct ConnectItem *connect)
   io_free(connect->accept_password);
   io_free(connect->send_password);
   io_free(connect->tls_cert_fingerprint);
-  io_free(connect->cipher_list);
   io_free(connect);
 }
 

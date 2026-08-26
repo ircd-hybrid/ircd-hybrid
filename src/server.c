@@ -302,9 +302,6 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
     return;
   }
 
-  if (!string_is_empty(connect->cipher_list))
-    tls_set_ciphers(&fde->tls, connect->cipher_list);
-
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
   client_update_activity_timeout(client);
 

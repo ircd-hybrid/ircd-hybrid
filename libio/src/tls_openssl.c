@@ -25,6 +25,30 @@
 static bool TLS_initialized;
 static tls_context_t tls_ctx;
 
+static void
+_tls_context_free(tls_context_t context)
+{
+  if (context->server_ctx)
+    SSL_CTX_free(context->server_ctx);
+  if (context->client_ctx)
+    SSL_CTX_free(context->client_ctx);
+
+  io_free(context);
+}
+
+static void
+_tls_context_ref(tls_context_t context)
+{
+  ++context->refs;
+}
+
+static void
+_tls_context_unref(tls_context_t context)
+{
+  if (--context->refs == 0)
+    _tls_context_free(context);
+}
+
 /*
  * report_crypto_errors - Dump crypto error list to log
  */
@@ -58,33 +82,42 @@ tls_is_initialized(void)
 void
 tls_init(void)
 {
-  if ((tls_ctx.server_ctx = SSL_CTX_new(TLS_server_method())) == NULL)
+  tls_context_t context = io_calloc(sizeof(*context));
+  _tls_context_ref(context);
+
+  context->server_ctx = SSL_CTX_new(TLS_server_method());
+  if (context->server_ctx == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
+
+    _tls_context_unref(context);
     exit(EXIT_FAILURE);
-    return;  /* Not reached */
   }
 
-  SSL_CTX_set_min_proto_version(tls_ctx.server_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_min_proto_version(tls_ctx->server_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(tls_ctx->server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(tls_ctx->server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(tls_ctx->server_ctx, SSL_SESS_CACHE_OFF);
 
-  if ((tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
+  context->client_ctx = SSL_CTX_new(TLS_client_method());
+  if (context->client_ctx == NULL)
   {
     const char *s = ERR_lib_error_string(ERR_get_error());
 
     log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
+
+    _tls_context_unref(context);
     exit(EXIT_FAILURE);
-    return;  /* Not reached */
   }
 
-  SSL_CTX_set_min_proto_version(tls_ctx.client_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx.client_ctx, SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
+  SSL_CTX_set_min_proto_version(tls_ctx->client_ctx, TLS1_2_VERSION);
+  SSL_CTX_set_options(tls_ctx->client_ctx, SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(tls_ctx->client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_session_cache_mode(tls_ctx->client_ctx, SSL_SESS_CACHE_OFF);
+
+  tls_ctx = context;
 }
 
 bool
@@ -95,22 +128,22 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  if (SSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
-      SSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
+  if (SSL_CTX_use_certificate_chain_file(tls_ctx->server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
+      SSL_CTX_use_certificate_chain_file(tls_ctx->client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
-      SSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
+  if (SSL_CTX_use_PrivateKey_file(tls_ctx->server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
+      SSL_CTX_use_PrivateKey_file(tls_ctx->client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_check_private_key(tls_ctx.server_ctx) != 1 ||
-      SSL_CTX_check_private_key(tls_ctx.client_ctx) != 1)
+  if (SSL_CTX_check_private_key(tls_ctx->server_ctx) != 1 ||
+      SSL_CTX_check_private_key(tls_ctx->client_ctx) != 1)
   {
     report_crypto_errors();
     return false;
@@ -124,7 +157,7 @@ const char *
 tls_get_cipher(const tls_data_t *tls_data)
 {
   static char buf[128];
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
 
   snprintf(buf, sizeof(buf), "%s-%s", SSL_get_version(ssl), SSL_get_cipher(ssl));
   return buf;
@@ -144,15 +177,23 @@ tls_get_library_info(void)
 bool
 tls_isusing(tls_data_t *tls_data)
 {
-  SSL *ssl = *tls_data;
-  return ssl != NULL;
+  return tls_data->session != NULL;
 }
 
 void
 tls_free(tls_data_t *tls_data)
 {
-  SSL_free(*tls_data);
-  *tls_data = NULL;
+  if (tls_data->session == NULL)
+    return;
+
+  SSL *session = tls_data->session;
+  tls_context_t context = tls_data->context;
+
+  tls_data->session = NULL;
+  tls_data->context = NULL;
+
+  SSL_free(session);
+  _tls_context_unref(context);
 }
 
 ssize_t
@@ -163,7 +204,7 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
   ERR_clear_error();
   errno = 0;
 
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
   size_t nread = 0;
   const int ret = SSL_read_ex(ssl, buf, bufsize, &nread);
   if (ret == 1)
@@ -201,7 +242,7 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
   ERR_clear_error();
   errno = 0;
 
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
   size_t nwritten = 0;
   const int ret = SSL_write_ex(ssl, buf, bufsize, &nwritten);
   if (ret == 1)
@@ -234,7 +275,7 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
 void
 tls_shutdown(tls_data_t *tls_data)
 {
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
   SSL_set_shutdown(ssl, SSL_RECEIVED_SHUTDOWN);
 
   if (SSL_shutdown(ssl) == 0)
@@ -247,36 +288,45 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   if (TLS_initialized == false)
     return false;
 
+  tls_context_t context = tls_ctx;
+
   SSL_CTX *ctx;
   switch (role)
   {
     case TLS_ROLE_SERVER:
-      ctx = tls_ctx.server_ctx;
+      ctx = context->server_ctx;
       break;
     case TLS_ROLE_CLIENT:
-      ctx = tls_ctx.client_ctx;
+      ctx = context->client_ctx;
       break;
     default:
       return false;
   }
 
-  SSL *ssl = SSL_new(ctx);
-  if (ssl == NULL)
-    return false;
+  _tls_context_ref(context);
+
+  SSL *session = SSL_new(ctx);
+  if (session == NULL)
+    goto fail;
 
   if (role == TLS_ROLE_SERVER)
-    SSL_set_accept_state(ssl);
+    SSL_set_accept_state(session);
   else
-    SSL_set_connect_state(ssl);
+    SSL_set_connect_state(session);
 
-  if (SSL_set_fd(ssl, fd) != 1)
-  {
-    SSL_free(ssl);
-    return false;
-  }
+  if (SSL_set_fd(session, fd) != 1)
+    goto fail;
 
-  *tls_data = ssl;
+  tls_data->session = session;
+  tls_data->context = context;
   return true;
+
+fail:
+  if (session)
+    SSL_free(session);
+
+  _tls_context_unref(context);
+  return false;
 }
 
 tls_handshake_status_t
@@ -287,7 +337,7 @@ tls_handshake(tls_data_t *tls_data, const char **errstr)
 
   ERR_clear_error();
 
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
   const int ret = SSL_do_handshake(ssl);
   if (ret == 1)
     return TLS_HANDSHAKE_DONE;
@@ -327,7 +377,7 @@ tls_handshake(tls_data_t *tls_data, const char **errstr)
 bool
 tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
 
   io_free(*fingerprint);
   *fingerprint = NULL;

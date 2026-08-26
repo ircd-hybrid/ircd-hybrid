@@ -72,7 +72,7 @@ tls_new_credentials(void)
   if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
     return true;
 
-  struct gnutls_context *const context = io_calloc(sizeof(*context));
+  struct tls_context *const context = io_calloc(sizeof(*context));
 
   int ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
   if (ret != GNUTLS_E_SUCCESS)
@@ -240,20 +240,25 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     case TLS_ROLE_SERVER:
       flags = GNUTLS_SERVER | GNUTLS_NONBLOCK;
       break;
+
     case TLS_ROLE_CLIENT:
       flags = GNUTLS_CLIENT | GNUTLS_NONBLOCK;
       break;
+
     default:
       return false;
   }
 
+  tls_context_t context = tls_ctx;
+  _tls_context_ref(context);
+
   gnutls_session_t session = NULL;
   int ret = gnutls_init(&session, flags);
   if (ret != GNUTLS_E_SUCCESS)
+  {
+    _tls_context_unref(context);
     return false;
-
-  tls_context_t context = tls_ctx;
-  _tls_context_ref(context);
+  }
 
   ret = gnutls_priority_set(session, context->priorities);
   if (ret != GNUTLS_E_SUCCESS)
@@ -266,7 +271,6 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
   gnutls_transport_set_int(session, fd);
 
   if (role == TLS_ROLE_SERVER)
-    /* Request client certificate if any. */
     gnutls_certificate_server_set_request(session, GNUTLS_CERT_REQUEST);
 
   tls_data->session = session;

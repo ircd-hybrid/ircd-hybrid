@@ -23,12 +23,19 @@
 #include <wolfssl/openssl/evp.h>
 #include <wolfssl/wolfcrypt/sha256.h>
 
-typedef WOLFSSL * tls_data_t;
+typedef struct tls_context *tls_context_t;
 
-typedef struct
+struct tls_context
 {
   WOLFSSL_CTX *server_ctx;
   WOLFSSL_CTX *client_ctx;
-} tls_context_t;
+  unsigned int refs;
+};
+
+typedef struct
+{
+  WOLFSSL *session;
+  tls_context_t context;
+} tls_data_t;
 #endif  /* HAVE_LIBWOLFSSL */
 #endif  /* INCLUDED_tls_wolfssl_h */

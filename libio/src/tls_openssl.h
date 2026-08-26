@@ -20,12 +20,19 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-typedef SSL * tls_data_t;
+typedef struct tls_context *tls_context_t;
 
-typedef struct
+struct tls_context
 {
   SSL_CTX *server_ctx;
   SSL_CTX *client_ctx;
-} tls_context_t;
+  unsigned int refs;
+};
+
+typedef struct
+{
+  SSL *session;
+  tls_context_t context;
+} tls_data_t;
 #endif  /* HAVE_LIBCRYPTO */
 #endif  /* INCLUDED_tls_openssl_h */

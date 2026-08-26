@@ -20,9 +20,9 @@
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
-typedef struct gnutls_context * tls_context_t;
+typedef struct tls_context *tls_context_t;
 
-struct gnutls_context
+struct tls_context
 {
   gnutls_certificate_credentials_t x509_cred;
   gnutls_priority_t priorities;

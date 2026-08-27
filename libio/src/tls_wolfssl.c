@@ -11,8 +11,6 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -202,7 +200,7 @@ tls_get_library_info(void)
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_isusing(const tls_data_t *tls_data)
 {
   return tls_data->session != NULL;
 }
@@ -233,6 +231,7 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 
   errno = 0;
 
+  /* TODO: Use wolfSSL_read_ex() once wolfSSL >= 5.8.0 is required. */
   const int ret = wolfSSL_read(ssl, buf, size);
   if (ret > 0)
     return ret;
@@ -270,6 +269,7 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
 
   errno = 0;
 
+  /* TODO: Use wolfSSL_write_ex() once wolfSSL >= 5.8.0 is required. */
   const int ret = wolfSSL_write(ssl, buf, size);
   if (ret > 0)
     return ret;

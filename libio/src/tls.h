@@ -32,13 +32,13 @@ enum
   TLS_CERTFP_STRING_SIZE = (TLS_CERTFP_DIGEST_SIZE * 2) + 1
 };
 
-typedef enum _tls_role
+typedef enum tls_role
 {
   TLS_ROLE_SERVER,
   TLS_ROLE_CLIENT
 } tls_role_t;
 
-typedef enum _tls_handshake_status
+typedef enum tls_handshake_status
 {
   TLS_HANDSHAKE_DONE,
   TLS_HANDSHAKE_WANT_READ,
@@ -65,9 +65,8 @@ extern void tls_init(void);
 extern void tls_shutdown(tls_data_t *);
 extern bool tls_configure(const tls_config_t *);
 extern bool tls_is_initialized(void);
-extern bool tls_isusing(tls_data_t *);
+extern bool tls_isusing(const tls_data_t *);
 extern bool tls_new(tls_data_t *, int, tls_role_t);
-extern bool tls_new_credentials(void);
 extern bool tls_get_peer_certificate_fingerprint(tls_data_t *, char **);
 extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
 extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);

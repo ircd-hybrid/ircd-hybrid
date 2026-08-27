@@ -10,8 +10,6 @@
  */
 
 #include <errno.h>
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 
 #include "io_hex.h"
@@ -173,7 +171,7 @@ tls_get_library_info(void)
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_isusing(const tls_data_t *tls_data)
 {
   return tls_data->session != NULL;
 }

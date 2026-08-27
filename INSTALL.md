@@ -1,17 +1,34 @@
 # Installation Guide for ircd-hybrid
 
-## Prerequisites
+## Requirements
 
-Ensure the following tools and libraries are installed on your system before commencing the installation process:
+The following tools and libraries are required to build ircd-hybrid:
 
-- **Autoconf** 2.71 or higher
-- **Automake** 1.16.5 or higher
-- **C compiler** (e.g., GCC)
-- **Yacc**
-- **Lex** with `noyywrap` support
-- **Libtool**
-- **GNU make** or a compatible make utility
-- **Jansson**
+- A C compiler, such as GCC or Clang
+- GNU make or a compatible make utility
+- Yacc
+- Lex with `noyywrap` support
+- Jansson
+
+The following tools are required when regenerating the build system:
+
+- Autoconf 2.71 or newer
+- Automake 1.16.5 or newer
+- Libtool
+
+### Optional TLS Support
+
+TLS support can be provided by one of the following libraries:
+
+- OpenSSL 3.0.0 or newer
+- GnuTLS 3.8.0 or newer
+- wolfSSL 5.6.0 or newer
+
+Only one TLS backend is selected at build time.
+
+ircd-hybrid requires TLS 1.2 or newer for TLS connections. Cipher suites,
+supported groups, and related cryptographic parameters are selected using the
+defaults provided by the selected TLS library and the system configuration.
 
 ## Installation Procedure
 
@@ -135,27 +152,18 @@ The `configure` script accepts several optional parameters for further customiza
 - `--enable-kqueue` - Force `kqueue` usage for IO loop mechanism.
 - `--enable-epoll` - Force `epoll` usage for IO loop mechanism.
 - `--enable-poll` - Force `poll` usage for IO loop mechanism.
-
 - `--with-tls` - Enable TLS support with the specified library. Options: `openssl`, `wolfssl`, `gnutls`, or `none`. By default, TLS support is set to `auto`. In this mode, the script checks for available TLS libraries in the following order:
-  1. **OpenSSL**: Version 1.1.1 or higher
-  2. **LibreSSL**: Equivalent to OpenSSL 1.1.1 or higher
-  3. **GnuTLS**: Version 3.6.5 or higher
-  4. **wolfSSL**: Version 4.3.0 or higher (must be built with the extended/full OpenSSL compatibility layer)
+  1. OpenSSL
+  2. GnuTLS
+  3. wolfSSL
 
-  If a specified TLS library is not found, the configuration process will disable TLS support and output an error message.
+  The first usable library is selected. If none is available, the build proceeds without TLS support.
 
   To explicitly specify a TLS library:
 
   ```sh
   ./configure --with-tls=openssl
   ```
-
-#### TLS Library Requirements
-
-- **OpenSSL**: Version 1.1.1 or higher
-- **LibreSSL**: Equivalent to OpenSSL 1.1.1 or higher
-- **GnuTLS**: Version 3.6.5 or higher
-- **wolfSSL**: Version 4.3.0 or higher (must be built with the extended/full OpenSSL compatibility layer)
 
 ### IO Loop Mechanism Configuration
 

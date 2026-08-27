@@ -17,13 +17,13 @@
 
 #ifndef HAVE_TLS
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
   return false;
 }
 
 void
-tls_init(void)
+tls_library_init(void)
 {
 }
 
@@ -34,60 +34,60 @@ tls_configure(const tls_config_t *config)
 }
 
 void
-tls_clear_credentials(void)
+tls_clear_config(void)
 {
 }
 
 const char *
-tls_get_cipher(const tls_data_t *tls_data)
+tls_session_get_cipher(const tls_data_t *tls_data)
 {
   return NULL;
 }
 
 tls_library_info_t
-tls_get_library_info(void)
+tls_library_get_info(void)
 {
   return (tls_library_info_t){ 0 };
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_session_is_active(const tls_data_t *tls_data)
 {
   return false;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_session_deinit(tls_data_t *tls_data)
 {
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   *want_write = false;
   return -1;
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   *want_read = false;
   return -1;
 }
 
 void
-tls_shutdown(tls_data_t *tls_data)
+tls_session_close_notify(tls_data_t *tls_data)
 {
 }
 
 bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
 {
   return false;
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, const char **errstr)
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
 {
   if (errstr)
     *errstr = NULL;
@@ -96,7 +96,7 @@ tls_handshake(tls_data_t *tls_data, const char **errstr)
 }
 
 bool
-tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   return false;
 }

@@ -167,10 +167,10 @@ send_queued_write(struct Client *to)
 
     ssize_t retlen;
 
-    if (tls_isusing(&to->connection->fde->tls))
+    if (tls_session_is_active(&to->connection->fde->tls))
     {
       bool tls_want_read = false;
-      retlen = tls_write(&to->connection->fde->tls, view.data, view.length, &tls_want_read);
+      retlen = tls_session_write(&to->connection->fde->tls, view.data, view.length, &tls_want_read);
 
       if (tls_want_read)
         return;  /* Retry later, don't register for write events. */

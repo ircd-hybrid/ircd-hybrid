@@ -40,24 +40,24 @@ _tls_context_free(tls_context_t context)
 static void
 _tls_context_ref(tls_context_t context)
 {
-  ++context->refs;
+  ++context->ref_count;
 }
 
 static void
 _tls_context_unref(tls_context_t context)
 {
-  if (--context->refs == 0)
+  if (--context->ref_count == 0)
     _tls_context_free(context);
 }
 
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
   return tls_ctx != NULL;
 }
 
 void
-tls_clear_credentials(void)
+tls_clear_config(void)
 {
   tls_context_t context = tls_ctx;
 
@@ -68,7 +68,7 @@ tls_clear_credentials(void)
 }
 
 void
-tls_init(void)
+tls_library_init(void)
 {
 }
 
@@ -147,7 +147,7 @@ tls_configure(const tls_config_t *config)
 }
 
 const char *
-tls_get_cipher(const tls_data_t *tls_data)
+tls_session_get_cipher(const tls_data_t *tls_data)
 {
   static char buf[128];
 
@@ -160,7 +160,7 @@ tls_get_cipher(const tls_data_t *tls_data)
 }
 
 tls_library_info_t
-tls_get_library_info(void)
+tls_library_get_info(void)
 {
   return (tls_library_info_t)
   {
@@ -171,13 +171,13 @@ tls_get_library_info(void)
 }
 
 bool
-tls_isusing(const tls_data_t *tls_data)
+tls_session_is_active(const tls_data_t *tls_data)
 {
   return tls_data->session != NULL;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_session_deinit(tls_data_t *tls_data)
 {
   if (tls_data->session == NULL)
     return;
@@ -193,7 +193,7 @@ tls_free(tls_data_t *tls_data)
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
   *want_write = false;
 
@@ -230,7 +230,7 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
   *want_read = false;
 
@@ -267,13 +267,13 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
 }
 
 void
-tls_shutdown(tls_data_t *tls_data)
+tls_session_close_notify(tls_data_t *tls_data)
 {
   gnutls_bye(tls_data->session, GNUTLS_SHUT_WR);
 }
 
 bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
 {
   if (tls_ctx == NULL)
     return false;
@@ -327,7 +327,7 @@ fail:
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, const char **errstr)
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
 {
   if (errstr)
     *errstr = NULL;
@@ -362,7 +362,7 @@ tls_handshake(tls_data_t *tls_data, const char **errstr)
 }
 
 bool
-tls_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   io_free(*fingerprint);
   *fingerprint = NULL;

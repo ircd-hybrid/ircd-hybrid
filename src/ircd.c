@@ -442,7 +442,7 @@ main(int argc, char *argv[])
   log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
   comm_init(ircd_event_manager);  /* This needs to be setup early ! -- adrian */
-  tls_init();
+  tls_library_init();
 
   /* Check if there is pidfile and daemon already running */
   if (io_pidfile_create(pidFileName))

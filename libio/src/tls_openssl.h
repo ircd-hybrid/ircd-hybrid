@@ -26,7 +26,7 @@ struct tls_context
 {
   SSL_CTX *server_ctx;
   SSL_CTX *client_ctx;
-  unsigned int refs;
+  unsigned int ref_count;
 };
 
 typedef struct

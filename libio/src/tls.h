@@ -38,7 +38,7 @@ typedef enum tls_role
   TLS_ROLE_CLIENT
 } tls_role_t;
 
-typedef enum tls_handshake_status
+typedef enum tls_session_handshake_status
 {
   TLS_HANDSHAKE_DONE,
   TLS_HANDSHAKE_WANT_READ,
@@ -59,18 +59,18 @@ typedef struct
   const char *compile_version;
 } tls_library_info_t;
 
-extern void tls_clear_credentials(void);
-extern void tls_free(tls_data_t *);
-extern void tls_init(void);
-extern void tls_shutdown(tls_data_t *);
+extern void tls_clear_config(void);
+extern void tls_library_init(void);
+extern void tls_session_close_notify(tls_data_t *);
+extern void tls_session_deinit(tls_data_t *);
 extern bool tls_configure(const tls_config_t *);
-extern bool tls_is_initialized(void);
-extern bool tls_isusing(const tls_data_t *);
-extern bool tls_new(tls_data_t *, int, tls_role_t);
-extern bool tls_get_peer_certificate_fingerprint(tls_data_t *, char **);
-extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
-extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);
-extern tls_handshake_status_t tls_handshake(tls_data_t *, const char **);
-extern tls_library_info_t tls_get_library_info(void);
-extern const char *tls_get_cipher(const tls_data_t *);
+extern bool tls_is_configured(void);
+extern bool tls_session_get_peer_certificate_fingerprint(tls_data_t *, char **);
+extern bool tls_session_init(tls_data_t *, int, tls_role_t);
+extern bool tls_session_is_active(const tls_data_t *);
+extern ssize_t tls_session_read(tls_data_t *, char *, size_t, bool *);
+extern ssize_t tls_session_write(tls_data_t *, const char *, size_t, bool *);
+extern tls_handshake_status_t tls_session_handshake(tls_data_t *, const char **);
+extern tls_library_info_t tls_library_get_info(void);
+extern const char *tls_session_get_cipher(const tls_data_t *);
 #endif  /* INCLUDED_tls_h */

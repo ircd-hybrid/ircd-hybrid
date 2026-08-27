@@ -156,7 +156,7 @@ user_welcome(struct Client *client)
   {
     user_mode_set_flag(client, UMODE_SECURE);
 
-    client->tls_cipher = io_strdup(tls_get_cipher(&client->connection->fde->tls));
+    client->tls_cipher = io_strdup(tls_session_get_cipher(&client->connection->fde->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
 

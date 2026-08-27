@@ -108,8 +108,8 @@ fd_close(fde_t *F)
   if (F->flags.is_socket)
     comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
-  if (tls_isusing(&F->tls))
-    tls_free(&F->tls);
+  if (tls_session_is_active(&F->tls))
+    tls_session_deinit(&F->tls);
 
   io_free(F->desc);
   /* Unlike squid, we're actually closing the FD here! -- adrian */

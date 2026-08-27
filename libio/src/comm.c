@@ -419,8 +419,8 @@ comm_socket_close(fde_t *fde)
 {
   assert(fde && fde->flags.open == true);
 
-  if (tls_isusing(&fde->tls))
-    tls_shutdown(&fde->tls);
+  if (tls_session_is_active(&fde->tls))
+    tls_session_close_notify(&fde->tls);
 
   fd_close(fde);
 }

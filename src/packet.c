@@ -44,10 +44,10 @@ read_packet(fde_t *fde, void *data_)
 
   while (true)
   {
-    if (tls_isusing(&fde->tls))
+    if (tls_session_is_active(&fde->tls))
     {
       bool want_write = false;
-      length = tls_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
+      length = tls_session_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
 
       if (want_write)
         comm_setselect(fde, COMM_SELECT_WRITE, send_write_ready, client);

@@ -26,7 +26,7 @@ struct tls_context
 {
   gnutls_certificate_credentials_t x509_cred;
   gnutls_priority_t priorities;
-  unsigned int refs;
+  unsigned int ref_count;
 };
 
 typedef struct

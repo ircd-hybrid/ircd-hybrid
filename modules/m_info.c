@@ -197,7 +197,7 @@ static const char *const info_text_lines[] =
 static void
 _info_send_tls_library(struct Client *client)
 {
-  const tls_library_info_t info = tls_get_library_info();
+  const tls_library_info_t info = tls_library_get_info();
   sendto_one_numeric(client, &me, RPL_INFO | SND_EXPLICIT,
                      ":TLS library: %s; runtime: %s; compile-time: %s",
                      info.name, info.runtime_version, info.compile_version);
@@ -228,7 +228,7 @@ _info_process_request(struct Client *client)
   {
     info_send(client);
 
-    if (tls_is_initialized())
+    if (tls_is_configured())
       _info_send_tls_library(client);
   }
 

@@ -916,7 +916,7 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
 }
 
 static void
-_client_tls_handshake_handler(fde_t *fde, void *data)
+_client_tls_session_handshake_handler(fde_t *fde, void *data)
 {
   struct Client *const client = data;
   assert(client && client_is_local(client));
@@ -933,7 +933,7 @@ _client_tls_handshake_handler(fde_t *fde, void *data)
   assert(client->connection->fde == fde);
 
   const char *tls_error = NULL;
-  const tls_handshake_status_t status = tls_handshake(&fde->tls, &tls_error);
+  const tls_handshake_status_t status = tls_session_handshake(&fde->tls, &tls_error);
 
   switch (status)
   {
@@ -942,15 +942,15 @@ _client_tls_handshake_handler(fde_t *fde, void *data)
       client_set_flag(client, FLAGS_TLS_ACTIVE);
 
       comm_setselect(fde, 0, NULL, NULL);
-      tls_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
+      tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(fde, COMM_SELECT_WRITE, _client_tls_handshake_handler, client);
+      comm_setselect(fde, COMM_SELECT_WRITE, _client_tls_session_handshake_handler, client);
       return;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(fde, COMM_SELECT_READ, _client_tls_handshake_handler, client);
+      comm_setselect(fde, COMM_SELECT_READ, _client_tls_session_handshake_handler, client);
       return;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
@@ -975,7 +975,7 @@ _client_begin_local_connection_ingress(struct Client *client)
     return;
   }
 
-  if (!tls_new(&client->connection->fde->tls, client->connection->fde->fd, TLS_ROLE_SERVER))
+  if (!tls_session_init(&client->connection->fde->tls, client->connection->fde->fd, TLS_ROLE_SERVER))
   {
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
@@ -983,7 +983,7 @@ _client_begin_local_connection_ingress(struct Client *client)
   }
 
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-  _client_tls_handshake_handler(client->connection->fde, client);
+  _client_tls_session_handshake_handler(client->connection->fde, client);
 }
 
 static struct Client *

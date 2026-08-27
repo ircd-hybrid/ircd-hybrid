@@ -820,7 +820,7 @@ _conf_apply_tls(void)
 
   if (certificate_file == NULL && private_key_file == NULL)
   {
-    tls_clear_credentials();
+    tls_clear_config();
     return true;
   }
 

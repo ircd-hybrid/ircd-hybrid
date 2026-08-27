@@ -237,7 +237,7 @@ _server_handshake_tls_finish(struct Client *client)
   fde_t *fde = client->connection->fde;
   comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
 
-  tls_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
+  tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
@@ -266,7 +266,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   assert(client->connection->fde);
   assert(client->connection->fde == fde);
 
-  tls_handshake_status_t ret = tls_handshake(&fde->tls, NULL);
+  tls_handshake_status_t ret = tls_session_handshake(&fde->tls, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
   {
     _server_handshake_tls_finish(client);
@@ -289,13 +289,13 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
 }
 
 static void
-_server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
+_server_tls_library_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
 {
   assert(client && client_is_local(client));
   assert(client->connection->fde);
   assert(client->connection->fde == fde);
 
-  if (!tls_new(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
+  if (!tls_session_init(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
   {
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
@@ -338,7 +338,7 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   }
 
   if (connect->flags & CONNECT_FLAG_USE_TLS)
-    _server_tls_init(client, connect, fde);
+    _server_tls_library_init(client, connect, fde);
   else
     _server_handshake_irc_start(client);
 }

@@ -29,7 +29,7 @@ struct tls_context
 {
   WOLFSSL_CTX *server_ctx;
   WOLFSSL_CTX *client_ctx;
-  unsigned int refs;
+  unsigned int ref_count;
 };
 
 typedef struct

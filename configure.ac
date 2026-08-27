@@ -35,9 +35,8 @@ AX_ARG_ENABLE_WARNINGS
 AX_ARG_ENABLE_EFENCE
 AX_ARG_WITH_TLS
 
-dnl Compiler and linker hardening.
-AX_GCC_STACK_PROTECT_CC
-AX_GCC_STACK_PROTECT_LIB
+dnl Build hardening.
+AX_ARG_ENABLE_STACK_PROTECTOR
 
 dnl Required libraries and platform support.
 AX_LIBRARY_JANSSON

@@ -2691,13 +2691,13 @@ as_fn_append ac_header_c_list " strings.h strings_h HAVE_STRINGS_H"
 as_fn_append ac_header_c_list " sys/stat.h sys_stat_h HAVE_SYS_STAT_H"
 as_fn_append ac_header_c_list " sys/types.h sys_types_h HAVE_SYS_TYPES_H"
 as_fn_append ac_header_c_list " unistd.h unistd_h HAVE_UNISTD_H"
-as_fn_append ac_func_c_list " strlcat HAVE_STRLCAT"
-as_fn_append ac_func_c_list " strlcpy HAVE_STRLCPY"
 as_fn_append ac_header_c_list " crypt.h crypt_h HAVE_CRYPT_H"
 as_fn_append ac_header_c_list " socket.h socket_h HAVE_SOCKET_H"
 as_fn_append ac_header_c_list " sys/param.h sys_param_h HAVE_SYS_PARAM_H"
 as_fn_append ac_header_c_list " sys/wait.h sys_wait_h HAVE_SYS_WAIT_H"
 as_fn_append ac_header_c_list " types.h types_h HAVE_TYPES_H"
+as_fn_append ac_func_c_list " strlcat HAVE_STRLCAT"
+as_fn_append ac_func_c_list " strlcpy HAVE_STRLCPY"
 
 # Auxiliary files required by this configure script.
 ac_aux_files="config.guess config.sub ltmain.sh compile missing install-sh"
@@ -2887,6 +2887,11 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+ac_config_headers="$ac_config_headers config.h"
+
 
 
 am__api_version='1.18'
@@ -3808,11 +3813,6 @@ fi
 
 
 
-ac_config_headers="$ac_config_headers config.h"
-
-
-
-# Checks for programs.
 
 
 
@@ -5434,7 +5434,6 @@ rm -f conftest.l $LEX_OUTPUT_ROOT.c
 fi
 
 
-# Initializing libtool.
 
 
 
@@ -15657,612 +15656,6 @@ eval "LTDLOPEN=\"$libname_spec\""
 
 LIBTOOL="$LIBTOOL --silent"
 
-# Checks for libraries.
-
-
-  if test "X$CC" != "X"; then
-    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether ${CC} accepts -fstack-protector-strong" >&5
-printf %s "checking whether ${CC} accepts -fstack-protector-strong... " >&6; }
-if test ${ssp_cv_cc+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ssp_old_cflags="$CFLAGS"
-       CFLAGS="$CFLAGS -fstack-protector-strong"
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ssp_cv_cc=yes
-else case e in #(
-  e) ssp_cv_cc=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-       CFLAGS="$ssp_old_cflags"
-       ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_cc" >&5
-printf '%s\n' "$ssp_cv_cc" >&6; }
-    if test $ssp_cv_cc = yes; then
-      CFLAGS="$CFLAGS -fstack-protector-strong"
-
-printf '%s\n' "#define ENABLE_SSP_CC 1" >>confdefs.h
-
-    else
-      unset ssp_cv_cc
-      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether ${CC} accepts -fstack-protector" >&5
-printf %s "checking whether ${CC} accepts -fstack-protector... " >&6; }
-if test ${ssp_cv_cc+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ssp_old_cflags="$CFLAGS"
-         CFLAGS="$CFLAGS -fstack-protector"
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ssp_cv_cc=yes
-else case e in #(
-  e) ssp_cv_cc=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-         CFLAGS="$ssp_old_cflags"
-         ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_cc" >&5
-printf '%s\n' "$ssp_cv_cc" >&6; }
-      if test $ssp_cv_cc = yes; then
-        CFLAGS="$CFLAGS -fstack-protector"
-
-printf '%s\n' "#define ENABLE_SSP_CC 1" >>confdefs.h
-
-      fi
-    fi
-  fi
-
-
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether libssp exists" >&5
-printf %s "checking whether libssp exists... " >&6; }
-if test ${ssp_cv_lib+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ssp_old_libs="$LIBS"
-     LIBS="$LIBS -lssp"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ssp_cv_lib=yes
-else case e in #(
-  e) ssp_cv_lib=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-     LIBS="$ssp_old_libs"
-     ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_lib" >&5
-printf '%s\n' "$ssp_cv_lib" >&6; }
-  if test $ssp_cv_lib = yes; then
-    LIBS="$LIBS -lssp"
-  fi
-
-
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing json_load_file" >&5
-printf %s "checking for library containing json_load_file... " >&6; }
-if test ${ac_cv_search_json_load_file+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char json_load_file (void);
-int
-main (void)
-{
-return json_load_file ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' jansson
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_json_load_file=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_json_load_file+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_json_load_file+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_json_load_file=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_json_load_file" >&5
-printf '%s\n' "$ac_cv_search_json_load_file" >&6; }
-ac_res=$ac_cv_search_json_load_file
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else case e in #(
-  e) as_fn_error $? "jansson library not found. Please install the jansson development package." "$LINENO" 5 ;;
-esac
-fi
-
-
-
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing socket" >&5
-printf %s "checking for library containing socket... " >&6; }
-if test ${ac_cv_search_socket+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char socket (void);
-int
-main (void)
-{
-return socket ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' socket
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_socket=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_socket+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_socket+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_socket=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_socket" >&5
-printf '%s\n' "$ac_cv_search_socket" >&6; }
-ac_res=$ac_cv_search_socket
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else case e in #(
-  e) as_fn_error $? "socket library not found" "$LINENO" 5 ;;
-esac
-fi
-
-
-
-# Checks for typedefs, structures, and compiler characteristics.
- { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether byte ordering is bigendian" >&5
-printf %s "checking whether byte ordering is bigendian... " >&6; }
-if test ${ac_cv_c_bigendian+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_cv_c_bigendian=unknown
-    # See if we're dealing with a universal compiler.
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __APPLE_CC__
-	       not a universal capable compiler
-	     #endif
-	     typedef int dummy;
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-
-	# Check for potential -arch flags.  It is not universal unless
-	# there are at least two -arch flags with different values.
-	ac_arch=
-	ac_prev=
-	for ac_word in $CC $CFLAGS $CPPFLAGS $LDFLAGS; do
-	 if test -n "$ac_prev"; then
-	   case $ac_word in
-	     i?86 | x86_64 | ppc | ppc64)
-	       if test -z "$ac_arch" || test "$ac_arch" = "$ac_word"; then
-		 ac_arch=$ac_word
-	       else
-		 ac_cv_c_bigendian=universal
-		 break
-	       fi
-	       ;;
-	   esac
-	   ac_prev=
-	 elif test "x$ac_word" = "x-arch"; then
-	   ac_prev=arch
-	 fi
-       done
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-    if test $ac_cv_c_bigendian = unknown; then
-      # See if sys/param.h defines the BYTE_ORDER macro.
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-	     #include <sys/param.h>
-
-int
-main (void)
-{
-#if ! (defined BYTE_ORDER && defined BIG_ENDIAN \\
-		     && defined LITTLE_ENDIAN && BYTE_ORDER && BIG_ENDIAN \\
-		     && LITTLE_ENDIAN)
-	      bogus endian macros
-	     #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  # It does; now see whether it defined to BIG_ENDIAN or not.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-		#include <sys/param.h>
-
-int
-main (void)
-{
-#if BYTE_ORDER != BIG_ENDIAN
-		 not big endian
-		#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_cv_c_bigendian=yes
-else case e in #(
-  e) ac_cv_c_bigendian=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-    fi
-    if test $ac_cv_c_bigendian = unknown; then
-      # See if <limits.h> defines _LITTLE_ENDIAN or _BIG_ENDIAN (e.g., Solaris).
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <limits.h>
-
-int
-main (void)
-{
-#if ! (defined _LITTLE_ENDIAN || defined _BIG_ENDIAN)
-	      bogus endian macros
-	     #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  # It does; now see whether it defined to _BIG_ENDIAN or not.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <limits.h>
-
-int
-main (void)
-{
-#ifndef _BIG_ENDIAN
-		 not big endian
-		#endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_cv_c_bigendian=yes
-else case e in #(
-  e) ac_cv_c_bigendian=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-    fi
-    if test $ac_cv_c_bigendian = unknown; then
-      # Compile a test program.
-      if test "$cross_compiling" = yes
-then :
-  # Try to guess by grepping values from an object file.
-	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-unsigned short int ascii_mm[] =
-		  { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
-		unsigned short int ascii_ii[] =
-		  { 0x694C, 0x5454, 0x656C, 0x6E45, 0x6944, 0x6E61, 0 };
-		int use_ascii (int i) {
-		  return ascii_mm[i] + ascii_ii[i];
-		}
-		unsigned short int ebcdic_ii[] =
-		  { 0x89D3, 0xE3E3, 0x8593, 0x95C5, 0x89C4, 0x9581, 0 };
-		unsigned short int ebcdic_mm[] =
-		  { 0xC2C9, 0xC785, 0x95C4, 0x8981, 0x95E2, 0xA8E2, 0 };
-		int use_ebcdic (int i) {
-		  return ebcdic_mm[i] + ebcdic_ii[i];
-		}
-		int
-		main (int argc, char **argv)
-		{
-		  /* Intimidate the compiler so that it does not
-		     optimize the arrays away.  */
-		  char *p = argv[0];
-		  ascii_mm[1] = *p++; ebcdic_mm[1] = *p++;
-		  ascii_ii[1] = *p++; ebcdic_ii[1] = *p++;
-		  return use_ascii (argc) == use_ebcdic (*p);
-		}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  if grep BIGenDianSyS conftest$ac_exeext >/dev/null; then
-	      ac_cv_c_bigendian=yes
-	    fi
-	    if grep LiTTleEnDian conftest$ac_exeext >/dev/null ; then
-	      if test "$ac_cv_c_bigendian" = unknown; then
-		ac_cv_c_bigendian=no
-	      else
-		# finding both strings is unlikely to happen, but who knows?
-		ac_cv_c_bigendian=unknown
-	      fi
-	    fi
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main (void)
-{
-
-	     /* Are we little or big endian?  From Harbison&Steele.  */
-	     union
-	     {
-	       long int l;
-	       char c[sizeof (long int)];
-	     } u;
-	     u.l = 1;
-	     return u.c[sizeof (long int) - 1] == 1;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"
-then :
-  ac_cv_c_bigendian=no
-else case e in #(
-  e) ac_cv_c_bigendian=yes ;;
-esac
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
-
-    fi ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_bigendian" >&5
-printf '%s\n' "$ac_cv_c_bigendian" >&6; }
- case $ac_cv_c_bigendian in #(
-   yes)
-     printf '%s\n' "#define WORDS_BIGENDIAN 1" >>confdefs.h
-;; #(
-   no)
-      ;; #(
-   universal)
-
-printf '%s\n' "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
-
-     ;; #(
-   *)
-     as_fn_error $? "unknown endianness
- presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
- esac
-
-
-# Checks for library functions.
-ac_func=
-for ac_item in $ac_func_c_list
-do
-  if test $ac_func; then
-    ac_fn_c_check_func "$LINENO" $ac_func ac_cv_func_$ac_func
-    if eval test \"x\$ac_cv_func_$ac_func\" = xyes; then
-      echo "#define $ac_item 1" >> confdefs.h
-    fi
-    ac_func=
-  else
-    ac_func=$ac_item
-  fi
-done
-
-
-
-# Checks for header files.
-
-
-
-
-
-
-
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
-printf %s "checking for library containing crypt... " >&6; }
-if test ${ac_cv_search_crypt+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char crypt (void);
-int
-main (void)
-{
-return crypt ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' crypt
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_crypt=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_crypt+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_crypt+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_crypt=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_crypt" >&5
-printf '%s\n' "$ac_cv_search_crypt" >&6; }
-ac_res=$ac_cv_search_crypt
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-
-# Force Clang to error on unknown warning options so AX_CHECK_COMPILE_FLAG detects unsupported flags.
 
 
 
@@ -16347,8 +15740,6 @@ fi
 done
 
 
-# Disable -Wformat-truncation specifically for gcc.
-
 
 
 
@@ -16432,7 +15823,6 @@ fi
 done
 
 
-# Argument processing.
 
   desired_iopoll_mechanism="none"
 
@@ -19675,92 +19065,603 @@ printf '%s\n' "$as_me: TLS backend: $ax_tls_backend" >&6;}
 
 
 
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-  eval ax_define_dir="\"$prefix\""
-  eval ax_define_dir="\"$ax_define_dir\""
-  PREFIX="$ax_define_dir"
+
+  if test "X$CC" != "X"; then
+    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether ${CC} accepts -fstack-protector-strong" >&5
+printf %s "checking whether ${CC} accepts -fstack-protector-strong... " >&6; }
+if test ${ssp_cv_cc+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ssp_old_cflags="$CFLAGS"
+       CFLAGS="$CFLAGS -fstack-protector-strong"
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ssp_cv_cc=yes
+else case e in #(
+  e) ssp_cv_cc=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+       CFLAGS="$ssp_old_cflags"
+       ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_cc" >&5
+printf '%s\n' "$ssp_cv_cc" >&6; }
+    if test $ssp_cv_cc = yes; then
+      CFLAGS="$CFLAGS -fstack-protector-strong"
+
+printf '%s\n' "#define ENABLE_SSP_CC 1" >>confdefs.h
+
+    else
+      unset ssp_cv_cc
+      { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether ${CC} accepts -fstack-protector" >&5
+printf %s "checking whether ${CC} accepts -fstack-protector... " >&6; }
+if test ${ssp_cv_cc+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ssp_old_cflags="$CFLAGS"
+         CFLAGS="$CFLAGS -fstack-protector"
+         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ssp_cv_cc=yes
+else case e in #(
+  e) ssp_cv_cc=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+         CFLAGS="$ssp_old_cflags"
+         ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_cc" >&5
+printf '%s\n' "$ssp_cv_cc" >&6; }
+      if test $ssp_cv_cc = yes; then
+        CFLAGS="$CFLAGS -fstack-protector"
+
+printf '%s\n' "#define ENABLE_SSP_CC 1" >>confdefs.h
+
+      fi
+    fi
+  fi
 
 
-printf '%s\n' "#define PREFIX \"$ax_define_dir\"" >>confdefs.h
+  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether libssp exists" >&5
+printf %s "checking whether libssp exists... " >&6; }
+if test ${ssp_cv_lib+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ssp_old_libs="$LIBS"
+     LIBS="$LIBS -lssp"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
+int
+main (void)
+{
 
-
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-  eval ax_define_dir="\"$sysconfdir\""
-  eval ax_define_dir="\"$ax_define_dir\""
-  SYSCONFDIR="$ax_define_dir"
-
-
-printf '%s\n' "#define SYSCONFDIR \"$ax_define_dir\"" >>confdefs.h
-
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
-
-
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-  eval ax_define_dir="\"$libdir\""
-  eval ax_define_dir="\"$ax_define_dir\""
-  LIBDIR="$ax_define_dir"
-
-
-printf '%s\n' "#define LIBDIR \"$ax_define_dir\"" >>confdefs.h
-
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
-
-
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-  eval ax_define_dir="\"$datadir\""
-  eval ax_define_dir="\"$ax_define_dir\""
-  DATADIR="$ax_define_dir"
-
-
-printf '%s\n' "#define DATADIR \"$ax_define_dir\"" >>confdefs.h
-
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
-
-
-  prefix_NONE=
-  exec_prefix_NONE=
-  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
-  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
-  eval ax_define_dir="\"$localstatedir\""
-  eval ax_define_dir="\"$ax_define_dir\""
-  LOCALSTATEDIR="$ax_define_dir"
-
-
-printf '%s\n' "#define LOCALSTATEDIR \"$ax_define_dir\"" >>confdefs.h
-
-  test "$prefix_NONE" && prefix=NONE
-  test "$exec_prefix_NONE" && exec_prefix=NONE
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ssp_cv_lib=yes
+else case e in #(
+  e) ssp_cv_lib=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="$ssp_old_libs"
+     ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_lib" >&5
+printf '%s\n' "$ssp_cv_lib" >&6; }
+  if test $ssp_cv_lib = yes; then
+    LIBS="$LIBS -lssp"
+  fi
 
 
 
-  LC_ALL=C
-  LANGUAGE=C
-  export LC_ALL
-  export LANGUAGE
+  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing json_load_file" >&5
+printf %s "checking for library containing json_load_file... " >&6; }
+if test ${ac_cv_search_json_load_file+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
 
-  DATE_FMT="+%B %-e %Y at %T%z"
-  SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
-  BUILD_DATE=$(date -u -d "@$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u -r "$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u "$DATE_FMT")
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char json_load_file (void);
+int
+main (void)
+{
+return json_load_file ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' jansson
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_search_json_load_file=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext
+  if test ${ac_cv_search_json_load_file+y}
+then :
+  break
+fi
+done
+if test ${ac_cv_search_json_load_file+y}
+then :
 
-printf '%s\n' "#define AX_BUILD_DATE \"$BUILD_DATE\"" >>confdefs.h
+else case e in #(
+  e) ac_cv_search_json_load_file=no ;;
+esac
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_json_load_file" >&5
+printf '%s\n' "$ac_cv_search_json_load_file" >&6; }
+ac_res=$ac_cv_search_json_load_file
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else case e in #(
+  e) as_fn_error $? "jansson library not found. Please install the jansson development package." "$LINENO" 5 ;;
+esac
+fi
+
+
+
+  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing socket" >&5
+printf %s "checking for library containing socket... " >&6; }
+if test ${ac_cv_search_socket+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char socket (void);
+int
+main (void)
+{
+return socket ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' socket
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_search_socket=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext
+  if test ${ac_cv_search_socket+y}
+then :
+  break
+fi
+done
+if test ${ac_cv_search_socket+y}
+then :
+
+else case e in #(
+  e) ac_cv_search_socket=no ;;
+esac
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_socket" >&5
+printf '%s\n' "$ac_cv_search_socket" >&6; }
+ac_res=$ac_cv_search_socket
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else case e in #(
+  e) as_fn_error $? "socket library not found" "$LINENO" 5 ;;
+esac
+fi
+
+
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
+printf %s "checking for library containing crypt... " >&6; }
+if test ${ac_cv_search_crypt+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char crypt (void);
+int
+main (void)
+{
+return crypt ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' crypt
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_search_crypt=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext
+  if test ${ac_cv_search_crypt+y}
+then :
+  break
+fi
+done
+if test ${ac_cv_search_crypt+y}
+then :
+
+else case e in #(
+  e) ac_cv_search_crypt=no ;;
+esac
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_crypt" >&5
+printf '%s\n' "$ac_cv_search_crypt" >&6; }
+ac_res=$ac_cv_search_crypt
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+
+ { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether byte ordering is bigendian" >&5
+printf %s "checking whether byte ordering is bigendian... " >&6; }
+if test ${ac_cv_c_bigendian+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_cv_c_bigendian=unknown
+    # See if we're dealing with a universal compiler.
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifndef __APPLE_CC__
+	       not a universal capable compiler
+	     #endif
+	     typedef int dummy;
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+	# Check for potential -arch flags.  It is not universal unless
+	# there are at least two -arch flags with different values.
+	ac_arch=
+	ac_prev=
+	for ac_word in $CC $CFLAGS $CPPFLAGS $LDFLAGS; do
+	 if test -n "$ac_prev"; then
+	   case $ac_word in
+	     i?86 | x86_64 | ppc | ppc64)
+	       if test -z "$ac_arch" || test "$ac_arch" = "$ac_word"; then
+		 ac_arch=$ac_word
+	       else
+		 ac_cv_c_bigendian=universal
+		 break
+	       fi
+	       ;;
+	   esac
+	   ac_prev=
+	 elif test "x$ac_word" = "x-arch"; then
+	   ac_prev=arch
+	 fi
+       done
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if sys/param.h defines the BYTE_ORDER macro.
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+	     #include <sys/param.h>
+
+int
+main (void)
+{
+#if ! (defined BYTE_ORDER && defined BIG_ENDIAN \\
+		     && defined LITTLE_ENDIAN && BYTE_ORDER && BIG_ENDIAN \\
+		     && LITTLE_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  # It does; now see whether it defined to BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+		#include <sys/param.h>
+
+int
+main (void)
+{
+#if BYTE_ORDER != BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ac_cv_c_bigendian=yes
+else case e in #(
+  e) ac_cv_c_bigendian=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if <limits.h> defines _LITTLE_ENDIAN or _BIG_ENDIAN (e.g., Solaris).
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main (void)
+{
+#if ! (defined _LITTLE_ENDIAN || defined _BIG_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  # It does; now see whether it defined to _BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main (void)
+{
+#ifndef _BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ac_cv_c_bigendian=yes
+else case e in #(
+  e) ac_cv_c_bigendian=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # Compile a test program.
+      if test "$cross_compiling" = yes
+then :
+  # Try to guess by grepping values from an object file.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+unsigned short int ascii_mm[] =
+		  { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
+		unsigned short int ascii_ii[] =
+		  { 0x694C, 0x5454, 0x656C, 0x6E45, 0x6944, 0x6E61, 0 };
+		int use_ascii (int i) {
+		  return ascii_mm[i] + ascii_ii[i];
+		}
+		unsigned short int ebcdic_ii[] =
+		  { 0x89D3, 0xE3E3, 0x8593, 0x95C5, 0x89C4, 0x9581, 0 };
+		unsigned short int ebcdic_mm[] =
+		  { 0xC2C9, 0xC785, 0x95C4, 0x8981, 0x95E2, 0xA8E2, 0 };
+		int use_ebcdic (int i) {
+		  return ebcdic_mm[i] + ebcdic_ii[i];
+		}
+		int
+		main (int argc, char **argv)
+		{
+		  /* Intimidate the compiler so that it does not
+		     optimize the arrays away.  */
+		  char *p = argv[0];
+		  ascii_mm[1] = *p++; ebcdic_mm[1] = *p++;
+		  ascii_ii[1] = *p++; ebcdic_ii[1] = *p++;
+		  return use_ascii (argc) == use_ebcdic (*p);
+		}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  if grep BIGenDianSyS conftest$ac_exeext >/dev/null; then
+	      ac_cv_c_bigendian=yes
+	    fi
+	    if grep LiTTleEnDian conftest$ac_exeext >/dev/null ; then
+	      if test "$ac_cv_c_bigendian" = unknown; then
+		ac_cv_c_bigendian=no
+	      else
+		# finding both strings is unlikely to happen, but who knows?
+		ac_cv_c_bigendian=unknown
+	      fi
+	    fi
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+else case e in #(
+  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main (void)
+{
+
+	     /* Are we little or big endian?  From Harbison&Steele.  */
+	     union
+	     {
+	       long int l;
+	       char c[sizeof (long int)];
+	     } u;
+	     u.l = 1;
+	     return u.c[sizeof (long int) - 1] == 1;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"
+then :
+  ac_cv_c_bigendian=no
+else case e in #(
+  e) ac_cv_c_bigendian=yes ;;
+esac
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
+esac
+fi
+
+    fi ;;
+esac
+fi
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_bigendian" >&5
+printf '%s\n' "$ac_cv_c_bigendian" >&6; }
+ case $ac_cv_c_bigendian in #(
+   yes)
+     printf '%s\n' "#define WORDS_BIGENDIAN 1" >>confdefs.h
+;; #(
+   no)
+      ;; #(
+   universal)
+
+printf '%s\n' "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
+
+     ;; #(
+   *)
+     as_fn_error $? "unknown endianness
+ presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
+ esac
+
+
+
+
+
+
+
+
+
+ac_func=
+for ac_item in $ac_func_c_list
+do
+  if test $ac_func; then
+    ac_fn_c_check_func "$LINENO" $ac_func ac_cv_func_$ac_func
+    if eval test \"x\$ac_cv_func_$ac_func\" = xyes; then
+      echo "#define $ac_item 1" >> confdefs.h
+    fi
+    ac_func=
+  else
+    ac_func=$ac_item
+  fi
+done
 
 
 
@@ -19849,6 +19750,96 @@ printf '%s\n' "$ax_cv_func_strftime_minus_e" >&6; }
 printf '%s\n' "#define HAVE_STRFTIME_MINUS_E 1" >>confdefs.h
 
   fi
+
+
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ax_define_dir="\"$prefix\""
+  eval ax_define_dir="\"$ax_define_dir\""
+  PREFIX="$ax_define_dir"
+
+
+printf '%s\n' "#define PREFIX \"$ax_define_dir\"" >>confdefs.h
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ax_define_dir="\"$sysconfdir\""
+  eval ax_define_dir="\"$ax_define_dir\""
+  SYSCONFDIR="$ax_define_dir"
+
+
+printf '%s\n' "#define SYSCONFDIR \"$ax_define_dir\"" >>confdefs.h
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ax_define_dir="\"$libdir\""
+  eval ax_define_dir="\"$ax_define_dir\""
+  LIBDIR="$ax_define_dir"
+
+
+printf '%s\n' "#define LIBDIR \"$ax_define_dir\"" >>confdefs.h
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ax_define_dir="\"$datadir\""
+  eval ax_define_dir="\"$ax_define_dir\""
+  DATADIR="$ax_define_dir"
+
+
+printf '%s\n' "#define DATADIR \"$ax_define_dir\"" >>confdefs.h
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
+
+  prefix_NONE=
+  exec_prefix_NONE=
+  test "x$prefix" = xNONE && prefix_NONE=yes && prefix=$ac_default_prefix
+  test "x$exec_prefix" = xNONE && exec_prefix_NONE=yes && exec_prefix=$prefix
+  eval ax_define_dir="\"$localstatedir\""
+  eval ax_define_dir="\"$ax_define_dir\""
+  LOCALSTATEDIR="$ax_define_dir"
+
+
+printf '%s\n' "#define LOCALSTATEDIR \"$ax_define_dir\"" >>confdefs.h
+
+  test "$prefix_NONE" && prefix=NONE
+  test "$exec_prefix_NONE" && exec_prefix=NONE
+
+
+
+  LC_ALL=C
+  LANGUAGE=C
+  export LC_ALL
+  export LANGUAGE
+
+  DATE_FMT="+%B %-e %Y at %T%z"
+  SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
+  BUILD_DATE=$(date -u -d "@$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u -r "$SOURCE_DATE_EPOCH" "$DATE_FMT" 2>/dev/null || date -u "$DATE_FMT")
+
+printf '%s\n' "#define AX_BUILD_DATE \"$BUILD_DATE\"" >>confdefs.h
+
 
 
 ac_config_files="$ac_config_files Makefile doc/Makefile help/Makefile libio/Makefile libio/src/Makefile libltdl/Makefile modules/Makefile src/Makefile tools/Makefile"
@@ -22162,10 +22153,10 @@ printf '%s\n' "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2
 fi
 
 
-echo "###############################################################################"
-echo "Configuration complete.  Type make (or gmake on some *BSD machines) to compile."
-echo
-echo "ircd-hybrid will be installed in ${prefix}.  To change this, run:"
-echo "   ./configure --prefix=DIRECTORY"
-echo "###############################################################################"
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: Configuration complete." >&5
+printf '%s\n' "$as_me: Configuration complete." >&6;}
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: Installation prefix: ${prefix}" >&5
+printf '%s\n' "$as_me: Installation prefix: ${prefix}" >&6;}
+{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: Run 'make' (or 'gmake' on some BSD systems) to build ircd-hybrid." >&5
+printf '%s\n' "$as_me: Run 'make' (or 'gmake' on some BSD systems) to build ircd-hybrid." >&6;}
 

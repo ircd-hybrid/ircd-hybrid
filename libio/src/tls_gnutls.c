@@ -279,11 +279,9 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     case TLS_ROLE_SERVER:
       flags = GNUTLS_SERVER | GNUTLS_NONBLOCK;
       break;
-
     case TLS_ROLE_CLIENT:
       flags = GNUTLS_CLIENT | GNUTLS_NONBLOCK;
       break;
-
     default:
       return false;
   }

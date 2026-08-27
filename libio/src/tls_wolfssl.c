@@ -204,7 +204,7 @@ tls_get_library_info(void)
 bool
 tls_isusing(tls_data_t *tls_data)
 {
-  return tls_data->session;
+  return tls_data->session != NULL;
 }
 
 void
@@ -333,11 +333,9 @@ tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
     case TLS_ROLE_SERVER:
       ctx = context->server_ctx;
       break;
-
     case TLS_ROLE_CLIENT:
       ctx = context->client_ctx;
       break;
-
     default:
       return false;
   }

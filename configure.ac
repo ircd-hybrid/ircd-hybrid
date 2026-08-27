@@ -1,7 +1,7 @@
 AC_PREREQ([2.71])
 
 dnl Project initialization.
-AC_INIT([ircd-hybrid], [8.2.48], [bugs@ircd-hybrid.org])
+AC_INIT([ircd-hybrid],[8.2.48],[bugs@ircd-hybrid.org],[ircd-hybrid],[https://www.ircd-hybrid.org/])
 AC_CONFIG_SRCDIR([src/ircd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -63,11 +63,11 @@ AC_CHECK_FUNCS_ONCE([
 AX_CHECK_STRFTIME_MINUS_E
 
 dnl Compile-time installation paths.
-AX_DEFINE_DIR([PREFIX], [prefix], [Set to prefix.])
-AX_DEFINE_DIR([SYSCONFDIR], [sysconfdir], [Set to sysconfdir.])
-AX_DEFINE_DIR([LIBDIR], [libdir], [Set to libdir.])
-AX_DEFINE_DIR([DATADIR], [datadir], [Set to datadir.])
-AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
+AX_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
+AX_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])
+AX_DEFINE_DIR([LIBDIR],[libdir],[Set to libdir.])
+AX_DEFINE_DIR([DATADIR],[datadir],[Set to datadir.])
+AX_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
 
 dnl Reproducible build metadata.
 AX_DEFINE_BUILD_DATE

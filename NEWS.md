@@ -1,10 +1,18 @@
 #### Noteworthy changes in version 8.2.48 (2025-??-??)
-* The `general::disable_auth` configuration directive has been renamed to `general::disable_ident`
 * The `LIST` command now implements the standard ELIST `C<` and `C>` creation-time
   filters correctly: `C<num` matches channels created within the last `<num>` minutes,
   while `C>num` matches channels created more than `<num>` minutes ago.
 * The `serverinfo::sid` configuration directive is no longer optional. Server IDs are
   no longer generated automatically.
+* The `general::disable_auth` configuration directive has been renamed to `general::disable_ident`
+* The `serverinfo::rsa_private_key_file` configuration directive has been renamed to
+  `serverinfo::tls_private_key_file`
+* The `serverinfo::tls_dh_param_file`, `serverinfo::tls_supported_groups`,
+  `serverinfo::tls_cipher_list`, `serverinfo::tls_cipher_suites`, and
+  `serverinfo::tls_message_digest_algorithm` configuration directives have been removed.
+  TLS cipher suites, supported groups, and related cryptographic parameters are now
+  selected by the configured TLS library and its system defaults. TLS certificate
+  fingerprints now always use SHA-256.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

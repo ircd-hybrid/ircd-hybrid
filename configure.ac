@@ -48,7 +48,6 @@ dnl Header availability.
 AC_CHECK_HEADERS_ONCE([
   crypt.h
   socket.h
-  sys/param.h
   sys/wait.h
   types.h
 ])

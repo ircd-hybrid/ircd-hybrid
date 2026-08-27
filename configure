@@ -603,7 +603,7 @@ PACKAGE_TARNAME='ircd-hybrid'
 PACKAGE_VERSION='8.2.48'
 PACKAGE_STRING='ircd-hybrid 8.2.48'
 PACKAGE_BUGREPORT='bugs@ircd-hybrid.org'
-PACKAGE_URL=''
+PACKAGE_URL='https://www.ircd-hybrid.org/'
 
 ac_unique_file="src/ircd.c"
 # Factoring default headers for most tests.
@@ -1520,6 +1520,7 @@ Use these variables to override the choices made by 'configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <bugs@ircd-hybrid.org>.
+ircd-hybrid home page: <https://www.ircd-hybrid.org/>.
 _ACEOF
 ac_status=$?
 fi
@@ -2683,7 +2684,6 @@ as_fn_append ac_header_c_list " sys/types.h sys_types_h HAVE_SYS_TYPES_H"
 as_fn_append ac_header_c_list " unistd.h unistd_h HAVE_UNISTD_H"
 as_fn_append ac_header_c_list " crypt.h crypt_h HAVE_CRYPT_H"
 as_fn_append ac_header_c_list " socket.h socket_h HAVE_SOCKET_H"
-as_fn_append ac_header_c_list " sys/param.h sys_param_h HAVE_SYS_PARAM_H"
 as_fn_append ac_header_c_list " sys/wait.h sys_wait_h HAVE_SYS_WAIT_H"
 as_fn_append ac_header_c_list " types.h types_h HAVE_TYPES_H"
 as_fn_append ac_func_c_list " strlcat HAVE_STRLCAT"
@@ -15619,7 +15619,6 @@ eval "LTDLOPEN=\"$libname_spec\""
 # Only expand once:
 
 
-LIBTOOL="$LIBTOOL --silent"
 
 
 
@@ -19362,6 +19361,9 @@ if test "$ac_res" != no
 then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+else case e in #(
+  e) as_fn_error $? "crypt() is required but was not found" "$LINENO" 5 ;;
+esac
 fi
 
 
@@ -19604,7 +19606,6 @@ printf '%s\n' "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
      as_fn_error $? "unknown endianness
  presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
  esac
-
 
 
 
@@ -20364,7 +20365,8 @@ $config_headers
 Configuration commands:
 $config_commands
 
-Report bugs to <bugs@ircd-hybrid.org>."
+Report bugs to <bugs@ircd-hybrid.org>.
+ircd-hybrid home page: <https://www.ircd-hybrid.org/>."
 
 _ACEOF
 ac_cs_config=`printf '%s\n' "$ac_configure_args" | sed "$ac_safe_unquote"`

@@ -6,22 +6,16 @@
 #ifndef INCLUDED_io_h
 #define INCLUDED_io_h
 #include <limits.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 
-#if defined PATH_MAX
+#ifdef PATH_MAX
 # define IO_PATH_MAX PATH_MAX
-#elif defined MAXPATHLEN
-# define IO_PATH_MAX MAXPATHLEN
 #else
 # define IO_PATH_MAX 4096
 #endif
 
-#if 0 && __GNUC__
-#define IO_AFP(a,b) __attribute__((format (printf, a, b)))
+#if defined(__GNUC__) || defined(__clang__)
+# define IO_AFP(a, b) __attribute__((format(printf, a, b)))
 #else
-#define IO_AFP(a,b)
+# define IO_AFP(a, b)
 #endif
-
 #endif  /* INCLUDED_io_h */

@@ -289,7 +289,7 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
 }
 
 static void
-_server_tls_library_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
+_server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
 {
   assert(client && client_is_local(client));
   assert(client->connection->fde);
@@ -338,7 +338,7 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   }
 
   if (connect->flags & CONNECT_FLAG_USE_TLS)
-    _server_tls_library_init(client, connect, fde);
+    _server_tls_init(client, connect, fde);
   else
     _server_handshake_irc_start(client);
 }

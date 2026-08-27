@@ -59,7 +59,7 @@ report_crypto_errors(void)
 }
 
 static int
-always_accept_verify_cb(int preverify_ok, WOLFSSL_X509_STORE_CTX *x509_ctx)
+_tls_verify_accept_all_cb(int preverify_ok, WOLFSSL_X509_STORE_CTX *x509_ctx)
 {
   return 1;
 }
@@ -97,7 +97,7 @@ _tls_context_new(void)
     goto fail;
 
   wolfSSL_CTX_set_session_cache_mode(context->server_ctx, WOLFSSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(context->server_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_verify(context->server_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
 
   context->client_ctx = wolfSSL_CTX_new(wolfTLS_client_method());
   if (context->client_ctx == NULL)
@@ -107,7 +107,7 @@ _tls_context_new(void)
     goto fail;
 
   wolfSSL_CTX_set_session_cache_mode(context->client_ctx, WOLFSSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(context->client_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  wolfSSL_CTX_set_verify(context->client_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
 
   return context;
 

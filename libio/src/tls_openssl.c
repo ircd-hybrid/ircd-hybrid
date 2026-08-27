@@ -57,7 +57,7 @@ report_crypto_errors(void)
 }
 
 static int
-always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
+_tls_verify_accept_all_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
   return 1;
 }
@@ -95,7 +95,7 @@ _tls_context_new(void)
     goto fail;
 
   SSL_CTX_set_options(context->server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(context->server_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_verify(context->server_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
   SSL_CTX_set_session_cache_mode(context->server_ctx, SSL_SESS_CACHE_OFF);
 
   context->client_ctx = SSL_CTX_new(TLS_client_method());
@@ -106,7 +106,7 @@ _tls_context_new(void)
     goto fail;
 
   SSL_CTX_set_options(context->client_ctx, SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(context->client_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  SSL_CTX_set_verify(context->client_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
   SSL_CTX_set_session_cache_mode(context->client_ctx, SSL_SESS_CACHE_OFF);
 
   return context;

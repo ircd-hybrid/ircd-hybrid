@@ -18,7 +18,7 @@
 #include "tls.h"
 
 #ifdef HAVE_TLS_GNUTLS
-static const char tls_priority_append[] =
+static const char tls_priority_overrides[] =
   "-VERS-SSL3.0:"
   "-VERS-TLS1.0:"
   "-VERS-TLS1.1:"
@@ -91,7 +91,7 @@ _tls_context_new(void)
     goto fail;
   }
 
-  ret = gnutls_priority_init2(&context->priorities, tls_priority_append, NULL, GNUTLS_PRIORITY_INIT_DEF_APPEND);
+  ret = gnutls_priority_init2(&context->priorities, tls_priority_overrides, NULL, GNUTLS_PRIORITY_INIT_DEF_APPEND);
   if (ret != GNUTLS_E_SUCCESS)
   {
     _tls_report_error("Could not initialize TLS priorities", ret);

@@ -238,8 +238,14 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
 
   gnutls_session_t session = tls_data->session;
   const ssize_t ret = gnutls_record_send(session, buf, bufsize);
-  if (ret >= 0)
+  if (ret > 0)
     return ret;
+
+  if (ret == 0)
+  {
+    errno = EIO;
+    return -1;
+  }
 
   const int saved_errno = errno;
 

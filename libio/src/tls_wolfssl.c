@@ -237,12 +237,6 @@ tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
   if (ret > 0)
     return ret;
 
-  if (ret == 0)
-  {
-    errno = 0;
-    return 0;
-  }
-
   const int saved_errno = errno;
 
   switch (wolfSSL_get_error(ssl, ret))
@@ -279,12 +273,6 @@ tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read
   const int ret = wolfSSL_write(ssl, buf, size);
   if (ret > 0)
     return ret;
-
-  if (ret == 0)
-  {
-    errno = 0;
-    return 0;
-  }
 
   const int saved_errno = errno;
 

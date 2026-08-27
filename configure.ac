@@ -40,7 +40,7 @@ AX_ARG_ENABLE_STACK_PROTECTOR
 dnl Required libraries and platform support.
 AX_LIBRARY_JANSSON
 AX_LIBRARY_NET
-AC_SEARCH_LIBS([crypt], [crypt])
+AC_SEARCH_LIBS([crypt],[crypt],[],[AC_MSG_ERROR([crypt() is required but was not found])])
 
 dnl Platform characteristics.
 AC_C_BIGENDIAN

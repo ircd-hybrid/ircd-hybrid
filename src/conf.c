@@ -779,8 +779,8 @@ conf_clear(void)
   ConfigServerInfo.network_name = NULL;
   io_free(ConfigServerInfo.network_description);
   ConfigServerInfo.network_description = NULL;
-  io_free(ConfigServerInfo.rsa_private_key_file);
-  ConfigServerInfo.rsa_private_key_file = NULL;
+  io_free(ConfigServerInfo.tls_private_key_file);
+  ConfigServerInfo.tls_private_key_file = NULL;
   io_free(ConfigServerInfo.tls_certificate_file);
   ConfigServerInfo.tls_certificate_file = NULL;
   io_free(ConfigServerInfo.motd_file);
@@ -816,7 +816,7 @@ static bool
 _conf_apply_tls(void)
 {
   const char *const certificate_file = ConfigServerInfo.tls_certificate_file;
-  const char *const private_key_file = ConfigServerInfo.rsa_private_key_file;
+  const char *const private_key_file = ConfigServerInfo.tls_private_key_file;
 
   if (certificate_file == NULL && private_key_file == NULL)
   {

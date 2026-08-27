@@ -220,7 +220,7 @@ struct config_serverinfo_entry
   char *motd_file;
   char *network_name;
   char *network_description;
-  char *rsa_private_key_file;
+  char *tls_private_key_file;
   char *tls_certificate_file;
   unsigned int hub;
   unsigned int default_max_clients;

@@ -289,7 +289,6 @@ resident                    { return RESIDENT; }
 restart                     { return T_RESTART; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }
-rsa_private_key_file        { return RSA_PRIVATE_KEY_FILE; }
 send_password               { return SEND_PASSWORD; }
 sendq                       { return SENDQ; }
 server                      { return T_SERVER; }
@@ -319,6 +318,7 @@ timeout                     { return TIMEOUT; }
 tls                         { return T_TLS; }
 tls_certificate_file        { return TLS_CERTIFICATE_FILE; }
 tls_certificate_fingerprint { return TLS_CERTIFICATE_FINGERPRINT; }
+tls_private_key_file        { return TLS_PRIVATE_KEY_FILE; }
 tls_connection_required     { return TLS_CONNECTION_REQUIRED; }
 ts_max_delta                { return TS_MAX_DELTA; }
 ts_warn_delta               { return TS_WARN_DELTA; }

@@ -274,7 +274,6 @@ reset_block_state(void)
 %token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
-%token  RSA_PRIVATE_KEY_FILE
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SEND_PASSWORD
 %token  SENDQ
@@ -327,6 +326,7 @@ reset_block_state(void)
 %token  TIMEOUT
 %token  TLS_CERTIFICATE_FILE
 %token  TLS_CERTIFICATE_FINGERPRINT
+%token  TLS_PRIVATE_KEY_FILE
 %token  TLS_CONNECTION_REQUIRED
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
@@ -454,7 +454,7 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_max_nick_length |
                         serverinfo_max_topic_length |
                         serverinfo_motd_file |
-                        serverinfo_rsa_private_key_file |
+                        serverinfo_tls_private_key_file |
                         serverinfo_sid |
                         serverinfo_tls_certificate_file |
                         error ';' ;
@@ -469,12 +469,12 @@ serverinfo_tls_certificate_file: TLS_CERTIFICATE_FILE '=' QSTRING ';'
   }
 };
 
-serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
+serverinfo_tls_private_key_file: TLS_PRIVATE_KEY_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    io_free(ConfigServerInfo.rsa_private_key_file);
-    ConfigServerInfo.rsa_private_key_file = io_strdup(yylval.string);
+    io_free(ConfigServerInfo.tls_private_key_file);
+    ConfigServerInfo.tls_private_key_file = io_strdup(yylval.string);
   }
 };
 

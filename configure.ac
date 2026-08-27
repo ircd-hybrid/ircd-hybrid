@@ -18,7 +18,6 @@ dnl Libtool and libltdl.
 LT_CONFIG_LTDL_DIR([libltdl])
 LT_INIT([dlopen disable-static])
 LTDL_INIT([recursive convenience])
-LIBTOOL="$LIBTOOL --silent"
 
 dnl Compiler flag handling.
 dnl Make Clang reject unknown warning options so feature tests detect them.

@@ -7,7 +7,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 
 AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
-AM_MAINTAINER_MODE
 
 dnl Toolchain.
 AC_PROG_CC

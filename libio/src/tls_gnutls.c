@@ -31,8 +31,10 @@ static tls_context_t tls_ctx;
 static void
 _tls_context_free(tls_context_t context)
 {
-  gnutls_priority_deinit(context->priorities);
-  gnutls_certificate_free_credentials(context->x509_cred);
+  if (context->priorities)
+    gnutls_priority_deinit(context->priorities);
+  if (context->x509_cred)
+    gnutls_certificate_free_credentials(context->x509_cred);
 
   io_free(context);
 }

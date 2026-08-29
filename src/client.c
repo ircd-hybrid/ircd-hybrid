@@ -588,12 +588,12 @@ _client_exit_log_session(const struct Client *client, const char *reason)
     log_write(LOG_TYPE_USER,
               "SESSION END: nick=\"%s\" user=\"%s\" host=\"%s\" ip=\"%s\" "
               "realhost=\"%s\" acct=\"%s\" duration=\"%s\" "
-              "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
+              "sent=%juB recv=%juB msgs_sent=%ju msgs_recv=%ju "
               "class=\"%s\" oper=\"%s\" reason=\"%s\"",
               client->name, client->username, client->host, client->sockhost, client->realhost, client->account,
               time_format_duration(client_get_session_duration(client)),
-              (uintmax_t)(client->connection->send.bytes >> 10),
-              (uintmax_t)(client->connection->recv.bytes >> 10),
+              client->connection->send.bytes,
+              client->connection->recv.bytes,
               client->connection->send.messages,
               client->connection->recv.messages,
               client_get_class_name(client),
@@ -603,12 +603,12 @@ _client_exit_log_session(const struct Client *client, const char *reason)
   {
     log_write(LOG_TYPE_IRCD,
               "LINK END: name=\"%s\" ip=\"%s\" duration=\"%s\" "
-              "sent=%juKiB recv=%juKiB msgs_sent=%u msgs_recv=%u "
+              "sent=%juB recv=%juB msgs_sent=%ju msgs_recv=%ju "
               "class=\"%s\" reason=\"%s\"",
               client->name, client->sockhost,
               time_format_duration(client_get_session_duration(client)),
-              (uintmax_t)(client->connection->send.bytes >> 10),
-              (uintmax_t)(client->connection->recv.bytes >> 10),
+              client->connection->send.bytes,
+              client->connection->recv.bytes,
               client->connection->send.messages,
               client->connection->recv.messages,
               client_get_class_name(client), reason);

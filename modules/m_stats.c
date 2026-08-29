@@ -915,7 +915,8 @@ stats_class(struct Client *client, int parc, char *parv[])
 static void
 stats_servlinks(struct Client *client, int parc, char *parv[])
 {
-  size_t send_bytes = 0, recv_bytes = 0;
+  uintmax_t send_bytes = 0;
+  uintmax_t recv_bytes = 0;
   const client_format_name_t target_name_format =
     client_is_admin(client) ? CLIENT_FORMAT_NAME_ADMIN : CLIENT_FORMAT_NAME_OPER;
 
@@ -930,14 +931,14 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
     const char *const target_name =
       client_format_name(target, target_name_format, &target_name_buffer);
 
-    /* ":%s 211 %s %s %u %u %zu %u %zu :%ju %ju %s" */
+    /* ":%s 211 %s %s %zu %ju %ju %ju %ju :%ju %ju %s" */
     sendto_one_numeric(client, &me, RPL_STATSLINKINFO,
                        target_name,
                        dbuf_queue_length(&target->connection->send_queue),
                        target->connection->send.messages,
-                       target->connection->send.bytes >> 10,
+                       target->connection->send.bytes,
                        target->connection->recv.messages,
-                       target->connection->recv.bytes >> 10,
+                       target->connection->recv.bytes,
                        client_get_session_duration(target),
                        client_get_socket_idle_duration(target),
                        capab_get(target, true));
@@ -1019,9 +1020,9 @@ stats_L_list(struct Client *client, const char *name, bool doall, bool wilds,
                        target_name,
                        dbuf_queue_length(&target->connection->send_queue),
                        target->connection->send.messages,
-                       target->connection->send.bytes >> 10,
+                       target->connection->send.bytes,
                        target->connection->recv.messages,
-                       target->connection->recv.bytes >> 10,
+                       target->connection->recv.bytes,
                        client_get_session_duration(target),
                        client_get_socket_idle_duration(target),
                        client_is_server(target) ? capab_get(target, true) : "-");

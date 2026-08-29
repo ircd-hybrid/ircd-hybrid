@@ -134,7 +134,7 @@ struct Connection
 
   struct
   {
-    uint32_t messages;  /**< Statistics: protocol messages sent/received */
+    uintmax_t messages;  /**< Statistics: protocol messages sent/received */
     uintmax_t bytes;  /**< Statistics: total bytes sent/received */
   } recv, send;
 

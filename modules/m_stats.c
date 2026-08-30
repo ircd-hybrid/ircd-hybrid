@@ -912,11 +912,43 @@ stats_class(struct Client *client, int parc, char *parv[])
   }
 }
 
+typedef struct
+{
+  double value;
+  const char *unit;
+} stats_scaled_bytes_t;
+
+static stats_scaled_bytes_t
+_stats_scale_bytes(uintmax_t bytes)
+{
+  static const char *const unit_names[] =
+  {
+    "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"
+  };
+
+  uintmax_t magnitude = bytes;
+  double value = (double)bytes;
+  size_t unit_index = 0;
+
+  while (magnitude >= 1024 && unit_index + 1 < IO_ARRAY_LENGTH(unit_names))
+  {
+    magnitude /= 1024;
+    value /= 1024.0;
+    ++unit_index;
+  }
+
+  return (stats_scaled_bytes_t)
+  {
+    .value = value,
+    .unit = unit_names[unit_index]
+  };
+}
+
 static void
 stats_servlinks(struct Client *client, int parc, char *parv[])
 {
-  uintmax_t send_bytes = 0;
-  uintmax_t recv_bytes = 0;
+  uintmax_t total_sent_bytes = 0;
+  uintmax_t total_received_bytes = 0;
   const client_format_name_t target_name_format =
     client_is_admin(client) ? CLIENT_FORMAT_NAME_ADMIN : CLIENT_FORMAT_NAME_OPER;
 
@@ -924,8 +956,8 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
   LIST_FOREACH(node, local_server_list.head)
   {
     const struct Client *const target = node->data;
-    send_bytes += target->connection->send.bytes;
-    recv_bytes += target->connection->recv.bytes;
+    total_sent_bytes += target->connection->send.bytes;
+    total_received_bytes += target->connection->recv.bytes;
 
     client_format_name_buffer_t target_name_buffer;
     const char *const target_name =
@@ -944,25 +976,27 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
                        capab_get(target, true));
   }
 
-  send_bytes >>= 10;
-  recv_bytes >>= 10;
+  const stats_scaled_bytes_t total_sent = _stats_scale_bytes(total_sent_bytes);
+  const stats_scaled_bytes_t total_received = _stats_scale_bytes(total_received_bytes);
 
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :%u total server(s)",
                      list_length(&local_server_list));
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Sent total: %7.2f %s",
-                     _GMKv(send_bytes), _GMKs(send_bytes));
+                     total_sent.value, total_sent.unit);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Recv total: %7.2f %s",
-                     _GMKv(recv_bytes), _GMKs(recv_bytes));
+                     total_received.value, total_received.unit);
+
+  const stats_scaled_bytes_t server_sent = _stats_scale_bytes(me.connection->send.bytes);
+  const stats_scaled_bytes_t server_received = _stats_scale_bytes(me.connection->recv.bytes);
 
   const uintmax_t uptime = client_get_session_duration(&me);
+  const double server_send_rate = uptime > 0 ? (double)me.connection->send.bytes / (1024.0 * (double)uptime) : 0.0;
+  const double server_receive_rate = uptime > 0 ? (double)me.connection->recv.bytes / (1024.0 * (double)uptime) : 0.0;
+
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Server send: %7.2f %s (%4.1f KiB/s)",
-                     _GMKv((me.connection->send.bytes >> 10)),
-                     _GMKs((me.connection->send.bytes >> 10)),
-                     (float)((float)((me.connection->send.bytes) >> 10) / (float)uptime));
+                     server_sent.value, server_sent.unit, server_send_rate);
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "? :Server recv: %7.2f %s (%4.1f KiB/s)",
-                     _GMKv((me.connection->recv.bytes >> 10)),
-                     _GMKs((me.connection->recv.bytes >> 10)),
-                     (float)((float)((me.connection->recv.bytes) >> 10) / (float)uptime));
+                     server_received.value, server_received.unit, server_receive_rate);
 }
 
 static const char *

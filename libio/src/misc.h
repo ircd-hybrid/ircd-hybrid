@@ -38,49 +38,6 @@
  */
 #define IO_ARRAY_LENGTH(x) ((sizeof(x)) / sizeof(x[0]))
 
-/**
- * @def _1MEG
- * @brief Represents 1 Mebibyte (MiB).
- *
- * This macro defines the size equivalent to 1 MiB, where 1 MiB equals 1024 Kibibytes (KiB).
- */
-#define _1MEG     (1024.0f)
-
-/**
- * @def _1GIG
- * @brief Represents 1 Gibibyte (GiB).
- *
- * This macro defines the size equivalent to 1 GiB, where 1 GiB equals 1024 Mebibytes (MiB).
- */
-#define _1GIG     (1024.0f * 1024.0f)
-
-/**
- * @def _1TER
- * @brief Represents 1 Tebibyte (TiB).
- *
- * This macro defines the size equivalent to 1 TiB, where 1 TiB equals 1024 Gibibytes (GiB).
- */
-#define _1TER     (1024.0f * 1024.0f * 1024.0f)
-
-/**
- * @def _GMKs
- * @brief Returns a string representing the appropriate size unit for a given size.
- * @param x Size value.
- * @return String representation of the size unit (Kibibytes, Mebibytes, Gibibytes, or Tebibytes).
- */
-#define _GMKs(x)  (((x) > _1TER) ? "Tebibytes" : (((x) > _1GIG) ? "Gibibytes" :\
-                  (((x) > _1MEG) ? "Mebibytes" : "Kibibytes")))
-
-/**
- * @def _GMKv
- * @brief Returns the size value converted to the appropriate unit.
- * @param x Size value.
- * @return Size value converted to Kibibytes, Mebibytes, Gibibytes, or left unchanged.
- */
-#define _GMKv(x)  (((x) > _1TER) ? (float)((x)/_1TER) : (((x) > _1GIG) ? \
-                   (float)((x)/_1GIG) : (((x) > _1MEG) ? (float)((x)/_1MEG) : \
-                   (float)(x))))
-
 extern const char *date(uintmax_t);
 extern const char *date_iso8601(uintmax_t);
 extern const char *date_iso8601_usec(uintmax_t);

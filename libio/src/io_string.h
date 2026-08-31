@@ -41,7 +41,6 @@ enum
   HOST_C    = 1 << 11,
   NONEOS_C  = 1 << 12,
   SERV_C    = 1 << 13,
-  EOL_C     = 1 << 14,
   MWILD_C   = 1 << 15,
   VCHAN_C   = 1 << 16,
   USER2_C   = 1 << 17,
@@ -59,12 +58,10 @@ enum
 #define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
 #define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
 #define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)
-#define IsLower(c)      (IsAlpha((c)) && ((unsigned char)(c) > 0x5f))
 #define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))
 #define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
 #define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || ('A' <= (c) && (c) <= 'F'))
 #define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
-#define IsEol(c) (CharAttrs[(unsigned char)(c)] & EOL_C)
 
 extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
 extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */

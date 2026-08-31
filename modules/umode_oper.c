@@ -13,11 +13,9 @@
 
 #include "client.h"
 #include "client_svstag.h"
-#include "conf.h"
 #include "command.h"
 #include "ircd.h"
 #include "ircd_hook.h"
-#include "numeric.h"
 #include "user_mode.h"
 
 static bool

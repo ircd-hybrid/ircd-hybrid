@@ -7,7 +7,7 @@
  * \brief Includes required functions for processing the POST/GET/PUT command.
  */
 
-#include "misc.h"
+#include "io.h"
 #include "module.h"
 
 #include "client.h"

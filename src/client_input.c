@@ -12,7 +12,6 @@
 #include <stddef.h>
 
 #include "dbuf.h"
-#include "misc.h"
 
 #include "client.h"
 #include "client_input.h"

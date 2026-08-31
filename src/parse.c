@@ -14,7 +14,6 @@
 
 #include "io_string.h"
 #include "log.h"
-#include "misc.h"
 
 #include "channel.h"
 #include "client.h"

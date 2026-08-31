@@ -19,7 +19,6 @@
 #include "list.h"
 #include "log.h"
 #include "memory.h"
-#include "misc.h"
 #include "rng_mt.h"
 #include "tls.h"
 

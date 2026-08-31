@@ -18,7 +18,6 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-#include "misc.h"
 #include "io_signal.h"
 #include "ircd.h"
 #include "ircd_exit.h"

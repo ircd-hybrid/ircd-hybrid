@@ -15,7 +15,6 @@
 #include <string.h>
 
 #include "io_time.h"
-#include "misc.h"
 #include "module.h"
 
 #include "client.h"

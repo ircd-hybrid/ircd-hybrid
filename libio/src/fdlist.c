@@ -21,7 +21,6 @@
 #include "io_rlimit.h"
 #include "io_string.h"
 #include "memory.h"
-#include "misc.h"
 
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;

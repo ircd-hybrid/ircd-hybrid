@@ -7,6 +7,32 @@
 #define INCLUDED_io_h
 #include <limits.h>
 
+/**
+ * @def IO_MAX
+ * @brief Macro for maximum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The greater of the two values.
+ */
+#define IO_MAX(a, b)  ((a) > (b) ? (a) : (b))
+
+/**
+ * @def IO_MIN
+ * @brief Macro for minimum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The smaller of the two values.
+ */
+#define IO_MIN(a, b)  ((a) < (b) ? (a) : (b))
+
+/**
+ * @def IO_ARRAY_LENGTH
+ * @brief Macro to determine the number of elements in an array.
+ * @param x Array whose number of elements is to be determined.
+ * @return The number of elements in the array.
+ */
+#define IO_ARRAY_LENGTH(x) ((sizeof(x)) / sizeof(x[0]))
+
 #ifdef PATH_MAX
 # define IO_PATH_MAX PATH_MAX
 #else

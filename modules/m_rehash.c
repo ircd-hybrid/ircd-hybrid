@@ -11,15 +11,14 @@
 #include <stddef.h>
 
 #include "io_string.h"
-#include "ircd.h"
 #include "log.h"
-#include "misc.h"
 #include "module.h"
 
 #include "client.h"
 #include "client_format.h"
 #include "conf.h"
 #include "conf_shared.h"
+#include "ircd.h"
 #include "motd.h"
 #include "numeric.h"
 #include "parse.h"

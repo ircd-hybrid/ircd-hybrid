@@ -15,7 +15,6 @@
 #include "io_string.h"
 #include "list.h"
 #include "log.h"
-#include "misc.h"
 #include "module.h"
 
 #include "client.h"

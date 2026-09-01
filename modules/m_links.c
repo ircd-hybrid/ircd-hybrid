@@ -23,7 +23,6 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "user_mode.h"
 
 static void
 _links_send_flat(struct Client *client)

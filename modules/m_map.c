@@ -25,7 +25,6 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "user_mode.h"
 
 enum { MAP_LINE_PREFIX_WIDTH = 50 };
 enum { MAP_PROMPT_BUFFER_SIZE = 64 };

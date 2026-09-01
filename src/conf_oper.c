@@ -15,7 +15,6 @@
 #include "conf_class.h"
 #include "conf_oper.h"
 #include "send.h"
-#include "user_mode.h"
 
 static list_t operator_items;
 

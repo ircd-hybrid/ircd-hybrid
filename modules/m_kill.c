@@ -24,7 +24,6 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "user_mode.h"
 
 static const struct Client *
 _kill_source_for_target(const struct Client *source, const struct Client *target)

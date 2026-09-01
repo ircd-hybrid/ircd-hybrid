@@ -8,7 +8,6 @@
  */
 
 #include <stddef.h>
-#include <stdlib.h>
 
 #include "io_parse.h"
 #include "io_string.h"
@@ -19,7 +18,6 @@
 #include "conf.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "parse.h"
 #include "send.h"
 #include "user.h"
 

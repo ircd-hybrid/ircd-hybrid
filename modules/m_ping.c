@@ -19,7 +19,6 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
-#include "user_mode.h"
 
 /*! \brief PING command handler
  *

@@ -160,7 +160,7 @@ _set_option_report(struct Client *source, const struct SetOption *option)
 }
 
 static void
-_set_option_report_change(struct Client *source, const struct SetOption *option)
+_set_option_report_change(const struct Client *source, const struct SetOption *option)
 {
   assert(source);
   assert(option);

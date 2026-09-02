@@ -265,7 +265,7 @@ nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_t
  *      - parv[11] = ircname (gecos)
  */
 static void
-uid_from_server(struct Client *source, int parc, char *parv[], uint32_t hopcount, uintmax_t nick_timestamp)
+uid_from_server(struct Client *source, size_t parc, char *parv[], uint32_t hopcount, uintmax_t nick_timestamp)
 {
   struct Client *const client = client_create_remote(source);
   client->hopcount = hopcount;
@@ -324,7 +324,7 @@ uid_from_server(struct Client *source, int parc, char *parv[], uint32_t hopcount
  */
 static bool
 perform_uid_introduction_collides(struct Client *source, struct Client *target,
-                                  int parc, char *parv[], uintmax_t nick_timestamp)
+                                  size_t parc, char *parv[], uintmax_t nick_timestamp)
 {
   const char *uid = parv[9];
 
@@ -497,7 +497,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
  *      - parv[1] = nickname
  */
 static void
-mr_nick(struct Client *source, int parc, char *parv[])
+mr_nick(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local(source));
 
@@ -575,7 +575,7 @@ _nick_change_check_channel_policy(struct Client *source)
  *      - parv[1] = nickname
  */
 static void
-m_nick(struct Client *source, int parc, char *parv[])
+m_nick(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local_user(source));
 
@@ -654,7 +654,7 @@ m_nick(struct Client *source, int parc, char *parv[])
  *      - parv[2] = timestamp
  */
 static void
-ms_nick(struct Client *source, int parc, char *parv[])
+ms_nick(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_user(source))
     return;  /* Servers and unknown clients can't change nicks. */
@@ -712,7 +712,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
  *      - parv[11] = ircname (gecos)
  */
 static void
-ms_uid(struct Client *source, int parc, char *parv[])
+ms_uid(struct Client *source, size_t parc, char *parv[])
 {
   if (check_clean_nick(source, parv[1]) == false ||
       check_clean_user(source, parv[1], parv[5]) == false ||

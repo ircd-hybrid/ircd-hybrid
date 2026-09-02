@@ -249,7 +249,7 @@ _list_process_request(struct Client *client, char *arg)
  *      - parv[1] = channel name/list options
  */
 static void
-m_list(struct Client *source, int parc, char *parv[])
+m_list(struct Client *source, size_t parc, char *parv[])
 {
   _list_process_request(source, parv[1]);
 }

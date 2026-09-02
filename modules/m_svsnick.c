@@ -45,7 +45,7 @@
  *      - parv[4] = new timestamp
  */
 static void
-ms_svsnick(struct Client *source, int parc, char *parv[])
+ms_svsnick(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_service(source) && !client_is_server(source))
     return;

@@ -110,7 +110,7 @@ _oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_r
  *      - parv[2] = oper password
  */
 static void
-m_oper(struct Client *source, int parc, char *parv[])
+m_oper(struct Client *source, size_t parc, char *parv[])
 {
   const char *const opername = parv[1];
   const char *const password = parv[2];
@@ -151,7 +151,7 @@ m_oper(struct Client *source, int parc, char *parv[])
  *      - parv[2] = oper password
  */
 static void
-mo_oper(struct Client *source, int parc, char *parv[])
+mo_oper(struct Client *source, size_t parc, char *parv[])
 {
   sendto_one_numeric(source, &me, RPL_YOUREOPER);
 }

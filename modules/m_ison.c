@@ -32,7 +32,7 @@
  *      - parv[1] = space-separated list of nicknames
  */
 static void
-m_ison(struct Client *source, int parc, char *parv[])
+m_ison(struct Client *source, size_t parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
   char *bufptr = buf;

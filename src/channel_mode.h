@@ -127,7 +127,7 @@ struct chan_mode
   int required_rank;
   int rank;
   void (*func)(struct Client *,
-               struct Channel *, int, int *, char *[], int *,
+               struct Channel *, size_t, size_t *, char *[], int *,
                int, int, const char, const struct chan_mode *);
 };
 
@@ -139,7 +139,7 @@ extern char cmode_class[][256];
 
 extern void channel_mode_clear_member_statuses(struct Channel *, const char *);
 extern void channel_mode_init(void);
-extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
+extern void channel_mode_set(struct Client *, struct Channel *, size_t, char *[]);
 extern void clear_ban_cache_list(list_t *);
 extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, uint32_t);
 

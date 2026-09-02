@@ -32,7 +32,7 @@
  *      - parv[0] = command
  */
 static void
-mo_close(struct Client *source, int parc, char *parv[])
+mo_close(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_CLOSE))
   {

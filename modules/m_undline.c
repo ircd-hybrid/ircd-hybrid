@@ -91,7 +91,7 @@ _undline_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_undline(struct Client *source, int parc, char *parv[])
+mo_undline(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_UNDLINE))
   {
@@ -132,7 +132,7 @@ mo_undline(struct Client *source, int parc, char *parv[])
  *      - parv[2] = IP address
  */
 static void
-ms_undline(struct Client *source, int parc, char *parv[])
+ms_undline(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {

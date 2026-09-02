@@ -84,7 +84,7 @@ _unresv_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unresv(struct Client *source, int parc, char *parv[])
+mo_unresv(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_UNRESV))
   {
@@ -125,7 +125,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
  *      - parv[2] = name mask
  */
 static void
-ms_unresv(struct Client *source, int parc, char *parv[])
+ms_unresv(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {

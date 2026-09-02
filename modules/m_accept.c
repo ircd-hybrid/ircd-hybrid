@@ -76,7 +76,7 @@ accept_list(struct Client *source)
  *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
 static void
-m_accept(struct Client *source, int parc, char *parv[])
+m_accept(struct Client *source, size_t parc, char *parv[])
 {
   char *mask = collapse(parv[1]);
 

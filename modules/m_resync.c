@@ -30,7 +30,7 @@
  *      - parv[1] = channel name
  */
 static void
-ms_resync(struct Client *source, int parc, char *parv[])
+ms_resync(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local_server(source));
 

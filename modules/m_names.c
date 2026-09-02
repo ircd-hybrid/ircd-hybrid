@@ -31,7 +31,7 @@
  *      - parv[1] = channel name
  */
 static void
-m_names(struct Client *source, int parc, char *parv[])
+m_names(struct Client *source, size_t parc, char *parv[])
 {
   const char *const channel_name = parv[1];
   if (string_is_empty(channel_name))

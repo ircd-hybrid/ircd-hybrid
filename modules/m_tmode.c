@@ -34,7 +34,7 @@
  *      - parv[3] = modes to be added or removed
  */
 static void
-ms_tmode(struct Client *source, int parc, char *parv[])
+ms_tmode(struct Client *source, size_t parc, char *parv[])
 {
   assert(!client_is_local_user(source));
 

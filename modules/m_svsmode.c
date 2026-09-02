@@ -33,7 +33,7 @@
  *      - parv[3] = modes to be added or removed
  */
 static void
-ms_svsmode(struct Client *source, int parc, char *parv[])
+ms_svsmode(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_service(source) && !client_is_server(source))
     return;

@@ -112,7 +112,7 @@ _rehash_option_find(const char *name)
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-mo_rehash(struct Client *source, int parc, char *parv[])
+mo_rehash(struct Client *source, size_t parc, char *parv[])
 {
   const char *option_name = NULL;
   const char *server_mask = NULL;
@@ -167,7 +167,7 @@ mo_rehash(struct Client *source, int parc, char *parv[])
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-ms_rehash(struct Client *source, int parc, char *parv[])
+ms_rehash(struct Client *source, size_t parc, char *parv[])
 {
   const char *const server_mask = parv[1];
   const char *const option_name = parv[2];

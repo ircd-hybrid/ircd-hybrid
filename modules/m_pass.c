@@ -29,7 +29,7 @@
  *      - parv[1] = password
  */
 static void
-mr_pass(struct Client *source, int parc, char *parv[])
+mr_pass(struct Client *source, size_t parc, char *parv[])
 {
   const char *const password = parv[1];
   assert(client_is_local(source));

@@ -91,7 +91,7 @@ _pseudo_format_message(const struct PseudoItem *pseudo, const char *message, cha
  * @param parv Array of parameters in the message.
  */
 static void
-_pseudo_message_handler(struct Client *source, int parc, char *parv[])
+_pseudo_message_handler(struct Client *source, size_t parc, char *parv[])
 {
   const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];  /* XXX */
 

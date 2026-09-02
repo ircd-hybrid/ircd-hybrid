@@ -424,7 +424,7 @@ target_process_list(struct Client *source, char *list, const char *text, bool no
 }
 
 static void
-m_message(struct Client *source, int parc, char *parv[], bool notice)
+m_message(struct Client *source, size_t parc, char *parv[], bool notice)
 {
   if (string_is_empty(parv[1]))
   {
@@ -460,7 +460,7 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
 }
 
 static void
-m_privmsg(struct Client *source, int parc, char *parv[])
+m_privmsg(struct Client *source, size_t parc, char *parv[])
 {
   /*
    * Servers have no reason to send privmsgs, yet sometimes there is cause
@@ -476,7 +476,7 @@ m_privmsg(struct Client *source, int parc, char *parv[])
 }
 
 static void
-m_notice(struct Client *source, int parc, char *parv[])
+m_notice(struct Client *source, size_t parc, char *parv[])
 {
   m_message(source, parc, parv, true);
 }

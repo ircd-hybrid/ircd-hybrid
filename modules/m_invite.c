@@ -101,7 +101,7 @@ _invite_commit(const struct Client *source, struct Client *target, struct Channe
  *      - parv[2] = channel name
  */
 static void
-m_invite(struct Client *source, int parc, char *parv[])
+m_invite(struct Client *source, size_t parc, char *parv[])
 {
   if (parc < 2)
   {
@@ -197,7 +197,7 @@ m_invite(struct Client *source, int parc, char *parv[])
  *      - parv[3] = channel timestamp
  */
 static void
-ms_invite(struct Client *source, int parc, char *parv[])
+ms_invite(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_user(source))
     return;

@@ -60,7 +60,7 @@ _knock_commit(const struct Client *source, struct Channel *channel, uintmax_t no
  *      - parv[1] = channel name
  */
 static void
-m_knock(struct Client *source, int parc, char *parv[])
+m_knock(struct Client *source, size_t parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
@@ -121,7 +121,7 @@ m_knock(struct Client *source, int parc, char *parv[])
 }
 
 static void
-ms_knock(struct Client *source, int parc, char *parv[])
+ms_knock(struct Client *source, size_t parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 

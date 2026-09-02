@@ -40,7 +40,7 @@
  *      - parv[4] = space delimited list of masks to add
  */
 static void
-ms_bmask(struct Client *source, int parc, char *parv[])
+ms_bmask(struct Client *source, size_t parc, char *parv[])
 {
   char modebuf[IRCD_BUFSIZE];
   char parabuf[IRCD_BUFSIZE];

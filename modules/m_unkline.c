@@ -91,7 +91,7 @@ _unkline_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unkline(struct Client *source, int parc, char *parv[])
+mo_unkline(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_UNKLINE))
   {
@@ -133,7 +133,7 @@ mo_unkline(struct Client *source, int parc, char *parv[])
  *      - parv[3] = host mask
  */
 static void
-ms_unkline(struct Client *source, int parc, char *parv[])
+ms_unkline(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {

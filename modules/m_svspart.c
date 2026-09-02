@@ -32,7 +32,7 @@
  *      - parv[3] = part message
  */
 static void
-ms_svspart(struct Client *source, int parc, char *parv[])
+ms_svspart(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_service(source) && !client_is_server(source))
     return;

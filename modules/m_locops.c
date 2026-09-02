@@ -33,7 +33,7 @@
  *      - parv[1] = message text
  */
 static void
-mo_locops(struct Client *source, int parc, char *parv[])
+mo_locops(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_LOCOPS))
   {
@@ -60,7 +60,7 @@ mo_locops(struct Client *source, int parc, char *parv[])
  *      - parv[2] = message text
  */
 static void
-ms_locops(struct Client *source, int parc, char *parv[])
+ms_locops(struct Client *source, size_t parc, char *parv[])
 {
   const char *const targets = parv[1];
   const char *const message = parv[2];

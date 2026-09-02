@@ -119,7 +119,7 @@ _away_commit(struct Client *source, const char *message)
  *      - parv[1] = away message
  */
 static void
-m_away(struct Client *source, int parc, char *parv[])
+m_away(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local_user(source));
 
@@ -154,7 +154,7 @@ m_away(struct Client *source, int parc, char *parv[])
 }
 
 static void
-ms_away(struct Client *source, int parc, char *parv[])
+ms_away(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_user(source));
 

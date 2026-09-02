@@ -34,7 +34,7 @@
  *      - parv[2] = destination
  */
 static void
-ms_pong(struct Client *source, int parc, char *parv[])
+ms_pong(struct Client *source, size_t parc, char *parv[])
 {
   const char *const origin_name = parv[1];
   const char *const destination_name = parv[2];
@@ -61,7 +61,7 @@ ms_pong(struct Client *source, int parc, char *parv[])
  *      - parv[1] = origin/ping cookie
  */
 static void
-mr_pong(struct Client *source, int parc, char *parv[])
+mr_pong(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local(source));
 

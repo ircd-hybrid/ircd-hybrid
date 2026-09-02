@@ -75,7 +75,7 @@ do_hash(struct Client *source, enum hash_type type)
  *      - parv[0] = command
  */
 static void
-mo_hash(struct Client *source, int parc, char *parv[])
+mo_hash(struct Client *source, size_t parc, char *parv[])
 {
   do_hash(source, HASH_TYPE_CLIENT);
   do_hash(source, HASH_TYPE_ID);

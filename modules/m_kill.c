@@ -63,7 +63,7 @@ _kill_send_to_target(const struct Client *source, struct Client *target, const c
  *      - parv[2] = reason
  */
 static void
-mo_kill(struct Client *source, int parc, char *parv[])
+mo_kill(struct Client *source, size_t parc, char *parv[])
 {
   bool from_history = false;
 
@@ -150,7 +150,7 @@ _kill_source_name_for_exit_reason(const struct Client *source)
  *      - parv[2] = kill path and reason
  */
 static void
-ms_kill(struct Client *source, int parc, char *parv[])
+ms_kill(struct Client *source, size_t parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
 

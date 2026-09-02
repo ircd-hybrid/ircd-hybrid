@@ -18,7 +18,7 @@ enum
 
 /*
  * m_functions execute protocol messages on this server:
- * int m_func(struct Client *source_p, int parc, char *parv[]);
+ * int m_func(struct Client *source_p, size_t parc, char *parv[]);
  *
  * source_p is the source of the message, defined by the
  * prefix part of the message if present. If not
@@ -37,7 +37,7 @@ enum
  * note: it is guaranteed that parv[0]..parv[parc - 1] are all
  * non-NULL pointers.
  */
-typedef void (*command_handler_fn)(struct Client *source, int parc, char *parv[]);
+typedef void (*command_handler_fn)(struct Client *source, size_t parc, char *parv[]);
 
 /** Enumerated type for client command handlers. */
 enum command_handler_type
@@ -54,9 +54,9 @@ struct CommandHandler
 {
   bool end_grace_period;  /**< Handler ends the flood grace period */
   bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
-  unsigned int args_min;  /**< At least this many args must be passed or an error will
+  size_t args_min;  /**< At least this many args must be passed or an error will
                                be sent to the user before the m_func is even called */
-  unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
+  size_t args_max;  /**< Maximum permitted parameters. If reached, the rest
                                of the message will be put into this last parameter */
   command_handler_fn handler;  /**< Command handler function. */
 };
@@ -81,8 +81,8 @@ extern void command_del(struct Command *);
 extern void command_del_array(struct Command *, size_t);
 extern void command_report(struct Client *);
 extern struct Command *command_find(const char *);
-extern void command_handler_ignore(struct Client *, int, char *[]);
-extern void command_handler_reject_not_oper(struct Client *, int, char *[]);
-extern void command_handler_reject_not_registered(struct Client *, int, char *[]);
-extern void command_handler_reject_already_registered(struct Client *, int, char *[]);
+extern void command_handler_ignore(struct Client *, size_t, char *[]);
+extern void command_handler_reject_not_oper(struct Client *, size_t, char *[]);
+extern void command_handler_reject_not_registered(struct Client *, size_t, char *[]);
+extern void command_handler_reject_already_registered(struct Client *, size_t, char *[]);
 #endif  /* INCLUDED_command_h */

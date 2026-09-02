@@ -110,7 +110,7 @@ _aline_parse_duration(const char *text, uintmax_t *duration_out)
 }
 
 bool
-aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], struct aline_ctx *aline)
+aline_parse(const char *cmd, struct Client *client, size_t parc, char *parv[], struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];

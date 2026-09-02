@@ -249,7 +249,7 @@ _info_process_request(struct Client *client)
  *      - parv[1] = nickname/servername
  */
 static void
-m_info(struct Client *source, int parc, char *parv[])
+m_info(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -280,7 +280,7 @@ m_info(struct Client *source, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_info(struct Client *source, int parc, char *parv[])
+ms_info(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s INFO :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;

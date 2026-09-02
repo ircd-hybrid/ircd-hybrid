@@ -28,7 +28,7 @@
  *      - parv[1] = certificate fingerprint
  */
 static void
-ms_certfp(struct Client *source, int parc, char *parv[])
+ms_certfp(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_user(source))
     return;

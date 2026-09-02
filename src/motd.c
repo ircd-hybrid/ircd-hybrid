@@ -408,7 +408,7 @@ motd_clear(void)
  * \param client Client requesting statistics.
  */
 void
-motd_report(struct Client *client, int parc, char *parv[])
+motd_report(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 

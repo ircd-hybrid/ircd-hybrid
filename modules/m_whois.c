@@ -275,7 +275,7 @@ _whois_process_request(struct Client *source, const char *target_name)
  *      - parv[2] = nickname
  */
 static void
-m_whois(struct Client *source, int parc, char *parv[])
+m_whois(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {
@@ -325,7 +325,7 @@ m_whois(struct Client *source, int parc, char *parv[])
  *      - parv[2] = nickname
  */
 static void
-mo_whois(struct Client *source, int parc, char *parv[])
+mo_whois(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {

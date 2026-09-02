@@ -35,7 +35,7 @@
  *      - parv[2] = nickname/servername
  */
 static void
-m_lusers(struct Client *source, int parc, char *parv[])
+m_lusers(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -67,7 +67,7 @@ m_lusers(struct Client *source, int parc, char *parv[])
  *      - parv[2] = nickname/servername
  */
 static void
-ms_lusers(struct Client *source, int parc, char *parv[])
+ms_lusers(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s LUSERS %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
     return;

@@ -128,7 +128,7 @@ _tburst_commit(struct Client *source, struct Channel *channel, uintmax_t channel
  *      - parv[5] = topic (can be an empty string)
  */
 static void
-ms_tburst(struct Client *source, int parc, char *parv[])
+ms_tburst(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_user(source) && !client_is_server(source))
     return;

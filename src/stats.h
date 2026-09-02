@@ -54,7 +54,7 @@ typedef enum
  *
  * This typedef defines the function signature for stats handler functions.
  */
-typedef void (*stats_handler_func)(struct Client *, int, char *[]);
+typedef void (*stats_handler_func)(struct Client *, size_t, char *[]);
 
 /**
  * @struct StatsHandler

@@ -194,7 +194,7 @@ report_cluster(struct Client *client)
 }
 
 static void
-stats_service(struct Client *client, int parc, char *parv[])
+stats_service(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -206,7 +206,7 @@ stats_service(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_gecos(struct Client *client, int parc, char *parv[])
+stats_gecos(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -219,7 +219,7 @@ stats_gecos(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_operator(struct Client *client, int parc, char *parv[])
+stats_operator(struct Client *client, size_t parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_o_oper_only)
   {
@@ -242,7 +242,7 @@ stats_operator(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_connect(struct Client *client, int parc, char *parv[])
+stats_connect(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -270,7 +270,7 @@ stats_connect(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_resv(struct Client *client, int parc, char *parv[])
+stats_resv(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -290,7 +290,7 @@ stats_resv(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_memory(struct Client *client, int parc, char *parv[])
+stats_memory(struct Client *client, size_t parc, char *parv[])
 {
   uint32_t attached_class_count = 0;
   uint32_t channel_members = 0;
@@ -427,7 +427,7 @@ stats_memory(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_dns_servers(struct Client *client, int parc, char *parv[])
+stats_dns_servers(struct Client *client, size_t parc, char *parv[])
 {
   for (size_t i = 0; i < reslib_nscount; ++i)
   {
@@ -438,7 +438,7 @@ stats_dns_servers(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_deny(struct Client *client, int parc, char *parv[])
+stats_deny(struct Client *client, size_t parc, char *parv[])
 {
   for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
@@ -460,7 +460,7 @@ stats_deny(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_tdeny(struct Client *client, int parc, char *parv[])
+stats_tdeny(struct Client *client, size_t parc, char *parv[])
 {
   for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
   {
@@ -482,7 +482,7 @@ stats_tdeny(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_exempt(struct Client *client, int parc, char *parv[])
+stats_exempt(struct Client *client, size_t parc, char *parv[])
 {
   if (ConfigGeneral.stats_e_disabled)
   {
@@ -529,7 +529,7 @@ stats_events_callback(const event_snapshot_t *snapshot, void *user_data)
 }
 
 static void
-stats_events(struct Client *client, int parc, char *parv[])
+stats_events(struct Client *client, size_t parc, char *parv[])
 {
   sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
                      "E :Operation                            Prio T Next Execution");
@@ -547,7 +547,7 @@ stats_events(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_fdlist(struct Client *client, int parc, char *parv[])
+stats_fdlist(struct Client *client, size_t parc, char *parv[])
 {
   for (int fd = 0; fd <= highest_fd; ++fd)
   {
@@ -559,7 +559,7 @@ stats_fdlist(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_hubleaf(struct Client *client, int parc, char *parv[])
+stats_hubleaf(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node, *mask_node;
   LIST_FOREACH(node, connect_get_list()->head)
@@ -612,7 +612,7 @@ show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
 }
 
 static void
-stats_auth(struct Client *client, int parc, char *parv[])
+stats_auth(struct Client *client, size_t parc, char *parv[])
 {
   /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if (ConfigGeneral.stats_i_oper_only && !client_is_oper(client))
@@ -644,7 +644,7 @@ stats_auth(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_kill(struct Client *client, int parc, char *parv[])
+stats_kill(struct Client *client, size_t parc, char *parv[])
 {
   if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
@@ -673,7 +673,7 @@ stats_kill(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_tkill(struct Client *client, int parc, char *parv[])
+stats_tkill(struct Client *client, size_t parc, char *parv[])
 {
   if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
   {
@@ -701,7 +701,7 @@ stats_tkill(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_messages(struct Client *client, int parc, char *parv[])
+stats_messages(struct Client *client, size_t parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_m_oper_only)
   {
@@ -713,7 +713,7 @@ stats_messages(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_pseudo(struct Client *client, int parc, char *parv[])
+stats_pseudo(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -732,7 +732,7 @@ stats_pseudo(struct Client *client, int parc, char *parv[])
  * side effects - client is shown a list of active opers
  */
 static void
-stats_operedup(struct Client *client, int parc, char *parv[])
+stats_operedup(struct Client *client, size_t parc, char *parv[])
 {
   unsigned int count = 0;
 
@@ -763,7 +763,7 @@ stats_operedup(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_ports(struct Client *client, int parc, char *parv[])
+stats_ports(struct Client *client, size_t parc, char *parv[])
 {
   if (ConfigGeneral.stats_P_oper_only && !client_is_oper(client))
   {
@@ -805,7 +805,7 @@ stats_ports(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_tstats(struct Client *client, int parc, char *parv[])
+stats_tstats(struct Client *client, size_t parc, char *parv[])
 {
   struct ServerStatistics sp = ServerStats;
 
@@ -852,7 +852,7 @@ stats_tstats(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_uptime(struct Client *client, int parc, char *parv[])
+stats_uptime(struct Client *client, size_t parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_u_oper_only)
   {
@@ -869,14 +869,14 @@ stats_uptime(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_shared(struct Client *client, int parc, char *parv[])
+stats_shared(struct Client *client, size_t parc, char *parv[])
 {
   report_shared(client);
   report_cluster(client);
 }
 
 static void
-stats_servers(struct Client *client, int parc, char *parv[])
+stats_servers(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -893,7 +893,7 @@ stats_servers(struct Client *client, int parc, char *parv[])
 }
 
 static void
-stats_class(struct Client *client, int parc, char *parv[])
+stats_class(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
@@ -945,7 +945,7 @@ _stats_scale_bytes(uintmax_t bytes)
 }
 
 static void
-stats_servlinks(struct Client *client, int parc, char *parv[])
+stats_servlinks(struct Client *client, size_t parc, char *parv[])
 {
   uintmax_t total_sent_bytes = 0;
   uintmax_t total_received_bytes = 0;
@@ -1000,7 +1000,7 @@ stats_servlinks(struct Client *client, int parc, char *parv[])
 }
 
 static const char *
-parse_stats_args(struct Client *client, int parc, char *parv[], bool *doall, bool *wilds)
+parse_stats_args(struct Client *client, size_t parc, char *parv[], bool *doall, bool *wilds)
 {
   const char *const name = parv[2];
 
@@ -1072,7 +1072,7 @@ stats_L(struct Client *client, const char *name, bool doall, bool wilds, unsigne
 }
 
 static void
-stats_ltrace(struct Client *client, int parc, char *parv[])
+stats_ltrace(struct Client *client, size_t parc, char *parv[])
 {
   bool doall = false;
   bool wilds = false;
@@ -1131,7 +1131,7 @@ static const struct StatsHandler stats_tab[] =
 };
 
 static void
-do_stats(struct Client *client, int parc, char *parv[])
+do_stats(struct Client *client, size_t parc, char *parv[])
 {
   const unsigned char letter = *parv[1];
 
@@ -1160,7 +1160,7 @@ do_stats(struct Client *client, int parc, char *parv[])
  *      parv[2] = (if present) server/mask in stats L
  */
 static void
-m_stats(struct Client *client, int parc, char *parv[])
+m_stats(struct Client *client, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -1188,7 +1188,7 @@ m_stats(struct Client *client, int parc, char *parv[])
  *      parv[2] = (if present) server/mask in stats L, or target
  */
 static void
-ms_stats(struct Client *client, int parc, char *parv[])
+ms_stats(struct Client *client, size_t parc, char *parv[])
 {
   if (server_route_command(client, ":%s STATS %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
     return;

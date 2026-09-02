@@ -28,7 +28,7 @@
  *      - parv[1] = space-separated list of capabilities
  */
 static void
-mr_capab(struct Client *source, int parc, char *parv[])
+mr_capab(struct Client *source, size_t parc, char *parv[])
 {
   char *const list = parv[1];
   char *saveptr = NULL;

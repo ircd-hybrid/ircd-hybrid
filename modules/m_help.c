@@ -112,7 +112,7 @@ do_help(struct Client *source, char *topic)
  *      - parv[1] = help topic
  */
 static void
-m_help(struct Client *source, int parc, char *parv[])
+m_help(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -139,7 +139,7 @@ m_help(struct Client *source, int parc, char *parv[])
  *      - parv[1] = help topic
  */
 static void
-mo_help(struct Client *source, int parc, char *parv[])
+mo_help(struct Client *source, size_t parc, char *parv[])
 {
   do_help(source, parv[1]);
 }

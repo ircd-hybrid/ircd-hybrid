@@ -26,7 +26,7 @@
  *      - parv[0] = command
  */
 static void
-mr_dumb_proxy(struct Client *source, int parc, char *parv[])
+mr_dumb_proxy(struct Client *source, size_t parc, char *parv[])
 {
   client_format_name_buffer_t source_name_buffer;
   const char *const source_name =

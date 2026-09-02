@@ -363,7 +363,7 @@ _cap_subcommand_find(const char *name)
  *      - parv[2] = space-separated list of capabilities
  */
 static void
-m_cap(struct Client *source, int parc, char *parv[])
+m_cap(struct Client *source, size_t parc, char *parv[])
 {
   const char *const subcommand_name = parv[1];
   const char *const caplist = parv[2];

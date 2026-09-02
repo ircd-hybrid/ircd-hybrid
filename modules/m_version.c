@@ -57,7 +57,7 @@ _version_process_request(struct Client *source)
  *      - parv[1] = nickname/servername
  */
 static void
-m_version(struct Client *source, int parc, char *parv[])
+m_version(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -88,7 +88,7 @@ m_version(struct Client *source, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_version(struct Client *source, int parc, char *parv[])
+ms_version(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;

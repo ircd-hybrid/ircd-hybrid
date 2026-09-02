@@ -134,7 +134,7 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
 }
 
 static void
-mo_xline(struct Client *source, int parc, char *parv[])
+mo_xline(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_XLINE))
   {
@@ -177,7 +177,7 @@ mo_xline(struct Client *source, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_xline(struct Client *source, int parc, char *parv[])
+ms_xline(struct Client *source, size_t parc, char *parv[])
 {
   uintmax_t duration;
   if (io_parse_uintmax(parv[3], &duration) != IO_PARSE_OK)

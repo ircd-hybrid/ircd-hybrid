@@ -266,7 +266,7 @@ _module_subcommand_find(const char *name)
  *      - parv[2] = module name
  */
 static void
-mo_module(struct Client *source, int parc, char *parv[])
+mo_module(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_MODULE))
   {

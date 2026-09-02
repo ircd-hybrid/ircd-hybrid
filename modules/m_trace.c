@@ -156,7 +156,7 @@ _trace_process_request(struct Client *source, const char *name)
  *      - parv[0] = command
  */
 static void
-m_trace(struct Client *source, int parc, char *parv[])
+m_trace(struct Client *source, size_t parc, char *parv[])
 {
   sendto_one_numeric(source, &me, RPL_TRACEEND, me.name);
 }
@@ -174,7 +174,7 @@ m_trace(struct Client *source, int parc, char *parv[])
  *      - parv[2] = nick or server name to forward the trace to
  */
 static void
-mo_trace(struct Client *source, int parc, char *parv[])
+mo_trace(struct Client *source, size_t parc, char *parv[])
 {
   if (parc > 2)
     if (server_route_command(source, ":%s TRACE %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)

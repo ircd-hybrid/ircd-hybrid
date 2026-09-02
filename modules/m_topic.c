@@ -89,7 +89,7 @@ _topic_send_current(struct Client *source, const struct Channel *channel)
  *      - parv[2] = topic text, if setting topic (can be an empty string)
  */
 static void
-m_topic(struct Client *source, int parc, char *parv[])
+m_topic(struct Client *source, size_t parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
@@ -143,7 +143,7 @@ m_topic(struct Client *source, int parc, char *parv[])
  *      - parv[2] = topic text (can be an empty string)
  */
 static void
-ms_topic(struct Client *source, int parc, char *parv[])
+ms_topic(struct Client *source, size_t parc, char *parv[])
 {
   struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)

@@ -91,7 +91,7 @@ _links_process_request(struct Client *source, char *parv[])
 }
 
 static void
-mo_links(struct Client *source, int parc, char *parv[])
+mo_links(struct Client *source, size_t parc, char *parv[])
 {
   _links_process_request(source, parv);
 }
@@ -112,7 +112,7 @@ mo_links(struct Client *source, int parc, char *parv[])
  *      - parv[2] = servername mask
  */
 static void
-m_links(struct Client *source, int parc, char *parv[])
+m_links(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 

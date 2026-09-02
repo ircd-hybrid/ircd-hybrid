@@ -73,7 +73,7 @@ _mlock_commit(struct Client *source, struct Channel *channel, uintmax_t channel_
  *      - parv[4] = modes to be locked
  */
 static void
-ms_mlock(struct Client *source, int parc, char *parv[])
+ms_mlock(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_service(source) && !client_is_server(source))
     return;

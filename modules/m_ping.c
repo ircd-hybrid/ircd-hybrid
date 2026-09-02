@@ -33,7 +33,7 @@
  *      - parv[2] = destination
  */
 static void
-m_ping(struct Client *source, int parc, char *parv[])
+m_ping(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {
@@ -72,7 +72,7 @@ m_ping(struct Client *source, int parc, char *parv[])
  *      - parv[2] = destination
  */
 static void
-ms_ping(struct Client *source, int parc, char *parv[])
+ms_ping(struct Client *source, size_t parc, char *parv[])
 {
   struct Client *target = NULL;
 

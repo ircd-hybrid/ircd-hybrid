@@ -138,7 +138,7 @@ set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode
  *      - parv[2] = channel password (key)
  */
 static void
-m_join(struct Client *source, int parc, char *parv[])
+m_join(struct Client *source, size_t parc, char *parv[])
 {
   channel_join_list(source, parv[1], parv[2]);
 }
@@ -157,7 +157,7 @@ m_join(struct Client *source, int parc, char *parv[])
  *		  and use it for the TimeStamp on a new channel.
  */
 static void
-ms_join(struct Client *source, int parc, char *parv[])
+ms_join(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_user(source))
     return;

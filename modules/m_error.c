@@ -33,7 +33,7 @@
  *      - parv[1] = error message
  */
 static void
-mr_error(struct Client *source, int parc, char *parv[])
+mr_error(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_local(source));
 
@@ -66,7 +66,7 @@ mr_error(struct Client *source, int parc, char *parv[])
  *      - parv[1] = error message
  */
 static void
-ms_error(struct Client *source, int parc, char *parv[])
+ms_error(struct Client *source, size_t parc, char *parv[])
 {
   const char *const message = string_or_default(parv[1], "<>");
 

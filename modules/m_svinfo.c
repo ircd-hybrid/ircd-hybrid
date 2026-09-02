@@ -67,7 +67,7 @@ _svinfo_report_link_status(struct Client *link, bool write_log, const char *stat
  *      - parv[4] = server's idea of UTC time
  */
 static void
-ms_svinfo(struct Client *source, int parc, char *parv[])
+ms_svinfo(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_local_server(source))
     return;

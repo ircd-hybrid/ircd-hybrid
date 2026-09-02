@@ -51,7 +51,7 @@ _motd_process_request(struct Client *source)
  *      - parv[1] = nickname/servername
  */
 static void
-m_motd(struct Client *source, int parc, char *parv[])
+m_motd(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -82,7 +82,7 @@ m_motd(struct Client *source, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_motd(struct Client *source, int parc, char *parv[])
+ms_motd(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s MOTD :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;

@@ -28,13 +28,13 @@
  * side effects	- propagates subcommand to locally connected servers
  */
 static void
-ms_encap(struct Client *source, int parc, char *parv[])
+ms_encap(struct Client *source, size_t parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   size_t cur_len = 0, len;
 
-  for (unsigned int i = 1; i < (unsigned int)parc - 1; ++i)
+  for (size_t i = 1; i + 1 < parc; ++i)
   {
     len = strlen(parv[i]) + 1;  /* +1 for the space */
 
@@ -66,15 +66,15 @@ ms_encap(struct Client *source, int parc, char *parv[])
   command->bytes += strlen(buf);
   command->ecount++;
 
-  parv += 2;
-  parc -= 2;
+  char **const handler_parv = parv + 2;
+  const size_t handler_parc = parc - 2;
 
   if (handler->args_min &&
-      (((unsigned int)parc < handler->args_min) ||
-       (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
+      (handler_parc < handler->args_min ||
+       (!handler->empty_last_arg && string_is_empty(handler_parv[handler->args_min - 1]))))
     return;
 
-  handler->handler(source, parc, parv);
+  handler->handler(source, handler_parc, handler_parv);
 }
 
 static struct Command command_table =

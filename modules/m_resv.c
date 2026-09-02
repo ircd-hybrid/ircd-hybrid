@@ -106,7 +106,7 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
  *   parv[1] = channel/nick to forbid
  */
 static void
-mo_resv(struct Client *source, int parc, char *parv[])
+mo_resv(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_RESV))
   {
@@ -149,7 +149,7 @@ mo_resv(struct Client *source, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_resv(struct Client *source, int parc, char *parv[])
+ms_resv(struct Client *source, size_t parc, char *parv[])
 {
   uintmax_t duration;
   if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)

@@ -36,7 +36,7 @@ _globops_send(struct Client *source, const char *message)
  *      - parv[1] = message text
  */
 static void
-mo_globops(struct Client *source, int parc, char *parv[])
+mo_globops(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_GLOBOPS))
   {
@@ -60,7 +60,7 @@ mo_globops(struct Client *source, int parc, char *parv[])
  *      - parv[1] = message text
  */
 static void
-ms_globops(struct Client *source, int parc, char *parv[])
+ms_globops(struct Client *source, size_t parc, char *parv[])
 {
   const char *const message = parv[1];
   _globops_send(source, message);

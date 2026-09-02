@@ -31,7 +31,7 @@
  * parv[2] - modes to change
  */
 static void
-set_user_mode(struct Client *source, int parc, char *parv[])
+set_user_mode(struct Client *source, size_t parc, char *parv[])
 {
   const char *const target_name = parv[1];
 
@@ -102,7 +102,7 @@ set_user_mode(struct Client *source, int parc, char *parv[])
  *      - parv[2] = modes to be added or removed
  */
 static void
-m_mode(struct Client *source, int parc, char *parv[])
+m_mode(struct Client *source, size_t parc, char *parv[])
 {
   const char *const name = parv[1];
   if (!IsChanPrefix(*name))

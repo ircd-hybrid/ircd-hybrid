@@ -29,7 +29,7 @@
  *      - parv[2] = part message
  */
 static void
-m_part(struct Client *source, int parc, char *parv[])
+m_part(struct Client *source, size_t parc, char *parv[])
 {
   channel_part_list(source, parv[1], parv[2]);
 }

@@ -629,7 +629,7 @@ _who_handle_nick_query(struct Client *source, const char *mask, const struct Who
  *                  so the final thing will be like o%tnchu,777
  */
 static void
-m_who(struct Client *source, int parc, char *parv[])
+m_who(struct Client *source, size_t parc, char *parv[])
 {
   char *mask = parv[1];
   struct WhoQuery who = { .maxmatches = WHO_MAX_REPLIES };

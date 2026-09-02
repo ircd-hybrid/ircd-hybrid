@@ -456,7 +456,7 @@ _server_establish(struct Client *client, struct ConnectItem *connect)
  *  parv[5] = serverinfo
  */
 static void
-mr_server(struct Client *source, int parc, char *parv[])
+mr_server(struct Client *source, size_t parc, char *parv[])
 {
   assert(source && client_is_local(source));
   assert(!client_is_server(source));
@@ -593,7 +593,7 @@ mr_server(struct Client *source, int parc, char *parv[])
  *  parv[5] = serverinfo
  */
 static void
-ms_sid(struct Client *source, int parc, char *parv[])
+ms_sid(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_server(source));
   assert(source->server);

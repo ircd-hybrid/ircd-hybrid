@@ -39,7 +39,7 @@
  *      - parv[4] = fake ip
  */
 static void
-mr_webirc(struct Client *source, int parc, char *parv[])
+mr_webirc(struct Client *source, size_t parc, char *parv[])
 {
   const char *const pass = parv[1];
   const char *const host = parv[3];

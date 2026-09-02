@@ -28,7 +28,7 @@
  *      - parv[0] = command
  */
 static void
-ms_eob(struct Client *source, int parc, char *parv[])
+ms_eob(struct Client *source, size_t parc, char *parv[])
 {
   assert(client_is_server(source));
 

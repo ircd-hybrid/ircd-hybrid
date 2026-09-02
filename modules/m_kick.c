@@ -78,7 +78,7 @@ _kick_commit(struct Client *source, struct Channel *channel,
  *      - parv[3] = reason
  */
 static void
-m_kick(struct Client *source, int parc, char *parv[])
+m_kick(struct Client *source, size_t parc, char *parv[])
 {
   const char *const channel_name = parv[1];
 
@@ -148,7 +148,7 @@ m_kick(struct Client *source, int parc, char *parv[])
  *      - parv[3] = reason
  */
 static void
-ms_kick(struct Client *source, int parc, char *parv[])
+ms_kick(struct Client *source, size_t parc, char *parv[])
 {
   struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)

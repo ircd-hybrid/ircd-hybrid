@@ -188,7 +188,7 @@ _set_option_report_change(const struct Client *source, const struct SetOption *o
 }
 
 static void
-mo_set(struct Client *source, int parc, char *parv[])
+mo_set(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_SET))
   {

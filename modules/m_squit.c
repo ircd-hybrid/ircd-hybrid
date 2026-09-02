@@ -75,7 +75,7 @@ _squit_report_remote_request(const struct Client *source, const struct Client *t
  *      - parv[2] = reason
  */
 static void
-mo_squit(struct Client *source, int parc, char *parv[])
+mo_squit(struct Client *source, size_t parc, char *parv[])
 {
   const char *const target_name = parv[1];
   struct Client *target = NULL;
@@ -148,7 +148,7 @@ mo_squit(struct Client *source, int parc, char *parv[])
  *      - parv[2] = reason
  */
 static void
-ms_squit(struct Client *source, int parc, char *parv[])
+ms_squit(struct Client *source, size_t parc, char *parv[])
 {
   struct Client *target = client_find_server(source, parv[1]);
   if (target == NULL)

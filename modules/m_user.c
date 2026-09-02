@@ -34,7 +34,7 @@
  *      - parv[4] = user's real name info
  */
 static void
-mr_user(struct Client *source, int parc, char *parv[])
+mr_user(struct Client *source, size_t parc, char *parv[])
 {
   const char *const username = parv[1];
   const char *const realname = parv[4];

@@ -37,7 +37,7 @@
  *      - parv[1] = channel name
  */
 static void
-mo_opme(struct Client *source, int parc, char *parv[])
+mo_opme(struct Client *source, size_t parc, char *parv[])
 {
   const char *const name = parv[1];
   list_node_t *node;

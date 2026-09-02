@@ -33,7 +33,7 @@
  *      - parv[1] = server name
  */
 static void
-mo_die(struct Client *source, int parc, char *parv[])
+mo_die(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_has_oper_flag(source, OPER_FLAG_DIE))
   {

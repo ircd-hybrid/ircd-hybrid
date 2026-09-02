@@ -121,7 +121,7 @@ _whowas_process_request(struct Client *source, const char *name, const char *lim
  *      - parv[3] = nickname/servername
  */
 static void
-m_whowas(struct Client *source, int parc, char *parv[])
+m_whowas(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {
@@ -159,7 +159,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_whowas(struct Client *source, int parc, char *parv[])
+ms_whowas(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {

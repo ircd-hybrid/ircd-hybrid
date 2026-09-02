@@ -101,7 +101,7 @@ _connect_process_request(struct Client *source, const char *name)
  *      - parv[3] = nickname/servername
  */
 static void
-mo_connect(struct Client *source, int parc, char *parv[])
+mo_connect(struct Client *source, size_t parc, char *parv[])
 {
   if (!string_is_empty(parv[3]))
   {
@@ -139,7 +139,7 @@ mo_connect(struct Client *source, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_connect(struct Client *source, int parc, char *parv[])
+ms_connect(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s CONNECT %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;

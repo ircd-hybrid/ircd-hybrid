@@ -43,7 +43,7 @@ typedef struct parse_context
   char *command_token;
   unsigned int numeric;
 
-  unsigned int parc;
+  size_t parc;
   char *parv[PARSE_MAX_PARAMETERS + 2];  /* <command> + <parameters> + NULL */
 } parse_context_t;
 
@@ -359,7 +359,7 @@ _parse_identify_command_token(parse_context_t *ctx)
   return _parse_identify_command(ctx);
 }
 
-static unsigned int
+static size_t
 _parse_get_parameter_count(const parse_context_t *ctx)
 {
   assert(ctx);
@@ -367,7 +367,7 @@ _parse_get_parameter_count(const parse_context_t *ctx)
   return ctx->parc - 1;
 }
 
-static unsigned int
+static size_t
 _parse_get_parameter_limit(const parse_context_t *ctx)
 {
   assert(ctx);
@@ -399,10 +399,10 @@ _parse_assert_parameters_valid(const parse_context_t *ctx)
   assert(ctx->parc > 0);
   assert(ctx->parc < IO_ARRAY_LENGTH(ctx->parv));
 
-  for (unsigned int i = 0; i < ctx->parc; ++i)
+  for (size_t i = 0; i < ctx->parc; ++i)
     assert(ctx->parv[i]);
 
-  for (unsigned int i = ctx->parc; i < IO_ARRAY_LENGTH(ctx->parv); ++i)
+  for (size_t i = ctx->parc; i < IO_ARRAY_LENGTH(ctx->parv); ++i)
     assert(ctx->parv[i] == NULL);
 }
 
@@ -414,7 +414,7 @@ _parse_split_parameters(parse_context_t *ctx)
   assert(ctx->buffer_cursor);
   assert(ctx->buffer_cursor <= ctx->buffer_end);
 
-  const unsigned int parameter_limit = _parse_get_parameter_limit(ctx);
+  const size_t parameter_limit = _parse_get_parameter_limit(ctx);
   assert(parameter_limit <= PARSE_MAX_PARAMETERS);
 
   ctx->parv[ctx->parc++] = ctx->command_token;
@@ -465,7 +465,7 @@ _parse_split_parameters(parse_context_t *ctx)
 }
 
 static void
-_parse_handle_command(struct Command *command, struct Client *source, unsigned int parc, char *parv[])
+_parse_handle_command(struct Command *command, struct Client *source, size_t parc, char *parv[])
 {
   assert(command);
   assert(command->name);
@@ -497,11 +497,11 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
     if (client_is_server(source->nexthop))
     {
       client_format_name_buffer_t link_name_buffer;
-      log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %u, got %u) via %s",
+      log_write(LOG_TYPE_DEBUG, "Invalid arguments for command from server: %s (expected at least %zu, got %zu) via %s",
                 command->name, handler->args_min, parc,
                 client_format_name(source->nexthop, CLIENT_FORMAT_NAME_LOG, &link_name_buffer));
 
-      client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %u, got %u)",
+      client_exit_fmt(source->nexthop, "Invalid arguments for command: %s (expected at least %zu, got %zu)",
                       command->name, handler->args_min, parc);
     }
     else
@@ -535,7 +535,7 @@ _parse_handle_command(struct Command *command, struct Client *source, unsigned i
  * the savvy approach is NEVER generate an error in response to an... error :)
  */
 static void
-_parse_handle_numeric(unsigned int numeric, struct Client *source, unsigned int parc, char *parv[])
+_parse_handle_numeric(unsigned int numeric, struct Client *source, size_t parc, char *parv[])
 {
   assert(source);
   assert(client_is_server(source));

@@ -192,7 +192,7 @@ remove_ban_list(struct Channel *channel, const char *origin_name, list_t *list, 
  * all the specified users while sending JOIN/MODEs to local clients
  */
 static void
-ms_sjoin(struct Client *source, int parc, char *parv[])
+ms_sjoin(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_server(source))
     return;
@@ -207,7 +207,7 @@ ms_sjoin(struct Client *source, int parc, char *parv[])
   }
 
   struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
-  int args = 0;
+  size_t args = 0;
   for (const char *modes = parv[3]; *modes; ++modes)
   {
     switch (*modes)

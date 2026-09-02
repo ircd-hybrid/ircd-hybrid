@@ -206,7 +206,7 @@ monitor_status(struct Client *source)
  *      - parv[2] = comma-separated list of nicknames 
  */
 static void
-m_monitor(struct Client *source, int parc, char *parv[])
+m_monitor(struct Client *source, size_t parc, char *parv[])
 {
   switch (*parv[1])
   {

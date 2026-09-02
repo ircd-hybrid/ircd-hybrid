@@ -36,7 +36,7 @@ enum { RFC1459_MAX_USERHOST_LIST = 5 };
  *      - parv[1] = space-separated list of up to 5 nicknames
  */
 static void
-m_userhost(struct Client *source, int parc, char *parv[])
+m_userhost(struct Client *source, size_t parc, char *parv[])
 {
   char response[NICKLEN + USERLEN + HOSTLEN + 5]; /* +5 for "*=+@\0" */
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */

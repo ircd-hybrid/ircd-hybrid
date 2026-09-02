@@ -35,7 +35,7 @@
  *      - parv[3] = account name
  */
 static void
-ms_svsaccount(struct Client *source, int parc, char *parv[])
+ms_svsaccount(struct Client *source, size_t parc, char *parv[])
 {
   if (!client_is_service(source) && !client_is_server(source))
     return;

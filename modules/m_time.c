@@ -32,7 +32,7 @@
  *      - parv[1] = nickname/servername
  */
 static void
-m_time(struct Client *source, int parc, char *parv[])
+m_time(struct Client *source, size_t parc, char *parv[])
 {
   /* This is safe enough to use during non hidden server mode */
   if (ConfigServerHide.disable_remote_commands == 0)
@@ -54,7 +54,7 @@ m_time(struct Client *source, int parc, char *parv[])
  *      - parv[1] = nickname/servername
  */
 static void
-ms_time(struct Client *source, int parc, char *parv[])
+ms_time(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s TIME :%s", 1, parv)->result != SERVER_ROUTE_ISME)
     return;

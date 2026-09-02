@@ -200,7 +200,7 @@ _map_process_request(struct Client *source)
  *      - parv[0] = command
  */
 static void
-m_map(struct Client *source, int parc, char *parv[])
+m_map(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
@@ -227,7 +227,7 @@ m_map(struct Client *source, int parc, char *parv[])
  *      - parv[0] = command
  */
 static void
-mo_map(struct Client *source, int parc, char *parv[])
+mo_map(struct Client *source, size_t parc, char *parv[])
 {
   _map_process_request(source);
 }

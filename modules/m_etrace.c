@@ -78,7 +78,7 @@ _etrace_process_request(struct Client *source, const char *name)
  *      - parv[2] = nick or server name to forward the etrace to
  */
 static void
-mo_etrace(struct Client *source, int parc, char *parv[])
+mo_etrace(struct Client *source, size_t parc, char *parv[])
 {
   if (parc > 2)
     if (server_route_command(source, ":%s ETRACE %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)

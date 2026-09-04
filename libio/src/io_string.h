@@ -40,7 +40,6 @@ enum
   USER_C    = 1 << 10,
   HOST_C    = 1 << 11,
   NONEOS_C  = 1 << 12,
-  SERV_C    = 1 << 13,
   MWILD_C   = 1 << 15,
   VCHAN_C   = 1 << 16,
   USER2_C   = 1 << 17,
@@ -55,7 +54,6 @@ enum
 #define IsKWildChar(c)  (CharAttrs[(unsigned char)(c)] & KWILD_C)
 #define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
-#define IsServChar(c)   (CharAttrs[(unsigned char)(c)] & (NICK_C | SERV_C))
 #define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
 #define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)
 #define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))

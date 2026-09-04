@@ -47,7 +47,7 @@ mr_webirc(struct Client *source, size_t parc, char *parv[])
 
   assert(client_is_local(source));
 
-  if (!valid_hostname(host))
+  if (!hostname_is_valid(host))
   {
     client_exit(source, "Invalid WebIRC hostname");
     return;

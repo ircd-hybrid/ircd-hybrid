@@ -43,7 +43,7 @@ ms_svshost(struct Client *source, size_t parc, char *parv[])
     return;
 
   const char *const new_host = parv[3];
-  if (!valid_hostname(new_host))
+  if (!hostname_is_valid(new_host))
     return;
 
   user_set_hostmask(target, new_host, false);

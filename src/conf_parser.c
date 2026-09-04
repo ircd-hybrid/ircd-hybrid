@@ -5034,7 +5034,7 @@ yyreduce:
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (valid_hostname(yylval.string))
+  if (hostname_is_valid(yylval.string))
   {
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
     block_state.flags.value |= CONF_FLAGS_SPOOF_IP;

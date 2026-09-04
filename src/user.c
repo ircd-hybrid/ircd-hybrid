@@ -385,21 +385,30 @@ user_register_remote(struct Client *client)
   user_introduce(client);
 }
 
-bool
-valid_hostname(const char *hostname)
+static bool
+_hostname_is_valid_char(unsigned char ch)
 {
-  const char *p = hostname;
+  return io_ascii_is_alnum(ch) || ch == '-' || ch == '.' || ch == ':';
+}
 
-  assert(p);
+bool
+hostname_is_valid(const char *hostname)
+{
+  if (string_is_empty(hostname))
+    return false;
 
-  if (string_is_empty(p) || *p == '.' || *p == ':')
+  if (strlen(hostname) > HOSTLEN)
+    return false;
+
+  const unsigned char *p = (const unsigned char *)hostname;
+  if (*p == '.' || *p == ':')
     return false;
 
   for (; *p; ++p)
-    if (!IsHostChar(*p))
+    if (!_hostname_is_valid_char(*p))
       return false;
 
-  return p - hostname <= HOSTLEN;
+  return true;
 }
 
 bool

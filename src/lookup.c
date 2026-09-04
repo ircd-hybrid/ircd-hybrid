@@ -20,6 +20,7 @@
 #include "lookup.h"
 #include "packet.h"
 #include "send.h"
+#include "user.h"
 
 typedef enum
 {
@@ -70,22 +71,6 @@ _lookup_check_complete(struct LookupRequest *lookup)
   read_packet(client->connection->fde, client);
 }
 
-static bool
-_lookup_verify_hostname(const char *hostname)
-{
-  const char *p = hostname;
-  assert(p);
-
-  if (string_is_empty(p) || *p == '.' || *p == ':')
-    return false;
-
-  for (; *p; ++p)
-    if (!IsHostChar(*p))
-      return false;
-
-  return true;
-}
-
 static void
 _lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
 {
@@ -98,7 +83,7 @@ _lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, s
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_TOO_LONG]);
   else if (!address_match(addr, &lookup->client->addr, true, false, 0))
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_IP_MISMATCH]);
-  else if (!_lookup_verify_hostname(name))
+  else if (!hostname_is_valid(name))
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_INVALID]);
   else
   {

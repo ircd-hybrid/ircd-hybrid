@@ -115,7 +115,7 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
 {
   assert(client_is_server(source));
 
-  if (valid_hostname(host))
+  if (hostname_is_valid(host))
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,

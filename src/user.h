@@ -18,7 +18,7 @@ extern void show_lusers(struct Client *);
 extern void user_set_hostmask(struct Client *, const char *, bool);
 extern void user_register_local(struct Client *);
 extern void user_register_remote(struct Client *);
-extern bool valid_hostname(const char *);
+extern bool hostname_is_valid(const char *);
 extern bool valid_username(const char *, bool);
 extern bool nickname_is_valid(const char *, bool);
 #endif  /* INCLUDED_user_h */

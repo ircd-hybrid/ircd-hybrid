@@ -55,7 +55,7 @@ ms_svsnick(struct Client *source, size_t parc, char *parv[])
     return;
 
   const char *const new_nick = parv[3];
-  if (!valid_nickname(new_nick, true))
+  if (!nickname_is_valid(new_nick, true))
     return;
 
   uintmax_t new_nick_timestamp;

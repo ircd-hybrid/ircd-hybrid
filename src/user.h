@@ -20,5 +20,5 @@ extern void user_register_local(struct Client *);
 extern void user_register_remote(struct Client *);
 extern bool valid_hostname(const char *);
 extern bool valid_username(const char *, bool);
-extern bool valid_nickname(const char *, bool);
+extern bool nickname_is_valid(const char *, bool);
 #endif  /* INCLUDED_user_h */

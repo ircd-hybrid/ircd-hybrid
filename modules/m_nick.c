@@ -52,7 +52,7 @@ check_clean_nick(struct Client *source, const char *nick)
    * The old code did some wacky stuff here, if the nick is invalid, kill it
    * and don't bother messing at all
    */
-  if (valid_nickname(nick, false))
+  if (nickname_is_valid(nick, false))
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
@@ -511,7 +511,7 @@ mr_nick(struct Client *source, size_t parc, char *parv[])
   char nick[NICKLEN + 1];
   strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
-  if (!valid_nickname(nick, true))
+  if (!nickname_is_valid(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, new_nick, "Erroneous Nickname");
     return;
@@ -589,7 +589,7 @@ m_nick(struct Client *source, size_t parc, char *parv[])
   char nick[NICKLEN + 1];
   strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
-  if (!valid_nickname(nick, true))
+  if (!nickname_is_valid(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
     return;

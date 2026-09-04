@@ -27,7 +27,6 @@
  */
 enum
 {
-  NICK_C    = 1 <<  6,
   CHAN_C    = 1 <<  7,
   CHANPFX_C = 1 <<  9,
   USER_C    = 1 << 10,
@@ -42,7 +41,6 @@ enum
 #define IsUser2Char(c)  (CharAttrs[(unsigned char)(c)] & USER2_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
-#define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
 
 extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
 extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */

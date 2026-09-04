@@ -185,7 +185,7 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
     return;
   }
 
-  if (!valid_nickname(prefix, false))
+  if (!nickname_is_valid(prefix, false))
   {
     log_write(LOG_TYPE_DEBUG, "Dropped invalid source prefix '%s' via %s",
               prefix, link_name);

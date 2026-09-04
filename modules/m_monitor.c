@@ -43,7 +43,7 @@ monitor_add(struct Client *source, char *list)
   for (const char *name = strtok_r(list, ",", &saveptr); name;
                    name = strtok_r(NULL, ",", &saveptr))
   {
-    if (!valid_nickname(name, true))
+    if (!nickname_is_valid(name, true))
       continue;
 
     if (list_length(&source->connection->monitor_list) >= ConfigGeneral.max_monitor)

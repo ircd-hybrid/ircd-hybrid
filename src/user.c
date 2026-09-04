@@ -447,21 +447,48 @@ valid_username(const char *username, bool local)
   return p - username <= USERLEN;
 }
 
-bool
-valid_nickname(const char *nickname, bool local)
+static bool
+_nickname_is_valid_char(unsigned char ch)
 {
-  const char *p = nickname;
+  if (io_ascii_is_alnum(ch))
+    return true;
 
-  assert(p);
+  switch (ch)
+  {
+    case '-':
+    case '[':
+    case '\\':
+    case ']':
+    case '^':
+    case '_':
+    case '`':
+    case '{':
+    case '|':
+    case '}':
+      return true;
+    default:
+      return false;
+  }
+}
 
-  if (string_is_empty(p) || *p == '-' || (local && io_ascii_is_digit(*p)))
+bool
+nickname_is_valid(const char *nickname, bool is_local_source)
+{
+  if (string_is_empty(nickname))
+    return false;
+
+  if (strlen(nickname) > NICKLEN)
+    return false;
+
+  const unsigned char *p = (const unsigned char *)nickname;
+  if (*p == '-' || (is_local_source && io_ascii_is_digit(*p)))
     return false;
 
   for (; *p; ++p)
-    if (!IsNickChar(*p))
+    if (!_nickname_is_valid_char(*p))
       return false;
 
-  return p - nickname <= NICKLEN;
+  return true;
 }
 
 void

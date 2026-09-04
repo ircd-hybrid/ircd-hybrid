@@ -82,7 +82,7 @@ _server_route_find_match(const list_t *list, const char *mask, const struct Clie
  * @return A pointer to a server_route_t structure containing the result of the routing attempt.
  */
 const server_route_t *
-server_route_command(struct Client *client, const char *command, int server, char *parv[])
+server_route_command(struct Client *client, const char *command, size_t server, char *parv[])
 {
   static server_route_t r;
   server_route_t *const route = &r;
@@ -142,39 +142,61 @@ server_route_command(struct Client *client, const char *command, int server, cha
   return route;
 }
 
+static bool
+_server_name_is_valid_char(unsigned char ch)
+{
+  return (ch >= 'A' && ch <= 'Z') ||
+         (ch >= 'a' && ch <= 'z') ||
+         (ch >= '0' && ch <= '9') || ch == '-' || ch == '.';
+}
+
 bool
 server_is_valid_name(const char *name)
 {
-  const char *p = name;
   if (string_is_empty(name))
     return false;
 
-  if (*p == '.')
+  if (strlen(name) > HOSTLEN)
     return false;
 
-  unsigned int dot_count = 0;
-  while (*p)
+  bool has_dot = false;
+  bool label_start = true;
+  unsigned char previous = '\0';
+
+  for (const unsigned char *p = (const unsigned char *)name; *p; ++p)
   {
-    if (!IsServChar(*p))
+    if (!_server_name_is_valid_char(*p))
       return false;
 
     if (*p == '.')
     {
-      ++dot_count;
-      if (*(p + 1) == '.')
+      if (label_start)
         return false;
+
+      if (previous == '-')
+        return false;
+
+      has_dot = true;
+      label_start = true;
+    }
+    else
+    {
+      if (label_start && *p == '-')
+        return false;
+
+      label_start = false;
     }
 
-    ++p;
+    previous = *p;
   }
 
-  if ((size_t)(p - name) > HOSTLEN)
+  if (label_start)
     return false;
 
-  if (*(p - 1) == '.')
+  if (previous == '-')
     return false;
 
-  return dot_count > 0;
+  return has_dot;
 }
 
 struct Server *

@@ -86,7 +86,7 @@ ident_check_reply(char *const reply)
   if (string_is_empty(token))
     return NULL;
 
-  while (IsSpace(*token))
+  while (io_ascii_is_space(*token))
     ++token;
 
   if (strncmp(token, "USERID", 6))
@@ -99,8 +99,8 @@ ident_check_reply(char *const reply)
   if (string_is_empty(token))
     return NULL;
 
-  while (IsSpace(*token))
-   ++token;
+  while (io_ascii_is_space(*token))
+    ++token;
 
   /*
    * Unless "OTHER" is specified as the operating system type, the server
@@ -125,7 +125,7 @@ ident_check_reply(char *const reply)
   if (string_is_empty(token))
     return NULL;
 
-  while (IsSpace(*token))
+  while (io_ascii_is_space(*token))
     ++token;
 
   while (*token == '~' || *token == '^')
@@ -136,7 +136,7 @@ ident_check_reply(char *const reply)
    */
   char *end;
   for (end = token; *end; ++end)
-    if (IsSpace(*end) || '@' == *end || ':' == *end)
+    if (io_ascii_is_space(*end) || '@' == *end || ':' == *end)
       break;
   *end = '\0';
 

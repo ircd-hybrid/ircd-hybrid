@@ -27,19 +27,12 @@
  */
 enum
 {
-  PRINT_C   = 1 <<  0,
-  CNTRL_C   = 1 <<  1,
-  ALPHA_C   = 1 <<  2,
-  PUNCT_C   = 1 <<  3,
-  DIGIT_C   = 1 <<  4,
-  SPACE_C   = 1 <<  5,
   NICK_C    = 1 <<  6,
   CHAN_C    = 1 <<  7,
   KWILD_C   = 1 <<  8,
   CHANPFX_C = 1 <<  9,
   USER_C    = 1 << 10,
   HOST_C    = 1 << 11,
-  NONEOS_C  = 1 << 12,
   MWILD_C   = 1 << 15,
   VCHAN_C   = 1 << 16,
   USER2_C   = 1 << 17,
@@ -54,12 +47,6 @@ enum
 #define IsKWildChar(c)  (CharAttrs[(unsigned char)(c)] & KWILD_C)
 #define IsMWildChar(c)  (CharAttrs[(unsigned char)(c)] & MWILD_C)
 #define IsNickChar(c)   (CharAttrs[(unsigned char)(c)] & NICK_C)
-#define IsAlpha(c)      (CharAttrs[(unsigned char)(c)] & ALPHA_C)
-#define IsSpace(c)      (CharAttrs[(unsigned char)(c)] & SPACE_C)
-#define IsUpper(c)      (IsAlpha((c)) && ((unsigned char)(c) < 0x60))
-#define IsDigit(c)      (CharAttrs[(unsigned char)(c)] & DIGIT_C)
-#define IsXDigit(c)     (IsDigit(c) || ('a' <= (c) && (c) <= 'f') || ('A' <= (c) && (c) <= 'F'))
-#define IsAlNum(c) (CharAttrs[(unsigned char)(c)] & (DIGIT_C | ALPHA_C))
 
 extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
 extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */
@@ -81,6 +68,17 @@ extern size_t strlcpy(char *, const char *, size_t);
 extern size_t strlcat(char *, const char *, size_t);
 #endif
 
+static inline bool
+io_ascii_is_space(unsigned char ch)
+{
+  return ch == ' '  ||
+         ch == '\t' ||
+         ch == '\n' ||
+         ch == '\v' ||
+         ch == '\f' ||
+         ch == '\r';
+}
+
 static inline unsigned char
 io_ascii_to_lower(unsigned char c)
 {
@@ -91,6 +89,36 @@ static inline unsigned char
 io_ascii_to_upper(unsigned char c)
 {
   return io_ascii_to_upper_table[c];
+}
+
+static inline bool
+io_ascii_is_alpha(unsigned char ch)
+{
+  return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+}
+
+static inline bool
+io_ascii_is_upper(unsigned char ch)
+{
+  return ch >= 'A' && ch <= 'Z';
+}
+
+static inline bool
+io_ascii_is_digit(unsigned char ch)
+{
+  return ch >= '0' && ch <= '9';
+}
+
+static inline bool
+io_ascii_is_xdigit(unsigned char ch)
+{
+  return io_ascii_is_digit(ch) || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+}
+
+static inline bool
+io_ascii_is_alnum(unsigned char ch)
+{
+  return io_ascii_is_alpha(ch) || io_ascii_is_digit(ch);
 }
 
 /**

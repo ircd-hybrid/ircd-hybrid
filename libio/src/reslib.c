@@ -164,7 +164,7 @@ reslib_parse_resolv_conf(void)
     p = input;
 
     /* skip until something thats not a space is seen */
-    while (IsSpace(*p))
+    while (io_ascii_is_space(*p))
       ++p;
 
     /* if at this point, have a '\0' then continue */
@@ -177,7 +177,7 @@ reslib_parse_resolv_conf(void)
 
     /* skip until a space is found */
     opt = p;
-    while (!IsSpace(*p) && *p)
+    while (!io_ascii_is_space(*p) && *p)
       ++p;
 
     if (*p == '\0')
@@ -187,7 +187,7 @@ reslib_parse_resolv_conf(void)
     *p++ = '\0';
 
     /* skip these spaces that are before the argument */
-    while (IsSpace(*p))
+    while (io_ascii_is_space(*p))
       ++p;
 
     /* Now arg should be right where p is pointing */

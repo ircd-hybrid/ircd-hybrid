@@ -1026,7 +1026,7 @@ _stats_l_get_target_name_format(const struct Client *source, const struct Client
        client_is_handshake(target)) && !client_is_admin(source))
     return CLIENT_FORMAT_NAME_OPER;
 
-  if (IsUpper(letter))
+  if (io_ascii_is_upper(letter))
     return CLIENT_FORMAT_NAME_ADMIN;
 
   return CLIENT_FORMAT_NAME_PUBLIC;

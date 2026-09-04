@@ -50,7 +50,7 @@ address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
 
   for (const char *p = text; (c = *p); ++p)
   {
-    if (IsXDigit(c))
+    if (io_ascii_is_xdigit(c))
     {
       if (nyble == 0)
         return HM_HOST;

@@ -121,7 +121,7 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
 {
   *input_extbans = *offset = 0;
 
-  if (!(*mask == '$' && IsAlpha(*(mask + 1)) && *(mask + 2) == ':'))
+  if (!(*mask == '$' && io_ascii_is_alpha(*(mask + 1)) && *(mask + 2) == ':'))
     return EXTBAN_NONE;
 
   const struct Extban *extban = extban_find(*(mask + 1));
@@ -136,7 +136,7 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
   if (extban->type == EXTBAN_MATCHING)
     return EXTBAN_MATCHING;
 
-  if (!(IsAlpha(*mask) && *(mask + 1) == ':'))
+  if (!(io_ascii_is_alpha(*mask) && *(mask + 1) == ':'))
     return EXTBAN_ACTING;
 
   extban = extban_find(*mask);

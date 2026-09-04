@@ -62,7 +62,7 @@ check_string(char *s)
 
   for (; *s; ++s)
   {
-    if (IsSpace(*s))
+    if (io_ascii_is_space(*s))
     {
       *s = '\0';
       break;

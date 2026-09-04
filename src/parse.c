@@ -178,7 +178,7 @@ _parse_handle_unknown_prefix(struct Client *link, const char *prefix)
     return;
   }
 
-  if (IsDigit(prefix[0]))
+  if (io_ascii_is_digit(prefix[0]))
   {
     log_write(LOG_TYPE_DEBUG, "Dropped invalid numeric source prefix '%s' via %s",
               prefix, link_name);
@@ -258,7 +258,10 @@ static bool
 _parse_token_is_numeric(const char *token)
 {
   assert(token);
-  return strlen(token) == 3 && IsDigit(token[0]) && IsDigit(token[1]) && IsDigit(token[2]);
+  return strlen(token) == 3 &&
+         io_ascii_is_digit(token[0]) &&
+         io_ascii_is_digit(token[1]) &&
+         io_ascii_is_digit(token[2]);
 }
 
 static void

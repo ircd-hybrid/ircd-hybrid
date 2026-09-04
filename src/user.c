@@ -417,7 +417,7 @@ valid_username(const char *username, bool local)
    * i.e. reject jokers who have '-@somehost' or '.@somehost'
    * or "-hi-@somehost", "h-----@somehost" would still be accepted.
    */
-  if (!IsAlNum(*p))
+  if (!io_ascii_is_alnum(*p))
     return false;
 
   if (local)
@@ -454,7 +454,7 @@ valid_nickname(const char *nickname, bool local)
 
   assert(p);
 
-  if (string_is_empty(p) || *p == '-' || (local && IsDigit(*p)))
+  if (string_is_empty(p) || *p == '-' || (local && io_ascii_is_digit(*p)))
     return false;
 
   for (; *p; ++p)

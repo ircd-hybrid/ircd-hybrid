@@ -42,7 +42,7 @@ find_cap(const char **caplist_p, bool *negate_p)
 {
   /* Skip leading whitespace. */
   const char *caplist = *caplist_p;
-  while (*caplist && IsSpace(*caplist))
+  while (*caplist && io_ascii_is_space(*caplist))
     ++caplist;
 
   *negate_p = *caplist == '-';  /* Check if the capability is negative. */
@@ -51,7 +51,7 @@ find_cap(const char **caplist_p, bool *negate_p)
 
   const char *caplist_start = caplist;
   /* Move the pointer to the end of the capability name. */
-  while (*caplist && !IsSpace(*caplist))
+  while (*caplist && !io_ascii_is_space(*caplist))
     ++caplist;
 
   /* If the capability name is empty, return NULL. */
@@ -66,7 +66,7 @@ find_cap(const char **caplist_p, bool *negate_p)
   strlcpy(name, caplist_start, sizeof(name));
 
   /* Skip trailing whitespace. */
-  while (*caplist && IsSpace(*caplist))
+  while (*caplist && io_ascii_is_space(*caplist))
     ++caplist;
 
   assert(caplist != *caplist_p || *caplist == '\0');  /* We *must* advance */

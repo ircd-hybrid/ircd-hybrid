@@ -29,16 +29,23 @@
 bool
 has_wildcards(const char *str)
 {
-  const unsigned char *p = (const unsigned char *)str;
+  bool escaped = false;
 
-  for (; *p; ++p)
+  for (const unsigned char *p = (const unsigned char *)str; *p; ++p)
   {
+    if (escaped)
+    {
+      escaped = false;
+      continue;
+    }
+
     if (*p == '\\')
     {
-      if (*++p == '\0')
-        return false;
+      escaped = true;
+      continue;
     }
-    else if (IsMWildChar(*p))
+
+    if (*p == '*' || *p == '?')
       return true;
   }
 

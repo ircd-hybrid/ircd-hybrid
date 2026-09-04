@@ -493,7 +493,7 @@ get_mask_hash(const char *text)
   const char *hp = "", *p;
 
   for (p = text + strlen(text) - 1; p >= text; --p)
-    if (IsMWildChar(*p))
+    if (*p == '*' || *p == '?')
       return hash_text(hp);
     else if (*p == '.')
       hp = p + 1;

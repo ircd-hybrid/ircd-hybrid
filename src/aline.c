@@ -26,70 +26,63 @@ enum
 bool
 aline_valid_mask_simple(const char *data)
 {
-  const unsigned char *p = (const unsigned char *)data;
-  unsigned char tmpch = '\0';
-  unsigned int nonwild = 0, wild = 0;
+  const unsigned int minimum = ConfigGeneral.min_nonwildcard_simple;
+  if (minimum == 0)
+    return true;
 
-  while ((tmpch = *p++))
+  unsigned int nonwild = 0;
+  bool has_wildcard = false;
+
+  for (const unsigned char *p = (const unsigned char *)data; *p; ++p)
   {
-    if (tmpch == '\\' && *p)
-    {
+    if (*p == '\\' && p[1] != '\0')
       ++p;
-      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return true;
-    }
-    else if (!IsMWildChar(tmpch))
+    else if (*p == '*' || *p == '?')
     {
-      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return true;
+      has_wildcard = true;
+      continue;
     }
-    else
-      ++wild;
+
+    if (++nonwild >= minimum)
+      return true;
   }
 
-  return wild == 0;
+  return has_wildcard == false;
+}
+
+static bool
+_aline_mask_char_is_nonwild(unsigned char ch)
+{
+  return ch != '*' &&
+         ch != '?' &&
+         ch != ':' &&
+         ch != '.';
 }
 
 bool
-aline_valid_mask(int count, ...)
+aline_valid_mask(size_t count, const char *const masks[])
 {
-  unsigned char tmpch = '\0';
+  const unsigned int minimum = ConfigGeneral.min_nonwildcard;
+  if (minimum == 0)
+    return true;
+
   unsigned int nonwild = 0;
 
-  /*
-   * Now we must check the user and host to make sure there
-   * are at least NONWILDCHARS non-wildcard characters in
-   * them, otherwise assume they are attempting to kline
-   * *@* or some variant of that. This code will also catch
-   * people attempting to kline *@*.tld, as long as NONWILDCHARS
-   * is greater than 3. In that case, there are only 3 non-wild
-   * characters (tld), so if NONWILDCHARS is 4, the kline will
-   * be disallowed.
-   * -wnder
-   */
-  va_list args;
-  va_start(args, count);
-
-  while (count--)
+  for (size_t i = 0; i < count; ++i)
   {
-    const unsigned char *p = va_arg(args, const unsigned char *);
-    if (p == NULL)
+    if (masks[i] == NULL)
       continue;
 
-    while ((tmpch = *p++))
+    for (const unsigned char *p = (const unsigned char *)masks[i]; *p; ++p)
     {
-      if (!IsKWildChar(tmpch))
-      {
-        if (++nonwild >= ConfigGeneral.min_nonwildcard)
-        {
-          va_end(args);
-          return true;
-        }
-      }
+      if (!_aline_mask_char_is_nonwild(*p))
+        continue;
+
+      if (++nonwild >= minimum)
+        return true;
     }
   }
 
-  va_end(args);
   return false;
 }
 

@@ -96,13 +96,18 @@ _kline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_
 static void
 kline_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!client_is_service(source) && !aline_valid_mask(2, aline->user, aline->host))
+  if (!client_is_service(source))
   {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me,
-                        ":Please include at least %u non-wildcard characters with the mask",
-                        ConfigGeneral.min_nonwildcard);
-    return;
+    const char *const masks[] = { aline->user, aline->host };
+
+    if (!aline_valid_mask(IO_ARRAY_LENGTH(masks), masks))
+    {
+      if (client_is_user(source))
+        sendto_one_notice(source, &me,
+                          ":Please include at least %u non-wildcard characters with the mask",
+                          ConfigGeneral.min_nonwildcard);
+      return;
+    }
   }
 
   struct io_addr parsed_addr;

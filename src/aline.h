@@ -23,6 +23,6 @@ struct aline_ctx
 };
 
 extern bool aline_valid_mask_simple(const char *);
-extern bool aline_valid_mask(int, ...);
+extern bool aline_valid_mask(size_t, const char *const[]);
 extern bool aline_parse(const char *, struct Client *, size_t, char *[], struct aline_ctx *);
 #endif  /* INCLUDED_aline_h */

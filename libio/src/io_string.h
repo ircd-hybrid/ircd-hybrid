@@ -29,16 +29,10 @@ enum
 {
   CHAN_C    = 1 <<  7,
   CHANPFX_C = 1 <<  9,
-  USER_C    = 1 << 10,
-  HOST_C    = 1 << 11,
   VCHAN_C   = 1 << 16,
-  USER2_C   = 1 << 17,
 };
 
 #define IsVisibleChanChar(c)   (CharAttrs[(unsigned char)(c)] & VCHAN_C)
-#define IsHostChar(c)   (CharAttrs[(unsigned char)(c)] & HOST_C)
-#define IsUserChar(c)   (CharAttrs[(unsigned char)(c)] & USER_C)
-#define IsUser2Char(c)  (CharAttrs[(unsigned char)(c)] & USER2_C)
 #define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
 #define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
 

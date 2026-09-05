@@ -252,7 +252,7 @@ user_register_local(struct Client *client)
     return;
   }
 
-  if (!valid_username(client->username, true))
+  if (!username_is_valid(client->username, true))
   {
     _user_register_report_rejection(client, "invalid username: \"%s\"",
                                     client->username);
@@ -411,49 +411,43 @@ hostname_is_valid(const char *hostname)
   return true;
 }
 
-bool
-valid_username(const char *username, bool local)
+static bool
+_username_is_special_char(unsigned char ch)
 {
-  const char *p = username;
+  return ch == '-' || ch == '_' || ch == '.';
+}
 
-  assert(p);
+bool
+username_is_valid(const char *username, bool is_local_source)
+{
+  if (string_is_empty(username))
+    return false;
 
+  if (strlen(username) > USERLEN)
+    return false;
+
+  const unsigned char *p = (const unsigned char *)username;
   if (*p == '~')
     ++p;
 
-  /*
-   * Reject usernames that don't start with an alphanum
-   * i.e. reject jokers who have '-@somehost' or '.@somehost'
-   * or "-hi-@somehost", "h-----@somehost" would still be accepted.
-   */
   if (!io_ascii_is_alnum(*p))
     return false;
 
-  if (local)
-  {
-    unsigned int special = 0;
+  unsigned int special_count = 0;
 
-    while (*p)
-    {
-      if (*p == '-' || *p == '_' || *p == '.')
-      {
-        if (ConfigGeneral.specials_in_ident < ++special)
-          return false;
-      }
-      else if (!IsUser2Char(*p))
-        return false;
-
-      ++p;
-    }
-  }
-  else
+  for (++p; *p; ++p)
   {
-    while (*++p)
-      if (!IsUserChar(*p))
-        return false;
+    if (io_ascii_is_alnum(*p))
+      continue;
+
+    if (!_username_is_special_char(*p))
+      return false;
+
+    if (is_local_source && ++special_count > ConfigGeneral.specials_in_ident)
+      return false;
   }
 
-  return p - username <= USERLEN;
+  return true;
 }
 
 static bool

@@ -97,7 +97,7 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
 {
   assert(client_is_server(source));
 
-  if (valid_username(user, false))
+  if (username_is_valid(user, false))
     return true;
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,

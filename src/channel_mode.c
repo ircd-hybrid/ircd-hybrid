@@ -435,24 +435,6 @@ chm_simple(struct Client *client, struct Channel *channel, size_t parc, size_t *
   mode_changes[mode_count].arg = NULL;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
-
-  /*
-   * TBR: backwards-compatibility code for servers that don't have channel mode 'z'.
-   */
-  if (mode->letter == 'S')
-  {
-    mode_changes[mode_count].letter = 'z';
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
-  }
-  else if (mode->letter == 'z')
-  {
-    mode_changes[mode_count].letter = 'S';
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
-  }
 }
 
 static void
@@ -860,7 +842,6 @@ const struct chan_mode cmode_tab[] =
   { .letter = 'O', .mode = MODE_OPERONLY, .required_rank = CHACCESS_OP, .only_opers = true, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'Q', .mode = MODE_NOKICK, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'R', .mode = MODE_REGONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
-  { .letter = 'S', .mode = MODE_SECUREONLY, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'T', .mode = MODE_NONOTICE, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'V', .mode = MODE_NOINVITE, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'Z', .mode = MODE_ISSECURE, .required_rank = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },

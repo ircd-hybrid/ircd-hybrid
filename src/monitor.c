@@ -85,15 +85,17 @@ monitor_notify_signon(const struct Client *client)
 
   struct Monitor *const monitor = _monitor_find(client->name);
   if (monitor == NULL)
-    return;  /* This name isn't on monitor */
+    return;
 
   char buf[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
   snprintf(buf, sizeof(buf), "%s!%s@%s", client->name, client->username, client->host);
 
-  /* Send notifies out to everybody on the list in header */
   list_node_t *node;
   LIST_FOREACH(node, monitor->monitored_by.head)
-    sendto_one_numeric(node->data, &me, RPL_MONONLINE, buf);
+  {
+    struct Client *const subscriber = node->data;
+    sendto_one_numeric(subscriber, &me, RPL_MONONLINE, buf);
+  }
 }
 
 /*! \brief Notifies all clients that have client's name on
@@ -107,12 +109,14 @@ monitor_notify_signoff(const struct Client *client)
 
   struct Monitor *const monitor = _monitor_find(client->name);
   if (monitor == NULL)
-    return;  /* This name isn't on monitor */
+    return;
 
-  /* Send notifies out to everybody on the list in header */
   list_node_t *node;
   LIST_FOREACH(node, monitor->monitored_by.head)
-    sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
+  {
+    struct Client *const subscriber = node->data;
+    sendto_one_numeric(subscriber, &me, RPL_MONOFFLINE, client->name);
+  }
 }
 
 /*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
@@ -128,13 +132,13 @@ monitor_subscribe(struct Client *client, const char *name)
   struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
   {
-    /* First subscriber for this name: create the monitor bucket entry. */
+    /* Create the shared monitor entry for the first subscriber. */
     monitor = io_calloc(sizeof(*monitor));
     monitor->name = io_strdup(name);
     list_add(monitor, &monitor->node, &monitor_hash[hash_string(monitor->name)]);
   }
   else if (list_find(&monitor->monitored_by, client))
-    return false;  /* Already subscribed. */
+    return false;
 
   /* Link both directions: monitor -> client and client -> monitor. */
   list_add(client, list_make_node(), &monitor->monitored_by);
@@ -153,20 +157,20 @@ monitor_unsubscribe(struct Client *client, const char *name)
 
   struct Monitor *const monitor = _monitor_find(name);
   if (monitor == NULL)
-    return;  /* No header found for that name, i.e. it is not being monitored. */
-
-  list_node_t *node = list_find_remove(&monitor->monitored_by, client);
-  if (node == NULL)
-    return;  /* This name is not being monitored by this client. */
-  list_free_node(node);
-
-  node = list_find_remove(&client->connection->monitor_list, monitor);
-  assert(node);
-  if (node == NULL)
     return;
-  list_free_node(node);
 
-  /* Remove the monitor header if nobody is subscribed anymore. */
+  list_node_t *const subscriber_node = list_find_remove(&monitor->monitored_by, client);
+  if (subscriber_node == NULL)
+    return;  /* This name is not being monitored by this client. */
+  list_free_node(subscriber_node);
+
+  list_node_t *const monitor_node = list_find_remove(&client->connection->monitor_list, monitor);
+  assert(monitor_node);
+  if (monitor_node == NULL)
+    return;
+  list_free_node(monitor_node);
+
+  /* Destroy the monitor entry when it has no subscribers left. */
   if (list_is_empty(&monitor->monitored_by))
     _monitor_destroy(monitor);
 }
@@ -194,7 +198,7 @@ monitor_clear_list(struct Client *client)
     if (subscriber_node)
       list_free_node(subscriber_node);
 
-    /* If this leaves a header without notifies, remove it. */
+    /* Destroy the monitor entry when it has no subscribers left. */
     if (list_is_empty(&monitor->monitored_by))
       _monitor_destroy(monitor);
   }
@@ -207,19 +211,20 @@ monitor_clear_list(struct Client *client)
 void
 monitor_count_memory(uint32_t *const count, size_t *const bytes)
 {
-  *count = *bytes = 0;
+  *count = 0;
+  *bytes = 0;
 
   for (size_t i = 0; i < HASHSIZE; ++i)
   {
-    (*count) += list_length(&monitor_hash[i]);
+    *count += list_length(&monitor_hash[i]);
 
     list_node_t *node;
     LIST_FOREACH(node, monitor_hash[i].head)
     {
       const struct Monitor *const monitor = node->data;
-      (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
+      *bytes += strlen(monitor->name) + 1;  /* +1 for '\0' */
     }
   }
 
-  (*bytes) += *count * sizeof(struct Monitor);
+  *bytes += *count * sizeof(struct Monitor);
 }

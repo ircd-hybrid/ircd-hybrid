@@ -15,6 +15,8 @@
 #include "extban.h"
 #include "isupport.h"
 
+static const char extban_prefix_char = '$';
+
 static list_t extban_list;
 static uint32_t matching_mask, acting_mask;
 
@@ -121,7 +123,7 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
 {
   *input_extbans = *offset = 0;
 
-  if (!(*mask == '$' && io_ascii_is_alpha(*(mask + 1)) && *(mask + 2) == ':'))
+  if (!(mask[0] == extban_prefix_char && io_ascii_is_alpha(mask[1]) && mask[2] == ':'))
     return EXTBAN_NONE;
 
   const struct Extban *extban = extban_find(*(mask + 1));
@@ -136,10 +138,10 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
   if (extban->type == EXTBAN_MATCHING)
     return EXTBAN_MATCHING;
 
-  if (!(io_ascii_is_alpha(*mask) && *(mask + 1) == ':'))
+  if (!(io_ascii_is_alpha(mask[0]) && mask[1] == ':'))
     return EXTBAN_ACTING;
 
-  extban = extban_find(*mask);
+  extban = extban_find(mask[0]);
   if (extban == NULL)
     return EXTBAN_INVALID;
 
@@ -170,8 +172,8 @@ extban_format(uint32_t e, char *buf)
 
     if (written == 0)
     {
-      written++;
-      *buf++ = '$';
+      ++written;
+      *buf++ = extban_prefix_char;
     }
 
     *buf++ = extban->character;
@@ -189,8 +191,8 @@ extban_format(uint32_t e, char *buf)
 
     if (written == 0)
     {
-      written++;
-      *buf++ = '$';
+      ++written;
+      *buf++ = extban_prefix_char;
     }
 
     *buf++ = extban->character;
@@ -218,11 +220,10 @@ extban_acting_mask(void)
 const char *
 extban_get_isupport(void)
 {
-  char extban_chars[256] = { 0 };
-  static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
-
   if (list_is_empty(&extban_list))
     return NULL;
+
+  char extban_chars[256] = { 0 };
 
   list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
@@ -231,13 +232,16 @@ extban_get_isupport(void)
     extban_chars[extban->character] = extban->character;
   }
 
-  char *p = buf + strlcpy(buf, "$,", sizeof(buf));
+  static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
+  char *p = buf;
+  *p++ = extban_prefix_char;
+  *p++ = ',';
 
   for (size_t i = 0; i < sizeof(extban_chars); ++i)
     if (extban_chars[i])
       *p++ = extban_chars[i];
+
   *p = '\0';
 
   return buf;
 }
-

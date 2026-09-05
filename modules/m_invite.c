@@ -48,7 +48,7 @@ _invite_send_invite_list(struct Client *source)
 }
 
 static void
-_invite_send_to_target(const struct Client *source, struct Client *target, struct Channel *channel)
+_invite_send_to_target(const struct Client *source, struct Client *target, const struct Channel *channel)
 {
   if (!client_is_local(target))
     return;

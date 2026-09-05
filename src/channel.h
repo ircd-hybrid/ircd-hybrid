@@ -108,6 +108,12 @@ extern const list_t *channel_get_list(void);
 extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
 
 static inline bool
+channel_is_valid_prefix_char(unsigned char ch)
+{
+  return ch == '#';
+}
+
+static inline bool
 channel_is_empty(const struct Channel *channel)
 {
   assert(channel);

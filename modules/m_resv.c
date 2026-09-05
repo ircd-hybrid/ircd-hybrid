@@ -19,6 +19,7 @@
 #include "module.h"
 
 #include "aline.h"
+#include "channel.h"
 #include "client.h"
 #include "client_format.h"
 #include "conf.h"
@@ -58,7 +59,7 @@ _resv_report_added(struct Client *source, const struct ResvItem *resv, uintmax_t
 static void
 resv_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)))
+  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask + channel_is_valid_prefix_char(*aline->mask)))
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me,

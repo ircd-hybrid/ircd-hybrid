@@ -585,7 +585,7 @@ _who_parse_options(struct WhoQuery *who, char *options)
 static bool
 _who_handle_channel_query(struct Client *source, const char *mask, const struct WhoQuery *who)
 {
-  if (!IsChanPrefix(*mask))
+  if (!channel_is_valid_prefix_char(*mask))
     return false;
 
   struct Channel *const channel = channel_find(mask);

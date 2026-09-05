@@ -378,7 +378,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
   }
 
   void *target;
-  if (IsChanPrefix(*name))
+  if (channel_is_valid_prefix_char(*name))
   {
     target = channel_find(name);
     if (target)

@@ -19,27 +19,8 @@
 
 #include "config.h"  /**< Autotools-generated HAVE_STRLCPY & HAVE_STRLCAT. */
 
-/**
- * @brief Enumeration of character attributes used for classification.
- *
- * This enum defines various character classes for classification,
- * utilized by the provided character classification macros.
- */
-enum
-{
-  CHAN_C    = 1 <<  7,
-  CHANPFX_C = 1 <<  9,
-  VCHAN_C   = 1 << 16,
-};
-
-#define IsVisibleChanChar(c)   (CharAttrs[(unsigned char)(c)] & VCHAN_C)
-#define IsChanPrefix(c) (CharAttrs[(unsigned char)(c)] & CHANPFX_C)
-#define IsChanChar(c)   (CharAttrs[(unsigned char)(c)] & CHAN_C)
-
 extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
 extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */
-
-extern const unsigned int CharAttrs[];
 
 extern const char *io_basename(const char *);
 extern const char *stripws(char *);

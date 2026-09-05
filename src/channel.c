@@ -207,35 +207,61 @@ channel_send_state(struct Client *client, const struct Channel *channel)
   _channel_send_mlock(client, channel);
 }
 
-/*! \brief Check channel name for invalid characters
- * \param name Pointer to channel name string
- * \param local Indicates whether it's a local or remote creation
- * \return false if invalid, true otherwise
- */
+static bool
+_channel_name_is_valid_char(unsigned char ch, bool visible_only)
+{
+  switch (ch)
+  {
+    case '\0':
+    case '\a':
+    case '\n':
+    case '\r':
+    case ' ':
+    case ',':
+      return false;
+    default:
+      break;
+  }
+
+  if (!visible_only)
+    return true;
+
+  switch (ch)
+  {
+    case 0x02:  /* STX */
+    case 0x03:  /* ETX */
+    case 0x0f:  /* SI */
+    case 0x16:  /* SYN */
+    case 0x1d:  /* GS */
+    case 0x1e:  /* RS */
+    case 0x1f:  /* US */
+    case 0xa0:  /* NBSP */
+      return false;
+    default:
+      return true;
+  }
+}
+
 bool
 channel_is_valid_name(const char *name, bool is_local_source)
 {
-  const char *p = name;
-
-  assert(!string_is_empty(p));
-
-  if (!IsChanPrefix(*p))
+  if (string_is_empty(name))
     return false;
 
-  if (is_local_source == false || ConfigChannel.disable_fake_channels == 0)
-  {
-    while (*++p)
-      if (!IsChanChar(*p))
-        return false;
-  }
-  else
-  {
-    while (*++p)
-      if (!IsVisibleChanChar(*p))
-        return false;
-  }
+  if (strlen(name) > CHANNELLEN)
+    return false;
 
-  return p - name <= CHANNELLEN;
+  const unsigned char *p = (const unsigned char *)name;
+  if (!channel_is_valid_prefix_char(*p))
+    return false;
+
+  const bool visible_only = is_local_source && ConfigChannel.disable_fake_channels;
+
+  for (++p; *p; ++p)
+    if (!_channel_name_is_valid_char(*p, visible_only))
+      return false;
+
+  return true;
 }
 
 void

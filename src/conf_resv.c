@@ -18,6 +18,7 @@
 #include "memory.h"
 #include "misc.h"
 
+#include "channel.h"
 #include "client.h"
 #include "conf.h"
 #include "conf_resv.h"
@@ -69,7 +70,7 @@ resv_delete(struct ResvItem *resv, bool expired)
 struct ResvItem *
 resv_make(const char *mask, const char *reason, const list_t *elist)
 {
-  list_t *const list = IsChanPrefix(*mask) ? &resv_chan_list : &resv_nick_list;
+  list_t *const list = channel_is_valid_prefix_char(*mask) ? &resv_chan_list : &resv_nick_list;
   struct ResvItem *const resv = io_calloc(sizeof(*resv));
   resv->list = list;
   resv->mask = io_strdup(mask);
@@ -113,7 +114,7 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
-  list_t *const list = IsChanPrefix(*name) ? &resv_chan_list : &resv_nick_list;
+  list_t *const list = channel_is_valid_prefix_char(*name) ? &resv_chan_list : &resv_nick_list;
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)

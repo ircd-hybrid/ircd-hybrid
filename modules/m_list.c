@@ -22,6 +22,7 @@
 #include "memory.h"
 #include "module.h"
 
+#include "channel.h"
 #include "client.h"
 #include "ircd.h"
 #include "isupport.h"
@@ -146,7 +147,7 @@ _parse_list_mask_filter(struct ListTask *task, const char *option)
   if (string_is_empty(mask))
     return false;
 
-  const bool has_channel_prefix = IsChanPrefix(*mask);
+  const bool has_channel_prefix = channel_is_valid_prefix_char(*mask);
   const char *const name = has_channel_prefix ? mask + 1 : mask;
   if (has_channel_prefix && string_is_empty(name))
     return false;

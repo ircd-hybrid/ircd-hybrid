@@ -572,7 +572,7 @@ _parse_handle_numeric(unsigned int numeric, struct Client *source, size_t parc, 
    * should never generate numeric replies to non-users anyway
    * Ahem... it can be a channel actually, csc bots use it :\ --Nem
    */
-  if (IsChanPrefix(*name))
+  if (channel_is_valid_prefix_char(*name))
   {
     const struct Channel *const channel = channel_find(name);
     if (channel == NULL)

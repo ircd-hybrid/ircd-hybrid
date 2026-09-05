@@ -105,7 +105,7 @@ static void
 m_mode(struct Client *source, size_t parc, char *parv[])
 {
   const char *const name = parv[1];
-  if (!IsChanPrefix(*name))
+  if (!channel_is_valid_prefix_char(*name))
   {
     set_user_mode(source, parc, parv);
     return;

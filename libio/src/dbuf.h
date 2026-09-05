@@ -43,7 +43,7 @@ struct dbuf_view
 struct dbuf_queue_iterator
 {
   const struct dbuf_queue *queue;
-  const void *cursor;
+  const list_node_t *cursor;
 };
 
 extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...) IO_AFP(2,3);

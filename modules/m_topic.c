@@ -38,7 +38,7 @@ _topic_format_setter_info(const struct Client *source, char *buf, size_t buflen)
 }
 
 static void
-_topic_notify_channel_members(struct Client *source, const struct Channel *channel)
+_topic_notify_channel_members(const struct Client *source, const struct Channel *channel)
 {
   if (client_is_user(source))
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",

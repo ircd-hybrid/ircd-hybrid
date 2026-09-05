@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "event.h"
+#include "io.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -176,6 +177,8 @@ user_welcome(struct Client *client)
   motd_signon(client);
 }
 
+static void
+_user_register_report_rejection(struct Client *client, const char *reason_format, ...) IO_AFP(2, 3);
 static void
 _user_register_report_rejection(struct Client *client, const char *reason_format, ...)
 {

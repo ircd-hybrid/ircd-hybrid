@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "comm.h"
+#include "io.h"
 #include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -106,6 +107,8 @@ _server_reject_internal(const server_rejection_context_t *ctx, const char *detai
 }
 
 static void
+_server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...) IO_AFP(3, 4);
+static void
 _server_reject_connection(struct Client *source, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {
   client_format_name_buffer_t admin_event_source_buffer;
@@ -151,6 +154,8 @@ _server_reject_format_introduction_event_source(const struct Client *introducer,
              introducer->name, link_name);
 }
 
+static void
+_server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...) IO_AFP(3, 4);
 static void
 _server_reject_introduction(struct Client *introducer, server_rejection_reason_t reason, const char *detail_fmt, ...)
 {

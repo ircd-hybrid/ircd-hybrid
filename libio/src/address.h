@@ -41,6 +41,7 @@ struct io_addr
 extern void address_strip_ipv4(struct io_addr *);
 extern void address_mask(struct io_addr *, int);
 extern bool address_from_bytes(struct io_addr *, int, const void *, size_t);
+extern bool address_to_bytes(const struct io_addr *, void *, size_t);
 extern bool address_from_string(const char *, struct io_addr *);
 extern bool address_to_string(const struct io_addr *, char *, size_t);
 extern bool address_match(const struct io_addr *, const struct io_addr *, bool, bool, int);

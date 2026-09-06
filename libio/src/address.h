@@ -71,7 +71,7 @@ address_is_ipv4_mapped(const struct io_addr *addr)
   if (!address_is_ipv6(addr))
     return false;
 
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
   return IN6_IS_ADDR_V4MAPPED(&v6->sin6_addr);
 }
 
@@ -80,12 +80,13 @@ address_is_unspecified(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     return v4->sin_addr.s_addr == INADDR_ANY;
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
     return IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr);
   }
 
@@ -109,12 +110,13 @@ address_get_port(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     return ntohs(v4->sin_port);
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
     return ntohs(v6->sin6_port);
   }
 
@@ -126,13 +128,14 @@ address_set_port(struct io_addr *addr, uint16_t port)
 {
   if (address_is_ipv4(addr))
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
     v4->sin_port = htons(port);
     return true;
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr->ss;
     v6->sin6_port = htons(port);
     return true;
   }

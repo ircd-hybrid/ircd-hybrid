@@ -159,7 +159,7 @@ address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
   uint8_t addb[4];
   int n = 0, bits = 0;
   char c;
-  struct sockaddr_in *const v4 = (struct sockaddr_in *)addr;
+  struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
 
   digits[n++] = text;
 
@@ -305,9 +305,9 @@ address_mask(struct io_addr *addr, int bits)
     /* Apply the mask to the network portion of the IPv4 address. */
     v4_base_ip->sin_addr.s_addr = htonl(ntohl(v4_base_ip->sin_addr.s_addr) & mask);
   }
-  else
+
+  if (address_is_ipv6(addr))
   {
-    assert(address_is_ipv6(addr));
     /* Calculate the number of full octets and remaining bits. */
     const unsigned int n = bits / 8;
     const unsigned int m = bits % 8;
@@ -358,9 +358,9 @@ address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact
       return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
     return address_match_ipv4(addr, mask, bits);
   }
-  else
+
+  if (address_is_ipv6(addr))
   {
-    assert(address_is_ipv6(addr));
     const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)&addr->ss;
     const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)&mask->ss;
 
@@ -529,14 +529,14 @@ address_to_string(const struct io_addr *addr, char *buf, size_t buflen)
 {
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     if (inet_ntop(AF_INET, &v4->sin_addr, buf, buflen))
       return true;
   }
-  else
+
+  if (address_is_ipv6(addr))
   {
-    assert(address_is_ipv6(addr));
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
     if (inet_ntop(AF_INET6, &v6->sin6_addr, buf, buflen))
       return true;
   }
@@ -551,7 +551,7 @@ address_from_bytes(struct io_addr *addr_out, int family, const void *bytes, size
 
   if (family == AF_INET && len == sizeof(struct in_addr))
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr.ss;
+    struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr.ss;
     v4->sin_family = AF_INET;
     memcpy(&v4->sin_addr, bytes, sizeof(v4->sin_addr));
 
@@ -561,7 +561,7 @@ address_from_bytes(struct io_addr *addr_out, int family, const void *bytes, size
 
   if (family == AF_INET6 && len == sizeof(struct in6_addr))
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr.ss;
+    struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr.ss;
     v6->sin6_family = AF_INET6;
     memcpy(&v6->sin6_addr, bytes, sizeof(v6->sin6_addr));
 

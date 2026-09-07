@@ -120,29 +120,40 @@ class_sweep_inactive(void)
   }
 }
 
-static patricia_tree_t *
-_class_ip_limit_trie(struct ClassItem *klass, const void *addr)
+static bool
+_class_ip_limit_resolve(const struct ClassItem *klass, const struct io_addr *addr,
+                        patricia_tree_t **tree, unsigned int *bitlen)
 {
-  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    return klass->ip_tree_v6;
-
-  return klass->ip_tree_v4;
+  switch (address_get_family(addr))
+  {
+    case AF_INET:
+      *tree = klass->ip_tree_v4;
+      *bitlen = klass->cidr_bitlen_ipv4;
+      return true;
+    case AF_INET6:
+      *tree = klass->ip_tree_v6;
+      *bitlen = klass->cidr_bitlen_ipv6;
+      return true;
+    default:
+      return false;
+  }
 }
 
 bool
 class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
 {
-  int bitlen;
-
-  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = klass->cidr_bitlen_ipv6;
-  else
-    bitlen = klass->cidr_bitlen_ipv4;
-
-  if (klass->number_per_cidr == 0 || bitlen == 0)
+  if (klass->number_per_cidr == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(_class_ip_limit_trie(klass, addr), addr, bitlen);
+  patricia_tree_t *tree;
+  unsigned int bitlen;
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
+    return false;
+
+  patricia_node_t *const pnode = patricia_make_and_lookup_addr(tree, addr, bitlen);
+  if (pnode == NULL)
+    return false;
+
   if (((uintptr_t)pnode->data) >= klass->number_per_cidr)
   {
     if (over_rule)
@@ -164,17 +175,15 @@ class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
 bool
 class_ip_limit_remove(struct ClassItem *klass, const void *addr)
 {
-  int bitlen;
-
-  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = klass->cidr_bitlen_ipv6;
-  else
-    bitlen = klass->cidr_bitlen_ipv4;
-
-  if (klass->number_per_cidr == 0 || bitlen == 0)
+  if (klass->number_per_cidr == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_try_search_exact_addr(_class_ip_limit_trie(klass, addr), addr, bitlen);
+  patricia_tree_t *tree;
+  unsigned int bitlen;
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
+    return false;
+
+  patricia_node_t *const pnode = patricia_try_search_exact_addr(tree, addr, bitlen);
   if (pnode == NULL)
     return false;
 
@@ -182,7 +191,7 @@ class_ip_limit_remove(struct ClassItem *klass, const void *addr)
 
   if (((uintptr_t)pnode->data) == 0)
   {
-    patricia_remove(_class_ip_limit_trie(klass, addr), pnode);
+    patricia_remove(tree, pnode);
     return true;
   }
 

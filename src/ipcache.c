@@ -26,25 +26,35 @@ static patricia_tree_t *ipcache_trie_v6;
 static patricia_tree_t *ipcache_trie_v4;
 
 static patricia_tree_t *
-_ipcache_get_trie(const void *addr)
+_ipcache_trie_for_addr(const struct io_addr *addr)
 {
-  if (((const struct sockaddr *)addr)->sa_family == AF_INET6)
-    return ipcache_trie_v6;
-  else
-    return ipcache_trie_v4;
+  switch (address_get_family(addr))
+  {
+    case AF_INET:
+      return ipcache_trie_v4;
+    case AF_INET6:
+      return ipcache_trie_v6;
+    default:
+      return NULL;
+  }
 }
 
 struct ip_entry *
 ipcache_record_find_or_add(const void *addr)
 {
-  patricia_tree_t *ptrie = _ipcache_get_trie(addr);
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(ptrie, addr, 0);
+  patricia_tree_t *const trie = _ipcache_trie_for_addr(addr);
+  if (trie == NULL)
+    return NULL;
 
-  if (pnode->data)  /* Deliberate crash if 'pnode' is NULL */
-    return pnode->data;  /* Already added to the trie */
+  patricia_node_t *const pnode = patricia_make_and_lookup_addr(trie, addr, 0);
+  if (pnode == NULL)
+    return NULL;
+
+  if (pnode->data)
+    return pnode->data;
 
   struct ip_entry *iptr = io_calloc(sizeof(*iptr));
-  iptr->trie_pointer = ptrie;
+  iptr->trie_pointer = trie;
   list_add(pnode, &iptr->node, &ipcache_list);
 
   PATRICIA_DATA_SET(pnode, iptr);
@@ -79,7 +89,11 @@ _ipcache_remove_expired_records(void *unused)
 void
 ipcache_record_remove(const void *addr, bool local)
 {
-  patricia_node_t *pnode = patricia_try_search_exact_addr(_ipcache_get_trie(addr), addr, 0);
+  patricia_tree_t *const trie = _ipcache_trie_for_addr(addr);
+  if (trie == NULL)
+    return;
+
+  patricia_node_t *const pnode = patricia_try_search_exact_addr(trie, addr, 0);
   if (pnode == NULL)
     return;
 

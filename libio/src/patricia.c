@@ -211,29 +211,26 @@ _patricia_prefix_to_addr(const patricia_prefix_t *prefix, struct io_addr *addr)
   }
 }
 
-const char *
-patricia_prefix_to_string(const patricia_prefix_t *prefix, bool with_len)
+bool
+patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buf, size_t buflen, bool with_len)
 {
-  static char buf[INET6_ADDRSTRLEN + sizeof("/128")];
-
   assert(prefix);
-  assert((prefix->family == AF_INET  && prefix->bitlen <= PATRICIA_MAXBITS_IPV4) ||
-         (prefix->family == AF_INET6 && prefix->bitlen <= PATRICIA_MAXBITS_IPV6));
+  assert(buf);
 
   struct io_addr addr;
   if (!_patricia_prefix_to_addr(prefix, &addr))
-    return NULL;
+    return false;
 
-  if (!address_to_string(&addr, buf, sizeof(buf)))
-    return NULL;
+  if (!address_to_string(&addr, buf, buflen))
+    return false;
 
-  if (with_len)
-  {
-    const size_t len = strlen(buf);
-    snprintf(buf + len, sizeof(buf) - len, "/%u", prefix->bitlen);
-  }
+  if (!with_len)
+    return true;
 
-  return buf;
+  const size_t len = strlen(buf);
+  const int written = snprintf(buf + len, buflen - len, "/%u", prefix->bitlen);
+
+  return written >= 0 && (size_t)written < buflen - len;
 }
 
 static patricia_prefix_t *

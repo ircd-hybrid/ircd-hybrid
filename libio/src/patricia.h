@@ -121,6 +121,7 @@ extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
 extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern void patricia_process(patricia_tree_t *, void (*)(patricia_prefix_t *, void *));
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
+extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, patricia_prefix_t *);
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
@@ -132,5 +133,4 @@ extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, const s
 extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
 extern patricia_tree_t *patricia_new(int);
-extern const char *patricia_prefix_to_string(const patricia_prefix_t *, bool);
 #endif  /* INCLUDED_patricia_h */

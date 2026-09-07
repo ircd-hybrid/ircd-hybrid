@@ -74,6 +74,25 @@ _patricia_prefix_bytes(const patricia_prefix_t *prefix)
 }
 
 static bool
+_patricia_prefix_bit_is_set(const unsigned char *bytes, unsigned int bit)
+{
+  return (bytes[bit / 8] & (0x80U >> (bit % 8))) != 0;
+}
+
+static unsigned int
+_patricia_prefix_first_differing_bit(const unsigned char *lhs, const unsigned char *rhs, unsigned int bitlen)
+{
+  for (unsigned int bit = 0; bit < bitlen; ++bit)
+  {
+    if (_patricia_prefix_bit_is_set(lhs, bit) !=
+        _patricia_prefix_bit_is_set(rhs, bit))
+      return bit;
+  }
+
+  return bitlen;
+}
+
+static bool
 _patricia_prefix_bits_equal(const unsigned char *lhs, const unsigned char *rhs, unsigned int bitlen)
 {
   if (bitlen == 0)
@@ -368,7 +387,7 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   while (node->bit < bitlen)
   {
-    if (BIT_TEST(addr[node->bit >> 3], 0x80 >> (node->bit & 0x07)))
+    if (_patricia_prefix_bit_is_set(addr, node->bit))
       node = node->r;
     else
       node = node->l;
@@ -415,7 +434,7 @@ patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inc
     if (node->prefix)
       stack[cnt++] = node;
 
-    if (BIT_TEST(addr[node->bit >> 3], 0x80 >> (node->bit & 0x07)))
+    if (_patricia_prefix_bit_is_set(addr, node->bit))
       node = node->r;
     else
       node = node->l;
@@ -475,7 +494,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   while (node->bit < bitlen || node->prefix == NULL)
   {
-    if (node->bit < maxbits && BIT_TEST(addr[node->bit >> 3], 0x80 >> (node->bit & 0x07)))
+    if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
     {
       if (node->r == NULL)
         break;
@@ -497,32 +516,8 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   const unsigned char *const test_addr = _patricia_prefix_bytes(node->prefix);
 
-  /* Find the first bit different */
-  unsigned int check_bit = node->bit < bitlen ? node->bit : bitlen;
-  unsigned int differ_bit = 0;
-  int j, r;
-
-  for (unsigned int i = 0; i * 8 < check_bit; i++)
-  {
-    if ((r = (addr[i] ^ test_addr[i])) == 0)
-    {
-      differ_bit = (i + 1) * 8;
-      continue;
-    }
-
-    /* I know the better way, but for now */
-    for (j = 0; j < 8; j++)
-      if (BIT_TEST(r, (0x80 >> j)))
-        break;
-
-    /* Must be found */
-    assert(j < 8);
-    differ_bit = i * 8 + j;
-    break;
-  }
-
-  if (differ_bit > check_bit)
-    differ_bit = check_bit;
+  const unsigned int check_bit = node->bit < bitlen ? node->bit : bitlen;
+  const unsigned int differ_bit = _patricia_prefix_first_differing_bit(addr, test_addr, check_bit);
 
   patricia_node_t *parent = node->parent;
   while (parent && parent->bit >= differ_bit)
@@ -550,7 +545,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   {
     new_node->parent = node;
 
-    if (node->bit < maxbits && BIT_TEST(addr[node->bit >> 3], 0x80 >> (node->bit & 0x07)))
+    if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
     {
       assert(node->r == NULL);
       node->r = new_node;
@@ -566,7 +561,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   if (bitlen == differ_bit)
   {
-    if (bitlen < maxbits && BIT_TEST(test_addr[bitlen >> 3], 0x80 >> (bitlen & 0x07)))
+    if (bitlen < maxbits && _patricia_prefix_bit_is_set(test_addr, bitlen))
       new_node->r = node;
     else
       new_node->l = node;
@@ -591,7 +586,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
     glue->bit = differ_bit;
     glue->parent = node->parent;
 
-    if (differ_bit < maxbits && BIT_TEST(addr[differ_bit >> 3], 0x80 >> (differ_bit & 0x07)))
+    if (differ_bit < maxbits && _patricia_prefix_bit_is_set(addr, differ_bit))
     {
       glue->r = new_node;
       glue->l = node;

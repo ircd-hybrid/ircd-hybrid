@@ -113,7 +113,7 @@ typedef struct _patricia_node_t
 typedef struct _patricia_tree_t
 {
   patricia_node_t *head;
-  unsigned int maxbits;  /* for IP, 32 bit addresses */
+  int family;
 } patricia_tree_t;
 
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));
@@ -131,6 +131,6 @@ extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *
 extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
 extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
-extern patricia_tree_t *patricia_new(unsigned int);
+extern patricia_tree_t *patricia_new(int);
 extern const char *patricia_prefix_to_string(const patricia_prefix_t *, bool);
 #endif  /* INCLUDED_patricia_h */

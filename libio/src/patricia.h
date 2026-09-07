@@ -114,7 +114,6 @@ typedef struct _patricia_tree_t
 {
   patricia_node_t *head;
   unsigned int maxbits;  /* for IP, 32 bit addresses */
-  int num_active_node;  /* for debug purpose */
 } patricia_tree_t;
 
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));

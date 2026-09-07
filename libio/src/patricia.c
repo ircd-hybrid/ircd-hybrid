@@ -301,7 +301,6 @@ patricia_clear(patricia_tree_t *tree, void (*func)(void *))
       assert(Xrn->data == NULL);
 
     io_free(Xrn);
-    tree->num_active_node--;
 
     if (l)
     {
@@ -319,8 +318,6 @@ patricia_clear(patricia_tree_t *tree, void (*func)(void *))
   }
 
   tree->head = NULL;
-
-  assert(tree->num_active_node == 0);
 }
 
 void
@@ -452,7 +449,6 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
     node->bit = prefix->bitlen;
     node->prefix = _patricia_prefix_ref(prefix);
     tree->head = node;
-    tree->num_active_node++;
 
     return node;
   }
@@ -533,7 +529,6 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   patricia_node_t *new_node = io_calloc(sizeof(*new_node));
   new_node->bit = prefix->bitlen;
   new_node->prefix = _patricia_prefix_ref(prefix);
-  tree->num_active_node++;
 
   if (node->bit == differ_bit)
   {
@@ -579,7 +574,6 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
     patricia_node_t *glue = io_calloc(sizeof(*glue));
     glue->bit = differ_bit;
     glue->parent = node->parent;
-    tree->num_active_node++;
 
     if (differ_bit < tree->maxbits && BIT_TEST(addr[differ_bit >> 3], 0x80 >> (differ_bit & 0x07)))
     {
@@ -637,7 +631,6 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
     parent = node->parent;
     _patricia_prefix_unref(node->prefix);
     io_free(node);
-    tree->num_active_node--;
 
     if (parent == NULL)
     {
@@ -678,7 +671,6 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
     child->parent = parent->parent;
     io_free(parent);
-    tree->num_active_node--;
     return;
   }
 
@@ -695,7 +687,6 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
   _patricia_prefix_unref(node->prefix);
   io_free(node);
-  tree->num_active_node--;
 
   if (parent == NULL)
   {

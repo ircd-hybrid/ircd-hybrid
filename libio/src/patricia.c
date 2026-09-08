@@ -713,12 +713,15 @@ patricia_make_and_lookup_addr(patricia_tree_t *tree, const struct io_addr *addr,
   return patricia_lookup(tree, &prefix);
 }
 
-void
+bool
 patricia_lookup_then_remove(patricia_tree_t *tree, const char *string)
 {
-  patricia_node_t *node = patricia_try_search_exact(tree, string);
-  if (node)
-    patricia_remove(tree, node);
+  patricia_node_t *const node = patricia_try_search_exact(tree, string);
+  if (node == NULL)
+    return false;
+
+  patricia_remove(tree, node);
+  return true;
 }
 
 patricia_node_t *

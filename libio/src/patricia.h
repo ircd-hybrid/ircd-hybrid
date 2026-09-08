@@ -115,9 +115,9 @@ typedef struct patricia_tree
 
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));
 extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
-extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern void patricia_foreach(patricia_tree_t *, void (*)(patricia_prefix_t *, void *));
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
+extern bool patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, patricia_prefix_t *);
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);

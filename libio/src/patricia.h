@@ -71,13 +71,13 @@ struct io_addr;
   continue; }
 
 #define PATRICIA_WALK_END \
-    if (Xrn->l) { \
-      if (Xrn->r) { \
-        *Xsp++ = Xrn->r; \
+    if (Xrn->left) { \
+      if (Xrn->right) { \
+        *Xsp++ = Xrn->right; \
       } \
-      Xrn = Xrn->l; \
-    } else if (Xrn->r) { \
-      Xrn = Xrn->r; \
+      Xrn = Xrn->left; \
+    } else if (Xrn->right) { \
+      Xrn = Xrn->right; \
     } else if (Xsp != Xstack) { \
       Xrn = *(--Xsp); \
     } else { \
@@ -86,7 +86,7 @@ struct io_addr;
   } \
 } while (0)
 
-typedef struct _patricia_prefix_t
+typedef struct patricia_prefix
 {
   unsigned short family;  /* AF_INET | AF_INET6 */
   unsigned short bitlen;  /* same as mask? */
@@ -94,23 +94,23 @@ typedef struct _patricia_prefix_t
 
   union
   {
-    struct in_addr sin;
-    struct in6_addr sin6;
-  } add;
+    struct in_addr ipv4;
+    struct in6_addr ipv6;
+  } addr;
 } patricia_prefix_t;
 
-typedef struct _patricia_node_t
+typedef struct patricia_node
 {
   unsigned int bit;  /* flag if this node used */
   patricia_prefix_t *prefix;  /* who we are in patricia tree */
-  struct _patricia_node_t *l, *r;  /* left and right children */
-  struct _patricia_node_t *parent;  /* may be used */
+  struct patricia_node *left, *right;  /* left and right children */
+  struct patricia_node *parent;  /* may be used */
   void *data;  /* pointer to data */
 } patricia_node_t;
 
-typedef struct _patricia_tree_t
+typedef struct patricia_tree
 {
-  patricia_node_t *head;
+  patricia_node_t *root;
   int family;
 } patricia_tree_t;
 

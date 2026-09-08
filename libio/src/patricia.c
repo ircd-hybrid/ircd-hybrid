@@ -70,7 +70,7 @@ _patricia_tree_accepts_prefix(const patricia_tree_t *tree, const patricia_prefix
 static const unsigned char *
 _patricia_prefix_bytes(const patricia_prefix_t *prefix)
 {
-  return (const unsigned char *)&prefix->add;
+  return (const unsigned char *)&prefix->addr;
 }
 
 static bool
@@ -123,7 +123,7 @@ _patricia_prefix_init(patricia_prefix_t *prefix, const struct io_addr *addr, uns
   if (maxbits == 0 || bitlen > maxbits)
     return false;
 
-  patricia_prefix_t tmp =
+  patricia_prefix_t new_prefix =
   {
     .family = family,
     .bitlen = bitlen
@@ -132,18 +132,18 @@ _patricia_prefix_init(patricia_prefix_t *prefix, const struct io_addr *addr, uns
   switch (family)
   {
     case AF_INET:
-      if (!address_to_bytes(addr, &tmp.add.sin, sizeof(tmp.add.sin)))
+      if (!address_to_bytes(addr, &new_prefix.addr.ipv4, sizeof(new_prefix.addr.ipv4)))
         return false;
       break;
     case AF_INET6:
-      if (!address_to_bytes(addr, &tmp.add.sin6, sizeof(tmp.add.sin6)))
+      if (!address_to_bytes(addr, &new_prefix.addr.ipv6, sizeof(new_prefix.addr.ipv6)))
         return false;
       break;
     default:
       return false;
   }
 
-  *prefix = tmp;
+  *prefix = new_prefix;
   return true;
 }
 
@@ -222,9 +222,9 @@ _patricia_prefix_to_addr(const patricia_prefix_t *prefix, struct io_addr *addr)
   switch (prefix->family)
   {
     case AF_INET:
-      return address_from_bytes(addr, AF_INET, &prefix->add.sin, sizeof(prefix->add.sin));
+      return address_from_bytes(addr, AF_INET, &prefix->addr.ipv4, sizeof(prefix->addr.ipv4));
     case AF_INET6:
-      return address_from_bytes(addr, AF_INET6, &prefix->add.sin6, sizeof(prefix->add.sin6));
+      return address_from_bytes(addr, AF_INET6, &prefix->addr.ipv6, sizeof(prefix->addr.ipv6));
     default:
       return false;
   }
@@ -246,10 +246,10 @@ patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buf, size_t buf
   if (!with_len)
     return true;
 
-  const size_t len = strlen(buf);
-  const int written = snprintf(buf + len, buflen - len, "/%u", prefix->bitlen);
+  const size_t address_len = strlen(buf);
+  const int written = snprintf(buf + address_len, buflen - address_len, "/%u", prefix->bitlen);
 
-  return written >= 0 && (size_t)written < buflen - len;
+  return written >= 0 && (size_t)written < buflen - address_len;
 }
 
 static patricia_prefix_t *
@@ -306,17 +306,17 @@ patricia_clear(patricia_tree_t *tree, void (*func)(void *))
 {
   assert(tree);
 
-  if (tree->head == NULL)
+  if (tree->root == NULL)
     return;
 
   patricia_node_t *Xstack[PATRICIA_MAXBITS + 1];
   patricia_node_t **Xsp = Xstack;
 
-  patricia_node_t *Xrn = tree->head;
+  patricia_node_t *Xrn = tree->root;
   while (Xrn)
   {
-    patricia_node_t *l = Xrn->l;
-    patricia_node_t *r = Xrn->r;
+    patricia_node_t *l = Xrn->left;
+    patricia_node_t *r = Xrn->right;
 
     if (Xrn->prefix)
     {
@@ -345,7 +345,7 @@ patricia_clear(patricia_tree_t *tree, void (*func)(void *))
       Xrn = NULL;
   }
 
-  tree->head = NULL;
+  tree->root = NULL;
 }
 
 void
@@ -361,10 +361,11 @@ patricia_destroy(patricia_tree_t *tree, void (*func)(void *))
 void
 patricia_process(patricia_tree_t *tree, void (*func)(patricia_prefix_t *, void *))
 {
+  assert(tree);
   assert(func);
 
   patricia_node_t *node;
-  PATRICIA_WALK(tree->head, node) {
+  PATRICIA_WALK(tree->root, node) {
     func(node->prefix, node->data);
   } PATRICIA_WALK_END;
 }
@@ -378,19 +379,19 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
   if (!_patricia_tree_accepts_prefix(tree, prefix))
     return NULL;
 
-  if (tree->head == NULL)
+  if (tree->root == NULL)
     return NULL;
 
-  patricia_node_t *node = tree->head;
+  patricia_node_t *node = tree->root;
   const unsigned char *const addr = _patricia_prefix_bytes(prefix);
   const unsigned int bitlen = prefix->bitlen;
 
   while (node->bit < bitlen)
   {
     if (_patricia_prefix_bit_is_set(addr, node->bit))
-      node = node->r;
+      node = node->right;
     else
-      node = node->l;
+      node = node->left;
 
     if (node == NULL)
       return NULL;
@@ -420,38 +421,35 @@ patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inc
   if (!_patricia_tree_accepts_prefix(tree, prefix))
     return NULL;
 
-  if (tree->head == NULL)
+  if (tree->root == NULL)
     return NULL;
 
-  patricia_node_t *node = tree->head;
-  patricia_node_t *stack[PATRICIA_MAXBITS + 1];
+  patricia_node_t *node = tree->root;
+  patricia_node_t *candidates[PATRICIA_MAXBITS + 1];
+  size_t candidate_count = 0;
   const unsigned char *const addr = _patricia_prefix_bytes(prefix);
-  const unsigned int bitlen = prefix->bitlen;
-  int cnt = 0;
 
+  const unsigned int bitlen = prefix->bitlen;
   while (node->bit < bitlen)
   {
     if (node->prefix)
-      stack[cnt++] = node;
+      candidates[candidate_count++] = node;
 
     if (_patricia_prefix_bit_is_set(addr, node->bit))
-      node = node->r;
+      node = node->right;
     else
-      node = node->l;
+      node = node->left;
 
     if (node == NULL)
       break;
   }
 
   if (inclusive && node && node->prefix)
-    stack[cnt++] = node;
+    candidates[candidate_count++] = node;
 
-  if (cnt <= 0)
-    return NULL;
-
-  while (--cnt >= 0)
+  while (candidate_count)
   {
-    node = stack[cnt];
+    node = candidates[--candidate_count];
 
     if (node->prefix->bitlen <= bitlen &&
         _patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix),
@@ -477,12 +475,12 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   if (!_patricia_tree_accepts_prefix(tree, prefix))
     return NULL;
 
-  if (tree->head == NULL)
+  if (tree->root == NULL)
   {
-    patricia_node_t *node = io_calloc(sizeof(*node));
+    patricia_node_t *const node = io_calloc(sizeof(*node));
     node->bit = prefix->bitlen;
     node->prefix = _patricia_prefix_ref(prefix);
-    tree->head = node;
+    tree->root = node;
 
     return node;
   }
@@ -490,23 +488,23 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   const unsigned int maxbits = _patricia_family_maxbits(tree->family);
   const unsigned char *const addr = _patricia_prefix_bytes(prefix);
   const unsigned int bitlen = prefix->bitlen;
-  patricia_node_t *node = tree->head;
+  patricia_node_t *node = tree->root;
 
   while (node->bit < bitlen || node->prefix == NULL)
   {
     if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
     {
-      if (node->r == NULL)
+      if (node->right == NULL)
         break;
 
-      node = node->r;
+      node = node->right;
     }
     else
     {
-      if (node->l == NULL)
+      if (node->left == NULL)
         break;
 
-      node = node->l;
+      node = node->left;
     }
 
     assert(node);
@@ -537,7 +535,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
     return node;
   }
 
-  patricia_node_t *new_node = io_calloc(sizeof(*new_node));
+  patricia_node_t *const new_node = io_calloc(sizeof(*new_node));
   new_node->bit = prefix->bitlen;
   new_node->prefix = _patricia_prefix_ref(prefix);
 
@@ -547,13 +545,13 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
     if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
     {
-      assert(node->r == NULL);
-      node->r = new_node;
+      assert(node->right == NULL);
+      node->right = new_node;
     }
     else
     {
-      assert(node->l == NULL);
-      node->l = new_node;
+      assert(node->left == NULL);
+      node->left = new_node;
     }
 
     return new_node;
@@ -562,54 +560,54 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   if (bitlen == differ_bit)
   {
     if (bitlen < maxbits && _patricia_prefix_bit_is_set(test_addr, bitlen))
-      new_node->r = node;
+      new_node->right = node;
     else
-      new_node->l = node;
+      new_node->left = node;
 
     new_node->parent = node->parent;
 
     if (node->parent == NULL)
     {
-      assert(tree->head == node);
-      tree->head = new_node;
+      assert(tree->root == node);
+      tree->root = new_node;
     }
-    else if (node->parent->r == node)
-      node->parent->r = new_node;
+    else if (node->parent->right == node)
+      node->parent->right = new_node;
     else
-      node->parent->l = new_node;
+      node->parent->left = new_node;
 
     node->parent = new_node;
   }
   else
   {
-    patricia_node_t *glue = io_calloc(sizeof(*glue));
-    glue->bit = differ_bit;
-    glue->parent = node->parent;
+    patricia_node_t *const branch_node = io_calloc(sizeof(*branch_node));
+    branch_node->bit = differ_bit;
+    branch_node->parent = node->parent;
 
     if (differ_bit < maxbits && _patricia_prefix_bit_is_set(addr, differ_bit))
     {
-      glue->r = new_node;
-      glue->l = node;
+      branch_node->right = new_node;
+      branch_node->left = node;
     }
     else
     {
-      glue->r = node;
-      glue->l = new_node;
+      branch_node->right = node;
+      branch_node->left = new_node;
     }
 
-    new_node->parent = glue;
+    new_node->parent = branch_node;
 
     if (node->parent == NULL)
     {
-      assert(tree->head == node);
-      tree->head = glue;
+      assert(tree->root == node);
+      tree->root = branch_node;
     }
-    else if (node->parent->r == node)
-      node->parent->r = glue;
+    else if (node->parent->right == node)
+      node->parent->right = branch_node;
     else
-      node->parent->l = glue;
+      node->parent->left = branch_node;
 
-    node->parent = glue;
+    node->parent = branch_node;
   }
 
   return new_node;
@@ -621,7 +619,7 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
   assert(tree);
   assert(node);
 
-  if (node->r && node->l)
+  if (node->right && node->left)
   {
     /*
      * This might be a placeholder node -- have to check and make sure
@@ -637,7 +635,7 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
   }
 
   patricia_node_t *parent, *child;
-  if (node->r == NULL && node->l == NULL)
+  if (node->right == NULL && node->left == NULL)
   {
     parent = node->parent;
     _patricia_prefix_unref(node->prefix);
@@ -645,22 +643,22 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
     if (parent == NULL)
     {
-      assert(tree->head == node);
-      tree->head = NULL;
+      assert(tree->root == node);
+      tree->root = NULL;
       return;
     }
 
-    if (parent->r == node)
+    if (parent->right == node)
     {
-      parent->r = NULL;
-      child = parent->l;
+      parent->right = NULL;
+      child = parent->left;
     }
     else
     {
-      assert(parent->l == node);
+      assert(parent->left == node);
 
-      parent->l = NULL;
-      child = parent->r;
+      parent->left = NULL;
+      child = parent->right;
     }
 
     if (parent->prefix)
@@ -669,15 +667,15 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
     /* We need to remove parent too */
     if (parent->parent == NULL)
     {
-      assert(tree->head == parent);
-      tree->head = child;
+      assert(tree->root == parent);
+      tree->root = child;
     }
-    else if (parent->parent->r == parent)
-      parent->parent->r = child;
+    else if (parent->parent->right == parent)
+      parent->parent->right = child;
     else
     {
-      assert(parent->parent->l == parent);
-      parent->parent->l = child;
+      assert(parent->parent->left == parent);
+      parent->parent->left = child;
     }
 
     child->parent = parent->parent;
@@ -685,12 +683,12 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
     return;
   }
 
-  if (node->r)
-    child = node->r;
+  if (node->right)
+    child = node->right;
   else
   {
-    assert(node->l);
-    child = node->l;
+    assert(node->left);
+    child = node->left;
   }
 
   parent = node->parent;
@@ -701,17 +699,17 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
   if (parent == NULL)
   {
-    assert(tree->head == node);
-    tree->head = child;
+    assert(tree->root == node);
+    tree->root = child;
     return;
   }
 
-  if (parent->r == node)
-    parent->r = child;
+  if (parent->right == node)
+    parent->right = child;
   else
   {
-    assert(parent->l == node);
-    parent->l = child;
+    assert(parent->left == node);
+    parent->left = child;
   }
 }
 

@@ -119,8 +119,8 @@ ipcache_get_stats(uint32_t *const number_ips_stored, size_t *const mem_ips_store
 void
 ipcache_init(void)
 {
-  ipcache_trie_v6 = patricia_new(AF_INET6);
-  ipcache_trie_v4 = patricia_new(AF_INET);
+  ipcache_trie_v6 = patricia_create(AF_INET6);
+  ipcache_trie_v4 = patricia_create(AF_INET);
 
   event_handle_t event_expire_ipcache =
     event_create(ircd_event_manager, "_ipcache_remove_expired_records", _ipcache_remove_expired_records, 123000, false, NULL, NULL);

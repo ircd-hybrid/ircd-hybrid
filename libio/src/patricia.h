@@ -88,9 +88,9 @@ struct io_addr;
 
 typedef struct patricia_prefix
 {
-  unsigned short family;  /* AF_INET | AF_INET6 */
-  unsigned short bitlen;  /* same as mask? */
-  unsigned int ref_count;  /* reference count */
+  int family;
+  unsigned int bitlen;
+  unsigned int ref_count;
 
   union
   {
@@ -101,11 +101,11 @@ typedef struct patricia_prefix
 
 typedef struct patricia_node
 {
-  unsigned int bit;  /* flag if this node used */
-  patricia_prefix_t *prefix;  /* who we are in patricia tree */
-  struct patricia_node *left, *right;  /* left and right children */
-  struct patricia_node *parent;  /* may be used */
-  void *data;  /* pointer to data */
+  unsigned int bit_index;
+  patricia_prefix_t *prefix;
+  struct patricia_node *left, *right;
+  struct patricia_node *parent;
+  void *data;
 } patricia_node_t;
 
 typedef struct patricia_tree
@@ -117,7 +117,7 @@ typedef struct patricia_tree
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));
 extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
 extern void patricia_lookup_then_remove(patricia_tree_t *, const char *);
-extern void patricia_process(patricia_tree_t *, void (*)(patricia_prefix_t *, void *));
+extern void patricia_foreach(patricia_tree_t *, void (*)(patricia_prefix_t *, void *));
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, patricia_prefix_t *);
@@ -130,5 +130,5 @@ extern patricia_node_t *patricia_try_search_best(patricia_tree_t *, const char *
 extern patricia_node_t *patricia_try_search_best_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
 extern patricia_node_t *patricia_try_search_exact(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
-extern patricia_tree_t *patricia_new(int);
+extern patricia_tree_t *patricia_create(int);
 #endif  /* INCLUDED_patricia_h */

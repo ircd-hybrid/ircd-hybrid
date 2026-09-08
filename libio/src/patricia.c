@@ -102,12 +102,12 @@ _patricia_prefix_bits_equal(const unsigned char *lhs, const unsigned char *rhs, 
   if (memcmp(lhs, rhs, bytes))
     return false;
 
-  const unsigned int remaining = bitlen % 8;
-  if (remaining == 0)
+  const unsigned int remaining_bits = bitlen % 8;
+  if (remaining_bits == 0)
     return true;
 
   const unsigned char mask =
-    (unsigned char)(0xFFU << (8 - remaining));
+    (unsigned char)(0xFFU << (8 - remaining_bits));
 
   return (lhs[bytes] & mask) == (rhs[bytes] & mask);
 }
@@ -175,12 +175,12 @@ _patricia_prefix_init_from_string(patricia_prefix_t *prefix, const char *string)
 
   if (slash)
   {
-    const size_t length = slash - string;
-    if (length >= sizeof(address_buf))
+    const size_t address_len = slash - string;
+    if (address_len >= sizeof(address_buf))
       return false;
 
-    memcpy(address_buf, string, length);
-    address_buf[length] = '\0';
+    memcpy(address_buf, string, address_len);
+    address_buf[address_len] = '\0';
     address_string = address_buf;
   }
 
@@ -231,7 +231,7 @@ _patricia_prefix_to_addr(const patricia_prefix_t *prefix, struct io_addr *addr)
 }
 
 bool
-patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buf, size_t buflen, bool with_len)
+patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buf, size_t buflen, bool include_bitlen)
 {
   assert(prefix);
   assert(buf);
@@ -243,7 +243,7 @@ patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buf, size_t buf
   if (!address_to_string(&addr, buf, buflen))
     return false;
 
-  if (!with_len)
+  if (!include_bitlen)
     return true;
 
   const size_t address_len = strlen(buf);
@@ -286,7 +286,7 @@ _patricia_prefix_unref(patricia_prefix_t *prefix)
 /* these routines support continuous mask only */
 
 patricia_tree_t *
-patricia_new(int family)
+patricia_create(int family)
 {
   if (_patricia_family_maxbits(family) == 0)
     return NULL;
@@ -359,7 +359,7 @@ patricia_destroy(patricia_tree_t *tree, void (*func)(void *))
  * if func is supplied, it will be called as func(node->prefix, node->data)
  */
 void
-patricia_process(patricia_tree_t *tree, void (*func)(patricia_prefix_t *, void *))
+patricia_foreach(patricia_tree_t *tree, void (*func)(patricia_prefix_t *, void *))
 {
   assert(tree);
   assert(func);
@@ -386,9 +386,9 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
   const unsigned char *const addr = _patricia_prefix_bytes(prefix);
   const unsigned int bitlen = prefix->bitlen;
 
-  while (node->bit < bitlen)
+  while (node->bit_index < bitlen)
   {
-    if (_patricia_prefix_bit_is_set(addr, node->bit))
+    if (_patricia_prefix_bit_is_set(addr, node->bit_index))
       node = node->right;
     else
       node = node->left;
@@ -397,11 +397,11 @@ patricia_search_exact(patricia_tree_t *tree, patricia_prefix_t *prefix)
       return NULL;
   }
 
-  if (node->bit > bitlen || node->prefix == NULL)
+  if (node->bit_index > bitlen || node->prefix == NULL)
     return NULL;
 
-  assert(node->bit == bitlen);
-  assert(node->bit == node->prefix->bitlen);
+  assert(node->bit_index == bitlen);
+  assert(node->bit_index == node->prefix->bitlen);
 
   if (_patricia_prefix_bits_equal(
         _patricia_prefix_bytes(node->prefix),
@@ -430,12 +430,12 @@ patricia_search_best2(patricia_tree_t *tree, patricia_prefix_t *prefix, bool inc
   const unsigned char *const addr = _patricia_prefix_bytes(prefix);
 
   const unsigned int bitlen = prefix->bitlen;
-  while (node->bit < bitlen)
+  while (node->bit_index < bitlen)
   {
     if (node->prefix)
       candidates[candidate_count++] = node;
 
-    if (_patricia_prefix_bit_is_set(addr, node->bit))
+    if (_patricia_prefix_bit_is_set(addr, node->bit_index))
       node = node->right;
     else
       node = node->left;
@@ -478,7 +478,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   if (tree->root == NULL)
   {
     patricia_node_t *const node = io_calloc(sizeof(*node));
-    node->bit = prefix->bitlen;
+    node->bit_index = prefix->bitlen;
     node->prefix = _patricia_prefix_ref(prefix);
     tree->root = node;
 
@@ -490,9 +490,9 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   const unsigned int bitlen = prefix->bitlen;
   patricia_node_t *node = tree->root;
 
-  while (node->bit < bitlen || node->prefix == NULL)
+  while (node->bit_index < bitlen || node->prefix == NULL)
   {
-    if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
+    if (node->bit_index < maxbits && _patricia_prefix_bit_is_set(addr, node->bit_index))
     {
       if (node->right == NULL)
         break;
@@ -514,17 +514,17 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
 
   const unsigned char *const test_addr = _patricia_prefix_bytes(node->prefix);
 
-  const unsigned int check_bit = node->bit < bitlen ? node->bit : bitlen;
+  const unsigned int check_bit = node->bit_index < bitlen ? node->bit_index : bitlen;
   const unsigned int differ_bit = _patricia_prefix_first_differing_bit(addr, test_addr, check_bit);
 
   patricia_node_t *parent = node->parent;
-  while (parent && parent->bit >= differ_bit)
+  while (parent && parent->bit_index >= differ_bit)
   {
     node = parent;
     parent = node->parent;
   }
 
-  if (differ_bit == bitlen && node->bit == bitlen)
+  if (differ_bit == bitlen && node->bit_index == bitlen)
   {
     if (node->prefix)
       return node;
@@ -536,14 +536,14 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   }
 
   patricia_node_t *const new_node = io_calloc(sizeof(*new_node));
-  new_node->bit = prefix->bitlen;
+  new_node->bit_index = prefix->bitlen;
   new_node->prefix = _patricia_prefix_ref(prefix);
 
-  if (node->bit == differ_bit)
+  if (node->bit_index == differ_bit)
   {
     new_node->parent = node;
 
-    if (node->bit < maxbits && _patricia_prefix_bit_is_set(addr, node->bit))
+    if (node->bit_index < maxbits && _patricia_prefix_bit_is_set(addr, node->bit_index))
     {
       assert(node->right == NULL);
       node->right = new_node;
@@ -581,7 +581,7 @@ patricia_lookup(patricia_tree_t *tree, patricia_prefix_t *prefix)
   else
   {
     patricia_node_t *const branch_node = io_calloc(sizeof(*branch_node));
-    branch_node->bit = differ_bit;
+    branch_node->bit_index = differ_bit;
     branch_node->parent = node->parent;
 
     if (differ_bit < maxbits && _patricia_prefix_bit_is_set(addr, differ_bit))

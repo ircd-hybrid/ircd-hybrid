@@ -362,19 +362,64 @@ patricia_destroy(patricia_tree_t *tree, void (*func)(void *))
   io_free(tree);
 }
 
-/*
- * if func is supplied, it will be called as func(node->prefix, node->data)
- */
+static const patricia_node_t *
+_patricia_node_next_preorder(const patricia_node_t *node)
+{
+  assert(node);
+
+  if (node->left)
+  {
+    assert(node->left->parent == node);
+    assert(node->left->bit_index > node->bit_index);
+    return node->left;
+  }
+
+  if (node->right)
+  {
+    assert(node->right->parent == node);
+    assert(node->right->bit_index > node->bit_index);
+    return node->right;
+  }
+
+  while (node->parent)
+  {
+    const patricia_node_t *const parent = node->parent;
+    const bool is_left = parent->left == node;
+    const bool is_right = parent->right == node;
+
+    assert(is_left != is_right);
+    assert(parent->bit_index < node->bit_index);
+
+    if (is_left && parent->right)
+    {
+      assert(parent->right->parent == parent);
+      assert(parent->right->bit_index > parent->bit_index);
+      return parent->right;
+    }
+
+    node = parent;
+  }
+
+  return NULL;
+}
+
 void
-patricia_foreach(patricia_tree_t *tree, void (*func)(patricia_prefix_t *, void *))
+patricia_foreach(const patricia_tree_t *tree, void (*func)(const patricia_prefix_t *, void *))
 {
   assert(tree);
   assert(func);
 
-  patricia_node_t *node;
-  PATRICIA_WALK(tree->root, node) {
-    func(node->prefix, node->data);
-  } PATRICIA_WALK_END;
+  if (tree->root)
+    assert(tree->root->parent == NULL);
+
+  for (const patricia_node_t *node = tree->root; node;)
+  {
+    const patricia_node_t *const next = _patricia_node_next_preorder(node);
+    if (node->prefix)
+      func(node->prefix, node->data);
+
+    node = next;
+  }
 }
 
 patricia_node_t *

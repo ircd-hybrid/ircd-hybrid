@@ -46,46 +46,6 @@ struct io_addr;
 #define PATRICIA_DATA_GET(node, type) (type *)((node)->data)
 #define PATRICIA_DATA_SET(node, value) ((node)->data = (void *)(value))
 
-#define PATRICIA_WALK(Xhead, Xnode) \
-  do { \
-    patricia_node_t *Xstack[PATRICIA_MAXBITS + 1]; \
-    patricia_node_t **Xsp = Xstack; \
-    patricia_node_t *Xrn = (Xhead); \
-    while ((Xnode = Xrn)) { \
-      if (Xnode->prefix)
-
-#define PATRICIA_WALK_ALL(Xhead, Xnode) \
-  do { \
-    patricia_node_t *Xstack[PATRICIA_MAXBITS + 1]; \
-    patricia_node_t **Xsp = Xstack; \
-    patricia_node_t *Xrn = (Xhead); \
-    while ((Xnode = Xrn)) { \
-      if (1)
-
-#define PATRICIA_WALK_BREAK { \
-  if (Xsp != Xstack) { \
-    Xrn = *(--Xsp); \
-  } else { \
-    Xrn = (patricia_node_t *)0; \
-  } \
-  continue; }
-
-#define PATRICIA_WALK_END \
-    if (Xrn->left) { \
-      if (Xrn->right) { \
-        *Xsp++ = Xrn->right; \
-      } \
-      Xrn = Xrn->left; \
-    } else if (Xrn->right) { \
-      Xrn = Xrn->right; \
-    } else if (Xsp != Xstack) { \
-      Xrn = *(--Xsp); \
-    } else { \
-      Xrn = (patricia_node_t *)0; \
-    } \
-  } \
-} while (0)
-
 typedef struct patricia_prefix
 {
   int family;
@@ -115,7 +75,7 @@ typedef struct patricia_tree
 
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));
 extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
-extern void patricia_foreach(patricia_tree_t *, void (*)(patricia_prefix_t *, void *));
+extern void patricia_foreach(const patricia_tree_t *, void (*)(const patricia_prefix_t *, void *));
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
 extern bool patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);

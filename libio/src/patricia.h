@@ -119,7 +119,7 @@ extern void patricia_foreach(patricia_tree_t *, void (*)(patricia_prefix_t *, vo
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
 extern bool patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
-extern patricia_node_t *patricia_lookup(patricia_tree_t *, patricia_prefix_t *);
+extern patricia_node_t *patricia_lookup(patricia_tree_t *, const patricia_prefix_t *);
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, const struct io_addr *, unsigned int);
 extern patricia_node_t *patricia_search_best(const patricia_tree_t *, patricia_prefix_t *);

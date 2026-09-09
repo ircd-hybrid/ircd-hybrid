@@ -378,7 +378,7 @@ patricia_foreach(patricia_tree_t *tree, void (*func)(patricia_prefix_t *, void *
 }
 
 patricia_node_t *
-patricia_search_exact(const patricia_tree_t *tree, patricia_prefix_t *prefix)
+patricia_search_exact(const patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {
   assert(tree);
   assert(prefix);
@@ -420,7 +420,7 @@ patricia_search_exact(const patricia_tree_t *tree, patricia_prefix_t *prefix)
 
 /* if inclusive != 0, "best" may be the given prefix itself */
 patricia_node_t *
-patricia_search_best2(const patricia_tree_t *tree, patricia_prefix_t *prefix, bool inclusive)
+patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *prefix, bool inclusive)
 {
   assert(tree);
   assert(prefix);
@@ -468,7 +468,7 @@ patricia_search_best2(const patricia_tree_t *tree, patricia_prefix_t *prefix, bo
 }
 
 patricia_node_t *
-patricia_search_best(const patricia_tree_t *tree, patricia_prefix_t *prefix)
+patricia_search_best(const patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {
   return patricia_search_best2(tree, prefix, true);
 }

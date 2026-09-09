@@ -304,55 +304,79 @@ patricia_create(int family)
   return tree;
 }
 
-/*
- * if func is supplied, it will be called as func(node->data)
- * before deleting the node
- */
 void
-patricia_clear(patricia_tree_t *tree, void (*func)(void *))
+patricia_clear(patricia_tree_t *tree, void (*data_cleanup)(void *))
 {
   assert(tree);
 
-  if (tree->root == NULL)
+  patricia_node_t *const root = tree->root;
+  if (root == NULL)
     return;
 
-  patricia_node_t *Xstack[PATRICIA_MAXBITS + 1];
-  patricia_node_t **Xsp = Xstack;
-
-  patricia_node_t *Xrn = tree->root;
-  while (Xrn)
-  {
-    patricia_node_t *l = Xrn->left;
-    patricia_node_t *r = Xrn->right;
-
-    if (Xrn->prefix)
-    {
-      io_free(Xrn->prefix);
-
-      if (Xrn->data && func)
-        func(Xrn->data);
-    }
-    else
-      assert(Xrn->data == NULL);
-
-    io_free(Xrn);
-
-    if (l)
-    {
-      if (r)
-        *Xsp++ = r;
-
-      Xrn = l;
-    }
-    else if (r)
-      Xrn = r;
-    else if (Xsp != Xstack)
-      Xrn = *(--Xsp);
-    else
-      Xrn = NULL;
-  }
+  assert(root->parent == NULL);
 
   tree->root = NULL;
+
+  patricia_node_t *stack[PATRICIA_MAXBITS + 1];
+  size_t stack_count = 0;
+
+  stack[stack_count++] = root;
+
+  const unsigned int max_bitlen = _patricia_family_maxbits(tree->family);
+  assert(max_bitlen != 0);
+
+  while (stack_count)
+  {
+    patricia_node_t *const node = stack[--stack_count];
+    assert(node->bit_index <= max_bitlen);
+
+    if (node->prefix)
+    {
+      assert(node->bit_index == node->prefix->bitlen);
+      assert(_patricia_tree_accepts_prefix(tree, node->prefix));
+    }
+    else
+    {
+      assert(node->left);
+      assert(node->right);
+      assert(node->data == NULL);
+    }
+
+    if (node->left && node->right)
+      assert(node->left != node->right);
+
+    /*
+     * Push right before left so the existing left-first preorder is
+     * preserved.
+     */
+    if (node->right)
+    {
+      assert(node->right->parent == node);
+      assert(node->right->bit_index > node->bit_index);
+      assert(stack_count < sizeof(stack) / sizeof(*stack));
+
+      stack[stack_count++] = node->right;
+    }
+
+    if (node->left)
+    {
+      assert(node->left->parent == node);
+      assert(node->left->bit_index > node->bit_index);
+      assert(stack_count < sizeof(stack) / sizeof(*stack));
+
+      stack[stack_count++] = node->left;
+    }
+
+    if (node->prefix)
+    {
+      if (node->data && data_cleanup)
+        data_cleanup(node->data);
+
+      io_free(node->prefix);
+    }
+
+    io_free(node);
+  }
 }
 
 void

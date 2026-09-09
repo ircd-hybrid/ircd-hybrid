@@ -463,7 +463,6 @@ patricia_search_exact(const patricia_tree_t *tree, const patricia_prefix_t *pref
   return NULL;
 }
 
-/* if inclusive != 0, "best" may be the given prefix itself */
 patricia_node_t *
 patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *prefix, bool inclusive)
 {
@@ -476,37 +475,46 @@ patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *pref
   if (tree->root == NULL)
     return NULL;
 
-  patricia_node_t *node = tree->root;
-  patricia_node_t *candidates[PATRICIA_MAXBITS + 1];
-  size_t candidate_count = 0;
-  const unsigned char *const addr = _patricia_prefix_bytes(prefix);
+  assert(tree->root->parent == NULL);
 
+  const unsigned char *const prefix_bytes = _patricia_prefix_bytes(prefix);
   const unsigned int bitlen = prefix->bitlen;
+
+  patricia_node_t *node = tree->root;
   while (node->bit_index < bitlen)
   {
-    if (node->prefix)
-      candidates[candidate_count++] = node;
-
-    if (_patricia_prefix_bit_is_set(addr, node->bit_index))
-      node = node->right;
-    else
-      node = node->left;
-
-    if (node == NULL)
+    patricia_node_t *const next =
+      _patricia_prefix_bit_is_set(prefix_bytes, node->bit_index) ? node->right : node->left;
+    if (next == NULL)
       break;
+
+    assert(next->parent == node);
+    assert(next->bit_index > node->bit_index);
+
+    node = next;
   }
 
-  if (inclusive && node && node->prefix)
-    candidates[candidate_count++] = node;
-
-  while (candidate_count)
+  while (node)
   {
-    node = candidates[--candidate_count];
+    if (node->prefix)
+    {
+      assert(node->bit_index == node->prefix->bitlen);
 
-    if (node->prefix->bitlen <= bitlen &&
-        _patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix),
-        _patricia_prefix_bytes(prefix), node->prefix->bitlen))
-      return node;
+      const unsigned int candidate_bitlen = node->prefix->bitlen;
+      if (candidate_bitlen <= bitlen &&
+          (inclusive || candidate_bitlen < bitlen) &&
+          _patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix), prefix_bytes, candidate_bitlen))
+        return node;
+    }
+
+    patricia_node_t *const parent = node->parent;
+    if (parent)
+    {
+      assert(parent->bit_index < node->bit_index);
+      assert((parent->left == node) != (parent->right == node));
+    }
+
+    node = parent;
   }
 
   return NULL;

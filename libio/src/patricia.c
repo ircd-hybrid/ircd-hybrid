@@ -455,36 +455,46 @@ patricia_search_exact(const patricia_tree_t *tree, const patricia_prefix_t *pref
   if (!_patricia_tree_accepts_prefix(tree, prefix))
     return NULL;
 
-  if (tree->root == NULL)
+  patricia_node_t *node = tree->root;
+  if (node == NULL)
     return NULL;
 
-  patricia_node_t *node = tree->root;
-  const unsigned char *const addr = _patricia_prefix_bytes(prefix);
-  const unsigned int bitlen = prefix->bitlen;
+  assert(node->parent == NULL);
 
+  const unsigned char *const prefix_bytes = _patricia_prefix_bytes(prefix);
+
+  const unsigned int bitlen = prefix->bitlen;
   while (node->bit_index < bitlen)
   {
-    if (_patricia_prefix_bit_is_set(addr, node->bit_index))
-      node = node->right;
-    else
-      node = node->left;
-
-    if (node == NULL)
+    patricia_node_t *const next =
+      _patricia_prefix_bit_is_set(prefix_bytes, node->bit_index) ? node->right : node->left;
+    if (next == NULL)
       return NULL;
+
+    assert(next->parent == node);
+    assert(next->bit_index > node->bit_index);
+
+    node = next;
   }
 
-  if (node->bit_index > bitlen || node->prefix == NULL)
+  if (node->bit_index != bitlen)
     return NULL;
 
-  assert(node->bit_index == bitlen);
+  if (node->prefix == NULL)
+  {
+    assert(node->left);
+    assert(node->right);
+    assert(node->data == NULL);
+    return NULL;
+  }
+
   assert(node->bit_index == node->prefix->bitlen);
+  assert(_patricia_tree_accepts_prefix(tree, node->prefix));
 
-  if (_patricia_prefix_bits_equal(
-        _patricia_prefix_bytes(node->prefix),
-        _patricia_prefix_bytes(prefix), bitlen))
-    return node;
+  if (!_patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix), prefix_bytes, bitlen))
+    return NULL;
 
-  return NULL;
+  return node;
 }
 
 patricia_node_t *

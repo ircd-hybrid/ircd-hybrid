@@ -40,6 +40,9 @@
 
 struct io_addr;
 
+typedef struct patricia_node patricia_node_t;
+typedef struct patricia_tree patricia_tree_t;
+
 typedef struct patricia_prefix
 {
   int family;
@@ -51,22 +54,6 @@ typedef struct patricia_prefix
     struct in6_addr ipv6;
   } addr;
 } patricia_prefix_t;
-
-typedef struct patricia_node
-{
-  patricia_prefix_t *prefix;
-  void *data;
-  struct patricia_node *parent;
-  struct patricia_node *left;
-  struct patricia_node *right;
-  unsigned int bit_index;
-} patricia_node_t;
-
-typedef struct patricia_tree
-{
-  patricia_node_t *root;
-  int family;
-} patricia_tree_t;
 
 typedef void (*patricia_data_cleanup_fn)(void *);
 typedef void (*patricia_foreach_fn)(const patricia_prefix_t *, void *);

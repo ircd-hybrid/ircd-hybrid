@@ -51,6 +51,22 @@ enum
   PATRICIA_MAX_BITLEN = PATRICIA_MAX_BITLEN_IPV6
 };
 
+typedef struct patricia_node
+{
+  patricia_prefix_t *prefix;
+  void *data;
+  struct patricia_node *parent;
+  struct patricia_node *left;
+  struct patricia_node *right;
+  unsigned int bit_index;
+} patricia_node_t;
+
+typedef struct patricia_tree
+{
+  patricia_node_t *root;
+  int family;
+} patricia_tree_t;
+
 static unsigned int
 _patricia_family_max_bitlen(int family)
 {

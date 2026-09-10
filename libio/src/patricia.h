@@ -35,6 +35,7 @@
 #ifndef INCLUDED_patricia_h
 #define INCLUDED_patricia_h
 #include <stdbool.h>
+#include <stddef.h>
 #include <netinet/in.h>
 
 struct io_addr;
@@ -53,11 +54,12 @@ typedef struct patricia_prefix
 
 typedef struct patricia_node
 {
-  unsigned int bit_index;
   patricia_prefix_t *prefix;
-  struct patricia_node *left, *right;
-  struct patricia_node *parent;
   void *data;
+  struct patricia_node *parent;
+  struct patricia_node *left;
+  struct patricia_node *right;
+  unsigned int bit_index;
 } patricia_node_t;
 
 typedef struct patricia_tree
@@ -66,9 +68,12 @@ typedef struct patricia_tree
   int family;
 } patricia_tree_t;
 
-extern void patricia_clear(patricia_tree_t *, void (*)(void *));
-extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
-extern void patricia_foreach(const patricia_tree_t *, void (*)(const patricia_prefix_t *, void *));
+typedef void (*patricia_data_cleanup_fn)(void *);
+typedef void (*patricia_foreach_fn)(const patricia_prefix_t *, void *);
+
+extern void patricia_clear(patricia_tree_t *, patricia_data_cleanup_fn);
+extern void patricia_destroy(patricia_tree_t *, patricia_data_cleanup_fn);
+extern void patricia_foreach(const patricia_tree_t *, patricia_foreach_fn);
 extern void patricia_node_set_data(patricia_node_t *, void *);
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
 extern bool patricia_lookup_then_remove(patricia_tree_t *, const char *);

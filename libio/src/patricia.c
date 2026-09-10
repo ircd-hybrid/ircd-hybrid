@@ -77,7 +77,7 @@ _patricia_tree_accepts_prefix(const patricia_tree_t *tree, const patricia_prefix
 
 static void
 _patricia_tree_replace_node(patricia_tree_t *tree,
-                            patricia_node_t *node,
+                            const patricia_node_t *node,
                             patricia_node_t *replacement)
 {
   assert(tree);
@@ -199,24 +199,24 @@ _patricia_prefix_init_from_addr(patricia_prefix_t *prefix, const struct io_addr 
 }
 
 static bool
-_patricia_prefix_init_from_string(patricia_prefix_t *prefix, const char *string)
+_patricia_prefix_init_from_string(patricia_prefix_t *prefix, const char *prefix_string)
 {
   assert(prefix);
-  assert(string);
+  assert(prefix_string);
 
-  char address_buf[INET6_ADDRSTRLEN];
-  const char *address_string = string;
-  const char *const slash = strchr(string, '/');
+  char address_buffer[INET6_ADDRSTRLEN];
+  const char *address_string = prefix_string;
+  const char *const slash = strchr(prefix_string, '/');
 
   if (slash)
   {
-    const size_t address_len = slash - string;
-    if (address_len >= sizeof(address_buf))
+    const size_t address_len = slash - prefix_string;
+    if (address_len >= sizeof(address_buffer))
       return false;
 
-    memcpy(address_buf, string, address_len);
-    address_buf[address_len] = '\0';
-    address_string = address_buf;
+    memcpy(address_buffer, prefix_string, address_len);
+    address_buffer[address_len] = '\0';
+    address_string = address_buffer;
   }
 
   struct io_addr addr;
@@ -406,9 +406,9 @@ patricia_clear(patricia_tree_t *tree, void (*data_cleanup)(void *))
 }
 
 void
-patricia_destroy(patricia_tree_t *tree, void (*func)(void *))
+patricia_destroy(patricia_tree_t *tree, void (*data_cleanup)(void *))
 {
-  patricia_clear(tree, func);
+  patricia_clear(tree, data_cleanup);
   io_free(tree);
 }
 
@@ -454,19 +454,19 @@ _patricia_node_next_preorder(const patricia_node_t *node)
 }
 
 void
-patricia_foreach(const patricia_tree_t *tree, void (*func)(const patricia_prefix_t *, void *))
+patricia_foreach(const patricia_tree_t *tree, patricia_foreach_fn callback)
 {
   assert(tree);
-  assert(func);
+  assert(callback);
 
   if (tree->root)
     assert(tree->root->parent == NULL);
 
-  for (const patricia_node_t *node = tree->root; node;)
+  for (const patricia_node_t *node = tree->root; node; )
   {
     const patricia_node_t *const next = _patricia_node_next_preorder(node);
     if (node->prefix)
-      func(node->prefix, node->data);
+      callback(node->prefix, node->data);
 
     node = next;
   }
@@ -524,7 +524,7 @@ patricia_search_exact(const patricia_tree_t *tree, const patricia_prefix_t *pref
 }
 
 patricia_node_t *
-patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *prefix, bool inclusive)
+patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *prefix, bool include_exact)
 {
   assert(tree);
   assert(prefix);
@@ -562,7 +562,7 @@ patricia_search_best2(const patricia_tree_t *tree, const patricia_prefix_t *pref
 
       const unsigned int candidate_bitlen = node->prefix->bitlen;
       if (candidate_bitlen <= bitlen &&
-          (inclusive || candidate_bitlen < bitlen) &&
+          (include_exact || candidate_bitlen < bitlen) &&
           _patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix), prefix_bytes, candidate_bitlen))
         return node;
     }
@@ -793,10 +793,10 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 }
 
 patricia_node_t *
-patricia_make_and_lookup(patricia_tree_t *tree, const char *string)
+patricia_make_and_lookup(patricia_tree_t *tree, const char *prefix_string)
 {
   patricia_prefix_t prefix;
-  if (!_patricia_prefix_init_from_string(&prefix, string))
+  if (!_patricia_prefix_init_from_string(&prefix, prefix_string))
     return NULL;
 
   return patricia_lookup(tree, &prefix);
@@ -813,9 +813,9 @@ patricia_make_and_lookup_addr(patricia_tree_t *tree, const struct io_addr *addr,
 }
 
 bool
-patricia_lookup_then_remove(patricia_tree_t *tree, const char *string)
+patricia_lookup_then_remove(patricia_tree_t *tree, const char *prefix_string)
 {
-  patricia_node_t *const node = patricia_try_search_exact(tree, string);
+  patricia_node_t *const node = patricia_try_search_exact(tree, prefix_string);
   if (node == NULL)
     return false;
 
@@ -824,20 +824,20 @@ patricia_lookup_then_remove(patricia_tree_t *tree, const char *string)
 }
 
 patricia_node_t *
-patricia_try_search_exact(const patricia_tree_t *tree, const char *string)
+patricia_try_search_exact(const patricia_tree_t *tree, const char *prefix_string)
 {
   patricia_prefix_t prefix;
-  if (!_patricia_prefix_init_from_string(&prefix, string))
+  if (!_patricia_prefix_init_from_string(&prefix, prefix_string))
     return NULL;
 
   return patricia_search_exact(tree, &prefix);
 }
 
 patricia_node_t *
-patricia_try_search_best(const patricia_tree_t *tree, const char *string)
+patricia_try_search_best(const patricia_tree_t *tree, const char *prefix_string)
 {
   patricia_prefix_t prefix;
-  if (!_patricia_prefix_init_from_string(&prefix, string))
+  if (!_patricia_prefix_init_from_string(&prefix, prefix_string))
     return NULL;
 
   return patricia_search_best(tree, &prefix);

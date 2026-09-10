@@ -43,9 +43,6 @@ struct io_addr;
 #define PATRICIA_MAXBITS_IPV4 (sizeof(struct in_addr) * 8)
 #define PATRICIA_MAXBITS_IPV6 (sizeof(struct in6_addr) * 8)
 
-#define PATRICIA_DATA_GET(node, type) (type *)((node)->data)
-#define PATRICIA_DATA_SET(node, value) ((node)->data = (void *)(value))
-
 typedef struct patricia_prefix
 {
   int family;
@@ -76,9 +73,11 @@ typedef struct patricia_tree
 extern void patricia_clear(patricia_tree_t *, void (*)(void *));
 extern void patricia_destroy(patricia_tree_t *, void (*)(void *));
 extern void patricia_foreach(const patricia_tree_t *, void (*)(const patricia_prefix_t *, void *));
+extern void patricia_node_set_data(patricia_node_t *, void *);
 extern void patricia_remove(patricia_tree_t *, patricia_node_t *);
 extern bool patricia_lookup_then_remove(patricia_tree_t *, const char *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
+extern void *patricia_node_get_data(const patricia_node_t *);
 extern patricia_node_t *patricia_lookup(patricia_tree_t *, const patricia_prefix_t *);
 extern patricia_node_t *patricia_make_and_lookup(patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_make_and_lookup_addr(patricia_tree_t *, const struct io_addr *, unsigned int);

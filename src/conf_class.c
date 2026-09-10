@@ -18,9 +18,22 @@
 #include "conf.h"
 #include "conf_class.h"
 
+struct class_ip_limit_entry
+{
+  unsigned int count;
+};
+
 static list_t class_list;
 
 struct ClassItem *class_default;
+
+static void
+_class_ip_limit_entry_free(void *data)
+{
+  assert(data);
+
+  io_free(data);
+}
 
 const list_t *
 class_get_list(void)
@@ -52,9 +65,9 @@ class_destroy(struct ClassItem *const klass)
   assert(klass->ref_count == 0);
 
   if (klass->ip_tree_v6)
-    patricia_destroy(klass->ip_tree_v6, NULL);
+    patricia_destroy(klass->ip_tree_v6, _class_ip_limit_entry_free);
   if (klass->ip_tree_v4)
-    patricia_destroy(klass->ip_tree_v4, NULL);
+    patricia_destroy(klass->ip_tree_v4, _class_ip_limit_entry_free);
 
   list_remove(&klass->node, &class_list);
   io_free(klass->name);
@@ -140,9 +153,10 @@ _class_ip_limit_resolve(const struct ClassItem *klass, const struct io_addr *add
 }
 
 bool
-class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
+class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, bool over_rule)
 {
-  if (klass->number_per_cidr == 0)
+  const unsigned int limit = klass->number_per_cidr;
+  if (limit == 0)
     return false;
 
   patricia_tree_t *tree;
@@ -154,26 +168,31 @@ class_ip_limit_add(struct ClassItem *klass, const void *addr, bool over_rule)
   if (pnode == NULL)
     return false;
 
-  if (((uintptr_t)pnode->data) >= klass->number_per_cidr)
+  struct class_ip_limit_entry *entry = patricia_node_get_data(pnode);
+  if (entry == NULL)
   {
+    entry = io_calloc(sizeof(*entry));
+    patricia_node_set_data(pnode, entry);
+  }
+
+  if (entry->count >= limit)
+  {
+    /*
+     * Overruled clients must still be counted because their eventual
+     * detachment calls class_ip_limit_remove().
+     */
     if (over_rule)
-      /*
-       * In case of overruling, we continue with the client registration process
-       * which means we expect a class_ip_limit_remove() call when detaching the
-       * configuration record upon client exit, therefore pnode->data has to be
-       * increased.
-       */
-      PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
+      ++entry->count;
 
     return true;
   }
 
-  PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
+  ++entry->count;
   return false;
 }
 
 bool
-class_ip_limit_remove(struct ClassItem *klass, const void *addr)
+class_ip_limit_remove(struct ClassItem *klass, const struct io_addr *addr)
 {
   if (klass->number_per_cidr == 0)
     return false;
@@ -187,22 +206,25 @@ class_ip_limit_remove(struct ClassItem *klass, const void *addr)
   if (pnode == NULL)
     return false;
 
-  PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) - 1));
+  struct class_ip_limit_entry *const entry = patricia_node_get_data(pnode);
+  assert(entry);
+  assert(entry->count > 0);
 
-  if (((uintptr_t)pnode->data) == 0)
-  {
-    patricia_remove(tree, pnode);
-    return true;
-  }
+  if (--entry->count)
+    return false;
 
-  return false;
+  patricia_node_set_data(pnode, NULL);
+  io_free(entry);
+  patricia_remove(tree, pnode);
+
+  return true;
 }
 
 void
 class_ip_limit_rebuild(struct ClassItem *klass)
 {
-  patricia_clear(klass->ip_tree_v6, NULL);
-  patricia_clear(klass->ip_tree_v4, NULL);
+  patricia_clear(klass->ip_tree_v6, _class_ip_limit_entry_free);
+  patricia_clear(klass->ip_tree_v4, _class_ip_limit_entry_free);
 
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)

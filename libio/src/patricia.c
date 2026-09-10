@@ -290,6 +290,24 @@ _patricia_prefix_dup(const patricia_prefix_t *prefix)
   return copy;
 }
 
+void *
+patricia_node_get_data(const patricia_node_t *node)
+{
+  assert(node);
+  assert(node->prefix);
+
+  return node->data;
+}
+
+void
+patricia_node_set_data(patricia_node_t *node, void *data)
+{
+  assert(node);
+  assert(node->prefix);
+
+  node->data = data;
+}
+
 /* these routines support continuous mask only */
 
 patricia_tree_t *

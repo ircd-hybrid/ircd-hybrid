@@ -40,7 +40,7 @@ _ipcache_trie_for_addr(const struct io_addr *addr)
 }
 
 struct ip_entry *
-ipcache_record_find_or_add(const void *addr)
+ipcache_record_find_or_add(const struct io_addr *addr)
 {
   patricia_tree_t *const trie = _ipcache_trie_for_addr(addr);
   if (trie == NULL)
@@ -50,31 +50,35 @@ ipcache_record_find_or_add(const void *addr)
   if (pnode == NULL)
     return NULL;
 
-  if (pnode->data)
-    return pnode->data;
+  struct ip_entry *entry = patricia_node_get_data(pnode);
+  if (entry)
+    return entry;
 
-  struct ip_entry *iptr = io_calloc(sizeof(*iptr));
-  iptr->trie_pointer = trie;
-  list_add(pnode, &iptr->node, &ipcache_list);
+  entry = io_calloc(sizeof(*entry));
+  entry->trie_pointer = trie;
 
-  PATRICIA_DATA_SET(pnode, iptr);
+  list_add(pnode, &entry->node, &ipcache_list);
+  patricia_node_set_data(pnode, entry);
 
-  return iptr;
+  return entry;
 }
 
 static void
 _ipcache_record_delete(patricia_node_t *pnode)
 {
-  struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
+  assert(pnode);
 
-  if (iptr->count_local == 0 && iptr->count_remote == 0 &&
-      (io_time_get(IO_TIME_MONOTONIC_SEC) - iptr->last_attempt) >= ConfigGeneral.throttle_time)
-  {
-    patricia_remove(iptr->trie_pointer, pnode);
+  struct ip_entry *const entry = patricia_node_get_data(pnode);
+  assert(entry);
 
-    list_remove(&iptr->node, &ipcache_list);
-    io_free(iptr);
-  }
+  if (entry->count_local || entry->count_remote ||
+      (io_time_get(IO_TIME_MONOTONIC_SEC) - entry->last_attempt) < ConfigGeneral.throttle_time)
+    return;
+
+  patricia_remove(entry->trie_pointer, pnode);
+
+  list_remove(&entry->node, &ipcache_list);
+  io_free(entry);
 }
 
 static void
@@ -87,7 +91,7 @@ _ipcache_remove_expired_records(void *unused)
 }
 
 void
-ipcache_record_remove(const void *addr, bool local)
+ipcache_record_remove(const struct io_addr *addr, bool local)
 {
   patricia_tree_t *const trie = _ipcache_trie_for_addr(addr);
   if (trie == NULL)
@@ -97,13 +101,20 @@ ipcache_record_remove(const void *addr, bool local)
   if (pnode == NULL)
     return;
 
-  struct ip_entry *iptr = PATRICIA_DATA_GET(pnode, struct ip_entry);
-  assert(iptr->count_local > 0 || iptr->count_remote > 0);
+  struct ip_entry *const entry = patricia_node_get_data(pnode);
+  assert(entry);
+  assert(entry->count_local > 0 || entry->count_remote > 0);
 
   if (local)
-    --iptr->count_local;
+  {
+    assert(entry->count_local > 0);
+    --entry->count_local;
+  }
   else
-    --iptr->count_remote;
+  {
+    assert(entry->count_remote > 0);
+    --entry->count_remote;
+  }
 
   _ipcache_record_delete(pnode);
 }

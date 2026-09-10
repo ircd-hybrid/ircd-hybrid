@@ -33,6 +33,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,15 +44,22 @@
 #include "memory.h"
 #include "patricia.h"
 
+enum
+{
+  PATRICIA_MAX_BITLEN_IPV4 = sizeof(struct in_addr) * CHAR_BIT,
+  PATRICIA_MAX_BITLEN_IPV6 = sizeof(struct in6_addr) * CHAR_BIT,
+  PATRICIA_MAX_BITLEN = PATRICIA_MAX_BITLEN_IPV6
+};
+
 static unsigned int
-_patricia_family_maxbits(int family)
+_patricia_family_max_bitlen(int family)
 {
   switch (family)
   {
     case AF_INET:
-      return PATRICIA_MAXBITS_IPV4;
+      return PATRICIA_MAX_BITLEN_IPV4;
     case AF_INET6:
-      return PATRICIA_MAXBITS_IPV6;
+      return PATRICIA_MAX_BITLEN_IPV6;
     default:
       return 0;
   }
@@ -60,11 +68,11 @@ _patricia_family_maxbits(int family)
 static bool
 _patricia_tree_accepts_prefix(const patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {
-  const unsigned int maxbits = _patricia_family_maxbits(tree->family);
-  if (maxbits == 0)
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(tree->family);
+  if (max_bitlen == 0)
     return false;
 
-  return prefix->family == tree->family && prefix->bitlen <= maxbits;
+  return prefix->family == tree->family && prefix->bitlen <= max_bitlen;
 }
 
 static void
@@ -146,8 +154,8 @@ _patricia_prefix_init(patricia_prefix_t *prefix, const struct io_addr *addr, uns
   assert(addr);
 
   const int family = address_get_family(addr);
-  const unsigned int maxbits = _patricia_family_maxbits(family);
-  if (maxbits == 0 || bitlen > maxbits)
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(family);
+  if (max_bitlen == 0 || bitlen > max_bitlen)
     return false;
 
   patricia_prefix_t new_prefix =
@@ -180,12 +188,12 @@ _patricia_prefix_init_from_addr(patricia_prefix_t *prefix, const struct io_addr 
   assert(prefix);
   assert(addr);
 
-  const unsigned int maxbits = _patricia_family_maxbits(address_get_family(addr));
-  if (maxbits == 0)
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(address_get_family(addr));
+  if (max_bitlen == 0)
     return false;
 
-  if (bitlen == 0 || bitlen > maxbits)
-    bitlen = maxbits;
+  if (bitlen == 0 || bitlen > max_bitlen)
+    bitlen = max_bitlen;
 
   return _patricia_prefix_init(prefix, addr, bitlen);
 }
@@ -215,11 +223,11 @@ _patricia_prefix_init_from_string(patricia_prefix_t *prefix, const char *string)
   if (!address_from_string(address_string, &addr))
     return false;
 
-  const unsigned int maxbits = _patricia_family_maxbits(address_get_family(&addr));
-  if (maxbits == 0)
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(address_get_family(&addr));
+  if (max_bitlen == 0)
     return false;
 
-  unsigned int bitlen = maxbits;
+  unsigned int bitlen = max_bitlen;
 
   if (slash)
   {
@@ -227,7 +235,7 @@ _patricia_prefix_init_from_string(patricia_prefix_t *prefix, const char *string)
     switch (io_parse_uint(slash + 1, &parsed_bitlen))
     {
       case IO_PARSE_OK:
-        if (parsed_bitlen <= maxbits)
+        if (parsed_bitlen <= max_bitlen)
           bitlen = parsed_bitlen;
         break;
       case IO_PARSE_RANGE:
@@ -313,7 +321,7 @@ patricia_node_set_data(patricia_node_t *node, void *data)
 patricia_tree_t *
 patricia_create(int family)
 {
-  if (_patricia_family_maxbits(family) == 0)
+  if (_patricia_family_max_bitlen(family) == 0)
     return NULL;
 
   patricia_tree_t *const tree = io_calloc(sizeof(*tree));
@@ -335,12 +343,12 @@ patricia_clear(patricia_tree_t *tree, void (*data_cleanup)(void *))
 
   tree->root = NULL;
 
-  patricia_node_t *stack[PATRICIA_MAXBITS + 1];
+  patricia_node_t *stack[PATRICIA_MAX_BITLEN + 1];
   size_t stack_count = 0;
 
   stack[stack_count++] = root;
 
-  const unsigned int max_bitlen = _patricia_family_maxbits(tree->family);
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(tree->family);
   assert(max_bitlen != 0);
 
   while (stack_count)
@@ -599,7 +607,7 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
 
   assert(tree->root->parent == NULL);
 
-  const unsigned int max_bitlen = _patricia_family_maxbits(tree->family);
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(tree->family);
   const unsigned char *const prefix_bytes = _patricia_prefix_bytes(prefix);
   const unsigned int bitlen = prefix->bitlen;
   patricia_node_t *node = tree->root;

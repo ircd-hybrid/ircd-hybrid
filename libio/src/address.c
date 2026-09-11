@@ -597,3 +597,27 @@ address_to_bytes(const struct io_addr *addr, void *bytes, size_t len)
 
   return false;
 }
+
+bool
+address_get_bytes(const struct io_addr *addr, const unsigned char **bytes_out, size_t *len_out)
+{
+  if (address_is_ipv4(addr))
+  {
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
+    *bytes_out = (const unsigned char *)&v4->sin_addr;
+    *len_out = sizeof(v4->sin_addr);
+    return true;
+  }
+
+  if (address_is_ipv6(addr))
+  {
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
+    *bytes_out = (const unsigned char *)&v6->sin6_addr;
+    *len_out = sizeof(v6->sin6_addr);
+    return true;
+  }
+
+  *bytes_out = NULL;
+  *len_out = 0;
+  return false;
+}

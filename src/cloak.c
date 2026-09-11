@@ -213,28 +213,17 @@ cloak_init(void)
 static const char *
 _cloak_mac_and_compose(const struct io_addr *addr)
 {
-  const void *addr_ptr;
+  const unsigned char *addr_bytes;
   size_t addr_len;
 
-  /* Determine the address pointer and length based on the address family (IPv4 or IPv6). */
-  if (address_is_ipv6(addr))
-  {
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *const)&addr->ss;
-    addr_ptr = &v6->sin6_addr;
-    addr_len = sizeof(struct in6_addr);
-  }
-  else
-  {
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *const)&addr->ss;
-    addr_ptr = &v4->sin_addr;
-    addr_len = sizeof(struct in_addr);
-  }
+  if (!address_get_bytes(addr, &addr_bytes, &addr_len))
+    return NULL;
 
   /* Compute SHA3 hash. */
   sha3_context_t ctx_sha3;
   sha3_init512(&ctx_sha3);
   sha3_update(&ctx_sha3, config->secret, config->secret_len);
-  sha3_update(&ctx_sha3, addr_ptr, addr_len);
+  sha3_update(&ctx_sha3, addr_bytes, addr_len);
   const uint8_t *const digest_sha3 = sha3_finalize(&ctx_sha3);
 
   /* Encode the hash in base32. */

@@ -46,10 +46,18 @@
 
 enum
 {
-  PATRICIA_MAX_BITLEN_IPV4 = sizeof(struct in_addr) * CHAR_BIT,
-  PATRICIA_MAX_BITLEN_IPV6 = sizeof(struct in6_addr) * CHAR_BIT,
+  PATRICIA_MAX_BITLEN_IPV4 = 32,
+  PATRICIA_MAX_BITLEN_IPV6 = 128,
   PATRICIA_MAX_BITLEN = PATRICIA_MAX_BITLEN_IPV6
 };
+
+_Static_assert(CHAR_BIT == 8, "Patricia prefix handling requires 8-bit bytes");
+_Static_assert(sizeof(struct in_addr) * CHAR_BIT ==
+               PATRICIA_MAX_BITLEN_IPV4,
+               "struct in_addr has an unexpected size");
+_Static_assert(sizeof(struct in6_addr) * CHAR_BIT ==
+               PATRICIA_MAX_BITLEN_IPV6,
+               "struct in6_addr has an unexpected size");
 
 typedef struct patricia_node
 {

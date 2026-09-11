@@ -831,17 +831,6 @@ patricia_make_and_lookup_addr(patricia_tree_t *tree, const struct io_addr *addr,
   return patricia_lookup(tree, &prefix);
 }
 
-bool
-patricia_lookup_then_remove(patricia_tree_t *tree, const char *prefix_string)
-{
-  patricia_node_t *const node = patricia_try_search_exact(tree, prefix_string);
-  if (node == NULL)
-    return false;
-
-  patricia_remove(tree, node);
-  return true;
-}
-
 patricia_node_t *
 patricia_try_search_exact(const patricia_tree_t *tree, const char *prefix_string)
 {

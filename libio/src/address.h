@@ -26,6 +26,14 @@ enum hostmask_type
 
 enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
 
+enum
+{
+  ADDRESS_REVERSE_NAME_BUFSIZE = 74
+};
+
+_Static_assert(ADDRESS_REVERSE_NAME_BUFSIZE == sizeof(struct in6_addr) * 4 + sizeof("ip6.arpa."),
+  "ADDRESS_REVERSE_NAME_BUFSIZE is incorrect");
+
 /**
  * @struct io_addr
  * @brief Structure to handle sockaddr_storage with compatibility for different implementations.
@@ -45,6 +53,7 @@ extern bool address_get_bytes(const struct io_addr *, const unsigned char **, si
 extern bool address_to_bytes(const struct io_addr *, void *, size_t);
 extern bool address_from_string(const char *, struct io_addr *);
 extern bool address_to_string(const struct io_addr *, char *, size_t);
+extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
 extern bool address_match(const struct io_addr *, const struct io_addr *, bool, bool, int);
 extern bool address_match_ipv6(const struct io_addr *, const struct io_addr *, int);
 extern bool address_match_ipv4(const struct io_addr *, const struct io_addr *, int);

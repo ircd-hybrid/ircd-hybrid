@@ -621,3 +621,81 @@ address_get_bytes(const struct io_addr *addr, const unsigned char **bytes_out, s
   *len_out = 0;
   return false;
 }
+
+static char *
+_address_append_decimal_octet(char *out, unsigned char octet)
+{
+  static const char digits[] = "0123456789";
+
+  if (octet >= 100)
+  {
+    *out++ = digits[octet / 100];
+    *out++ = digits[(octet / 10) % 10];
+  }
+  else if (octet >= 10)
+    *out++ = digits[octet / 10];
+
+  *out++ = digits[octet % 10];
+  return out;
+}
+
+bool
+address_to_reverse_name(const struct io_addr *addr, char *buffer, size_t buffer_size)
+{
+  const unsigned char *bytes;
+  size_t length;
+
+  if (!address_get_bytes(addr, &bytes, &length))
+    return false;
+
+  char reverse_name[ADDRESS_REVERSE_NAME_BUFSIZE];
+  char *out = reverse_name;
+
+  if (address_is_ipv4(addr))
+  {
+    if (length != sizeof(struct in_addr))
+      return false;
+
+    for (size_t i = length; i-- > 0;)
+    {
+      out = _address_append_decimal_octet(out, bytes[i]);
+      *out++ = '.';
+    }
+
+    static const char suffix[] = "in-addr.arpa.";
+    memcpy(out, suffix, sizeof(suffix));
+    out += sizeof(suffix) - 1;
+  }
+  else if (address_is_ipv6(addr))
+  {
+    if (length != sizeof(struct in6_addr))
+      return false;
+
+    static const char digits[] = "0123456789abcdef";
+
+    for (size_t i = length; i-- > 0;)
+    {
+      const unsigned char octet = bytes[i];
+      *out++ = digits[octet & 0x0f];
+      *out++ = '.';
+      *out++ = digits[octet >> 4];
+      *out++ = '.';
+    }
+
+    static const char suffix[] = "ip6.arpa.";
+    memcpy(out, suffix, sizeof(suffix));
+    out += sizeof(suffix) - 1;
+  }
+  else
+    return false;
+
+  const size_t required_size = (size_t)(out - reverse_name) + 1;
+  assert(required_size <= sizeof(reverse_name));
+  assert(*out == '\0');
+
+  if (buffer_size < required_size)
+    return false;
+
+  memcpy(buffer, reverse_name, required_size);
+  return true;
+}

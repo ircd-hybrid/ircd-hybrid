@@ -213,10 +213,10 @@ class_ip_limit_remove(struct ClassItem *klass, const struct io_addr *addr)
   if (--entry->count)
     return false;
 
-  patricia_node_set_data(pnode, NULL);
-  io_free(entry);
-  patricia_remove(tree, pnode);
+  struct class_ip_limit_entry *const removed_entry = patricia_remove(tree, pnode);
+  assert(removed_entry == entry);
 
+  io_free(removed_entry);
   return true;
 }
 

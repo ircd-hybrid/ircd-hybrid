@@ -758,19 +758,21 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
   return new_node;
 }
 
-void
+void *
 patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 {
   assert(tree);
   assert(node);
   assert(node->prefix);
 
+  void *const data = node->data;
+
   if (node->left && node->right)
   {
     io_free(node->prefix);
     node->prefix = NULL;
     node->data = NULL;
-    return;
+    return data;
   }
 
   if (node->left || node->right)
@@ -780,7 +782,7 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
     io_free(node->prefix);
     io_free(node);
-    return;
+    return data;
   }
 
   patricia_node_t *const parent = node->parent;
@@ -806,6 +808,7 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
 
   io_free(node->prefix);
   io_free(node);
+  return data;
 }
 
 patricia_node_t *

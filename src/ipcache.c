@@ -75,10 +75,11 @@ _ipcache_record_delete(patricia_node_t *pnode)
       (io_time_get(IO_TIME_MONOTONIC_SEC) - entry->last_attempt) < ConfigGeneral.throttle_time)
     return;
 
-  patricia_remove(entry->trie_pointer, pnode);
+  struct ip_entry *const removed_entry = patricia_remove(entry->trie_pointer, pnode);
+  assert(removed_entry == entry);
 
-  list_remove(&entry->node, &ipcache_list);
-  io_free(entry);
+  list_remove(&removed_entry->node, &ipcache_list);
+  io_free(removed_entry);
 }
 
 static void

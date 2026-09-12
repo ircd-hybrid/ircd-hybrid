@@ -255,7 +255,7 @@ struct AddressRec
     {
       /* Pointer into MaskItem... -A1kmm */
       struct io_addr addr;
-      int bits;
+      unsigned int bits;
     } ipa;
 
     /* Pointer into MaskItem... -A1kmm */

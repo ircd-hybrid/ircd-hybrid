@@ -38,7 +38,7 @@ struct Motd
                     class name if type==MOTD_CLASS,
                     text IP mask if type==MOTD_IPMASK. */
   struct io_addr address;  /**< Address if type==MOTD_IPMASK. */
-  int addrbits;  /**< Number of bits checked in Motd::address. */
+  unsigned int addrbits;  /**< Number of bits checked in Motd::address. */
   unsigned int maxcount;  /**< Number of lines for MOTD. */
   struct MotdCache *cache;  /**< MOTD cache entry. */
 };

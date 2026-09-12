@@ -250,10 +250,11 @@ _motd_lookup(const struct Client *client)
         break;
       case MOTD_IPMASKV6:
       case MOTD_IPMASKV4:
-        if (address_match(&client->addr, &motd->address, false, false, motd->addrbits))
+        if (address_match_prefix(&client->addr, &motd->address, motd->addrbits))
           return motd;
         break;
-      default: break;
+      default:
+        break;
     }
   }
 

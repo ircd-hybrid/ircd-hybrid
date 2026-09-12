@@ -83,7 +83,7 @@ struct Ban
   size_t banstr_len;  /**< Cached string length of Ban::banstr */
   uintmax_t when;  /**< Time this ban has been set; real time */
   struct io_addr addr;
-  int bits;
+  unsigned int bits;
   int type;
 };
 

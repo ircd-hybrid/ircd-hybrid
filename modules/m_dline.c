@@ -55,7 +55,7 @@ dline_check(const struct AddressRec *arec)
       {
         case HM_IPV6:
         case HM_IPV4:
-          if (address_match(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
+          if (address_match_prefix(&client->addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
             conf_ban_apply(client, CONF_BAN_TYPE_DLINE, arec->conf->reason);
           break;
         default:
@@ -93,7 +93,7 @@ static void
 dline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   struct io_addr parsed_addr;
-  int cidr_bits = 0;
+  unsigned int cidr_bits = 0;
   unsigned int minimum_cidr_bits = 0;
 
   switch (address_parse_netmask(aline->host, &parsed_addr, &cidr_bits))

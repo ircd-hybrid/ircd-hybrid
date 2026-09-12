@@ -49,16 +49,21 @@ typedef struct
 static bool
 target_filter_host(const struct Client *client, void *context)
 {
-  const target_mask_ctx_t *ctx = context;
+  const target_mask_ctx_t *const ctx = context;
   const char *const mask = ctx->mask;
   struct io_addr addr;
-  int bits = 0;
+  unsigned int bitlen;
 
-  const int result = address_parse_netmask(mask, &addr, &bits);
-  if (result == HM_IPV4 || result == HM_IPV6)
-    return address_match(&client->addr, &addr, false, false, bits);
-
-  return match(mask, client->realhost) == 0;
+  switch (address_parse_netmask(mask, &addr, &bitlen))
+  {
+    case HM_IPV4:
+    case HM_IPV6:
+      return address_match_prefix(&client->addr, &addr, bitlen);
+    case HM_HOST:
+      return match(mask, client->realhost) == 0;
+    default:
+      return false;
+  }
 }
 
 static bool

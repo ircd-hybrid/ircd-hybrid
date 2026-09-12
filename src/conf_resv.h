@@ -33,7 +33,7 @@ struct ResvExemptItem
   char *user;
   char *host;
   struct io_addr addr;
-  int bits;
+  unsigned int bits;
   int type;
 };
 

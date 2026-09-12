@@ -451,35 +451,27 @@ _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
   if (ban->extban & extban_matching_mask())
   {
     const struct Extban *const extban = extban_find_flag(ban->extban & extban_matching_mask());
-    if (extban == NULL)
+    if (extban == NULL || extban->matches == NULL)
       return false;
 
-    if (extban->matches == NULL || extban->matches(client, channel, ban) == EXTBAN_NO_MATCH)
-      return false;
-
-    return true;
+    return extban->matches(client, channel, ban) == EXTBAN_MATCH;
   }
 
-  if (match(ban->name, client->name) == 0 && match(ban->user, client->username) == 0)
+  if (match(ban->name, client->name) || match(ban->user, client->username))
+    return false;
+
+  switch (ban->type)
   {
-    switch (ban->type)
-    {
-      case HM_HOST:
-        if (match(ban->host, client->realhost) == 0 ||
-            match(ban->host, client->sockhost) == 0 || match(ban->host, client->host) == 0)
-          return true;
-        break;
-      case HM_IPV6:
-      case HM_IPV4:
-        if (address_match(&client->addr, &ban->addr, false, false, ban->bits))
-          return true;
-        break;
-      default:
-        assert(0);
-    }
+    case HM_HOST:
+      return (match(ban->host, client->realhost) == 0 ||
+              match(ban->host, client->sockhost) == 0 || match(ban->host, client->host) == 0);
+    case HM_IPV6:
+    case HM_IPV4:
+      return address_match_prefix(&client->addr, &ban->addr, ban->bits);
+    default:
+      assert(false);
+      return false;
   }
-
-  return false;
 }
 
 bool

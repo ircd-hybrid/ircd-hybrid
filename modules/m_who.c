@@ -277,12 +277,21 @@ _who_matches(struct Client *source, const struct Client *target,
   if ((who->matchsel & WHO_FIELD_NIP) && client_is_oper(source))
   {
     struct io_addr addr;
-    int bits = 0;
-    const int ret = address_parse_netmask(mask, &addr, &bits);
+    unsigned int bitlen;
 
-    if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_match(&target->addr, &addr, false, false, bits))
-        return true;
+    switch (address_parse_netmask(mask, &addr, &bitlen))
+    {
+      case HM_IPV4:
+      case HM_IPV6:
+        if (address_match_prefix(&target->addr, &addr, bitlen))
+          return true;
+        break;
+      case HM_HOST:
+        break;
+      default:
+        assert(false);
+        break;
+    }
 
     if (match(mask, target->sockhost) == 0)
       return true;

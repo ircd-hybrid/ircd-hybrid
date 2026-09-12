@@ -8,6 +8,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -36,14 +37,14 @@
  * Comments: Called from address_parse_netmask
  */
 static int
-address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_ipv6_netmask(const char *text, struct io_addr *addr, unsigned int *b)
 {
   char c;
   int d[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   int dp = 0;
   int nyble = 4;
   int finsert = -1;
-  int bits = 128;
+  unsigned int bits = 128;
   int deficit = 0;
   uint16_t dc[8];
   struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr->ss;
@@ -91,10 +92,10 @@ address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
 
       bits = strtoul(p + 1, &after, 10);
 
-      if (bits < 0 || bits > 128 || *after)
+      if (bits > 128 || *after)
         return HM_HOST;
       /* 16 bits for each hextet, plus 4 for each parsed nyble */
-      if (bits > dp * 16 + (4 - nyble) * 4 && !(finsert >= 0))
+      if (bits > (unsigned int)(dp * 16 + (4 - nyble) * 4) && finsert < 0)
         return HM_HOST;
       break;
     }
@@ -153,11 +154,12 @@ address_parse_ipv6_netmask(const char *text, struct io_addr *addr, int *b)
  * Comments: Called from address_parse_netmask
  */
 static int
-address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_ipv4_netmask(const char *text, struct io_addr *addr, unsigned int *b)
 {
   const char *digits[4];
   uint8_t addb[4];
-  int n = 0, bits = 0;
+  int n = 0;
+  unsigned int bits = 0;
   char c;
   struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
 
@@ -187,9 +189,9 @@ address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
       char *after;
       bits = strtoul(p + 1, &after, 10);
 
-      if (bits < 0 || *after)
+      if (*after)
         return HM_HOST;
-      if (bits > n * 8)
+      if (bits > (unsigned int)n * 8U)
         return HM_HOST;
 
       break;
@@ -230,6 +232,64 @@ address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
   return HM_IPV4;
 }
 
+bool
+address_equal(const struct io_addr *lhs, const struct io_addr *rhs)
+{
+  if (address_get_family(lhs) != address_get_family(rhs))
+    return false;
+
+  const unsigned char *lhs_bytes;
+  const unsigned char *rhs_bytes;
+  size_t lhs_length;
+  size_t rhs_length;
+
+  if (!address_get_bytes(lhs, &lhs_bytes, &lhs_length) ||
+      !address_get_bytes(rhs, &rhs_bytes, &rhs_length))
+    return false;
+
+  if (lhs_length != rhs_length)
+    return false;
+
+  return memcmp(lhs_bytes, rhs_bytes, lhs_length) == 0;
+}
+
+bool
+address_equal_with_port(const struct io_addr *lhs, const struct io_addr *rhs)
+{
+  return address_equal(lhs, rhs) && address_get_port(lhs) == address_get_port(rhs);
+}
+
+bool
+address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsigned int bitlen)
+{
+  if (address_get_family(lhs) != address_get_family(rhs))
+    return false;
+
+  const unsigned char *lhs_bytes;
+  const unsigned char *rhs_bytes;
+  size_t lhs_length;
+  size_t rhs_length;
+
+  if (!address_get_bytes(lhs, &lhs_bytes, &lhs_length) ||
+      !address_get_bytes(rhs, &rhs_bytes, &rhs_length))
+    return false;
+
+  if (lhs_length != rhs_length || bitlen > lhs_length * CHAR_BIT)
+    return false;
+
+  const size_t full_bytes = bitlen / CHAR_BIT;
+  if (full_bytes && memcmp(lhs_bytes, rhs_bytes, full_bytes))
+    return false;
+
+  const unsigned int remaining_bits = bitlen % CHAR_BIT;
+  if (remaining_bits == 0)
+    return true;
+
+  const unsigned char mask =
+    (unsigned char)(UCHAR_MAX << (CHAR_BIT - remaining_bits));
+  return (lhs_bytes[full_bytes] & mask) == (rhs_bytes[full_bytes] & mask);
+}
+
 /* int address_parse_netmask(const char *, struct io_addr *, int *);
  * Input: A hostmask, or an IPV4/6 address.
  * Output: An integer describing whether it is an IPV4, IPV6 address or a
@@ -238,7 +298,7 @@ address_parse_ipv4_netmask(const char *text, struct io_addr *addr, int *b)
  * Side effects: None
  */
 int
-address_parse_netmask(const char *text, struct io_addr *addr, int *b)
+address_parse_netmask(const char *text, struct io_addr *addr, unsigned int *b)
 {
   address_clear(addr);
 
@@ -323,97 +383,6 @@ address_mask(struct io_addr *addr, int bits)
     for (unsigned int i = n + 1; i < 16; ++i)
       v6_base_ip->sin6_addr.s6_addr[i] = 0;
   }
-}
-
-/**
- * @brief Compare two network addresses for equality or matching.
- *
- * This function compares two network addresses for equality or matching based on
- * specified criteria such as exact match, port match, and subnet match.
- *
- * @param addr  Pointer to the first network address.
- * @param mask  Pointer to the second network address.
- * @param exact If true, performs an exact address match (ignores bits parameter).
- * @param port  If true, compares port numbers for equality.
- * @param bits  Number of bits to consider for subnet matching (ignored if exact is true).
- *
- * @return True if addresses match based on the specified criteria, false otherwise.
- */
-bool
-address_match(const struct io_addr *addr, const struct io_addr *mask, bool exact, bool port, int bits)
-{
-  /* Check if address families are the same */
-  if (address_get_family(addr) != address_get_family(mask))
-    return false;
-
-  if (address_is_ipv4(addr))
-  {
-    const struct sockaddr_in *const sin1 = (const struct sockaddr_in *)&addr->ss;
-    const struct sockaddr_in *const sin2 = (const struct sockaddr_in *)&mask->ss;
-
-    /* Compare port numbers if required */
-    if (port && (sin1->sin_port != sin2->sin_port))
-      return false;
-    if (exact)
-      return sin1->sin_addr.s_addr == sin2->sin_addr.s_addr;
-    return address_match_ipv4(addr, mask, bits);
-  }
-
-  if (address_is_ipv6(addr))
-  {
-    const struct sockaddr_in6 *const sin1 = (const struct sockaddr_in6 *)&addr->ss;
-    const struct sockaddr_in6 *const sin2 = (const struct sockaddr_in6 *)&mask->ss;
-
-    if (port && (sin1->sin6_port != sin2->sin6_port))
-      return false;
-    if (exact)
-      return memcmp(sin1->sin6_addr.s6_addr, sin2->sin6_addr.s6_addr, sizeof(struct in6_addr)) == 0;
-    return address_match_ipv6(addr, mask, bits);
-  }
-
-  return false;  /* Invalid address family */
-}
-
-/* The address matching stuff... */
-/* int address_match_ipv6(struct io_addr *, struct io_addr *, int)
- * Input: An IP address, an IP mask, the number of bits in the mask.
- * Output: if match, -1 else 0
- * Side effects: None
- */
-bool
-address_match_ipv6(const struct io_addr *addr, const struct io_addr *mask, int bits)
-{
-  int i, m, n = bits / 8;
-  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
-  const struct sockaddr_in6 *const v6mask = (const struct sockaddr_in6 *)&mask->ss;
-
-  for (i = 0; i < n; ++i)
-    if (v6->sin6_addr.s6_addr[i] != v6mask->sin6_addr.s6_addr[i])
-      return false;
-
-  if ((m = bits % 8) == 0)
-    return true;
-  if ((v6->sin6_addr.s6_addr[n] & ~((1 << (8 - m)) - 1)) ==
-      v6mask->sin6_addr.s6_addr[n])
-    return true;
-  return false;
-}
-
-/* int address_match_ipv4(struct io_addr *, struct io_addr *, int)
- * Input: An IP address, an IP mask, the number of bits in the mask.
- * Output: if match, -1 else 0
- * Side Effects: None
- */
-bool
-address_match_ipv4(const struct io_addr *addr, const struct io_addr *mask, int bits)
-{
-  const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
-  const struct sockaddr_in *const v4mask = (const struct sockaddr_in *)&mask->ss;
-
-  if ((ntohl(v4->sin_addr.s_addr) & ~((1 << (32 - bits)) - 1)) ==
-      ntohl(v4mask->sin_addr.s_addr))
-    return true;
-  return false;
 }
 
 /* unsigned long hash_ipv4(struct io_addr*)

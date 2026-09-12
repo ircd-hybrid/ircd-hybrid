@@ -119,7 +119,7 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
           break;
         case HM_IPV4:
         case HM_IPV6:
-          host_match = address_match(&client->addr, &oper->addr, false, false, oper->bits);
+          host_match = address_match_prefix(&client->addr, &oper->addr, oper->bits);
           break;
       }
     }

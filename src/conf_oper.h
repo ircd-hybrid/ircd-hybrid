@@ -77,7 +77,7 @@ struct OperItem
   struct ClassItem *klass;
   enum hostmask_type htype;
   struct io_addr addr;
-  int bits;
+  unsigned int bits;
   oper_conf_flags_t flags;
   oper_priv_flags_t oper_privs;
   list_node_t node;

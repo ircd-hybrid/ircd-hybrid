@@ -138,23 +138,24 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
   LIST_FOREACH(node, resv->exempt_list.head)
   {
     const struct ResvExemptItem *const exempt = node->data;
-    if (match(exempt->name, client->name) == 0 && match(exempt->user, client->username) == 0)
+    if (match(exempt->name, client->name) || match(exempt->user, client->username))
+      continue;
+
+    switch (exempt->type)
     {
-      switch (exempt->type)
-      {
-        case HM_HOST:
-          if (match(exempt->host, client->realhost) == 0 ||
-              match(exempt->host, client->sockhost) == 0 || match(exempt->host, client->host) == 0)
-            return true;
-          break;
-        case HM_IPV6:
-        case HM_IPV4:
-          if (address_match(&client->addr, &exempt->addr, false, false, exempt->bits))
-            return true;
-          break;
-        default:
-          assert(0);
-      }
+      case HM_HOST:
+        if (match(exempt->host, client->realhost) == 0 ||
+            match(exempt->host, client->sockhost) == 0 || match(exempt->host, client->host) == 0)
+          return true;
+        break;
+      case HM_IPV4:
+      case HM_IPV6:
+        if (address_match_prefix(&client->addr, &exempt->addr, exempt->bits))
+          return true;
+        break;
+      default:
+        assert(false);
+        break;
     }
   }
 

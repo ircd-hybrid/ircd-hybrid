@@ -128,10 +128,12 @@ make_request(dns_callback_fnc callback, void *ctx)
  *      revised for ircd, cryogen(stu) may03
  */
 static bool
-res_ourserver(const struct io_addr *inp)
+res_ourserver(const struct io_addr *addr)
 {
+  assert(addr);
+
   for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_match(inp, &reslib_nsaddr_list[i], true, true, 0))
+    if (address_equal_with_port(addr, &reslib_nsaddr_list[i]))
       return true;
 
   return false;

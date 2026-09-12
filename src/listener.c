@@ -190,15 +190,15 @@ _listener_find(const struct io_addr *addr)
   list_node_t *node;
   LIST_FOREACH(node, listener_list.head)
   {
-    struct Listener *listener = node->data;
-    if (memcmp(addr, &listener->addr, sizeof(*addr)) == 0)
-    {
-      /* Try to return an open listener, otherwise reuse a closed one */
-      if (listener_is_active(listener))
-        return listener;
+    struct Listener *const listener = node->data;
+    if (!address_equal_with_port(addr, &listener->addr))
+      continue;
 
-      last_closed = listener;
-    }
+    /* Try to return an open listener, otherwise reuse a closed one */
+    if (listener_is_active(listener))
+      return listener;
+
+    last_closed = listener;
   }
 
   return last_closed;

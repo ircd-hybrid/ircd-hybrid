@@ -44,16 +44,16 @@ struct io_addr
 };
 
 extern void address_unmap_ipv4(struct io_addr *);
-extern void address_mask(struct io_addr *, int);
 extern bool address_equal(const struct io_addr *, const struct io_addr *);
 extern bool address_equal_with_port(const struct io_addr *, const struct io_addr *);
 extern bool address_from_bytes(struct io_addr *, int, const void *, size_t);
-extern bool address_get_bytes(const struct io_addr *, const unsigned char **, size_t *);
-extern bool address_to_bytes(const struct io_addr *, void *, size_t);
 extern bool address_from_string(const char *, struct io_addr *);
-extern bool address_to_string(const struct io_addr *, char *, size_t);
-extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
+extern bool address_get_bytes(const struct io_addr *, const unsigned char **, size_t *);
+extern bool address_mask(struct io_addr *, unsigned int);
 extern bool address_match_prefix(const struct io_addr *, const struct io_addr *, unsigned int);
+extern bool address_to_bytes(const struct io_addr *, void *, size_t);
+extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
+extern bool address_to_string(const struct io_addr *, char *, size_t);
 extern int address_parse_netmask(const char *, struct io_addr *, unsigned int *);
 extern uint32_t hash_ipv4(const struct io_addr *, int);
 extern uint32_t hash_ipv6(const struct io_addr *, int);

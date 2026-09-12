@@ -353,36 +353,43 @@ address_unmap_ipv4(struct io_addr *addr)
  * For IPv6, the mask is applied to the specified number of octets,
  * and the remaining octets are set to zero.
  */
-void
-address_mask(struct io_addr *addr, int bits)
+bool
+address_mask(struct io_addr *addr, unsigned int bitlen)
 {
+  unsigned char *bytes;
+  size_t byte_length;
+
   if (address_is_ipv4(addr))
   {
-    /* Calculate the IPv4 mask based on the prefix length. */
-    const int mask = ~((1 << (32 - bits)) - 1);
-    struct sockaddr_in *const v4_base_ip = (struct sockaddr_in *)&addr->ss;
-
-    /* Apply the mask to the network portion of the IPv4 address. */
-    v4_base_ip->sin_addr.s_addr = htonl(ntohl(v4_base_ip->sin_addr.s_addr) & mask);
+    struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
+    bytes = (unsigned char *)&v4->sin_addr;
+    byte_length = sizeof(v4->sin_addr);
   }
-
-  if (address_is_ipv6(addr))
+  else if (address_is_ipv6(addr))
   {
-    /* Calculate the number of full octets and remaining bits. */
-    const unsigned int n = bits / 8;
-    const unsigned int m = bits % 8;
-
-    /* Calculate the IPv6 mask based on the remaining bits. */
-    const int mask = ~((1 << (8 - m)) - 1);
-    struct sockaddr_in6 *const v6_base_ip = (struct sockaddr_in6 *)&addr->ss;
-
-    /* Apply the mask to the specified octet in the IPv6 address. */
-    v6_base_ip->sin6_addr.s6_addr[n] = v6_base_ip->sin6_addr.s6_addr[n] & mask;
-
-    /* Set the remaining octets to zero. */
-    for (unsigned int i = n + 1; i < 16; ++i)
-      v6_base_ip->sin6_addr.s6_addr[i] = 0;
+    struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr->ss;
+    bytes = (unsigned char *)&v6->sin6_addr;
+    byte_length = sizeof(v6->sin6_addr);
   }
+  else
+    return false;
+
+  if (bitlen > byte_length * CHAR_BIT)
+    return false;
+
+  size_t byte_index = bitlen / CHAR_BIT;
+  const unsigned int remaining_bits = bitlen % CHAR_BIT;
+  if (remaining_bits)
+  {
+    const unsigned char mask =
+      (unsigned char)(UCHAR_MAX << (CHAR_BIT - remaining_bits));
+    bytes[byte_index++] &= mask;
+  }
+
+  if (byte_index < byte_length)
+    memset(bytes + byte_index, 0, byte_length - byte_index);
+
+  return true;
 }
 
 /* unsigned long hash_ipv4(struct io_addr*)

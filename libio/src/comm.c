@@ -291,9 +291,9 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   fde->cleanup_handler = comm_connect_cleanup;
   fde->cleanup_data = op;
 
-  if (baddr && address_is_specific(baddr))
+  if (baddr && address_is_specified(baddr))
   {
-    if (bind(fde->fd, (const struct sockaddr *)&baddr->ss, address_length(baddr)) == -1)
+    if (bind(fde->fd, (const struct sockaddr *)&baddr->ss, address_get_sockaddr_length(baddr)) == -1)
     {
       /* Failure, call the callback with COMM_ERR_BIND */
       comm_connect_complete(op, COMM_ERR_BIND);
@@ -302,7 +302,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   }
 
   /* Try the connect() */
-  if (connect(fde->fd, (struct sockaddr *)&op->remote_addr.ss, address_length(&op->remote_addr)) == 0)
+  if (connect(fde->fd, (struct sockaddr *)&op->remote_addr.ss, address_get_sockaddr_length(&op->remote_addr)) == 0)
   {
     comm_connect_complete(op, COMM_OK);
     return;
@@ -392,7 +392,7 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
   }
 #endif
 
-  if (bind(fde->fd, (const struct sockaddr *)&addr->ss, address_length(addr)) == -1)
+  if (bind(fde->fd, (const struct sockaddr *)&addr->ss, address_get_sockaddr_length(addr)) == -1)
   {
     char addr_str[INET6_ADDRSTRLEN];
     address_to_string(addr, addr_str, sizeof(addr_str));
@@ -452,7 +452,7 @@ comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
     return NULL;
   }
 
-  address_strip_ipv4(addr);
+  address_unmap_ipv4(addr);
 
   if (!setup_socket(fd, address_get_family(addr), SOCK_STREAM))
   {

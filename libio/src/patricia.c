@@ -355,7 +355,7 @@ patricia_create(int family)
 }
 
 void
-patricia_clear(patricia_tree_t *tree, void (*data_cleanup)(void *))
+patricia_clear(patricia_tree_t *tree, patricia_data_cleanup_fn data_cleanup)
 {
   assert(tree);
 
@@ -430,7 +430,7 @@ patricia_clear(patricia_tree_t *tree, void (*data_cleanup)(void *))
 }
 
 void
-patricia_destroy(patricia_tree_t *tree, void (*data_cleanup)(void *))
+patricia_destroy(patricia_tree_t *tree, patricia_data_cleanup_fn data_cleanup)
 {
   patricia_clear(tree, data_cleanup);
   io_free(tree);

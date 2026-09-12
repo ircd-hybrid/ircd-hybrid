@@ -286,7 +286,7 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
 
   struct io_addr bind_addr;
   address_copy(&bind_addr, &local_addr);
-  address_strip_ipv4(&bind_addr);
+  address_unmap_ipv4(&bind_addr);
   address_set_port(&bind_addr, 0);
 
   comm_connect_tcp(request->fde, addr, IDENT_PORTNUM, &bind_addr, ident_connect_callback, request, timeout_ms);

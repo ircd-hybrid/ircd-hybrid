@@ -31,9 +31,6 @@ enum
   ADDRESS_REVERSE_NAME_BUFSIZE = 74
 };
 
-_Static_assert(ADDRESS_REVERSE_NAME_BUFSIZE == sizeof(struct in6_addr) * 4 + sizeof("ip6.arpa."),
-  "ADDRESS_REVERSE_NAME_BUFSIZE is incorrect");
-
 /**
  * @struct io_addr
  * @brief Structure to handle sockaddr_storage with compatibility for different implementations.
@@ -46,7 +43,7 @@ struct io_addr
   struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
 };
 
-extern void address_strip_ipv4(struct io_addr *);
+extern void address_unmap_ipv4(struct io_addr *);
 extern void address_mask(struct io_addr *, int);
 extern bool address_from_bytes(struct io_addr *, int, const void *, size_t);
 extern bool address_get_bytes(const struct io_addr *, const unsigned char **, size_t *);
@@ -104,7 +101,7 @@ address_is_unspecified(const struct io_addr *addr)
 }
 
 static inline bool
-address_is_specific(const struct io_addr *addr)
+address_is_specified(const struct io_addr *addr)
 {
   return (address_is_ipv4(addr) || address_is_ipv6(addr)) && !address_is_unspecified(addr);
 }
@@ -154,7 +151,7 @@ address_set_port(struct io_addr *addr, uint16_t port)
 }
 
 static inline socklen_t
-address_length(const struct io_addr *addr)
+address_get_sockaddr_length(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
     return sizeof(struct sockaddr_in);

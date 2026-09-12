@@ -259,7 +259,7 @@ address_parse_netmask(const char *text, struct io_addr *addr, int *b)
  * @param addr Pointer to the io_addr structure representing the IP address.
  */
 void
-address_strip_ipv4(struct io_addr *addr)
+address_unmap_ipv4(struct io_addr *addr)
 {
   /* Check if the address is an IPv6-mapped IPv4 address. */
   if (!address_is_ipv4_mapped(addr))
@@ -638,6 +638,9 @@ _address_append_decimal_octet(char *out, unsigned char octet)
   *out++ = digits[octet % 10];
   return out;
 }
+
+_Static_assert(ADDRESS_REVERSE_NAME_BUFSIZE == sizeof(struct in6_addr) * 4 + sizeof("ip6.arpa."),
+  "ADDRESS_REVERSE_NAME_BUFSIZE is incorrect");
 
 bool
 address_to_reverse_name(const struct io_addr *addr, char *buffer, size_t buffer_size)

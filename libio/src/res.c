@@ -210,7 +210,7 @@ send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
 
   for (unsigned int i = 0; i < max_queries; ++i)
     sendto(ResolverFileDescriptor->fd, msg, len, 0,
-           (struct sockaddr *)&reslib_nsaddr_list[i], address_length(&reslib_nsaddr_list[i]));
+           (struct sockaddr *)&reslib_nsaddr_list[i], address_get_sockaddr_length(&reslib_nsaddr_list[i]));
 }
 
 /*

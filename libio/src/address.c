@@ -89,22 +89,30 @@ address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsig
 void
 address_unmap_ipv4(struct io_addr *addr)
 {
-  /* Check if the address is an IPv6-mapped IPv4 address. */
-  if (!address_is_ipv4_mapped(addr))
+  if (addr == NULL || !address_is_ipv4_mapped(addr))
     return;
 
-  struct sockaddr_in6 v6;
-  memcpy(&v6, &addr->ss, sizeof(v6));
+  const struct sockaddr_in6 *const ipv6 = (const struct sockaddr_in6 *)&addr->ss;
 
-  /* Wipe the underlying storage to remove v6 garbage padding. */
-  address_clear(addr);
+  struct in_addr ipv4_address;
+  memcpy(&ipv4_address, &ipv6->sin6_addr.s6_addr[12], sizeof(ipv4_address));
 
-  struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
-  v4->sin_family = AF_INET;
-  v4->sin_port = v6.sin6_port;
+  const uint16_t port = address_get_port(addr);
 
-  /* Copy the IPv4 portion from the IPv6-mapped address to the input address. */
-  memcpy(&v4->sin_addr, &v6.sin6_addr.s6_addr[12], sizeof(v4->sin_addr));
+  struct io_addr ipv4;
+  if (!address_from_bytes(&ipv4, AF_INET, &ipv4_address, sizeof(ipv4_address)))
+  {
+    assert(false);
+    return;
+  }
+
+  if (!address_set_port(&ipv4, port))
+  {
+    assert(false);
+    return;
+  }
+
+  *addr = ipv4;
 }
 
 /**

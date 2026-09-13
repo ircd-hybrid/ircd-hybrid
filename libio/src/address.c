@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file hostmask.c
- * \brief Code to efficiently find IP & hostmask based configs.
+/*! \file address.c
+ * \brief Address representation and conversion functions.
  */
 
 #include <assert.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -36,9 +35,7 @@ address_equal(const struct io_addr *lhs, const struct io_addr *rhs)
   if (!address_get_bytes(lhs, &lhs_bytes, &lhs_length) ||
       !address_get_bytes(rhs, &rhs_bytes, &rhs_length))
     return false;
-
-  if (lhs_length != rhs_length)
-    return false;
+  assert(lhs_length == rhs_length);
 
   return memcmp(lhs_bytes, rhs_bytes, lhs_length) == 0;
 }
@@ -63,8 +60,9 @@ address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsig
   if (!address_get_bytes(lhs, &lhs_bytes, &lhs_length) ||
       !address_get_bytes(rhs, &rhs_bytes, &rhs_length))
     return false;
+  assert(lhs_length == rhs_length);
 
-  if (lhs_length != rhs_length || bitlen > lhs_length * CHAR_BIT)
+  if (bitlen > lhs_length * CHAR_BIT)
     return false;
 
   const size_t full_bytes = bitlen / CHAR_BIT;
@@ -284,15 +282,13 @@ address_to_string(const struct io_addr *addr, char *buf, size_t buflen)
   if (address_is_ipv4(addr))
   {
     const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
-    if (inet_ntop(AF_INET, &v4->sin_addr, buf, buflen))
-      return true;
+    return inet_ntop(AF_INET, &v4->sin_addr, buf, buflen) != NULL;
   }
 
   if (address_is_ipv6(addr))
   {
     const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
-    if (inet_ntop(AF_INET6, &v6->sin6_addr, buf, buflen))
-      return true;
+    return inet_ntop(AF_INET6, &v6->sin6_addr, buf, buflen) != NULL;
   }
 
   return false;
@@ -397,8 +393,7 @@ address_to_reverse_name(const struct io_addr *addr, char *buffer, size_t buffer_
 
   if (address_is_ipv4(addr))
   {
-    if (length != sizeof(struct in_addr))
-      return false;
+    assert(length == sizeof(struct in_addr));
 
     for (size_t i = length; i-- > 0;)
     {
@@ -412,8 +407,7 @@ address_to_reverse_name(const struct io_addr *addr, char *buffer, size_t buffer_
   }
   else if (address_is_ipv6(addr))
   {
-    if (length != sizeof(struct in6_addr))
-      return false;
+    assert(length == sizeof(struct in6_addr));
 
     static const char digits[] = "0123456789abcdef";
 

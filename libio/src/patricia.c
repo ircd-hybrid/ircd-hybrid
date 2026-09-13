@@ -141,11 +141,35 @@ _patricia_prefix_bit_is_set(const unsigned char *bytes, unsigned int bit)
 static unsigned int
 _patricia_prefix_first_differing_bit(const unsigned char *lhs, const unsigned char *rhs, unsigned int bitlen)
 {
-  for (unsigned int bit = 0; bit < bitlen; ++bit)
+  assert(lhs);
+  assert(rhs);
+  assert(bitlen <= PATRICIA_MAX_BITLEN);
+
+  const unsigned int full_bytes = bitlen / CHAR_BIT;
+  for (unsigned int byte_index = 0; byte_index < full_bytes; ++byte_index)
   {
-    if (_patricia_prefix_bit_is_set(lhs, bit) !=
-        _patricia_prefix_bit_is_set(rhs, bit))
-      return bit;
+    const unsigned char differing_bits = lhs[byte_index] ^ rhs[byte_index];
+    if (differing_bits == 0)
+      continue;
+
+    for (unsigned int bit = 0; bit < CHAR_BIT; ++bit)
+    {
+      const unsigned int mask = 1U << (CHAR_BIT - 1 - bit);
+      if (differing_bits & mask)
+        return byte_index * CHAR_BIT + bit;
+    }
+  }
+
+  const unsigned int remaining_bits = bitlen % CHAR_BIT;
+  if (remaining_bits)
+  {
+    const unsigned char differing_bits = lhs[full_bytes] ^ rhs[full_bytes];
+    for (unsigned int bit = 0; bit < remaining_bits; ++bit)
+    {
+      const unsigned int mask = 1U << (CHAR_BIT - 1 - bit);
+      if (differing_bits & mask)
+        return full_bytes * CHAR_BIT + bit;
+    }
   }
 
   return bitlen;

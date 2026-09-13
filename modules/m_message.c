@@ -51,19 +51,14 @@ target_filter_host(const struct Client *client, void *context)
 {
   const target_mask_ctx_t *const ctx = context;
   const char *const mask = ctx->mask;
-  struct io_addr addr;
-  unsigned int bitlen;
 
-  switch (address_parse_netmask(mask, &addr, &bitlen))
-  {
-    case HM_IPV4:
-    case HM_IPV6:
-      return address_match_prefix(&client->addr, &addr, bitlen);
-    case HM_HOST:
-      return match(mask, client->realhost) == 0;
-    default:
-      return false;
-  }
+  struct io_addr addr;
+  unsigned int prefix_length;
+
+  if (address_parse_prefix(mask, &addr, &prefix_length))
+    return address_match_prefix(&client->addr, &addr, prefix_length);
+
+  return match(mask, client->realhost) == 0;
 }
 
 static bool

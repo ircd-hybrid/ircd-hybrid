@@ -121,13 +121,14 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-am_libio_la_OBJECTS = address.lo base32.lo comm.lo comm_epoll.lo \
-	comm_kqueue.lo comm_poll.lo dbuf.lo event.lo fdlist.lo hook.lo \
-	ident.lo io_daemon.lo io_getopt.lo io_hex.lo io_parse.lo \
-	io_pidfile.lo io_rlimit.lo io_signal.lo io_string.lo \
-	io_time.lo list.lo log.lo match.lo misc.lo memory.lo module.lo \
-	patricia.lo res.lo reslib.lo rng_mt.lo sha3.lo tls_gnutls.lo \
-	tls_none.lo tls_openssl.lo tls_wolfssl.lo
+am_libio_la_OBJECTS = address.lo address_parse.lo base32.lo comm.lo \
+	comm_epoll.lo comm_kqueue.lo comm_poll.lo dbuf.lo event.lo \
+	fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo io_hex.lo \
+	io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
+	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
+	memory.lo module.lo patricia.lo res.lo reslib.lo rng_mt.lo \
+	sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
+	tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -151,7 +152,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/address.Plo ./$(DEPDIR)/base32.Plo \
+am__depfiles_remade = ./$(DEPDIR)/address.Plo \
+	./$(DEPDIR)/address_parse.Plo ./$(DEPDIR)/base32.Plo \
 	./$(DEPDIR)/comm.Plo ./$(DEPDIR)/comm_epoll.Plo \
 	./$(DEPDIR)/comm_kqueue.Plo ./$(DEPDIR)/comm_poll.Plo \
 	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/event.Plo \
@@ -368,6 +370,7 @@ libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
 libio_la_LDFLAGS = -export-dynamic -avoid-version
 libio_la_SOURCES = address.c     \
                     address.h     \
+                    address_parse.c \
                     base32.c      \
                     base32.h      \
                     comm.c        \
@@ -488,6 +491,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/address.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/address_parse.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_epoll.Plo@am__quote@ # am--include-marker
@@ -685,6 +689,7 @@ clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
 
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/address.Plo
+	-rm -f ./$(DEPDIR)/address_parse.Plo
 	-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
 	-rm -f ./$(DEPDIR)/comm_epoll.Plo
@@ -765,6 +770,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/address.Plo
+	-rm -f ./$(DEPDIR)/address_parse.Plo
 	-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
 	-rm -f ./$(DEPDIR)/comm_epoll.Plo

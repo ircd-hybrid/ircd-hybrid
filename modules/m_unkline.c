@@ -46,7 +46,7 @@ _unkline_remove(struct Client *source, const struct aline_ctx *aline)
   struct io_addr parsed_addr;
   struct io_addr *parsed_addr_ptr = NULL;
 
-  if (address_parse_netmask(aline->host, &parsed_addr, NULL) != HM_HOST)
+  if (address_parse_prefix(aline->host, &parsed_addr, NULL))
     parsed_addr_ptr = &parsed_addr;
 
   struct MaskItem *const conf =

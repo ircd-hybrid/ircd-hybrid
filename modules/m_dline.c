@@ -38,8 +38,11 @@
 #include "server_capab.h"
 
 static void
-dline_check(const struct AddressRec *arec)
+dline_check(const struct AddressRec *record)
 {
+  assert(record);
+  assert(address_is_ipv4(&record->addr) || address_is_ipv6(&record->addr));
+
   list_t *tab[] = { &local_client_list, &unknown_list, NULL };
 
   for (list_t **list = tab; *list; ++list)
@@ -51,16 +54,8 @@ dline_check(const struct AddressRec *arec)
       if (client_is_dead(client))
         continue;
 
-      switch (arec->masktype)
-      {
-        case HM_IPV6:
-        case HM_IPV4:
-          if (address_match_prefix(&client->addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-            conf_ban_apply(client, CONF_BAN_TYPE_DLINE, arec->conf->reason);
-          break;
-        default:
-          assert(0);
-      }
+      if (address_match_prefix(&client->addr, &record->addr, record->prefix_length))
+        conf_ban_apply(client, CONF_BAN_TYPE_DLINE, record->conf->reason);
     }
   }
 }
@@ -94,25 +89,19 @@ dline_handle(struct Client *source, const struct aline_ctx *aline)
 {
   struct io_addr parsed_addr;
   unsigned int cidr_bits = 0;
-  unsigned int minimum_cidr_bits = 0;
 
-  switch (address_parse_netmask(aline->host, &parsed_addr, &cidr_bits))
+  if (!address_parse_prefix(aline->host, &parsed_addr, &cidr_bits))
   {
-    case HM_IPV4:
-      minimum_cidr_bits = ConfigGeneral.dline_min_cidr;
-      break;
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Invalid D-line");
 
-    case HM_IPV6:
-      minimum_cidr_bits = ConfigGeneral.dline_min_cidr6;
-      break;
-
-    default:
-      if (client_is_user(source))
-        sendto_one_notice(source, &me, ":Invalid D-line");
-      return;
+    return;
   }
 
-  if (minimum_cidr_bits > 0 && !client_is_service(source) && (unsigned int)cidr_bits < minimum_cidr_bits)
+  const unsigned int minimum_cidr_bits =
+    address_is_ipv4(&parsed_addr) ? ConfigGeneral.dline_min_cidr :
+                                    ConfigGeneral.dline_min_cidr6;
+  if (minimum_cidr_bits > 0 && !client_is_service(source) && cidr_bits < minimum_cidr_bits)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me,

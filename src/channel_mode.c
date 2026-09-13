@@ -184,7 +184,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
     nuh_split(&nuh);
 
-    ban->type = address_parse_netmask(ban->host, &ban->addr, &ban->bits);
+    address_parse_prefix(ban->host, &ban->addr, &ban->bits);
   }
 
   if (client_is_local_user(client))

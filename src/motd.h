@@ -18,8 +18,7 @@ enum MotdType
 {
   MOTD_UNIVERSAL, /**< MOTD for all users */
   MOTD_HOSTMASK,  /**< MOTD selected by hostmask */
-  MOTD_IPMASKV4,  /**< MOTD selected by IPv4 mask */
-  MOTD_IPMASKV6,  /**< MOTD selected by IPv6 mask */
+  MOTD_ADDRESS_PREFIX,  /**< MOTD selected by address prefix. */
   MOTD_CLASS      /**< MOTD selected by connection class */
 };
 
@@ -36,8 +35,8 @@ struct Motd
   char *path;  /**< Pathname of MOTD file. */
   char *mask;  /**< Hostmask if type==MOTD_HOSTMASK,
                     class name if type==MOTD_CLASS,
-                    text IP mask if type==MOTD_IPMASK. */
-  struct io_addr address;  /**< Address if type==MOTD_IPMASK. */
+                    text IP mask if type==MOTD_ADDRESS_PREFIX. */
+  struct io_addr addr;  /**< Address if type==MOTD_ADDRESS_PREFIX. */
   unsigned int addrbits;  /**< Number of bits checked in Motd::address. */
   unsigned int maxcount;  /**< Number of lines for MOTD. */
   struct MotdCache *cache;  /**< MOTD cache entry. */

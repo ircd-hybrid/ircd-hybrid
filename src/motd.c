@@ -55,21 +55,10 @@ _motd_create(const char *mask, const char *path)
     motd->type = MOTD_UNIVERSAL;
   else if (class_find(mask, true))
     motd->type = MOTD_CLASS;
+  else if (address_parse_prefix(mask, &motd->addr, &motd->addrbits))
+    motd->type = MOTD_ADDRESS_PREFIX;
   else
-  {
-    switch (address_parse_netmask(mask, &motd->address, &motd->addrbits))
-    {
-      case HM_IPV4:
-        motd->type = MOTD_IPMASKV4;
-        break;
-      case HM_IPV6:
-        motd->type = MOTD_IPMASKV6;
-        break;
-      default:  /* HM_HOST */
-        motd->type = MOTD_HOSTMASK;
-        break;
-    }
-  }
+    motd->type = MOTD_HOSTMASK;
 
   motd->mask = mask ? io_strdup(mask) : NULL;
   motd->path = io_strdup(path);
@@ -248,12 +237,11 @@ _motd_lookup(const struct Client *client)
             match(motd->mask, client->sockhost) == 0 || match(motd->mask, client->host) == 0)
           return motd;
         break;
-      case MOTD_IPMASKV6:
-      case MOTD_IPMASKV4:
-        if (address_match_prefix(&client->addr, &motd->address, motd->addrbits))
+      case MOTD_ADDRESS_PREFIX:
+        if (address_match_prefix(&client->addr, &motd->addr, motd->addrbits))
           return motd;
         break;
-      default:
+      case MOTD_UNIVERSAL:
         break;
     }
   }

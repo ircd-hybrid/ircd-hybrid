@@ -6,6 +6,7 @@ libio_la_LDFLAGS = -export-dynamic -avoid-version
 
 libio_la_SOURCES =  address.c     \
                     address.h     \
+                    address_parse.c \
                     base32.c      \
                     base32.h      \
                     comm.c        \

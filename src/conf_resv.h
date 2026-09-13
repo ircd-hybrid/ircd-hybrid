@@ -34,7 +34,6 @@ struct ResvExemptItem
   char *host;
   struct io_addr addr;
   unsigned int bits;
-  int type;
 };
 
 extern void resv_delete(struct ResvItem *, bool);

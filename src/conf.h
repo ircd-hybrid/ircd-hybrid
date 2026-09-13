@@ -243,29 +243,11 @@ struct config_log_entry
 struct AddressRec
 {
   list_node_t node;
-
-  /* masktype: HM_HOST, HM_IPV4, HM_IPV6 -A1kmm */
-  enum hostmask_type masktype;
-  /* type: CONF_CLIENT, CONF_DLINE, CONF_KLINE etc... -A1kmm */
   enum maskitem_type type;
-
-  union
-  {
-    struct
-    {
-      /* Pointer into MaskItem... -A1kmm */
-      struct io_addr addr;
-      unsigned int bits;
-    } ipa;
-
-    /* Pointer into MaskItem... -A1kmm */
-    const char *hostname;
-  } Mask;
-
-  /* Higher precedences overrule lower ones... */
+  const char *hostmask;
+  struct io_addr addr;
+  unsigned int prefix_length;
   unsigned int precedence;
-
-  /* Only checked if !(type & 1)... */
   const char *username;
   struct MaskItem *conf;
 };
@@ -291,10 +273,11 @@ extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void yyerror(const char *);
 extern bool conf_match_password(const char *, const struct MaskItem *);
 extern int conf_connect_allowed(const struct io_addr *);
-extern struct AddressRec *add_conf_by_address(const unsigned int, struct MaskItem *);
+
+extern struct AddressRec *add_conf_by_address(enum maskitem_type, struct MaskItem *);
 extern struct MaskItem *conf_authorize_client(struct Client *, enum conf_authorize_result *, const char **);
 extern struct MaskItem *conf_make(enum maskitem_type);
 extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
-extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, unsigned int, const char *, const char *, int);
+extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, enum maskitem_type, const char *, const char *, bool);
 extern struct MaskItem *find_dline_conf(const struct io_addr *);
 #endif  /* INCLUDED_conf_h */

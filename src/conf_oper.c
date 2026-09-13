@@ -108,23 +108,19 @@ oper_authenticate(const struct Client *client, const char *oper_name, const char
     if (io_strcasecmp(oper->name, oper_name))
       continue;
 
-    bool host_match = false;
-    if (match(oper->user, client->username) == 0)
+    bool mask_matches = match(oper->user, client->username) == 0;
+    if (mask_matches)
     {
-      switch (oper->htype)
-      {
-        case HM_HOST:
-          host_match = (match(oper->host, client->realhost) == 0 ||
-                        match(oper->host, client->sockhost) == 0 || match(oper->host, client->host) == 0);
-          break;
-        case HM_IPV4:
-        case HM_IPV6:
-          host_match = address_match_prefix(&client->addr, &oper->addr, oper->bits);
-          break;
-      }
+      if (address_is_ipv4(&oper->addr) ||
+          address_is_ipv6(&oper->addr))
+        mask_matches = address_match_prefix(&client->addr, &oper->addr, oper->bits);
+      else
+        mask_matches =
+          match(oper->host, client->realhost) == 0 ||
+          match(oper->host, client->sockhost) == 0 || match(oper->host, client->host) == 0;
     }
 
-    if (host_match == false)
+    if (!mask_matches)
     {
       if (result < OPER_AUTH_FAIL_HOST)
         result = OPER_AUTH_FAIL_HOST;

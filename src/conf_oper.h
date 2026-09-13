@@ -75,7 +75,6 @@ struct OperItem
   char *whois_text;
   char *modes;
   struct ClassItem *klass;
-  enum hostmask_type htype;
   struct io_addr addr;
   unsigned int bits;
   oper_conf_flags_t flags;

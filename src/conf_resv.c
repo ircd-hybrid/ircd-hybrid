@@ -103,7 +103,8 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
       exempt->name = io_strdup(nick);
       exempt->user = io_strdup(user);
       exempt->host = io_strdup(host);
-      exempt->type = address_parse_netmask(host, &exempt->addr, &exempt->bits);
+      address_parse_prefix(exempt->host, &exempt->addr, &exempt->bits);
+
       list_add_tail(exempt, &exempt->node, &resv->exempt_list);
     }
   }
@@ -141,22 +142,15 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
     if (match(exempt->name, client->name) || match(exempt->user, client->username))
       continue;
 
-    switch (exempt->type)
+    if (address_is_ipv4(&exempt->addr) ||
+        address_is_ipv6(&exempt->addr))
     {
-      case HM_HOST:
-        if (match(exempt->host, client->realhost) == 0 ||
-            match(exempt->host, client->sockhost) == 0 || match(exempt->host, client->host) == 0)
-          return true;
-        break;
-      case HM_IPV4:
-      case HM_IPV6:
-        if (address_match_prefix(&client->addr, &exempt->addr, exempt->bits))
-          return true;
-        break;
-      default:
-        assert(false);
-        break;
+      if (address_match_prefix(&client->addr, &exempt->addr, exempt->bits))
+        return true;
     }
+    else if (match(exempt->host, client->realhost) == 0 ||
+             match(exempt->host, client->sockhost) == 0 || match(exempt->host, client->host) == 0)
+      return true;
   }
 
   return false;

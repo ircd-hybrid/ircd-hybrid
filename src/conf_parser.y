@@ -904,7 +904,7 @@ oper_entry: OPERATOR
 
     oper->flags = block_state.flags.value;
     oper->oper_privs = block_state.port.value;
-    oper->htype = address_parse_netmask(oper->host, &oper->addr, &oper->bits);
+    address_parse_prefix(oper->host, &oper->addr, &oper->bits);
 
     oper_assign_class(oper, block_state.klass.buf);
   }
@@ -2045,17 +2045,17 @@ deny_entry: DENY
   if (!block_state.addr.buf[0])
     break;
 
-  if (address_parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
-  {
-    struct MaskItem *conf = conf_make(CONF_DLINE);
-    conf->host = io_strdup(block_state.addr.buf);
+  if (!address_parse_prefix(block_state.addr.buf, NULL, NULL))
+    break;
 
-    if (block_state.rpass.buf[0])
-      conf->reason = io_strdup(block_state.rpass.buf);
-    else
-      conf->reason = io_strdup(CONF_NOREASON);
-    add_conf_by_address(CONF_DLINE, conf);
-  }
+  struct MaskItem *const conf = conf_make(CONF_DLINE);
+  conf->host = io_strdup(block_state.addr.buf);
+
+  if (block_state.rpass.buf[0])
+    conf->reason = io_strdup(block_state.rpass.buf);
+  else
+    conf->reason = io_strdup(CONF_NOREASON);
+  add_conf_by_address(CONF_DLINE, conf);
 };
 
 deny_items:     deny_items deny_item | deny_item;
@@ -2084,16 +2084,16 @@ exempt_item:  exempt_ip | error;
 
 exempt_ip: IP '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (*yylval.string && address_parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
-    {
-      struct MaskItem *conf = conf_make(CONF_EXEMPT);
-      conf->host = io_strdup(yylval.string);
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-      add_conf_by_address(CONF_EXEMPT, conf);
-    }
-  }
+  if (!address_parse_prefix(yylval.string, NULL, NULL))
+    break;
+
+  struct MaskItem *const conf = conf_make(CONF_EXEMPT);
+  conf->host = io_strdup(yylval.string);
+
+  add_conf_by_address(CONF_EXEMPT, conf);
 };
 
 

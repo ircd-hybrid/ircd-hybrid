@@ -38,7 +38,7 @@
 #include "server_capab.h"
 
 static void
-kline_check(const struct AddressRec *arec)
+kline_check(const struct AddressRec *record)
 {
   list_node_t *node, *node_next;
 
@@ -48,24 +48,20 @@ kline_check(const struct AddressRec *arec)
     if (client_is_dead(client))
       continue;
 
-    if (match(arec->username, client->username))
+    if (match(record->username, client->username))
       continue;
 
-    switch (arec->masktype)
+    if (address_is_ipv4(&record->addr) ||
+        address_is_ipv6(&record->addr))
     {
-      case HM_HOST:
-        if (match(arec->Mask.hostname, client->realhost) == 0 ||
-            match(arec->Mask.hostname, client->sockhost) == 0 || match(arec->Mask.hostname, client->host) == 0)
-          conf_ban_apply(client, CONF_BAN_TYPE_KLINE, arec->conf->reason);
-        break;
-      case HM_IPV6:
-      case HM_IPV4:
-        if (address_match_prefix(&client->addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits))
-          conf_ban_apply(client, CONF_BAN_TYPE_KLINE, arec->conf->reason);
-        break;
-      default:
-        assert(0);
+      if (!address_match_prefix(&client->addr, &record->addr, record->prefix_length))
+        continue;
     }
+    else if (match(record->hostmask, client->realhost) &&
+             match(record->hostmask, client->sockhost) && match(record->hostmask, client->host))
+      continue;
+
+    conf_ban_apply(client, CONF_BAN_TYPE_KLINE, record->conf->reason);
   }
 }
 
@@ -111,29 +107,25 @@ kline_handle(struct Client *source, const struct aline_ctx *aline)
   }
 
   struct io_addr parsed_addr;
-  unsigned int cidr_bits = 0;
-  unsigned int minimum_cidr_bits = 0;
+  unsigned int prefix_length = 0;
   struct io_addr *parsed_addr_ptr = NULL;
-  switch (address_parse_netmask(aline->host, &parsed_addr, &cidr_bits))
-  {
-    case HM_IPV4:
-      minimum_cidr_bits = ConfigGeneral.kline_min_cidr;
-      parsed_addr_ptr = &parsed_addr;
-      break;
-    case HM_IPV6:
-      minimum_cidr_bits = ConfigGeneral.kline_min_cidr6;
-      parsed_addr_ptr = &parsed_addr;
-      break;
-    default:  /* HM_HOST */
-      break;
-  }
 
-  if (minimum_cidr_bits > 0 && !client_is_service(source) && (unsigned int)cidr_bits < minimum_cidr_bits)
+  if (address_parse_prefix(aline->host, &parsed_addr, &prefix_length))
   {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
-                        minimum_cidr_bits);
-    return;
+    parsed_addr_ptr = &parsed_addr;
+
+    const unsigned int minimum_prefix_length =
+      address_is_ipv4(&parsed_addr) ? ConfigGeneral.kline_min_cidr :
+                                      ConfigGeneral.kline_min_cidr6;
+    if (minimum_prefix_length > 0 && !client_is_service(source) &&
+        prefix_length < minimum_prefix_length)
+    {
+      if (client_is_user(source))
+        sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
+                          minimum_prefix_length);
+
+      return;
+    }
   }
 
   struct MaskItem *conf;

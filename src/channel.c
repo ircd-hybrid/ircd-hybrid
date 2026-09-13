@@ -460,18 +460,12 @@ _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
   if (match(ban->name, client->name) || match(ban->user, client->username))
     return false;
 
-  switch (ban->type)
-  {
-    case HM_HOST:
-      return (match(ban->host, client->realhost) == 0 ||
-              match(ban->host, client->sockhost) == 0 || match(ban->host, client->host) == 0);
-    case HM_IPV6:
-    case HM_IPV4:
-      return address_match_prefix(&client->addr, &ban->addr, ban->bits);
-    default:
-      assert(false);
-      return false;
-  }
+  if (address_is_ipv4(&ban->addr) ||
+      address_is_ipv6(&ban->addr))
+    return address_match_prefix(&client->addr, &ban->addr, ban->bits);
+
+  return match(ban->host, client->realhost) == 0 ||
+         match(ban->host, client->sockhost) == 0 || match(ban->host, client->host) == 0;
 }
 
 bool

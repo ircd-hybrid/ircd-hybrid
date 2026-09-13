@@ -80,8 +80,8 @@ extern char conf_file_name[IRCD_BUFSIZE];
  * should always be true (i.e. conf->flags & CONF_FLAGS_NEED_PASSWORD == 0)
  */
 struct MaskItem *
-find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int type,
-                     const char *username, const char *password, int do_match)
+find_conf_by_address(const char *name, const struct io_addr *addr, enum maskitem_type type,
+                     const char *username, const char *password, bool do_match)
 {
   unsigned int highest_precedence = 0;
   struct MaskItem *best_conf = NULL;
@@ -91,47 +91,45 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
   {
     if (address_is_ipv6(addr))
     {
-      for (int bitlen = 128; bitlen >= 0; bitlen -= 16)
+      for (int hash_prefix_length = 128; hash_prefix_length >= 0; hash_prefix_length -= 16)
       {
         list_node_t *node;
-        LIST_FOREACH(node, atable[hash_ipv6(addr, bitlen)].head)
+        LIST_FOREACH(node, atable[hash_ipv6(addr, hash_prefix_length)].head)
         {
-          const struct AddressRec *const arec = node->data;
-          if (arec->type != type ||
-              arec->precedence <= highest_precedence ||
-              arec->masktype != HM_IPV6 ||
-              !address_match_prefix(addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits) ||
-              (username && compare(arec->username, username)) ||
-              (!IsNeedPassword(arec->conf) &&
-               arec->conf->passwd &&
-               !conf_match_password(password, arec->conf)))
+          const struct AddressRec *const record = node->data;
+          if (record->type != type ||
+              record->precedence <= highest_precedence ||
+              !address_is_ipv6(&record->addr) ||
+              !address_match_prefix(addr, &record->addr, record->prefix_length) ||
+              (username && compare(record->username, username)) ||
+              (!IsNeedPassword(record->conf) &&
+               record->conf->passwd && !conf_match_password(password, record->conf)))
             continue;
 
-          highest_precedence = arec->precedence;
-          best_conf = arec->conf;
+          highest_precedence = record->precedence;
+          best_conf = record->conf;
         }
       }
     }
     else if (address_is_ipv4(addr))
     {
-      for (int bitlen = 32; bitlen >= 0; bitlen -= 8)
+      for (int hash_prefix_length = 32; hash_prefix_length >= 0; hash_prefix_length -= 8)
       {
         list_node_t *node;
-        LIST_FOREACH(node, atable[hash_ipv4(addr, bitlen)].head)
+        LIST_FOREACH(node, atable[hash_ipv4(addr, hash_prefix_length)].head)
         {
-          const struct AddressRec *const arec = node->data;
-          if (arec->type != type ||
-              arec->precedence <= highest_precedence ||
-              arec->masktype != HM_IPV4 ||
-              !address_match_prefix(addr, &arec->Mask.ipa.addr, arec->Mask.ipa.bits) ||
-              (username && compare(arec->username, username)) ||
-              (!IsNeedPassword(arec->conf) &&
-               arec->conf->passwd &&
-               !conf_match_password(password, arec->conf)))
+          const struct AddressRec *const record = node->data;
+          if (record->type != type ||
+              record->precedence <= highest_precedence ||
+              !address_is_ipv4(&record->addr) ||
+              !address_match_prefix(addr, &record->addr, record->prefix_length) ||
+              (username && compare(record->username, username)) ||
+              (!IsNeedPassword(record->conf) &&
+               record->conf->passwd && !conf_match_password(password, record->conf)))
             continue;
 
-          highest_precedence = arec->precedence;
-          best_conf = arec->conf;
+          highest_precedence = record->precedence;
+          best_conf = record->conf;
         }
       }
     }
@@ -139,24 +137,24 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
 
   if (name)
   {
-    for (const char *part = name; ;)
+    for (const char *part = name; ; )
     {
       list_node_t *node;
       LIST_FOREACH(node, atable[hash_text(part)].head)
       {
-        const struct AddressRec *const arec = node->data;
-        if (arec->type != type ||
-            arec->precedence <= highest_precedence ||
-            arec->masktype != HM_HOST ||
-            compare(arec->Mask.hostname, name) ||
-            (username && compare(arec->username, username)) ||
-            (!IsNeedPassword(arec->conf) &&
-             arec->conf->passwd &&
-             !conf_match_password(password, arec->conf)))
+        const struct AddressRec *const record = node->data;
+        if (record->type != type ||
+            record->precedence <= highest_precedence ||
+            address_is_ipv4(&record->addr) ||
+            address_is_ipv6(&record->addr) ||
+            compare(record->hostmask, name) ||
+            (username && compare(record->username, username)) ||
+            (!IsNeedPassword(record->conf) &&
+             record->conf->passwd && !conf_match_password(password, record->conf)))
           continue;
 
-        highest_precedence = arec->precedence;
-        best_conf = arec->conf;
+        highest_precedence = record->precedence;
+        best_conf = record->conf;
       }
 
       part = strchr(part, '.');
@@ -169,19 +167,19 @@ find_conf_by_address(const char *name, const struct io_addr *addr, unsigned int 
     list_node_t *node;
     LIST_FOREACH(node, atable[0].head)
     {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != type ||
-          arec->precedence <= highest_precedence ||
-          arec->masktype != HM_HOST ||
-          compare(arec->Mask.hostname, name) ||
-          (username && compare(arec->username, username)) ||
-          (!IsNeedPassword(arec->conf) &&
-           arec->conf->passwd &&
-           !conf_match_password(password, arec->conf)))
+      const struct AddressRec *const record = node->data;
+      if (record->type != type ||
+          record->precedence <= highest_precedence ||
+          address_is_ipv4(&record->addr) ||
+          address_is_ipv6(&record->addr) ||
+          compare(record->hostmask, name) ||
+          (username && compare(record->username, username)) ||
+          (!IsNeedPassword(record->conf) &&
+           record->conf->passwd && !conf_match_password(password, record->conf)))
         continue;
 
-      highest_precedence = arec->precedence;
-      best_conf = arec->conf;
+      highest_precedence = record->precedence;
+      best_conf = record->conf;
     }
   }
 
@@ -227,81 +225,82 @@ find_dline_conf(const struct io_addr *addr)
 }
 
 struct AddressRec *
-add_conf_by_address(const unsigned int type, struct MaskItem *conf)
+add_conf_by_address(enum maskitem_type type, struct MaskItem *conf)
 {
-  const char *const hostname = conf->host;
-  const char *const username = conf->user;
-  static unsigned int prec_value = UINT_MAX;
-  unsigned int bits = 0;
+  assert(type);
+  assert(conf);
+  assert(!string_is_empty(conf->host));
 
-  assert(type && !string_is_empty(hostname));
+  static unsigned int precedence = UINT_MAX;
 
-  struct AddressRec *arec = io_calloc(sizeof(*arec));
-  arec->masktype = address_parse_netmask(hostname, &arec->Mask.ipa.addr, &bits);
-  arec->Mask.ipa.bits = bits;
-  arec->username = username;
-  arec->conf = conf;
-  arec->precedence = prec_value--;
-  arec->type = type;
+  struct AddressRec *const record = io_calloc(sizeof(*record));
+  record->type = type;
+  record->hostmask = conf->host;
+  record->username = conf->user;
+  record->conf = conf;
+  record->precedence = precedence--;
 
-  switch (arec->masktype)
+  address_clear(&record->addr);
+  record->prefix_length = 0;
+
+  address_parse_prefix(record->hostmask, &record->addr, &record->prefix_length);
+
+  if (address_is_ipv4(&record->addr))
   {
-    case HM_IPV4:
-      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
-      bits -= bits % 8;
-      list_add(arec, &arec->node, &atable[hash_ipv4(&arec->Mask.ipa.addr, bits)]);
-      break;
-    case HM_IPV6:
-      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
-      bits -= bits % 16;
-      list_add(arec, &arec->node, &atable[hash_ipv6(&arec->Mask.ipa.addr, bits)]);
-      break;
-    default: /* HM_HOST */
-      arec->Mask.hostname = hostname;
-      list_add(arec, &arec->node, &atable[get_mask_hash(hostname)]);
-      break;
+    const unsigned int hash_prefix_length =
+      record->prefix_length - record->prefix_length % 8;
+    list_add(record, &record->node, &atable[hash_ipv4(&record->addr, hash_prefix_length)]);
   }
+  else if (address_is_ipv6(&record->addr))
+  {
+    const unsigned int hash_prefix_length =
+      record->prefix_length - record->prefix_length % 16;
+    list_add(record, &record->node, &atable[hash_ipv6(&record->addr, hash_prefix_length)]);
+  }
+  else
+    list_add(record, &record->node, &atable[get_mask_hash(record->hostmask)]);
 
-  return arec;
+  return record;
 }
 
 void
-delete_one_address_conf(const char *address, struct MaskItem *conf)
+delete_one_address_conf(const char *mask, struct MaskItem *conf)
 {
-  unsigned int bits = 0;
-  uint32_t hv = 0;
-  list_node_t *node;
+  assert(mask);
+  assert(conf);
+
+  uint32_t hash_value;
   struct io_addr addr;
+  unsigned int prefix_length;
 
-  switch (address_parse_netmask(address, &addr, &bits))
+  if (address_parse_prefix(mask, &addr, &prefix_length))
   {
-    case HM_IPV4:
-      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
-      bits -= bits % 8;
-      hv = hash_ipv4(&addr, bits);
-      break;
-    case HM_IPV6:
-      /* We have to do this, since we do not re-hash for every bit -A1kmm. */
-      bits -= bits % 16;
-      hv = hash_ipv6(&addr, bits);
-      break;
-    default: /* HM_HOST */
-      hv = get_mask_hash(address);
-      break;
-  }
-
-  LIST_FOREACH(node, atable[hv].head)
-  {
-    struct AddressRec *arec = node->data;
-
-    if (arec->conf == conf)
+    if (address_is_ipv4(&addr))
     {
-      list_remove(&arec->node, &atable[hv]);
-
-      conf_free(conf);
-      io_free(arec);
-      return;
+      const unsigned int hash_prefix_length = prefix_length - prefix_length % 8;
+      hash_value = hash_ipv4(&addr, hash_prefix_length);
     }
+    else
+    {
+      assert(address_is_ipv6(&addr));
+      const unsigned int hash_prefix_length = prefix_length - prefix_length % 16;
+      hash_value = hash_ipv6(&addr, hash_prefix_length);
+    }
+  }
+  else
+    hash_value = get_mask_hash(mask);
+
+  list_node_t *node;
+  LIST_FOREACH(node, atable[hash_value].head)
+  {
+    struct AddressRec *const record = node->data;
+    if (record->conf != conf)
+      continue;
+
+    list_remove(&record->node, &atable[hash_value]);
+    conf_free(conf);
+    io_free(record);
+    return;
   }
 }
 

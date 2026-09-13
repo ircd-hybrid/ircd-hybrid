@@ -20,6 +20,8 @@
 #include "address.h"
 #include "io_string.h"
 
+_Static_assert(CHAR_BIT == 8, "address handling requires 8-bit bytes");
+
 bool
 address_equal(const struct io_addr *lhs, const struct io_addr *rhs)
 {
@@ -327,27 +329,14 @@ address_from_bytes(struct io_addr *addr_out, int family, const void *bytes, size
 bool
 address_to_bytes(const struct io_addr *addr, void *bytes, size_t len)
 {
-  if (address_is_ipv4(addr))
-  {
-    if (len != sizeof(struct in_addr))
-      return false;
+  const unsigned char *address_bytes;
+  size_t address_length;
 
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
-    memcpy(bytes, &v4->sin_addr, len);
-    return true;
-  }
+  if (!address_get_bytes(addr, &address_bytes, &address_length) || len != address_length)
+    return false;
 
-  if (address_is_ipv6(addr))
-  {
-    if (len != sizeof(struct in6_addr))
-      return false;
-
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
-    memcpy(bytes, &v6->sin6_addr, len);
-    return true;
-  }
-
-  return false;
+  memcpy(bytes, address_bytes, address_length);
+  return true;
 }
 
 bool

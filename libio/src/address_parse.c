@@ -182,6 +182,10 @@ _address_parse_ipv6_wildcard(const char *text, const char *wildcard, struct io_a
 static bool
 _address_parse_ipv6_prefix(const char *text, struct io_addr *addr_out, unsigned int *prefix_length_out)
 {
+  assert(text);
+  assert(addr_out);
+  assert(prefix_length_out);
+
   const char *const wildcard = strchr(text, '*');
   if (wildcard)
     return _address_parse_ipv6_wildcard(text, wildcard, addr_out, prefix_length_out);
@@ -219,6 +223,8 @@ _address_parse_ipv6_prefix(const char *text, struct io_addr *addr_out, unsigned 
 bool
 address_parse_prefix(const char *text, struct io_addr *addr_out, unsigned int *prefix_length_out)
 {
+  assert(text);
+
   struct io_addr addr;
   unsigned int prefix_length;
 

@@ -12,7 +12,6 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -31,20 +30,6 @@ enum
 };
 
 static bool
-_address_parse_prefix_length(const char *text, unsigned int max_prefix_length, unsigned int *prefix_length_out)
-{
-  assert(text);
-  assert(prefix_length_out);
-
-  unsigned int prefix_length;
-  if (io_parse_uint_range(text, 0, max_prefix_length, &prefix_length) != IO_PARSE_OK)
-    return false;
-
-  *prefix_length_out = prefix_length;
-  return true;
-}
-
-static bool
 _address_parse_ipv4_octet(const char *text, size_t text_length, unsigned char *octet_out)
 {
   assert(text);
@@ -61,7 +46,7 @@ _address_parse_ipv4_octet(const char *text, size_t text_length, unsigned char *o
       return false;
 
     value = value * 10U + (unsigned int)(text[i] - '0');
-    if (value > UINT8_MAX)
+    if (value > UCHAR_MAX)
       return false;
   }
 
@@ -94,13 +79,14 @@ _address_parse_ipv4_prefix(const char *text, struct io_addr *addr_out, unsigned 
       return false;
 
     ++octet_count;
+    const unsigned int explicit_prefix_length = (unsigned int)(octet_count * CHAR_BIT);
 
     if (*octet_end == '\0')
     {
       if (octet_count < 2)
         return false;
 
-      prefix_length = (unsigned int)(octet_count * CHAR_BIT);
+      prefix_length = explicit_prefix_length;
       break;
     }
 
@@ -109,8 +95,8 @@ _address_parse_ipv4_prefix(const char *text, struct io_addr *addr_out, unsigned 
       if (octet_count < 2)
         return false;
 
-      const unsigned int max_prefix_length = (unsigned int)(octet_count * CHAR_BIT);
-      if (!_address_parse_prefix_length(octet_end + 1, max_prefix_length, &prefix_length))
+      if (io_parse_uint_range(octet_end + 1, 0,
+                              explicit_prefix_length, &prefix_length) != IO_PARSE_OK)
         return false;
 
       break;
@@ -125,7 +111,7 @@ _address_parse_ipv4_prefix(const char *text, struct io_addr *addr_out, unsigned 
       if (cursor[1] != '\0' || octet_count >= sizeof(address_bytes))
         return false;
 
-      prefix_length = (unsigned int)(octet_count * CHAR_BIT);
+      prefix_length = explicit_prefix_length;
       break;
     }
   }
@@ -159,9 +145,9 @@ _address_parse_ipv6_wildcard(const char *text, const char *wildcard, struct io_a
   if (wildcard[-1] != ':' || text[0] == ':' || strstr(text, "::") || strchr(text, '/'))
     return false;
 
-  size_t hextet_count = 1;
+  size_t hextet_count = 0;
 
-  for (const char *p = text; p < wildcard - 1; ++p)
+  for (const char *p = text; p < wildcard; ++p)
   {
     if (*p == ':')
       ++hextet_count;
@@ -215,7 +201,9 @@ _address_parse_ipv6_prefix(const char *text, struct io_addr *addr_out, unsigned 
     address_buffer[address_text_length] = '\0';
     address_text = address_buffer;
 
-    if (!_address_parse_prefix_length(prefix_separator + 1, ADDRESS_IPV6_MAX_PREFIX_LENGTH, &prefix_length))
+    if (io_parse_uint_range(prefix_separator + 1, 0,
+                            ADDRESS_IPV6_MAX_PREFIX_LENGTH,
+                            &prefix_length) != IO_PARSE_OK)
       return false;
   }
 

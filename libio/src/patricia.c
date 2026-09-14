@@ -91,6 +91,9 @@ _patricia_family_max_bitlen(int family)
 static bool
 _patricia_tree_accepts_prefix(const patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {
+  assert(tree);
+  assert(prefix);
+
   const unsigned int max_bitlen = _patricia_family_max_bitlen(tree->family);
   if (max_bitlen == 0)
     return false;
@@ -128,6 +131,7 @@ _patricia_tree_replace_node(patricia_tree_t *tree,
 static const unsigned char *
 _patricia_prefix_bytes(const patricia_prefix_t *prefix)
 {
+  assert(prefix);
   return (const unsigned char *)&prefix->addr;
 }
 
@@ -180,6 +184,7 @@ _patricia_prefix_bits_equal(const unsigned char *lhs, const unsigned char *rhs, 
 {
   assert(lhs);
   assert(rhs);
+  assert(bitlen <= PATRICIA_MAX_BITLEN);
 
   const size_t full_bytes = bitlen / CHAR_BIT;
   if (full_bytes && memcmp(lhs, rhs, full_bytes))
@@ -303,6 +308,9 @@ static patricia_prefix_t *
 _patricia_prefix_dup(const patricia_prefix_t *prefix)
 {
   assert(prefix);
+  assert(_patricia_family_max_bitlen(prefix->family) != 0);
+  assert(prefix->bitlen <= _patricia_family_max_bitlen(prefix->family));
+
 
   patricia_prefix_t *const copy = io_calloc(sizeof(*copy));
   *copy = *prefix;
@@ -758,6 +766,31 @@ patricia_remove(patricia_tree_t *tree, patricia_node_t *node)
   assert(tree);
   assert(node);
   assert(node->prefix);
+  assert(node->bit_index == node->prefix->bitlen);
+  assert(_patricia_tree_accepts_prefix(tree, node->prefix));
+
+  if (node->parent)
+  {
+    assert(node->parent->bit_index < node->bit_index);
+    assert((node->parent->left == node) != (node->parent->right == node));
+  }
+  else
+    assert(tree->root == node);
+
+  if (node->left)
+  {
+    assert(node->left->parent == node);
+    assert(node->left->bit_index > node->bit_index);
+  }
+
+  if (node->right)
+  {
+    assert(node->right->parent == node);
+    assert(node->right->bit_index > node->bit_index);
+  }
+
+  if (node->left && node->right)
+    assert(node->left != node->right);
 
   void *const data = node->data;
 

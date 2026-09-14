@@ -349,6 +349,15 @@ patricia_node_set_data(patricia_node_t *node, void *data)
   node->data = data;
 }
 
+const patricia_prefix_t *
+patricia_node_get_prefix(const patricia_node_t *node)
+{
+  assert(node);
+  assert(node->prefix);
+
+  return node->prefix;
+}
+
 patricia_tree_t *
 patricia_create(int family)
 {

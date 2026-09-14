@@ -76,4 +76,5 @@ extern patricia_node_t *patricia_try_search_best_addr(const patricia_tree_t *, c
 extern patricia_node_t *patricia_try_search_exact(const patricia_tree_t *, const char *);
 extern patricia_node_t *patricia_try_search_exact_addr(const patricia_tree_t *, const struct io_addr *, unsigned int);
 extern patricia_tree_t *patricia_create(int);
+extern const patricia_prefix_t *patricia_node_get_prefix(const patricia_node_t *);
 #endif  /* INCLUDED_patricia_h */

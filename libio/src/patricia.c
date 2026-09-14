@@ -270,6 +270,19 @@ _patricia_prefix_to_addr(const patricia_prefix_t *prefix, struct io_addr *addr)
   }
 }
 
+static bool
+_patricia_prefix_normalize(patricia_prefix_t *normalized, const patricia_prefix_t *prefix)
+{
+  assert(normalized);
+  assert(prefix);
+
+  struct io_addr addr;
+  if (!_patricia_prefix_to_addr(prefix, &addr))
+    return false;
+
+  return _patricia_prefix_init(normalized, &addr, prefix->bitlen);
+}
+
 bool
 patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buffer,
                           size_t buffer_size, bool include_bitlen)
@@ -604,14 +617,12 @@ patricia_search_best(const patricia_tree_t *tree, const patricia_prefix_t *prefi
   return patricia_search_best2(tree, prefix, true);
 }
 
-patricia_node_t *
-patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
+static patricia_node_t *
+_patricia_lookup_canonical(patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {
   assert(tree);
   assert(prefix);
-
-  if (!_patricia_tree_accepts_prefix(tree, prefix))
-    return NULL;
+  assert(_patricia_tree_accepts_prefix(tree, prefix));
 
   if (tree->root == NULL)
   {
@@ -632,23 +643,17 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
 
   while (node->bit_index < bitlen || node->prefix == NULL)
   {
-    assert(node->bit_index <= max_bitlen);
+    assert(node->bit_index < max_bitlen);
 
     if (node->prefix == NULL)
     {
       assert(node->left);
       assert(node->right);
-      assert(node->bit_index < max_bitlen);
+      assert(node->data == NULL);
     }
 
-    patricia_node_t *next;
-
-    if (node->bit_index < max_bitlen &&
-        _patricia_prefix_bit_is_set(prefix_bytes, node->bit_index))
-      next = node->right;
-    else
-      next = node->left;
-
+    patricia_node_t *const next =
+      _patricia_prefix_bit_is_set(prefix_bytes, node->bit_index) ? node->right : node->left;
     if (next == NULL)
       break;
 
@@ -672,8 +677,13 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
   while (node->parent && node->parent->bit_index >= differing_bit)
   {
     assert(node->parent->bit_index < node->bit_index);
+    assert((node->parent->left == node) != (node->parent->right == node));
+
     node = node->parent;
   }
+
+  assert(differing_bit <= node->bit_index);
+  assert(node->parent == NULL || node->parent->bit_index < differing_bit);
 
   if (differing_bit == bitlen && node->bit_index == bitlen)
   {
@@ -699,11 +709,11 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
      * new prefix belongs in its currently empty branch.
      */
     assert(node->prefix);
+    assert(node->bit_index < max_bitlen);
 
     new_node->parent = node;
 
-    if (node->bit_index < max_bitlen &&
-        _patricia_prefix_bit_is_set(prefix_bytes, node->bit_index))
+    if (_patricia_prefix_bit_is_set(prefix_bytes, node->bit_index))
     {
       assert(node->right == NULL);
       node->right = new_node;
@@ -719,8 +729,11 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
 
   if (bitlen == differing_bit)
   {
-    /* The new prefix is an ancestor of the existing node. */
-    if (bitlen < max_bitlen && _patricia_prefix_bit_is_set(node_bytes, bitlen))
+    /* The new prefix is an ancestor of the existing subtree. */
+    assert(bitlen < node->bit_index);
+    assert(bitlen < max_bitlen);
+
+    if (_patricia_prefix_bit_is_set(node_bytes, bitlen))
       new_node->right = node;
     else
       new_node->left = node;
@@ -758,6 +771,22 @@ patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
   }
 
   return new_node;
+}
+
+patricia_node_t *
+patricia_lookup(patricia_tree_t *tree, const patricia_prefix_t *prefix)
+{
+  assert(tree);
+  assert(prefix);
+
+  patricia_prefix_t normalized;
+  if (!_patricia_prefix_normalize(&normalized, prefix))
+    return NULL;
+
+  if (!_patricia_tree_accepts_prefix(tree, &normalized))
+    return NULL;
+
+  return _patricia_lookup_canonical(tree, &normalized);
 }
 
 void *

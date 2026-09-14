@@ -29,29 +29,34 @@ enum
   ADDRESS_IPV6_HEXTET_COUNT = ADDRESS_IPV6_MAX_PREFIX_LENGTH / ADDRESS_IPV6_HEXTET_BITS
 };
 
-static bool
-_address_parse_ipv4_octet(const char *text, size_t text_length, unsigned char *octet_out)
+static const char *
+_address_parse_ipv4_octet(const char *text, unsigned char *octet_out)
 {
   assert(text);
   assert(octet_out);
 
-  if (text_length == 0 || text_length > 3)
-    return false;
-
+  const char *cursor = text;
   unsigned int value = 0;
+  unsigned int digit_count = 0;
 
-  for (size_t i = 0; i < text_length; ++i)
+  while (io_ascii_is_digit(*cursor))
   {
-    if (!io_ascii_is_digit(text[i]))
-      return false;
+    if (digit_count == 3)
+      return NULL;
 
-    value = value * 10U + (unsigned int)(text[i] - '0');
+    value = value * 10U + (unsigned int)(*cursor - '0');
     if (value > UCHAR_MAX)
-      return false;
+      return NULL;
+
+    ++cursor;
+    ++digit_count;
   }
 
+  if (digit_count == 0)
+    return NULL;
+
   *octet_out = (unsigned char)value;
-  return true;
+  return cursor;
 }
 
 static bool
@@ -71,11 +76,9 @@ _address_parse_ipv4_prefix(const char *text, struct io_addr *addr_out, unsigned 
     if (octet_count >= sizeof(address_bytes))
       return false;
 
-    const char *octet_end = cursor;
-    while (io_ascii_is_digit(*octet_end))
-      ++octet_end;
-
-    if (!_address_parse_ipv4_octet(cursor, (size_t)(octet_end - cursor), &address_bytes[octet_count]))
+    const char *const octet_end =
+      _address_parse_ipv4_octet(cursor, &address_bytes[octet_count]);
+    if (octet_end == NULL)
       return false;
 
     ++octet_count;

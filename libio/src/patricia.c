@@ -874,7 +874,10 @@ patricia_make_and_lookup(patricia_tree_t *tree, const char *prefix_string)
   if (!_patricia_prefix_init_from_string(&prefix, prefix_string))
     return NULL;
 
-  return patricia_lookup(tree, &prefix);
+  if (!_patricia_tree_accepts_prefix(tree, &prefix))
+    return NULL;
+
+  return _patricia_lookup_canonical(tree, &prefix);
 }
 
 patricia_node_t *
@@ -884,7 +887,10 @@ patricia_make_and_lookup_addr(patricia_tree_t *tree, const struct io_addr *addr,
   if (!_patricia_prefix_init(&prefix, addr, bitlen))
     return NULL;
 
-  return patricia_lookup(tree, &prefix);
+  if (!_patricia_tree_accepts_prefix(tree, &prefix))
+    return NULL;
+
+  return _patricia_lookup_canonical(tree, &prefix);
 }
 
 patricia_node_t *

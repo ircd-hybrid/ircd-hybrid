@@ -45,14 +45,11 @@ _address_parse_ipv4_octet(const char *text, unsigned char *octet_out)
       return NULL;
 
     value = value * 10U + (unsigned int)(*cursor - '0');
-    if (value > UCHAR_MAX)
-      return NULL;
-
     ++cursor;
     ++digit_count;
   }
 
-  if (digit_count == 0)
+  if (digit_count == 0 || value > UCHAR_MAX)
     return NULL;
 
   *octet_out = (unsigned char)value;

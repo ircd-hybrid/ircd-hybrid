@@ -132,6 +132,7 @@ _address_parse_ipv6_wildcard(const char *text, const char *wildcard, struct io_a
   assert(text);
   assert(wildcard);
   assert(*wildcard == '*');
+  assert(wildcard == strchr(text, '*'));
   assert(addr_out);
   assert(prefix_length_out);
 

@@ -71,7 +71,7 @@ struct ClassItem
   unsigned int max_channels;  /**< Maximum number of channels clients in this class can join. */
   unsigned int cidr_bitlen_ipv4;  /**< CIDR bit length for IPv4 subnets. */
   unsigned int cidr_bitlen_ipv6;  /**< CIDR bit length for IPv6 subnets. */
-  unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet. */
+  unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet; 0 disables the limit. */
   unsigned int flags;  /**< Bitwise flags indicating class configuration options. */
 };
 

@@ -163,7 +163,7 @@ class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, enum cla
 
   patricia_tree_t *tree;
   unsigned int bitlen;
-  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen))
     return false;
 
   patricia_node_t *const node = patricia_make_and_lookup_addr(tree, addr, bitlen);
@@ -192,7 +192,7 @@ class_ip_limit_remove(struct ClassItem *klass, const struct io_addr *addr)
 
   patricia_tree_t *tree;
   unsigned int bitlen;
-  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen))
     return false;
 
   patricia_node_t *const node = patricia_try_search_exact_addr(tree, addr, bitlen);

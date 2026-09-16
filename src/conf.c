@@ -484,7 +484,10 @@ conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_
   client_set_flag(client, FLAGS_IPHASH);
 
   if (exempt_limits)
+  {
+    class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ACCOUNT_ONLY);
     return true;
+  }
 
   if (klass->max_total && klass->ref_count >= klass->max_total)
   {
@@ -507,7 +510,7 @@ conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_
     return false;
   }
 
-  if (class_ip_limit_add(klass, &client->addr, false))
+  if (class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ENFORCE))
   {
     _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_CIDR_LIMIT,
                                 "connection class full: CIDR subnet limit reached");

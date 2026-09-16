@@ -37,6 +37,12 @@ enum
   CLASS_FLAGS_HIDE_IDLE_FROM_OPERS = 1 << 2,  /**< Flag indicating idle is hidden from operators. */
 };
 
+enum class_ip_limit_mode
+{
+  CLASS_IP_LIMIT_ENFORCE,
+  CLASS_IP_LIMIT_ACCOUNT_ONLY,
+};
+
 /**
  * @struct ClassItem
  * @brief Structure representing a class configuration.
@@ -81,7 +87,7 @@ extern void class_init(void);
 extern void class_ip_limit_rebuild(struct ClassItem *);
 extern void class_mark_all_inactive(void);
 extern void class_sweep_inactive(void);
-extern bool class_ip_limit_add(struct ClassItem *, const struct io_addr *addr, bool);
+extern bool class_ip_limit_add(struct ClassItem *, const struct io_addr *addr, enum class_ip_limit_mode);
 extern bool class_ip_limit_remove(struct ClassItem *, const struct io_addr *addr);
 extern struct ClassItem *class_create(void);
 extern struct ClassItem *class_find(const char *, bool);

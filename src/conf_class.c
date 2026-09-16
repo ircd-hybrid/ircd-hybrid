@@ -153,8 +153,10 @@ _class_ip_limit_resolve(const struct ClassItem *klass, const struct io_addr *add
 }
 
 bool
-class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, bool over_rule)
+class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, enum class_ip_limit_mode mode)
 {
+  assert(mode == CLASS_IP_LIMIT_ENFORCE || mode == CLASS_IP_LIMIT_ACCOUNT_ONLY);
+
   const unsigned int limit = klass->number_per_cidr;
   if (limit == 0)
     return false;
@@ -164,28 +166,19 @@ class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, bool ove
   if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
     return false;
 
-  patricia_node_t *const pnode = patricia_make_and_lookup_addr(tree, addr, bitlen);
-  if (pnode == NULL)
+  patricia_node_t *const node = patricia_make_and_lookup_addr(tree, addr, bitlen);
+  if (node == NULL)
     return false;
 
-  struct class_ip_limit_entry *entry = patricia_node_get_data(pnode);
+  struct class_ip_limit_entry *entry = patricia_node_get_data(node);
   if (entry == NULL)
   {
     entry = io_calloc(sizeof(*entry));
-    patricia_node_set_data(pnode, entry);
+    patricia_node_set_data(node, entry);
   }
 
-  if (entry->count >= limit)
-  {
-    /*
-     * Overruled clients must still be counted because their eventual
-     * detachment calls class_ip_limit_remove().
-     */
-    if (over_rule)
-      ++entry->count;
-
+  if (mode == CLASS_IP_LIMIT_ENFORCE && entry->count >= limit)
     return true;
-  }
 
   ++entry->count;
   return false;
@@ -202,18 +195,18 @@ class_ip_limit_remove(struct ClassItem *klass, const struct io_addr *addr)
   if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen) || bitlen == 0)
     return false;
 
-  patricia_node_t *const pnode = patricia_try_search_exact_addr(tree, addr, bitlen);
-  if (pnode == NULL)
+  patricia_node_t *const node = patricia_try_search_exact_addr(tree, addr, bitlen);
+  if (node == NULL)
     return false;
 
-  struct class_ip_limit_entry *const entry = patricia_node_get_data(pnode);
+  struct class_ip_limit_entry *const entry = patricia_node_get_data(node);
   assert(entry);
   assert(entry->count > 0);
 
   if (--entry->count)
     return false;
 
-  struct class_ip_limit_entry *const removed_entry = patricia_remove(tree, pnode);
+  struct class_ip_limit_entry *const removed_entry = patricia_remove(tree, node);
   assert(removed_entry == entry);
 
   io_free(removed_entry);
@@ -231,7 +224,7 @@ class_ip_limit_rebuild(struct ClassItem *klass)
   {
     const struct Client *const client = node->data;
     if (client->connection->base_class == klass)
-      class_ip_limit_add(klass, &client->addr, true);
+      class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ACCOUNT_ONLY);
   }
 }
 

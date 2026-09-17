@@ -394,59 +394,81 @@ resend_query(struct reslist *request)
   }
 }
 
+static bool
+_res_packet_has_bytes(const unsigned char *cursor, const unsigned char *end, size_t length)
+{
+  assert(cursor);
+  assert(end);
+
+  if (cursor > end)
+    return false;
+
+  return length <= (size_t)(end - cursor);
+}
+
+static bool
+_res_packet_skip_name(const unsigned char **cursor, const unsigned char *end)
+{
+  assert(cursor);
+  assert(*cursor);
+  assert(end);
+
+  const int length = reslib_dn_skipname(*cursor, end);
+  if (length <= 0 || !_res_packet_has_bytes(*cursor, end, (size_t)length))
+    return false;
+
+  *cursor += (size_t)length;
+  return true;
+}
+
 /*
  * proc_answer - process name server reply
  */
 static bool
-proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigned char *eob)
+proc_answer(struct reslist *request, const HEADER *header,
+            const unsigned char *packet, const unsigned char *packet_end)
 {
-  char hostbuf[RFC1035_MAX_DOMAIN_LENGTH + 100]; /* working buffer */
-  unsigned char *current = buf + sizeof(HEADER); /* current position in buf */
-  unsigned int type = 0;       /* answer type */
-  unsigned int rd_length = 0;
+  assert(request);
+  assert(header);
+  assert(packet);
+  assert(packet_end);
 
-  for (; header->qdcount > 0; --header->qdcount)
+  if (!_res_packet_has_bytes(packet, packet_end, HFIXEDSZ))
+    return false;
+
+  const unsigned char *cursor = packet + HFIXEDSZ;
+  char hostbuf[sizeof(request->name)];
+
+  for (unsigned int i = 0; i < header->qdcount; ++i)
   {
-    int n = reslib_dn_skipname(current, eob);
-    if (n < 0)
-      break;
-
-    current += (size_t)n + QFIXEDSZ;
-  }
-
-  /*
-   * Process each answer sent to us blech.
-   */
-  while (header->ancount > 0 && current < eob)
-  {
-    --header->ancount;
-
-    int n = reslib_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
-    if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
+    if (!_res_packet_skip_name(&cursor, packet_end) ||
+        !_res_packet_has_bytes(cursor, packet_end, QFIXEDSZ))
       return false;
 
-    hostbuf[RFC1035_MAX_DOMAIN_LENGTH] = '\0';
+    cursor += QFIXEDSZ;
+  }
 
-    /*
-     * With Address arithmetic you have to be very anal
-     * this code was not working on alpha due to that
-     * (spotted by rodder/jailbird/dianora)
-     */
-    current += (size_t)n;
+  for (unsigned int i = 0; i < header->ancount; ++i)
+  {
+    if (!_res_packet_skip_name(&cursor, packet_end) ||
+        !_res_packet_has_bytes(cursor, packet_end, ANSWER_FIXED_SIZE))
+      return false;
 
-    if (!((current + ANSWER_FIXED_SIZE) < eob))
-      break;
+    const unsigned int type = reslib_ns_get16(cursor);
+    cursor += TYPE_SIZE;
+    cursor += CLASS_SIZE;
+    cursor += TTL_SIZE;
 
-    type = reslib_ns_get16(current);
-    current += TYPE_SIZE;
-    current += CLASS_SIZE;
-    current += TTL_SIZE;
-    rd_length = reslib_ns_get16(current);
-    current += RDLENGTH_SIZE;
+    const size_t rd_length = reslib_ns_get16(cursor);
+    cursor += RDLENGTH_SIZE;
 
-    /*
-     * Wait to set request->type until we verify this structure
-     */
+    if (!_res_packet_has_bytes(cursor, packet_end, rd_length))
+      return false;
+
+    const unsigned char *const rdata = cursor;
+    const unsigned char *const rdata_end = rdata + rd_length;
+    cursor = rdata_end;
+
     switch (type)
     {
       case T_A:
@@ -454,22 +476,36 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
         if (request->type != type)
           return false;
 
-        return address_from_bytes(&request->addr, type == T_A ? AF_INET : AF_INET6, current, rd_length);
+        return address_from_bytes(&request->addr, type == T_A ? AF_INET : AF_INET6, rdata, rd_length);
 
       case T_PTR:
+      {
         if (request->type != type)
           return false;
 
-        n = reslib_dn_expand(buf, eob, current, hostbuf, sizeof(hostbuf));
-        if (n < 0  /* Broken message */ || n == 0  /* No more answers left */)
+        const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
+        if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
+          return false;
+
+        const int expanded_length =
+          reslib_dn_expand(packet, packet_end, rdata, hostbuf, (int)sizeof(hostbuf));
+
+        if (expanded_length != encoded_length)
           return false;
 
         request->name_len = strlcpy(request->name, hostbuf, sizeof(request->name));
+        assert(request->name_len < sizeof(request->name));
         return true;
+      }
 
       case T_CNAME:
-        current += rd_length;
+      {
+        const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
+        if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
+          return false;
+
         break;
+      }
 
       default:
         return false;
@@ -490,10 +526,12 @@ res_readreply(fde_t *fde, void *data)
   assert(socket->fde == fde);
 
   unsigned char buf[sizeof(HEADER) + MAXPACKET];
+
   while (true)
   {
     struct io_addr addr = { 0 };
     socklen_t len = sizeof(addr.ss);
+
     ssize_t rc = recvfrom(fde->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr.ss, &len);
     if (rc == -1)
       break;

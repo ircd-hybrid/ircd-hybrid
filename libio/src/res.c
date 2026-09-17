@@ -52,6 +52,13 @@
 #error this code needs to be able to address individual octets
 #endif
 
+struct resolver_socket
+{
+  int family;
+  const char *description;
+  fde_t *fde;
+};
+
 static void res_readreply(fde_t *, void *);
 
 #define MAXPACKET      1024  /**< rfc says 512 but we expand names so ... */
@@ -83,9 +90,74 @@ struct reslist
   void *callback_ctx;                        /**< Context pointer for callback. */
 };
 
-static fde_t *ResolverFileDescriptor;
+static struct resolver_socket resolver_sockets[] =
+{
+  { .family = AF_INET, .description = "IPv4 UDP resolver socket" },
+  { .family = AF_INET6, .description = "IPv6 UDP resolver socket" }
+};
+
 static list_t request_list;
 
+static struct resolver_socket *
+_resolver_socket_find_by_family(int family)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
+    if (resolver_sockets[i].family == family)
+      return &resolver_sockets[i];
+
+  return NULL;
+}
+
+static bool
+_resolver_family_is_configured(int family)
+{
+  for (unsigned int i = 0; i < reslib_nscount; ++i)
+    if (address_get_family(&reslib_nsaddr_list[i]) == family)
+      return true;
+
+  return false;
+}
+
+static void
+_resolver_socket_open(struct resolver_socket *socket)
+{
+  if (socket->fde)
+    return;
+
+  socket->fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
+  if (socket->fde)
+    comm_setselect(socket->fde, COMM_SELECT_READ, res_readreply, socket);
+}
+
+static void
+_resolver_socket_close(struct resolver_socket *socket)
+{
+  if (socket->fde == NULL)
+    return;
+
+  comm_socket_close(socket->fde);
+  socket->fde = NULL;
+}
+
+static void
+_resolver_socket_close_all(void)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
+    _resolver_socket_close(&resolver_sockets[i]);
+}
+
+static bool
+_resolver_source_is_configured_nameserver(const struct resolver_socket *socket, const struct io_addr *addr)
+{
+  if (address_get_family(addr) != socket->family)
+    return false;
+
+  for (unsigned int i = 0; i < reslib_nscount; ++i)
+    if (address_equal_with_port(addr, &reslib_nsaddr_list[i]))
+      return true;
+
+  return false;
+}
 
 /*
  * rem_request - remove a request from the list.
@@ -116,62 +188,25 @@ make_request(dns_callback_fnc callback, void *ctx)
   return request;
 }
 
-/*
- * int
- * res_ourserver(inp)
- *      looks up "inp" in reslib_nsaddr_list[]
- * returns:
- *      0  : not found
- *      >0 : found
- * author:
- *      paul vixie, 29may94
- *      revised for ircd, cryogen(stu) may03
- */
-static bool
-res_ourserver(const struct io_addr *addr)
-{
-  assert(addr);
-
-  for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_equal_with_port(addr, &reslib_nsaddr_list[i]))
-      return true;
-
-  return false;
-}
-
-/*
- * start_resolver - do everything we need to read the resolv.conf file
- * and initialize the resolver file descriptor if needed
- */
 static void
 start_resolver(void)
 {
   reslib_res_init();
 
-  if (ResolverFileDescriptor == NULL)
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
   {
-    ResolverFileDescriptor = comm_socket_create(address_get_family(&reslib_nsaddr_list[0]),
-                                                SOCK_DGRAM, 0, "UDP resolver socket");
-    if (ResolverFileDescriptor == NULL)
-      return;
-
-    /* At the moment, the resolver FD data is global .. */
-    comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL);
+    struct resolver_socket *const socket = &resolver_sockets[i];
+    if (_resolver_family_is_configured(socket->family))
+      _resolver_socket_open(socket);
+    else
+      _resolver_socket_close(socket);
   }
 }
 
-/*
- * restart_resolver - reread resolv.conf, reopen socket
- */
 void
 restart_resolver(void)
 {
-  if (ResolverFileDescriptor)
-  {
-    comm_socket_close(ResolverFileDescriptor);
-    ResolverFileDescriptor = NULL;
-  }
-
+  _resolver_socket_close_all();
   start_resolver();
 }
 
@@ -200,19 +235,33 @@ delete_resolver_queries(const void *vptr)
  * nameservers or -1 if no successful sends.
  */
 static void
-send_res_msg(const unsigned char *msg, int len, unsigned int rcount)
+send_res_msg(const unsigned char *msg, size_t len, unsigned int max_nameservers)
 {
-  unsigned int max_queries = IO_MIN(reslib_nscount, rcount);
+  assert(msg);
+  assert(len > 0);
+  assert(max_nameservers > 0);
 
-  /* RES_PRIMARY option is not implemented
-   * if (res.options & RES_PRIMARY || 0 == max_queries)
-   */
-  if (max_queries == 0)
-    max_queries = 1;
+  unsigned int nameservers_sent = 0;
 
-  for (unsigned int i = 0; i < max_queries; ++i)
-    sendto(ResolverFileDescriptor->fd, msg, len, 0,
-           (struct sockaddr *)&reslib_nsaddr_list[i], address_get_sockaddr_length(&reslib_nsaddr_list[i]));
+  for (unsigned int i = 0; i < reslib_nscount && nameservers_sent < max_nameservers; ++i)
+  {
+    const struct io_addr *const nameserver = &reslib_nsaddr_list[i];
+    const struct resolver_socket *const socket =
+      _resolver_socket_find_by_family(address_get_family(nameserver));
+
+    if (socket == NULL || socket->fde == NULL)
+      continue;
+
+    ssize_t bytes_sent;
+    do
+      bytes_sent = sendto(socket->fde->fd, msg, len, 0,
+                          (const struct sockaddr *)&nameserver->ss,
+                          address_get_sockaddr_length(nameserver));
+    while (bytes_sent == -1 && errno == EINTR);
+
+    if (bytes_sent == (ssize_t)len)
+      ++nameservers_sent;
+  }
 }
 
 /*
@@ -260,7 +309,7 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
     request->id = header->id;
     ++request->sends;
 
-    send_res_msg(buf, request_len, request->sends);
+    send_res_msg(buf, (size_t)request_len, request->sends);
   }
 }
 
@@ -434,25 +483,26 @@ proc_answer(struct reslist *request, HEADER *header, unsigned char *buf, unsigne
  * res_readreply - read a dns reply from the nameserver and process it.
  */
 static void
-res_readreply(fde_t *F, void *data)
+res_readreply(fde_t *fde, void *data)
 {
-  unsigned char buf[sizeof(HEADER) + MAXPACKET];
-  struct io_addr addr;
+  struct resolver_socket *const socket = data;
+  assert(socket);
+  assert(socket->fde == fde);
 
+  unsigned char buf[sizeof(HEADER) + MAXPACKET];
   while (true)
   {
-    socklen_t len = sizeof(addr);
-    ssize_t rc = recvfrom(F->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &len);
+    struct io_addr addr = { 0 };
+    socklen_t len = sizeof(addr.ss);
+    ssize_t rc = recvfrom(fde->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr.ss, &len);
     if (rc == -1)
       break;
 
     if (rc <= (ssize_t)sizeof(HEADER))
       continue;
 
-    /*
-     * Check against possibly fake replies
-     */
-    if (!res_ourserver(&addr))
+    /* Ignore replies from unconfigured sources. */
+    if (!_resolver_source_is_configured_nameserver(socket, &addr))
       continue;
 
     /*
@@ -528,7 +578,7 @@ res_readreply(fde_t *F, void *data)
     }
   }
 
-  comm_setselect(F, COMM_SELECT_READ, res_readreply, NULL);
+  comm_setselect(fde, COMM_SELECT_READ, res_readreply, socket);
 }
 
 /*

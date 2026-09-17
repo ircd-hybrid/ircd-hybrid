@@ -86,7 +86,7 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   log_write(LOG_TYPE_IRCD, "%s", buf);
 
-  save_all_databases(NULL);
+  conf_db_save_all(NULL);
 
   io_pidfile_remove(pidFileName);
   io_pidfile_close();

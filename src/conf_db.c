@@ -400,10 +400,20 @@ load_xline_database(const char *filename)
 }
 
 void
-save_all_databases(void *unused)
+conf_db_save_all(void *unused)
 {
   save_kline_database(ConfigGeneral.klinefile);
   save_dline_database(ConfigGeneral.dlinefile);
   save_xline_database(ConfigGeneral.xlinefile);
   save_resv_database(ConfigGeneral.resvfile);
+}
+
+void
+conf_db_load_all(void)
+{
+
+  load_kline_database(ConfigGeneral.klinefile);
+  load_dline_database(ConfigGeneral.dlinefile);
+  load_xline_database(ConfigGeneral.xlinefile);
+  load_resv_database(ConfigGeneral.resvfile);
 }

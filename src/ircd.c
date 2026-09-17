@@ -463,10 +463,7 @@ main(int argc, char *argv[])
   links_cache_init();
   _ircd_init_me();
 
-  load_kline_database(ConfigGeneral.klinefile);
-  load_dline_database(ConfigGeneral.dlinefile);
-  load_xline_database(ConfigGeneral.xlinefile);
-  load_resv_database(ConfigGeneral.resvfile);
+  conf_db_load_all();
 
   module_load_all(NULL);
 
@@ -474,9 +471,9 @@ main(int argc, char *argv[])
     event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
   event_schedule(event_cleanup_tklines);
 
-  event_handle_t event_save_all_databases =
-    event_create(ircd_event_manager, "save_all_databases", save_all_databases, 300000, false, NULL, NULL);
-  event_schedule(event_save_all_databases);
+  event_handle_t event_conf_db_save_all =
+    event_create(ircd_event_manager, "conf_db_save_all", conf_db_save_all, 300000, false, NULL, NULL);
+  event_schedule(event_conf_db_save_all);
 
   event_handle_t event_server_connect_auto =
     event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);

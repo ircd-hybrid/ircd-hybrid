@@ -479,6 +479,8 @@ static bool
 conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_limits,
                     enum conf_authorize_result *result_out, const char **failure_reason_out)
 {
+  assert(!client_has_flag(client, FLAGS_IPHASH));
+
   struct ip_entry *const ipcache = ipcache_record_find_or_add(&client->addr);
   ++ipcache->count_local;
   client_set_flag(client, FLAGS_IPHASH);

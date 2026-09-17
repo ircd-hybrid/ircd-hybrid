@@ -58,16 +58,15 @@ class_create(void)
 }
 
 void
-class_destroy(struct ClassItem *const klass)
+class_destroy(struct ClassItem *klass)
 {
+  assert(klass);
   assert(klass != class_default);
   assert(klass->active == false);
   assert(klass->ref_count == 0);
 
-  if (klass->ip_tree_v6)
-    patricia_destroy(klass->ip_tree_v6, _class_ip_limit_entry_free);
-  if (klass->ip_tree_v4)
-    patricia_destroy(klass->ip_tree_v4, _class_ip_limit_entry_free);
+  patricia_destroy(klass->ip_tree_v6, _class_ip_limit_entry_free);
+  patricia_destroy(klass->ip_tree_v4, _class_ip_limit_entry_free);
 
   list_remove(&klass->node, &class_list);
   io_free(klass->name);
@@ -77,6 +76,9 @@ class_destroy(struct ClassItem *const klass)
 void
 class_init(void)
 {
+  assert(class_default == NULL);
+  assert(list_is_empty(&class_list));
+
   class_default = class_create();
   class_default->name = io_strdup(CLASS_DEFAULT_NAME);
 }

@@ -454,11 +454,11 @@ proc_answer(struct reslist *request, const HEADER *header,
         !_res_packet_has_bytes(cursor, packet_end, ANSWER_FIXED_SIZE))
       return false;
 
-    const unsigned int type = reslib_ns_get16(cursor);
+    const unsigned int rr_type = reslib_ns_get16(cursor);
     cursor += TYPE_SIZE;
+    const unsigned int rr_class = reslib_ns_get16(cursor);
     cursor += CLASS_SIZE;
     cursor += TTL_SIZE;
-
     const size_t rd_length = reslib_ns_get16(cursor);
     cursor += RDLENGTH_SIZE;
 
@@ -469,18 +469,21 @@ proc_answer(struct reslist *request, const HEADER *header,
     const unsigned char *const rdata_end = rdata + rd_length;
     cursor = rdata_end;
 
-    switch (type)
+    if (rr_class != C_IN)
+      continue;
+
+    switch (rr_type)
     {
       case T_A:
       case T_AAAA:
-        if (request->type != type)
+        if (request->type != rr_type)
           return false;
 
-        return address_from_bytes(&request->addr, type == T_A ? AF_INET : AF_INET6, rdata, rd_length);
+        return address_from_bytes(&request->addr, rr_type == T_A ? AF_INET : AF_INET6, rdata, rd_length);
 
       case T_PTR:
       {
-        if (request->type != type)
+        if (request->type != rr_type)
           return false;
 
         const int encoded_length = reslib_dn_skipname(rdata, rdata_end);

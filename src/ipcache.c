@@ -46,36 +46,36 @@ ipcache_record_find_or_add(const struct io_addr *addr)
   if (trie == NULL)
     return NULL;
 
-  patricia_node_t *const pnode = patricia_make_and_lookup_addr(trie, addr, 0);
-  if (pnode == NULL)
+  patricia_node_t *const node = patricia_make_and_lookup_addr(trie, addr, 0);
+  if (node == NULL)
     return NULL;
 
-  struct ip_entry *entry = patricia_node_get_data(pnode);
+  struct ip_entry *entry = patricia_node_get_data(node);
   if (entry)
     return entry;
 
   entry = io_calloc(sizeof(*entry));
   entry->trie_pointer = trie;
 
-  list_add(pnode, &entry->node, &ipcache_list);
-  patricia_node_set_data(pnode, entry);
+  list_add(node, &entry->node, &ipcache_list);
+  patricia_node_set_data(node, entry);
 
   return entry;
 }
 
 static void
-_ipcache_record_delete(patricia_node_t *pnode)
+_ipcache_record_delete(patricia_node_t *node)
 {
-  assert(pnode);
+  assert(node);
 
-  struct ip_entry *const entry = patricia_node_get_data(pnode);
+  struct ip_entry *const entry = patricia_node_get_data(node);
   assert(entry);
 
   if (entry->count_local || entry->count_remote ||
       (io_time_get(IO_TIME_MONOTONIC_SEC) - entry->last_attempt) < ConfigGeneral.throttle_time)
     return;
 
-  struct ip_entry *const removed_entry = patricia_remove(entry->trie_pointer, pnode);
+  struct ip_entry *const removed_entry = patricia_remove(entry->trie_pointer, node);
   assert(removed_entry == entry);
 
   list_remove(&removed_entry->node, &ipcache_list);
@@ -98,11 +98,11 @@ ipcache_record_remove(const struct io_addr *addr, bool local)
   if (trie == NULL)
     return;
 
-  patricia_node_t *const pnode = patricia_try_search_exact_addr(trie, addr, 0);
-  if (pnode == NULL)
+  patricia_node_t *const node = patricia_try_search_exact_addr(trie, addr, 0);
+  if (node == NULL)
     return;
 
-  struct ip_entry *const entry = patricia_node_get_data(pnode);
+  struct ip_entry *const entry = patricia_node_get_data(node);
   assert(entry);
   assert(entry->count_local > 0 || entry->count_remote > 0);
 
@@ -117,7 +117,7 @@ ipcache_record_remove(const struct io_addr *addr, bool local)
     --entry->count_remote;
   }
 
-  _ipcache_record_delete(pnode);
+  _ipcache_record_delete(node);
 }
 
 void

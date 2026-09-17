@@ -477,14 +477,14 @@ proc_answer(struct reslist *request, const HEADER *header,
       case T_A:
       case T_AAAA:
         if (request->type != rr_type)
-          return false;
+          continue;
 
         return address_from_bytes(&request->addr, rr_type == T_A ? AF_INET : AF_INET6, rdata, rd_length);
 
       case T_PTR:
       {
         if (request->type != rr_type)
-          return false;
+          continue;
 
         const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
         if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
@@ -507,11 +507,11 @@ proc_answer(struct reslist *request, const HEADER *header,
         if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
           return false;
 
-        break;
+        continue;
       }
 
       default:
-        return false;
+        continue;
     }
   }
 

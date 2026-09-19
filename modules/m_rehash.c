@@ -67,7 +67,7 @@ static void
 _rehash_dns(struct Client *source)
 {
   _rehash_report(source, "DNS", "rehashing DNS");
-  restart_resolver();
+  resolver_restart();
 }
 
 struct RehashOption

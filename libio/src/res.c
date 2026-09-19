@@ -59,7 +59,7 @@ struct resolver_socket
   fde_t *fde;
 };
 
-static void res_readreply(fde_t *, void *);
+static void _resolver_read_reply(fde_t *, void *);
 
 #define MAXPACKET      1024  /**< rfc says 512 but we expand names so ... */
 
@@ -74,7 +74,7 @@ static void res_readreply(fde_t *, void *);
 #define RDLENGTH_SIZE     (size_t)2
 #define ANSWER_FIXED_SIZE (TYPE_SIZE + CLASS_SIZE + TTL_SIZE + RDLENGTH_SIZE)
 
-struct reslist
+struct resolver_request
 {
   list_node_t node;                           /**< Doubly linked list node. */
   unsigned int id;                           /**< Request ID (from request header). */
@@ -86,7 +86,7 @@ struct reslist
   struct io_addr addr;                    /**< Address for this request. */
   char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
   size_t name_len;                         /**< Actual hostname length. */
-  dns_callback_fnc callback;                 /**< Callback function on completion. */
+  resolver_callback_fnc callback;                 /**< Callback function on completion. */
   void *callback_ctx;                        /**< Context pointer for callback. */
 };
 
@@ -98,7 +98,7 @@ static struct resolver_socket resolver_sockets[] =
 
 static list_t request_list;
 
-static struct resolver_socket *
+static const struct resolver_socket *
 _resolver_socket_find_by_family(int family)
 {
   for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
@@ -126,7 +126,7 @@ _resolver_socket_open(struct resolver_socket *socket)
 
   socket->fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
   if (socket->fde)
-    comm_setselect(socket->fde, COMM_SELECT_READ, res_readreply, socket);
+    comm_setselect(socket->fde, COMM_SELECT_READ, _resolver_read_reply, socket);
 }
 
 static void
@@ -160,36 +160,36 @@ _resolver_source_is_configured_nameserver(const struct resolver_socket *socket, 
 }
 
 /*
- * rem_request - remove a request from the list.
+ * _resolver_request_destroy - remove a request from the list.
  * This must also free any memory that has been allocated for
  * temporary storage of DNS results.
  */
 static void
-rem_request(struct reslist *request)
+_resolver_request_destroy(struct resolver_request *request)
 {
   list_remove(&request->node, &request_list);
   io_free(request);
 }
 
 /*
- * make_request - Create a DNS request record for the server.
+ * _resolver_request_create - Create a DNS request record for the server.
  */
-static struct reslist *
-make_request(dns_callback_fnc callback, void *ctx)
+static struct resolver_request *
+_resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
 {
-  struct reslist *request = io_calloc(sizeof(*request));
+  struct resolver_request *const request = io_calloc(sizeof(*request));
   request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
   request->retries = 2;
   request->timeout = 4;  /* Start at 4 and exponential inc. */
   request->callback = callback;
-  request->callback_ctx = ctx;
+  request->callback_ctx = callback_ctx;
   list_add(request, &request->node, &request_list);
 
   return request;
 }
 
 static void
-start_resolver(void)
+_resolver_start(void)
 {
   reslib_res_init();
 
@@ -204,38 +204,38 @@ start_resolver(void)
 }
 
 void
-restart_resolver(void)
+resolver_restart(void)
 {
   _resolver_socket_close_all();
-  start_resolver();
+  _resolver_start();
 }
 
 /*
- * delete_resolver_queries - cleanup outstanding queries
+ * resolver_cancel_by_context - cleanup outstanding queries
  * for which there no longer exist clients or conf lines.
  */
 void
-delete_resolver_queries(const void *vptr)
+resolver_cancel_by_context(const void *callback_ctx)
 {
   list_node_t *node, *node_next;
 
   LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    struct reslist *request = node->data;
-    if (request->callback_ctx == vptr)
-      rem_request(request);
+    struct resolver_request *const request = node->data;
+    if (request->callback_ctx == callback_ctx)
+      _resolver_request_destroy(request);
   }
 }
 
 /*
- * send_res_msg - sends msg to all nameservers found in the "_res" structure.
+ * _resolver_send_packet - sends msg to all nameservers found in the "_res" structure.
  * This should reflect /etc/resolv.conf. We will get responses
  * which arent needed but is easier than checking to see if nameserver
  * isn't present. Returns number of messages successfully sent to
  * nameservers or -1 if no successful sends.
  */
 static void
-send_res_msg(const unsigned char *msg, size_t len, unsigned int max_nameservers)
+_resolver_send_packet(const unsigned char *msg, size_t len, unsigned int max_nameservers)
 {
   assert(msg);
   assert(len > 0);
@@ -265,18 +265,17 @@ send_res_msg(const unsigned char *msg, size_t len, unsigned int max_nameservers)
 }
 
 /*
- * find_id - find a dns request id (id is determined by dn_mkquery)
+ * _resolver_request_find_by_id - find a dns request id (id is determined by dn_mkquery)
  */
-static struct reslist *
-find_id(unsigned int id)
+static struct resolver_request *
+_resolver_request_find_by_id(unsigned int transaction_id)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, request_list.head)
   {
-    struct reslist *request = node->data;
-
-    if (request->id == id)
+    struct resolver_request *const request = node->data;
+    if (request->id == transaction_id)
       return request;
   }
 
@@ -284,17 +283,17 @@ find_id(unsigned int id)
 }
 
 /*
- * query_name - generate a query based on class, type and name.
+ * _resolver_query_send - generate a query based on class, type and name.
  */
 static void
-query_name(const char *name, int query_class, int type, struct reslist *request)
+_resolver_query_send(const char *name, int query_class, int type, struct resolver_request *request)
 {
   unsigned char buf[MAXPACKET];
 
-  int request_len = reslib_res_mkquery(name, query_class, type, buf, sizeof(buf));
-  if (request_len > 0)
+  const int packet_length = reslib_res_mkquery(name, query_class, type, buf, sizeof(buf));
+  if (packet_length > 0)
   {
-    HEADER *header = (HEADER *)buf;
+    HEADER *const header = (HEADER *)buf;
 
     /*
      * Generate an unique id.
@@ -304,20 +303,20 @@ query_name(const char *name, int query_class, int type, struct reslist *request)
      */
     do
       header->id = (header->id + genrand_int32()) & 0xFFFF;
-    while (find_id(header->id));
+    while (_resolver_request_find_by_id(header->id));
 
     request->id = header->id;
     ++request->sends;
 
-    send_res_msg(buf, (size_t)request_len, request->sends);
+    _resolver_send_packet(buf, (size_t)packet_length, request->sends);
   }
 }
 
 /*
- * do_query_name - nameserver lookup name
+ * _resolver_query_name - nameserver lookup name
  */
 static void
-do_query_name(dns_callback_fnc callback, void *ctx, const char *name, struct reslist *request, int type)
+_resolver_query_name(resolver_callback_fnc callback, void *ctx, const char *name, struct resolver_request *request, int type)
 {
   char host_name[RFC1035_MAX_DOMAIN_LENGTH + 1];
 
@@ -325,20 +324,20 @@ do_query_name(dns_callback_fnc callback, void *ctx, const char *name, struct res
 
   if (request == NULL)
   {
-    request = make_request(callback, ctx);
+    request = _resolver_request_create(callback, ctx);
     request->type = type;
     request->name_len = strlcpy(request->name, host_name, sizeof(request->name));
   }
 
   request->type = type;
-  query_name(host_name, C_IN, type, request);
+  _resolver_query_send(host_name, C_IN, type, request);
 }
 
 /*
- * do_query_number - Use this to do reverse IP# lookups.
+ * _resolver_query_addr - Use this to do reverse IP# lookups.
  */
 static void
-do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr, struct reslist *request)
+_resolver_query_addr(resolver_callback_fnc callback, void *ctx, const struct io_addr *addr, struct resolver_request *request)
 {
   assert(addr);
   assert(address_is_ipv4(addr) || address_is_ipv6(addr));
@@ -349,45 +348,45 @@ do_query_number(dns_callback_fnc callback, void *ctx, const struct io_addr *addr
 
   if (request == NULL)
   {
-    request = make_request(callback, ctx);
+    request = _resolver_request_create(callback, ctx);
     request->type = T_PTR;
     address_copy(&request->addr, addr);
   }
 
-  query_name(reverse_name, C_IN, T_PTR, request);
+  _resolver_query_send(reverse_name, C_IN, T_PTR, request);
 }
 
 /*
- * gethost_byname_type - get host address from name
+ * resolver_lookup_name - get host address from name
  *
  */
 void
-gethost_byname_type(dns_callback_fnc callback, void *ctx, const char *name, int type)
+resolver_lookup_name(resolver_callback_fnc callback, void *ctx, const char *name, int type)
 {
   assert(name);
-  do_query_name(callback, ctx, name, NULL, type);
+  _resolver_query_name(callback, ctx, name, NULL, type);
 }
 
 /*
- * gethost_byaddr - get host name from address
+ * resolver_lookup_addr - get host name from address
  */
 void
-gethost_byaddr(dns_callback_fnc callback, void *ctx, const struct io_addr *addr)
+resolver_lookup_addr(resolver_callback_fnc callback, void *ctx, const struct io_addr *addr)
 {
-  do_query_number(callback, ctx, addr, NULL);
+  _resolver_query_addr(callback, ctx, addr, NULL);
 }
 
 static void
-resend_query(struct reslist *request)
+_resolver_query_resend(struct resolver_request *request)
 {
   switch (request->type)
   {
     case T_PTR:
-      do_query_number(NULL, NULL, &request->addr, request);
+      _resolver_query_addr(NULL, NULL, &request->addr, request);
       break;
     case T_A:
     case T_AAAA:
-      do_query_name(NULL, NULL, request->name, request, request->type);
+      _resolver_query_name(NULL, NULL, request->name, request, request->type);
       break;
     default:
       break;
@@ -395,7 +394,7 @@ resend_query(struct reslist *request)
 }
 
 static bool
-_res_packet_has_bytes(const unsigned char *cursor, const unsigned char *end, size_t length)
+_resolver_packet_has_bytes(const unsigned char *cursor, const unsigned char *end, size_t length)
 {
   assert(cursor);
   assert(end);
@@ -407,14 +406,14 @@ _res_packet_has_bytes(const unsigned char *cursor, const unsigned char *end, siz
 }
 
 static bool
-_res_packet_skip_name(const unsigned char **cursor, const unsigned char *end)
+_resolver_packet_skip_name(const unsigned char **cursor, const unsigned char *end)
 {
   assert(cursor);
   assert(*cursor);
   assert(end);
 
   const int length = reslib_dn_skipname(*cursor, end);
-  if (length <= 0 || !_res_packet_has_bytes(*cursor, end, (size_t)length))
+  if (length <= 0 || !_resolver_packet_has_bytes(*cursor, end, (size_t)length))
     return false;
 
   *cursor += (size_t)length;
@@ -422,18 +421,18 @@ _res_packet_skip_name(const unsigned char **cursor, const unsigned char *end)
 }
 
 /*
- * proc_answer - process name server reply
+ * _resolver_process_answer - process name server reply
  */
 static bool
-proc_answer(struct reslist *request, const HEADER *header,
-            const unsigned char *packet, const unsigned char *packet_end)
+_resolver_process_answer(struct resolver_request *request, const HEADER *header,
+                         const unsigned char *packet, const unsigned char *packet_end)
 {
   assert(request);
   assert(header);
   assert(packet);
   assert(packet_end);
 
-  if (!_res_packet_has_bytes(packet, packet_end, HFIXEDSZ))
+  if (!_resolver_packet_has_bytes(packet, packet_end, HFIXEDSZ))
     return false;
 
   const unsigned char *cursor = packet + HFIXEDSZ;
@@ -441,8 +440,8 @@ proc_answer(struct reslist *request, const HEADER *header,
 
   for (unsigned int i = 0; i < header->qdcount; ++i)
   {
-    if (!_res_packet_skip_name(&cursor, packet_end) ||
-        !_res_packet_has_bytes(cursor, packet_end, QFIXEDSZ))
+    if (!_resolver_packet_skip_name(&cursor, packet_end) ||
+        !_resolver_packet_has_bytes(cursor, packet_end, QFIXEDSZ))
       return false;
 
     cursor += QFIXEDSZ;
@@ -450,8 +449,8 @@ proc_answer(struct reslist *request, const HEADER *header,
 
   for (unsigned int i = 0; i < header->ancount; ++i)
   {
-    if (!_res_packet_skip_name(&cursor, packet_end) ||
-        !_res_packet_has_bytes(cursor, packet_end, ANSWER_FIXED_SIZE))
+    if (!_resolver_packet_skip_name(&cursor, packet_end) ||
+        !_resolver_packet_has_bytes(cursor, packet_end, ANSWER_FIXED_SIZE))
       return false;
 
     const unsigned int rr_type = reslib_ns_get16(cursor);
@@ -462,7 +461,7 @@ proc_answer(struct reslist *request, const HEADER *header,
     const size_t rd_length = reslib_ns_get16(cursor);
     cursor += RDLENGTH_SIZE;
 
-    if (!_res_packet_has_bytes(cursor, packet_end, rd_length))
+    if (!_resolver_packet_has_bytes(cursor, packet_end, rd_length))
       return false;
 
     const unsigned char *const rdata = cursor;
@@ -519,10 +518,10 @@ proc_answer(struct reslist *request, const HEADER *header,
 }
 
 /*
- * res_readreply - read a dns reply from the nameserver and process it.
+ * _resolver_read_reply - read a dns reply from the nameserver and process it.
  */
 static void
-res_readreply(fde_t *fde, void *data)
+_resolver_read_reply(fde_t *fde, void *data)
 {
   struct resolver_socket *const socket = data;
   assert(socket);
@@ -549,7 +548,7 @@ res_readreply(fde_t *fde, void *data)
     /*
      * Convert DNS reply reader from Network byte order to CPU byte order.
      */
-    HEADER *header = (HEADER *)buf;
+    HEADER *const header = (HEADER *)buf;
     header->ancount = ntohs(header->ancount);
     header->qdcount = ntohs(header->qdcount);
     header->nscount = ntohs(header->nscount);
@@ -559,7 +558,7 @@ res_readreply(fde_t *fde, void *data)
      * Response for an id which we have already received an answer for
      * just ignore this response.
      */
-    struct reslist *request = find_id(header->id);
+    struct resolver_request *const request = _resolver_request_find_by_id(header->id);
     if (request == NULL)
       continue;
 
@@ -570,7 +569,7 @@ res_readreply(fde_t *fde, void *data)
        * any more (no retries granted).
        */
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
-      rem_request(request);
+      _resolver_request_destroy(request);
       continue;
     }
 
@@ -579,10 +578,10 @@ res_readreply(fde_t *fde, void *data)
      * We only give it one shot. If it fails, just leave the client
      * unresolved.
      */
-    if (!proc_answer(request, header, buf, buf + rc))
+    if (!_resolver_process_answer(request, header, buf, buf + rc))
     {
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
-      rem_request(request);
+      _resolver_request_destroy(request);
       continue;
     }
 
@@ -595,7 +594,7 @@ res_readreply(fde_t *fde, void *data)
          * don't bother trying again, the client address doesn't resolve
          */
         (*request->callback)(request->callback_ctx, NULL, NULL, 0);
-        rem_request(request);
+        _resolver_request_destroy(request);
         continue;
       }
 
@@ -603,11 +602,11 @@ res_readreply(fde_t *fde, void *data)
        * Lookup the 'authoritative' name that we were given for the ip#.
        */
       if (address_is_ipv6(&request->addr))
-        gethost_byname_type(request->callback, request->callback_ctx, request->name, T_AAAA);
+        resolver_lookup_name(request->callback, request->callback_ctx, request->name, T_AAAA);
       else
-        gethost_byname_type(request->callback, request->callback_ctx, request->name, T_A);
+        resolver_lookup_name(request->callback, request->callback_ctx, request->name, T_A);
 
-      rem_request(request);
+      _resolver_request_destroy(request);
     }
     else
     {
@@ -615,11 +614,11 @@ res_readreply(fde_t *fde, void *data)
        * Got a name and address response, client resolved
        */
       (*request->callback)(request->callback_ctx, &request->addr, request->name, request->name_len);
-      rem_request(request);
+      _resolver_request_destroy(request);
     }
   }
 
-  comm_setselect(fde, COMM_SELECT_READ, res_readreply, socket);
+  comm_setselect(fde, COMM_SELECT_READ, _resolver_read_reply, socket);
 }
 
 /*
@@ -627,28 +626,28 @@ res_readreply(fde_t *fde, void *data)
  * there too long without being resolved.
  */
 static void
-resolver_timeout(void *unused)
+_resolver_process_timeouts(void *unused)
 {
   const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
-    struct reslist *const request = node->data;
-    const uintmax_t timeout = request->sentat + request->timeout;
+    struct resolver_request *const request = node->data;
 
+    const uintmax_t timeout = request->sentat + request->timeout;
     if (now >= timeout)
     {
       if (--request->retries <= 0)
       {
         (*request->callback)(request->callback_ctx, NULL, NULL, 0);
-        rem_request(request);
+        _resolver_request_destroy(request);
       }
       else
       {
         request->sentat = now;
         request->timeout += request->timeout;
-        resend_query(request);
+        _resolver_query_resend(request);
       }
     }
   }
@@ -658,11 +657,12 @@ resolver_timeout(void *unused)
  * resolver_init - initialize resolver and resolver library
  */
 void
-resolver_init(event_manager_t mgr)
+resolver_init(event_manager_t manager)
 {
-  start_resolver();
+  _resolver_start();
 
-  event_handle_t event_resolver_timeout = event_create(mgr, "resolver_timeout", resolver_timeout, 1000, false, NULL, NULL);
+  event_handle_t event_resolver_timeout =
+    event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts, 1000, false, NULL, NULL);
   event_set_priority(event_resolver_timeout, 1);
   event_schedule(event_resolver_timeout);
 }

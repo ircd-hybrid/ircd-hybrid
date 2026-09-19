@@ -132,7 +132,7 @@ lookup_delete(struct LookupRequest *lookup)
     lookup->ident_request = NULL;
   }
 
-  delete_resolver_queries(lookup);
+  resolver_cancel_by_context(lookup);
   io_free(lookup);
 }
 
@@ -150,7 +150,7 @@ lookup_start(struct Client *client)
   {
     sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_DNS_START]);
     lookup->dns_pending = true;
-    gethost_byaddr(_lookup_dns_callback, lookup, &client->addr);
+    resolver_lookup_addr(_lookup_dns_callback, lookup, &client->addr);
   }
 
   if (ConfigGeneral.disable_ident == 0)

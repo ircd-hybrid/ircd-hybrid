@@ -101,7 +101,7 @@ connect_destroy(struct ConnectItem *connect)
   list_remove(&connect->node, &connect_items);
 
   if (connect->dns_pending)
-    delete_resolver_queries(connect);
+    resolver_cancel_by_context(connect);
 
   if (connect->accept_password)
     memset(connect->accept_password, 0, strlen(connect->accept_password));
@@ -164,7 +164,7 @@ connect_dns_lookup(struct ConnectItem *connect)
   connect->dns_failed = false;
 
   const int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
-  gethost_byname_type(_connect_dns_callback, connect, connect->host, query_type);
+  resolver_lookup_name(_connect_dns_callback, connect, connect->host, query_type);
 }
 
 struct ConnectItem *

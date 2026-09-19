@@ -696,7 +696,7 @@ conf_rehash(bool sig)
     log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
   }
 
-  restart_resolver();
+  resolver_restart();
 
   /* don't close listeners until we know we can go ahead with the rehash */
 

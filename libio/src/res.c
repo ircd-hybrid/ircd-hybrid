@@ -61,31 +61,30 @@ struct resolver_socket
 
 static void _resolver_read_reply(fde_t *, void *);
 
-#define MAXPACKET      1024  /**< rfc says 512 but we expand names so ... */
+#define RESOLVER_MESSAGE_BUFFER_SIZE 1024
 
-/*
- * RFC 1104/1105 wasn't very helpful about what these fields
- * should be named, so for now, we'll just name them this way.
- * We probably should look at what named calls them or something.
- */
-#define TYPE_SIZE         (size_t)2
-#define CLASS_SIZE        (size_t)2
-#define TTL_SIZE          (size_t)4
-#define RDLENGTH_SIZE     (size_t)2
-#define ANSWER_FIXED_SIZE (TYPE_SIZE + CLASS_SIZE + TTL_SIZE + RDLENGTH_SIZE)
+#define DNS_RR_TYPE_SIZE          ((size_t)2)
+#define DNS_RR_CLASS_SIZE         ((size_t)2)
+#define DNS_RR_TTL_SIZE           ((size_t)4)
+#define DNS_RR_RDLENGTH_SIZE      ((size_t)2)
+#define DNS_RR_FIXED_FIELDS_SIZE \
+  (DNS_RR_TYPE_SIZE +            \
+   DNS_RR_CLASS_SIZE +           \
+   DNS_RR_TTL_SIZE +             \
+   DNS_RR_RDLENGTH_SIZE)
 
 struct resolver_request
 {
   list_node_t node;                           /**< Doubly linked list node. */
   unsigned int id;                           /**< Request ID (from request header). */
   unsigned int type;                         /**< Current request type. */
-  char retries;                              /**< Retry counter */
-  unsigned int sends;                        /**< Number of sends (>1 means resent). */
-  uintmax_t sentat;                          /**< Timestamp we last sent this request. */
+  char retries_remaining;                              /**< Retry counter */
+  unsigned int send_count;                        /**< Number of sends (>1 means resent). */
+  uintmax_t last_sent_at;                          /**< Timestamp we last sent this request. */
   uintmax_t timeout;                         /**< When this request times out. */
   struct io_addr addr;                    /**< Address for this request. */
   char name[RFC1035_MAX_DOMAIN_LENGTH + 1];  /**< Hostname for this request. */
-  size_t name_len;                         /**< Actual hostname length. */
+  size_t name_length;                         /**< Actual hostname length. */
   resolver_callback_fnc callback;                 /**< Callback function on completion. */
   void *callback_ctx;                        /**< Context pointer for callback. */
 };
@@ -178,8 +177,8 @@ static struct resolver_request *
 _resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
 {
   struct resolver_request *const request = io_calloc(sizeof(*request));
-  request->sentat = io_time_get(IO_TIME_MONOTONIC_SEC);
-  request->retries = 2;
+  request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
+  request->retries_remaining = 2;
   request->timeout = 4;  /* Start at 4 and exponential inc. */
   request->callback = callback;
   request->callback_ctx = callback_ctx;
@@ -204,7 +203,7 @@ _resolver_start(void)
 }
 
 void
-resolver_restart(void)
+resolver_reload(void)
 {
   _resolver_socket_close_all();
   _resolver_start();
@@ -235,10 +234,10 @@ resolver_cancel_by_context(const void *callback_ctx)
  * nameservers or -1 if no successful sends.
  */
 static void
-_resolver_send_packet(const unsigned char *msg, size_t len, unsigned int max_nameservers)
+_resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned int max_nameservers)
 {
   assert(msg);
-  assert(len > 0);
+  assert(packet_length > 0);
   assert(max_nameservers > 0);
 
   unsigned int nameservers_sent = 0;
@@ -254,12 +253,12 @@ _resolver_send_packet(const unsigned char *msg, size_t len, unsigned int max_nam
 
     ssize_t bytes_sent;
     do
-      bytes_sent = sendto(socket->fde->fd, msg, len, 0,
+      bytes_sent = sendto(socket->fde->fd, msg, packet_length, 0,
                           (const struct sockaddr *)&nameserver->ss,
                           address_get_sockaddr_length(nameserver));
     while (bytes_sent == -1 && errno == EINTR);
 
-    if (bytes_sent == (ssize_t)len)
+    if (bytes_sent >= 0 && (size_t)bytes_sent == packet_length)
       ++nameservers_sent;
   }
 }
@@ -288,12 +287,12 @@ _resolver_request_find_by_id(unsigned int transaction_id)
 static void
 _resolver_query_send(const char *name, int query_class, int type, struct resolver_request *request)
 {
-  unsigned char buf[MAXPACKET];
+  unsigned char packet[RESOLVER_MESSAGE_BUFFER_SIZE];
 
-  const int packet_length = reslib_res_mkquery(name, query_class, type, buf, sizeof(buf));
+  const int packet_length = reslib_res_mkquery(name, query_class, type, packet, sizeof(packet));
   if (packet_length > 0)
   {
-    HEADER *const header = (HEADER *)buf;
+    HEADER *const header = (HEADER *)packet;
 
     /*
      * Generate an unique id.
@@ -306,9 +305,9 @@ _resolver_query_send(const char *name, int query_class, int type, struct resolve
     while (_resolver_request_find_by_id(header->id));
 
     request->id = header->id;
-    ++request->sends;
+    ++request->send_count;
 
-    _resolver_send_packet(buf, (size_t)packet_length, request->sends);
+    _resolver_send_packet(packet, (size_t)packet_length, request->send_count);
   }
 }
 
@@ -326,7 +325,7 @@ _resolver_query_name(resolver_callback_fnc callback, void *ctx, const char *name
   {
     request = _resolver_request_create(callback, ctx);
     request->type = type;
-    request->name_len = strlcpy(request->name, host_name, sizeof(request->name));
+    request->name_length = strlcpy(request->name, host_name, sizeof(request->name));
   }
 
   request->type = type;
@@ -455,7 +454,7 @@ _resolver_process_answer(struct resolver_request *request, const HEADER *header,
     return false;
 
   const unsigned char *cursor = packet + HFIXEDSZ;
-  char hostbuf[sizeof(request->name)];
+  char hostname[sizeof(request->name)];
 
   for (unsigned int i = 0; i < header->qdcount; ++i)
   {
@@ -469,22 +468,22 @@ _resolver_process_answer(struct resolver_request *request, const HEADER *header,
   for (unsigned int i = 0; i < header->ancount; ++i)
   {
     if (!_resolver_packet_skip_name(&cursor, packet_end) ||
-        !_resolver_packet_has_bytes(cursor, packet_end, ANSWER_FIXED_SIZE))
+        !_resolver_packet_has_bytes(cursor, packet_end, DNS_RR_FIXED_FIELDS_SIZE))
       return false;
 
-    const unsigned int rr_type = reslib_ns_get16(cursor);
-    cursor += TYPE_SIZE;
-    const unsigned int rr_class = reslib_ns_get16(cursor);
-    cursor += CLASS_SIZE;
-    cursor += TTL_SIZE;
-    const size_t rd_length = reslib_ns_get16(cursor);
-    cursor += RDLENGTH_SIZE;
+    const uint16_t rr_type = reslib_ns_get16(cursor);
+    cursor += DNS_RR_TYPE_SIZE;
+    const uint16_t rr_class = reslib_ns_get16(cursor);
+    cursor += DNS_RR_CLASS_SIZE;
+    cursor += DNS_RR_TTL_SIZE;
+    const uint16_t rdata_length = reslib_ns_get16(cursor);
+    cursor += DNS_RR_RDLENGTH_SIZE;
 
-    if (!_resolver_packet_has_bytes(cursor, packet_end, rd_length))
+    if (!_resolver_packet_has_bytes(cursor, packet_end, rdata_length))
       return false;
 
     const unsigned char *const rdata = cursor;
-    const unsigned char *const rdata_end = rdata + rd_length;
+    const unsigned char *const rdata_end = rdata + rdata_length;
     cursor = rdata_end;
 
     if (rr_class != C_IN)
@@ -497,7 +496,7 @@ _resolver_process_answer(struct resolver_request *request, const HEADER *header,
         if (request->type != rr_type)
           continue;
 
-        return address_from_bytes(&request->addr, rr_type == T_A ? AF_INET : AF_INET6, rdata, rd_length);
+        return address_from_bytes(&request->addr, rr_type == T_A ? AF_INET : AF_INET6, rdata, rdata_length);
 
       case T_PTR:
       {
@@ -505,24 +504,24 @@ _resolver_process_answer(struct resolver_request *request, const HEADER *header,
           continue;
 
         const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
-        if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
+        if (encoded_length <= 0 || (size_t)encoded_length != rdata_length)
           return false;
 
         const int expanded_length =
-          reslib_dn_expand(packet, packet_end, rdata, hostbuf, (int)sizeof(hostbuf));
+          reslib_dn_expand(packet, packet_end, rdata, hostname, (int)sizeof(hostname));
 
         if (expanded_length != encoded_length)
           return false;
 
-        request->name_len = strlcpy(request->name, hostbuf, sizeof(request->name));
-        assert(request->name_len < sizeof(request->name));
+        request->name_length = strlcpy(request->name, hostname, sizeof(request->name));
+        assert(request->name_length < sizeof(request->name));
         return true;
       }
 
       case T_CNAME:
       {
         const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
-        if (encoded_length <= 0 || (size_t)encoded_length != rd_length)
+        if (encoded_length <= 0 || (size_t)encoded_length != rdata_length)
           return false;
 
         continue;
@@ -546,14 +545,14 @@ _resolver_read_reply(fde_t *fde, void *data)
   assert(socket);
   assert(socket->fde == fde);
 
-  unsigned char buf[sizeof(HEADER) + MAXPACKET];
+  unsigned char packet[sizeof(HEADER) + RESOLVER_MESSAGE_BUFFER_SIZE];
 
   while (true)
   {
     struct io_addr addr = { 0 };
     socklen_t len = sizeof(addr.ss);
 
-    ssize_t rc = recvfrom(fde->fd, buf, sizeof(buf), 0, (struct sockaddr *)&addr.ss, &len);
+    ssize_t rc = recvfrom(fde->fd, packet, sizeof(packet), 0, (struct sockaddr *)&addr.ss, &len);
     if (rc == -1)
       break;
 
@@ -567,7 +566,7 @@ _resolver_read_reply(fde_t *fde, void *data)
     /*
      * Convert DNS reply reader from Network byte order to CPU byte order.
      */
-    HEADER *const header = (HEADER *)buf;
+    HEADER *const header = (HEADER *)packet;
     header->ancount = ntohs(header->ancount);
     header->qdcount = ntohs(header->qdcount);
     header->nscount = ntohs(header->nscount);
@@ -585,7 +584,7 @@ _resolver_read_reply(fde_t *fde, void *data)
     {
       /*
        * If a bad error was returned, stop here and don't send
-       * any more (no retries granted).
+       * any more (no retries_remaining granted).
        */
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       _resolver_request_destroy(request);
@@ -597,7 +596,7 @@ _resolver_read_reply(fde_t *fde, void *data)
      * We only give it one shot. If it fails, just leave the client
      * unresolved.
      */
-    if (!_resolver_process_answer(request, header, buf, buf + rc))
+    if (!_resolver_process_answer(request, header, packet, packet + rc))
     {
       (*request->callback)(request->callback_ctx, NULL, NULL, 0);
       _resolver_request_destroy(request);
@@ -606,7 +605,7 @@ _resolver_read_reply(fde_t *fde, void *data)
 
     if (request->type == T_PTR)
     {
-      if (request->name_len == 0)
+      if (request->name_length == 0)
       {
         /*
          * Got a PTR response with no name, something bogus is happening
@@ -629,7 +628,7 @@ _resolver_read_reply(fde_t *fde, void *data)
       /*
        * Got a name and address response, client resolved
        */
-      (*request->callback)(request->callback_ctx, &request->addr, request->name, request->name_len);
+      (*request->callback)(request->callback_ctx, &request->addr, request->name, request->name_length);
       _resolver_request_destroy(request);
     }
   }
@@ -651,17 +650,17 @@ _resolver_process_timeouts(void *unused)
   {
     struct resolver_request *const request = node->data;
 
-    const uintmax_t timeout = request->sentat + request->timeout;
+    const uintmax_t timeout = request->last_sent_at + request->timeout;
     if (now >= timeout)
     {
-      if (--request->retries <= 0)
+      if (--request->retries_remaining <= 0)
       {
         (*request->callback)(request->callback_ctx, NULL, NULL, 0);
         _resolver_request_destroy(request);
       }
       else
       {
-        request->sentat = now;
+        request->last_sent_at = now;
         request->timeout += request->timeout;
         _resolver_query_resend(request);
       }

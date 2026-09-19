@@ -163,8 +163,7 @@ connect_dns_lookup(struct ConnectItem *connect)
   connect->dns_pending = true;
   connect->dns_failed = false;
 
-  const int query_type = (connect->address_family == AF_INET) ? T_A : T_AAAA;
-  resolver_lookup_name(_connect_dns_callback, connect, connect->host, query_type);
+  resolver_lookup_name(_connect_dns_callback, connect, connect->host, connect->address_family);
 }
 
 struct ConnectItem *

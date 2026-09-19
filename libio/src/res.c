@@ -356,24 +356,43 @@ _resolver_query_addr(resolver_callback_fnc callback, void *ctx, const struct io_
   _resolver_query_send(reverse_name, C_IN, T_PTR, request);
 }
 
+static int
+_resolver_query_type_from_family(int family)
+{
+  switch (family)
+  {
+    case AF_INET:
+      return T_A;
+    case AF_INET6:
+      return T_AAAA;
+    default:
+      assert(!"unsupported address family");
+      return 0;
+  }
+}
+
 /*
  * resolver_lookup_name - get host address from name
  *
  */
 void
-resolver_lookup_name(resolver_callback_fnc callback, void *ctx, const char *name, int type)
+resolver_lookup_name(resolver_callback_fnc callback, void *callback_ctx, const char *name, int family)
 {
+  assert(callback);
   assert(name);
-  _resolver_query_name(callback, ctx, name, NULL, type);
+  assert(family == AF_INET || family == AF_INET6);
+
+  const int query_type = _resolver_query_type_from_family(family);
+  _resolver_query_name(callback, callback_ctx, name, NULL, query_type);
 }
 
 /*
  * resolver_lookup_addr - get host name from address
  */
 void
-resolver_lookup_addr(resolver_callback_fnc callback, void *ctx, const struct io_addr *addr)
+resolver_lookup_addr(resolver_callback_fnc callback, void *callback_ctx, const struct io_addr *addr)
 {
-  _resolver_query_addr(callback, ctx, addr, NULL);
+  _resolver_query_addr(callback, callback_ctx, addr, NULL);
 }
 
 static void
@@ -601,11 +620,8 @@ _resolver_read_reply(fde_t *fde, void *data)
       /*
        * Lookup the 'authoritative' name that we were given for the ip#.
        */
-      if (address_is_ipv6(&request->addr))
-        resolver_lookup_name(request->callback, request->callback_ctx, request->name, T_AAAA);
-      else
-        resolver_lookup_name(request->callback, request->callback_ctx, request->name, T_A);
-
+      resolver_lookup_name(request->callback, request->callback_ctx,
+                           request->name, address_get_family(&request->addr));
       _resolver_request_destroy(request);
     }
     else

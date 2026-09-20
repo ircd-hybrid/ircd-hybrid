@@ -26,7 +26,7 @@
 #include "memory.h"
 #include "misc.h"
 #include "module.h"
-#include "res.h"
+#include "resolver.h"
 
 #include "client.h"
 #include "client_format.h"

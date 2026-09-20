@@ -96,7 +96,7 @@
 #include <netinet/in.h>
 
 #include "io_string.h"
-#include "res.h"
+#include "resolver.h"
 #include "reslib.h"
 
 #define MAXLINE 128

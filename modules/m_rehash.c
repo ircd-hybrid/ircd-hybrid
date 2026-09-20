@@ -22,7 +22,7 @@
 #include "motd.h"
 #include "numeric.h"
 #include "parse.h"
-#include "res.h"
+#include "resolver.h"
 #include "send.h"
 
 static void

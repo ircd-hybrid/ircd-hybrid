@@ -32,7 +32,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -44,7 +43,7 @@
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "res.h"
+#include "resolver.h"
 #include "reslib.h"
 #include "rng_mt.h"
 
@@ -245,9 +244,9 @@ _resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned i
   for (unsigned int i = 0; i < reslib_nscount && nameservers_sent < max_nameservers; ++i)
   {
     const struct io_addr *const nameserver = &reslib_nsaddr_list[i];
+
     const struct resolver_socket *const socket =
       _resolver_socket_find_by_family(address_get_family(nameserver));
-
     if (socket == NULL || socket->fde == NULL)
       continue;
 

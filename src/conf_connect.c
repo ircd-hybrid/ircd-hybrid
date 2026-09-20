@@ -13,7 +13,7 @@
 #include "io_string.h"
 #include "log.h"
 #include "memory.h"
-#include "res.h"
+#include "resolver.h"
 #include "reslib.h"
 
 #include "client.h"

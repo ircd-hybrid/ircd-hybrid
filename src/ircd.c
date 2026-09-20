@@ -37,7 +37,7 @@
 #include "log.h"
 #include "memory.h"
 #include "module.h"
-#include "res.h"
+#include "resolver.h"
 #include "rng_mt.h"
 
 #include "channel_mode.h"

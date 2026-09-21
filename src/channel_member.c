@@ -75,7 +75,7 @@ channel_member_rank_to_prefix(int rank)
     {
       static char prefix[2];
       prefix[0] = tab->prefix;
-      prefix[1] = '\0';  /* Just for safety */
+      prefix[1] = '\0';
 
       return prefix;
     }

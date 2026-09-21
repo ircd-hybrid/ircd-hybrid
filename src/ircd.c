@@ -183,19 +183,18 @@ _io_loop(void)
     io_time_update_cache();
     event_manager_dispatch_due(ircd_event_manager);
 
-    /* Check to see whether we have to rehash the configuration. */
-    if (dorehash)
+     if (dorehash)
     {
-      conf_rehash(true);
       dorehash = 0;
+      conf_rehash(true);
     }
 
     if (doremotd)
     {
+      doremotd = 0;
       motd_recache();
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Got signal SIGUSR1, reloading motd file(s)");
-      doremotd = 0;
     }
   }
 }
@@ -401,11 +400,11 @@ main(int argc, char *argv[])
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
-  ConfigGeneral.configfile = CPATH;    /* Server configuration file */
-  ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
-  ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
-  ConfigGeneral.dlinefile  = DLPATH;   /* dline file                */
-  ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
+  ConfigGeneral.configfile = CPATH;
+  ConfigGeneral.klinefile  = KPATH;
+  ConfigGeneral.xlinefile  = XPATH;
+  ConfigGeneral.dlinefile  = DLPATH;
+  ConfigGeneral.resvfile   = RESVPATH;
 
   myargv = argv;
   umask(077);  /* umask 077: u=rwx,g=,o= */
@@ -463,7 +462,7 @@ main(int argc, char *argv[])
   ipcache_init();
   channel_mode_init();
   extban_init();
-  capab_init();  /* Set up default_server_capabs */
+  capab_init();
   _initialize_global_set_options();  /* Has to be called after conf_read_files() */
   links_cache_init();
   _ircd_init_me();

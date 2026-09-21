@@ -16,6 +16,8 @@ libio_la_SOURCES =  address.c     \
                     comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
+                    dns.c         \
+                    dns.h         \
                     event.c       \
                     event.h       \
                     fdlist.c      \
@@ -60,8 +62,6 @@ libio_la_SOURCES =  address.c     \
                     resolver.h    \
                     resolver_config.c \
                     resolver_config.h \
-                    reslib.c      \
-                    reslib.h      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \

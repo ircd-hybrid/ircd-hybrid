@@ -38,6 +38,7 @@
 
 #include "address.h"
 #include "comm.h"
+#include "dns.h"
 #include "fdlist.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -45,7 +46,6 @@
 #include "memory.h"
 #include "resolver.h"
 #include "resolver_config.h"
-#include "reslib.h"
 #include "rng_mt.h"
 
 _Static_assert(CHAR_BIT == 8, "DNS resolver requires 8-bit bytes");
@@ -59,33 +59,25 @@ struct resolver_socket
 
 static void _resolver_read_reply(fde_t *, void *);
 
-enum
-{
-  RESOLVER_MAX_ATTEMPTS = 2
-};
-
 #define RESOLVER_MESSAGE_BUFFER_SIZE 1024
 
-#define DNS_RR_TYPE_SIZE          ((size_t)2)
-#define DNS_RR_CLASS_SIZE         ((size_t)2)
-#define DNS_RR_TTL_SIZE           ((size_t)4)
-#define DNS_RR_RDLENGTH_SIZE      ((size_t)2)
-#define DNS_RR_FIXED_FIELDS_SIZE \
-  (DNS_RR_TYPE_SIZE +            \
-   DNS_RR_CLASS_SIZE +           \
-   DNS_RR_TTL_SIZE +             \
-   DNS_RR_RDLENGTH_SIZE)
+enum
+{
+  RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
+  RESOLVER_MAX_ATTEMPTS = 2,
+  RESOLVER_NAME_CAPACITY = DNS_NAME_TEXT_CAPACITY,
+};
 
 struct resolver_request
 {
   list_node_t node;
-  unsigned int id;
-  unsigned int type;
+  uint16_t transaction_id;
+  uint16_t query_type;
   unsigned int attempt_count;
   uintmax_t last_sent_at;
   uintmax_t timeout;
   struct io_addr addr;
-  char name[RFC1035_MAX_DOMAIN_LENGTH + 1];
+  char name[RESOLVER_NAME_CAPACITY];
   size_t name_length;
   resolver_callback_fnc callback;
   void *callback_ctx;
@@ -255,9 +247,9 @@ resolver_cancel_by_context(const void *callback_ctx)
 }
 
 static void
-_resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned int max_nameservers)
+_resolver_send_packet(const unsigned char *packet, size_t packet_length, unsigned int max_nameservers)
 {
-  assert(msg);
+  assert(packet);
   assert(packet_length > 0);
   assert(max_nameservers > 0);
   assert(resolver_config.nameserver_count > 0);
@@ -276,7 +268,7 @@ _resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned i
 
     ssize_t bytes_sent;
     do
-      bytes_sent = sendto(socket->fde->fd, msg, packet_length, 0,
+      bytes_sent = sendto(socket->fde->fd, packet, packet_length, 0,
                           (const struct sockaddr *)&nameserver->ss,
                           address_get_sockaddr_length(nameserver));
     while (bytes_sent == -1 && errno == EINTR);
@@ -287,68 +279,87 @@ _resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned i
 }
 
 static struct resolver_request *
-_resolver_request_find_by_id(unsigned int transaction_id)
+_resolver_request_find_by_transaction_id(uint16_t transaction_id)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, request_list.head)
   {
     struct resolver_request *const request = node->data;
-    if (request->id == transaction_id)
+    if (request->transaction_id == transaction_id)
       return request;
   }
 
   return NULL;
 }
 
-static void
-_resolver_query_send(const char *name, int query_class, int type, struct resolver_request *request)
+static bool
+_resolver_transaction_id_generate(uint16_t *transaction_id)
 {
+  assert(transaction_id);
+
+  const uint16_t first = (uint16_t)genrand_int32();
+
+  for (uint32_t offset = 0; offset <= UINT16_MAX; ++offset)
+  {
+    const uint16_t candidate = (uint16_t)(first + offset);
+    if (_resolver_request_find_by_transaction_id(candidate) == NULL)
+    {
+      *transaction_id = candidate;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+static void
+_resolver_query_send(const char *name, uint16_t query_type, struct resolver_request *request)
+{
+  assert(name);
   assert(request);
   assert(request->attempt_count < RESOLVER_MAX_ATTEMPTS);
 
   ++request->attempt_count;
 
-  unsigned char packet[RESOLVER_MESSAGE_BUFFER_SIZE];
+  uint16_t transaction_id;
+  if (!_resolver_transaction_id_generate(&transaction_id))
+    return;
 
-  const int packet_length = reslib_res_mkquery(name, query_class, type, packet, sizeof(packet));
-  if (packet_length > 0)
+  const struct dns_query query =
   {
-    HEADER *const header = (HEADER *)packet;
+    .name = name,
+    .transaction_id = transaction_id,
+    .type = query_type,
+    .class = DNS_CLASS_IN,
+    .recursion_desired = true
+  };
 
-    /*
-     * Generate an unique id.
-     * NOTE: we don't have to worry about converting this to and from
-     * network byte order, the nameserver does not interpret this value
-     * and returns it unchanged.
-     */
-    do
-      header->id = (header->id + genrand_int32()) & 0xFFFF;
-    while (_resolver_request_find_by_id(header->id));
+  unsigned char packet[DNS_QUERY_WIRE_MAX_LENGTH];
+  size_t packet_length;
+  if (!dns_query_encode(&query, packet, sizeof(packet), &packet_length))
+    return;
 
-    request->id = header->id;
-
-    _resolver_send_packet(packet, (size_t)packet_length, request->attempt_count);
-  }
+  request->transaction_id = transaction_id;
+  _resolver_send_packet(packet, packet_length, request->attempt_count);
 }
 
 static void
 _resolver_query_name(resolver_callback_fnc callback, void *callback_ctx, const char *name,
-                     struct resolver_request *request, int type)
+                     struct resolver_request *request, uint16_t query_type)
 {
-  char host_name[RFC1035_MAX_DOMAIN_LENGTH + 1];
+  char host_name[RESOLVER_NAME_CAPACITY];
 
   strlcpy(host_name, name, sizeof(host_name));
 
   if (request == NULL)
   {
     request = _resolver_request_create(callback, callback_ctx);
-    request->type = type;
     request->name_length = strlcpy(request->name, host_name, sizeof(request->name));
   }
 
-  request->type = type;
-  _resolver_query_send(host_name, C_IN, type, request);
+  request->query_type = query_type;
+  _resolver_query_send(host_name, query_type, request);
 }
 
 static void
@@ -365,22 +376,22 @@ _resolver_query_addr(resolver_callback_fnc callback, void *callback_ctx, const s
   if (request == NULL)
   {
     request = _resolver_request_create(callback, callback_ctx);
-    request->type = T_PTR;
+    request->query_type = DNS_TYPE_PTR;
     address_copy(&request->addr, addr);
   }
 
-  _resolver_query_send(reverse_name, C_IN, T_PTR, request);
+  _resolver_query_send(reverse_name, DNS_TYPE_PTR, request);
 }
 
-static int
+static uint16_t
 _resolver_query_type_from_family(int family)
 {
   switch (family)
   {
     case AF_INET:
-      return T_A;
+      return DNS_TYPE_A;
     case AF_INET6:
-      return T_AAAA;
+      return DNS_TYPE_AAAA;
     default:
       assert(!"unsupported address family");
       return 0;
@@ -394,7 +405,7 @@ resolver_lookup_name(resolver_callback_fnc callback, void *callback_ctx, const c
   assert(name);
   assert(family == AF_INET || family == AF_INET6);
 
-  const int query_type = _resolver_query_type_from_family(family);
+  const uint16_t query_type = _resolver_query_type_from_family(family);
   _resolver_query_name(callback, callback_ctx, name, NULL, query_type);
 }
 
@@ -407,129 +418,74 @@ resolver_lookup_addr(resolver_callback_fnc callback, void *callback_ctx, const s
 static void
 _resolver_query_resend(struct resolver_request *request)
 {
-  switch (request->type)
+  assert(request);
+
+  switch (request->query_type)
   {
-    case T_PTR:
+    case DNS_TYPE_PTR:
       _resolver_query_addr(NULL, NULL, &request->addr, request);
       break;
-    case T_A:
-    case T_AAAA:
-      _resolver_query_name(NULL, NULL, request->name, request, request->type);
+    case DNS_TYPE_A:
+    case DNS_TYPE_AAAA:
+      _resolver_query_name(NULL, NULL, request->name, request, request->query_type);
       break;
     default:
-      break;
+      assert(!"unsupported resolver query type");
+      return;
   }
 }
 
 static bool
-_resolver_packet_has_bytes(const unsigned char *cursor, const unsigned char *end, size_t length)
-{
-  assert(cursor);
-  assert(end);
-
-  if (cursor > end)
-    return false;
-
-  return length <= (size_t)(end - cursor);
-}
-
-static bool
-_resolver_packet_skip_name(const unsigned char **cursor, const unsigned char *end)
-{
-  assert(cursor);
-  assert(*cursor);
-  assert(end);
-
-  const int length = reslib_dn_skipname(*cursor, end);
-  if (length <= 0 || !_resolver_packet_has_bytes(*cursor, end, (size_t)length))
-    return false;
-
-  *cursor += (size_t)length;
-  return true;
-}
-
-static bool
-_resolver_process_answer(struct resolver_request *request, const HEADER *header,
-                         const unsigned char *packet, const unsigned char *packet_end)
+_resolver_process_answer(struct resolver_request *request, struct dns_reader *reader,
+                         const struct dns_header *header)
 {
   assert(request);
+  assert(reader);
   assert(header);
-  assert(packet);
-  assert(packet_end);
-  assert(packet <= packet_end);
 
-  if (!_resolver_packet_has_bytes(packet, packet_end, HFIXEDSZ))
-    return false;
-
-  const unsigned char *cursor = packet + HFIXEDSZ;
-  char hostname[sizeof(request->name)];
-
-  for (unsigned int i = 0; i < header->qdcount; ++i)
+  for (uint16_t i = 0; i < header->question_count; ++i)
   {
-    if (!_resolver_packet_skip_name(&cursor, packet_end) ||
-        !_resolver_packet_has_bytes(cursor, packet_end, QFIXEDSZ))
+    struct dns_question question;
+    if (!dns_reader_read_question(reader, &question))
       return false;
-
-    cursor += QFIXEDSZ;
   }
 
-  for (unsigned int i = 0; i < header->ancount; ++i)
+  for (uint16_t i = 0; i < header->answer_count; ++i)
   {
-    if (!_resolver_packet_skip_name(&cursor, packet_end) ||
-        !_resolver_packet_has_bytes(cursor, packet_end, DNS_RR_FIXED_FIELDS_SIZE))
+    struct dns_record record;
+    if (!dns_reader_read_record(reader, &record))
       return false;
 
-    const uint16_t rr_type = reslib_ns_get16(cursor);
-    cursor += DNS_RR_TYPE_SIZE;
-    const uint16_t rr_class = reslib_ns_get16(cursor);
-    cursor += DNS_RR_CLASS_SIZE;
-    cursor += DNS_RR_TTL_SIZE;
-    const uint16_t rdata_length = reslib_ns_get16(cursor);
-    cursor += DNS_RR_RDLENGTH_SIZE;
-
-    if (!_resolver_packet_has_bytes(cursor, packet_end, rdata_length))
-      return false;
-
-    const unsigned char *const rdata = cursor;
-    const unsigned char *const rdata_end = rdata + rdata_length;
-    cursor = rdata_end;
-
-    if (rr_class != C_IN)
+    if (record.class != DNS_CLASS_IN)
       continue;
 
-    switch (rr_type)
+    switch (record.type)
     {
-      case T_A:
-      case T_AAAA:
-        if (request->type != rr_type)
-          continue;
-
-        return address_from_bytes(&request->addr, rr_type == T_A ? AF_INET : AF_INET6, rdata, rdata_length);
-
-      case T_PTR:
+      case DNS_TYPE_A:
+      case DNS_TYPE_AAAA:
       {
-        if (request->type != rr_type)
+        if (request->query_type != record.type)
           continue;
 
-        const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
-        if (encoded_length <= 0 || (size_t)encoded_length != rdata_length)
-          return false;
+        const int family = record.type == DNS_TYPE_A ? AF_INET : AF_INET6;
+        const unsigned char *const rdata = reader->packet.data + record.rdata.offset;
 
-        const int expanded_length =
-          reslib_dn_expand(packet, packet_end, rdata, hostname, (int)sizeof(hostname));
-
-        if (expanded_length != encoded_length)
-          return false;
-
-        request->name_length = strlcpy(request->name, hostname, sizeof(request->name));
-        assert(request->name_length < sizeof(request->name));
-        return true;
+        return address_from_bytes(&request->addr, family, rdata, record.rdata.length);
       }
 
-      case T_CNAME:
+      case DNS_TYPE_PTR:
+        if (request->query_type != record.type)
+          continue;
+
+        return dns_name_decode(&reader->packet, record.rdata,
+                               request->name, sizeof(request->name), &request->name_length);
+
+      case DNS_TYPE_CNAME:
       {
-        const int encoded_length = reslib_dn_skipname(rdata, rdata_end);
-        if (encoded_length <= 0 || (size_t)encoded_length != rdata_length)
+        char cname[DNS_NAME_TEXT_CAPACITY];
+        size_t cname_length;
+
+        if (!dns_name_decode(&reader->packet, record.rdata, cname, sizeof(cname), &cname_length))
           return false;
 
         continue;
@@ -550,89 +506,71 @@ _resolver_read_reply(fde_t *fde, void *data)
   assert(socket);
   assert(socket->fde == fde);
 
-  unsigned char packet[sizeof(HEADER) + RESOLVER_MESSAGE_BUFFER_SIZE];
+  unsigned char packet[RESOLVER_UDP_MESSAGE_CAPACITY];
 
   while (true)
   {
-    struct io_addr addr = { 0 };
-    socklen_t len = sizeof(addr.ss);
+    struct io_addr source = { 0 };
+    socklen_t source_length = sizeof(source.ss);
 
-    ssize_t rc = recvfrom(fde->fd, packet, sizeof(packet), 0, (struct sockaddr *)&addr.ss, &len);
-    if (rc == -1)
+    ssize_t bytes_received;
+    do
+      bytes_received = recvfrom(fde->fd, packet, sizeof(packet), 0,
+                                (struct sockaddr *)&source.ss, &source_length);
+    while (bytes_received == -1 && errno == EINTR);
+
+    if (bytes_received == -1)
       break;
 
-    if (rc <= (ssize_t)sizeof(HEADER))
+    const size_t packet_length = (size_t)bytes_received;
+    if (packet_length < DNS_HEADER_WIRE_SIZE)
       continue;
 
-    /* Ignore replies from unconfigured sources. */
-    if (!_resolver_source_is_configured_nameserver(socket, &addr))
+    if (!_resolver_source_is_configured_nameserver(socket, &source))
       continue;
 
-    /*
-     * Convert DNS reply reader from Network byte order to CPU byte order.
-     */
-    HEADER *const header = (HEADER *)packet;
-    header->ancount = ntohs(header->ancount);
-    header->qdcount = ntohs(header->qdcount);
-    header->nscount = ntohs(header->nscount);
-    header->arcount = ntohs(header->arcount);
+    struct dns_reader reader;
+    dns_reader_init(&reader, packet, packet_length);
 
-    /*
-     * Response for an id which we have already received an answer for
-     * just ignore this response.
-     */
-    struct resolver_request *const request = _resolver_request_find_by_id(header->id);
+    struct dns_header header;
+    if (!dns_reader_read_header(&reader, &header) ||
+        !dns_header_is_response(&header) || dns_header_get_opcode(&header) != DNS_OPCODE_QUERY)
+      continue;
+
+    struct resolver_request *const request =
+      _resolver_request_find_by_transaction_id(header.transaction_id);
     if (request == NULL)
       continue;
 
-    if (header->rcode != NO_ERRORS || header->ancount == 0)
-    {
-      /*
-       * If a bad error was returned, stop here and don't send
-       * any more (no retries_remaining granted).
-       */
-      request->callback(request->callback_ctx, NULL, NULL, 0);
-      _resolver_request_destroy(request);
-      continue;
-    }
-
-    /*
-     * If this fails there was an error decoding the received packet.
-     * We only give it one shot. If it fails, just leave the client
-     * unresolved.
-     */
-    if (!_resolver_process_answer(request, header, packet, packet + rc))
+    if (dns_header_get_response_code(&header) != DNS_RESPONSE_CODE_NOERROR || header.answer_count == 0)
     {
       request->callback(request->callback_ctx, NULL, NULL, 0);
       _resolver_request_destroy(request);
       continue;
     }
 
-    if (request->type == T_PTR)
+    if (!_resolver_process_answer(request, &reader, &header))
+    {
+      request->callback(request->callback_ctx, NULL, NULL, 0);
+      _resolver_request_destroy(request);
+      continue;
+    }
+
+    if (request->query_type == DNS_TYPE_PTR)
     {
       if (request->name_length == 0)
       {
-        /*
-         * Got a PTR response with no name, something bogus is happening
-         * don't bother trying again, the client address doesn't resolve
-         */
         request->callback(request->callback_ctx, NULL, NULL, 0);
         _resolver_request_destroy(request);
         continue;
       }
 
-      /*
-       * Lookup the 'authoritative' name that we were given for the ip#.
-       */
       resolver_lookup_name(request->callback, request->callback_ctx,
                            request->name, address_get_family(&request->addr));
       _resolver_request_destroy(request);
     }
     else
     {
-      /*
-       * Got a name and address response, client resolved
-       */
       request->callback(request->callback_ctx, &request->addr, request->name, request->name_length);
       _resolver_request_destroy(request);
     }

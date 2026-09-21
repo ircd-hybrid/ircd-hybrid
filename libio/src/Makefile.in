@@ -122,13 +122,13 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am_libio_la_OBJECTS = address.lo address_parse.lo base32.lo comm.lo \
-	comm_epoll.lo comm_kqueue.lo comm_poll.lo dbuf.lo event.lo \
-	fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo io_hex.lo \
-	io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
+	comm_epoll.lo comm_kqueue.lo comm_poll.lo dbuf.lo dns.lo \
+	event.lo fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo \
+	io_hex.lo io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
 	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
 	memory.lo module.lo patricia.lo resolver.lo resolver_config.lo \
-	reslib.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
-	tls_openssl.lo tls_wolfssl.lo
+	rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
+	tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -156,7 +156,7 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/address_parse.Plo ./$(DEPDIR)/base32.Plo \
 	./$(DEPDIR)/comm.Plo ./$(DEPDIR)/comm_epoll.Plo \
 	./$(DEPDIR)/comm_kqueue.Plo ./$(DEPDIR)/comm_poll.Plo \
-	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/event.Plo \
+	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo \
 	./$(DEPDIR)/fdlist.Plo ./$(DEPDIR)/hook.Plo \
 	./$(DEPDIR)/ident.Plo ./$(DEPDIR)/io_daemon.Plo \
 	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/io_hex.Plo \
@@ -166,11 +166,10 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/module.Plo ./$(DEPDIR)/patricia.Plo \
-	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/resolver.Plo \
-	./$(DEPDIR)/resolver_config.Plo ./$(DEPDIR)/rng_mt.Plo \
-	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
-	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
-	./$(DEPDIR)/tls_wolfssl.Plo
+	./$(DEPDIR)/resolver.Plo ./$(DEPDIR)/resolver_config.Plo \
+	./$(DEPDIR)/rng_mt.Plo ./$(DEPDIR)/sha3.Plo \
+	./$(DEPDIR)/tls_gnutls.Plo ./$(DEPDIR)/tls_none.Plo \
+	./$(DEPDIR)/tls_openssl.Plo ./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -381,6 +380,8 @@ libio_la_SOURCES = address.c     \
                     comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
+                    dns.c         \
+                    dns.h         \
                     event.c       \
                     event.h       \
                     fdlist.c      \
@@ -425,8 +426,6 @@ libio_la_SOURCES = address.c     \
                     resolver.h    \
                     resolver_config.c \
                     resolver_config.h \
-                    reslib.c      \
-                    reslib.h      \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \
@@ -501,6 +500,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_kqueue.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_poll.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
@@ -521,7 +521,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver_config.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Plo@am__quote@ # am--include-marker
@@ -700,6 +699,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
 	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
+	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
@@ -720,7 +720,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
-	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
 	-rm -f ./$(DEPDIR)/resolver_config.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
@@ -782,6 +781,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
 	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
+	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
@@ -802,7 +802,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
-	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
 	-rm -f ./$(DEPDIR)/resolver_config.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file res.h
+/*! \file resolver.h
  * \brief ircd resolver functions
  */
 
-#ifndef INCLUDED_res_h
-#define INCLUDED_res_h
+#ifndef INCLUDED_resolver_h
+#define INCLUDED_resolver_h
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -24,4 +24,4 @@ extern bool resolver_reload(void);
 extern void resolver_cancel_by_context(const void *);
 extern void resolver_lookup_name(resolver_callback_fnc , void *, const char *, int);
 extern void resolver_lookup_addr(resolver_callback_fnc, void *, const struct io_addr *);
-#endif  /* INCLUDED_res_h */
+#endif  /* INCLUDED_resolver_h */

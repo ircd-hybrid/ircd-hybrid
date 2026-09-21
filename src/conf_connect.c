@@ -14,7 +14,6 @@
 #include "log.h"
 #include "memory.h"
 #include "resolver.h"
-#include "reslib.h"
 
 #include "client.h"
 #include "conf_connect.h"

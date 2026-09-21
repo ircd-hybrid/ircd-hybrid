@@ -58,6 +58,8 @@ libio_la_SOURCES =  address.c     \
                     patricia.h    \
                     resolver.c    \
                     resolver.h    \
+                    resolver_config.c \
+                    resolver_config.h \
                     reslib.c      \
                     reslib.h      \
                     rng_mt.c      \

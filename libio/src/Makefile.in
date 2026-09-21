@@ -126,9 +126,9 @@ am_libio_la_OBJECTS = address.lo address_parse.lo base32.lo comm.lo \
 	fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo io_hex.lo \
 	io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
 	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
-	memory.lo module.lo patricia.lo resolver.lo reslib.lo \
-	rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
-	tls_wolfssl.lo
+	memory.lo module.lo patricia.lo resolver.lo resolver_config.lo \
+	reslib.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
+	tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -167,9 +167,10 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/module.Plo ./$(DEPDIR)/patricia.Plo \
 	./$(DEPDIR)/reslib.Plo ./$(DEPDIR)/resolver.Plo \
-	./$(DEPDIR)/rng_mt.Plo ./$(DEPDIR)/sha3.Plo \
-	./$(DEPDIR)/tls_gnutls.Plo ./$(DEPDIR)/tls_none.Plo \
-	./$(DEPDIR)/tls_openssl.Plo ./$(DEPDIR)/tls_wolfssl.Plo
+	./$(DEPDIR)/resolver_config.Plo ./$(DEPDIR)/rng_mt.Plo \
+	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
+	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
+	./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -422,6 +423,8 @@ libio_la_SOURCES = address.c     \
                     patricia.h    \
                     resolver.c    \
                     resolver.h    \
+                    resolver_config.c \
+                    resolver_config.h \
                     reslib.c      \
                     reslib.h      \
                     rng_mt.c      \
@@ -520,6 +523,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reslib.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver_config.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rng_mt.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_gnutls.Plo@am__quote@ # am--include-marker
@@ -718,6 +722,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
+	-rm -f ./$(DEPDIR)/resolver_config.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f ./$(DEPDIR)/tls_gnutls.Plo
@@ -799,6 +804,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/reslib.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
+	-rm -f ./$(DEPDIR)/resolver_config.Plo
 	-rm -f ./$(DEPDIR)/rng_mt.Plo
 	-rm -f ./$(DEPDIR)/sha3.Plo
 	-rm -f ./$(DEPDIR)/tls_gnutls.Plo

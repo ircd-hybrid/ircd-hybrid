@@ -21,7 +21,7 @@
 #include "list.h"
 #include "misc.h"
 #include "module.h"
-#include "reslib.h"
+#include "resolver.h"
 
 #include "channel.h"
 #include "channel_invite.h"
@@ -429,11 +429,25 @@ stats_memory(struct Client *client, size_t parc, char *parv[])
 static void
 stats_dns_servers(struct Client *client, size_t parc, char *parv[])
 {
-  for (size_t i = 0; i < reslib_nscount; ++i)
+  const size_t nameserver_count = resolver_nameserver_count();
+
+  for (size_t i = 0; i < nameserver_count; ++i)
   {
-    char buf[HOSTIPLEN + 1];
-    if (address_to_string(&reslib_nsaddr_list[i], buf, sizeof(buf)))
-      sendto_one_numeric(client, &me, RPL_STATSALINE, buf);
+    struct io_addr nameserver;
+    const bool found = resolver_nameserver_get(i, &nameserver);
+    assert(found);
+
+    if (!found)
+      continue;
+
+    char address[HOSTIPLEN + 1];
+    const bool converted = address_to_string(&nameserver, address, sizeof(address));
+    assert(converted);
+
+    if (!converted)
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_STATSALINE, address);
   }
 }
 

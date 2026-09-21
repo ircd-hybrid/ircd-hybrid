@@ -44,6 +44,7 @@
 #include "list.h"
 #include "memory.h"
 #include "resolver.h"
+#include "resolver_config.h"
 #include "reslib.h"
 #include "rng_mt.h"
 
@@ -94,6 +95,7 @@ static struct resolver_socket resolver_sockets[] =
   { .family = AF_INET6, .description = "IPv6 UDP resolver socket" }
 };
 
+static struct resolver_config resolver_config;
 static list_t request_list;
 
 static const struct resolver_socket *
@@ -107,24 +109,19 @@ _resolver_socket_find_by_family(int family)
 }
 
 static bool
-_resolver_family_is_configured(int family)
-{
-  for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_get_family(&reslib_nsaddr_list[i]) == family)
-      return true;
-
-  return false;
-}
-
-static void
 _resolver_socket_open(struct resolver_socket *socket)
 {
+  assert(socket);
+
   if (socket->fde)
-    return;
+    return true;
 
   socket->fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
-  if (socket->fde)
-    comm_setselect(socket->fde, COMM_SELECT_READ, _resolver_read_reply, socket);
+  if (socket->fde == NULL)
+    return false;
+
+  comm_setselect(socket->fde, COMM_SELECT_READ, _resolver_read_reply, socket);
+  return true;
 }
 
 static void
@@ -137,24 +134,54 @@ _resolver_socket_close(struct resolver_socket *socket)
   socket->fde = NULL;
 }
 
-static void
-_resolver_socket_close_all(void)
+static bool
+_resolver_socket_reconfigure(const struct resolver_config *config)
 {
+  assert(config);
+  assert(config->nameserver_count > 0);
+  assert(config->nameserver_count <= IO_ARRAY_LENGTH(config->nameservers));
+
+  bool opened[IO_ARRAY_LENGTH(resolver_sockets)] = { false };
   for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
-    _resolver_socket_close(&resolver_sockets[i]);
+  {
+    struct resolver_socket *const socket = &resolver_sockets[i];
+    if (!resolver_config_has_family(config, socket->family) || socket->fde)
+      continue;
+
+    if (!_resolver_socket_open(socket))
+    {
+      for (size_t j = 0; j < IO_ARRAY_LENGTH(resolver_sockets); ++j)
+      {
+        if (opened[j])
+          _resolver_socket_close(&resolver_sockets[j]);
+      }
+
+      return false;
+    }
+
+    opened[i] = true;
+  }
+
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
+  {
+    struct resolver_socket *const socket = &resolver_sockets[i];
+    if (!resolver_config_has_family(config, socket->family))
+      _resolver_socket_close(socket);
+  }
+
+  return true;
 }
 
 static bool
-_resolver_source_is_configured_nameserver(const struct resolver_socket *socket, const struct io_addr *addr)
+_resolver_source_is_configured_nameserver(const struct resolver_socket *socket, const struct io_addr *source)
 {
-  if (address_get_family(addr) != socket->family)
+  assert(socket);
+  assert(source);
+
+  if (address_get_family(source) != socket->family)
     return false;
 
-  for (unsigned int i = 0; i < reslib_nscount; ++i)
-    if (address_equal_with_port(addr, &reslib_nsaddr_list[i]))
-      return true;
-
-  return false;
+  return resolver_config_contains_nameserver(&resolver_config, source);
 }
 
 /*
@@ -186,26 +213,39 @@ _resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
   return request;
 }
 
-static void
-_resolver_start(void)
+size_t
+resolver_nameserver_count(void)
 {
-  reslib_res_init();
-
-  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
-  {
-    struct resolver_socket *const socket = &resolver_sockets[i];
-    if (_resolver_family_is_configured(socket->family))
-      _resolver_socket_open(socket);
-    else
-      _resolver_socket_close(socket);
-  }
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
+  return resolver_config.nameserver_count;
 }
 
-void
+bool
+resolver_nameserver_get(size_t index, struct io_addr *nameserver)
+{
+  assert(nameserver);
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
+
+  if (index >= resolver_config.nameserver_count)
+    return false;
+
+  address_copy(nameserver, &resolver_config.nameservers[index]);
+  return true;
+}
+
+bool
 resolver_reload(void)
 {
-  _resolver_socket_close_all();
-  _resolver_start();
+  struct resolver_config candidate;
+
+  if (!resolver_config_load(&candidate))
+    return false;
+
+  if (!_resolver_socket_reconfigure(&candidate))
+    return false;
+
+  resolver_config = candidate;
+  return true;
 }
 
 /*
@@ -238,12 +278,14 @@ _resolver_send_packet(const unsigned char *msg, size_t packet_length, unsigned i
   assert(msg);
   assert(packet_length > 0);
   assert(max_nameservers > 0);
+  assert(resolver_config.nameserver_count > 0);
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
 
   unsigned int nameservers_sent = 0;
 
-  for (unsigned int i = 0; i < reslib_nscount && nameservers_sent < max_nameservers; ++i)
+  for (size_t i = 0; i < resolver_config.nameserver_count && nameservers_sent < max_nameservers; ++i)
   {
-    const struct io_addr *const nameserver = &reslib_nsaddr_list[i];
+    const struct io_addr *const nameserver = &resolver_config.nameservers[i];
 
     const struct resolver_socket *const socket =
       _resolver_socket_find_by_family(address_get_family(nameserver));
@@ -670,13 +712,22 @@ _resolver_process_timeouts(void *unused)
 /*
  * resolver_init - initialize resolver and resolver library
  */
-void
+bool
 resolver_init(event_manager_t manager)
 {
-  _resolver_start();
+  struct resolver_config candidate;
+
+  if (!resolver_config_load(&candidate))
+    return false;
+
+  if (!_resolver_socket_reconfigure(&candidate))
+    return false;
+
+  resolver_config = candidate;
 
   event_handle_t event_resolver_timeout =
     event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts, 1000, false, NULL, NULL);
   event_set_priority(event_resolver_timeout, 1);
   event_schedule(event_resolver_timeout);
+  return true;
 }

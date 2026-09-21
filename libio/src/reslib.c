@@ -96,13 +96,7 @@
 #include <netinet/in.h>
 
 #include "io_string.h"
-#include "resolver.h"
 #include "reslib.h"
-
-#define MAXLINE 128
-
-struct io_addr reslib_nsaddr_list[RESLIB_MAXNS];
-unsigned int reslib_nscount = 0;
 
 static int reslib_ns_name_compress(const char *, unsigned char *, size_t, const unsigned char **, const unsigned char **);
 static int reslib_dn_find(const unsigned char *, const unsigned char *, const unsigned char **, const unsigned char **);
@@ -112,108 +106,6 @@ static int reslib_ns_name_ntop(const unsigned char *, char *, size_t);
 static int reslib_ns_name_skip(const unsigned char **, const unsigned char *);
 static int reslib_mklower(int);
 
-
-/* reslib_add_nameserver()
- *
- * input        - either an IPV4 address in dotted quad
- *                or an IPV6 address in : format
- * output       - NONE
- * side effects - entry in reslib_nsaddr_list is filled in as needed
- */
-static void
-reslib_add_nameserver(const char *arg)
-{
-  /* Done max number of nameservers? */
-  if (reslib_nscount >= RESLIB_MAXNS)
-    return;
-
-  if (!address_from_string(arg, &reslib_nsaddr_list[reslib_nscount]))
-    return;
-
-  address_set_port(&reslib_nsaddr_list[reslib_nscount], NS_DEFAULTPORT);
-  reslib_nscount++;
-}
-
-/* parse_resvconf()
- *
- * inputs - NONE
- * output - -1 if failure 0 if success
- * side effects - fills in reslib_nsaddr_list
- */
-static void
-reslib_parse_resolv_conf(void)
-{
-  char *p;
-  char *opt;
-  char *arg;
-  char input[MAXLINE];
-  FILE *file;
-
-  /* XXX "/etc/resolv.conf" should be from a define in config.h perhaps
-   * for cygwin support etc. this hardcodes it to unix for now -db
-   */
-  if ((file = fopen("/etc/resolv.conf", "r")) == NULL)
-    return;
-
-  while (fgets(input, sizeof(input), file))
-  {
-    /* blow away any newline */
-    if ((p = strpbrk(input, "\r\n")))
-      *p = '\0';
-
-    p = input;
-
-    /* skip until something thats not a space is seen */
-    while (io_ascii_is_space(*p))
-      ++p;
-
-    /* if at this point, have a '\0' then continue */
-    if (*p == '\0')
-      continue;
-
-    /* Ignore comment lines immediately */
-    if (*p == ';' || *p == '#')
-      continue;
-
-    /* skip until a space is found */
-    opt = p;
-    while (!io_ascii_is_space(*p) && *p)
-      ++p;
-
-    if (*p == '\0')
-      continue;  /* no arguments?.. ignore this line */
-
-    /* blow away the space character */
-    *p++ = '\0';
-
-    /* skip these spaces that are before the argument */
-    while (io_ascii_is_space(*p))
-      ++p;
-
-    /* Now arg should be right where p is pointing */
-    arg = p;
-
-    if ((p = strpbrk(arg, " \t")))
-      *p = '\0';  /* take the first word */
-
-    if (!io_strcasecmp(opt, "nameserver"))
-      reslib_add_nameserver(arg);
-  }
-
-  fclose(file);
-}
-
-void
-reslib_res_init(void)
-{
-  reslib_nscount = 0;
-  memset(reslib_nsaddr_list, 0, sizeof(reslib_nsaddr_list));
-
-  reslib_parse_resolv_conf();
-
-  if (reslib_nscount == 0)
-    reslib_add_nameserver("127.0.0.1");
-}
 
 /* Expand compressed domain name COMP_DN to full domain name.  MSG is
    a pointer to the beginning of the message, EOMORIG points to the

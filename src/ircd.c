@@ -454,7 +454,12 @@ main(int argc, char *argv[])
   module_init();
   conf_read_files(true);   /* cold start init conf files */
 
-  resolver_init(ircd_event_manager);
+  if (!resolver_init(ircd_event_manager))
+  {
+    log_write(LOG_TYPE_IRCD, "Failed to initialize resolver");
+    exit(EXIT_FAILURE);
+  }
+
   ipcache_init();
   channel_mode_init();
   extban_init();

@@ -135,9 +135,6 @@ typedef struct
   unsigned  arcount : 16;  /**< Number of resource entries */
 } HEADER;
 
-extern struct io_addr reslib_nsaddr_list[];
-extern unsigned int reslib_nscount;
-extern void reslib_res_init(void);
 extern int reslib_dn_expand(const unsigned char *, const unsigned char *, const unsigned char *, char *, int);
 extern int reslib_dn_skipname(const unsigned char *, const unsigned char *);
 extern unsigned int reslib_ns_get16(const unsigned char *);

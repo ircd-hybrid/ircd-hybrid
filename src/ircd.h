@@ -51,37 +51,6 @@ struct SetOptions
 };
 
 /**
- * @struct ServerStatistics
- * @brief Structure for server communication and connection statistics.
- *
- * This structure holds statistics related to server communication and connections.
- * These metrics provide insights into data transmission, connection durations,
- * and various activities between clients and servers.
- */
-struct ServerStatistics
-{
-  uint64_t is_cbs;  /**< Bytes sent to clients. */
-  uint64_t is_cbr;  /**< Bytes received from clients. */
-  uint64_t is_sbs;  /**< Bytes sent to servers. */
-  uint64_t is_sbr;  /**< Bytes received from servers. */
-  uint64_t is_cti;  /**< Time spent connected by clients. */
-  uint64_t is_sti;  /**< Time spent connected by servers. */
-  uint64_t is_cl;  /**< Number of client connections. */
-  uint64_t is_sv;  /**< Number of server connections. */
-  uint64_t is_ni;  /**< Connections with unidentified sources. */
-  uint64_t is_ac;  /**< Number of accepted connections. */
-  uint64_t is_ref;  /**< Number of refused connections. */
-  uint64_t is_unco;  /**< Number of unknown commands received. */
-  uint64_t is_wrdi;  /**< Number of commands going in the wrong direction. */
-  uint64_t is_unpf;  /**< Number of messages with unknown prefixes. */
-  uint64_t is_empt;  /**< Number of empty messages received. */
-  uint64_t is_num;  /**< Number of numeric messages received. */
-  uint64_t is_kill;  /**< Number of kills generated on collisions. */
-  uint64_t is_asuc;  /**< Number of successful authentication requests. */
-  uint64_t is_abad;  /**< Number of unsuccessful authentication requests. */
-};
-
-/**
  * @struct Counter
  * @brief Structure holding various server activity counters.
  *
@@ -135,7 +104,6 @@ extern const char *logFileName;
 extern const char *pidFileName;
 
 extern struct Counter Count;
-extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
 extern event_manager_t ircd_event_manager;

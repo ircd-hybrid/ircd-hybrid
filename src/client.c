@@ -630,11 +630,6 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
 
   _client_exit_log_session(client, reason);
 
-  ++ServerStats.is_sv;
-  ServerStats.is_sbs += client->connection->send.bytes;
-  ServerStats.is_sbr += client->connection->recv.bytes;
-  ServerStats.is_sti += client_get_session_duration(client);
-
   assert(list_find(&local_server_list, client));
   list_remove(&client->connection->node, &local_server_list);
 
@@ -649,11 +644,6 @@ _client_exit_cleanup_user_connection(struct Client *client, const char *reason)
   assert(client_is_user(client));
 
   _client_exit_log_session(client, reason);
-
-  ++ServerStats.is_cl;
-  ServerStats.is_cbs += client->connection->send.bytes;
-  ServerStats.is_cbr += client->connection->recv.bytes;
-  ServerStats.is_cti += client_get_session_duration(client);
 
   assert(list_find(&local_client_list, client));
   list_remove(&client->connection->node, &local_client_list);
@@ -685,8 +675,6 @@ _client_exit_cleanup_unregistered_connection(struct Client *client, const char *
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Link Failed: %s [ip=%s] (Reason: %s)",
                    client->name, client->sockhost, reason);
-
-  ++ServerStats.is_ni;
 
   assert(list_find(&unknown_list, client));
   list_remove(&client->connection->node, &unknown_list);
@@ -894,7 +882,6 @@ _client_reject_connection_server_full(fde_t *client_fde, const struct Listener *
   sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
                              remote_addr_str, listener_get_name(listener), listener_get_port(listener));
 
-  ++ServerStats.is_ref;
   comm_socket_close(client_fde);
 }
 
@@ -911,7 +898,6 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
             remote_addr_str, listener_get_name(listener), listener_get_port(listener),
             policy_result == BANNED_CLIENT ? "D-lined" : "Throttled");
 
-  ++ServerStats.is_ref;
   comm_socket_close(client_fde);
 }
 
@@ -1034,8 +1020,6 @@ client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
     _client_reject_connection_by_policy(client_fde, listener, remote_addr_str, policy_result);
     return;
   }
-
-  ++ServerStats.is_ac;
 
   struct Client *const client =
     _client_create_accepted_local_connection(client_fde, listener, remote_addr, remote_addr_str);

@@ -96,10 +96,7 @@ _parse_extract_command_token(parse_context_t *ctx)
   assert(ctx->buffer_cursor <= ctx->buffer_end);
 
   if (*ctx->buffer_cursor == '\0')
-  {
-    ++ServerStats.is_empt;
     return false;
-  }
 
   char *const token = ctx->buffer_cursor;
   const size_t token_length = strcspn(token, " ");
@@ -107,10 +104,7 @@ _parse_extract_command_token(parse_context_t *ctx)
   assert(token_end <= ctx->buffer_end);
 
   if (token_length == 0)
-  {
-    ++ServerStats.is_empt;
     return false;
-  }
 
   if (*token_end == ' ')
     *token_end++ = '\0';
@@ -222,7 +216,6 @@ _parse_resolve_source(parse_context_t *ctx)
    */
   if (source == NULL)
   {
-    ++ServerStats.is_unpf;
     _parse_handle_unknown_prefix(ctx->client, ctx->prefix);
     return false;
   }
@@ -235,8 +228,6 @@ _parse_resolve_source(parse_context_t *ctx)
    */
   if (source->nexthop != ctx->client)
   {
-    ++ServerStats.is_wrdi;
-
     client_format_name_buffer_t expected_link_name_buffer;
     client_format_name_buffer_t actual_link_name_buffer;
     const char *const expected_link_name =
@@ -293,8 +284,6 @@ _parse_handle_unknown_command_token(const parse_context_t *ctx)
     log_write(LOG_TYPE_DEBUG, "Unknown command from server: %s via %s",
               ctx->command_token, client_format_name(ctx->client, CLIENT_FORMAT_NAME_LOG, &client_name_buffer));
   }
-
-  ++ServerStats.is_unco;
 }
 
 static bool
@@ -318,7 +307,6 @@ _parse_identify_numeric(parse_context_t *ctx)
     return false;
   }
 
-  ++ServerStats.is_num;
   return true;
 }
 

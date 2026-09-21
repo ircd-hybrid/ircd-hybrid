@@ -205,26 +205,3 @@ monitor_clear_list(struct Client *client)
 
   assert(list_is_empty(&client->connection->monitor_list));
 }
-
-/*! \brief Counts up memory used by monitor list headers
- */
-void
-monitor_count_memory(uint32_t *const count, size_t *const bytes)
-{
-  *count = 0;
-  *bytes = 0;
-
-  for (size_t i = 0; i < HASHSIZE; ++i)
-  {
-    *count += list_length(&monitor_hash[i]);
-
-    list_node_t *node;
-    LIST_FOREACH(node, monitor_hash[i].head)
-    {
-      const struct Monitor *const monitor = node->data;
-      *bytes += strlen(monitor->name) + 1;  /* +1 for '\0' */
-    }
-  }
-
-  *bytes += *count * sizeof(struct Monitor);
-}

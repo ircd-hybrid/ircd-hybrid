@@ -121,14 +121,6 @@ ipcache_record_remove(const struct io_addr *addr, bool local)
 }
 
 void
-ipcache_get_stats(uint32_t *const number_ips_stored, size_t *const mem_ips_stored)
-{
-  /* TBD: inaccurate for now as it does only count the amount of memory for struct ip_entry items */
-  (*number_ips_stored) = list_length(&ipcache_list);
-  (*mem_ips_stored) = list_length(&ipcache_list) * sizeof(struct ip_entry);
-}
-
-void
 ipcache_init(void)
 {
   ipcache_trie_v6 = patricia_create(AF_INET6);

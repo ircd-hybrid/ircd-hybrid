@@ -57,21 +57,6 @@ _listener_destroy(struct Listener *listener)
   io_free(listener);
 }
 
-void
-listener_count_memory(unsigned int *count, size_t *bytes)
-{
-  *count = *bytes = 0;
-
-  list_node_t *node;
-  LIST_FOREACH(node, listener_list.head)
-  {
-    const struct Listener *const listener = node->data;
-    ++*count;
-    *bytes += sizeof(*listener);
-    *bytes += strlen(listener->name) + 1;
-  }
-}
-
 enum { LISTENER_ACCEPT_BUDGET = 128 };
 
 static void
@@ -108,7 +93,6 @@ _listener_accept_connection(fde_t *F, void *data_)
     if (!address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)))
     {
       log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
-      ++ServerStats.is_ref;
       comm_socket_close(client_fde);
       continue;
     }

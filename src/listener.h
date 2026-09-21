@@ -42,7 +42,6 @@ extern void listener_add(uint16_t, const char *, listener_flag_t);
 extern void listener_release(struct Listener *);
 extern void listener_retain(struct Listener *);
 extern void listener_close_marked(void);
-extern void listener_count_memory(unsigned int *, size_t *);
 extern const list_t *listener_get_list(void);
 
 static inline const char *

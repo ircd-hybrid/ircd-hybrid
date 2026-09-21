@@ -104,16 +104,12 @@ _lookup_ident_callback(void *user_data, const char *username)
   lookup->ident_pending = false;
 
   if (string_is_empty(username))
-  {
-    ++ServerStats.is_abad;
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_FAIL]);
-  }
   else
   {
     strlcpy(lookup->client->username, username, sizeof(lookup->client->username));
     client_set_flag(lookup->client, FLAGS_GOTID);
 
-    ++ServerStats.is_asuc;
     sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_SUCCESS]);
   }
 
@@ -163,10 +159,7 @@ lookup_start(struct Client *client)
     if (lookup->ident_request)
       lookup->ident_pending = true;
     else
-    {
-      ++ServerStats.is_abad;
       sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_FAIL]);
-    }
   }
 
   _lookup_check_complete(lookup);

@@ -93,16 +93,6 @@ struct Counter Count;
 struct ServerState_t server_state;
 
 /**
- * @struct ServerStatistics
- * @brief Structure for server communication and connection statistics.
- *
- * The `ServerStatistics` structure contains statistics related to server communication
- * and connections. These metrics provide insights into data transmission, connection
- * durations, and various activities between clients and servers.
- */
-struct ServerStatistics ServerStats;
-
-/**
  * @struct Connection
  * @brief Structure representing the connection details for this server.
  *

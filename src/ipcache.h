@@ -26,7 +26,6 @@ struct ip_entry
 };
 
 extern void ipcache_record_remove(const struct io_addr *addr, bool);
-extern void ipcache_get_stats(uint32_t *const, size_t *const);
 extern void ipcache_init(void);
 extern struct ip_entry *ipcache_record_find_or_add(const struct io_addr *addr);
 #endif  /* INCLUDED_ipcache_h */

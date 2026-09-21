@@ -211,7 +211,6 @@ _user_register_reject_authorization(struct Client *client, enum conf_authorize_r
                                   failure_reason);
 
   client_exit_fmt(client, "Connection rejected - %s", failure_reason);
-  ++ServerStats.is_ref;
 }
 
 /*! \brief This function is called when both NICK and USER messages
@@ -261,7 +260,6 @@ user_register_local(struct Client *client)
                                     client->username);
 
     client_exit(client, "Invalid username");
-    ++ServerStats.is_ref;
     return;
   }
 
@@ -284,7 +282,6 @@ user_register_local(struct Client *client)
                                     local_client_count, max_clients);
 
     client_exit(client, "Server is full - try again later");
-    ++ServerStats.is_ref;
     return;
   }
 
@@ -298,7 +295,6 @@ user_register_local(struct Client *client)
                                       client->info, gecos->reason, client->sockhost);
 
       client_exit(client, "Bad user information");
-      ++ServerStats.is_ref;
       return;
     }
   }
@@ -306,7 +302,6 @@ user_register_local(struct Client *client)
   if (!client_id_allocate_uid(client))
   {
     client_exit(client, "Local client ID generator exhausted");
-    ++ServerStats.is_ref;
     return;
   }
 

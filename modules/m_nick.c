@@ -70,7 +70,6 @@ check_clean_nick(struct Client *source, const char *nick)
     client_exit(source, "Bad Nickname");
   }
 
-  ++ServerStats.is_kill;
   return false;
 }
 
@@ -88,7 +87,6 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
   sendto_one(source, ":%s KILL %s :%s (Bad UID)",
              me.id, uid, me.name);
 
-  ++ServerStats.is_kill;
   return false;
 }
 
@@ -106,7 +104,6 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
   sendto_one(source, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
 
-  ++ServerStats.is_kill;
   return false;
 }
 
@@ -124,7 +121,6 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
   sendto_one(source, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
 
-  ++ServerStats.is_kill;
   return false;
 }
 
@@ -349,8 +345,6 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
 
     client_set_flag(target, FLAGS_KILLED);
     client_exit(target, "Nick collision (new)");
-
-    ++ServerStats.is_kill;
     return false;
   }
 
@@ -386,8 +380,6 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
 
   client_set_flag(target, FLAGS_KILLED);
   client_exit(target, "Nick collision");
-
-  ++ServerStats.is_kill;
   return true;
 }
 
@@ -430,8 +422,6 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
     client_set_flag(target, FLAGS_KILLED);
     client_exit(source, "Nick collision (old)");
     client_exit(target, "Nick collision (new)");
-
-    ServerStats.is_kill += 2;
     return false;
   }
 
@@ -460,7 +450,6 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
     else
       client_exit(source, "Nick collision (new)");
 
-    ++ServerStats.is_kill;
     return false;
   }
 
@@ -480,8 +469,6 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
 
   client_set_flag(target, FLAGS_KILLED);
   client_exit(target, "Nick collision");
-
-  ++ServerStats.is_kill;
   return true;
 }
 
@@ -735,7 +722,6 @@ ms_uid(struct Client *source, size_t parc, char *parv[])
 
     sendto_one(source, ":%s KILL %s :%s (Malformed UID introduction)",
                me.id, parv[9], me.name);
-    ++ServerStats.is_kill;
     return;
   }
 
@@ -756,8 +742,6 @@ ms_uid(struct Client *source, size_t parc, char *parv[])
 
     client_set_flag(target, FLAGS_KILLED);
     client_exit(target, "ID Collision");
-
-    ++ServerStats.is_kill;
     return;
   }
 

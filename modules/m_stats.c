@@ -290,143 +290,6 @@ stats_resv(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
-stats_memory(struct Client *client, size_t parc, char *parv[])
-{
-  uint32_t attached_class_count = 0;
-  uint32_t channel_members = 0;
-  uint32_t channel_invites = 0;
-  uint32_t channel_bans = 0;
-  uint32_t channel_except = 0;
-  uint32_t channel_invex = 0;
-  uint32_t number_ips_stored = 0;
-  size_t channel_ban_memory = 0;
-  size_t channel_except_memory = 0;
-  size_t channel_invex_memory = 0;
-  size_t mem_ips_stored = 0;
-  uint32_t local_client_count  = 0;
-  uint32_t remote_client_count = 0;
-  size_t local_client_memory_used  = 0;
-  size_t remote_client_memory_used = 0;
-  uint32_t monitor_list_headers = 0;
-  uint32_t monitor_list_entries = 0;
-  size_t monitor_list_memory = 0;
-  uint32_t listener_count = 0;
-  size_t listener_memory = 0;
-
-  list_node_t *node;
-  LIST_FOREACH(node, local_server_list.head)
-  {
-    const struct Client *const target = node->data;
-    if (target->connection->base_class)
-      attached_class_count++;
-    if (target->connection->oper_class)
-      attached_class_count++;
-  }
-
-  LIST_FOREACH(node, local_client_list.head)
-  {
-    const struct Client *const target = node->data;
-    if (target->connection->base_class)
-      attached_class_count++;
-    if (target->connection->oper_class)
-      attached_class_count++;
-
-    monitor_list_entries += list_length(&target->connection->monitor_list);
-  }
-
-  local_client_count = list_length(&local_server_list) +
-                       list_length(&local_client_list);
-  remote_client_count = list_length(&global_server_list) +
-                        list_length(&global_client_list) - local_client_count;
-
-  /* Count up all members, invites, ban lists, except lists, Invex lists */
-  LIST_FOREACH(node, channel_get_list()->head)
-  {
-    const struct Channel *const channel = node->data;
-    channel_members += list_length(&channel->member_list);
-    channel_invites += list_length(&channel->invite_list);
-
-    channel_bans += list_length(&channel->ban_list);
-    channel_ban_memory += list_length(&channel->ban_list) * sizeof(struct Ban);
-
-    channel_except += list_length(&channel->exception_list);
-    channel_except_memory += list_length(&channel->exception_list) * sizeof(struct Ban);
-
-    channel_invex += list_length(&channel->invite_exception_list);
-    channel_invex_memory += list_length(&channel->invite_exception_list) * sizeof(struct Ban);
-  }
-
-  monitor_count_memory(&monitor_list_headers, &monitor_list_memory);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :MONITOR headers %u(%zu) entries %u(%zu)",
-                     monitor_list_headers, monitor_list_memory, monitor_list_entries,
-                     monitor_list_entries * sizeof(list_node_t) * 2);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Clients %u(%zu)",
-                     list_length(&global_client_list),
-                     list_length(&global_client_list) * sizeof(struct Client));
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Servers %u(%zu, %zu)",
-                     list_length(&global_server_list),
-                     list_length(&global_server_list) * sizeof(struct Client),
-                     list_length(&global_server_list) * sizeof(struct Server));
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                     "z :Resv channels %u(%zu) nicks %u(%zu)",
-                     list_length(resv_chan_get_list()),
-                     list_length(resv_chan_get_list()) * sizeof(struct ResvItem),
-                     list_length(resv_nick_get_list()),
-                     list_length(resv_nick_get_list()) * sizeof(struct ResvItem));
-
-  listener_count_memory(&listener_count, &listener_memory);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Listeners %u(%zu)",
-                     listener_count, listener_memory);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Classes %u(%zu)",
-                     list_length(class_get_list()),
-                     list_length(class_get_list()) * sizeof(struct ClassItem));
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Attached classes %u",
-                     attached_class_count);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channels %u(%zu)",
-                     list_length(channel_get_list()),
-                     list_length(channel_get_list()) * sizeof(struct Channel));
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Bans %u(%zu)",
-                     channel_bans, channel_ban_memory);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Exceptions %u(%zu)",
-                     channel_except, channel_except_memory);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Invex %u(%zu)",
-                     channel_invex, channel_invex_memory);
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Channel members %u(%zu) invites %u(%zu)",
-                     channel_members, channel_members * sizeof(struct ChannelMember),
-                     channel_invites, channel_invites * sizeof(struct ChannelInvite));
-
-  uint32_t group_count, whowas_count;
-  size_t group_bytes, whowas_bytes;
-  whowas_count_memory(&group_count, &group_bytes, &whowas_count, &whowas_bytes);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Whowas groups %u(%zu), users %u(%zu)",
-                     group_count, group_bytes, whowas_count, whowas_bytes);
-
-  motd_memory_count(client);
-
-  ipcache_get_stats(&number_ips_stored, &mem_ips_stored);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :iphash %u(%zu)",
-                     number_ips_stored, mem_ips_stored);
-
-  local_client_memory_used = local_client_count * (sizeof(struct Client) + sizeof(struct Connection));
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Local client Memory in use: %u(%zu)",
-                     local_client_count, local_client_memory_used);
-
-  remote_client_memory_used = remote_client_count * sizeof(struct Client);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "z :Remote client Memory in use: %u(%zu)",
-                     remote_client_count, remote_client_memory_used);
-}
-
-static void
 stats_dns_servers(struct Client *client, size_t parc, char *parv[])
 {
   const size_t nameserver_count = resolver_nameserver_count();
@@ -819,53 +682,6 @@ stats_ports(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
-stats_tstats(struct Client *client, size_t parc, char *parv[])
-{
-  struct ServerStatistics sp = ServerStats;
-
-  list_node_t *node;
-  LIST_FOREACH(node, local_server_list.head)
-  {
-    const struct Client *const target = node->data;
-    sp.is_sbs += target->connection->send.bytes;
-    sp.is_sbr += target->connection->recv.bytes;
-    sp.is_sti += client_get_session_duration(target);
-    sp.is_sv++;
-  }
-
-  LIST_FOREACH(node, local_client_list.head)
-  {
-    const struct Client *const target = node->data;
-    sp.is_cbs += target->connection->send.bytes;
-    sp.is_cbr += target->connection->recv.bytes;
-    sp.is_cti += client_get_session_duration(target);
-    sp.is_cl++;
-  }
-
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :accepts %" PRIu64 " refused %" PRIu64,
-                     sp.is_ac, sp.is_ref);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :unknown commands %" PRIu64 " prefixes %" PRIu64,
-                     sp.is_unco, sp.is_unpf);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :nick collisions %" PRIu64 " unknown closes %" PRIu64,
-                     sp.is_kill, sp.is_ni);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :wrong direction %" PRIu64 " empty %" PRIu64,
-                     sp.is_wrdi, sp.is_empt);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :numerics seen %" PRIu64,
-                     sp.is_num);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :auth successes %" PRIu64 " fails %" PRIu64,
-                     sp.is_asuc, sp.is_abad);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :Client Server");
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :connected %" PRIu64 " %" PRIu64,
-                     sp.is_cl, sp.is_sv);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes sent %" PRIu64 " %" PRIu64,
-                     sp.is_cbs, sp.is_sbs);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :bytes received %" PRIu64 " %" PRIu64,
-                     sp.is_cbr, sp.is_sbr);
-  sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "t :time connected %" PRIu64 " %" PRIu64,
-                     sp.is_cti, sp.is_sti);
-}
-
-static void
 stats_uptime(struct Client *client, size_t parc, char *parv[])
 {
   if (!client_is_oper(client) && ConfigGeneral.stats_u_oper_only)
@@ -1131,7 +947,6 @@ static const struct StatsHandler stats_tab[] =
   STATS_HANDLER_INIT('Q', stats_resv, &UMODE_OPER),
   STATS_HANDLER_INIT('s', stats_pseudo, &UMODE_OPER),
   STATS_HANDLER_INIT('S', stats_service, &UMODE_OPER),
-  STATS_HANDLER_INIT('t', stats_tstats, &UMODE_OPER),
   STATS_HANDLER_INIT('T', motd_report, &UMODE_OPER),
   STATS_HANDLER_INIT('u', stats_uptime, 0),
   STATS_HANDLER_INIT('U', stats_shared, &UMODE_OPER),
@@ -1140,7 +955,6 @@ static const struct StatsHandler stats_tab[] =
   STATS_HANDLER_INIT('X', stats_gecos, &UMODE_OPER),
   STATS_HANDLER_INIT('y', stats_class, &UMODE_OPER),
   STATS_HANDLER_INIT('Y', stats_class, &UMODE_OPER),
-  STATS_HANDLER_INIT('z', stats_memory, &UMODE_OPER),
   STATS_HANDLER_INIT('?', stats_servlinks, &UMODE_OPER)
 };
 

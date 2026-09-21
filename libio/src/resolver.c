@@ -59,6 +59,11 @@ struct resolver_socket
 
 static void _resolver_read_reply(fde_t *, void *);
 
+enum
+{
+  RESOLVER_MAX_ATTEMPTS = 2
+};
+
 #define RESOLVER_MESSAGE_BUFFER_SIZE 1024
 
 #define DNS_RR_TYPE_SIZE          ((size_t)2)
@@ -76,8 +81,7 @@ struct resolver_request
   list_node_t node;
   unsigned int id;
   unsigned int type;
-  char retries_remaining;
-  unsigned int send_count;
+  unsigned int attempt_count;
   uintmax_t last_sent_at;
   uintmax_t timeout;
   struct io_addr addr;
@@ -194,7 +198,6 @@ _resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
 {
   struct resolver_request *const request = io_calloc(sizeof(*request));
   request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
-  request->retries_remaining = 2;
   request->timeout = 4;
   request->callback = callback;
   request->callback_ctx = callback_ctx;
@@ -301,6 +304,11 @@ _resolver_request_find_by_id(unsigned int transaction_id)
 static void
 _resolver_query_send(const char *name, int query_class, int type, struct resolver_request *request)
 {
+  assert(request);
+  assert(request->attempt_count < RESOLVER_MAX_ATTEMPTS);
+
+  ++request->attempt_count;
+
   unsigned char packet[RESOLVER_MESSAGE_BUFFER_SIZE];
 
   const int packet_length = reslib_res_mkquery(name, query_class, type, packet, sizeof(packet));
@@ -319,9 +327,8 @@ _resolver_query_send(const char *name, int query_class, int type, struct resolve
     while (_resolver_request_find_by_id(header->id));
 
     request->id = header->id;
-    ++request->send_count;
 
-    _resolver_send_packet(packet, (size_t)packet_length, request->send_count);
+    _resolver_send_packet(packet, (size_t)packet_length, request->attempt_count);
   }
 }
 
@@ -643,11 +650,13 @@ _resolver_process_timeouts(void *unused)
   LIST_FOREACH_SAFE(node, node_next, request_list.head)
   {
     struct resolver_request *const request = node->data;
+    assert(request->attempt_count > 0);
+    assert(request->attempt_count <= RESOLVER_MAX_ATTEMPTS);
 
     const uintmax_t timeout = request->last_sent_at + request->timeout;
     if (now >= timeout)
     {
-      if (--request->retries_remaining <= 0)
+      if (request->attempt_count >= RESOLVER_MAX_ATTEMPTS)
       {
         request->callback(request->callback_ctx, NULL, NULL, 0);
         _resolver_request_destroy(request);

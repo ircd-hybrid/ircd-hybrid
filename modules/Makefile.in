@@ -312,12 +312,6 @@ m_globops_la_OBJECTS = $(am_m_globops_la_OBJECTS)
 m_globops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(m_globops_la_LDFLAGS) $(LDFLAGS) -o $@
-m_hash_la_LIBADD =
-am_m_hash_la_OBJECTS = m_hash.lo
-m_hash_la_OBJECTS = $(am_m_hash_la_OBJECTS)
-m_hash_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_hash_la_LDFLAGS) $(LDFLAGS) -o $@
 m_help_la_LIBADD =
 am_m_help_la_OBJECTS = m_help.lo
 m_help_la_OBJECTS = $(am_m_help_la_OBJECTS)
@@ -929,44 +923,43 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/m_die.Plo ./$(DEPDIR)/m_dline.Plo \
 	./$(DEPDIR)/m_encap.Plo ./$(DEPDIR)/m_eob.Plo \
 	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_etrace.Plo \
-	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_hash.Plo \
-	./$(DEPDIR)/m_help.Plo ./$(DEPDIR)/m_info.Plo \
-	./$(DEPDIR)/m_invite.Plo ./$(DEPDIR)/m_ison.Plo \
-	./$(DEPDIR)/m_join.Plo ./$(DEPDIR)/m_kick.Plo \
-	./$(DEPDIR)/m_kill.Plo ./$(DEPDIR)/m_kline.Plo \
-	./$(DEPDIR)/m_knock.Plo ./$(DEPDIR)/m_links.Plo \
-	./$(DEPDIR)/m_list.Plo ./$(DEPDIR)/m_locops.Plo \
-	./$(DEPDIR)/m_lusers.Plo ./$(DEPDIR)/m_map.Plo \
-	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_metadata.Plo \
-	./$(DEPDIR)/m_mlock.Plo ./$(DEPDIR)/m_mode.Plo \
-	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
-	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
-	./$(DEPDIR)/m_nick.Plo ./$(DEPDIR)/m_oper.Plo \
-	./$(DEPDIR)/m_opme.Plo ./$(DEPDIR)/m_part.Plo \
-	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
-	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
-	./$(DEPDIR)/m_quit.Plo ./$(DEPDIR)/m_rehash.Plo \
-	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
-	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_server.Plo \
-	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_sjoin.Plo \
-	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_stats.Plo \
-	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
-	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
-	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
-	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
-	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
-	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_tmode.Plo \
-	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
-	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
-	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
-	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
-	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_webirc.Plo \
-	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
-	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo \
-	./$(DEPDIR)/umode_admin.Plo ./$(DEPDIR)/umode_bot.Plo \
-	./$(DEPDIR)/umode_callerid.Plo ./$(DEPDIR)/umode_cloak.Plo \
-	./$(DEPDIR)/umode_connect.Plo ./$(DEPDIR)/umode_deaf.Plo \
-	./$(DEPDIR)/umode_expiration.Plo \
+	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_help.Plo \
+	./$(DEPDIR)/m_info.Plo ./$(DEPDIR)/m_invite.Plo \
+	./$(DEPDIR)/m_ison.Plo ./$(DEPDIR)/m_join.Plo \
+	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
+	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
+	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
+	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
+	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_message.Plo \
+	./$(DEPDIR)/m_metadata.Plo ./$(DEPDIR)/m_mlock.Plo \
+	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_module.Plo \
+	./$(DEPDIR)/m_monitor.Plo ./$(DEPDIR)/m_motd.Plo \
+	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_nick.Plo \
+	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_opme.Plo \
+	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_pass.Plo \
+	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
+	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_quit.Plo \
+	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
+	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_resync.Plo \
+	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
+	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
+	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
+	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
+	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
+	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
+	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
+	./$(DEPDIR)/m_tmode.Plo ./$(DEPDIR)/m_topic.Plo \
+	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
+	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
+	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
+	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
+	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
+	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
+	./$(DEPDIR)/m_xline.Plo ./$(DEPDIR)/umode_admin.Plo \
+	./$(DEPDIR)/umode_bot.Plo ./$(DEPDIR)/umode_callerid.Plo \
+	./$(DEPDIR)/umode_cloak.Plo ./$(DEPDIR)/umode_connect.Plo \
+	./$(DEPDIR)/umode_deaf.Plo ./$(DEPDIR)/umode_expiration.Plo \
 	./$(DEPDIR)/umode_external.Plo \
 	./$(DEPDIR)/umode_farconnect.Plo ./$(DEPDIR)/umode_flood.Plo \
 	./$(DEPDIR)/umode_hidden.Plo ./$(DEPDIR)/umode_hidechans.Plo \
@@ -1010,21 +1003,20 @@ SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
 	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
 	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
-	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
-	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
-	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
-	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
-	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_message_la_SOURCES) \
-	$(m_metadata_la_SOURCES) $(m_mlock_la_SOURCES) \
-	$(m_mode_la_SOURCES) $(m_module_la_SOURCES) \
-	$(m_monitor_la_SOURCES) $(m_motd_la_SOURCES) \
-	$(m_names_la_SOURCES) $(m_nick_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_opme_la_SOURCES) $(m_part_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
+	$(m_globops_la_SOURCES) $(m_help_la_SOURCES) \
+	$(m_info_la_SOURCES) $(m_invite_la_SOURCES) \
+	$(m_ison_la_SOURCES) $(m_join_la_SOURCES) $(m_kick_la_SOURCES) \
+	$(m_kill_la_SOURCES) $(m_kline_la_SOURCES) \
+	$(m_knock_la_SOURCES) $(m_links_la_SOURCES) \
+	$(m_list_la_SOURCES) $(m_locops_la_SOURCES) \
+	$(m_lusers_la_SOURCES) $(m_map_la_SOURCES) \
+	$(m_message_la_SOURCES) $(m_metadata_la_SOURCES) \
+	$(m_mlock_la_SOURCES) $(m_mode_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
+	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
+	$(m_nick_la_SOURCES) $(m_oper_la_SOURCES) $(m_opme_la_SOURCES) \
+	$(m_part_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
 	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
@@ -1069,21 +1061,20 @@ DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
 	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
 	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
 	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_hash_la_SOURCES) \
-	$(m_help_la_SOURCES) $(m_info_la_SOURCES) \
-	$(m_invite_la_SOURCES) $(m_ison_la_SOURCES) \
-	$(m_join_la_SOURCES) $(m_kick_la_SOURCES) $(m_kill_la_SOURCES) \
-	$(m_kline_la_SOURCES) $(m_knock_la_SOURCES) \
-	$(m_links_la_SOURCES) $(m_list_la_SOURCES) \
-	$(m_locops_la_SOURCES) $(m_lusers_la_SOURCES) \
-	$(m_map_la_SOURCES) $(m_message_la_SOURCES) \
-	$(m_metadata_la_SOURCES) $(m_mlock_la_SOURCES) \
-	$(m_mode_la_SOURCES) $(m_module_la_SOURCES) \
-	$(m_monitor_la_SOURCES) $(m_motd_la_SOURCES) \
-	$(m_names_la_SOURCES) $(m_nick_la_SOURCES) \
-	$(m_oper_la_SOURCES) $(m_opme_la_SOURCES) $(m_part_la_SOURCES) \
-	$(m_pass_la_SOURCES) $(m_ping_la_SOURCES) $(m_pong_la_SOURCES) \
-	$(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
+	$(m_globops_la_SOURCES) $(m_help_la_SOURCES) \
+	$(m_info_la_SOURCES) $(m_invite_la_SOURCES) \
+	$(m_ison_la_SOURCES) $(m_join_la_SOURCES) $(m_kick_la_SOURCES) \
+	$(m_kill_la_SOURCES) $(m_kline_la_SOURCES) \
+	$(m_knock_la_SOURCES) $(m_links_la_SOURCES) \
+	$(m_list_la_SOURCES) $(m_locops_la_SOURCES) \
+	$(m_lusers_la_SOURCES) $(m_map_la_SOURCES) \
+	$(m_message_la_SOURCES) $(m_metadata_la_SOURCES) \
+	$(m_mlock_la_SOURCES) $(m_mode_la_SOURCES) \
+	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
+	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
+	$(m_nick_la_SOURCES) $(m_oper_la_SOURCES) $(m_opme_la_SOURCES) \
+	$(m_part_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
+	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
 	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
 	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
 	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
@@ -1343,7 +1334,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_error.la      \
                       m_etrace.la     \
                       m_globops.la    \
-                      m_hash.la       \
                       m_help.la       \
                       m_info.la       \
                       m_invite.la     \
@@ -1463,7 +1453,6 @@ m_eob_la_LDFLAGS = $(MODULE_FLAGS)
 m_error_la_LDFLAGS = $(MODULE_FLAGS)
 m_etrace_la_LDFLAGS = $(MODULE_FLAGS)
 m_globops_la_LDFLAGS = $(MODULE_FLAGS)
-m_hash_la_LDFLAGS = $(MODULE_FLAGS)
 m_help_la_LDFLAGS = $(MODULE_FLAGS)
 m_info_la_LDFLAGS = $(MODULE_FLAGS)
 m_invite_la_LDFLAGS = $(MODULE_FLAGS)
@@ -1582,7 +1571,6 @@ m_eob_la_SOURCES = m_eob.c
 m_error_la_SOURCES = m_error.c
 m_etrace_la_SOURCES = m_etrace.c
 m_globops_la_SOURCES = m_globops.c
-m_hash_la_SOURCES = m_hash.c
 m_help_la_SOURCES = m_help.c
 m_info_la_SOURCES = m_info.c
 m_invite_la_SOURCES = m_invite.c
@@ -1790,9 +1778,6 @@ m_etrace.la: $(m_etrace_la_OBJECTS) $(m_etrace_la_DEPENDENCIES) $(EXTRA_m_etrace
 
 m_globops.la: $(m_globops_la_OBJECTS) $(m_globops_la_DEPENDENCIES) $(EXTRA_m_globops_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_globops_la_LINK) -rpath $(modulesdir) $(m_globops_la_OBJECTS) $(m_globops_la_LIBADD) $(LIBS)
-
-m_hash.la: $(m_hash_la_OBJECTS) $(m_hash_la_DEPENDENCIES) $(EXTRA_m_hash_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_hash_la_LINK) -rpath $(modulesdir) $(m_hash_la_OBJECTS) $(m_hash_la_LIBADD) $(LIBS)
 
 m_help.la: $(m_help_la_OBJECTS) $(m_help_la_DEPENDENCIES) $(EXTRA_m_help_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(m_help_la_LINK) -rpath $(modulesdir) $(m_help_la_OBJECTS) $(m_help_la_LIBADD) $(LIBS)
@@ -2104,7 +2089,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_error.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_etrace.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_globops.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_hash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_help.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_info.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_invite.Plo@am__quote@ # am--include-marker
@@ -2388,7 +2372,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/m_error.Plo
 	-rm -f ./$(DEPDIR)/m_etrace.Plo
 	-rm -f ./$(DEPDIR)/m_globops.Plo
-	-rm -f ./$(DEPDIR)/m_hash.Plo
 	-rm -f ./$(DEPDIR)/m_help.Plo
 	-rm -f ./$(DEPDIR)/m_info.Plo
 	-rm -f ./$(DEPDIR)/m_invite.Plo
@@ -2552,7 +2535,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/m_error.Plo
 	-rm -f ./$(DEPDIR)/m_etrace.Plo
 	-rm -f ./$(DEPDIR)/m_globops.Plo
-	-rm -f ./$(DEPDIR)/m_hash.Plo
 	-rm -f ./$(DEPDIR)/m_help.Plo
 	-rm -f ./$(DEPDIR)/m_info.Plo
 	-rm -f ./$(DEPDIR)/m_invite.Plo

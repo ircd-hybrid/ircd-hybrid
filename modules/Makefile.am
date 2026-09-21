@@ -56,7 +56,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_error.la      \
                       m_etrace.la     \
                       m_globops.la    \
-                      m_hash.la       \
                       m_help.la       \
                       m_info.la       \
                       m_invite.la     \
@@ -179,7 +178,6 @@ m_eob_la_LDFLAGS = $(MODULE_FLAGS)
 m_error_la_LDFLAGS = $(MODULE_FLAGS)
 m_etrace_la_LDFLAGS = $(MODULE_FLAGS)
 m_globops_la_LDFLAGS = $(MODULE_FLAGS)
-m_hash_la_LDFLAGS = $(MODULE_FLAGS)
 m_help_la_LDFLAGS = $(MODULE_FLAGS)
 m_info_la_LDFLAGS = $(MODULE_FLAGS)
 m_invite_la_LDFLAGS = $(MODULE_FLAGS)
@@ -301,7 +299,6 @@ m_eob_la_SOURCES = m_eob.c
 m_error_la_SOURCES = m_error.c
 m_etrace_la_SOURCES = m_etrace.c
 m_globops_la_SOURCES = m_globops.c
-m_hash_la_SOURCES = m_hash.c
 m_help_la_SOURCES = m_help.c
 m_info_la_SOURCES = m_info.c
 m_invite_la_SOURCES = m_invite.c

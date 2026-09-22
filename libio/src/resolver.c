@@ -591,8 +591,8 @@ _resolver_process_timeouts(void *unused)
   }
 }
 
-bool
-resolver_init(event_manager_t manager)
+static bool
+_resolver_config_update(void)
 {
   struct resolver_config candidate;
 
@@ -603,6 +603,14 @@ resolver_init(event_manager_t manager)
     return false;
 
   resolver_config = candidate;
+  return true;
+}
+
+bool
+resolver_init(event_manager_t manager)
+{
+  if (!_resolver_config_update())
+    return false;
 
   event_handle_t event_resolver_timeout =
     event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts, 1000, false, NULL, NULL);
@@ -614,16 +622,7 @@ resolver_init(event_manager_t manager)
 bool
 resolver_reload(void)
 {
-  struct resolver_config candidate;
-
-  if (!resolver_config_load(&candidate))
-    return false;
-
-  if (!_resolver_socket_reconfigure(&candidate))
-    return false;
-
-  resolver_config = candidate;
-  return true;
+  return _resolver_config_update();
 }
 
 size_t

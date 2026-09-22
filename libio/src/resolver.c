@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file resolver.c
- * \brief ircd resolver functions
+/**
+ * @file resolver.c
+ * @brief Asynchronous DNS resolver implementation.
  */
 
 /*
@@ -48,24 +49,17 @@
 #include "resolver_config.h"
 #include "rng_mt.h"
 
-_Static_assert(CHAR_BIT == 8, "DNS resolver requires 8-bit bytes");
+enum
+{
+  RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
+  RESOLVER_MAX_ATTEMPTS = 2,
+};
 
 struct resolver_socket
 {
   int family;
   const char *description;
   fde_t *fde;
-};
-
-static void _resolver_read_reply(fde_t *, void *);
-
-#define RESOLVER_MESSAGE_BUFFER_SIZE 1024
-
-enum
-{
-  RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
-  RESOLVER_MAX_ATTEMPTS = 2,
-  RESOLVER_NAME_CAPACITY = DNS_NAME_TEXT_CAPACITY,
 };
 
 struct resolver_request
@@ -77,7 +71,7 @@ struct resolver_request
   uintmax_t last_sent_at;
   uintmax_t timeout;
   struct io_addr addr;
-  char name[RESOLVER_NAME_CAPACITY];
+  char name[DNS_NAME_TEXT_CAPACITY];
   size_t name_length;
   resolver_callback_fnc callback;
   void *callback_ctx;
@@ -91,6 +85,8 @@ static struct resolver_socket resolver_sockets[] =
 
 static struct resolver_config resolver_config;
 static list_t request_list;
+
+static void _resolver_read_reply(fde_t *, void *);
 
 static const struct resolver_socket *
 _resolver_socket_find_by_family(int family)
@@ -166,86 +162,6 @@ _resolver_socket_reconfigure(const struct resolver_config *config)
   return true;
 }
 
-static bool
-_resolver_source_is_configured_nameserver(const struct resolver_socket *socket, const struct io_addr *source)
-{
-  assert(socket);
-  assert(source);
-
-  if (address_get_family(source) != socket->family)
-    return false;
-
-  return resolver_config_contains_nameserver(&resolver_config, source);
-}
-
-static void
-_resolver_request_destroy(struct resolver_request *request)
-{
-  list_remove(&request->node, &request_list);
-  io_free(request);
-}
-
-static struct resolver_request *
-_resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
-{
-  struct resolver_request *const request = io_calloc(sizeof(*request));
-  request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
-  request->timeout = 4;
-  request->callback = callback;
-  request->callback_ctx = callback_ctx;
-  list_add(request, &request->node, &request_list);
-
-  return request;
-}
-
-size_t
-resolver_nameserver_count(void)
-{
-  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
-  return resolver_config.nameserver_count;
-}
-
-bool
-resolver_nameserver_get(size_t index, struct io_addr *nameserver)
-{
-  assert(nameserver);
-  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
-
-  if (index >= resolver_config.nameserver_count)
-    return false;
-
-  address_copy(nameserver, &resolver_config.nameservers[index]);
-  return true;
-}
-
-bool
-resolver_reload(void)
-{
-  struct resolver_config candidate;
-
-  if (!resolver_config_load(&candidate))
-    return false;
-
-  if (!_resolver_socket_reconfigure(&candidate))
-    return false;
-
-  resolver_config = candidate;
-  return true;
-}
-
-void
-resolver_cancel_by_context(const void *callback_ctx)
-{
-  list_node_t *node, *node_next;
-
-  LIST_FOREACH_SAFE(node, node_next, request_list.head)
-  {
-    struct resolver_request *const request = node->data;
-    if (request->callback_ctx == callback_ctx)
-      _resolver_request_destroy(request);
-  }
-}
-
 static void
 _resolver_send_packet(const unsigned char *packet, size_t packet_length, unsigned int max_nameservers)
 {
@@ -276,6 +192,38 @@ _resolver_send_packet(const unsigned char *packet, size_t packet_length, unsigne
     if (bytes_sent >= 0 && (size_t)bytes_sent == packet_length)
       ++nameservers_sent;
   }
+}
+
+static bool
+_resolver_source_is_configured_nameserver(const struct resolver_socket *socket, const struct io_addr *source)
+{
+  assert(socket);
+  assert(source);
+
+  if (address_get_family(source) != socket->family)
+    return false;
+
+  return resolver_config_contains_nameserver(&resolver_config, source);
+}
+
+static struct resolver_request *
+_resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
+{
+  struct resolver_request *const request = io_calloc(sizeof(*request));
+  request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
+  request->timeout = 4;
+  request->callback = callback;
+  request->callback_ctx = callback_ctx;
+  list_add(request, &request->node, &request_list);
+
+  return request;
+}
+
+static void
+_resolver_request_destroy(struct resolver_request *request)
+{
+  list_remove(&request->node, &request_list);
+  io_free(request);
 }
 
 static struct resolver_request *
@@ -313,6 +261,21 @@ _resolver_transaction_id_generate(uint16_t *transaction_id)
   return false;
 }
 
+static uint16_t
+_resolver_query_type_from_family(int family)
+{
+  switch (family)
+  {
+    case AF_INET:
+      return DNS_TYPE_A;
+    case AF_INET6:
+      return DNS_TYPE_AAAA;
+    default:
+      assert(!"unsupported address family");
+      return 0;
+  }
+}
+
 static void
 _resolver_query_send(const char *name, uint16_t query_type, struct resolver_request *request)
 {
@@ -348,7 +311,7 @@ static void
 _resolver_query_name(resolver_callback_fnc callback, void *callback_ctx, const char *name,
                      struct resolver_request *request, uint16_t query_type)
 {
-  char host_name[RESOLVER_NAME_CAPACITY];
+  char host_name[DNS_NAME_TEXT_CAPACITY];
 
   strlcpy(host_name, name, sizeof(host_name));
 
@@ -381,38 +344,6 @@ _resolver_query_addr(resolver_callback_fnc callback, void *callback_ctx, const s
   }
 
   _resolver_query_send(reverse_name, DNS_TYPE_PTR, request);
-}
-
-static uint16_t
-_resolver_query_type_from_family(int family)
-{
-  switch (family)
-  {
-    case AF_INET:
-      return DNS_TYPE_A;
-    case AF_INET6:
-      return DNS_TYPE_AAAA;
-    default:
-      assert(!"unsupported address family");
-      return 0;
-  }
-}
-
-void
-resolver_lookup_name(resolver_callback_fnc callback, void *callback_ctx, const char *name, int family)
-{
-  assert(callback);
-  assert(name);
-  assert(family == AF_INET || family == AF_INET6);
-
-  const uint16_t query_type = _resolver_query_type_from_family(family);
-  _resolver_query_name(callback, callback_ctx, name, NULL, query_type);
-}
-
-void
-resolver_lookup_addr(resolver_callback_fnc callback, void *callback_ctx, const struct io_addr *addr)
-{
-  _resolver_query_addr(callback, callback_ctx, addr, NULL);
 }
 
 static void
@@ -627,4 +558,73 @@ resolver_init(event_manager_t manager)
   event_set_priority(event_resolver_timeout, 1);
   event_schedule(event_resolver_timeout);
   return true;
+}
+
+bool
+resolver_reload(void)
+{
+  struct resolver_config candidate;
+
+  if (!resolver_config_load(&candidate))
+    return false;
+
+  if (!_resolver_socket_reconfigure(&candidate))
+    return false;
+
+  resolver_config = candidate;
+  return true;
+}
+
+size_t
+resolver_nameserver_count(void)
+{
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
+  return resolver_config.nameserver_count;
+}
+
+bool
+resolver_nameserver_get(size_t index, struct io_addr *nameserver)
+{
+  assert(nameserver);
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
+
+  if (index >= resolver_config.nameserver_count)
+    return false;
+
+  address_copy(nameserver, &resolver_config.nameservers[index]);
+  return true;
+}
+
+void
+resolver_lookup_name(resolver_callback_fnc callback, void *callback_ctx, const char *name, int family)
+{
+  assert(callback);
+  assert(name);
+  assert(family == AF_INET || family == AF_INET6);
+
+  const uint16_t query_type = _resolver_query_type_from_family(family);
+  _resolver_query_name(callback, callback_ctx, name, NULL, query_type);
+}
+
+void
+resolver_lookup_addr(resolver_callback_fnc callback, void *callback_ctx, const struct io_addr *addr)
+{
+  assert(callback);
+  assert(addr);
+  assert(address_is_ipv4(addr) || address_is_ipv6(addr));
+
+  _resolver_query_addr(callback, callback_ctx, addr, NULL);
+}
+
+void
+resolver_cancel_by_context(const void *callback_ctx)
+{
+  list_node_t *node, *node_next;
+
+  LIST_FOREACH_SAFE(node, node_next, request_list.head)
+  {
+    struct resolver_request *const request = node->data;
+    if (request->callback_ctx == callback_ctx)
+      _resolver_request_destroy(request);
+  }
 }

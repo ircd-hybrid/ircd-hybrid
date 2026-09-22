@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+/**
+ * @file resolver_config.c
+ * @brief DNS resolver configuration loading and management.
+ */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>

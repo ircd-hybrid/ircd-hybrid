@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file resolver.h
- * \brief ircd resolver functions
+/**
+ * @file resolver.h
+ * @brief Asynchronous DNS resolver interface.
  */
 
 #ifndef INCLUDED_resolver_h

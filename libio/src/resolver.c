@@ -63,6 +63,13 @@ enum resolver_nameserver_state
   RESOLVER_NAMESERVER_STATE_FAILED
 };
 
+enum resolver_response_result
+{
+  RESOLVER_RESPONSE_RESULT_MATCH,
+  RESOLVER_RESPONSE_RESULT_NO_MATCH,
+  RESOLVER_RESPONSE_RESULT_MALFORMED
+};
+
 struct resolver_socket
 {
   int family;
@@ -482,26 +489,38 @@ _resolver_response_code_is_nameserver_failure(uint16_t response_code)
          response_code != DNS_RESPONSE_CODE_NXDOMAIN;
 }
 
-static bool
-_resolver_process_answer(struct resolver_request *request, struct dns_reader *reader,
-                         const struct dns_header *header)
+static enum resolver_response_result
+_resolver_process_response(struct resolver_request *request, struct dns_reader *reader,
+                           const struct dns_header *header)
 {
   assert(request);
   assert(reader);
   assert(header);
+  assert(request->query_type == DNS_TYPE_A ||
+         request->query_type == DNS_TYPE_AAAA ||
+         request->query_type == DNS_TYPE_PTR);
+
+  const uint16_t response_code = dns_header_get_response_code(header);
+  assert(response_code == DNS_RESPONSE_CODE_NOERROR ||
+         response_code == DNS_RESPONSE_CODE_NXDOMAIN);
 
   for (uint16_t i = 0; i < header->question_count; ++i)
   {
     struct dns_question question;
     if (!dns_reader_read_question(reader, &question))
-      return false;
+      return RESOLVER_RESPONSE_RESULT_MALFORMED;
   }
+
+  bool has_match = false;
+  struct io_addr matched_addr = { 0 };
+  char matched_name[DNS_NAME_TEXT_CAPACITY];
+  size_t matched_name_length = 0;
 
   for (uint16_t i = 0; i < header->answer_count; ++i)
   {
     struct dns_record record;
     if (!dns_reader_read_record(reader, &record))
-      return false;
+      return RESOLVER_RESPONSE_RESULT_MALFORMED;
 
     if (record.class != DNS_CLASS_IN)
       continue;
@@ -512,38 +531,94 @@ _resolver_process_answer(struct resolver_request *request, struct dns_reader *re
       case DNS_TYPE_AAAA:
       {
         if (request->query_type != record.type)
-          continue;
+          break;
 
         const int family = record.type == DNS_TYPE_A ? AF_INET : AF_INET6;
         const unsigned char *const rdata = reader->packet.data + record.rdata.offset;
 
-        return address_from_bytes(&request->addr, family, rdata, record.rdata.length);
+        struct io_addr addr;
+        if (!address_from_bytes(&addr, family, rdata, record.rdata.length))
+          return RESOLVER_RESPONSE_RESULT_MALFORMED;
+
+        if (!has_match && response_code == DNS_RESPONSE_CODE_NOERROR)
+        {
+          matched_addr = addr;
+          has_match = true;
+        }
+
+        break;
       }
 
       case DNS_TYPE_PTR:
+      {
         if (request->query_type != record.type)
-          continue;
+          break;
 
-        return dns_name_decode(&reader->packet, record.rdata,
-                               request->name, sizeof(request->name), &request->name_length);
+        char name[DNS_NAME_TEXT_CAPACITY];
+        size_t name_length;
+        if (!dns_name_decode(&reader->packet, record.rdata, name, sizeof(name), &name_length))
+          return RESOLVER_RESPONSE_RESULT_MALFORMED;
+
+        if (!has_match && response_code == DNS_RESPONSE_CODE_NOERROR && name_length != 0)
+        {
+          memcpy(matched_name, name, name_length + 1);
+          matched_name_length = name_length;
+          has_match = true;
+        }
+
+        break;
+      }
 
       case DNS_TYPE_CNAME:
       {
-        char cname[DNS_NAME_TEXT_CAPACITY];
-        size_t cname_length;
+        char name[DNS_NAME_TEXT_CAPACITY];
+        size_t name_length;
 
-        if (!dns_name_decode(&reader->packet, record.rdata, cname, sizeof(cname), &cname_length))
-          return false;
+        if (!dns_name_decode(&reader->packet, record.rdata, name, sizeof(name), &name_length))
+          return RESOLVER_RESPONSE_RESULT_MALFORMED;
 
-        continue;
+        break;
       }
 
       default:
-        continue;
+        break;
     }
   }
 
-  return false;
+  const size_t remaining_record_count =
+    (size_t)header->authority_count + (size_t)header->additional_count;
+
+  for (size_t i = 0; i < remaining_record_count; ++i)
+  {
+    struct dns_record record;
+    if (!dns_reader_read_record(reader, &record))
+      return RESOLVER_RESPONSE_RESULT_MALFORMED;
+  }
+
+  if (reader->offset != reader->packet.length)
+    return RESOLVER_RESPONSE_RESULT_MALFORMED;
+
+  if (!has_match)
+    return RESOLVER_RESPONSE_RESULT_NO_MATCH;
+
+  switch (request->query_type)
+  {
+    case DNS_TYPE_PTR:
+      memcpy(request->name, matched_name, matched_name_length + 1);
+      request->name_length = matched_name_length;
+      break;
+
+    case DNS_TYPE_A:
+    case DNS_TYPE_AAAA:
+      address_copy(&request->addr, &matched_addr);
+      break;
+
+    default:
+      assert(!"unsupported resolver query type");
+      return RESOLVER_RESPONSE_RESULT_MALFORMED;
+  }
+
+  return RESOLVER_RESPONSE_RESULT_MATCH;
 }
 
 static void
@@ -610,35 +685,29 @@ _resolver_read_reply(fde_t *fde, void *data)
       continue;
     }
 
-    if (response_code != DNS_RESPONSE_CODE_NOERROR || header.answer_count == 0)
+    switch (_resolver_process_response(request, &reader, &header))
     {
-      request->callback(request->callback_ctx, NULL, NULL, 0);
-      _resolver_request_destroy(request);
-      continue;
-    }
+      case RESOLVER_RESPONSE_RESULT_MATCH:
+        break;
 
-    if (!_resolver_process_answer(request, &reader, &header))
-    {
-      if (!source_nameserver_is_current)
+      case RESOLVER_RESPONSE_RESULT_NO_MATCH:
+        request->callback(request->callback_ctx, NULL, NULL, 0);
+        _resolver_request_destroy(request);
         continue;
 
-      if (_resolver_request_retry(request))
-        continue;
+      case RESOLVER_RESPONSE_RESULT_MALFORMED:
+        _resolver_request_mark_nameserver_failed(request, source_nameserver_index);
 
-      request->callback(request->callback_ctx, NULL, NULL, 0);
-      _resolver_request_destroy(request);
-      continue;
+        if (!source_nameserver_is_current || _resolver_request_retry(request))
+          continue;
+
+        request->callback(request->callback_ctx, NULL, NULL, 0);
+        _resolver_request_destroy(request);
+        continue;
     }
 
     if (request->query_type == DNS_TYPE_PTR)
     {
-      if (request->name_length == 0)
-      {
-        request->callback(request->callback_ctx, NULL, NULL, 0);
-        _resolver_request_destroy(request);
-        continue;
-      }
-
       resolver_callback_fn callback = request->callback;
       void *const callback_ctx = request->callback_ctx;
       const bool submitted =

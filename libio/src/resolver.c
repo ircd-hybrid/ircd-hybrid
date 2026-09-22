@@ -489,6 +489,49 @@ _resolver_response_code_is_nameserver_failure(uint16_t response_code)
          response_code != DNS_RESPONSE_CODE_NXDOMAIN;
 }
 
+static bool
+_resolver_question_matches_request(const struct resolver_request *request,
+                                   const struct dns_message_view *packet,
+                                   const struct dns_question *question)
+{
+  assert(request);
+  assert(packet);
+  assert(question);
+  assert(request->query_type == DNS_TYPE_A ||
+         request->query_type == DNS_TYPE_AAAA ||
+         request->query_type == DNS_TYPE_PTR);
+
+  if (question->type != request->query_type || question->class != DNS_CLASS_IN)
+    return false;
+
+  char reverse_name[ADDRESS_REVERSE_NAME_BUFSIZE];
+  const char *expected_name;
+
+  switch (request->query_type)
+  {
+    case DNS_TYPE_PTR:
+      if (!address_to_reverse_name(&request->addr, reverse_name, sizeof(reverse_name)))
+      {
+        assert(!"failed to format PTR query name");
+        return false;
+      }
+
+      expected_name = reverse_name;
+      break;
+
+    case DNS_TYPE_A:
+    case DNS_TYPE_AAAA:
+      expected_name = request->name;
+      break;
+
+    default:
+      assert(!"unsupported resolver query type");
+      return false;
+  }
+
+  return dns_name_equal_text(packet, question->name, expected_name);
+}
+
 static enum resolver_response_result
 _resolver_process_response(struct resolver_request *request, struct dns_reader *reader,
                            const struct dns_header *header)
@@ -504,12 +547,7 @@ _resolver_process_response(struct resolver_request *request, struct dns_reader *
   assert(response_code == DNS_RESPONSE_CODE_NOERROR ||
          response_code == DNS_RESPONSE_CODE_NXDOMAIN);
 
-  for (uint16_t i = 0; i < header->question_count; ++i)
-  {
-    struct dns_question question;
-    if (!dns_reader_read_question(reader, &question))
-      return RESOLVER_RESPONSE_RESULT_MALFORMED;
-  }
+  assert(header->question_count == 1);
 
   bool has_match = false;
   struct io_addr matched_addr = { 0 };
@@ -667,6 +705,14 @@ _resolver_read_reply(fde_t *fde, void *data)
 
     if (request->config_generation != resolver_config_generation ||
         request->nameserver_states[source_nameserver_index] == RESOLVER_NAMESERVER_STATE_UNQUERIED)
+      continue;
+
+    if (header.question_count != 1)
+      continue;
+
+    struct dns_question question;
+    if (!dns_reader_read_question(&reader, &question) ||
+        !_resolver_question_matches_request(request, &reader.packet, &question))
       continue;
 
     const bool source_nameserver_is_current = source_nameserver_index == request->nameserver_index;

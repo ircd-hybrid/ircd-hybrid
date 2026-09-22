@@ -73,7 +73,7 @@ struct resolver_request
   struct io_addr addr;
   char name[DNS_NAME_TEXT_CAPACITY];
   size_t name_length;
-  resolver_callback_fnc callback;
+  resolver_callback_fn callback;
   void *callback_ctx;
 };
 
@@ -162,7 +162,7 @@ _resolver_socket_reconfigure(const struct resolver_config *config)
   return true;
 }
 
-static void
+static bool
 _resolver_send_packet(const unsigned char *packet, size_t packet_length, unsigned int max_nameservers)
 {
   assert(packet);
@@ -192,6 +192,8 @@ _resolver_send_packet(const unsigned char *packet, size_t packet_length, unsigne
     if (bytes_sent >= 0 && (size_t)bytes_sent == packet_length)
       ++nameservers_sent;
   }
+
+  return nameservers_sent != 0;
 }
 
 static bool
@@ -207,14 +209,14 @@ _resolver_source_is_configured_nameserver(const struct resolver_socket *socket, 
 }
 
 static struct resolver_request *
-_resolver_request_create(resolver_callback_fnc callback, void *callback_ctx)
+_resolver_request_create(resolver_callback_fn callback, void *callback_ctx)
 {
+  assert(callback);
+
   struct resolver_request *const request = io_calloc(sizeof(*request));
-  request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
   request->timeout = 4;
   request->callback = callback;
   request->callback_ctx = callback_ctx;
-  list_add(request, &request->node, &request_list);
 
   return request;
 }
@@ -276,23 +278,23 @@ _resolver_query_type_from_family(int family)
   }
 }
 
-static void
-_resolver_query_send(const char *name, uint16_t query_type, struct resolver_request *request)
+static bool
+_resolver_query_send(const char *name, uint16_t query_type, unsigned int attempt_count, uint16_t *transaction_id)
 {
   assert(name);
-  assert(request);
-  assert(request->attempt_count < RESOLVER_MAX_ATTEMPTS);
+  assert(query_type == DNS_TYPE_A || query_type == DNS_TYPE_AAAA || query_type == DNS_TYPE_PTR);
+  assert(attempt_count > 0);
+  assert(attempt_count <= RESOLVER_MAX_ATTEMPTS);
+  assert(transaction_id);
 
-  ++request->attempt_count;
-
-  uint16_t transaction_id;
-  if (!_resolver_transaction_id_generate(&transaction_id))
-    return;
+  uint16_t candidate;
+  if (!_resolver_transaction_id_generate(&candidate))
+    return false;
 
   const struct dns_query query =
   {
     .name = name,
-    .transaction_id = transaction_id,
+    .transaction_id = candidate,
     .type = query_type,
     .class = DNS_CLASS_IN,
     .recursion_desired = true
@@ -300,53 +302,93 @@ _resolver_query_send(const char *name, uint16_t query_type, struct resolver_requ
 
   unsigned char packet[DNS_QUERY_WIRE_MAX_LENGTH];
   size_t packet_length;
-  if (!dns_query_encode(&query, packet, sizeof(packet), &packet_length))
-    return;
+  if (!dns_query_encode(&query, packet, sizeof(packet), &packet_length) ||
+      !_resolver_send_packet(packet, packet_length, attempt_count))
+    return false;
+
+  *transaction_id = candidate;
+  return true;
+}
+
+static bool
+_resolver_request_submit(struct resolver_request *request, const char *name)
+{
+  assert(request);
+  assert(name);
+  assert(request->attempt_count < RESOLVER_MAX_ATTEMPTS);
+
+  const unsigned int attempt_count = request->attempt_count + 1;
+
+  uint16_t transaction_id;
+  if (!_resolver_query_send(name, request->query_type, attempt_count, &transaction_id))
+    return false;
 
   request->transaction_id = transaction_id;
-  _resolver_send_packet(packet, packet_length, request->attempt_count);
+  request->attempt_count = attempt_count;
+  request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  if (attempt_count > 1)
+    request->timeout *= 2;
+
+  return true;
 }
 
-static void
-_resolver_query_name(resolver_callback_fnc callback, void *callback_ctx, const char *name,
-                     struct resolver_request *request, uint16_t query_type)
+static bool
+_resolver_request_start(struct resolver_request *request, const char *name)
 {
-  char host_name[DNS_NAME_TEXT_CAPACITY];
+  assert(request);
+  assert(name);
+  assert(request->attempt_count == 0);
 
-  strlcpy(host_name, name, sizeof(host_name));
-
-  if (request == NULL)
+  if (!_resolver_request_submit(request, name))
   {
-    request = _resolver_request_create(callback, callback_ctx);
-    request->name_length = strlcpy(request->name, host_name, sizeof(request->name));
+    io_free(request);
+    return false;
   }
 
-  request->query_type = query_type;
-  _resolver_query_send(host_name, query_type, request);
+  list_add(request, &request->node, &request_list);
+  return true;
 }
 
-static void
-_resolver_query_addr(resolver_callback_fnc callback, void *callback_ctx, const struct io_addr *addr,
-                     struct resolver_request *request)
+static bool
+_resolver_query_name(resolver_callback_fn callback, void *callback_ctx, const char *name, uint16_t query_type)
 {
+  assert(callback);
+  assert(name);
+  assert(query_type == DNS_TYPE_A || query_type == DNS_TYPE_AAAA);
+
+  struct resolver_request *const request = _resolver_request_create(callback, callback_ctx);
+  request->query_type = query_type;
+  request->name_length = strlcpy(request->name, name, sizeof(request->name));
+
+  if (request->name_length >= sizeof(request->name))
+  {
+    io_free(request);
+    return false;
+  }
+
+  return _resolver_request_start(request, request->name);
+}
+
+static bool
+_resolver_query_addr(resolver_callback_fn callback, void *callback_ctx, const struct io_addr *addr)
+{
+  assert(callback);
   assert(addr);
   assert(address_is_ipv4(addr) || address_is_ipv6(addr));
 
   char reverse_name[ADDRESS_REVERSE_NAME_BUFSIZE];
   if (!address_to_reverse_name(addr, reverse_name, sizeof(reverse_name)))
-    return;
+    return false;
 
-  if (request == NULL)
-  {
-    request = _resolver_request_create(callback, callback_ctx);
-    request->query_type = DNS_TYPE_PTR;
-    address_copy(&request->addr, addr);
-  }
+  struct resolver_request *const request = _resolver_request_create(callback, callback_ctx);
+  request->query_type = DNS_TYPE_PTR;
+  address_copy(&request->addr, addr);
 
-  _resolver_query_send(reverse_name, DNS_TYPE_PTR, request);
+  return _resolver_request_start(request, reverse_name);
 }
 
-static void
+static bool
 _resolver_query_resend(struct resolver_request *request)
 {
   assert(request);
@@ -354,15 +396,19 @@ _resolver_query_resend(struct resolver_request *request)
   switch (request->query_type)
   {
     case DNS_TYPE_PTR:
-      _resolver_query_addr(NULL, NULL, &request->addr, request);
-      break;
+    {
+      char reverse_name[ADDRESS_REVERSE_NAME_BUFSIZE];
+      if (!address_to_reverse_name(&request->addr, reverse_name, sizeof(reverse_name)))
+        return false;
+
+      return _resolver_request_submit(request, reverse_name);
+    }
     case DNS_TYPE_A:
     case DNS_TYPE_AAAA:
-      _resolver_query_name(NULL, NULL, request->name, request, request->query_type);
-      break;
+      return _resolver_request_submit(request, request->name);
     default:
       assert(!"unsupported resolver query type");
-      return;
+      return false;
   }
 }
 
@@ -496,9 +542,15 @@ _resolver_read_reply(fde_t *fde, void *data)
         continue;
       }
 
-      resolver_lookup_name(request->callback, request->callback_ctx,
-                           request->name, address_get_family(&request->addr));
+      resolver_callback_fn callback = request->callback;
+      void *const callback_ctx = request->callback_ctx;
+      const bool submitted =
+        resolver_lookup_name(callback, callback_ctx, request->name, address_get_family(&request->addr));
+
       _resolver_request_destroy(request);
+
+      if (!submitted)
+        callback(callback_ctx, NULL, NULL, 0);
     }
     else
     {
@@ -530,11 +582,10 @@ _resolver_process_timeouts(void *unused)
         request->callback(request->callback_ctx, NULL, NULL, 0);
         _resolver_request_destroy(request);
       }
-      else
+      else if (!_resolver_query_resend(request))
       {
-        request->last_sent_at = now;
-        request->timeout += request->timeout;
-        _resolver_query_resend(request);
+        request->callback(request->callback_ctx, NULL, NULL, 0);
+        _resolver_request_destroy(request);
       }
     }
   }
@@ -595,25 +646,25 @@ resolver_nameserver_get(size_t index, struct io_addr *nameserver)
   return true;
 }
 
-void
-resolver_lookup_name(resolver_callback_fnc callback, void *callback_ctx, const char *name, int family)
+bool
+resolver_lookup_name(resolver_callback_fn callback, void *callback_ctx, const char *name, int family)
 {
   assert(callback);
   assert(name);
   assert(family == AF_INET || family == AF_INET6);
 
   const uint16_t query_type = _resolver_query_type_from_family(family);
-  _resolver_query_name(callback, callback_ctx, name, NULL, query_type);
+  return _resolver_query_name(callback, callback_ctx, name, query_type);
 }
 
-void
-resolver_lookup_addr(resolver_callback_fnc callback, void *callback_ctx, const struct io_addr *addr)
+bool
+resolver_lookup_addr(resolver_callback_fn callback, void *callback_ctx, const struct io_addr *addr)
 {
   assert(callback);
   assert(addr);
   assert(address_is_ipv4(addr) || address_is_ipv6(addr));
 
-  _resolver_query_addr(callback, callback_ctx, addr, NULL);
+  return _resolver_query_addr(callback, callback_ctx, addr);
 }
 
 void

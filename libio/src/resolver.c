@@ -590,19 +590,16 @@ _resolver_read_reply(fde_t *fde, void *data)
     if (request == NULL)
       continue;
 
-    const bool source_nameserver_was_queried =
-      request->config_generation == resolver_config_generation &&
-      request->nameserver_states[source_nameserver_index] != RESOLVER_NAMESERVER_STATE_UNQUERIED;
-    const bool source_nameserver_is_current =
-      source_nameserver_was_queried && source_nameserver_index == request->nameserver_index;
+    if (request->config_generation != resolver_config_generation ||
+        request->nameserver_states[source_nameserver_index] == RESOLVER_NAMESERVER_STATE_UNQUERIED)
+      continue;
+
+    const bool source_nameserver_is_current = source_nameserver_index == request->nameserver_index;
 
     const uint16_t response_code = dns_header_get_response_code(&header);
     if (dns_header_is_truncated(&header) ||
         _resolver_response_code_is_nameserver_failure(response_code))
     {
-      if (!source_nameserver_was_queried)
-        continue;
-
       _resolver_request_mark_nameserver_failed(request, source_nameserver_index);
 
       if (!source_nameserver_is_current || _resolver_request_retry(request))

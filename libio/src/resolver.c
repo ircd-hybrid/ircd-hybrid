@@ -54,7 +54,11 @@ enum
   RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
   RESOLVER_INITIAL_TIMEOUT = 4,
   RESOLVER_MAX_ROUNDS = 2,
+  RESOLVER_MAX_PENDING_REQUESTS = 4096
 };
+
+_Static_assert(RESOLVER_MAX_PENDING_REQUESTS <= UINT16_MAX + 1U,
+               "resolver request limit exceeds transaction ID space");
 
 enum resolver_nameserver_state
 {
@@ -104,6 +108,8 @@ static struct resolver_socket resolver_sockets[] =
 static struct resolver_config resolver_config;
 static uint64_t resolver_config_generation;
 static list_t request_list;
+static struct resolver_request *requests_by_transaction_id[UINT16_MAX + 1U];
+static size_t request_count;
 
 static void _resolver_read_reply(fde_t *, void *);
 
@@ -235,6 +241,10 @@ static struct resolver_request *
 _resolver_request_create(resolver_callback_fn callback, void *callback_ctx)
 {
   assert(callback);
+  assert(request_count <= RESOLVER_MAX_PENDING_REQUESTS);
+
+  if (request_count == RESOLVER_MAX_PENDING_REQUESTS)
+    return NULL;
 
   struct resolver_request *const request = io_calloc(sizeof(*request));
   request->callback = callback;
@@ -244,44 +254,55 @@ _resolver_request_create(resolver_callback_fn callback, void *callback_ctx)
 }
 
 static void
+_resolver_request_publish(struct resolver_request *request)
+{
+  assert(request);
+  assert(request_count < RESOLVER_MAX_PENDING_REQUESTS);
+  assert(requests_by_transaction_id[request->transaction_id] == NULL);
+
+  requests_by_transaction_id[request->transaction_id] = request;
+  list_add(request, &request->node, &request_list);
+  ++request_count;
+}
+
+static void
 _resolver_request_destroy(struct resolver_request *request)
 {
+  assert(request);
+  assert(request_count > 0);
+  assert(requests_by_transaction_id[request->transaction_id] == request);
+
+  requests_by_transaction_id[request->transaction_id] = NULL;
   list_remove(&request->node, &request_list);
+  --request_count;
   io_free(request);
 }
 
 static struct resolver_request *
 _resolver_request_find_by_transaction_id(uint16_t transaction_id)
 {
-  list_node_t *node;
-
-  LIST_FOREACH(node, request_list.head)
-  {
-    struct resolver_request *const request = node->data;
-    if (request->transaction_id == transaction_id)
-      return request;
-  }
-
-  return NULL;
+  return requests_by_transaction_id[transaction_id];
 }
 
 static bool
 _resolver_transaction_id_generate(uint16_t *transaction_id)
 {
   assert(transaction_id);
+  assert(request_count < RESOLVER_MAX_PENDING_REQUESTS);
 
   const uint16_t first = (uint16_t)genrand_int32();
 
-  for (uint32_t offset = 0; offset <= UINT16_MAX; ++offset)
+  for (size_t offset = 0; offset <= request_count; ++offset)
   {
     const uint16_t candidate = (uint16_t)(first + offset);
-    if (_resolver_request_find_by_transaction_id(candidate) == NULL)
-    {
-      *transaction_id = candidate;
-      return true;
-    }
+    if (_resolver_request_find_by_transaction_id(candidate))
+      continue;
+
+    *transaction_id = candidate;
+    return true;
   }
 
+  assert(!"resolver transaction ID registry is inconsistent");
   return false;
 }
 
@@ -360,7 +381,7 @@ _resolver_request_start(struct resolver_request *request, const char *name)
     return false;
   }
 
-  list_add(request, &request->node, &request_list);
+  _resolver_request_publish(request);
   return true;
 }
 
@@ -372,6 +393,9 @@ _resolver_query_name(resolver_callback_fn callback, void *callback_ctx, const ch
   assert(query_type == DNS_TYPE_A || query_type == DNS_TYPE_AAAA);
 
   struct resolver_request *const request = _resolver_request_create(callback, callback_ctx);
+  if (request == NULL)
+    return false;
+
   request->query_type = query_type;
   request->name_length = strlcpy(request->name, name, sizeof(request->name));
 
@@ -396,6 +420,9 @@ _resolver_query_addr(resolver_callback_fn callback, void *callback_ctx, const st
     return false;
 
   struct resolver_request *const request = _resolver_request_create(callback, callback_ctx);
+  if (request == NULL)
+    return false;
+
   request->query_type = DNS_TYPE_PTR;
   address_copy(&request->addr, addr);
 
@@ -756,12 +783,16 @@ _resolver_read_reply(fde_t *fde, void *data)
     {
       resolver_callback_fn callback = request->callback;
       void *const callback_ctx = request->callback_ctx;
-      const bool submitted =
-        resolver_lookup_name(callback, callback_ctx, request->name, address_get_family(&request->addr));
+      const int family = address_get_family(&request->addr);
+
+      assert(request->name_length < sizeof(request->name));
+
+      char name[DNS_NAME_TEXT_CAPACITY];
+      memcpy(name, request->name, request->name_length + 1);
 
       _resolver_request_destroy(request);
 
-      if (!submitted)
+      if (!resolver_lookup_name(callback, callback_ctx, name, family))
         callback(callback_ctx, NULL, NULL, 0);
     }
     else

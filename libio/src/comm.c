@@ -279,9 +279,14 @@ void
 comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
                  void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout_ms)
 {
+  assert(fde);
+  assert(fde->flags.open);
+  assert(caddr);
   assert(handler);
+  assert(fde->cleanup_handler == NULL);
+  assert(fde->cleanup_data == NULL);
 
-  comm_op_t *op = io_calloc(sizeof(*op));
+  comm_op_t *const op = io_calloc(sizeof(*op));
   op->fde = fde;
   op->completion_handler = handler;
   op->completion_handler_data = data;

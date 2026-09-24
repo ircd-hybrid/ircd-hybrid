@@ -80,52 +80,6 @@ stripws(char *str)
 }
 
 /**
- * @brief Tokenize a delimited input list into a vector of tokens.
- *
- * This function splits an input buffer, 'names', using a specified delimiter, 'token'.
- * The resulting tokens are stored in the 'vector' array, up to the specified 'size'.
- * Empty tokens, occurring at the start or end of the list or adjacent to each other, are ignored.
- * The function returns the number of tokens written to the vector.
- *
- * @param names Input buffer containing the list to be tokenized.
- * @param token Delimiter used to split the list into tokens.
- * @param vector Output array to store the tokens.
- * @param size Maximum number of elements in the vector.
- * @return Number of tokens written to the vector.
- */
-unsigned int
-token_vector(char *names, char token, char *vector[], unsigned int size)
-{
-  unsigned int count = 0;
-  char *start = names;
-
-  assert(names);
-  assert(vector);
-  assert(size > 1);
-
-  vector[count++] = start;
-
-  for (char *end = strchr(start, token); end;
-             end = strchr(start, token))
-  {
-    *end++ = '\0';
-    start = end;
-
-    if (*start)
-    {
-      vector[count++] = start;
-
-      if (count < size)
-        continue;
-    }
-
-    break;
-  }
-
-  return count;
-}
-
-/**
  * @brief Extracts the base name of a path.
  *
  * This function returns a pointer to the base name portion of a file path.

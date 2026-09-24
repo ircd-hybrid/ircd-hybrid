@@ -5,18 +5,9 @@
 
 #ifndef INCLUDED_lookup_h
 #define INCLUDED_lookup_h
-#include <stdbool.h>
 
-#include "ident.h"
-#include "client.h"
-
-struct LookupRequest
-{
-  ident_request_t *ident_request;
-  struct Client *client;
-  bool dns_pending;
-  bool ident_pending;
-};
+struct Client;
+struct LookupRequest;
 
 extern void lookup_delete(struct LookupRequest *);
 extern void lookup_start(struct Client *);

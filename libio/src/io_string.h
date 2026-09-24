@@ -26,7 +26,6 @@ extern const char *io_basename(const char *);
 extern const char *stripws(char *);
 extern bool has_wildcards(const char *);
 extern int match(const char *, const char *);
-extern unsigned int token_vector(char *, char, char *[], unsigned int);
 extern char *collapse(char *);
 extern int io_strcasecmp(const char *, const char *);
 extern int io_strncasecmp(const char *, const char *, size_t);

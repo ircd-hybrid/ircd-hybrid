@@ -121,21 +121,28 @@ connect_destroy(struct ConnectItem *connect)
 }
 
 static void
-_connect_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
+_connect_dns_callback(void *callback_ctx, const struct io_addr *addresses, size_t address_count)
 {
-  struct ConnectItem *const connect = vptr;
+  struct ConnectItem *const connect = callback_ctx;
   assert(connect);
   assert(connect->dns_pending);
 
   connect->dns_pending = false;
 
-  if (addr)
+  if (addresses == NULL || address_count == 0)
   {
-    address_copy(&connect->remote_addr, addr);
-    connect->dns_failed = false;
-  }
-  else
+    assert(addresses == NULL && address_count == 0);
+
+    address_clear(&connect->remote_addr);
     connect->dns_failed = true;
+    return;
+  }
+
+  assert(address_get_family(&addresses[0]) == connect->address_family);
+
+  /* A connect block maintains a single resolved destination address. */
+  address_copy(&connect->remote_addr, &addresses[0]);
+  connect->dns_failed = false;
 }
 
 void
@@ -145,24 +152,28 @@ connect_dns_lookup(struct ConnectItem *connect)
   assert(connect->address_family == AF_INET || connect->address_family == AF_INET6);
   assert(!string_is_empty(connect->host));
 
+  if (connect->dns_pending)
+    return;
+
   if (address_from_string(connect->host, &connect->remote_addr))
   {
-    connect->dns_pending = false;
     connect->dns_failed = false;
     return;
   }
 
   /*
-   * By this point connect->host possibly is not a numerical network address. Do a nameserver
-   * lookup of the connect host. If the connect entry is currently doing a ns lookup do nothing.
+   * By this point connect->host is not a numerical network address. Resolve the configured
+   * address family asynchronously.
    */
-  if (connect->dns_pending)
-    return;
-
+  address_clear(&connect->remote_addr);
   connect->dns_pending = true;
   connect->dns_failed = false;
 
-  resolver_lookup_name(_connect_dns_callback, connect, connect->host, connect->address_family);
+  if (!resolver_lookup_name(_connect_dns_callback, connect, connect->host, connect->address_family))
+  {
+    connect->dns_pending = false;
+    connect->dns_failed = true;
+  }
 }
 
 struct ConnectItem *

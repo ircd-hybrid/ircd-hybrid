@@ -38,10 +38,23 @@ enum lookup_report_type
   LOOKUP_REPORT_COUNT
 };
 
+enum lookup_dns_state
+{
+  LOOKUP_DNS_STATE_IDLE = 0,
+  LOOKUP_DNS_STATE_REVERSE,
+  LOOKUP_DNS_STATE_FORWARD
+};
+
+struct LookupDNS
+{
+  enum lookup_dns_state state;
+  char hostname[HOSTLEN + 1];
+};
+
 struct LookupRequest
 {
   struct Client *client;
-  bool dns_pending;
+  struct LookupDNS dns;
   bool ident_pending;
 };
 
@@ -82,7 +95,7 @@ _lookup_complete_if_ready(struct LookupRequest *lookup)
 {
   _lookup_assert_attached(lookup);
 
-  if (lookup->dns_pending || lookup->ident_pending)
+  if (lookup->dns.state != LOOKUP_DNS_STATE_IDLE || lookup->ident_pending)
     return;
 
   struct Client *const client = lookup->client;
@@ -101,41 +114,86 @@ _lookup_complete_if_ready(struct LookupRequest *lookup)
   read_packet(client->connection->fde, client);
 }
 
-static enum lookup_report_type
-_lookup_dns_process_result(struct LookupRequest *lookup, const struct io_addr *addr,
-                           const char *name, size_t name_length)
+static void
+_lookup_dns_finish(struct LookupRequest *lookup, enum lookup_report_type report)
 {
   _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_IDLE);
 
-  if (addr == NULL || name == NULL || name_length == 0)
-    return LOOKUP_REPORT_DNS_FAIL;
-
-  if (name_length > HOSTLEN)
-    return LOOKUP_REPORT_DNS_TOO_LONG;
-
-  if (!address_equal(addr, &lookup->client->addr))
-    return LOOKUP_REPORT_DNS_IP_MISMATCH;
-
-  if (!hostname_is_valid(name))
-    return LOOKUP_REPORT_DNS_INVALID;
-
-  strlcpy(lookup->client->host, name, sizeof(lookup->client->host));
-  return LOOKUP_REPORT_DNS_SUCCESS;
+  lookup->dns.hostname[0] = '\0';
+  _lookup_report(lookup, report);
+  _lookup_complete_if_ready(lookup);
 }
 
 static void
-_lookup_dns_callback(void *callback_ctx, const struct io_addr *addr, const char *name, size_t name_length)
+_lookup_dns_forward_callback(void *callback_ctx, const struct io_addr *addresses, size_t address_count)
 {
   struct LookupRequest *const lookup = callback_ctx;
   _lookup_assert_attached(lookup);
-  assert(lookup->dns_pending);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_FORWARD);
+  assert(lookup->dns.hostname[0] != '\0');
 
-  lookup->dns_pending = false;
+  lookup->dns.state = LOOKUP_DNS_STATE_IDLE;
 
-  const enum lookup_report_type report = _lookup_dns_process_result(lookup, addr, name, name_length);
-  _lookup_report(lookup, report);
+  if (addresses == NULL || address_count == 0)
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
+    return;
+  }
 
-  _lookup_complete_if_ready(lookup);
+  for (size_t i = 0; i < address_count; ++i)
+  {
+    if (!address_equal(&addresses[i], &lookup->client->addr))
+      continue;
+
+    strlcpy(lookup->client->host, lookup->dns.hostname, sizeof(lookup->client->host));
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_SUCCESS);
+    return;
+  }
+
+  _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_IP_MISMATCH);
+}
+
+static void
+_lookup_dns_reverse_callback(void *callback_ctx, const char *name, size_t name_length)
+{
+  struct LookupRequest *const lookup = callback_ctx;
+  _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_REVERSE);
+  assert(lookup->dns.hostname[0] == '\0');
+
+  lookup->dns.state = LOOKUP_DNS_STATE_IDLE;
+
+  if (name == NULL || name_length == 0)
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
+    return;
+  }
+
+  if (name_length > HOSTLEN)
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_TOO_LONG);
+    return;
+  }
+
+  if (!hostname_is_valid(name))
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_INVALID);
+    return;
+  }
+
+  strlcpy(lookup->dns.hostname, name, sizeof(lookup->dns.hostname));
+
+  const int family = address_get_family(&lookup->client->addr);
+  assert(family == AF_INET || family == AF_INET6);
+
+  if (resolver_lookup_name(_lookup_dns_forward_callback, lookup, lookup->dns.hostname, family))
+  {
+    lookup->dns.state = LOOKUP_DNS_STATE_FORWARD;
+    return;
+  }
+
+  _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
 }
 
 static void
@@ -163,13 +221,14 @@ static void
 _lookup_dns_start(struct LookupRequest *lookup)
 {
   _lookup_assert_attached(lookup);
-  assert(!lookup->dns_pending);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_IDLE);
+  assert(lookup->dns.hostname[0] == '\0');
 
   _lookup_report(lookup, LOOKUP_REPORT_DNS_START);
 
-  if (resolver_lookup_addr(_lookup_dns_callback, lookup, &lookup->client->addr))
+  if (resolver_lookup_addr(_lookup_dns_reverse_callback, lookup, &lookup->client->addr))
   {
-    lookup->dns_pending = true;
+    lookup->dns.state = LOOKUP_DNS_STATE_REVERSE;
     return;
   }
 

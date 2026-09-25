@@ -53,7 +53,7 @@ struct ident_request
 {
   list_node_t node;
   fde_t *fde;
-  event_handle_t io_timeout_event;
+  event_handle_t timeout_event;
 
   ident_callback_fn callback;
   void *callback_ctx;
@@ -342,26 +342,16 @@ _ident_user_id_extract(const struct ident_user_id_reply *reply, char *username, 
   return true;
 }
 
-static bool
-_ident_io_timeout_schedule(struct ident_request *request)
-{
-  assert(request);
-  assert(request->fde);
-  assert(request->io_timeout_event);
-
-  return event_schedule(request->io_timeout_event) == EVENT_SUCCESS;
-}
-
 static void
-_ident_io_timeout_cancel(struct ident_request *request)
+_ident_timeout_cancel(struct ident_request *request)
 {
   assert(request);
 
-  if (request->io_timeout_event == NULL)
+  if (request->timeout_event == NULL)
     return;
 
-  event_handle_t timeout_event = request->io_timeout_event;
-  request->io_timeout_event = NULL;
+  event_handle_t timeout_event = request->timeout_event;
+  request->timeout_event = NULL;
   event_destroy(timeout_event);
 }
 
@@ -373,7 +363,7 @@ _ident_request_destroy(struct ident_request *request)
   if (request->state == IDENT_REQUEST_STATE_ACTIVE)
     list_remove(&request->node, &ident_request_list);
 
-  _ident_io_timeout_cancel(request);
+  _ident_timeout_cancel(request);
 
   fde_t *const fde = request->fde;
   request->fde = NULL;
@@ -420,15 +410,16 @@ _ident_request_fail(struct ident_request *request)
 }
 
 static void
-_ident_io_timeout_expire(void *context)
+_ident_timeout_expire(void *context)
 {
   struct ident_request *const request = context;
   assert(request);
   assert(request->state == IDENT_REQUEST_STATE_ACTIVE);
+  assert(request->fde);
 
-  event_handle_t timeout_event = request->io_timeout_event;
+  event_handle_t timeout_event = request->timeout_event;
   assert(timeout_event);
-  request->io_timeout_event = NULL;
+  request->timeout_event = NULL;
   event_destroy(timeout_event);
 
   _ident_request_complete(request, NULL);
@@ -586,8 +577,9 @@ _ident_connect_complete(fde_t *fde, int error, void *context)
 
   assert(request->state == IDENT_REQUEST_STATE_STARTING ||
          request->state == IDENT_REQUEST_STATE_ACTIVE);
+  assert(request->timeout_event);
 
-  if (error != COMM_OK || !_ident_io_timeout_schedule(request))
+  if (error != COMM_OK)
   {
     _ident_request_fail(request);
     return;
@@ -679,14 +671,6 @@ ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, u
 
   request->query_length = (size_t)formatted_length;
 
-  request->io_timeout_event =
-    event_create(comm_event_manager, "ident_io_timeout", _ident_io_timeout_expire, timeout_ms, true, request, NULL);
-  if (request->io_timeout_event == NULL)
-  {
-    io_free(request);
-    return false;
-  }
-
   request->fde =
     comm_socket_create(address_get_family(&connection_peer_addr), SOCK_STREAM, 0, "ident");
   if (request->fde == NULL)
@@ -704,8 +688,16 @@ ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, u
     return false;
   }
 
+  request->timeout_event =
+    event_create(comm_event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
+  if (request->timeout_event == NULL || event_schedule(request->timeout_event) != EVENT_SUCCESS)
+  {
+    _ident_request_destroy(request);
+    return false;
+  }
+
   comm_connect_tcp(request->fde, &connection_peer_addr, IDENT_SERVICE_PORT, &bind_addr,
-                   _ident_connect_complete, request, timeout_ms);
+                   _ident_connect_complete, request, 0);
 
   if (request->state == IDENT_REQUEST_STATE_START_FAILED)
   {

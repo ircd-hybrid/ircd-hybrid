@@ -66,7 +66,7 @@ enum resolver_nameserver_state
 {
   RESOLVER_NAMESERVER_STATE_UNQUERIED = 0,
   RESOLVER_NAMESERVER_STATE_QUERIED,
-  RESOLVER_NAMESERVER_STATE_FAILED
+  RESOLVER_NAMESERVER_STATE_EXCLUDED
 };
 
 enum resolver_response_result
@@ -74,6 +74,13 @@ enum resolver_response_result
   RESOLVER_RESPONSE_RESULT_MATCH,
   RESOLVER_RESPONSE_RESULT_NO_MATCH,
   RESOLVER_RESPONSE_RESULT_MALFORMED
+};
+
+enum resolver_response_disposition
+{
+  RESOLVER_RESPONSE_DISPOSITION_PROCESS,
+  RESOLVER_RESPONSE_DISPOSITION_RETRY,
+  RESOLVER_RESPONSE_DISPOSITION_EXCLUDE
 };
 
 enum resolver_completion_type
@@ -476,7 +483,7 @@ _resolver_request_submit(struct resolver_request *request,
 
   for (size_t i = start_index; i < resolver_config.nameserver_count; ++i)
   {
-    if (request->nameserver_states[i] == RESOLVER_NAMESERVER_STATE_FAILED ||
+    if (request->nameserver_states[i] == RESOLVER_NAMESERVER_STATE_EXCLUDED ||
         !_resolver_send_packet(packet, packet_length, i))
       continue;
 
@@ -571,7 +578,42 @@ _resolver_query_addr(resolver_lookup_addr_callback_fn callback, void *callback_c
 }
 
 static bool
-_resolver_request_retry(struct resolver_request *request)
+_resolver_request_retry_current_round(struct resolver_request *request)
+{
+  assert(request);
+  assert(request->config_generation == resolver_config_generation);
+  assert(request->round_index < RESOLVER_MAX_ROUNDS);
+  assert(request->nameserver_index < resolver_config.nameserver_count);
+  assert(request->nameserver_states[request->nameserver_index] !=
+         RESOLVER_NAMESERVER_STATE_UNQUERIED);
+
+  if (request->nameserver_index + 1 >= resolver_config.nameserver_count)
+    return false;
+
+  return _resolver_request_submit(request, request->nameserver_index + 1, request->round_index);
+}
+
+static bool
+_resolver_request_can_retry_next_round(const struct resolver_request *request)
+{
+  assert(request);
+  assert(request->config_generation == resolver_config_generation);
+  assert(request->round_index < RESOLVER_MAX_ROUNDS);
+  assert(resolver_config.nameserver_count > 0);
+  assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
+
+  if (request->round_index + 1 >= RESOLVER_MAX_ROUNDS)
+    return false;
+
+  for (size_t i = 0; i < resolver_config.nameserver_count; ++i)
+    if (request->nameserver_states[i] != RESOLVER_NAMESERVER_STATE_EXCLUDED)
+      return true;
+
+  return false;
+}
+
+static bool
+_resolver_request_retry_after_timeout(struct resolver_request *request)
 {
   assert(request);
   assert(request->round_index < RESOLVER_MAX_ROUNDS);
@@ -613,21 +655,34 @@ _resolver_request_retry(struct resolver_request *request)
 }
 
 static void
-_resolver_request_mark_nameserver_failed(struct resolver_request *request, size_t nameserver_index)
+_resolver_request_exclude_nameserver(struct resolver_request *request, size_t nameserver_index)
 {
   assert(request);
   assert(request->config_generation == resolver_config_generation);
   assert(nameserver_index < resolver_config.nameserver_count);
   assert(request->nameserver_states[nameserver_index] != RESOLVER_NAMESERVER_STATE_UNQUERIED);
 
-  request->nameserver_states[nameserver_index] = RESOLVER_NAMESERVER_STATE_FAILED;
+  request->nameserver_states[nameserver_index] = RESOLVER_NAMESERVER_STATE_EXCLUDED;
 }
 
-static bool
-_resolver_response_code_is_nameserver_failure(uint8_t response_code)
+static enum resolver_response_disposition
+_resolver_response_code_disposition(uint8_t response_code)
 {
-  return response_code != DNS_RESPONSE_CODE_NOERROR &&
-         response_code != DNS_RESPONSE_CODE_NXDOMAIN;
+  switch (response_code)
+  {
+    case DNS_RESPONSE_CODE_NOERROR:
+    case DNS_RESPONSE_CODE_NXDOMAIN:
+      return RESOLVER_RESPONSE_DISPOSITION_PROCESS;
+
+    case DNS_RESPONSE_CODE_SERVFAIL:
+      return RESOLVER_RESPONSE_DISPOSITION_RETRY;
+
+    case DNS_RESPONSE_CODE_FORMERR:
+    case DNS_RESPONSE_CODE_NOTIMP:
+    case DNS_RESPONSE_CODE_REFUSED:
+    default:
+      return RESOLVER_RESPONSE_DISPOSITION_EXCLUDE;
+  }
 }
 
 static bool
@@ -1060,12 +1115,19 @@ _resolver_process_packet(const struct resolver_socket *socket,
   const bool source_nameserver_is_current = source_nameserver_index == request->nameserver_index;
 
   const uint8_t response_code = dns_header_get_response_code(&header);
-  if (dns_header_is_truncated(&header) ||
-      _resolver_response_code_is_nameserver_failure(response_code))
-  {
-    _resolver_request_mark_nameserver_failed(request, source_nameserver_index);
+  const enum resolver_response_disposition response_disposition =
+    dns_header_is_truncated(&header) ?
+      RESOLVER_RESPONSE_DISPOSITION_EXCLUDE :
+      _resolver_response_code_disposition(response_code);
 
-    if (!source_nameserver_is_current || _resolver_request_retry(request))
+  if (response_disposition != RESOLVER_RESPONSE_DISPOSITION_PROCESS)
+  {
+    if (response_disposition == RESOLVER_RESPONSE_DISPOSITION_EXCLUDE)
+      _resolver_request_exclude_nameserver(request, source_nameserver_index);
+
+    if (!source_nameserver_is_current ||
+        _resolver_request_retry_current_round(request) ||
+        _resolver_request_can_retry_next_round(request))
       return false;
 
     _resolver_request_finalize_failure(request, completion);
@@ -1083,9 +1145,11 @@ _resolver_process_packet(const struct resolver_socket *socket,
       return true;
 
     case RESOLVER_RESPONSE_RESULT_MALFORMED:
-      _resolver_request_mark_nameserver_failed(request, source_nameserver_index);
+      _resolver_request_exclude_nameserver(request, source_nameserver_index);
 
-      if (!source_nameserver_is_current || _resolver_request_retry(request))
+      if (!source_nameserver_is_current ||
+          _resolver_request_retry_current_round(request) ||
+          _resolver_request_can_retry_next_round(request))
         return false;
 
       _resolver_request_finalize_failure(request, completion);
@@ -1170,7 +1234,7 @@ _resolver_process_timeouts(void *unused)
         now_ms - request->last_sent_at_ms < timeout_interval_ms)
       continue;
 
-    if (_resolver_request_retry(request))
+    if (_resolver_request_retry_after_timeout(request))
       continue;
 
     struct resolver_completion completion;

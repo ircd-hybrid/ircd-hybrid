@@ -27,6 +27,7 @@ struct resolver_config
   size_t nameserver_count;
 };
 
+extern bool resolver_config_equal(const struct resolver_config *, const struct resolver_config *);
 extern bool resolver_config_load(struct resolver_config *);
 extern bool resolver_config_has_family(const struct resolver_config *, int);
 extern bool resolver_config_contains_nameserver(const struct resolver_config *, const struct io_addr *);

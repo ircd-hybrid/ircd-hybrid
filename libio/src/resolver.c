@@ -1184,6 +1184,9 @@ _resolver_config_update(void)
   if (!_resolver_socket_reconfigure(&candidate))
     return false;
 
+  if (resolver_config_equal(&resolver_config, &candidate))
+    return true;
+
   resolver_config = candidate;
   ++resolver_config_generation;
   return true;

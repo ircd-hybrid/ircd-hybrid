@@ -290,6 +290,24 @@ _resolver_config_load_file(const char *path, struct resolver_config *config)
 }
 
 bool
+resolver_config_equal(const struct resolver_config *lhs, const struct resolver_config *rhs)
+{
+  assert(lhs);
+  assert(rhs);
+  assert(lhs->nameserver_count <= IO_ARRAY_LENGTH(lhs->nameservers));
+  assert(rhs->nameserver_count <= IO_ARRAY_LENGTH(rhs->nameservers));
+
+  if (lhs->nameserver_count != rhs->nameserver_count)
+    return false;
+
+  for (size_t i = 0; i < lhs->nameserver_count; ++i)
+    if (!address_equal_with_port(&lhs->nameservers[i], &rhs->nameservers[i]))
+      return false;
+
+  return true;
+}
+
+bool
 resolver_config_load(struct resolver_config *config)
 {
   assert(config);

@@ -53,7 +53,8 @@
 enum
 {
   RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
-  RESOLVER_INITIAL_TIMEOUT = 4,
+  RESOLVER_INITIAL_TIMEOUT_MS = 4000,
+  RESOLVER_TIMEOUT_SCAN_INTERVAL_MS = 1000,
   RESOLVER_MAX_ROUNDS = 2,
   RESOLVER_MAX_PENDING_REQUESTS = 4096
 };
@@ -126,8 +127,7 @@ struct resolver_request
   unsigned int round_index;
   uint64_t config_generation;
   enum resolver_nameserver_state nameserver_states[RESOLVER_CONFIG_NAMESERVER_CAPACITY];
-  uintmax_t last_sent_at;
-  uintmax_t timeout_interval;
+  uintmax_t last_sent_at_ms;
   char query_name[DNS_NAME_TEXT_CAPACITY];
   size_t query_name_length;
 
@@ -137,7 +137,7 @@ struct resolver_request
 
 static struct resolver_socket resolver_sockets[] =
 {
-  { .family = AF_INET, .description = "IPv4 UDP resolver socket" },
+  { .family = AF_INET,  .description = "IPv4 UDP resolver socket" },
   { .family = AF_INET6, .description = "IPv6 UDP resolver socket" }
 };
 
@@ -145,7 +145,6 @@ static struct resolver_config resolver_config;
 static uint64_t resolver_config_generation;
 static list_t request_list;
 static struct resolver_request *requests_by_transaction_id[UINT16_MAX + 1U];
-static size_t request_count;
 
 static void _resolver_read_reply(fde_t *, void *);
 
@@ -276,6 +275,7 @@ _resolver_nameserver_find_index_by_source(const struct resolver_socket *socket, 
 static struct resolver_request *
 _resolver_request_create(void *callback_ctx)
 {
+  const size_t request_count = list_length(&request_list);
   assert(request_count <= RESOLVER_MAX_PENDING_REQUESTS);
 
   if (request_count == RESOLVER_MAX_PENDING_REQUESTS)
@@ -290,24 +290,22 @@ static void
 _resolver_request_publish(struct resolver_request *request)
 {
   assert(request);
-  assert(request_count < RESOLVER_MAX_PENDING_REQUESTS);
+  assert(list_length(&request_list) < RESOLVER_MAX_PENDING_REQUESTS);
   assert(requests_by_transaction_id[request->transaction_id] == NULL);
 
   requests_by_transaction_id[request->transaction_id] = request;
   list_add(request, &request->node, &request_list);
-  ++request_count;
 }
 
 static void
 _resolver_request_destroy(struct resolver_request *request)
 {
   assert(request);
-  assert(request_count > 0);
+  assert(list_length(&request_list) > 0);
   assert(requests_by_transaction_id[request->transaction_id] == request);
 
   requests_by_transaction_id[request->transaction_id] = NULL;
   list_remove(&request->node, &request_list);
-  --request_count;
   io_free(request);
 }
 
@@ -396,6 +394,8 @@ static bool
 _resolver_transaction_id_generate(uint16_t *transaction_id)
 {
   assert(transaction_id);
+
+  const size_t request_count = list_length(&request_list);
   assert(request_count < RESOLVER_MAX_PENDING_REQUESTS);
 
   const uint16_t first = (uint16_t)genrand_int32();
@@ -429,9 +429,21 @@ _resolver_query_type_from_family(int family)
   }
 }
 
+static uintmax_t
+_resolver_timeout_interval_ms(unsigned int round_index)
+{
+  assert(round_index < RESOLVER_MAX_ROUNDS);
+
+  uintmax_t timeout_interval_ms = RESOLVER_INITIAL_TIMEOUT_MS;
+  for (unsigned int i = 0; i < round_index; ++i)
+    timeout_interval_ms *= 2;
+
+  return timeout_interval_ms;
+}
+
 static bool
 _resolver_request_submit(struct resolver_request *request,
-                         size_t start_index, unsigned int round_index, uintmax_t timeout_interval)
+                         size_t start_index, unsigned int round_index)
 {
   assert(request);
   assert(request->query_type == DNS_TYPE_A ||
@@ -441,7 +453,6 @@ _resolver_request_submit(struct resolver_request *request,
   assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
   assert(start_index < resolver_config.nameserver_count);
   assert(round_index < RESOLVER_MAX_ROUNDS);
-  assert(timeout_interval >= RESOLVER_INITIAL_TIMEOUT);
 
   const struct dns_query query =
   {
@@ -467,8 +478,7 @@ _resolver_request_submit(struct resolver_request *request,
     request->nameserver_states[i] = RESOLVER_NAMESERVER_STATE_QUERIED;
     request->round_index = round_index;
     request->config_generation = resolver_config_generation;
-    request->last_sent_at = io_time_get(IO_TIME_MONOTONIC_SEC);
-    request->timeout_interval = timeout_interval;
+    request->last_sent_at_ms = io_time_get_monotonic_ms_total();
     return true;
   }
 
@@ -493,7 +503,7 @@ _resolver_request_start(struct resolver_request *request)
   assert(request->query_name[request->query_name_length] == '\0');
 
   if (!_resolver_transaction_id_generate(&request->transaction_id) ||
-      !_resolver_request_submit(request, 0, 0, RESOLVER_INITIAL_TIMEOUT))
+      !_resolver_request_submit(request, 0, 0))
   {
     io_free(request);
     return false;
@@ -566,7 +576,6 @@ _resolver_request_retry(struct resolver_request *request)
 
   size_t next_nameserver_index;
   unsigned int round_index = request->round_index;
-  uintmax_t timeout_interval = request->timeout_interval;
 
   if (request->config_generation != resolver_config_generation ||
       request->nameserver_index >= resolver_config.nameserver_count)
@@ -577,27 +586,21 @@ _resolver_request_retry(struct resolver_request *request)
     next_nameserver_index = 0;
   }
   else if (request->nameserver_index + 1 < resolver_config.nameserver_count)
-  {
     next_nameserver_index = request->nameserver_index + 1;
-  }
   else if (++round_index < RESOLVER_MAX_ROUNDS)
-  {
     next_nameserver_index = 0;
-    timeout_interval *= 2;
-  }
   else
     return false;
 
   while (round_index < RESOLVER_MAX_ROUNDS)
   {
-    if (_resolver_request_submit(request, next_nameserver_index, round_index, timeout_interval))
+    if (_resolver_request_submit(request, next_nameserver_index, round_index))
       return true;
 
     if (++round_index >= RESOLVER_MAX_ROUNDS)
       break;
 
     next_nameserver_index = 0;
-    timeout_interval *= 2;
   }
 
   return false;
@@ -615,7 +618,7 @@ _resolver_request_mark_nameserver_failed(struct resolver_request *request, size_
 }
 
 static bool
-_resolver_response_code_is_nameserver_failure(uint16_t response_code)
+_resolver_response_code_is_nameserver_failure(uint8_t response_code)
 {
   return response_code != DNS_RESPONSE_CODE_NOERROR &&
          response_code != DNS_RESPONSE_CODE_NXDOMAIN;
@@ -921,7 +924,7 @@ _resolver_process_response(const struct resolver_request *request, struct dns_re
          request->query_type == DNS_TYPE_AAAA ||
          request->query_type == DNS_TYPE_PTR);
 
-  const uint16_t response_code = dns_header_get_response_code(header);
+  const uint8_t response_code = dns_header_get_response_code(header);
   assert(response_code == DNS_RESPONSE_CODE_NOERROR ||
          response_code == DNS_RESPONSE_CODE_NXDOMAIN);
   assert(header->question_count == 1);
@@ -1050,7 +1053,7 @@ _resolver_process_packet(const struct resolver_socket *socket,
 
   const bool source_nameserver_is_current = source_nameserver_index == request->nameserver_index;
 
-  const uint16_t response_code = dns_header_get_response_code(&header);
+  const uint8_t response_code = dns_header_get_response_code(&header);
   if (dns_header_is_truncated(&header) ||
       _resolver_response_code_is_nameserver_failure(response_code))
   {
@@ -1145,7 +1148,7 @@ _resolver_process_timeouts(void *unused)
 {
   (void)unused;
 
-  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  const uintmax_t now_ms = io_time_get_monotonic_ms_total();
 
   for (size_t i = 0; i < IO_ARRAY_LENGTH(requests_by_transaction_id); ++i)
   {
@@ -1156,8 +1159,9 @@ _resolver_process_timeouts(void *unused)
     assert(request->transaction_id == (uint16_t)i);
     assert(request->round_index < RESOLVER_MAX_ROUNDS);
 
-    if (now < request->last_sent_at ||
-        now - request->last_sent_at < request->timeout_interval)
+    const uintmax_t timeout_interval_ms = _resolver_timeout_interval_ms(request->round_index);
+    if (now_ms < request->last_sent_at_ms ||
+        now_ms - request->last_sent_at_ms < timeout_interval_ms)
       continue;
 
     if (_resolver_request_retry(request))
@@ -1188,13 +1192,21 @@ _resolver_config_update(void)
 bool
 resolver_init(event_manager_t manager)
 {
-  if (!_resolver_config_update())
+  event_handle_t timeout_event =
+    event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts,
+                 RESOLVER_TIMEOUT_SCAN_INTERVAL_MS, false, NULL, NULL);
+  if (timeout_event == NULL)
     return false;
 
-  event_handle_t event_resolver_timeout =
-    event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts, 1000, false, NULL, NULL);
-  event_set_priority(event_resolver_timeout, 1);
-  event_schedule(event_resolver_timeout);
+  if (event_set_priority(timeout_event, 1) != EVENT_SUCCESS ||
+      event_schedule(timeout_event) != EVENT_SUCCESS ||
+      !_resolver_config_update())
+  {
+    const event_status_t status = event_destroy(timeout_event);
+    assert(status == EVENT_SUCCESS);
+    return false;
+  }
+
   return true;
 }
 

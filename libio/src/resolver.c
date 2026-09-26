@@ -162,6 +162,8 @@ static bool
 _resolver_socket_open(struct resolver_socket *socket)
 {
   assert(socket);
+  assert(socket->family == AF_INET || socket->family == AF_INET6);
+  assert(socket->description);
 
   if (socket->fde)
     return true;
@@ -449,6 +451,10 @@ _resolver_request_submit(struct resolver_request *request,
   assert(request->query_type == DNS_TYPE_A ||
          request->query_type == DNS_TYPE_AAAA ||
          request->query_type == DNS_TYPE_PTR);
+  assert(request->query_name_length < sizeof(request->query_name));
+  assert(request->query_name[request->query_name_length] == '\0');
+  assert(requests_by_transaction_id[request->transaction_id] == NULL ||
+         requests_by_transaction_id[request->transaction_id] == request);
   assert(resolver_config.nameserver_count > 0);
   assert(resolver_config.nameserver_count <= IO_ARRAY_LENGTH(resolver_config.nameservers));
   assert(start_index < resolver_config.nameserver_count);

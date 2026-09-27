@@ -15,7 +15,6 @@ AC_PROG_YACC
 AC_PROG_LEX([noyywrap])
 AC_PROG_INSTALL
 
-dnl Libtool and libltdl.
 dnl Libtool.
 LT_INIT([dlopen disable-static])
 
@@ -45,7 +44,7 @@ AX_ARG_ENABLE_STACK_PROTECTOR
 dnl Required libraries and platform support.
 AX_LIBRARY_JANSSON
 AX_LIBRARY_NET
-AC_SEARCH_LIBS([crypt],[crypt],[],[AC_MSG_ERROR([crypt() is required but was not found])])
+AC_SEARCH_LIBS([crypt], [crypt], [], [AC_MSG_ERROR([crypt() is required but was not found])])
 
 dnl Header availability.
 AC_CHECK_HEADERS_ONCE([
@@ -64,11 +63,11 @@ AC_CHECK_FUNCS_ONCE([
 AX_CHECK_STRFTIME_MINUS_E
 
 dnl Compile-time installation paths.
-AX_DEFINE_DIR([PREFIX],[prefix],[Set to prefix.])
-AX_DEFINE_DIR([SYSCONFDIR],[sysconfdir],[Set to sysconfdir.])
-AX_DEFINE_DIR([LIBDIR],[libdir],[Set to libdir.])
-AX_DEFINE_DIR([DATADIR],[datadir],[Set to datadir.])
-AX_DEFINE_DIR([LOCALSTATEDIR],[localstatedir],[Set to localstatedir.])
+AX_DEFINE_DIR([PREFIX], [prefix], [Set to prefix.])
+AX_DEFINE_DIR([SYSCONFDIR], [sysconfdir], [Set to sysconfdir.])
+AX_DEFINE_DIR([LIBDIR], [libdir], [Set to libdir.])
+AX_DEFINE_DIR([DATADIR], [datadir], [Set to datadir.])
+AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 
 dnl Reproducible build metadata.
 AX_DEFINE_BUILD_DATE

@@ -13,6 +13,7 @@
   TLS cipher suites, supported groups, and related cryptographic parameters are now
   selected by the configured TLS library and its system defaults. TLS certificate
   fingerprints now always use SHA-256.
+* Module names in `modules.conf` no longer include file suffixes
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

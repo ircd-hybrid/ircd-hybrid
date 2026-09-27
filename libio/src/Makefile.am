@@ -1,8 +1,6 @@
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src -DMODULE_LOADER_SUFFIX=\"$(MODULE_FILE_SUFFIX)\"
+
 noinst_LTLIBRARIES = libio.la
-libio_la_DEPENDENCIES = $(LTDLDEPS)
-libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
-libio_la_LDFLAGS = -export-dynamic -avoid-version
 
 libio_la_SOURCES =  address.c     \
                     address.h     \
@@ -56,6 +54,8 @@ libio_la_SOURCES =  address.c     \
                     memory.h      \
                     module.c      \
                     module.h      \
+                    module_loader.c \
+                    module_loader.h \
                     patricia.c    \
                     patricia.h    \
                     resolver.c    \

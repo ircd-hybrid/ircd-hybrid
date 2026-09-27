@@ -108,8 +108,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_library_jansson.m4 \
 	$(top_srcdir)/m4/ax_library_net.m4 \
 	$(top_srcdir)/m4/ax_require_defined.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltargz.m4 \
-	$(top_srcdir)/m4/ltdl.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -120,23 +119,20 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
-am__DEPENDENCIES_1 =
+libio_la_LIBADD =
 am_libio_la_OBJECTS = address.lo address_parse.lo base32.lo comm.lo \
 	comm_epoll.lo comm_kqueue.lo comm_poll.lo dbuf.lo dns.lo \
 	event.lo fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo \
 	io_hex.lo io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
 	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
-	memory.lo module.lo patricia.lo resolver.lo resolver_config.lo \
-	rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
-	tls_wolfssl.lo
+	memory.lo module.lo module_loader.lo patricia.lo resolver.lo \
+	resolver_config.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
+	tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libio_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libio_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -165,11 +161,12 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/io_string.Plo ./$(DEPDIR)/io_time.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
-	./$(DEPDIR)/module.Plo ./$(DEPDIR)/patricia.Plo \
-	./$(DEPDIR)/resolver.Plo ./$(DEPDIR)/resolver_config.Plo \
-	./$(DEPDIR)/rng_mt.Plo ./$(DEPDIR)/sha3.Plo \
-	./$(DEPDIR)/tls_gnutls.Plo ./$(DEPDIR)/tls_none.Plo \
-	./$(DEPDIR)/tls_openssl.Plo ./$(DEPDIR)/tls_wolfssl.Plo
+	./$(DEPDIR)/module.Plo ./$(DEPDIR)/module_loader.Plo \
+	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/resolver.Plo \
+	./$(DEPDIR)/resolver_config.Plo ./$(DEPDIR)/rng_mt.Plo \
+	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
+	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
+	./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -245,7 +242,6 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 FILECMD = @FILECMD@
 GREP = @GREP@
-INCLTDL = @INCLTDL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -256,31 +252,20 @@ LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LIBADD_DL = @LIBADD_DL@
-LIBADD_DLD_LINK = @LIBADD_DLD_LINK@
-LIBADD_DLOPEN = @LIBADD_DLOPEN@
-LIBADD_SHL_LOAD = @LIBADD_SHL_LOAD@
 LIBDIR = @LIBDIR@
-LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LOCALSTATEDIR = @LOCALSTATEDIR@
-LTDLDEPS = @LTDLDEPS@
-LTDLINCL = @LTDLINCL@
-LTDLOPEN = @LTDLOPEN@
 LTLIBOBJS = @LTLIBOBJS@
-LT_ARGZ_H = @LT_ARGZ_H@
-LT_CONFIG_H = @LT_CONFIG_H@
-LT_DLLOADERS = @LT_DLLOADERS@
-LT_DLPREOPEN = @LT_DLPREOPEN@
 LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MODULE_FILE_SUFFIX = @MODULE_FILE_SUFFIX@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -344,8 +329,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-ltdl_LIBOBJS = @ltdl_LIBOBJS@
-ltdl_LTLIBOBJS = @ltdl_LTLIBOBJS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -357,17 +340,13 @@ runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
-sys_symbol_underscore = @sys_symbol_underscore@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src -DMODULE_LOADER_SUFFIX=\"$(MODULE_FILE_SUFFIX)\"
 noinst_LTLIBRARIES = libio.la
-libio_la_DEPENDENCIES = $(LTDLDEPS)
-libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
-libio_la_LDFLAGS = -export-dynamic -avoid-version
 libio_la_SOURCES = address.c     \
                     address.h     \
                     address_parse.c \
@@ -420,6 +399,8 @@ libio_la_SOURCES = address.c     \
                     memory.h      \
                     module.c      \
                     module.h      \
+                    module_loader.c \
+                    module_loader.h \
                     patricia.c    \
                     patricia.h    \
                     resolver.c    \
@@ -484,7 +465,7 @@ clean-noinstLTLIBRARIES:
 	$(am__rm_f) $${locs}
 
 libio.la: $(libio_la_OBJECTS) $(libio_la_DEPENDENCIES) $(EXTRA_libio_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libio_la_LINK)  $(libio_la_OBJECTS) $(libio_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK)  $(libio_la_OBJECTS) $(libio_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -520,6 +501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module_loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver_config.Plo@am__quote@ # am--include-marker
@@ -719,6 +701,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
+	-rm -f ./$(DEPDIR)/module_loader.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
 	-rm -f ./$(DEPDIR)/resolver_config.Plo
@@ -801,6 +784,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
+	-rm -f ./$(DEPDIR)/module_loader.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
 	-rm -f ./$(DEPDIR)/resolver_config.Plo

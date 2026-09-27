@@ -38,11 +38,8 @@
 enum module_error_code
 {
   MODULE_SUCCESS = 0,  /**< Operation completed successfully. */
-  MODULE_ERR_INIT_FAILED,  /**< Failed to initialize module system. */
-  MODULE_ERR_SHUTDOWN_FAILED,  /**< Failed to shut down module system. */
   MODULE_ERR_LOAD_FAILED,  /**< Failed to load module. */
   MODULE_ERR_INVALID_PATH,  /**< Invalid module path specified. */
-  MODULE_ERR_INVALID_SUFFIX,  /**< Invalid module file suffix. */
   MODULE_ERR_NOT_FOUND,  /**< Module not found. */
   MODULE_ERR_ALREADY_LOADED,  /**< Module already loaded. */
   MODULE_ERR_NOT_CONFIGURED,  /**< Module not configured to be loaded. */
@@ -107,8 +104,6 @@ extern void module_set_base_path(const char *);
 extern void module_config_clear(void);
 extern void module_set_load_callback(void (*)(const char *, const void *, void *));
 extern void module_set_unload_callback(void (*)(const char *, const void *, void *));
-extern enum module_error_code module_init(void);
-extern enum module_error_code module_cleanup(void);
 extern enum module_error_code module_load(const char *, bool, void *);
 extern enum module_error_code module_unload(const char *, bool, void *);
 extern enum module_error_code module_config_add(const char *, bool, bool);

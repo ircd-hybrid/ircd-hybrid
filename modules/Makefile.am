@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
-MODULE_FLAGS = -module -avoid-version
+MODULE_FLAGS = -module -avoid-version -shrext $(MODULE_FILE_SUFFIX)
 
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 modulesdir = $(pkglibdir)/modules

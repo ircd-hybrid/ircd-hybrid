@@ -18,12 +18,12 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "ltdl.h"
 #include "io.h"
 #include "io_string.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
+#include "module_loader.h"
 #include "module.h"
 
 /**
@@ -90,11 +90,8 @@ static void (*module_unload_callback)(const char *, const void *, void *);
 static const char *const module_error_strings[MODULE_ERR_COUNT] =
 {
   [MODULE_SUCCESS] = "Operation completed successfully",
-  [MODULE_ERR_INIT_FAILED] = "Failed to initialize the libltdl dynamic link library: %s",
-  [MODULE_ERR_SHUTDOWN_FAILED] = "Failed to shut down the libltdl dynamic link library: %s",
   [MODULE_ERR_LOAD_FAILED] = "Failed to load module %s: %s",
   [MODULE_ERR_INVALID_PATH] = "Invalid module path: %s",
-  [MODULE_ERR_INVALID_SUFFIX] = "Invalid module name %s: Expected file suffix '.la'",
   [MODULE_ERR_NOT_FOUND] = "Module not loaded: %s",
   [MODULE_ERR_ALREADY_LOADED] = "Module already loaded: %s",
   [MODULE_ERR_NOT_CONFIGURED] = "Module not configured to be loaded: %s",
@@ -196,47 +193,6 @@ module_set_unload_callback(void (*callback)(const char *name, const void *handle
 }
 
 /**
- * @brief Initializes the module management system.
- *
- * This function initializes the libltdl dynamic link library, setting up the environment for
- * loading and unloading modules. It must be called before any modules can be loaded or managed.
- *
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_init(void)
-{
-  if (lt_dlinit())
-  {
-    module_set_error(MODULE_ERR_INIT_FAILED, lt_dlerror());
-    return MODULE_ERR_INIT_FAILED;
-  }
-
-  return MODULE_SUCCESS;
-}
-
-/**
- * @brief Cleans up the module management system.
- *
- * This function shuts down the libltdl dynamic link library, cleaning up resources used
- * for module management. It should be called when the application is shutting down to ensure
- * that all resources are properly released.
- *
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_cleanup(void)
-{
-  if (lt_dlexit())
-  {
-    module_set_error(MODULE_ERR_SHUTDOWN_FAILED, lt_dlerror());
-    return MODULE_ERR_SHUTDOWN_FAILED;
-  }
-
-  return MODULE_SUCCESS;
-}
-
-/**
  * @brief Retrieves the last error message.
  *
  * This function returns the last error message set during module operations. It can be used
@@ -272,25 +228,6 @@ module_get_attributes(const struct Module *module)
     attributes[0] = '\0';
 
   return attributes;
-}
-
-/**
- * @brief Validates the suffix of a module file.
- *
- * This function checks if the specified module name has the expected file suffix.
- * It ensures that only files with the correct suffix are processed as modules.
- *
- * @param name Name of the module file.
- * @return true if the suffix is valid, false otherwise.
- */
-static bool
-module_valid_suffix(const char *name)
-{
-  const char *const suffix = strrchr(name, '.');
-  if (suffix && strcmp(suffix, ".la") == 0)
-    return true;
-
-  return false;
 }
 
 /**
@@ -354,13 +291,6 @@ module_config_find(const char *name)
 enum module_error_code
 module_unload(const char *name, bool reload, void *user_data)
 {
-  /* Ensure the module name has a valid suffix. */
-  if (!module_valid_suffix(name))
-  {
-    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
-    return MODULE_ERR_INVALID_SUFFIX;
-  }
-
   /* Find the module to unload. */
   struct Module *const module = module_find(name);
   if (module == NULL)
@@ -395,16 +325,14 @@ module_unload(const char *name, bool reload, void *user_data)
    * This is necessary because the handle is required for the unload callback,
    * and once the handle is closed, it may no longer be valid or accessible.
    */
-  const lt_dlhandle handle = module->handle;
+  const module_loader_handle_t handle = module->handle;
 
-  /* Close the module handle. */
-  if (lt_dlclose(module->handle))
+  if (!module_loader_close(module->handle))
   {
-    module_set_error(MODULE_ERR_CLOSE_FAILED, name, lt_dlerror());
+    module_set_error(MODULE_ERR_CLOSE_FAILED, name, module_loader_get_error());
     return MODULE_ERR_CLOSE_FAILED;
   }
 
-  /* Invoke the unload callback, if defined. */
   if (module_unload_callback)
     module_unload_callback(name, handle, user_data);
 
@@ -439,13 +367,6 @@ module_load(const char *name, bool manual, void *user_data)
     return MODULE_ERR_INVALID_PATH;
   }
 
-  /* Ensure the module name has a valid suffix if it's a manual load. */
-  if (manual && !module_valid_suffix(name))
-  {
-    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
-    return MODULE_ERR_INVALID_SUFFIX;
-  }
-
   /* Ensure the module is configured before loading. */
   if (module_config_find(name) == NULL)
   {
@@ -460,13 +381,16 @@ module_load(const char *name, bool manual, void *user_data)
     return MODULE_ERR_ALREADY_LOADED;
   }
 
-  /* Resolve the module path. */
-  char path[IO_PATH_MAX];
-  if (module_base_path)
-    snprintf(path, sizeof(path), "%s/%s", module_base_path, name);
-  else
+  if (module_base_path == NULL)
   {
     module_set_error(MODULE_ERR_INVALID_PATH, "Base path is not set");
+    return MODULE_ERR_INVALID_PATH;
+  }
+
+  char path[IO_PATH_MAX];
+  if (!module_loader_build_path(path, sizeof(path), module_base_path, name))
+  {
+    module_set_error(MODULE_ERR_INVALID_PATH, module_loader_get_error());
     return MODULE_ERR_INVALID_PATH;
   }
 
@@ -493,23 +417,23 @@ module_load(const char *name, bool manual, void *user_data)
     return MODULE_ERR_INVALID_FILE;
   }
 
-  /* Attempt to load the module. */
-  lt_dlhandle handle = lt_dlopen(path);
+  module_loader_handle_t handle = module_loader_open(path);
   if (handle == NULL)
   {
-    module_set_error(MODULE_ERR_LOAD_FAILED, name, lt_dlerror());
+    module_set_error(MODULE_ERR_LOAD_FAILED, name, module_loader_get_error());
     return MODULE_ERR_LOAD_FAILED;
   }
 
-  /* Retrieve the module entry point. */
-  struct Module *const module = lt_dlsym(handle, "module_entry");
-  if (module == NULL)
+  void *symbol;
+  if (!module_loader_symbol(handle, "module_entry", &symbol))
   {
-    module_set_error(MODULE_ERR_LOAD_FAILED, name, lt_dlerror());
-    lt_dlclose(handle);
+    module_set_error(MODULE_ERR_LOAD_FAILED, name, module_loader_get_error());
+
+    module_loader_close(handle);
     return MODULE_ERR_LOAD_FAILED;
   }
 
+  struct Module *const module = symbol;
   module->handle = handle;
   module->name = io_strdup(name);
 
@@ -546,12 +470,6 @@ module_config_add(const char *name, bool resident, bool core)
   {
     module_set_error(MODULE_ERR_CONFIG_EXISTS, name);
     return MODULE_ERR_CONFIG_EXISTS;
-  }
-
-  if (!module_valid_suffix(name))
-  {
-    module_set_error(MODULE_ERR_INVALID_SUFFIX, name);
-    return MODULE_ERR_INVALID_SUFFIX;
   }
 
   struct ModuleConfig *const config = io_calloc(sizeof(*config));

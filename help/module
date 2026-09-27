@@ -13,18 +13,18 @@ Available options are:
   LOAD
     - Loads a specified module into the ircd. The module name must be
       provided with a relative path from the configured base directory.
-    - Usage: MODULE LOAD <module_name.la>
+    - Usage: MODULE LOAD <module_name>
 
   UNLOAD
     - Unloads a specified module from the ircd. The module name must be
       provided with a relative path from the configured base directory.
       When a module is unloaded, all associated commands are also unloaded.
-    - Usage: MODULE UNLOAD <module_name.la>
+    - Usage: MODULE UNLOAD <module_name>
 
   RELOAD
     - Reloads specified modules. If a module name is provided, that
       module is reloaded. If * is provided, all configured modules are
       reloaded.
-    - Usage: MODULE RELOAD [<module_name.la> | *]
+    - Usage: MODULE RELOAD [<module_name> | *]
 
 - Requires Oper Priv: module

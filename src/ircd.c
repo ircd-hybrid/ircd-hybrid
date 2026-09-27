@@ -440,7 +440,6 @@ main(int argc, char *argv[])
   ircd_hook_init();
   class_init();
   cloak_init();
-  module_init();
   conf_read_files(true);   /* cold start init conf files */
 
   if (!resolver_init(ircd_event_manager))

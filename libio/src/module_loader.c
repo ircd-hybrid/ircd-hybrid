@@ -16,16 +16,13 @@
 
 #include "module_loader.h"
 
-#ifndef MODULE_LOADER_SUFFIX
-#error "MODULE_LOADER_SUFFIX must be defined by the build system"
-#endif
-
 enum
 {
   MODULE_LOADER_ERROR_CAPACITY = 512
 };
 
 static char module_loader_last_error[MODULE_LOADER_ERROR_CAPACITY];
+static const char module_loader_suffix[] = ".so";
 
 static void
 _module_loader_clear_error(void)
@@ -59,7 +56,7 @@ module_loader_build_path(char *path, size_t path_size, const char *directory, co
 
   _module_loader_clear_error();
 
-  const int length = snprintf(path, path_size, "%s/%s%s", directory, name, MODULE_LOADER_SUFFIX);
+  const int length = snprintf(path, path_size, "%s/%s%s", directory, name, module_loader_suffix);
   if (length < 0)
   {
     _module_loader_set_error("Failed to construct module path");

@@ -22,7 +22,6 @@ dnl Native dynamic module loader.
 AC_CHECK_HEADERS([dlfcn.h], [], [AC_MSG_ERROR([dlfcn.h is required])])
 AC_SEARCH_LIBS([dlopen], [dl], [], [AC_MSG_ERROR([dlopen() is required])])
 AC_CHECK_FUNCS([dlsym dlclose dlerror], [], [AC_MSG_ERROR([a POSIX dynamic loader is required])])
-AC_SUBST([MODULE_FILE_SUFFIX], [.so])
 
 dnl Compiler flag handling.
 dnl Make Clang reject unknown warning options so feature tests detect them.

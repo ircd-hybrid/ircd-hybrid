@@ -42,9 +42,6 @@ AX_LIBRARY_JANSSON
 AX_LIBRARY_NET
 AC_SEARCH_LIBS([crypt],[crypt],[],[AC_MSG_ERROR([crypt() is required but was not found])])
 
-dnl Platform characteristics.
-AC_C_BIGENDIAN
-
 dnl Header availability.
 AC_CHECK_HEADERS_ONCE([
   crypt.h

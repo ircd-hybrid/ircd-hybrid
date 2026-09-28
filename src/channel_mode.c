@@ -44,15 +44,6 @@ static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
 static uint32_t simple_modes_mask;  /* bit mask of simple modes already set */
 
-/* check_string()
- *
- * inputs       - string to check
- * output       - pointer to modified string
- * side effects - Fixes a string so that the first white space found
- *                becomes an end of string marker (`\0`).
- *                returns the 'fixed' string or "*" if the string
- *                was NULL length or a NULL pointer.
- */
 static void
 check_string(char *s)
 {
@@ -389,7 +380,6 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   return true;
 }
 
-/* Mode functions handle mode changes for a particular mode... */
 static void
 chm_nosuch(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
@@ -410,20 +400,19 @@ chm_simple(struct Client *client, struct Channel *channel, size_t parc, size_t *
   if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
-  /* If have already dealt with this simple mode, ignore it */
   if (simple_modes_mask & mode->mode)
     return;
 
   simple_modes_mask |= mode->mode;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
     if (client_is_local_user(client) && channel_has_mode(channel, mode->mode))
       return;
 
     channel_set_mode(channel, mode->mode);
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
     if (client_is_local_user(client) && !channel_has_mode(channel, mode->mode))
       return;
@@ -559,17 +548,17 @@ chm_flag(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
   if (client_is_local_user(client) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
     if (channel_member_has_flags(member, mode->flag))
-      return;  /* No redundant mode changes */
+      return;
 
     channel_member_set_flags(member, mode->flag);
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
     if (!channel_member_has_flags(member, mode->flag))
-      return;  /* No redundant mode changes */
+      return;
 
     channel_member_unset_flags(member, mode->flag);
   }
@@ -690,7 +679,6 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
                  client->id, channel->creation_time, channel->name);
 
-  /* Loop the list of modes we have */
   for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
@@ -702,10 +690,6 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
     else
       arglen = 0;
 
-    /*
-     * If we're creeping past the buf size, we need to send it and make
-     * another line for the other modes
-     */
     if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)

@@ -85,11 +85,9 @@ show_lusers(struct Client *client)
 static void
 report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
 {
-  /* If this user is being spoofed, tell them so */
   if (IsConfDoSpoofIp(conf))
     sendto_one_notice(client, &me, ":*** Spoofing your IP");
 
-  /* If this user is in the exception class, set it "E lined" */
   if (IsConfExemptKline(conf))
   {
     client_set_flag(client, FLAGS_EXEMPTKLINE);
@@ -108,7 +106,6 @@ report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
     sendto_one_notice(client, &me, ":*** You are exempt from resvs");
   }
 
-  /* If this user is exempt from user limits set it "F lined" */
   if (IsConfExemptLimits(conf))
   {
     client_set_flag(client, FLAGS_NOLIMIT);
@@ -213,11 +210,6 @@ _user_register_reject_authorization(struct Client *client, enum conf_authorize_r
   client_exit_fmt(client, "Connection rejected - %s", failure_reason);
 }
 
-/*! \brief This function is called when both NICK and USER messages
- *      have been accepted for the client, in whatever order. Only
- *      after this, is the UID message propagated.
- * \param client Pointer to given client to introduce
- */
 void
 user_register_local(struct Client *client)
 {
@@ -263,14 +255,6 @@ user_register_local(struct Client *client)
     return;
   }
 
-  /*
-   * Limit clients -
-   * We want to be able to have servers and F-line clients
-   * connect, so save room for "buffer" connections.
-   * Smaller servers may want to decrease this, and it should
-   * probably be just a percentage of the MAXCLIENTS...
-   *   -Taner
-   */
   unsigned int max_clients = GlobalSetOptions.maxclients;
   if (IsConfExemptLimits(conf))
     max_clients += MAX_BUFFER;
@@ -344,9 +328,6 @@ user_register_local(struct Client *client)
   if (ConfigGeneral.invisible_on_connect)
     user_mode_set_flag_exec(client, UMODE_INVISIBLE, USER_MODE_SOURCE_REGULAR);
 
-  /*
-   * Report if user has &^>= etc. and set flags as needed in client
-   */
   report_and_set_user_flags(client, conf);
 
   user_welcome(client);
@@ -363,10 +344,6 @@ user_register_remote(struct Client *client)
 {
   assert(client->uplink->nexthop == client->nexthop);
 
-  /*
-   * If the nick has been introduced by a services server,
-   * make it a service as well.
-   */
   if (client_is_service(client->uplink))
     client_set_flag(client, FLAGS_SERVICE);
 

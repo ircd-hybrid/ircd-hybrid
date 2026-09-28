@@ -278,7 +278,7 @@ void
 sendto_one(struct Client *to, const char *format, ...)
 {
   if (client_is_dead(to->nexthop))
-    return;  /* This socket has already been marked as dead */
+    return;
 
   struct dbuf_block *const block = dbuf_block_create();
 
@@ -296,7 +296,7 @@ void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
   if (client_is_dead(to->nexthop))
-    return;  /* This socket has already been marked as dead */
+    return;
 
   const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
@@ -327,7 +327,7 @@ void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *format, ...)
 {
   if (client_is_dead(to->nexthop))
-    return;  /* This socket has already been marked as dead */
+    return;
 
   const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
@@ -536,15 +536,12 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
     if (client_is_dead(client))
       continue;
 
-    /* check against 'one' */
     if (exclude_client && (client == exclude_client->nexthop))
       continue;
 
-    /* check we have required capabs */
     if (capab_has_flag(client, required_capab) != required_capab)
       continue;
 
-    /* check we don't have any forbidden capabs */
     if (capab_has_flag(client, excluded_capab))
       continue;
 
@@ -575,11 +572,9 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
     if (client_is_dead(target->nexthop))
       continue;
 
-    /* Do not attempt to send to ourselves ... */
     if (client_is_me(target))
       continue;
 
-    /* ... or the source */
     if (target->nexthop == source->nexthop)
       continue;
 

@@ -8,25 +8,6 @@
  * @brief Asynchronous DNS resolver implementation.
  */
 
-/*
- * A rewrite of Darren Reed's original res.c As there is nothing
- * left of Darren's original code, this is now licensed by the hybrid group.
- * (Well, some of the function names are the same, and bits of the structs..)
- * You can use it where it is useful, free even. Buy us a beer and stuff.
- *
- * The authors takes no responsibility for any damage or loss
- * of property which results from the use of this software.
- *
- * July 1999 - Rewrote a bunch of stuff here. Change hostent builder code,
- *     added callbacks and reference counting of returned hostents.
- *     --Bleep (Thomas Helvey <tomh@inxpress.net>)
- *
- * This was all needlessly complicated for irc. Simplified. No more hostent
- * All we really care about is the IP -> hostname mappings. That's all.
- *
- * Apr 28, 2003 --cryogen and Dianora
- */
-
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>

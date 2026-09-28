@@ -39,9 +39,6 @@
 /** Doubly linked list containing a list of all channels. */
 static list_t channel_list;
 
-/*! \brief Returns the channel_list as constant
- * \return channel_list
- */
 const list_t *
 channel_get_list(void)
 {
@@ -125,12 +122,6 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
   sendto_one(client, "%s", buf);
 }
 
-/*! \brief Sends +b/+e/+I
- * \param client   Client pointer to server
- * \param channel  Pointer to channel
- * \param list     Pointer to list of modes to send
- * \param flag     Char flag flagging type of mode. Currently this can be 'b', e' or 'I'
- */
 static void
 _channel_send_mask_list(struct Client *client, const struct Channel *channel, const list_t *list, const char flag)
 {
@@ -148,9 +139,6 @@ _channel_send_mask_list(struct Client *client, const struct Channel *channel, co
     const struct Ban *const ban = node->data;
     const size_t len = ban->banstr_len + 1;  /* +1 for space */
 
-    /*
-     * Send buffer and start over if we cannot fit another ban
-     */
     if ((bufptr - buf) + len > sizeof(buf) - 2)
     {
       sendto_one(client, "%s", buf);
@@ -190,10 +178,6 @@ _channel_send_mlock(struct Client *target, const struct Channel *channel)
              channel->mode_lock_time, string_or_empty(channel->mode_lock));
 }
 
-/*! \brief Send "client" a full list of the modes for channel channel
- * \param client  Pointer to client client
- * \param channel Pointer to channel pointer
- */
 void
 channel_send_state(struct Client *client, const struct Channel *channel)
 {
@@ -281,11 +265,6 @@ _channel_free_mask_list(list_t *list)
   }
 }
 
-/*! \brief Get Channel block for name (and allocate a new channel
- *         block, if it didn't exist before)
- * \param name Channel name
- * \return Channel block
- */
 struct Channel *
 channel_create(const char *name)
 {
@@ -293,9 +272,9 @@ channel_create(const char *name)
 
   struct Channel *const channel = io_calloc(sizeof(*channel));
   channel->hash_next = channel;
-  /* Doesn't hurt to set it here */
   channel->creation_time = io_time_get(IO_TIME_REALTIME_SEC);
   channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+
   /* Cache channel name length to avoid repetitive strlen() calls. */
   channel->name_len = strlcpy(channel->name, name, sizeof(channel->name));
   if (channel->name_len >= sizeof(channel->name))
@@ -307,15 +286,11 @@ channel_create(const char *name)
   return channel;
 }
 
-/*! \brief Walk through this channel, and destroy it.
- * \param channel Channel pointer
- */
 void
 channel_destroy(struct Channel *channel)
 {
   channel_invite_remove_all(&channel->invite_list);
 
-  /* Free ban/exception/invex lists */
   _channel_free_mask_list(&channel->ban_list);
   _channel_free_mask_list(&channel->exception_list);
   _channel_free_mask_list(&channel->invite_exception_list);
@@ -378,10 +353,6 @@ _channel_get_privacy_prefix(const struct Channel *channel)
   return "=";
 }
 
-/*! \brief lists all names on given channel
- * \param client   Pointer to client struct requesting names
- * \param channel  Pointer to channel block
- */
 void
 channel_send_namereply(struct Client *client, struct Channel *channel)
 {
@@ -439,11 +410,6 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
   sendto_one_numeric(client, &me, RPL_ENDOFNAMES, channel->name);
 }
 
-/*!
- * \param client Pointer to Client to check
- * \param list   Pointer to ban list to search
- * \return true if ban found for given n!u\@h mask, false otherwise
- */
 static bool
 _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 {
@@ -503,11 +469,6 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
   return false;
 }
 
-/*!
- * \param channel Pointer to channel block
- * \param client  Pointer to client to check access fo
- * \return false if not banned, true otherwise
- */
 bool
 is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
 {
@@ -516,13 +477,6 @@ is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
   return false;
 }
 
-/*! Tests if a client can join a certain channel
- * \param client Pointer to client attempting to join
- * \param channel  Pointer to channel
- * \param key      Key sent by client attempting to join if present
- * \return ERR_BANNEDFROMCHAN, ERR_INVITEONLYCHAN, ERR_CHANNELISFULL
- *         or 0 if allowed to join.
- */
 static int
 _can_join(struct Client *client, struct Channel *channel, const char *key)
 {
@@ -552,10 +506,6 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
   return 0;
 }
 
-/*! Checks if a message contains control codes
- * \param message The actual message string the client wants to send
- * \return true if the message does contain any control codes, false otherwise
- */
 static bool
 _msg_has_ctrls(const char *message)
 {
@@ -583,15 +533,6 @@ _msg_has_ctrls(const char *message)
   return false;  /* No control code found */
 }
 
-/*! Tests if a client can send to a channel
- * \param channel Pointer to Channel struct
- * \param client  Pointer to Client struct
- * \param member  Pointer to Membership struct (can be NULL)
- * \param message The actual message string the client wants to send
- * \return CAN_SEND_OPV if op, halfop, or voiced on channel\n
- *         CAN_SEND_NONOP if can send to channel but is not an op\n
- *         CAN_SEND_NO if they cannot send to channel\n
- */
 channel_send_perm_t
 channel_send_qualifies(struct Channel *channel, struct Client *client, struct ChannelMember *member,
                        unsigned int statusmsg, const char *message, bool notice, const char **error)
@@ -662,7 +603,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   }
 
   *error = "you are banned (+b)";
-  /* Cache can send if banned */
+
   if (client_is_local(client))
   {
     if (member)
@@ -688,12 +629,6 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   return CHANNEL_SEND_PERM_STANDARD;
 }
 
-/*! \brief Updates the client's oper_warn_count_down, warns the
- *         IRC operators if necessary, and updates
- *         join_part_countdown as needed.
- * \param client Pointer to struct Client to check
- * \param name   Channel name or NULL if this is a part.
- */
 static void
 _channel_check_spambot_warning(struct Client *client, const char *name)
 {
@@ -707,7 +642,6 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
     {
       client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 
-      /* It's already known as a possible spambot */
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "User %s (%s@%s) trying to join %s is a possible spambot",
                      client->name, client->username, client->host, name);
@@ -727,7 +661,7 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
         client->connection->join_part_count -= decrement_count;
     }
     else if (now - client->connection->last_join_time < GlobalSetOptions.spam_time)
-      ++client->connection->join_part_count;  /* It's a possible spambot */
+      ++client->connection->join_part_count;
 
     if (name)
       client->connection->last_join_time = now;
@@ -736,13 +670,6 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
   }
 }
 
-/*! \brief Sets the channel topic for a certain channel
- * \param channel    Pointer to struct Channel
- * \param topic      The topic string
- * \param topic_setter n!u\@h formatted string of the topic setter
- * \param topicts    Timestamp on the topic
- * \param local      Whether the topic is set by a local client
- */
 void
 channel_set_topic(struct Channel *channel, const char *topic, const char *topic_setter, uintmax_t topicts, bool local)
 {
@@ -763,11 +690,6 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
   channel->topic_time = topicts;
 }
 
-/*! \brief Sets the mode lock for a certain channel
- * \param client     Pointer to struct Client
- * \param channel    Pointer to struct Channel
- * \param mode_lock  The modes to lock as a string. Can be NULL.
- */
 void
 channel_set_mode_lock(struct Client *client, struct Channel *channel, const char *mode_lock)
 {
@@ -788,6 +710,7 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
                    name = strtok_r(NULL,      ",", &saveptr))
   {
     const char *key = NULL;
+
     /* If we have any more keys, take the first for this channel. */
     if (!string_is_empty(key_list) && (key_list = strchr(key = key_list, ',')))
       *key_list++ = '\0';
@@ -839,8 +762,7 @@ channel_join(struct Client *client, const char *name, const char *key)
     if (channel_member_find(channel, client))
       return;
 
-    /* can_join() checks for +i, +l, key, bans, etc. */
-    int ret = _can_join(client, channel, key);
+    const int ret = _can_join(client, channel, key);
     if (ret)
     {
       sendto_one_numeric(client, &me, ret, channel->name);
@@ -857,9 +779,6 @@ channel_join(struct Client *client, const char *name, const char *key)
 
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  /*
-   * Set channel modes if appropriate, and propagate
-   */
   if (status_flags == CHFL_CHANOP)
   {
     channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
@@ -867,9 +786,6 @@ channel_join(struct Client *client, const char *name, const char *key)
     sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                    me.id, channel->creation_time, channel->name, client->id);
 
-    /*
-     * Notify all other users on the new channel
-     */
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          client->name, client->username, client->host, channel->name, client->account, client->info);
     sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
@@ -902,11 +818,6 @@ channel_join(struct Client *client, const char *name, const char *key)
   channel_send_namereply(client, channel);
 }
 
-/*! \brief Removes a client from a specific channel
- * \param client Pointer to client to remove
- * \param name   Name of channel to remove from
- * \param reason Part reason to show
- */
 void
 channel_part(struct Client *client, const char *name, const char *reason)
 {
@@ -927,9 +838,6 @@ channel_part(struct Client *client, const char *name, const char *reason)
   if (client_is_local(client) && !client_is_oper(client))
     _channel_check_spambot_warning(client, NULL);
 
-  /*
-   * Remove user from the old channel (if any). Only allow /part reasons in -m chans.
-   */
   bool show_reason = true;
   if (string_is_empty(reason))
     show_reason = false;

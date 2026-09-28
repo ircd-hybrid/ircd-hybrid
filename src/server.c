@@ -337,10 +337,8 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   assert(client && client_is_local(client));
   assert(client_is_connecting(client));
 
-  /* Check the status */
   if (status != COMM_OK)
   {
-    /* We have an error, so report it and quit */
     const char *const err_str = comm_errstr(status);
 
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed or closed connect socket. */
@@ -348,7 +346,6 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
     return;
   }
 
-  /* COMM_OK, so continue the connection procedure */
   assert(fde);
   assert(client->connection->fde == fde);
 
@@ -377,7 +374,6 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   assert(connect->timeout > 0);
   assert(client_find_entity_by_name(connect->name) == NULL);
 
-  /* Still processing a DNS lookup? -> exit */
   if (connect->dns_pending)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -399,12 +395,10 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
-  /* Create a socket for the server connection */
   fde_t *const new_fde = comm_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
   if (new_fde == NULL)
     return false;
 
-  /* Create a local client */
   struct Client *const client = client_create_local();
   client->connection->fde = new_fde;
 
@@ -426,17 +420,8 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
-  /* Now, initiate the connection */
   comm_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, &connect->bind_addr,
                    _server_connect_callback, client, connect->timeout * 1000ULL);
-
-  /*
-   * At this point we have a connection in progress and a connect {} block
-   * attached to the client, the socket info should be saved in the client
-   * and it should either be resolved or have a valid address.
-   *
-   * The socket has been connected or connect is in progress.
-   */
   return true;
 }
 
@@ -461,13 +446,6 @@ server_connect_auto(void *unused)
     if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
       continue;
 
-    /*
-     * Skip this entry if the use of it is still on hold until
-     * future. Otherwise handle this entry (and set it on hold
-     * until next time). Will reset only hold times, if already
-     * made one successfull connection... [this algorithm is
-     * a bit fuzzy... -- msa >;) ]
-     */
     const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
     if (connect->autoconnect_hold_until > now)
       continue;
@@ -476,7 +454,6 @@ server_connect_auto(void *unused)
     if (connect->klass->ref_count >= connect->klass->max_total)
       continue;
 
-    /* Skip if a server with this name is already connected or connecting. */
     if (client_find_entity_by_name(connect->name))
       continue;
 

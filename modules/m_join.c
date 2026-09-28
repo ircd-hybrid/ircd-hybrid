@@ -31,16 +31,6 @@
 #include "server.h"
 #include "server_capab.h"
 
-/* set_final_mode
- *
- * inputs       - channel mode
- *              - old channel mode
- * output       - NONE
- * side effects - walk through all the channel modes turning off modes
- *                that were on in oldmode but aren't on in mode.
- *                Then walk through turning on modes that are on in mode
- *                but were not set in oldmode.
- */
 static void
 set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode, char *mbuf, char *pbuf)
 {

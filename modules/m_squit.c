@@ -80,7 +80,6 @@ mo_squit(struct Client *source, size_t parc, char *parv[])
   const char *const target_name = parv[1];
   struct Client *target = NULL;
 
-  /* The following allows wild cards in SQUIT. */
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {

@@ -95,7 +95,6 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
                             list_length(&channel->exception_list) +
                             list_length(&channel->invite_exception_list);
 
-    /* Don't let local clients overflow the b/e/I lists */
     if (num_mask >= ((channel_has_mode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
     {
       sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
@@ -147,7 +146,6 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     }
   }
 
-  /* Don't allow empty bans */
   if (string_is_empty(maskptr))
     return NULL;
 
@@ -489,13 +487,13 @@ chm_mask(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
   if (*mask == ':' || (!client_is_local(client) && strchr(mask, ' ')))
     return;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
     ret = add_id(client, channel, mask, list, mode->flag);
     if (ret == NULL)
       return;
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
     ret = del_id(client, channel, mask, list, mode->flag);
     if (ret == NULL)

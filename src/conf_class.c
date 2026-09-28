@@ -103,10 +103,6 @@ class_find(const char *name, bool active)
   return NULL;
 }
 
-/*
- * We don't delete the class table, rather mark all entries for deletion.
- * The table is cleaned up by delete_marked_classes. - avalon
- */
 void
 class_mark_all_inactive(void)
 {

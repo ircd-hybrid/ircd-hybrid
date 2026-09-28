@@ -54,26 +54,11 @@ struct MotdCache
   char motd[][MOTD_LINESIZE];  /**< Message body. */
 };
 
-/* motd_send sends a MOTD off to a user */
-extern void motd_send(struct Client *);
-
-/* motd_signon sends a MOTD off to a newly-registered user */
-extern void motd_signon(struct Client *);
-
-/* motd_recache causes all the MOTD caches to be cleared */
-extern void motd_recache(void);
-
-/* motd_init initializes the MOTD routines, including reading the
- * ircd.motd and remote.motd files into cache
- */
-extern void motd_init(void);
-
-/* This routine adds a MOTD */
 extern void motd_add(const char *, const char *);
-
-/* This routine clears the list of MOTDs */
 extern void motd_clear(void);
-
-/* This is called to report motd {} blocks */
+extern void motd_init(void);
+extern void motd_recache(void);
 extern void motd_report(struct Client *, size_t, char *[]);
+extern void motd_send(struct Client *);
+extern void motd_signon(struct Client *);
 #endif  /* INCLUDED_motd_h */

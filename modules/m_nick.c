@@ -48,10 +48,6 @@ check_clean_nick(struct Client *source, const char *nick)
 {
   assert(client_is_server(source) || (client_is_user(source) && !client_is_local(source)));
 
-  /*
-   * The old code did some wacky stuff here, if the nick is invalid, kill it
-   * and don't bother messing at all
-   */
   if (nickname_is_valid(nick, false))
     return true;
 
@@ -60,7 +56,6 @@ check_clean_nick(struct Client *source, const char *nick)
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
-  /* Bad nick change */
   if (!client_is_server(source))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
@@ -211,7 +206,6 @@ nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_t
   assert(client_is_user(source));
   assert(source->name[0]);
 
-  /* Client changing their nick */
   const bool samenick = io_strcasecmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
@@ -232,7 +226,6 @@ nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_t
   sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
                                source->name, source->username, source->host, new_nick);
 
-  /* Set the new nick name */
   client_update_name(source, new_nick);
 
   if (samenick == false)
@@ -327,8 +320,6 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   assert(client_is_server(source));
   assert(client_is_user(target));
 
-  /* Server introducing new nick */
-
   /* If their TS's are the same, kill both */
   if (nick_timestamp == target->nick_timestamp)
   {
@@ -348,7 +339,6 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
     return false;
   }
 
-  /* The timestamps are different */
   const bool sameuser = io_strcasecmp(target->username, parv[5]) == 0 &&
                         io_strcasecmp(target->sockhost, parv[8]) == 0;
 
@@ -403,7 +393,6 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
   assert(client_is_user(target));
   assert(nick_timestamp);
 
-  /* It's a client changing nick and causing a collide */
   if (nick_timestamp == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
@@ -425,7 +414,6 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
     return false;
   }
 
-  /* The timestamps are different */
   const bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
                         io_strcasecmp(target->sockhost, source->sockhost) == 0;
   if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
@@ -614,10 +602,6 @@ m_nick(struct Client *source, size_t parc, char *parv[])
   }
   else if (client_is_unknown(target))
   {
-    /*
-     * If the client that has the nick isn't registered yet (NICK but no
-     * USER) then drop the unregistered client.
-     */
     client_exit(target, "Overridden by other sign on");
 
     nick_change_local(source, nick);
@@ -667,7 +651,6 @@ ms_nick(struct Client *source, size_t parc, char *parv[])
     nick_change_remote(source, new_nick, new_nick_timestamp);
   else if (client_is_unknown(target))
   {
-    /* We're not living in the past anymore, an unknown client is local only. */
     client_exit(target, "Overridden by other sign on");
 
     nick_change_remote(source, new_nick, new_nick_timestamp);

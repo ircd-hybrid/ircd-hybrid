@@ -4,7 +4,7 @@
  */
 
 /*! \file channel.c
- * \brief Responsible for managing channels, members, bans and topics
+ * \brief Responsible for managing channels, bans and topics
  */
 
 #include <assert.h>

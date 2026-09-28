@@ -231,7 +231,7 @@ stats_operator(struct Client *client, size_t parc, char *parv[])
   LIST_FOREACH(node, oper_get_list()->head)
   {
     const struct OperItem *const oper = node->data;
-    if (client_is_oper(client))  /* Don't allow non opers to see oper privs */
+    if (client_is_oper(client))
       sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
                          oper->name, oper_privs_as_string(oper->oper_privs),
                          oper->klass->name);
@@ -327,7 +327,6 @@ stats_deny(struct Client *client, size_t parc, char *parv[])
         continue;
 
       const struct MaskItem *const conf = arec->conf;
-      /* Don't report a temporary dline as permanent dline */
       if (conf->until)
         continue;
 
@@ -349,7 +348,6 @@ stats_tdeny(struct Client *client, size_t parc, char *parv[])
         continue;
 
       const struct MaskItem *const conf = arec->conf;
-      /* Don't report a permanent dline as temporary dline */
       if (conf->until == 0)
         continue;
 
@@ -491,7 +489,6 @@ show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
 static void
 stats_auth(struct Client *client, size_t parc, char *parv[])
 {
-  /* Oper only, if unopered, return ERR_NOPRIVILEGES */
   if (ConfigGeneral.stats_i_oper_only && !client_is_oper(client))
   {
     sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
@@ -539,7 +536,6 @@ stats_kill(struct Client *client, size_t parc, char *parv[])
         continue;
 
       const struct MaskItem *const conf = arec->conf;
-      /* Don't report a temporary kline as permanent kline */
       if (conf->until)
         continue;
 
@@ -602,12 +598,6 @@ stats_pseudo(struct Client *client, size_t parc, char *parv[])
   }
 }
 
-/* stats_operedup()
- *
- * input	- client pointer
- * output	- none
- * side effects - client is shown a list of active opers
- */
 static void
 stats_operedup(struct Client *client, size_t parc, char *parv[])
 {
@@ -992,7 +982,6 @@ m_stats(struct Client *client, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  /* Check the user is actually allowed to do /stats, and isn't flooding */
   if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(client, &me, RPL_LOAD2HI, "STATS");
@@ -1001,7 +990,6 @@ m_stats(struct Client *client, size_t parc, char *parv[])
 
   last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  /* Is the stats meant for us? */
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_route_command(client, ":%s STATS %s :%s", 2, parv)->result != SERVER_ROUTE_ISME)
       return;

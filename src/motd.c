@@ -89,9 +89,9 @@ _motd_cache(struct Motd *motd)
     struct MotdCache *const cache = node->data;
     if (strcmp(cache->path, motd->path) == 0 && cache->maxcount == motd->maxcount)
     {
-      cache->ref_count++;  /* Increase reference count */
-      motd->cache = cache;  /* Remember cache */
-      return motd->cache;  /* Return it */
+      cache->ref_count++;
+      motd->cache = cache;
+      return motd->cache;
     }
   }
 
@@ -102,7 +102,6 @@ _motd_cache(struct Motd *motd)
     return NULL;
   }
 
-  /* Need the file's modification time */
   struct stat sb;
   if (fstat(fd, &sb))
   {
@@ -118,7 +117,6 @@ _motd_cache(struct Motd *motd)
     return NULL;
   }
 
-  /* Gotta read in the file, now */
   FILE *const file = fdopen(fd, "r");
   if (file == NULL)
   {
@@ -127,12 +125,11 @@ _motd_cache(struct Motd *motd)
     return NULL;
   }
 
-  /* Ok, allocate a structure; we'll realloc later to trim memory */
   struct MotdCache *const cache = io_calloc(sizeof(*cache) + (MOTD_LINESIZE * MOTD_MAXLINES));
   cache->ref_count = 1;
   cache->path = io_strdup(motd->path);
   cache->maxcount = motd->maxcount;
-  cache->modtime = sb.st_mtime;  /* Store modtime */
+  cache->modtime = sb.st_mtime;
 
   char line[MOTD_LINESIZE + 2];  /* +2 for \r\n */
   while (cache->count < cache->maxcount && fgets(line, sizeof(line), file))
@@ -146,16 +143,14 @@ _motd_cache(struct Motd *motd)
     cache->count++;
   }
 
-  fclose(file);  /* Close the file */
+  fclose(file);
 
   /* Trim memory usage a little */
   motd->cache = io_calloc(sizeof(*motd->cache) + (MOTD_LINESIZE * cache->count));
   memcpy(motd->cache, cache, sizeof(*motd->cache) + (MOTD_LINESIZE * cache->count));
   io_free(cache);
 
-  /* Now link it in */
   list_add(motd->cache, &motd->cache->node, &MotdList.cachelist);
-
   return motd->cache;
 }
 
@@ -170,16 +165,16 @@ _motd_decache(struct Motd *motd)
     return;
 
   struct MotdCache *const cache = motd->cache;
-  if (cache == NULL)  /* We can be called for records with no cache */
+  if (cache == NULL)
     return;
 
-  motd->cache = NULL;  /* Zero the cache */
+  motd->cache = NULL;
 
   if (--cache->ref_count == 0)
   {
     list_remove(&cache->node, &MotdList.cachelist);
-    io_free(cache->path);  /* Free path info */
-    io_free(cache);  /* Very simple for a reason */
+    io_free(cache->path);
+    io_free(cache);
   }
 }
 
@@ -193,10 +188,10 @@ _motd_destroy(struct Motd *motd)
   if (motd == NULL)
     return;
 
-  if (motd->cache)  /* Drop the cache */
+  if (motd->cache)
     _motd_decache(motd);
 
-  io_free(motd->path);  /* We always must have a path */
+  io_free(motd->path);
   io_free(motd->mask);
   io_free(motd);
 }
@@ -214,10 +209,9 @@ _motd_lookup(const struct Client *client)
 {
   assert(client);
 
-  if (!client_is_local(client))  /* Not my user, always return remote motd */
+  if (!client_is_local(client))
     return MotdList.remote;
 
-  /* Check the motd blocks first */
   list_node_t *node;
   LIST_FOREACH(node, MotdList.other.head)
   {
@@ -246,7 +240,7 @@ _motd_lookup(const struct Client *client)
     }
   }
 
-  return MotdList.local;  /* Ok, return the default motd */
+  return MotdList.local;
 }
 
 /*! \brief Send the content of a MotdCache to a user.
@@ -257,13 +251,12 @@ _motd_lookup(const struct Client *client)
 static void
 _motd_send_cache(struct Client *client, const struct MotdCache *cache)
 {
-  if (cache == NULL)  /* No motd to send */
+  if (cache == NULL)
   {
     sendto_one_numeric(client, &me, ERR_NOMOTD);
     return;
   }
 
-  /* Send the motd */
   sendto_one_numeric(client, &me, RPL_MOTDSTART, me.name);
 
   for (size_t i = 0; i < cache->count; ++i)
@@ -279,7 +272,6 @@ void
 motd_send(struct Client *client)
 {
   assert(client);
-
   _motd_send_cache(client, _motd_cache(_motd_lookup(client)));
 }
 
@@ -314,16 +306,14 @@ void
 motd_recache(void)
 {
   if (MotdList.local)
-    _motd_decache(MotdList.local);  /* Decache local and remote MOTDs */
-
+    _motd_decache(MotdList.local);
   if (MotdList.remote)
     _motd_decache(MotdList.remote);
 
   list_node_t *node;
-  LIST_FOREACH(node, MotdList.other.head)  /* Now all the others */
+  LIST_FOREACH(node, MotdList.other.head)
     _motd_decache(node->data);
 
-  /* Now recache local and remote MOTDs */
   _motd_cache(MotdList.local);
   _motd_cache(MotdList.remote);
 }
@@ -334,13 +324,13 @@ motd_recache(void)
 void
 motd_init(void)
 {
-  if (MotdList.local)  /* Destroy old local MOTD */
+  if (MotdList.local)
   {
     _motd_destroy(MotdList.local);
     MotdList.local = NULL;
   }
 
-  if (MotdList.remote)  /* Destroy old remote MOTD */
+  if (MotdList.remote)
   {
     _motd_destroy(MotdList.remote);
     MotdList.remote = NULL;
@@ -351,10 +341,10 @@ motd_init(void)
     return;
 
   MotdList.local = _motd_create(NULL, path);
-  _motd_cache(MotdList.local);  /* Initialize local MOTD and cache it */
+  _motd_cache(MotdList.local);
 
   MotdList.remote = _motd_create(NULL, path);
-  _motd_cache(MotdList.remote);  /* Initialize remote MOTD and cache it */
+  _motd_cache(MotdList.remote);
 }
 
 /* \brief Add a new MOTD.
@@ -388,7 +378,6 @@ motd_clear(void)
     _motd_destroy(motd);
   }
 
-  /* Now recache local and remote MOTDs */
   _motd_cache(MotdList.local);
   _motd_cache(MotdList.remote);
 }

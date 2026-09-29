@@ -1162,6 +1162,7 @@ _resolver_read_reply(fde_t *fde, void *data)
 {
   struct resolver_socket *const socket = data;
   assert(socket);
+  assert(socket->fde);
   assert(socket->fde == fde);
 
   unsigned char packet[RESOLVER_UDP_MESSAGE_CAPACITY];

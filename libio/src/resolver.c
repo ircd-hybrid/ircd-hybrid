@@ -231,8 +231,7 @@ _resolver_send_packet(const unsigned char *packet, size_t packet_length, size_t 
   ssize_t bytes_sent;
   do
     bytes_sent = sendto(socket->fde->fd, packet, packet_length, 0,
-                        (const struct sockaddr *)&nameserver->ss,
-                        address_get_sockaddr_length(nameserver));
+                        address_get_sockaddr(nameserver), address_get_sockaddr_length(nameserver));
   while (bytes_sent == -1 && errno == EINTR);
 
   return bytes_sent >= 0 && (size_t)bytes_sent == packet_length;

@@ -143,6 +143,13 @@ address_set_port(struct io_addr *addr, uint16_t port)
   return false;
 }
 
+static inline const struct sockaddr *
+address_get_sockaddr(const struct io_addr *addr)
+{
+  assert(addr);
+  return (const struct sockaddr *)&addr->ss;
+}
+
 static inline socklen_t
 address_get_sockaddr_length(const struct io_addr *addr)
 {

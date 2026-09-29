@@ -298,7 +298,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
 
   if (baddr && address_is_specified(baddr))
   {
-    if (bind(fde->fd, (const struct sockaddr *)&baddr->ss, address_get_sockaddr_length(baddr)) == -1)
+    if (bind(fde->fd, address_get_sockaddr(baddr), address_get_sockaddr_length(baddr)) == -1)
     {
       /* Failure, call the callback with COMM_ERR_BIND */
       comm_connect_complete(op, COMM_ERR_BIND);
@@ -397,7 +397,7 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
   }
 #endif
 
-  if (bind(fde->fd, (const struct sockaddr *)&addr->ss, address_get_sockaddr_length(addr)) == -1)
+  if (bind(fde->fd, address_get_sockaddr(addr), address_get_sockaddr_length(addr)) == -1)
   {
     char addr_str[INET6_ADDRSTRLEN];
     address_to_string(addr, addr_str, sizeof(addr_str));

@@ -122,12 +122,12 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_LIBADD =
 am_libio_la_OBJECTS = address.lo address_parse.lo base32.lo comm.lo \
 	comm_epoll.lo comm_kqueue.lo comm_poll.lo dbuf.lo dns.lo \
-	event.lo fdlist.lo hook.lo ident.lo io_daemon.lo io_getopt.lo \
-	io_hex.lo io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
-	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
-	memory.lo module.lo module_loader.lo patricia.lo resolver.lo \
-	resolver_config.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
-	tls_openssl.lo tls_wolfssl.lo
+	event.lo fdlist.lo hook.lo hostmask_index.lo ident.lo \
+	io_daemon.lo io_getopt.lo io_hex.lo io_parse.lo io_pidfile.lo \
+	io_rlimit.lo io_signal.lo io_string.lo io_time.lo list.lo \
+	log.lo match.lo misc.lo memory.lo module.lo module_loader.lo \
+	patricia.lo resolver.lo resolver_config.lo rng_mt.lo sha3.lo \
+	tls_gnutls.lo tls_none.lo tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -154,12 +154,13 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/comm_kqueue.Plo ./$(DEPDIR)/comm_poll.Plo \
 	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo \
 	./$(DEPDIR)/fdlist.Plo ./$(DEPDIR)/hook.Plo \
-	./$(DEPDIR)/ident.Plo ./$(DEPDIR)/io_daemon.Plo \
-	./$(DEPDIR)/io_getopt.Plo ./$(DEPDIR)/io_hex.Plo \
-	./$(DEPDIR)/io_parse.Plo ./$(DEPDIR)/io_pidfile.Plo \
-	./$(DEPDIR)/io_rlimit.Plo ./$(DEPDIR)/io_signal.Plo \
-	./$(DEPDIR)/io_string.Plo ./$(DEPDIR)/io_time.Plo \
-	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
+	./$(DEPDIR)/hostmask_index.Plo ./$(DEPDIR)/ident.Plo \
+	./$(DEPDIR)/io_daemon.Plo ./$(DEPDIR)/io_getopt.Plo \
+	./$(DEPDIR)/io_hex.Plo ./$(DEPDIR)/io_parse.Plo \
+	./$(DEPDIR)/io_pidfile.Plo ./$(DEPDIR)/io_rlimit.Plo \
+	./$(DEPDIR)/io_signal.Plo ./$(DEPDIR)/io_string.Plo \
+	./$(DEPDIR)/io_time.Plo ./$(DEPDIR)/list.Plo \
+	./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
 	./$(DEPDIR)/module.Plo ./$(DEPDIR)/module_loader.Plo \
 	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/resolver.Plo \
@@ -366,6 +367,8 @@ libio_la_SOURCES = address.c     \
                     fdlist.h      \
                     hook.c        \
                     hook.h        \
+                    hostmask_index.c \
+                    hostmask_index.h \
                     ident.c       \
                     ident.h       \
                     io.h          \
@@ -484,6 +487,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask_index.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_daemon.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_getopt.Plo@am__quote@ # am--include-marker
@@ -684,6 +688,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/hostmask_index.Plo
 	-rm -f ./$(DEPDIR)/ident.Plo
 	-rm -f ./$(DEPDIR)/io_daemon.Plo
 	-rm -f ./$(DEPDIR)/io_getopt.Plo
@@ -767,6 +772,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/event.Plo
 	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
+	-rm -f ./$(DEPDIR)/hostmask_index.Plo
 	-rm -f ./$(DEPDIR)/ident.Plo
 	-rm -f ./$(DEPDIR)/io_daemon.Plo
 	-rm -f ./$(DEPDIR)/io_getopt.Plo

@@ -57,11 +57,13 @@ typedef struct patricia_prefix
 
 typedef void (*patricia_data_cleanup_fn)(void *);
 typedef void (*patricia_foreach_fn)(const patricia_prefix_t *, void *);
+typedef bool (*patricia_foreach_match_fn)(const patricia_prefix_t *, void *, void *);
 
 extern void patricia_clear(patricia_tree_t *, patricia_data_cleanup_fn);
 extern void patricia_destroy(patricia_tree_t *, patricia_data_cleanup_fn);
 extern void patricia_foreach(const patricia_tree_t *, patricia_foreach_fn);
 extern void patricia_node_set_data(patricia_node_t *, void *);
+extern bool patricia_foreach_match_addr(const patricia_tree_t *, const struct io_addr *, patricia_foreach_match_fn, void *);
 extern bool patricia_prefix_to_string(const patricia_prefix_t *, char *, size_t, bool);
 extern void *patricia_node_get_data(const patricia_node_t *);
 extern void *patricia_remove(patricia_tree_t *, patricia_node_t *);

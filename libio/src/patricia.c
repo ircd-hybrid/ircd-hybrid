@@ -512,6 +512,83 @@ patricia_foreach(const patricia_tree_t *tree, patricia_foreach_fn callback)
   }
 }
 
+bool
+patricia_foreach_match_addr(const patricia_tree_t *tree, const struct io_addr *addr,
+                            patricia_foreach_match_fn callback, void *callback_ctx)
+{
+  assert(tree);
+  assert(addr);
+  assert(callback);
+
+  if (address_get_family(addr) != tree->family)
+    return true;
+
+  const unsigned char *addr_bytes;
+  size_t addr_length;
+
+  if (!address_get_bytes(addr, &addr_bytes, &addr_length))
+  {
+    assert(false);
+    return true;
+  }
+
+  const unsigned int max_bitlen = _patricia_family_max_bitlen(tree->family);
+  assert(max_bitlen);
+
+  if (addr_length * CHAR_BIT != max_bitlen)
+  {
+    assert(false);
+    return true;
+  }
+
+  const patricia_node_t *node = tree->root;
+  if (node)
+    assert(node->parent == NULL);
+
+  while (node)
+  {
+    assert(node->bit_index <= max_bitlen);
+
+    if (node->prefix)
+    {
+      assert(node->bit_index == node->prefix->bitlen);
+      assert(_patricia_tree_accepts_prefix(tree, node->prefix));
+
+      /*
+       * Nodes may skip bit positions. Following the query-selected branches
+       * alone therefore does not prove that a stored prefix matches; verify
+       * the complete prefix before reporting it.
+       */
+      if (!_patricia_prefix_bits_equal(_patricia_prefix_bytes(node->prefix), addr_bytes, node->prefix->bitlen))
+        break;
+
+      if (!callback(node->prefix, node->data, callback_ctx))
+        return false;
+    }
+    else
+    {
+      assert(node->left);
+      assert(node->right);
+      assert(node->data == NULL);
+    }
+
+    if (node->bit_index == max_bitlen)
+      break;
+
+    const patricia_node_t *const next =
+      _patricia_prefix_bit_is_set(addr_bytes, node->bit_index) ? node->right : node->left;
+    if (next == NULL)
+      break;
+
+    assert(next->parent == node);
+    assert(next->bit_index > node->bit_index);
+
+    node = next;
+  }
+
+  return true;
+}
+
 patricia_node_t *
 patricia_search_exact(const patricia_tree_t *tree, const patricia_prefix_t *prefix)
 {

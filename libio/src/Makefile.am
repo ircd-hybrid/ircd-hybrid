@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = libio.la
 
 libio_la_SOURCES =  address.c     \
                     address.h     \
+                    address_index.c \
+                    address_index.h \
                     address_parse.c \
                     base32.c      \
                     base32.h      \

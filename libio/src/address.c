@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -435,5 +436,34 @@ address_to_reverse_name(const struct io_addr *addr, char *buffer, size_t buffer_
     return false;
 
   memcpy(buffer, reverse_name, required_size);
+  return true;
+}
+
+bool
+address_prefix_to_string(const struct io_addr *addr, unsigned int prefix_length,
+                         char *buffer, size_t buffer_size)
+{
+  assert(addr);
+  assert(buffer);
+
+  if (buffer_size == 0)
+    return false;
+
+  struct io_addr network = *addr;
+  if (!address_mask(&network, prefix_length))
+    return false;
+
+  char address[INET6_ADDRSTRLEN];
+  if (!address_to_string(&network, address, sizeof(address)))
+    return false;
+
+  char prefix[INET6_ADDRSTRLEN + sizeof("/128")];
+  const int written =
+    snprintf(prefix, sizeof(prefix), "%s/%u", address, prefix_length);
+
+  if (written < 0 || (size_t)written >= sizeof(prefix) || (size_t)written >= buffer_size)
+    return false;
+
+  memcpy(buffer, prefix, (size_t)written + 1);
   return true;
 }

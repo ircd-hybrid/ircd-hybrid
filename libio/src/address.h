@@ -45,6 +45,7 @@ extern bool address_get_bytes(const struct io_addr *, const unsigned char **, si
 extern bool address_mask(struct io_addr *, unsigned int);
 extern bool address_match_prefix(const struct io_addr *, const struct io_addr *, unsigned int);
 extern bool address_parse_prefix(const char *, struct io_addr *, unsigned int *);
+extern bool address_prefix_to_string(const struct io_addr *, unsigned int, char *, size_t);
 extern bool address_to_bytes(const struct io_addr *, void *, size_t);
 extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
 extern bool address_to_string(const struct io_addr *, char *, size_t);

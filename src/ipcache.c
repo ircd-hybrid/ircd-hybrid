@@ -46,7 +46,11 @@ ipcache_record_find_or_add(const struct io_addr *addr)
   if (trie == NULL)
     return NULL;
 
-  patricia_node_t *const node = patricia_make_and_lookup_addr(trie, addr, 0);
+  const unsigned int bit_length = address_get_bit_length(addr);
+  if (bit_length == 0)
+    return NULL;
+
+  patricia_node_t *const node = patricia_make_and_lookup_addr(trie, addr, bit_length);
   if (node == NULL)
     return NULL;
 
@@ -98,7 +102,11 @@ ipcache_record_remove(const struct io_addr *addr, bool local)
   if (trie == NULL)
     return;
 
-  patricia_node_t *const node = patricia_try_search_exact_addr(trie, addr, 0);
+  const unsigned int bit_length = address_get_bit_length(addr);
+  if (bit_length == 0)
+    return;
+
+  patricia_node_t *const node = patricia_try_search_exact_addr(trie, addr, bit_length);
   if (node == NULL)
     return;
 

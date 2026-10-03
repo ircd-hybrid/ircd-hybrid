@@ -156,6 +156,18 @@ address_get_sockaddr_length(const struct io_addr *addr)
   return 0;
 }
 
+static inline unsigned int
+address_get_bit_length(const struct io_addr *addr)
+{
+  if (address_is_ipv4(addr))
+    return 32;
+
+  if (address_is_ipv6(addr))
+    return 128;
+
+  return 0;
+}
+
 static inline void
 address_clear(struct io_addr *addr)
 {

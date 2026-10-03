@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the STATS command.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -29,9 +30,13 @@
 #include "client.h"
 #include "client_format.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
 #include "conf_gecos.h"
+#include "conf_kill.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
@@ -315,45 +320,40 @@ stats_dns_servers(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
+_stats_deny_report(struct Client *client, bool temporary)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, conf_deny_get_list()->head)
+  {
+    const struct conf_deny *const deny = node->data;
+
+    const bool is_temporary = deny->expires_at != 0;
+    if (is_temporary != temporary)
+      continue;
+
+    char prefix[IRCD_BUFSIZE];
+    const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+    assert(formatted);
+
+    if (!formatted)
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_STATSDLINE,
+                       temporary ? 'd' : 'D', prefix, deny->reason);
+  }
+}
+
+static void
 stats_deny(struct Client *client, size_t parc, char *parv[])
 {
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_DLINE)
-        continue;
-
-      const struct MaskItem *const conf = arec->conf;
-      if (conf->until)
-        continue;
-
-      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'D', conf->host, conf->reason);
-    }
-  }
+  _stats_deny_report(client, false);
 }
 
 static void
 stats_tdeny(struct Client *client, size_t parc, char *parv[])
 {
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_DLINE)
-        continue;
-
-      const struct MaskItem *const conf = arec->conf;
-      if (conf->until == 0)
-        continue;
-
-      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'd', conf->host, conf->reason);
-    }
-  }
+  _stats_deny_report(client, true);
 }
 
 static void
@@ -365,18 +365,19 @@ stats_exempt(struct Client *client, size_t parc, char *parv[])
     return;
   }
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
+  list_node_t *node;
+  LIST_FOREACH(node, conf_exempt_get_list()->head)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_EXEMPT)
-        continue;
+    const struct conf_exempt *const exempt = node->data;
 
-      const struct MaskItem *const conf = arec->conf;
-      sendto_one_numeric(client, &me, RPL_STATSDLINE, 'e', conf->host, "");
-    }
+    char prefix[IRCD_BUFSIZE];
+    const bool formatted = conf_exempt_format_prefix(exempt, prefix, sizeof(prefix));
+    assert(formatted);
+
+    if (!formatted)
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_STATSDLINE, 'e', prefix, "");
   }
 }
 
@@ -453,37 +454,45 @@ stats_hubleaf(struct Client *client, size_t parc, char *parv[])
 }
 
 static const char *
-show_iline_prefix(const struct Client *client, const struct MaskItem *conf)
+_stats_auth_format_user(const struct Client *client,
+                        const struct conf_auth *auth,
+                        const struct conf_auth_rule *rule, char *buffer, size_t buffer_size)
 {
-  static char buf[USERLEN + 16];
-  char *bufptr = buf;
+  assert(client);
+  assert(auth);
+  assert(rule);
+  assert(buffer);
+  assert(buffer_size >= USERLEN + 16);
 
-  if (IsConfWebIRC(conf))
-    *bufptr++ = '<';
-  if (IsNoTilde(conf))
-    *bufptr++ = '-';
-  if (IsNeedIdentd(conf))
-    *bufptr++ = '+';
-  if (!IsNeedPassword(conf))
-    *bufptr++ = '&';
-  if (IsConfExemptResv(conf))
-    *bufptr++ = '$';
-  if (IsConfDoSpoofIp(conf))
-    *bufptr++ = '=';
-  if (IsConfCanFlood(conf))
-    *bufptr++ = '|';
+  char *cursor = buffer;
+
+  if (auth->flags & CONF_AUTH_FLAG_WEBIRC)
+    *cursor++ = '<';
+  if (auth->flags & CONF_AUTH_FLAG_NO_TILDE)
+    *cursor++ = '-';
+  if (auth->flags & CONF_AUTH_FLAG_REQUIRE_IDENT)
+    *cursor++ = '+';
+  if ((auth->flags & CONF_AUTH_FLAG_REJECT_PASSWORD_MISMATCH) == 0)
+    *cursor++ = '&';
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_RESV)
+    *cursor++ = '$';
+  if (!string_is_empty(auth->spoof))
+    *cursor++ = '=';
+  if (auth->flags & CONF_AUTH_FLAG_CAN_FLOOD)
+    *cursor++ = '|';
+
   if (client_is_oper(client))
   {
-    if (IsConfExemptKline(conf))
-      *bufptr++ = '^';
-    if (IsConfExemptXline(conf))
-      *bufptr++ = '!';
-    if (IsConfExemptLimits(conf))
-      *bufptr++ = '>';
+    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE)
+      *cursor++ = '^';
+    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE)
+      *cursor++ = '!';
+    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
+      *cursor++ = '>';
   }
 
-  strlcpy(bufptr, conf->user, USERLEN + 1);
-  return buf;
+  strlcpy(cursor, rule->user, buffer_size - (size_t)(cursor - buffer));
+  return buffer;
 }
 
 static void
@@ -495,25 +504,49 @@ stats_auth(struct Client *client, size_t parc, char *parv[])
     return;
   }
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
+  list_node_t *auth_node;
+  LIST_FOREACH(auth_node, conf_auth_get_list()->head)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_CLIENT)
-        continue;
+    const struct conf_auth *const auth = auth_node->data;
+    if (!string_is_empty(auth->spoof) && !client_is_oper(client))
+      continue;
 
-      const struct MaskItem *const conf = arec->conf;
-      if (IsConfDoSpoofIp(conf) && !client_is_oper(client))
-        continue;
+    list_node_t *rule_node;
+    LIST_FOREACH(rule_node, auth->rules.head)
+    {
+      const struct conf_auth_rule *const rule = rule_node->data;
+      char user[USERLEN + 16];
 
       sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
-                         string_or_default(conf->name, "*"),
-                         show_iline_prefix(client, conf),
-                         conf->host, conf->port,
-                         conf->klass->name);
+                         string_or_default(auth->spoof, "*"),
+                         _stats_auth_format_user(client, auth, rule, user, sizeof(user)),
+                         rule->host, 0U, auth->klass->name);
     }
+  }
+}
+
+static void
+_stats_kill_report(struct Client *client, bool temporary)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, conf_kill_get_list()->head)
+  {
+    const struct conf_kill *const kill = node->data;
+
+    const bool is_temporary = kill->expires_at != 0;
+    if (is_temporary != temporary)
+      continue;
+
+    char host[IRCD_BUFSIZE];
+    const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+    assert(formatted);
+
+    if (!formatted)
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_STATSKLINE,
+                       temporary ? 'k' : 'K', host, kill->user, kill->reason);
   }
 }
 
@@ -526,23 +559,7 @@ stats_kill(struct Client *client, size_t parc, char *parv[])
     return;
   }
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_KLINE)
-        continue;
-
-      const struct MaskItem *const conf = arec->conf;
-      if (conf->until)
-        continue;
-
-      sendto_one_numeric(client, &me, RPL_STATSKLINE,
-                         'K', conf->host, conf->user, conf->reason);
-    }
-  }
+  _stats_kill_report(client, false);
 }
 
 static void
@@ -554,23 +571,7 @@ stats_tkill(struct Client *client, size_t parc, char *parv[])
     return;
   }
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
-    {
-      const struct AddressRec *const arec = node->data;
-      if (arec->type != CONF_KLINE)
-        continue;
-
-      const struct MaskItem *const conf = arec->conf;
-      /* Don't report a permanent kline as temporary kline */
-      if (conf->until == 0)
-        continue;
-
-      sendto_one_numeric(client, &me, RPL_STATSKLINE, 'k', conf->host, conf->user, conf->reason);
-    }
-  }
+  _stats_kill_report(client, true);
 }
 
 static void

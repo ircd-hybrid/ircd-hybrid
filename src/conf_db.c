@@ -7,6 +7,7 @@
  * \brief Includes file utilities for database handling
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,8 +19,11 @@
 
 #include "conf.h"
 #include "conf_db.h"
+#include "conf_deny.h"
 #include "conf_gecos.h"
+#include "conf_kill.h"
 #include "conf_resv.h"
+#include "ircd_defs.h"
 
 void
 save_kline_database(const char *filename)
@@ -28,31 +32,39 @@ save_kline_database(const char *filename)
   json_t *kline_array = json_array();
   json_object_set_new(root, "k_lines", kline_array);
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
+  list_node_t *node;
+  LIST_FOREACH(node, conf_kill_get_list()->head)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
+    const struct conf_kill *const kill = node->data;
+    if (kill->origin != CONF_KILL_ORIGIN_DATABASE)
+      continue;
+
+    char host[IRCD_BUFSIZE];
+    const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+
+    assert(formatted);
+    if (!formatted)
     {
-      const struct AddressRec *arec = node->data;
-      if (arec->type != CONF_KLINE || !IsConfDatabase(arec->conf))
-        continue;
-
-      json_error_t error;
-      json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:s, s:I, s:I}",
-                                   "user", arec->conf->user,
-                                   "host", arec->conf->host,
-                                   "reason", arec->conf->reason,
-                                   "created_at", arec->conf->setat,
-                                   "expires_at", arec->conf->until);
-      if (entry == NULL)
-      {
-        log_write(LOG_TYPE_IRCD, "Error packing kline: line %d, column %d, position %d: %s",
-                  error.line, error.column, error.position, error.text);
-        continue;
-      }
-
-      json_array_append_new(kline_array, entry);
+      log_write(LOG_TYPE_IRCD, "Unable to format K-line host for [%s] while saving database",
+                kill->user);
+      continue;
     }
+
+    json_error_t error;
+    json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:s, s:I, s:I}",
+                                 "user", kill->user,
+                                 "host", host,
+                                 "reason", kill->reason,
+                                 "created_at", kill->created_at,
+                                 "expires_at", kill->expires_at);
+    if (entry == NULL)
+    {
+      log_write(LOG_TYPE_IRCD, "Error packing kline: line %d, column %d, position %d: %s",
+                error.line, error.column, error.position, error.text);
+      continue;
+    }
+
+    json_array_append_new(kline_array, entry);
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
@@ -102,15 +114,18 @@ load_kline_database(const char *filename)
       continue;
     }
 
-    struct MaskItem *conf = conf_make(CONF_KLINE);
-    conf->user = io_strdup(user);
-    conf->host = io_strdup(host);
-    conf->reason = io_strdup(reason);
-    conf->setat = created_at;
-    conf->until = expires_at;
+    const struct conf_kill_spec spec =
+    {
+      .user = user,
+      .host = host,
+      .reason = reason,
+      .created_at = created_at,
+      .expires_at = expires_at,
+      .origin = CONF_KILL_ORIGIN_DATABASE
+    };
 
-    SetConfDatabase(conf);
-    add_conf_by_address(CONF_KLINE, conf);
+    if (conf_kill_add(&spec) == NULL)
+      log_write(LOG_TYPE_IRCD, "Unable to load kline at index %zu", index);
   }
 
   json_decref(root);
@@ -123,34 +138,44 @@ save_dline_database(const char *filename)
   json_t *dline_array = json_array();
   json_object_set_new(root, "d_lines", dline_array);
 
-  for (size_t i = 0; i < ADDRESS_HASHSIZE; ++i)
+  list_node_t *node;
+  LIST_FOREACH(node, conf_deny_get_list()->head)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, atable[i].head)
+    const struct conf_deny *const deny = node->data;
+    if (deny->origin != CONF_DENY_ORIGIN_DATABASE)
+      continue;
+
+    char prefix[IRCD_BUFSIZE];
+    const bool formatted =
+      conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+
+    assert(formatted);
+    if (!formatted)
     {
-      const struct AddressRec *arec = node->data;
-      if (arec->type != CONF_DLINE || !IsConfDatabase(arec->conf))
-        continue;
-
-      json_error_t error;
-      json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
-                                   "host", arec->conf->host,
-                                   "reason", arec->conf->reason,
-                                   "created_at", arec->conf->setat,
-                                   "expires_at", arec->conf->until);
-      if (entry == NULL)
-      {
-        log_write(LOG_TYPE_IRCD, "Error packing dline: line %d, column %d, position %d: %s",
-                  error.line, error.column, error.position, error.text);
-        continue;
-      }
-
-      json_array_append_new(dline_array, entry);
+      log_write(LOG_TYPE_IRCD, "Unable to format D-line prefix while saving database");
+      continue;
     }
+
+    json_error_t error;
+    json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
+                                 "host", prefix,
+                                 "reason", deny->reason,
+                                 "created_at", deny->created_at,
+                                 "expires_at", deny->expires_at);
+    if (entry == NULL)
+    {
+      log_write(LOG_TYPE_IRCD,
+                "Error packing dline: line %d, column %d, position %d: %s",
+                error.line, error.column, error.position, error.text);
+      continue;
+    }
+
+    json_array_append_new(dline_array, entry);
   }
 
   if (json_dump_file(root, filename, JSON_INDENT(4)))
-    log_write(LOG_TYPE_IRCD, "Error writing JSON data to file '%s'", filename);
+    log_write(LOG_TYPE_IRCD,
+              "Error writing JSON data to file '%s'", filename);
 
   json_decref(root);
 }
@@ -180,28 +205,36 @@ load_dline_database(const char *filename)
   json_t *entry;
   json_array_foreach(d_lines, index, entry)
   {
-    const char *host, *reason;
-    uint64_t created_at, expires_at;
-    int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
-                             "host", &host,
-                             "reason", &reason,
-                             "created_at", &created_at,
-                             "expires_at", &expires_at);
+    const char *prefix;
+    const char *reason;
+    uint64_t created_at;
+    uint64_t expires_at;
+
+    const int res =
+      json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
+                     "host", &prefix,
+                     "reason", &reason,
+                     "created_at", &created_at,
+                     "expires_at", &expires_at);
     if (res)
     {
-      log_write(LOG_TYPE_IRCD, "Error unpacking dline at index %zu: line %d, column %d, position %d: %s",
+      log_write(LOG_TYPE_IRCD,
+                "Error unpacking dline at index %zu: line %d, column %d, position %d: %s",
                 index, error.line, error.column, error.position, error.text);
       continue;
     }
 
-    struct MaskItem *conf = conf_make(CONF_DLINE);
-    conf->host = io_strdup(host);
-    conf->reason = io_strdup(reason);
-    conf->setat = created_at;
-    conf->until = expires_at;
+    const struct conf_deny_spec spec =
+    {
+      .prefix = prefix,
+      .reason = reason,
+      .created_at = created_at,
+      .expires_at = expires_at,
+      .origin = CONF_DENY_ORIGIN_DATABASE
+    };
 
-    SetConfDatabase(conf);
-    add_conf_by_address(CONF_DLINE, conf);
+    if (conf_deny_add(&spec) == NULL)
+      log_write(LOG_TYPE_IRCD, "Unable to load dline at index %zu", index);
   }
 
   json_decref(root);

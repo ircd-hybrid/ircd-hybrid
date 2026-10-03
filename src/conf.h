@@ -10,57 +10,16 @@
 #ifndef INCLUDED_conf_h
 #define INCLUDED_conf_h
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
-#include "address.h"
-#include "conf_class.h"
-
+struct io_addr;
 struct Client;
-
-enum conf_authorize_result
-{
-  CONF_AUTHORIZE_SUCCESS,
-  CONF_AUTHORIZE_NO_AUTH_BLOCK,
-  CONF_AUTHORIZE_KLINE_MATCH,
-  CONF_AUTHORIZE_IDENT_REQUIRED,
-  CONF_AUTHORIZE_PASSWORD_MISMATCH,
-  CONF_AUTHORIZE_CLASS_TOTAL_LIMIT,
-  CONF_AUTHORIZE_CLASS_LOCAL_IP_LIMIT,
-  CONF_AUTHORIZE_CLASS_GLOBAL_IP_LIMIT,
-  CONF_AUTHORIZE_CLASS_CIDR_LIMIT,
-};
 
 enum conf_ban_type
 {
   CONF_BAN_TYPE_KLINE,
   CONF_BAN_TYPE_DLINE,
   CONF_BAN_TYPE_XLINE,
-};
-
-enum maskitem_type
-{
-  CONF_CLIENT = 1,
-  CONF_KLINE,
-  CONF_DLINE,
-  CONF_EXEMPT,
-};
-
-/* MaskItem->flags */
-enum
-{
-  CONF_FLAGS_NO_TILDE        = 1 <<  0,
-  CONF_FLAGS_NEED_IDENTD     = 1 <<  1,
-  CONF_FLAGS_EXEMPTKLINE     = 1 <<  2,
-  CONF_FLAGS_NOLIMIT         = 1 <<  3,
-  CONF_FLAGS_SPOOF_IP        = 1 <<  4,
-  CONF_FLAGS_CAN_FLOOD       = 1 <<  6,
-  CONF_FLAGS_NEED_PASSWORD   = 1 <<  7,
-  CONF_FLAGS_ENCRYPTED       = 1 <<  9,
-  CONF_FLAGS_IN_DATABASE     = 1 << 10,
-  CONF_FLAGS_EXEMPTRESV      = 1 << 11,
-  CONF_FLAGS_WEBIRC          = 1 << 13,
-  CONF_FLAGS_EXEMPTXLINE     = 1 << 14
 };
 
 enum
@@ -70,40 +29,6 @@ enum
 };
 
 #define CONF_NOREASON "<No reason supplied>"
-
-/* Macros for struct MaskItem */
-#define IsConfWebIRC(x)           ((x)->flags & CONF_FLAGS_WEBIRC)
-#define IsNoTilde(x)              ((x)->flags & CONF_FLAGS_NO_TILDE)
-#define IsConfCanFlood(x)         ((x)->flags & CONF_FLAGS_CAN_FLOOD)
-#define IsNeedPassword(x)         ((x)->flags & CONF_FLAGS_NEED_PASSWORD)
-#define IsNeedIdentd(x)           ((x)->flags & CONF_FLAGS_NEED_IDENTD)
-#define IsConfExemptKline(x)      ((x)->flags & CONF_FLAGS_EXEMPTKLINE)
-#define IsConfExemptXline(x)      ((x)->flags & CONF_FLAGS_EXEMPTXLINE)
-#define IsConfExemptLimits(x)     ((x)->flags & CONF_FLAGS_NOLIMIT)
-#define IsConfExemptResv(x)       ((x)->flags & CONF_FLAGS_EXEMPTRESV)
-#define IsConfDoSpoofIp(x)        ((x)->flags & CONF_FLAGS_SPOOF_IP)
-#define IsConfDatabase(x)         ((x)->flags & CONF_FLAGS_IN_DATABASE)
-#define SetConfDatabase(x)        ((x)->flags |= CONF_FLAGS_IN_DATABASE)
-
-
-#define IsConfKill(x)           ((x)->type == CONF_KLINE)
-#define IsConfClient(x)         ((x)->type == CONF_CLIENT)
-
-struct MaskItem
-{
-  list_node_t         node;
-  enum maskitem_type type;
-  unsigned int       flags;
-  unsigned int       port;
-  uintmax_t          until;     /* Hold action until this time (calendar time) */
-  uintmax_t          setat;
-  struct ClassItem  *klass;  /* Class of connection */
-  char              *name;
-  char              *user;     /* user part of user@host */
-  char              *host;     /* host part of user@host */
-  char              *passwd;
-  char              *reason;
-};
 
 struct conf_parser_context
 {
@@ -240,19 +165,6 @@ struct config_log_entry
   unsigned int use_logging;
 };
 
-struct AddressRec
-{
-  list_node_t node;
-  enum maskitem_type type;
-  const char *hostmask;
-  struct io_addr addr;
-  unsigned int prefix_length;
-  unsigned int precedence;
-  const char *username;
-  struct MaskItem *conf;
-};
-
-extern list_t atable[ADDRESS_HASHSIZE];
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;
@@ -262,22 +174,11 @@ extern struct config_serverinfo_entry ConfigServerInfo;
 extern struct config_admin_entry ConfigAdminInfo;
 
 extern void cleanup_tklines(void *);
-extern void conf_assign_class(struct MaskItem *, const char *);
 extern void conf_ban_apply(struct Client *, enum conf_ban_type, const char *);
 extern void conf_ban_check_clients(void);
 extern void conf_error_report(const char *);
-extern void conf_free(struct MaskItem *);
 extern void conf_read_files(bool);
 extern void conf_rehash(bool);
-extern void delete_one_address_conf(const char *, struct MaskItem *);
 extern void yyerror(const char *);
-extern bool conf_match_password(const char *, const struct MaskItem *);
 extern int conf_connect_allowed(const struct io_addr *);
-
-extern struct AddressRec *add_conf_by_address(enum maskitem_type, struct MaskItem *);
-extern struct MaskItem *conf_authorize_client(struct Client *, enum conf_authorize_result *, const char **);
-extern struct MaskItem *conf_make(enum maskitem_type);
-extern struct MaskItem *find_address_conf(const char *, const char *, const struct io_addr *, const char *);
-extern struct MaskItem *find_conf_by_address(const char *, const struct io_addr *, enum maskitem_type, const char *, const char *, bool);
-extern struct MaskItem *find_dline_conf(const struct io_addr *);
 #endif  /* INCLUDED_conf_h */

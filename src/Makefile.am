@@ -40,6 +40,8 @@ ircd_SOURCES = accept.c          \
                command.h         \
                conf.c            \
                conf.h            \
+               conf_auth.c       \
+               conf_auth.h       \
                conf_class.c      \
                conf_class.h      \
                conf_cluster.c    \
@@ -48,8 +50,14 @@ ircd_SOURCES = accept.c          \
                conf_connect.h    \
                conf_db.c         \
                conf_db.h         \
+               conf_deny.c       \
+               conf_deny.h       \
+               conf_exempt.c     \
+               conf_exempt.h     \
                conf_gecos.c      \
                conf_gecos.h      \
+               conf_kill.c       \
+               conf_kill.h       \
                conf_oper.c       \
                conf_oper.h       \
                conf_pseudo.c     \

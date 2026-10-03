@@ -29,10 +29,14 @@
 #include "cloak.h"
 #include "command.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
 #include "conf_connect.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
 #include "conf_gecos.h"
+#include "conf_kill.h"
 #include "conf_oper.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
@@ -1395,6 +1399,7 @@ auth_entry: IRCD_AUTH
     reset_block_state();
 } '{' auth_items '}' ';'
 {
+  struct conf_auth *auth = NULL;
   list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
@@ -1402,14 +1407,14 @@ auth_entry: IRCD_AUTH
 
   LIST_FOREACH(node, block_state.mask.list.head)
   {
-    char *s = node->data;
+    char *const mask = node->data;
 
-    if (string_is_empty(s))
+    if (string_is_empty(mask))
       continue;
 
     struct nuh_split nuh =
     {
-      .nuhmask = s,
+      .nuhmask = mask,
       .nickptr = NULL,
       .userptr = block_state.user.buf,
       .hostptr = block_state.host.buf,
@@ -1420,31 +1425,38 @@ auth_entry: IRCD_AUTH
 
     nuh_split(&nuh);
 
-    struct MaskItem *conf = conf_make(CONF_CLIENT);
-    conf->user = io_strdup(block_state.user.buf);
-    conf->host = io_strdup(block_state.host.buf);
+    if (auth)
+    {
+      if (!conf_auth_add_rule(auth, block_state.user.buf, block_state.host.buf))
+        conf_error_report("Unable to add auth rule");
 
-    if (block_state.rpass.buf[0])
-      conf->passwd = io_strdup(block_state.rpass.buf);
-    if (block_state.name.buf[0])
-      conf->name = io_strdup(block_state.name.buf);
+      continue;
+    }
 
-    conf->flags = block_state.flags.value;
-    conf->port = block_state.port.value;
+    const struct conf_auth_spec spec =
+    {
+      .user = block_state.user.buf,
+      .host = block_state.host.buf,
+      .password = block_state.rpass.buf,
+      .spoof = block_state.name.buf,
+      .class_name = block_state.klass.buf,
+      .flags = block_state.flags.value
+    };
 
-    conf_assign_class(conf, block_state.klass.buf);
-    add_conf_by_address(CONF_CLIENT, conf);
+    auth = conf_auth_add(&spec);
+    if (auth == NULL)
+      conf_error_report("Unable to add auth block");
   }
 };
 
-auth_items:     auth_items auth_item | auth_item;
-auth_item:      auth_user |
-                auth_passwd |
-                auth_class |
-                auth_flags |
-                auth_spoof |
-                auth_encrypted |
-                error ';' ;
+auth_items: auth_items auth_item | auth_item;
+auth_item: auth_user |
+           auth_passwd |
+           auth_class |
+           auth_flags |
+           auth_spoof |
+           auth_encrypted |
+           error ';' ;
 
 auth_user: USER '=' QSTRING ';'
 {
@@ -1469,55 +1481,56 @@ auth_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass == 2)
   {
     if (yylval.number)
-      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value |= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
     else
-      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value &= ~CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
   }
 };
 
 auth_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
+    block_state.flags.value &= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
 } '=' auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;
+
 auth_flags_item: EXCEED_LIMIT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NOLIMIT;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_LIMITS;
 } | KLINE_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTKLINE;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_KLINE;
 } | XLINE_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTXLINE;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_XLINE;
 } | NEED_IDENT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NEED_IDENTD;
+    block_state.flags.value |= CONF_AUTH_FLAG_REQUIRE_IDENT;
 } | CAN_FLOOD
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_CAN_FLOOD;
+    block_state.flags.value |= CONF_AUTH_FLAG_CAN_FLOOD;
 } | NO_TILDE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NO_TILDE;
+    block_state.flags.value |= CONF_AUTH_FLAG_NO_TILDE;
 } | RESV_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTRESV;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_RESV;
 } | T_WEBIRC
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_WEBIRC;
+    block_state.flags.value |= CONF_AUTH_FLAG_WEBIRC;
 } | NEED_PASSWORD
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NEED_PASSWORD;
+    block_state.flags.value |= CONF_AUTH_FLAG_REJECT_PASSWORD_MISMATCH;
 };
 
 auth_spoof: SPOOF '=' QSTRING ';'
@@ -1526,14 +1539,11 @@ auth_spoof: SPOOF '=' QSTRING ';'
     break;
 
   if (hostname_is_valid(yylval.string))
-  {
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
-    block_state.flags.value |= CONF_FLAGS_SPOOF_IP;
-  }
   else
-    log_write(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
+    log_write(LOG_TYPE_IRCD,
+              "Spoof either is too long or contains invalid characters. Ignoring it.");
 };
-
 
 /***************************************************************************
  * resv {} section
@@ -1929,7 +1939,7 @@ connect_aftype: AFTYPE '=' T_IPV4 ';'
 
 connect_flags: IRCD_FLAGS
 {
-  block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
+  block_state.flags.value &= CONNECT_FLAG_ENCRYPTED_PASSWORD;
 } '=' connect_flags_items ';';
 
 connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_item;
@@ -1989,15 +1999,16 @@ kill_entry: KILL
       !block_state.host.buf[0])
     break;
 
-  struct MaskItem *conf = conf_make(CONF_KLINE);
-  conf->user = io_strdup(block_state.user.buf);
-  conf->host = io_strdup(block_state.host.buf);
+  const struct conf_kill_spec spec =
+  {
+    .user = block_state.user.buf,
+    .host = block_state.host.buf,
+    .reason = block_state.rpass.buf[0] ? block_state.rpass.buf : CONF_NOREASON,
+    .origin = CONF_KILL_ORIGIN_CONFIG
+  };
 
-  if (block_state.rpass.buf[0])
-    conf->reason = io_strdup(block_state.rpass.buf);
-  else
-    conf->reason = io_strdup(CONF_NOREASON);
-  add_conf_by_address(CONF_KLINE, conf);
+  if (conf_kill_add(&spec) == NULL)
+    conf_error_report("Unable to add K-line");
 };
 
 kill_items:     kill_items kill_item | kill_item;
@@ -2045,17 +2056,15 @@ deny_entry: DENY
   if (!block_state.addr.buf[0])
     break;
 
-  if (!address_parse_prefix(block_state.addr.buf, NULL, NULL))
-    break;
+  const struct conf_deny_spec spec =
+  {
+    .prefix = block_state.addr.buf,
+    .reason = block_state.rpass.buf[0] ? block_state.rpass.buf : CONF_NOREASON,
+    .origin = CONF_DENY_ORIGIN_CONFIG
+  };
 
-  struct MaskItem *const conf = conf_make(CONF_DLINE);
-  conf->host = io_strdup(block_state.addr.buf);
-
-  if (block_state.rpass.buf[0])
-    conf->reason = io_strdup(block_state.rpass.buf);
-  else
-    conf->reason = io_strdup(CONF_NOREASON);
-  add_conf_by_address(CONF_DLINE, conf);
+  if (conf_deny_add(&spec) == NULL)
+    conf_error_report("Unable to add D-line");
 };
 
 deny_items:     deny_items deny_item | deny_item;
@@ -2087,13 +2096,8 @@ exempt_ip: IP '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (!address_parse_prefix(yylval.string, NULL, NULL))
-    break;
-
-  struct MaskItem *const conf = conf_make(CONF_EXEMPT);
-  conf->host = io_strdup(yylval.string);
-
-  add_conf_by_address(CONF_EXEMPT, conf);
+  if (conf_exempt_add(yylval.string) == NULL)
+    conf_error_report("Unable to add D-line exemption");
 };
 
 

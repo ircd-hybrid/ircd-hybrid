@@ -45,8 +45,12 @@
 #include "client_id.h"
 #include "cloak.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_class.h"
 #include "conf_db.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
+#include "conf_kill.h"
 #include "defaults.h"
 #include "extban.h"
 #include "hash.h"
@@ -440,6 +444,11 @@ main(int argc, char *argv[])
   ircd_hook_init();
   class_init();
   cloak_init();
+
+  conf_auth_init();
+  conf_deny_init();
+  conf_exempt_init();
+  conf_kill_init();
   conf_read_files(true);   /* cold start init conf files */
 
   if (!resolver_init(ircd_event_manager))

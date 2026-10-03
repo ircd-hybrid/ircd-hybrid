@@ -127,9 +127,11 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	client.$(OBJEXT) client_find.$(OBJEXT) client_format.$(OBJEXT) \
 	client_id.$(OBJEXT) client_input.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
-	conf.$(OBJEXT) conf_class.$(OBJEXT) conf_cluster.$(OBJEXT) \
-	conf_connect.$(OBJEXT) conf_db.$(OBJEXT) conf_gecos.$(OBJEXT) \
-	conf_oper.$(OBJEXT) conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
+	conf.$(OBJEXT) conf_auth.$(OBJEXT) conf_class.$(OBJEXT) \
+	conf_cluster.$(OBJEXT) conf_connect.$(OBJEXT) \
+	conf_db.$(OBJEXT) conf_deny.$(OBJEXT) conf_exempt.$(OBJEXT) \
+	conf_gecos.$(OBJEXT) conf_kill.$(OBJEXT) conf_oper.$(OBJEXT) \
+	conf_pseudo.$(OBJEXT) conf_resv.$(OBJEXT) \
 	conf_service.$(OBJEXT) conf_shared.$(OBJEXT) \
 	conf_parser.$(OBJEXT) conf_lexer.$(OBJEXT) extban.$(OBJEXT) \
 	extban_account.$(OBJEXT) extban_channel.$(OBJEXT) \
@@ -177,9 +179,11 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/client_id.Po ./$(DEPDIR)/client_input.Po \
 	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
 	./$(DEPDIR)/command.Po ./$(DEPDIR)/conf.Po \
-	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
-	./$(DEPDIR)/conf_connect.Po ./$(DEPDIR)/conf_db.Po \
-	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_lexer.Po \
+	./$(DEPDIR)/conf_auth.Po ./$(DEPDIR)/conf_class.Po \
+	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_connect.Po \
+	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_deny.Po \
+	./$(DEPDIR)/conf_exempt.Po ./$(DEPDIR)/conf_gecos.Po \
+	./$(DEPDIR)/conf_kill.Po ./$(DEPDIR)/conf_lexer.Po \
 	./$(DEPDIR)/conf_oper.Po ./$(DEPDIR)/conf_parser.Po \
 	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
 	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
@@ -436,6 +440,8 @@ ircd_SOURCES = accept.c          \
                command.h         \
                conf.c            \
                conf.h            \
+               conf_auth.c       \
+               conf_auth.h       \
                conf_class.c      \
                conf_class.h      \
                conf_cluster.c    \
@@ -444,8 +450,14 @@ ircd_SOURCES = accept.c          \
                conf_connect.h    \
                conf_db.c         \
                conf_db.h         \
+               conf_deny.c       \
+               conf_deny.h       \
+               conf_exempt.c     \
+               conf_exempt.h     \
                conf_gecos.c      \
                conf_gecos.h      \
+               conf_kill.c       \
+               conf_kill.h       \
                conf_oper.c       \
                conf_oper.h       \
                conf_pseudo.c     \
@@ -632,11 +644,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloak.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/command.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_auth.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_class.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_cluster.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_connect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_db.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_deny.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_exempt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_gecos.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_kill.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_lexer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_oper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/conf_parser.Po@am__quote@ # am--include-marker
@@ -871,11 +887,15 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/cloak.Po
 	-rm -f ./$(DEPDIR)/command.Po
 	-rm -f ./$(DEPDIR)/conf.Po
+	-rm -f ./$(DEPDIR)/conf_auth.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po
 	-rm -f ./$(DEPDIR)/conf_connect.Po
 	-rm -f ./$(DEPDIR)/conf_db.Po
+	-rm -f ./$(DEPDIR)/conf_deny.Po
+	-rm -f ./$(DEPDIR)/conf_exempt.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
+	-rm -f ./$(DEPDIR)/conf_kill.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po
 	-rm -f ./$(DEPDIR)/conf_oper.Po
 	-rm -f ./$(DEPDIR)/conf_parser.Po
@@ -983,11 +1003,15 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/cloak.Po
 	-rm -f ./$(DEPDIR)/command.Po
 	-rm -f ./$(DEPDIR)/conf.Po
+	-rm -f ./$(DEPDIR)/conf_auth.Po
 	-rm -f ./$(DEPDIR)/conf_class.Po
 	-rm -f ./$(DEPDIR)/conf_cluster.Po
 	-rm -f ./$(DEPDIR)/conf_connect.Po
 	-rm -f ./$(DEPDIR)/conf_db.Po
+	-rm -f ./$(DEPDIR)/conf_deny.Po
+	-rm -f ./$(DEPDIR)/conf_exempt.Po
 	-rm -f ./$(DEPDIR)/conf_gecos.Po
+	-rm -f ./$(DEPDIR)/conf_kill.Po
 	-rm -f ./$(DEPDIR)/conf_lexer.Po
 	-rm -f ./$(DEPDIR)/conf_oper.Po
 	-rm -f ./$(DEPDIR)/conf_parser.Po

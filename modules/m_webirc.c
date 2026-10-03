@@ -17,7 +17,10 @@
 #include "module.h"
 
 #include "client.h"
-#include "conf.h"
+#include "conf_auth.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
+#include "conf_kill.h"
 #include "ircd.h"
 #include "parse.h"
 #include "send.h"
@@ -53,29 +56,36 @@ mr_webirc(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  const struct MaskItem *conf =
-    find_address_conf(source->host, client_has_flag(source, FLAGS_GOTID) ?
-                      source->username : "webirc", &source->addr, pass);
-  if (conf == NULL)
+  const char *const username =
+    client_has_flag(source, FLAGS_GOTID) ? source->username : "webirc";
+  const struct conf_auth *auth = NULL;
+  const enum conf_auth_lookup_result lookup_result =
+    conf_auth_find(source->host, &source->addr, username, pass, &auth);
+
+  if (lookup_result == CONF_AUTH_LOOKUP_NONE)
+    return;
+  assert(auth);
+
+  if ((auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE) == 0 &&
+      conf_kill_find(&source->addr, username, source->host))
     return;
 
-  if (!IsConfClient(conf))
-    return;  /* It's a CONF_KLINE */
-
-  if (!IsConfWebIRC(conf))
+  if ((auth->flags & CONF_AUTH_FLAG_WEBIRC) == 0)
   {
     client_exit(source, "Not a WebIRC auth block");
     return;
   }
 
-  if (string_is_empty(conf->passwd))
+  if (string_is_empty(auth->password))
   {
     client_exit(source, "WebIRC auth blocks must have a password");
     return;
   }
 
-  if (!conf_match_password(pass, conf))
+  if (lookup_result != CONF_AUTH_LOOKUP_MATCH)
   {
+    assert(lookup_result == CONF_AUTH_LOOKUP_PASSWORD_MISMATCH);
+
     client_exit(source, "Invalid WebIRC password");
     return;
   }
@@ -98,14 +108,10 @@ mr_webirc(struct Client *source, size_t parc, char *parv[])
   strlcpy(source->realhost, host, sizeof(source->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  conf = find_dline_conf(&source->addr);
-  if (conf)
+  if (conf_deny_find(&source->addr) && conf_exempt_find(&source->addr) == NULL)
   {
-    if (conf->type == CONF_DLINE)
-    {
-      client_exit(source, "D-lined");
-      return;
-    }
+    client_exit(source, "D-lined");
+    return;
   }
 
   user_mode_set_flag(source, UMODE_WEBIRC);

@@ -8,11 +8,11 @@
  */
 
 #include <assert.h>
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "address.h"
 #include "io_parse.h"
@@ -20,7 +20,6 @@
 #include "io_time.h"
 #include "list.h"
 #include "log.h"
-#include "memory.h"
 #include "misc.h"
 #include "module.h"
 
@@ -29,6 +28,7 @@
 #include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_deny.h"
 #include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
@@ -37,123 +37,238 @@
 #include "send.h"
 #include "server_capab.h"
 
-static void
-dline_check(const struct AddressRec *record)
+static uintmax_t
+_dline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
 {
-  assert(record);
-  assert(address_is_ipv4(&record->addr) || address_is_ipv6(&record->addr));
+  assert(duration_seconds > 0);
 
-  list_t *tab[] = { &local_client_list, &unknown_list, NULL };
+  if (duration_seconds > UINTMAX_MAX - created_at)
+    return UINTMAX_MAX;
 
-  for (list_t **list = tab; *list; ++list)
+  return created_at + duration_seconds;
+}
+
+static bool
+_dline_validate_prefix(struct Client *source, const char *prefix)
+{
+  assert(source);
+  assert(!string_is_empty(prefix));
+
+  struct io_addr network;
+  unsigned int prefix_length;
+
+  if (!address_parse_prefix(prefix, &network, &prefix_length))
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Invalid D-Line");
+
+    return false;
+  }
+
+  const unsigned int minimum_prefix_length =
+    address_is_ipv4(&network) ? ConfigGeneral.dline_min_cidr :
+                                ConfigGeneral.dline_min_cidr6;
+
+  if (minimum_prefix_length == 0 || client_is_service(source) ||
+      prefix_length >= minimum_prefix_length)
+    return true;
+
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
+                      minimum_prefix_length);
+
+  return false;
+}
+
+static void
+_dline_enforce_clients(const struct conf_deny *deny)
+{
+  assert(deny);
+
+  list_t *const lists[] = { &local_client_list, &unknown_list };
+
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(lists); ++i)
   {
     list_node_t *node, *node_next;
-    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, lists[i]->head)
     {
       struct Client *const client = node->data;
-      if (client_is_dead(client))
+      if (client_is_dead(client) || !conf_deny_matches(deny, &client->addr))
         continue;
 
-      if (address_match_prefix(&client->addr, &record->addr, record->prefix_length))
-        conf_ban_apply(client, CONF_BAN_TYPE_DLINE, record->conf->reason);
+      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, deny->reason);
     }
   }
 }
 
 static void
-_dline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_t duration_minutes)
+_dline_notice_added(struct Client *source, const char *prefix,
+                    const char *input_prefix, uintmax_t duration_seconds)
 {
+  assert(source);
+  assert(!string_is_empty(prefix));
+  assert(!string_is_empty(input_prefix));
+
+  if (!client_is_user(source))
+    return;
+
+  const bool normalized = strcmp(input_prefix, prefix) != 0;
+
+  if (duration_seconds)
+  {
+    const uintmax_t duration_minutes = duration_seconds / 60;
+
+    if (normalized)
+      sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s] (normalized from %s)",
+                        duration_minutes, prefix, input_prefix);
+    else
+      sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s]",
+                        duration_minutes, prefix);
+
+    return;
+  }
+
+  if (normalized)
+    sendto_one_notice(source, &me,
+                      ":Added D-Line [%s] (normalized from %s)",
+                      prefix, input_prefix);
+  else
+    sendto_one_notice(source, &me, ":Added D-Line [%s]", prefix);
+}
+
+static void
+_dline_notice_existing(struct Client *source, const struct aline_ctx *aline,
+                       const struct conf_deny *existing)
+{
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->host));
+  assert(existing);
+
+  if (!client_is_user(source))
+    return;
+
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(existing, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    log_write(LOG_TYPE_IRCD, "Unable to format existing D-line prefix for [%s]",
+              aline->host);
+    sendto_one_notice(source, &me, ":[%s] is already covered by an existing D-Line",
+                      aline->host);
+    return;
+  }
+
+  sendto_one_notice(source, &me, ":[%s] already D-Lined by [%s] - %s",
+                    aline->host, prefix, existing->reason);
+}
+
+static void
+_dline_report_added(struct Client *source, const struct conf_deny *deny,
+                    const char *prefix, uintmax_t duration_seconds)
+{
+  assert(source);
+  assert(deny);
+  assert(!string_is_empty(prefix));
+
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  if (duration_minutes)
+  if (duration_seconds)
   {
+    const uintmax_t duration_minutes = duration_seconds / 60;
+
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary D-line added by %s for [%s] (%ju min) [%s]",
-                   source_name, conf->host, duration_minutes, conf->reason);
+                   source_name, prefix, duration_minutes, deny->reason);
     log_write(LOG_TYPE_DLINE,
               "Temporary D-line added by %s for [%s] (%ju min) [%s]",
-              source_name, conf->host, duration_minutes, conf->reason);
+              source_name, prefix, duration_minutes, deny->reason);
     return;
   }
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "D-line added by %s for [%s] [%s]",
-                 source_name, conf->host, conf->reason);
+                 source_name, prefix, deny->reason);
   log_write(LOG_TYPE_DLINE, "D-line added by %s for [%s] [%s]",
-            source_name, conf->host, conf->reason);
+            source_name, prefix, deny->reason);
 }
 
 static void
-dline_handle(struct Client *source, const struct aline_ctx *aline)
+_dline_add(struct Client *source, const struct aline_ctx *aline)
 {
-  struct io_addr parsed_addr;
-  unsigned int cidr_bits = 0;
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->host));
+  assert(aline->reason);
 
-  if (!address_parse_prefix(aline->host, &parsed_addr, &cidr_bits))
+  if (!_dline_validate_prefix(source, aline->host))
+    return;
+
+  const struct conf_deny *const existing = conf_deny_find_covering(aline->host);
+  if (existing)
   {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Invalid D-line");
-
+    _dline_notice_existing(source, aline, existing);
     return;
   }
 
-  const unsigned int minimum_cidr_bits =
-    address_is_ipv4(&parsed_addr) ? ConfigGeneral.dline_min_cidr :
-                                    ConfigGeneral.dline_min_cidr6;
-  if (minimum_cidr_bits > 0 && !client_is_service(source) && cidr_bits < minimum_cidr_bits)
-  {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me,
-                        ":For safety, bitmasks less than %u require conf access.",
-                        minimum_cidr_bits);
-    return;
-  }
-
-  struct MaskItem *conf = find_conf_by_address(NULL, &parsed_addr, CONF_DLINE, NULL, NULL, 1);
-  if (conf)
-  {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":[%s] already D-lined by [%s] - %s",
-                        aline->host, conf->host, conf->reason);
-    return;
-  }
+  const uintmax_t created_at = io_time_get(IO_TIME_REALTIME_SEC);
+  const uintmax_t expires_at =
+    aline->duration ? _dline_expiration_time(created_at, aline->duration) : 0;
+  const char *const created_date = date_iso8601(0);
 
   char reason[IRCD_BUFSIZE];
   if (aline->duration)
+  {
+    const uintmax_t duration_minutes = aline->duration / 60;
     snprintf(reason, sizeof(reason), "Temporary D-line %ju min. - %.*s (%s)",
-             aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
+             duration_minutes, REASONLEN, aline->reason, created_date);
+  }
   else
     snprintf(reason, sizeof(reason), "%.*s (%s)",
-             REASONLEN, aline->reason, date_iso8601(0));
+             REASONLEN, aline->reason, created_date);
 
-  conf = conf_make(CONF_DLINE);
-  conf->host = io_strdup(aline->host);
-  conf->reason = io_strdup(reason);
-  conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
-  SetConfDatabase(conf);
-
-  if (aline->duration)
+  const struct conf_deny_spec spec =
   {
-    conf->until = conf->setat + aline->duration;
-    const uintmax_t duration_minutes = aline->duration / 60;
+    .prefix = aline->host,
+    .reason = reason,
+    .created_at = created_at,
+    .expires_at = expires_at,
+    .origin = CONF_DENY_ORIGIN_DATABASE
+  };
 
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added temporary D-line [%s] (%ju min)",
-                        conf->host, duration_minutes);
-
-    _dline_report_added(source, conf, duration_minutes);
-  }
-  else
+  struct conf_deny *const deny = conf_deny_add(&spec);
+  if (deny == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added D-line [%s]",
-                        conf->host);
+      sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
+                        aline->host);
 
-    _dline_report_added(source, conf, 0);
+    log_write(LOG_TYPE_IRCD, "Unable to add D-line for [%s]", aline->host);
+    return;
   }
 
-  dline_check(add_conf_by_address(CONF_DLINE, conf));
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
+                        aline->host);
+
+    log_write(LOG_TYPE_IRCD, "Unable to format newly added D-line prefix for [%s]",
+              aline->host);
+    conf_deny_delete(deny);
+    return;
+  }
+
+  _dline_notice_added(source, prefix, aline->host, aline->duration);
+  _dline_report_added(source, deny, prefix, aline->duration);
+  _dline_enforce_clients(deny);
 }
 
 static void
@@ -174,7 +289,7 @@ mo_dline(struct Client *source, size_t parc, char *parv[])
     sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
                        aline.server, aline.duration, aline.host, aline.reason);
 
-    /* Allow ON to apply local dline as well if it matches */
+    /* Apply the D-line locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }
@@ -182,7 +297,7 @@ mo_dline(struct Client *source, size_t parc, char *parv[])
     cluster_distribute(source, "DLINE", CAPAB_DLN, CLUSTER_DLINE, "%ju %s :%s",
                        aline.duration, aline.host, aline.reason);
 
-  dline_handle(source, &aline);
+  _dline_add(source, &aline);
 }
 
 /*! \brief DLINE command handler
@@ -202,8 +317,8 @@ mo_dline(struct Client *source, size_t parc, char *parv[])
 static void
 ms_dline(struct Client *source, size_t parc, char *parv[])
 {
-  uintmax_t duration;
-  if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)
+  uintmax_t duration_seconds;
+  if (io_parse_uintmax(parv[2], &duration_seconds) != IO_PARSE_OK)
     return;
 
   struct aline_ctx aline =
@@ -213,7 +328,7 @@ ms_dline(struct Client *source, size_t parc, char *parv[])
     .host = parv[3],
     .reason = parv[4],
     .server = parv[1],
-    .duration = duration
+    .duration = duration_seconds
   };
 
   sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
@@ -224,7 +339,7 @@ ms_dline(struct Client *source, size_t parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_DLINE, source->uplink->name, source->username, source->host))
-    dline_handle(source, &aline);
+    _dline_add(source, &aline);
 }
 
 static struct Command command_table =

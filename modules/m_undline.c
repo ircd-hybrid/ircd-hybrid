@@ -7,10 +7,10 @@
  * \brief Includes required functions for processing the UNDLINE command.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "address.h"
 #include "io_string.h"
 #include "log.h"
 #include "module.h"
@@ -18,8 +18,9 @@
 #include "aline.h"
 #include "client.h"
 #include "client_format.h"
-#include "conf.h"
 #include "conf_cluster.h"
+#include "conf_deny.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -28,30 +29,31 @@
 #include "server_capab.h"
 
 static void
-_undline_report_removed(struct Client *source, const struct MaskItem *conf)
+_undline_report_removed(struct Client *source, const struct conf_deny *deny, const char *prefix)
 {
+  assert(source);
+  assert(deny);
+  assert(!string_is_empty(prefix));
+
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "D-line removed by %s for [%s]",
-                 source_name, conf->host);
+                 source_name, prefix);
   log_write(LOG_TYPE_DLINE, "D-line removed by %s for [%s]",
-            source_name, conf->host);
+            source_name, prefix);
 }
 
 static void
 _undline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct io_addr parsed_addr;
-  struct io_addr *parsed_addr_ptr = NULL;
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->host));
 
-  if (address_parse_prefix(aline->host, &parsed_addr, NULL))
-    parsed_addr_ptr = &parsed_addr;
-
-  struct MaskItem *const conf =
-    find_conf_by_address(NULL, parsed_addr_ptr, CONF_DLINE, NULL, NULL, 0);
-  if (conf == NULL)
+  struct conf_deny *const deny = conf_deny_find_exact(aline->host);
+  if (deny == NULL)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":No D-line for [%s] found",
@@ -59,22 +61,37 @@ _undline_remove(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  if (!IsConfDatabase(conf))
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
   {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me,
-                        ":D-line for [%s] is in the configuration file and must be removed by hand",
-                        conf->host);
+    log_write(LOG_TYPE_IRCD, "Unable to format D-line prefix for [%s]",
+              aline->host);
     return;
   }
 
+  switch (deny->origin)
+  {
+    case CONF_DENY_ORIGIN_CONFIG:
+      if (client_is_user(source))
+        sendto_one_notice(source, &me,
+                          ":D-line for [%s] is in the configuration file and must be removed by hand",
+                          prefix);
+      return;
+    case CONF_DENY_ORIGIN_DATABASE:
+      break;
+    default:
+      assert(false);
+      return;
+  }
+
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":Removed D-line [%s]",
-                      conf->host);
+    sendto_one_notice(source, &me, ":Removed D-line [%s]", prefix);
 
-  _undline_report_removed(source, conf);
-
-  delete_one_address_conf(aline->host, conf);
+  _undline_report_removed(source, deny, prefix);
+  conf_deny_delete(deny);
 }
 
 /*! \brief UNDLINE command handler
@@ -108,7 +125,7 @@ mo_undline(struct Client *source, size_t parc, char *parv[])
     sendto_match_servs(source, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
                        aline.server, aline.host);
 
-    /* Allow ON to apply local undline as well if it matches */
+    /* Apply the UNDLINE locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }

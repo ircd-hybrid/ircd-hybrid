@@ -8,11 +8,11 @@
  */
 
 #include <assert.h>
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "address.h"
 #include "io_parse.h"
@@ -21,7 +21,6 @@
 #include "list.h"
 #include "log.h"
 #include "misc.h"
-#include "memory.h"
 #include "module.h"
 
 #include "aline.h"
@@ -29,6 +28,7 @@
 #include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
+#include "conf_kill.h"
 #include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
@@ -37,141 +37,267 @@
 #include "send.h"
 #include "server_capab.h"
 
-static void
-kline_check(const struct AddressRec *record)
+static uintmax_t
+_kline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
 {
-  list_node_t *node, *node_next;
+  assert(duration_seconds > 0);
 
+  if (duration_seconds > UINTMAX_MAX - created_at)
+    return UINTMAX_MAX;
+
+  return created_at + duration_seconds;
+}
+
+static bool
+_kline_validate_masks(struct Client *source, const struct aline_ctx *aline)
+{
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->user));
+  assert(!string_is_empty(aline->host));
+
+  if (client_is_service(source))
+    return true;
+
+  const char *const masks[] = { aline->user, aline->host };
+  if (aline_valid_mask(IO_ARRAY_LENGTH(masks), masks))
+    return true;
+
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the mask",
+                      ConfigGeneral.min_nonwildcard);
+
+  return false;
+}
+
+static bool
+_kline_validate_prefix(struct Client *source, const char *host)
+{
+  assert(source);
+  assert(!string_is_empty(host));
+
+  struct io_addr network;
+  unsigned int prefix_length;
+
+  if (!address_parse_prefix(host, &network, &prefix_length))
+    return true;
+
+  const unsigned int minimum_prefix_length =
+    address_is_ipv4(&network) ? ConfigGeneral.kline_min_cidr :
+                                ConfigGeneral.kline_min_cidr6;
+
+  if (minimum_prefix_length == 0 || client_is_service(source) ||
+      prefix_length >= minimum_prefix_length)
+    return true;
+
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
+                      minimum_prefix_length);
+
+  return false;
+}
+
+static bool
+_kline_matches_client(const struct conf_kill *kill, const struct Client *client)
+{
+  assert(kill);
+  assert(client);
+
+  return conf_kill_matches(kill, &client->addr, client->username, client->realhost) ||
+         conf_kill_matches(kill, NULL, client->username, client->sockhost) ||
+         conf_kill_matches(kill, NULL, client->username, client->host);
+}
+
+static void
+_kline_enforce_clients(const struct conf_kill *kill)
+{
+  assert(kill);
+
+  list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
     struct Client *const client = node->data;
-    if (client_is_dead(client))
+    if (client_is_dead(client) || !_kline_matches_client(kill, client))
       continue;
 
-    if (match(record->username, client->username))
-      continue;
-
-    if (address_is_ipv4(&record->addr) ||
-        address_is_ipv6(&record->addr))
-    {
-      if (!address_match_prefix(&client->addr, &record->addr, record->prefix_length))
-        continue;
-    }
-    else if (match(record->hostmask, client->realhost) &&
-             match(record->hostmask, client->sockhost) && match(record->hostmask, client->host))
-      continue;
-
-    conf_ban_apply(client, CONF_BAN_TYPE_KLINE, record->conf->reason);
+    conf_ban_apply(client, CONF_BAN_TYPE_KLINE, kill->reason);
   }
 }
 
 static void
-_kline_report_added(struct Client *source, const struct MaskItem *conf, uintmax_t duration_minutes)
+_kline_notice_added(struct Client *source, const struct conf_kill *kill,
+                    const char *host, const char *input_host, uintmax_t duration_seconds)
 {
+  assert(source);
+  assert(kill);
+  assert(!string_is_empty(host));
+  assert(!string_is_empty(input_host));
+
+  if (!client_is_user(source))
+    return;
+
+  const bool normalized = strcmp(input_host, host) != 0;
+
+  if (duration_seconds)
+  {
+    const uintmax_t duration_minutes = duration_seconds / 60;
+
+    if (normalized)
+      sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s] (normalized from %s)",
+                        duration_minutes, kill->user, host, input_host);
+    else
+      sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",
+                        duration_minutes, kill->user, host);
+
+    return;
+  }
+
+  if (normalized)
+    sendto_one_notice(source, &me, ":Added K-Line [%s@%s] (normalized from %s)",
+                      kill->user, host, input_host);
+  else
+    sendto_one_notice(source, &me, ":Added K-Line [%s@%s]",
+                      kill->user, host);
+}
+
+static void
+_kline_notice_existing(struct Client *source, const struct aline_ctx *aline,
+                       const struct conf_kill *existing)
+{
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->user));
+  assert(!string_is_empty(aline->host));
+  assert(existing);
+
+  if (!client_is_user(source))
+    return;
+
+  char host[IRCD_BUFSIZE];
+  const bool formatted = conf_kill_format_host(existing, host, sizeof(host));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    log_write(LOG_TYPE_IRCD, "Unable to format existing K-line host for [%s@%s]",
+              aline->user, aline->host);
+    sendto_one_notice(source, &me, ":Unable to display the existing K-Line covering [%s@%s]",
+                      aline->user, aline->host);
+    return;
+  }
+
+  sendto_one_notice(source, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
+                    aline->user, aline->host, existing->user, host, existing->reason);
+}
+
+static void
+_kline_report_added(struct Client *source, const struct conf_kill *kill,
+                    const char *host, uintmax_t duration_seconds)
+{
+  assert(source);
+  assert(kill);
+  assert(!string_is_empty(host));
+
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  if (duration_minutes)
+  if (duration_seconds)
   {
+    const uintmax_t duration_minutes = duration_seconds / 60;
+
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary K-line added by %s for [%s@%s] (%ju min) [%s]",
-                   source_name, conf->user, conf->host, duration_minutes, conf->reason);
+                   source_name, kill->user, host, duration_minutes, kill->reason);
     log_write(LOG_TYPE_KLINE,
               "Temporary K-line added by %s for [%s@%s] (%ju min) [%s]",
-              source_name, conf->user, conf->host, duration_minutes, conf->reason);
+              source_name, kill->user, host, duration_minutes, kill->reason);
     return;
   }
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "K-line added by %s for [%s@%s] [%s]",
-                 source_name, conf->user, conf->host, conf->reason);
+                 source_name, kill->user, host, kill->reason);
   log_write(LOG_TYPE_KLINE, "K-line added by %s for [%s@%s] [%s]",
-            source_name, conf->user, conf->host, conf->reason);
+            source_name, kill->user, host, kill->reason);
 }
 
 static void
-kline_handle(struct Client *source, const struct aline_ctx *aline)
+_kline_add(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!client_is_service(source))
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->user));
+  assert(!string_is_empty(aline->host));
+  assert(aline->reason);
+
+  if (!_kline_validate_masks(source, aline) ||
+      !_kline_validate_prefix(source, aline->host))
+    return;
+
+  const struct conf_kill *const existing = conf_kill_find_covering(aline->user, aline->host);
+  if (existing)
   {
-    const char *const masks[] = { aline->user, aline->host };
-
-    if (!aline_valid_mask(IO_ARRAY_LENGTH(masks), masks))
-    {
-      if (client_is_user(source))
-        sendto_one_notice(source, &me,
-                          ":Please include at least %u non-wildcard characters with the mask",
-                          ConfigGeneral.min_nonwildcard);
-      return;
-    }
-  }
-
-  struct io_addr parsed_addr;
-  unsigned int prefix_length = 0;
-  struct io_addr *parsed_addr_ptr = NULL;
-
-  if (address_parse_prefix(aline->host, &parsed_addr, &prefix_length))
-  {
-    parsed_addr_ptr = &parsed_addr;
-
-    const unsigned int minimum_prefix_length =
-      address_is_ipv4(&parsed_addr) ? ConfigGeneral.kline_min_cidr :
-                                      ConfigGeneral.kline_min_cidr6;
-    if (minimum_prefix_length > 0 && !client_is_service(source) &&
-        prefix_length < minimum_prefix_length)
-    {
-      if (client_is_user(source))
-        sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
-                          minimum_prefix_length);
-
-      return;
-    }
-  }
-
-  struct MaskItem *conf;
-  if ((conf = find_conf_by_address(aline->host, parsed_addr_ptr, CONF_KLINE, aline->user, NULL, 0)))
-  {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":[%s@%s] already K-Lined by [%s@%s] - %s",
-                        aline->user, aline->host, conf->user, conf->host, conf->reason);
+    _kline_notice_existing(source, aline, existing);
     return;
   }
 
+  const uintmax_t created_at = io_time_get(IO_TIME_REALTIME_SEC);
+  const uintmax_t expires_at =
+    aline->duration ? _kline_expiration_time(created_at, aline->duration) : 0;
+  const char *const created_date = date_iso8601(0);
+
   char reason[IRCD_BUFSIZE];
   if (aline->duration)
-    snprintf(reason, sizeof(reason), "Temporary K-line %ju min. - %.*s (%s)",
-             aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
-  else
-    snprintf(reason, sizeof(reason), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
-
-  conf = conf_make(CONF_KLINE);
-  conf->user = io_strdup(aline->user);
-  conf->host = io_strdup(aline->host);
-  conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
-  conf->reason = io_strdup(reason);
-  SetConfDatabase(conf);
-
-  if (aline->duration)
   {
-    conf->until = conf->setat + aline->duration;
     const uintmax_t duration_minutes = aline->duration / 60;
-
-    if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. K-Line [%s@%s]",
-                        duration_minutes, conf->user, conf->host);
-
-    _kline_report_added(source, conf, duration_minutes);
+    snprintf(reason, sizeof(reason), "Temporary K-line %ju min. - %.*s (%s)",
+             duration_minutes, REASONLEN, aline->reason, created_date);
   }
   else
+    snprintf(reason, sizeof(reason), "%.*s (%s)",
+             REASONLEN, aline->reason, created_date);
+
+  const struct conf_kill_spec spec =
+  {
+    .user = aline->user,
+    .host = aline->host,
+    .reason = reason,
+    .created_at = created_at,
+    .expires_at = expires_at,
+    .origin = CONF_KILL_ORIGIN_DATABASE
+  };
+
+  struct conf_kill *const kill = conf_kill_add(&spec);
+  if (kill == NULL)
   {
     if (client_is_user(source))
-      sendto_one_notice(source, &me, ":Added K-Line [%s@%s]",
-                        conf->user, conf->host);
+      sendto_one_notice(source, &me, ":Unable to add K-Line [%s@%s]",
+                        aline->user, aline->host);
 
-    _kline_report_added(source, conf, 0);
+    log_write(LOG_TYPE_IRCD, "Unable to add K-line for [%s@%s]",
+              aline->user, aline->host);
+    return;
   }
 
-  kline_check(add_conf_by_address(CONF_KLINE, conf));
+  char host[IRCD_BUFSIZE];
+  const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add K-Line [%s@%s]",
+                        aline->user, aline->host);
+
+    log_write(LOG_TYPE_IRCD, "Unable to format newly added K-line host for [%s@%s]",
+              aline->user, aline->host);
+    conf_kill_delete(kill);
+    return;
+  }
+
+  _kline_notice_added(source, kill, host, aline->host, aline->duration);
+  _kline_report_added(source, kill, host, aline->duration);
+  _kline_enforce_clients(kill);
 }
 
 static void
@@ -192,7 +318,7 @@ mo_kline(struct Client *source, size_t parc, char *parv[])
     sendto_match_servs(source, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
                        aline.server, aline.duration, aline.user, aline.host, aline.reason);
 
-    /* Allow ON to apply local kline as well if it matches */
+    /* Apply the K-line locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }
@@ -200,7 +326,7 @@ mo_kline(struct Client *source, size_t parc, char *parv[])
     cluster_distribute(source, "KLINE", CAPAB_KLN, CLUSTER_KLINE, "%ju %s %s :%s",
                        aline.duration, aline.user, aline.host, aline.reason);
 
-  kline_handle(source, &aline);
+  _kline_add(source, &aline);
 }
 
 /*! \brief KLINE command handler
@@ -221,8 +347,8 @@ mo_kline(struct Client *source, size_t parc, char *parv[])
 static void
 ms_kline(struct Client *source, size_t parc, char *parv[])
 {
-  uintmax_t duration;
-  if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)
+  uintmax_t duration_seconds;
+  if (io_parse_uintmax(parv[2], &duration_seconds) != IO_PARSE_OK)
     return;
 
   struct aline_ctx aline =
@@ -233,7 +359,7 @@ ms_kline(struct Client *source, size_t parc, char *parv[])
     .host = parv[4],
     .reason = parv[5],
     .server = parv[1],
-    .duration = duration
+    .duration = duration_seconds
   };
 
   sendto_match_servs(source, aline.server, CAPAB_KLN, "KLINE %s %ju %s %s :%s",
@@ -244,7 +370,7 @@ ms_kline(struct Client *source, size_t parc, char *parv[])
 
   if (client_is_service(source) ||
       shared_find(SHARED_KLINE, source->uplink->name, source->username, source->host))
-    kline_handle(source, &aline);
+    _kline_add(source, &aline);
 }
 
 static struct Command command_table =

@@ -7,10 +7,10 @@
  * \brief Includes required functions for processing the UNKLINE command.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "address.h"
 #include "io_string.h"
 #include "log.h"
 #include "module.h"
@@ -18,8 +18,9 @@
 #include "aline.h"
 #include "client.h"
 #include "client_format.h"
-#include "conf.h"
 #include "conf_cluster.h"
+#include "conf_kill.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -28,30 +29,32 @@
 #include "server_capab.h"
 
 static void
-_unkline_report_removed(struct Client *source, const struct MaskItem *conf)
+_unkline_report_removed(struct Client *source, const struct conf_kill *kill, const char *host)
 {
+  assert(source);
+  assert(kill);
+  assert(!string_is_empty(host));
+
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "K-line removed by %s for [%s@%s]",
-                 source_name, conf->user, conf->host);
+                 source_name, kill->user, host);
   log_write(LOG_TYPE_KLINE, "K-line removed by %s for [%s@%s]",
-            source_name, conf->user, conf->host);
+            source_name, kill->user, host);
 }
 
 static void
 _unkline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct io_addr parsed_addr;
-  struct io_addr *parsed_addr_ptr = NULL;
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->user));
+  assert(!string_is_empty(aline->host));
 
-  if (address_parse_prefix(aline->host, &parsed_addr, NULL))
-    parsed_addr_ptr = &parsed_addr;
-
-  struct MaskItem *const conf =
-    find_conf_by_address(aline->host, parsed_addr_ptr, CONF_KLINE, aline->user, NULL, 0);
-  if (conf == NULL)
+  struct conf_kill *const kill = conf_kill_find_exact(aline->user, aline->host);
+  if (kill == NULL)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":No K-line for [%s@%s] found",
@@ -59,22 +62,37 @@ _unkline_remove(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  if (!IsConfDatabase(conf))
+  char host[IRCD_BUFSIZE];
+  const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+  assert(formatted);
+
+  if (!formatted)
   {
-    if (client_is_user(source))
-      sendto_one_notice(source, &me,
-                        ":K-line for [%s@%s] is in the configuration file and must be removed by hand",
-                        conf->user, conf->host);
+    log_write(LOG_TYPE_IRCD, "Unable to format K-line host for [%s@%s]",
+              aline->user, aline->host);
     return;
   }
 
+  switch (kill->origin)
+  {
+    case CONF_KILL_ORIGIN_CONFIG:
+      if (client_is_user(source))
+        sendto_one_notice(source, &me,
+                          ":K-line for [%s@%s] is in the configuration file and must be removed by hand",
+                          kill->user, host);
+      return;
+    case CONF_KILL_ORIGIN_DATABASE:
+      break;
+    default:
+      assert(false);
+      return;
+  }
+
   if (client_is_user(source))
-    sendto_one_notice(source, &me, ":Removed K-line [%s@%s]",
-                      conf->user, conf->host);
+    sendto_one_notice(source, &me, ":Removed K-line [%s@%s]", kill->user, host);
 
-  _unkline_report_removed(source, conf);
-
-  delete_one_address_conf(aline->host, conf);
+  _unkline_report_removed(source, kill, host);
+  conf_kill_delete(kill);
 }
 
 /*! \brief UNKLINE command handler
@@ -105,10 +123,10 @@ mo_unkline(struct Client *source, size_t parc, char *parv[])
 
   if (aline.server)
   {
-     sendto_match_servs(source, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
-                        aline.server, aline.user, aline.host);
+    sendto_match_servs(source, aline.server, CAPAB_UNKLN, "UNKLINE %s %s %s",
+                       aline.server, aline.user, aline.host);
 
-    /* Allow ON to apply local unkline as well if it matches */
+    /* Apply the UNKLINE locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }

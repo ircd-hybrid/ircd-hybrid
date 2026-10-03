@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "address.h"
 #include "list.h"
 
 struct ResvItem

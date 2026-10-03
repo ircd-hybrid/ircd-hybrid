@@ -33,6 +33,7 @@
 #include "client_input.h"
 #include "cloak.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_gecos.h"
 #include "defaults.h"
 #include "hash.h"
@@ -83,36 +84,36 @@ show_lusers(struct Client *client)
 }
 
 static void
-report_and_set_user_flags(struct Client *client, const struct MaskItem *conf)
+_user_report_and_set_flags(struct Client *client, const struct conf_auth *auth)
 {
-  if (IsConfDoSpoofIp(conf))
+  if (!string_is_empty(auth->spoof))
     sendto_one_notice(client, &me, ":*** Spoofing your IP");
 
-  if (IsConfExemptKline(conf))
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE)
   {
     client_set_flag(client, FLAGS_EXEMPTKLINE);
     sendto_one_notice(client, &me, ":*** You are exempt from K/D lines");
   }
 
-  if (IsConfExemptXline(conf))
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE)
   {
     client_set_flag(client, FLAGS_EXEMPTXLINE);
     sendto_one_notice(client, &me, ":*** You are exempt from X lines");
   }
 
-  if (IsConfExemptResv(conf))
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_RESV)
   {
     client_set_flag(client, FLAGS_EXEMPTRESV);
     sendto_one_notice(client, &me, ":*** You are exempt from resvs");
   }
 
-  if (IsConfExemptLimits(conf))
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
   {
     client_set_flag(client, FLAGS_NOLIMIT);
     sendto_one_notice(client, &me, ":*** You are exempt from user limits");
   }
 
-  if (IsConfCanFlood(conf))
+  if (auth->flags & CONF_AUTH_FLAG_CAN_FLOOD)
   {
     client_set_flag(client, FLAGS_CANFLOOD);
     sendto_one_notice(client, &me, ":*** You are exempt from flood protection");
@@ -192,16 +193,17 @@ _user_register_report_rejection(struct Client *client, const char *reason_format
                  client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer), reason);
 }
 
+
 static void
-_user_register_reject_authorization(struct Client *client, enum conf_authorize_result result,
+_user_register_reject_authorization(struct Client *client, enum conf_auth_result result,
                                     const char *failure_reason)
 {
-  assert(result != CONF_AUTHORIZE_SUCCESS);
+  assert(result != CONF_AUTH_SUCCESS);
 
   if (string_is_empty(failure_reason))
     failure_reason = "unknown reason";
 
-  if (result == CONF_AUTHORIZE_PASSWORD_MISMATCH)
+  if (result == CONF_AUTH_PASSWORD_MISMATCH)
     sendto_one_numeric(client, &me, ERR_PASSWDMISMATCH);
 
   _user_register_report_rejection(client, "authorization failed: %s",
@@ -236,11 +238,12 @@ user_register_local(struct Client *client)
       return;
   }
 
-  enum conf_authorize_result authorize_result = CONF_AUTHORIZE_SUCCESS;
+  enum conf_auth_result authorize_result = CONF_AUTH_SUCCESS;
   const char *authorize_failure_reason = NULL;
-  const struct MaskItem *const conf =
-    conf_authorize_client(client, &authorize_result, &authorize_failure_reason);
-  if (conf == NULL)
+
+  const struct conf_auth *const auth =
+    conf_auth_authorize_client(client, &authorize_result, &authorize_failure_reason);
+  if (auth == NULL)
   {
     _user_register_reject_authorization(client, authorize_result, authorize_failure_reason);
     return;
@@ -256,7 +259,7 @@ user_register_local(struct Client *client)
   }
 
   unsigned int max_clients = GlobalSetOptions.maxclients;
-  if (IsConfExemptLimits(conf))
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
     max_clients += MAX_BUFFER;
 
   const unsigned int local_client_count = list_length(&local_client_list);
@@ -269,7 +272,7 @@ user_register_local(struct Client *client)
     return;
   }
 
-  if (!IsConfExemptXline(conf))
+  if ((auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE) == 0)
   {
     const struct GecosItem *const gecos = gecos_find(client->info, match);
     if (gecos)
@@ -328,7 +331,7 @@ user_register_local(struct Client *client)
   if (ConfigGeneral.invisible_on_connect)
     user_mode_set_flag_exec(client, UMODE_INVISIBLE, USER_MODE_SOURCE_REGULAR);
 
-  report_and_set_user_flags(client, conf);
+  _user_report_and_set_flags(client, auth);
 
   user_welcome(client);
 

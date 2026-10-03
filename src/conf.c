@@ -9,14 +9,12 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "address.h"
 #include "io_string.h"
@@ -32,10 +30,14 @@
 #include "client_format.h"
 #include "cloak.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
 #include "conf_connect.h"
+#include "conf_exempt.h"
 #include "conf_gecos.h"
+#include "conf_deny.h"
+#include "conf_kill.h"
 #include "conf_oper.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
@@ -55,8 +57,6 @@
 
 extern int yyparse();  /* Defined in conf_parser.c */
 
-list_t atable[ADDRESS_HASHSIZE];
-
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
 struct config_general_entry ConfigGeneral;
@@ -69,479 +69,32 @@ extern unsigned int conf_line_number;
 extern char conf_line_text[];
 extern char conf_file_name[IRCD_BUFSIZE];
 
-/* struct MaskItem *find_conf_by_address(const char *, struct io_addr *,
- *                                         int type, int fam, const char *username)
- * Input: The hostname, the address, the type of mask to find, the address
- *        family, the username.
- * Output: The matching value with the highest precedence.
- * Side-effects: None
- * Note: Setting bit 0 of the type means that the username is ignored.
- * Warning: IsNeedPassword for everything that is not an auth{} entry
- * should always be true (i.e. conf->flags & CONF_FLAGS_NEED_PASSWORD == 0)
- */
-struct MaskItem *
-find_conf_by_address(const char *name, const struct io_addr *addr, enum maskitem_type type,
-                     const char *username, const char *password, bool do_match)
+static void
+_conf_kill_expire_notice(const struct conf_kill *kill, void *unused)
 {
-  unsigned int highest_precedence = 0;
-  struct MaskItem *best_conf = NULL;
-  int (*const compare)(const char *, const char *) = do_match ? match : io_strcasecmp;
+  char host[IRCD_BUFSIZE];
+  const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+  assert(formatted);
 
-  if (addr)
-  {
-    if (address_is_ipv6(addr))
-    {
-      for (int hash_prefix_length = 128; hash_prefix_length >= 0; hash_prefix_length -= 16)
-      {
-        list_node_t *node;
-        LIST_FOREACH(node, atable[hash_ipv6(addr, hash_prefix_length)].head)
-        {
-          const struct AddressRec *const record = node->data;
-          if (record->type != type ||
-              record->precedence <= highest_precedence ||
-              !address_is_ipv6(&record->addr) ||
-              !address_match_prefix(addr, &record->addr, record->prefix_length) ||
-              (username && compare(record->username, username)) ||
-              (!IsNeedPassword(record->conf) &&
-               record->conf->passwd && !conf_match_password(password, record->conf)))
-            continue;
-
-          highest_precedence = record->precedence;
-          best_conf = record->conf;
-        }
-      }
-    }
-    else if (address_is_ipv4(addr))
-    {
-      for (int hash_prefix_length = 32; hash_prefix_length >= 0; hash_prefix_length -= 8)
-      {
-        list_node_t *node;
-        LIST_FOREACH(node, atable[hash_ipv4(addr, hash_prefix_length)].head)
-        {
-          const struct AddressRec *const record = node->data;
-          if (record->type != type ||
-              record->precedence <= highest_precedence ||
-              !address_is_ipv4(&record->addr) ||
-              !address_match_prefix(addr, &record->addr, record->prefix_length) ||
-              (username && compare(record->username, username)) ||
-              (!IsNeedPassword(record->conf) &&
-               record->conf->passwd && !conf_match_password(password, record->conf)))
-            continue;
-
-          highest_precedence = record->precedence;
-          best_conf = record->conf;
-        }
-      }
-    }
-  }
-
-  if (name)
-  {
-    for (const char *part = name; ; )
-    {
-      list_node_t *node;
-      LIST_FOREACH(node, atable[hash_text(part)].head)
-      {
-        const struct AddressRec *const record = node->data;
-        if (record->type != type ||
-            record->precedence <= highest_precedence ||
-            address_is_ipv4(&record->addr) ||
-            address_is_ipv6(&record->addr) ||
-            compare(record->hostmask, name) ||
-            (username && compare(record->username, username)) ||
-            (!IsNeedPassword(record->conf) &&
-             record->conf->passwd && !conf_match_password(password, record->conf)))
-          continue;
-
-        highest_precedence = record->precedence;
-        best_conf = record->conf;
-      }
-
-      part = strchr(part, '.');
-      if (part == NULL)
-        break;
-
-      ++part;
-    }
-
-    list_node_t *node;
-    LIST_FOREACH(node, atable[0].head)
-    {
-      const struct AddressRec *const record = node->data;
-      if (record->type != type ||
-          record->precedence <= highest_precedence ||
-          address_is_ipv4(&record->addr) ||
-          address_is_ipv6(&record->addr) ||
-          compare(record->hostmask, name) ||
-          (username && compare(record->username, username)) ||
-          (!IsNeedPassword(record->conf) &&
-           record->conf->passwd && !conf_match_password(password, record->conf)))
-        continue;
-
-      highest_precedence = record->precedence;
-      best_conf = record->conf;
-    }
-  }
-
-  return best_conf;
-}
-
-struct MaskItem *
-find_address_conf(const char *host, const char *user, const struct io_addr *addr, const char *password)
-{
-  struct MaskItem *authcnf = NULL, *killcnf = NULL;
-
-  /* Find the best auth{} block... If none, return NULL -A1kmm */
-  if ((authcnf = find_conf_by_address(host, addr, CONF_CLIENT, user, password, 1)) == NULL)
-    return NULL;
-
-  /* If they are exempt from K-lines, return the best auth{} block. -A1kmm */
-  if (IsConfExemptKline(authcnf))
-    return authcnf;
-
-  /* Find the best K-line... -A1kmm */
-  killcnf = find_conf_by_address(host, addr, CONF_KLINE, user, NULL, 1);
-
-  /*
-   * If they are K-lined, return the K-line. Otherwise, return the
-   * auth {} block. -A1kmm
-   */
-  if (killcnf)
-    return killcnf;
-
-  return authcnf;
-}
-
-struct MaskItem *
-find_dline_conf(const struct io_addr *addr)
-{
-  struct MaskItem *eline;
-
-  eline = find_conf_by_address(NULL, addr, CONF_EXEMPT, NULL, NULL, 1);
-  if (eline)
-    return eline;
-
-  return find_conf_by_address(NULL, addr, CONF_DLINE, NULL, NULL, 1);
-}
-
-struct AddressRec *
-add_conf_by_address(enum maskitem_type type, struct MaskItem *conf)
-{
-  assert(type);
-  assert(conf);
-  assert(!string_is_empty(conf->host));
-
-  static unsigned int precedence = UINT_MAX;
-
-  struct AddressRec *const record = io_calloc(sizeof(*record));
-  record->type = type;
-  record->hostmask = conf->host;
-  record->username = conf->user;
-  record->conf = conf;
-  record->precedence = precedence--;
-
-  address_clear(&record->addr);
-  record->prefix_length = 0;
-
-  address_parse_prefix(record->hostmask, &record->addr, &record->prefix_length);
-
-  if (address_is_ipv4(&record->addr))
-  {
-    const unsigned int hash_prefix_length =
-      record->prefix_length - record->prefix_length % 8;
-    list_add(record, &record->node, &atable[hash_ipv4(&record->addr, hash_prefix_length)]);
-  }
-  else if (address_is_ipv6(&record->addr))
-  {
-    const unsigned int hash_prefix_length =
-      record->prefix_length - record->prefix_length % 16;
-    list_add(record, &record->node, &atable[hash_ipv6(&record->addr, hash_prefix_length)]);
-  }
-  else
-    list_add(record, &record->node, &atable[get_mask_hash(record->hostmask)]);
-
-  return record;
-}
-
-void
-delete_one_address_conf(const char *mask, struct MaskItem *conf)
-{
-  assert(mask);
-  assert(conf);
-
-  uint32_t hash_value;
-  struct io_addr addr;
-  unsigned int prefix_length;
-
-  if (address_parse_prefix(mask, &addr, &prefix_length))
-  {
-    if (address_is_ipv4(&addr))
-    {
-      const unsigned int hash_prefix_length = prefix_length - prefix_length % 8;
-      hash_value = hash_ipv4(&addr, hash_prefix_length);
-    }
-    else
-    {
-      assert(address_is_ipv6(&addr));
-      const unsigned int hash_prefix_length = prefix_length - prefix_length % 16;
-      hash_value = hash_ipv6(&addr, hash_prefix_length);
-    }
-  }
-  else
-    hash_value = get_mask_hash(mask);
-
-  list_node_t *node;
-  LIST_FOREACH(node, atable[hash_value].head)
-  {
-    struct AddressRec *const record = node->data;
-    if (record->conf != conf)
-      continue;
-
-    list_remove(&record->node, &atable[hash_value]);
-    conf_free(conf);
-    io_free(record);
+  if (!formatted)
     return;
-  }
-}
-
-static void
-clear_out_address_conf(void)
-{
-  list_node_t *node, *node_next;
-
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
-    {
-      struct AddressRec *arec = node->data;
-
-      /*
-       * Destroy the ircd.conf items and keep those that are in the databases
-       */
-      if (IsConfDatabase(arec->conf))
-        continue;
-
-      list_remove(&arec->node, &atable[i]);
-
-      conf_free(arec->conf);
-      io_free(arec);
-    }
-  }
-}
-
-static void
-hostmask_send_expiration(const struct AddressRec *const arec)
-{
-  char ban_type = '?';
-
-  switch (arec->type)
-  {
-    case CONF_KLINE:
-      ban_type = 'K';
-      break;
-    case CONF_DLINE:
-      ban_type = 'D';
-      break;
-    default: break;
-  }
 
   sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "Temporary %c-line for [%s@%s] expired", ban_type,
-                 (arec->conf->user) ? arec->conf->user : "*",
-                 (arec->conf->host) ? arec->conf->host : "*");
+                 "Temporary K-line for [%s@%s] expired", kill->user, host);
 }
 
 static void
-hostmask_expire_temporary(void)
+_conf_deny_expire_notice(const struct conf_deny *deny, void *unused)
 {
-  list_node_t *node, *node_next;
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+  assert(formatted);
 
-  for (unsigned int i = 0; i < ADDRESS_HASHSIZE; ++i)
-  {
-    LIST_FOREACH_SAFE(node, node_next, atable[i].head)
-    {
-      struct AddressRec *arec = node->data;
+  if (!formatted)
+    return;
 
-      if (arec->conf->until == 0 || arec->conf->until > io_time_get(IO_TIME_REALTIME_SEC))
-        continue;
-
-      switch (arec->type)
-      {
-        case CONF_KLINE:
-        case CONF_DLINE:
-          hostmask_send_expiration(arec);
-
-          list_remove(&arec->node, &atable[i]);
-          conf_free(arec->conf);
-          io_free(arec);
-          break;
-        default: break;
-      }
-    }
-  }
-}
-
-struct MaskItem *
-conf_make(enum maskitem_type type)
-{
-  struct MaskItem *const conf = io_calloc(sizeof(*conf));
-  conf->type = type;
-  return conf;
-}
-
-void
-conf_free(struct MaskItem *conf)
-{
-  if (conf->passwd)
-    memset(conf->passwd, 0, strlen(conf->passwd));
-
-  conf->klass = NULL;
-
-  io_free(conf->name);
-  io_free(conf->passwd);
-  io_free(conf->reason);
-  io_free(conf->user);
-  io_free(conf->host);
-  io_free(conf);
-}
-
-static void
-_conf_authorize_set_failure(enum conf_authorize_result *result_out, const char **failure_reason_out,
-                            enum conf_authorize_result result, const char *failure_reason)
-{
-  assert(result_out);
-  assert(failure_reason_out);
-  assert(result != CONF_AUTHORIZE_SUCCESS);
-  assert(!string_is_empty(failure_reason));
-
-  *result_out = result;
-  *failure_reason_out = failure_reason;
-}
-
-static struct MaskItem *
-conf_auth_verify_credentials(struct Client *client, enum conf_authorize_result *result_out,
-                             const char **failure_reason_out)
-{
-  char username[USERLEN + 1] = "~";
-
-  if (client_has_flag(client, FLAGS_GOTID))
-    strlcpy(username, client->username, sizeof(username));
-  else
-    strlcpy(username + 1, client->username, sizeof(username) - 1);
-
-  struct MaskItem *const conf = find_address_conf(client->host, username, &client->addr,
-                                                  client->connection->password);
-  if (conf == NULL)
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_NO_AUTH_BLOCK,
-                                "no matching auth block");
-    return NULL;
-  }
-
-  assert(IsConfClient(conf) || IsConfKill(conf));
-
-  if (IsConfKill(conf))
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_KLINE_MATCH,
-                                string_or_default(conf->reason, "K-lined"));
-    return NULL;
-  }
-
-  if (IsNeedIdentd(conf) && !client_has_flag(client, FLAGS_GOTID))
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_IDENT_REQUIRED,
-                                "ident required");
-    return NULL;
-  }
-
-  if (!string_is_empty(conf->passwd) && !conf_match_password(client->connection->password, conf))
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_PASSWORD_MISMATCH,
-                                "password mismatch");
-    return NULL;
-  }
-
-  if (!client_has_flag(client, FLAGS_GOTID) && !IsNoTilde(conf))
-    strlcpy(client->username, username, sizeof(client->username));
-
-  strlcpy(client->realhost, client->host, sizeof(client->realhost));
-
-  if (IsConfDoSpoofIp(conf))
-  {
-    strlcpy(client->host, conf->name, sizeof(client->host));
-    client_set_flag(client, FLAGS_SPOOF);
-  }
-
-  return conf;
-}
-
-static bool
-conf_admit_to_class(struct ClassItem *klass, struct Client *client, bool exempt_limits,
-                    enum conf_authorize_result *result_out, const char **failure_reason_out)
-{
-  assert(!client_has_flag(client, FLAGS_IPHASH));
-
-  struct ip_entry *const ipcache = ipcache_record_find_or_add(&client->addr);
-  ++ipcache->count_local;
-  client_set_flag(client, FLAGS_IPHASH);
-
-  if (exempt_limits)
-  {
-    class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ACCOUNT_ONLY);
-    return true;
-  }
-
-  if (klass->max_total && klass->ref_count >= klass->max_total)
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_TOTAL_LIMIT,
-                                "connection class full: total limit reached");
-    return false;
-  }
-
-  if (klass->max_perip_local && ipcache->count_local > klass->max_perip_local)
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_LOCAL_IP_LIMIT,
-                                "connection class full: local per-IP limit reached");
-    return false;
-  }
-
-  if (klass->max_perip_global && (ipcache->count_local + ipcache->count_remote) > klass->max_perip_global)
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_GLOBAL_IP_LIMIT,
-                                "connection class full: global per-IP limit reached");
-    return false;
-  }
-
-  if (class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ENFORCE))
-  {
-    _conf_authorize_set_failure(result_out, failure_reason_out, CONF_AUTHORIZE_CLASS_CIDR_LIMIT,
-                                "connection class full: CIDR subnet limit reached");
-    return false;
-  }
-
-  return true;
-}
-
-struct MaskItem *
-conf_authorize_client(struct Client *client, enum conf_authorize_result *result_out,
-                      const char **failure_reason_out)
-{
-  *result_out = CONF_AUTHORIZE_SUCCESS;
-  *failure_reason_out = NULL;
-
-  struct MaskItem *const conf =
-    conf_auth_verify_credentials(client, result_out, failure_reason_out);
-  if (conf == NULL)
-    return NULL;
-
-  if (!conf_admit_to_class(conf->klass, client, IsConfExemptLimits(conf), result_out, failure_reason_out))
-    return NULL;
-
-  client_set_class(client, conf->klass, CLIENT_CLASS_BASE);
-
-  io_free(client->connection->password);
-  client->connection->password = NULL;
-  return conf;
+  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Temporary D-line for [%s] expired", prefix);
 }
 
 static void
@@ -710,15 +263,11 @@ conf_rehash(bool sig)
 int
 conf_connect_allowed(const struct io_addr *addr)
 {
-  const struct MaskItem *conf = find_dline_conf(addr);
+  if (conf_exempt_find(addr))
+    return 0;
 
-  if (conf)
-  {
-    /* DLINE exempt also gets you out of static limits/pacing... */
-    if (conf->type == CONF_EXEMPT)
-      return 0;
+  if (conf_deny_find(addr))
     return BANNED_CLIENT;
-  }
 
   struct ip_entry *ip_found = ipcache_record_find_or_add(addr);
   if ((io_time_get(IO_TIME_MONOTONIC_SEC) - ip_found->last_attempt) < ConfigGeneral.throttle_time)
@@ -738,7 +287,11 @@ conf_connect_allowed(const struct io_addr *addr)
 void
 cleanup_tklines(void *unused)
 {
-  hostmask_expire_temporary();
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
+
+  conf_deny_expire(now, _conf_deny_expire_notice, NULL);
+  conf_kill_expire(now, _conf_kill_expire_notice, NULL);
+
   gecos_expire();
   resv_expire();
 }
@@ -754,7 +307,10 @@ conf_clear(void)
    */
   class_mark_all_inactive();
 
-  clear_out_address_conf();
+  conf_deny_clear_configuration();
+  conf_kill_clear_configuration();
+  conf_exempt_clear();
+  conf_auth_clear();
 
   module_config_clear();  /* Clear loadmodule items */
 
@@ -917,20 +473,6 @@ conf_read_files(bool cold)
 }
 
 void
-conf_assign_class(struct MaskItem *conf, const char *name)
-{
-  if (string_is_empty(name) || (conf->klass = class_find(name, true)) == NULL)
-  {
-    conf->klass = class_default;
-
-    assert(conf->type == CONF_CLIENT);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                   "Warning *** Defaulting to default class for %s@%s",
-                   conf->user, conf->host);
-  }
-}
-
-void
 yyerror(const char *msg)
 {
   if (conf_parser_ctx.pass != 1)
@@ -951,21 +493,6 @@ conf_error_report(const char *msg)
                  conf_file_name, conf_line_number, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
             conf_file_name, conf_line_number, msg, p);
-}
-
-bool
-conf_match_password(const char *password, const struct MaskItem *conf)
-{
-  if (string_is_empty(password) || string_is_empty(conf->passwd))
-    return false;
-
-  const char *encr;
-  if (conf->flags & CONF_FLAGS_ENCRYPTED)
-    encr = crypt(password, conf->passwd);
-  else
-    encr = password;
-
-  return encr && strcmp(encr, conf->passwd) == 0;
 }
 
 static const char *
@@ -1025,7 +552,7 @@ conf_ban_apply(struct Client *client, enum conf_ban_type type, const char *reaso
 
       break;
     case CONF_BAN_TYPE_DLINE:
-      if (find_conf_by_address(NULL, &client->addr, CONF_EXEMPT, NULL, NULL, 1))
+      if (conf_exempt_find(&client->addr))
         return;
       break;
     case CONF_BAN_TYPE_XLINE:
@@ -1052,24 +579,23 @@ conf_ban_apply(struct Client *client, enum conf_ban_type type, const char *reaso
 static bool
 _conf_ban_check_dline(struct Client *client)
 {
-  const struct MaskItem *const conf =
-    find_conf_by_address(NULL, &client->addr, CONF_DLINE, NULL, NULL, 1);
-  if (conf == NULL)
+  const struct conf_deny *const deny = conf_deny_find(&client->addr);
+  if (deny == NULL)
     return false;
 
-  conf_ban_apply(client, CONF_BAN_TYPE_DLINE, conf->reason);
+  conf_ban_apply(client, CONF_BAN_TYPE_DLINE, deny->reason);
   return true;
 }
 
 static bool
 _conf_ban_check_kline(struct Client *client)
 {
-  const struct MaskItem *const conf =
-    find_conf_by_address(client->host, &client->addr, CONF_KLINE, client->username, NULL, 1);
-  if (conf == NULL)
+  const struct conf_kill *const kill =
+    conf_kill_find(&client->addr, client->username, client->host);
+  if (kill == NULL)
     return false;
 
-  conf_ban_apply(client, CONF_BAN_TYPE_KLINE, conf->reason);
+  conf_ban_apply(client, CONF_BAN_TYPE_KLINE, kill->reason);
   return true;
 }
 

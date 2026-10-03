@@ -17,8 +17,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
-
 enum
 {
   ADDRESS_REVERSE_NAME_BUFSIZE = 74
@@ -49,10 +47,6 @@ extern bool address_prefix_to_string(const struct io_addr *, unsigned int, char 
 extern bool address_to_bytes(const struct io_addr *, void *, size_t);
 extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
 extern bool address_to_string(const struct io_addr *, char *, size_t);
-extern uint32_t hash_ipv4(const struct io_addr *, int);
-extern uint32_t hash_ipv6(const struct io_addr *, int);
-extern uint32_t hash_text(const char *);
-extern uint32_t get_mask_hash(const char *);
 
 static inline bool
 address_is_ipv4(const struct io_addr *addr)

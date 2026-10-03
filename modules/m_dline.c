@@ -142,7 +142,7 @@ _dline_notice_existing(struct Client *source, const struct aline_ctx *aline,
 {
   assert(source);
   assert(aline);
-  assert(!string_is_empty(aline->host));
+  assert(!string_is_empty(aline->mask));
   assert(existing);
 
   if (!client_is_user(source))
@@ -155,14 +155,14 @@ _dline_notice_existing(struct Client *source, const struct aline_ctx *aline,
   if (!formatted)
   {
     log_write(LOG_TYPE_IRCD, "Unable to format existing D-line prefix for [%s]",
-              aline->host);
+              aline->mask);
     sendto_one_notice(source, &me, ":[%s] is already covered by an existing D-Line",
-                      aline->host);
+                      aline->mask);
     return;
   }
 
   sendto_one_notice(source, &me, ":[%s] already D-Lined by [%s] - %s",
-                    aline->host, prefix, existing->reason);
+                    aline->mask, prefix, existing->reason);
 }
 
 static void
@@ -201,13 +201,13 @@ _dline_add(struct Client *source, const struct aline_ctx *aline)
 {
   assert(source);
   assert(aline);
-  assert(!string_is_empty(aline->host));
+  assert(!string_is_empty(aline->mask));
   assert(aline->reason);
 
-  if (!_dline_validate_prefix(source, aline->host))
+  if (!_dline_validate_prefix(source, aline->mask))
     return;
 
-  const struct conf_deny *const existing = conf_deny_find_covering(aline->host);
+  const struct conf_deny *const existing = conf_deny_find_covering(aline->mask);
   if (existing)
   {
     _dline_notice_existing(source, aline, existing);
@@ -232,7 +232,7 @@ _dline_add(struct Client *source, const struct aline_ctx *aline)
 
   const struct conf_deny_spec spec =
   {
-    .prefix = aline->host,
+    .prefix = aline->mask,
     .reason = reason,
     .created_at = created_at,
     .expires_at = expires_at,
@@ -244,9 +244,9 @@ _dline_add(struct Client *source, const struct aline_ctx *aline)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
-                        aline->host);
+                        aline->mask);
 
-    log_write(LOG_TYPE_IRCD, "Unable to add D-line for [%s]", aline->host);
+    log_write(LOG_TYPE_IRCD, "Unable to add D-line for [%s]", aline->mask);
     return;
   }
 
@@ -258,15 +258,15 @@ _dline_add(struct Client *source, const struct aline_ctx *aline)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
-                        aline->host);
+                        aline->mask);
 
     log_write(LOG_TYPE_IRCD, "Unable to format newly added D-line prefix for [%s]",
-              aline->host);
+              aline->mask);
     conf_deny_delete(deny);
     return;
   }
 
-  _dline_notice_added(source, prefix, aline->host, aline->duration);
+  _dline_notice_added(source, prefix, aline->mask, aline->duration);
   _dline_report_added(source, deny, prefix, aline->duration);
   _dline_enforce_clients(deny);
 }
@@ -280,14 +280,14 @@ mo_dline(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  struct aline_ctx aline = { .add = true, .simple_mask = false };
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
   if (!aline_parse("DLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
   {
     sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
-                       aline.server, aline.duration, aline.host, aline.reason);
+                       aline.server, aline.duration, aline.mask, aline.reason);
 
     /* Apply the D-line locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
@@ -295,7 +295,7 @@ mo_dline(struct Client *source, size_t parc, char *parv[])
   }
   else
     cluster_distribute(source, "DLINE", CAPAB_DLN, CLUSTER_DLINE, "%ju %s :%s",
-                       aline.duration, aline.host, aline.reason);
+                       aline.duration, aline.mask, aline.reason);
 
   _dline_add(source, &aline);
 }
@@ -324,15 +324,15 @@ ms_dline(struct Client *source, size_t parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = true,
-    .simple_mask = false,
-    .host = parv[3],
+    .simple_mask = true,
+    .mask = parv[3],
     .reason = parv[4],
     .server = parv[1],
     .duration = duration_seconds
   };
 
   sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
-                     aline.server, aline.duration, aline.host, aline.reason);
+                     aline.server, aline.duration, aline.mask, aline.reason);
 
   if (match(aline.server, me.name))
     return;

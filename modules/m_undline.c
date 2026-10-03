@@ -50,14 +50,14 @@ _undline_remove(struct Client *source, const struct aline_ctx *aline)
 {
   assert(source);
   assert(aline);
-  assert(!string_is_empty(aline->host));
+  assert(!string_is_empty(aline->mask));
 
-  struct conf_deny *const deny = conf_deny_find_exact(aline->host);
+  struct conf_deny *const deny = conf_deny_find_exact(aline->mask);
   if (deny == NULL)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":No D-line for [%s] found",
-                        aline->host);
+                        aline->mask);
     return;
   }
 
@@ -68,7 +68,7 @@ _undline_remove(struct Client *source, const struct aline_ctx *aline)
   if (!formatted)
   {
     log_write(LOG_TYPE_IRCD, "Unable to format D-line prefix for [%s]",
-              aline->host);
+              aline->mask);
     return;
   }
 
@@ -116,14 +116,14 @@ mo_undline(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  struct aline_ctx aline = { .add = false, .simple_mask = false };
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
   if (!aline_parse("UNDLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
   {
     sendto_match_servs(source, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
-                       aline.server, aline.host);
+                       aline.server, aline.mask);
 
     /* Apply the UNDLINE locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
@@ -131,7 +131,7 @@ mo_undline(struct Client *source, size_t parc, char *parv[])
   }
   else
     cluster_distribute(source, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s",
-                       aline.host);
+                       aline.mask);
 
   _undline_remove(source, &aline);
 }
@@ -154,13 +154,13 @@ ms_undline(struct Client *source, size_t parc, char *parv[])
   struct aline_ctx aline =
   {
     .add = false,
-    .simple_mask = false,
-    .host = parv[2],
+    .simple_mask = true,
+    .mask = parv[2],
     .server = parv[1]
   };
 
   sendto_match_servs(source, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
-                     aline.server, aline.host);
+                     aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return;

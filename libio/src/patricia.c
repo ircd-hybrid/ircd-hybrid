@@ -290,26 +290,24 @@ patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buffer,
   assert(prefix);
   assert(buffer);
 
-  struct io_addr addr;
-  if (!_patricia_prefix_to_addr(prefix, &addr) || !address_mask(&addr, prefix->bitlen))
+  if (buffer_size == 0)
     return false;
 
-  char formatted[INET6_ADDRSTRLEN + sizeof("/128") - 1];
+  struct io_addr addr;
+  if (!_patricia_prefix_to_addr(prefix, &addr))
+    return false;
+
+  if (include_bitlen)
+    return address_prefix_to_string(&addr, prefix->bitlen, buffer, buffer_size);
+
+  if (!address_mask(&addr, prefix->bitlen))
+    return false;
+
+  char formatted[INET6_ADDRSTRLEN];
   if (!address_to_string(&addr, formatted, sizeof(formatted)))
     return false;
 
-  size_t length = strlen(formatted);
-
-  if (include_bitlen)
-  {
-    const int written =
-      snprintf(formatted + length, sizeof(formatted) - length, "/%u", prefix->bitlen);
-    if (written < 0 || (size_t)written >= sizeof(formatted) - length)
-      return false;
-
-    length += (size_t)written;
-  }
-
+  const size_t length = strlen(formatted);
   if (buffer_size <= length)
     return false;
 
@@ -323,7 +321,6 @@ _patricia_prefix_dup(const patricia_prefix_t *prefix)
   assert(prefix);
   assert(_patricia_family_max_bitlen(prefix->family) != 0);
   assert(prefix->bitlen <= _patricia_family_max_bitlen(prefix->family));
-
 
   patricia_prefix_t *const copy = io_calloc(sizeof(*copy));
   *copy = *prefix;

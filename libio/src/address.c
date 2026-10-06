@@ -90,7 +90,9 @@ address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsig
 void
 address_unmap_ipv4(struct io_addr *addr)
 {
-  if (addr == NULL || !address_is_ipv4_mapped(addr))
+  assert(addr);
+
+  if (!address_is_ipv4_mapped(addr))
     return;
 
   const struct sockaddr_in6 *const ipv6 = (const struct sockaddr_in6 *)&addr->ss;

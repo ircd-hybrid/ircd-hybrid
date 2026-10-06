@@ -259,13 +259,20 @@ cloak_compute(const struct io_addr *addr)
   if (config->num_bits == 0 || string_is_empty(config->secret))
     return NULL;
 
-  struct io_addr tmp;
-  address_copy(&tmp, addr);
+  unsigned int prefix_length;
 
-  if (address_is_ipv6(addr))
-    address_mask(&tmp, config->cidr_len_ipv6);
-  else /* address_is_ipv4(addr) == true */
-    address_mask(&tmp, config->cidr_len_ipv4);
+  if (address_is_ipv4(addr))
+    prefix_length = config->cidr_len_ipv4;
+  else if (address_is_ipv6(addr))
+    prefix_length = config->cidr_len_ipv6;
+  else
+    return NULL;
 
-  return _cloak_mac_and_compose(&tmp);
+  struct io_addr masked_addr;
+  address_copy(&masked_addr, addr);
+
+  if (!address_mask(&masked_addr, prefix_length))
+    return NULL;
+
+  return _cloak_mac_and_compose(&masked_addr);
 }

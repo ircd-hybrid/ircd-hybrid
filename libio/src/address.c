@@ -48,7 +48,7 @@ address_equal_with_port(const struct io_addr *lhs, const struct io_addr *rhs)
 }
 
 bool
-address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsigned int bitlen)
+address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsigned int prefix_length)
 {
   if (address_get_family(lhs) != address_get_family(rhs))
     return false;
@@ -63,14 +63,14 @@ address_match_prefix(const struct io_addr *lhs, const struct io_addr *rhs, unsig
     return false;
   assert(lhs_length == rhs_length);
 
-  if (bitlen > lhs_length * CHAR_BIT)
+  if (prefix_length > lhs_length * CHAR_BIT)
     return false;
 
-  const size_t full_bytes = bitlen / CHAR_BIT;
+  const size_t full_bytes = prefix_length / CHAR_BIT;
   if (full_bytes && memcmp(lhs_bytes, rhs_bytes, full_bytes))
     return false;
 
-  const unsigned int remaining_bits = bitlen % CHAR_BIT;
+  const unsigned int remaining_bits = prefix_length % CHAR_BIT;
   if (remaining_bits == 0)
     return true;
 
@@ -131,7 +131,7 @@ address_unmap_ipv4(struct io_addr *addr)
  * and the remaining octets are set to zero.
  */
 bool
-address_mask(struct io_addr *addr, unsigned int bitlen)
+address_mask(struct io_addr *addr, unsigned int prefix_length)
 {
   unsigned char *bytes;
   size_t byte_length;
@@ -151,11 +151,11 @@ address_mask(struct io_addr *addr, unsigned int bitlen)
   else
     return false;
 
-  if (bitlen > byte_length * CHAR_BIT)
+  if (prefix_length > byte_length * CHAR_BIT)
     return false;
 
-  size_t byte_index = bitlen / CHAR_BIT;
-  const unsigned int remaining_bits = bitlen % CHAR_BIT;
+  size_t byte_index = prefix_length / CHAR_BIT;
+  const unsigned int remaining_bits = prefix_length % CHAR_BIT;
   if (remaining_bits)
   {
     const unsigned char mask =
@@ -369,11 +369,11 @@ address_prefix_to_string(const struct io_addr *addr, unsigned int prefix_length,
   if (!address_mask(&network, prefix_length))
     return false;
 
-  char address[INET6_ADDRSTRLEN];
+  char address[ADDRESS_STRING_BUFSIZE];
   if (!address_to_string(&network, address, sizeof(address)))
     return false;
 
-  char prefix[INET6_ADDRSTRLEN + sizeof("/128")];
+  char prefix[ADDRESS_PREFIX_BUFSIZE];
   const int written =
     snprintf(prefix, sizeof(prefix), "%s/%u", address, prefix_length);
 

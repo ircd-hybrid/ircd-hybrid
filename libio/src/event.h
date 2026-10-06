@@ -28,7 +28,6 @@ typedef enum
 {
   EVENT_SUCCESS = 0,
   EVENT_ERR_INVALID_ARG,
-  EVENT_ERR_NOT_FOUND,
   EVENT_ERR_BUSY,
   EVENT_ERR_RANGE,
 } event_status_t;

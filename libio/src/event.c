@@ -453,8 +453,10 @@ _event_destroy_finalize(event_handle_t event)
 event_status_t
 event_destroy(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL)
+  if (event == NULL)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
 
   if (event->destroy_pending)
     return EVENT_SUCCESS;
@@ -478,8 +480,10 @@ event_destroy(event_handle_t event)
 event_status_t
 event_unschedule(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL || event->destroy_pending)
+  if (event == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
 
   if (event->manager->dispatching_event == event)
     event->auto_reschedule_suppressed = true;
@@ -494,8 +498,11 @@ event_unschedule(event_handle_t event)
 event_status_t
 event_schedule(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
+  if (event == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
+  assert(event->handler);
 
   return _event_schedule_relative(event, event->interval_ms);
 }
@@ -503,8 +510,11 @@ event_schedule(event_handle_t event)
 event_status_t
 event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 {
-  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
+  if (event == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
+  assert(event->handler);
 
   if (absolute_time_ms == EVENT_TIME_NEVER)
     return EVENT_ERR_RANGE;
@@ -515,8 +525,11 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 event_status_t
 event_schedule_jittered(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
+  if (event == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
+  assert(event->handler);
 
   uintmax_t delay_ms = event->interval_ms;
 
@@ -536,8 +549,11 @@ event_schedule_jittered(event_handle_t event)
 event_status_t
 event_reset(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
+  if (event == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
+  assert(event->handler);
 
   return event_reschedule(event, event->interval_ms);
 }
@@ -545,8 +561,11 @@ event_reset(event_handle_t event)
 event_status_t
 event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
 {
-  if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending || new_delay_ms == 0)
+  if (event == NULL || event->destroy_pending || new_delay_ms == 0)
     return EVENT_ERR_INVALID_ARG;
+
+  assert(event->manager);
+  assert(event->handler);
 
   return _event_schedule_relative(event, new_delay_ms);
 }
@@ -575,8 +594,10 @@ event_get_time_until_fire(event_handle_t event)
 bool
 event_is_scheduled(event_handle_t event)
 {
-  if (event == NULL || event->manager == NULL)
+  if (event == NULL)
     return false;
+
+  assert(event->manager);
 
   return event->heap_index != EVENT_HEAP_INVALID_INDEX &&
          event->heap_index < event->manager->heap_size &&
@@ -708,8 +729,7 @@ event_manager_dispatch_due(event_manager_t manager)
       continue;
     }
 
-    if (event->oneshot == false &&
-        event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
+    if (!event->oneshot && !event->auto_reschedule_suppressed && !event_is_scheduled(event))
     {
       uintmax_t next_fire_time_ms;
       if (!_event_fire_time_from_now(event->interval_ms, &next_fire_time_ms))

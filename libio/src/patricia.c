@@ -303,7 +303,7 @@ patricia_prefix_to_string(const patricia_prefix_t *prefix, char *buffer,
   if (!address_mask(&addr, prefix->bitlen))
     return false;
 
-  char formatted[INET6_ADDRSTRLEN];
+  char formatted[ADDRESS_STRING_BUFSIZE];
   if (!address_to_string(&addr, formatted, sizeof(formatted)))
     return false;
 

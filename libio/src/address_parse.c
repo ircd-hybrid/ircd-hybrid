@@ -161,7 +161,7 @@ _address_parse_ipv6_wildcard(const char *text, const char *wildcard, struct io_a
    * Replace the wildcard with IPv6 zero compression and let the
    * regular address parser validate the explicit hextets.
    */
-  char address_buffer[INET6_ADDRSTRLEN];
+  char address_buffer[ADDRESS_STRING_BUFSIZE];
 
   const size_t wildcard_offset = (size_t)(wildcard - text);
   if (wildcard_offset > sizeof(address_buffer) - 2)
@@ -191,7 +191,7 @@ _address_parse_ipv6_prefix(const char *text, struct io_addr *addr_out, unsigned 
   if (wildcard)
     return _address_parse_ipv6_wildcard(text, wildcard, addr_out, prefix_length_out);
 
-  char address_buffer[INET6_ADDRSTRLEN];
+  char address_buffer[ADDRESS_STRING_BUFSIZE];
   const char *address_text = text;
   const char *const prefix_separator = strchr(text, '/');
   unsigned int prefix_length = ADDRESS_IPV6_MAX_PREFIX_LENGTH;

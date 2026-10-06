@@ -399,7 +399,7 @@ comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
 
   if (bind(fde->fd, address_get_sockaddr(addr), address_get_sockaddr_length(addr)) == -1)
   {
-    char addr_str[INET6_ADDRSTRLEN];
+    char addr_str[ADDRESS_STRING_BUFSIZE];
     address_to_string(addr, addr_str, sizeof(addr_str));
 
     log_write(LOG_TYPE_IRCD, "comm_socket_listen: bind() failed for %s: %s",

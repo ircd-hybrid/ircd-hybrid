@@ -291,10 +291,15 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   op->completion_handler = handler;
   op->completion_handler_data = data;
   address_copy(&op->remote_addr, caddr);
-  address_set_port(&op->remote_addr, port);
 
   fde->cleanup_handler = comm_connect_cleanup;
   fde->cleanup_data = op;
+
+  if (!address_set_port(&op->remote_addr, port))
+  {
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+    return;
+  }
 
   if (baddr && address_is_specified(baddr))
   {

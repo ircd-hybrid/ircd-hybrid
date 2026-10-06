@@ -53,6 +53,19 @@ _event_now_ms(void)
 }
 
 static bool
+_event_fire_time_from_now(uintmax_t delay_ms, uintmax_t *fire_time_ms)
+{
+  assert(fire_time_ms);
+
+  const uintmax_t current_time_ms = _event_now_ms();
+  if (delay_ms >= EVENT_TIME_NEVER - current_time_ms)
+    return false;
+
+  *fire_time_ms = current_time_ms + delay_ms;
+  return true;
+}
+
+static bool
 _event_heap_precedes(const struct event_instance *a, const struct event_instance *b)
 {
   if (a->next_fire_time_ms < b->next_fire_time_ms)
@@ -268,6 +281,22 @@ _event_schedule_absolute(event_handle_t event, uintmax_t absolute_time_ms)
   return EVENT_SUCCESS;
 }
 
+static event_status_t
+_event_schedule_relative(event_handle_t event, uintmax_t delay_ms)
+{
+  assert(event);
+  assert(event->manager);
+  assert(event->handler);
+  assert(!event->destroy_pending);
+  assert(delay_ms > 0);
+
+  uintmax_t fire_time_ms;
+  if (!_event_fire_time_from_now(delay_ms, &fire_time_ms))
+    return EVENT_ERR_RANGE;
+
+  return _event_schedule_absolute(event, fire_time_ms);
+}
+
 event_manager_t
 event_manager_create(const event_manager_config_t *config)
 {
@@ -468,10 +497,7 @@ event_schedule(event_handle_t event)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending)
     return EVENT_ERR_INVALID_ARG;
 
-  const uintmax_t current_time_ms = _event_now_ms();
-  const uintmax_t absolute_time_ms = current_time_ms + event->interval_ms;
-
-  return _event_schedule_absolute(event, absolute_time_ms);
+  return _event_schedule_relative(event, event->interval_ms);
 }
 
 event_status_t
@@ -481,7 +507,7 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
     return EVENT_ERR_INVALID_ARG;
 
   if (absolute_time_ms == EVENT_TIME_NEVER)
-    return EVENT_ERR_INVALID_ARG;
+    return EVENT_ERR_RANGE;
 
   return _event_schedule_absolute(event, absolute_time_ms);
 }
@@ -504,10 +530,7 @@ event_schedule_jittered(event_handle_t event)
       delay_ms = 1;
   }
 
-  const uintmax_t current_time_ms = _event_now_ms();
-  const uintmax_t absolute_time_ms = current_time_ms + delay_ms;
-
-  return _event_schedule_absolute(event, absolute_time_ms);
+  return _event_schedule_relative(event, delay_ms);
 }
 
 event_status_t
@@ -525,10 +548,7 @@ event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
   if (event == NULL || event->manager == NULL || event->handler == NULL || event->destroy_pending || new_delay_ms == 0)
     return EVENT_ERR_INVALID_ARG;
 
-  const uintmax_t current_time_ms = _event_now_ms();
-  const uintmax_t new_absolute_fire_time_ms = current_time_ms + new_delay_ms;
-
-  return _event_schedule_absolute(event, new_absolute_fire_time_ms);
+  return _event_schedule_relative(event, new_delay_ms);
 }
 
 uintmax_t
@@ -655,6 +675,8 @@ event_manager_dispatch_due(event_manager_t manager)
   assert(manager->heap_array || manager->heap_size == 0);
   assert(manager->dispatching_event == NULL);
 
+  event_status_t status = EVENT_SUCCESS;
+
   manager->is_running = true;
 
   while (manager->heap_size > 0)
@@ -689,7 +711,14 @@ event_manager_dispatch_due(event_manager_t manager)
     if (event->oneshot == false &&
         event->auto_reschedule_suppressed == false && !event_is_scheduled(event))
     {
-      event->next_fire_time_ms = current_time_ms + event->interval_ms;
+      uintmax_t next_fire_time_ms;
+      if (!_event_fire_time_from_now(event->interval_ms, &next_fire_time_ms))
+      {
+        status = EVENT_ERR_RANGE;
+        break;
+      }
+
+      event->next_fire_time_ms = next_fire_time_ms;
       _event_heap_insert(manager, event);
       assert(event_is_scheduled(event));
     }
@@ -701,5 +730,5 @@ event_manager_dispatch_due(event_manager_t manager)
 
   assert(manager->dispatching_event == NULL);
   assert(manager->heap_size <= manager->heap_capacity);
-  return EVENT_SUCCESS;
+  return status;
 }

@@ -196,7 +196,6 @@ cloak_init(void)
   cloak_set_num_bits(80);
   cloak_set_cidr_len_ipv4(32);
   cloak_set_cidr_len_ipv6(64);
-  cloak_set_secret("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
   cloak_set_suffix("irc");
 }
 
@@ -254,9 +253,10 @@ _cloak_mac_and_compose(const struct io_addr *addr)
 const char *
 cloak_compute(const struct io_addr *addr)
 {
-  if (config->enabled == 0)
-    return NULL;
-  if (config->num_bits == 0 || string_is_empty(config->secret))
+  if (!config->enabled ||
+      config->num_bits == 0 ||
+      string_is_empty(config->secret) ||
+      string_is_empty(config->suffix))
     return NULL;
 
   unsigned int prefix_length;

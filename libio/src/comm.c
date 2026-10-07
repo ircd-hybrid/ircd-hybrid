@@ -282,6 +282,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   assert(fde);
   assert(fde->flags.open);
   assert(caddr);
+  assert(address_is_ipv4(caddr) || address_is_ipv6(caddr));
   assert(handler);
   assert(fde->cleanup_handler == NULL);
   assert(fde->cleanup_data == NULL);
@@ -312,7 +313,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   }
 
   /* Try the connect() */
-  if (connect(fde->fd, (struct sockaddr *)&op->remote_addr.ss, address_get_sockaddr_length(&op->remote_addr)) == 0)
+  if (connect(fde->fd, address_get_sockaddr(&op->remote_addr), address_get_sockaddr_length(&op->remote_addr)) == 0)
   {
     comm_connect_complete(op, COMM_OK);
     return;

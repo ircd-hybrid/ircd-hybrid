@@ -14,6 +14,8 @@
   selected by the configured TLS library and its system defaults. TLS certificate
   fingerprints now always use SHA-256.
 * Module names in `modules.conf` no longer include file suffixes
+* `STATS i/I`, `k/K`, `m/M`, `o/O`, and `P` are now always restricted to IRC operators;
+  the corresponding `general::stats_*_oper_only` directives have been removed.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

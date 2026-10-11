@@ -226,13 +226,8 @@ stats_gecos(struct Client *client, size_t parc, char *parv[])
 static void
 stats_operator(struct Client *client, size_t parc, char *parv[])
 {
-  if (!client_is_oper(client) && ConfigGeneral.stats_o_oper_only)
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   list_node_t *node;
+
   LIST_FOREACH(node, oper_get_list()->head)
   {
     const struct OperItem *const oper = node->data;
@@ -498,13 +493,8 @@ _stats_auth_format_user(const struct Client *client,
 static void
 stats_auth(struct Client *client, size_t parc, char *parv[])
 {
-  if (ConfigGeneral.stats_i_oper_only && !client_is_oper(client))
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   list_node_t *auth_node;
+
   LIST_FOREACH(auth_node, conf_auth_get_list()->head)
   {
     const struct conf_auth *const auth = auth_node->data;
@@ -553,36 +543,18 @@ _stats_kill_report(struct Client *client, bool temporary)
 static void
 stats_kill(struct Client *client, size_t parc, char *parv[])
 {
-  if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   _stats_kill_report(client, false);
 }
 
 static void
 stats_tkill(struct Client *client, size_t parc, char *parv[])
 {
-  if (ConfigGeneral.stats_k_oper_only && !client_is_oper(client))
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   _stats_kill_report(client, true);
 }
 
 static void
 stats_messages(struct Client *client, size_t parc, char *parv[])
 {
-  if (!client_is_oper(client) && ConfigGeneral.stats_m_oper_only)
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   command_report(client);
 }
 
@@ -633,13 +605,8 @@ stats_operedup(struct Client *client, size_t parc, char *parv[])
 static void
 stats_ports(struct Client *client, size_t parc, char *parv[])
 {
-  if (ConfigGeneral.stats_P_oper_only && !client_is_oper(client))
-  {
-    sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
-    return;
-  }
-
   list_node_t *node;
+
   LIST_FOREACH(node, listener_get_list()->head)
   {
     char buf[8];
@@ -922,18 +889,18 @@ static const struct StatsHandler stats_tab[] =
   STATS_HANDLER_INIT('F', stats_fdlist, &UMODE_ADMIN),
   STATS_HANDLER_INIT('h', stats_hubleaf, &UMODE_OPER),
   STATS_HANDLER_INIT('H', stats_hubleaf, &UMODE_OPER),
-  STATS_HANDLER_INIT('i', stats_auth, 0),
-  STATS_HANDLER_INIT('I', stats_auth, 0),
-  STATS_HANDLER_INIT('k', stats_tkill, 0),
-  STATS_HANDLER_INIT('K', stats_kill, 0),
+  STATS_HANDLER_INIT('i', stats_auth, &UMODE_OPER),
+  STATS_HANDLER_INIT('I', stats_auth, &UMODE_OPER),
+  STATS_HANDLER_INIT('k', stats_tkill, &UMODE_OPER),
+  STATS_HANDLER_INIT('K', stats_kill, &UMODE_OPER),
   STATS_HANDLER_INIT('l', stats_ltrace, &UMODE_OPER),
   STATS_HANDLER_INIT('L', stats_ltrace, &UMODE_OPER),
-  STATS_HANDLER_INIT('m', stats_messages, 0),
-  STATS_HANDLER_INIT('M', stats_messages, 0),
-  STATS_HANDLER_INIT('o', stats_operator, 0),
-  STATS_HANDLER_INIT('O', stats_operator, 0),
+  STATS_HANDLER_INIT('m', stats_messages, &UMODE_OPER),
+  STATS_HANDLER_INIT('M', stats_messages, &UMODE_OPER),
+  STATS_HANDLER_INIT('o', stats_operator, &UMODE_OPER),
+  STATS_HANDLER_INIT('O', stats_operator, &UMODE_OPER),
   STATS_HANDLER_INIT('p', stats_operedup, 0),
-  STATS_HANDLER_INIT('P', stats_ports, 0),
+  STATS_HANDLER_INIT('P', stats_ports, &UMODE_OPER),
   STATS_HANDLER_INIT('q', stats_resv, &UMODE_OPER),
   STATS_HANDLER_INIT('Q', stats_resv, &UMODE_OPER),
   STATS_HANDLER_INIT('s', stats_pseudo, &UMODE_OPER),

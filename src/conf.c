@@ -165,11 +165,6 @@ conf_set_defaults(void)
   ConfigGeneral.ts_max_delta = 600;
   ConfigGeneral.warn_no_connect_block = 1;
   ConfigGeneral.stats_e_disabled = 0;
-  ConfigGeneral.stats_i_oper_only = 1;  /* 1 = masked */
-  ConfigGeneral.stats_k_oper_only = 1;  /* 1 = masked */
-  ConfigGeneral.stats_o_oper_only = 1;
-  ConfigGeneral.stats_m_oper_only = 1;
-  ConfigGeneral.stats_P_oper_only = 0;
   ConfigGeneral.stats_u_oper_only = 0;
   ConfigGeneral.caller_id_wait = 60;
   ConfigGeneral.opers_bypass_callerid = 1;

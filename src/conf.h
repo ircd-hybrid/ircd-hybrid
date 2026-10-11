@@ -70,11 +70,6 @@ struct config_general_entry
   unsigned int warn_no_connect_block;
   unsigned int invisible_on_connect;
   unsigned int stats_e_disabled;
-  unsigned int stats_i_oper_only;
-  unsigned int stats_k_oper_only;
-  unsigned int stats_m_oper_only;
-  unsigned int stats_o_oper_only;
-  unsigned int stats_P_oper_only;
   unsigned int stats_u_oper_only;
   unsigned int short_motd;
   unsigned int no_oper_flood;

@@ -186,7 +186,6 @@ enable_owner                { return ENABLE_OWNER; }
 encrypted                   { return ENCRYPTED; }
 exceed_limit                { return EXCEED_LIMIT; }
 exempt                      { return EXEMPT; }
-failed_oper_notice          { return FAILED_OPER_NOTICE; }
 file                        { return T_FILE; }
 flags                       { return IRCD_FLAGS; }
 flatten_links               { return FLATTEN_LINKS; }

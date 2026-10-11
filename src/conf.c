@@ -151,7 +151,6 @@ conf_set_defaults(void)
   ConfigGeneral.kill_chase_time_limit = 90;
   ConfigGeneral.default_floodcount = 8;
   ConfigGeneral.default_floodtime = 1;
-  ConfigGeneral.failed_oper_notice = 1;
   ConfigGeneral.specials_in_ident = 0;
   ConfigGeneral.min_nonwildcard = 4;
   ConfigGeneral.min_nonwildcard_simple = 3;

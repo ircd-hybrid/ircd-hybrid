@@ -16,6 +16,8 @@
 * Module names in `modules.conf` no longer include file suffixes
 * `STATS i/I`, `k/K`, `m/M`, `o/O`, and `P` are now always restricted to IRC operators;
   the corresponding `general::stats_*_oper_only` directives have been removed.
+* The `general::failed_oper_notice` directive has been removed. Failed `OPER`
+  attempts are now always reported.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

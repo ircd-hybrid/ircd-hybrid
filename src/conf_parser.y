@@ -184,7 +184,6 @@ reset_block_state(void)
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
-%token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
 %token  FLATTEN_LINKS_DELAY
 %token  FLATTEN_LINKS_FILE
@@ -2144,7 +2143,6 @@ general_entry: GENERAL '{' general_items '}' ';';
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
                     general_away_time |
-                    general_failed_oper_notice |
                     general_anti_nick_flood |
                     general_max_nick_time |
                     general_max_nick_changes |
@@ -2242,11 +2240,6 @@ general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
   ConfigGeneral.kill_chase_time_limit = $3;
-};
-
-general_failed_oper_notice: FAILED_OPER_NOTICE '=' TBOOL ';'
-{
-  ConfigGeneral.failed_oper_notice = yylval.number;
 };
 
 general_anti_nick_flood: ANTI_NICK_FLOOD '=' TBOOL ';'

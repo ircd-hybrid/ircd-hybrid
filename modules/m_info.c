@@ -73,7 +73,6 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "disable_ident", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.disable_ident, "Completely disable ident lookups"),
   INFO_ENTRY_INIT("general", "dline_min_cidr", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.dline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 D-Lines"),
   INFO_ENTRY_INIT("general", "dline_min_cidr6", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.dline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 D-Lines"),
-  INFO_ENTRY_INIT("general", "failed_oper_notice", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.failed_oper_notice, "Inform opers if someone tries to /oper with the wrong credentials"),
   INFO_ENTRY_INIT("general", "ident_timeout", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.ident_timeout, "How long to wait for Ident replies"),
   INFO_ENTRY_INIT("general", "invisible_on_connect", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.invisible_on_connect, "Automatically set mode +i on connecting users"),
   INFO_ENTRY_INIT("general", "kill_chase_time_limit", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kill_chase_time_limit, "Nick Change Tracker for KILL"),

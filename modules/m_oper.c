@@ -88,10 +88,9 @@ _oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_r
   client_format_name_buffer_t client_name_buffer;
   const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-  if (ConfigGeneral.failed_oper_notice)
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Failed OPER attempt as [%s] by %s (%s)",
-                   name, client_name, reason);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Failed OPER attempt as [%s] by %s (%s)",
+                 name, client_name, reason);
 
   log_write(LOG_TYPE_OPER, "Failed OPER attempt as [%s] by %s (%s)",
             name, client_name, reason);

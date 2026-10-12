@@ -110,7 +110,6 @@ conf_set_defaults(void)
   ConfigLog.use_logging = 1;
   log_set_enabled(ConfigLog.use_logging);
 
-  ConfigChannel.enable_extbans = 0;
   ConfigChannel.disable_fake_channels = 0;
   ConfigChannel.invite_client_count = 10;
   ConfigChannel.invite_client_time = 300;

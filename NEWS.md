@@ -18,6 +18,8 @@
   the corresponding `general::stats_*_oper_only` directives have been removed.
 * The `general::failed_oper_notice` directive has been removed. Failed `OPER`
   attempts are now always reported.
+* Extended bans and owner/admin channel modes are now always enabled; the corresponding
+  `channel::enable_*` directives have been removed.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

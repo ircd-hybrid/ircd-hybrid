@@ -527,8 +527,7 @@ mr_server(struct Client *source, size_t parc, char *parv[])
 
   if (service_find(name) == NULL)
   {
-    if ((ConfigChannel.enable_owner == 0) != !capab_has_flag(source, CAPAB_QOP) ||
-        (ConfigChannel.enable_admin == 0) != !capab_has_flag(source, CAPAB_AOP))
+    if (!capab_has_flag(source, CAPAB_QOP) || !capab_has_flag(source, CAPAB_AOP))
     {
       _server_reject_connection(source, SERVER_REJECT_CONFIG_MISMATCH, "Mismatching AOP/QOP capabilities");
       return;

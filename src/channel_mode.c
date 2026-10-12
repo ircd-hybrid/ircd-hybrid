@@ -117,13 +117,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       return NULL;
     }
 
-    if (etype != EXTBAN_NONE && ConfigChannel.enable_extbans == 0)
-    {
-      sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
-      return NULL;
-    }
-
-    uint32_t extban_acting = extbans & extban_acting_mask();
+    const uint32_t extban_acting = extbans & extban_acting_mask();
     if (extban_acting)
     {
       const struct Extban *const extban = extban_find_flag(extban_acting);
@@ -134,7 +128,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       }
     }
 
-    uint32_t extban_matching = extbans & extban_matching_mask();
+    const uint32_t extban_matching = extbans & extban_matching_mask();
     if (extban_matching)
     {
       const struct Extban *const extban = extban_find_flag(extban_matching);
@@ -854,10 +848,6 @@ channel_mode_init(void)
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
   {
-    if ((tab->rank == CHACCESS_OWNER && ConfigChannel.enable_owner == 0) ||
-        (tab->rank == CHACCESS_ADMIN && ConfigChannel.enable_admin == 0))
-      continue;
-
     cmode_map[tab->letter] = tab;
 
     const char lstr[] = { tab->letter, '\0' };
@@ -898,8 +888,8 @@ channel_mode_init(void)
   isupport_add("EXCEPTS", NULL);
   isupport_add("INVEX", NULL);
 
-  capab_add("QOP", CAPAB_QOP, ConfigChannel.enable_owner != 0);
-  capab_add("AOP", CAPAB_AOP, ConfigChannel.enable_admin != 0);
+  capab_add("QOP", CAPAB_QOP, true);
+  capab_add("AOP", CAPAB_AOP, true);
   capab_add("HOP", CAPAB_HOP, true);
 }
 

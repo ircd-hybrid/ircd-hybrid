@@ -180,9 +180,6 @@ dline                       { return T_DLINE; }
 dline_min_cidr              { return DLINE_MIN_CIDR; }
 dline_min_cidr6             { return DLINE_MIN_CIDR6; }
 email                       { return EMAIL; }
-enable_admin                { return ENABLE_ADMIN; }
-enable_extbans              { return ENABLE_EXTBANS; }
-enable_owner                { return ENABLE_OWNER; }
 encrypted                   { return ENCRYPTED; }
 exceed_limit                { return EXCEED_LIMIT; }
 exempt                      { return EXEMPT; }

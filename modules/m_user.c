@@ -50,11 +50,11 @@ mr_user(struct Client *source, size_t parc, char *parv[])
 
   if (!client_has_flag(source, FLAGS_GOTID))
   {
-    char *p = strchr(username, '@');
-    if (p)
-      *p = '\0';
-
     strlcpy(source->username, username, sizeof(source->username));
+
+    char *const separator = strchr(source->username, '@');
+    if (separator)
+      *separator = '\0';
   }
 
   strlcpy(source->info, realname, sizeof(source->info));

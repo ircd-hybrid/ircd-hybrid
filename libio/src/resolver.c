@@ -18,6 +18,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/uio.h>
 
 #include "address.h"
 #include "comm.h"
@@ -34,6 +35,7 @@
 enum
 {
   RESOLVER_UDP_MESSAGE_CAPACITY = 1024,
+  RESOLVER_READ_PACKET_BUDGET = 64,
   RESOLVER_INITIAL_TIMEOUT_MS = 4000,
   RESOLVER_TIMEOUT_SCAN_INTERVAL_MS = 1000,
   RESOLVER_MAX_ROUNDS = 2,
@@ -104,6 +106,7 @@ struct resolver_socket
   int family;
   const char *description;
   fde_t *fde;
+  uint64_t generation;
 };
 
 struct resolver_request
@@ -172,6 +175,7 @@ _resolver_socket_close(struct resolver_socket *socket)
 
   comm_socket_close(socket->fde);
   socket->fde = NULL;
+  ++socket->generation;
 }
 
 static bool
@@ -1165,33 +1169,52 @@ _resolver_read_reply(fde_t *fde, void *data)
   assert(socket->fde);
   assert(socket->fde == fde);
 
+  const uint64_t generation = socket->generation;
   unsigned char packet[RESOLVER_UDP_MESSAGE_CAPACITY];
-  struct resolver_completion completion;
-  bool completed = false;
-
-  while (true)
+  struct iovec buffer =
   {
-    struct io_addr source = { 0 };
-    socklen_t source_length = sizeof(source.ss);
+    .iov_base = packet,
+    .iov_len = sizeof(packet)
+  };
 
-    ssize_t bytes_received;
-    do
-      bytes_received = recvfrom(fde->fd, packet, sizeof(packet), 0,
-                                (struct sockaddr *)&source.ss, &source_length);
-    while (bytes_received == -1 && errno == EINTR);
-
-    if (bytes_received == -1)
-      break;
-
-    completed = _resolver_process_packet(socket, packet, (size_t)bytes_received, &source, &completion);
-    if (completed)
-      break;
-  }
-
+  /* Keep reception armed before callbacks can reconfigure the resolver. */
   comm_setselect(fde, COMM_SELECT_READ, _resolver_read_reply, socket);
 
-  if (completed)
+  for (size_t packets_read = 0; packets_read < RESOLVER_READ_PACKET_BUDGET; ++packets_read)
+  {
+    struct io_addr source = { 0 };
+    struct msghdr message;
+    ssize_t bytes_received;
+
+    do
+    {
+      message = (struct msghdr)
+      {
+        .msg_name = &source.ss,
+        .msg_namelen = sizeof(source.ss),
+        .msg_iov = &buffer,
+        .msg_iovlen = 1
+      };
+
+      bytes_received = recvmsg(fde->fd, &message, 0);
+    } while (bytes_received == -1 && errno == EINTR);
+
+    if (bytes_received == -1)
+      return;
+
+    if (message.msg_flags & MSG_TRUNC)
+      continue;
+
+    struct resolver_completion completion;
+    if (!_resolver_process_packet(socket, packet, (size_t)bytes_received, &source, &completion))
+      continue;
+
     _resolver_completion_dispatch(&completion);
+
+    /* A callback may close and reopen the socket, reusing the same descriptor. */
+    if (socket->generation != generation)
+      return;
+  }
 }
 
 static void

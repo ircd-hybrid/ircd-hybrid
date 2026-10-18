@@ -1222,6 +1222,9 @@ _resolver_process_timeouts(void *unused)
 {
   (void)unused;
 
+  if (list_is_empty(&request_list))
+    return;
+
   const uintmax_t now_ms = io_time_get_monotonic_ms_total();
 
   for (size_t i = 0; i < IO_ARRAY_LENGTH(requests_by_transaction_id); ++i)

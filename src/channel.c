@@ -712,8 +712,14 @@ channel_join_list(struct Client *client, char *chan_list, char *key_list)
     const char *key = NULL;
 
     /* If we have any more keys, take the first for this channel. */
-    if (!string_is_empty(key_list) && (key_list = strchr(key = key_list, ',')))
-      *key_list++ = '\0';
+    if (!string_is_empty(key_list))
+    {
+      key = key_list;
+
+      key_list = strchr(key_list, ',');
+      if (key_list)
+        *key_list++ = '\0';
+    }
 
     channel_join(client, name, key);
   }

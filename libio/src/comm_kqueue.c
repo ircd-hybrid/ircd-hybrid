@@ -131,14 +131,19 @@ comm_select(int timeout_ms)
   poll_time.tv_sec = timeout_ms / 1000;
   poll_time.tv_nsec = (timeout_ms % 1000) * 1000000L;
   num = kevent(kqueue_fd, kq_fdlist, kqoff, ke, KE_LENGTH, &poll_time);
+  const int wait_errno = errno;
   kqoff = 0;
 
   io_time_update_cache();
 
   if (num < 0)
   {
-    const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
-    nanosleep(&req, NULL);  /* Avoid 99% CPU in comm_select */
+    if (wait_errno != EINTR)
+    {
+      /* Avoid a busy loop after persistent wait errors. */
+      const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
+      nanosleep(&req, NULL);
+    }
     return;
   }
 

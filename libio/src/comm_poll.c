@@ -10,6 +10,7 @@
 #include "config.h"  /**< Autotools-generated USE_IOPOLL_MECHANISM & AX_IOPOLL_MECHANISM_POLL. */
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_POLL
 #include <assert.h>
+#include <errno.h>
 #include <poll.h>
 #include <time.h>
 
@@ -128,13 +129,18 @@ comm_select(int timeout_ms)
   void (*hdl)(fde_t *, void *);
 
   num = poll(pollfds, pollnum, timeout_ms);
+  const int wait_errno = errno;
 
   io_time_update_cache();
 
   if (num < 0)
   {
-    const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
-    nanosleep(&req, NULL);  /* Avoid 99% CPU in comm_select */
+    if (wait_errno != EINTR)
+    {
+      /* Avoid a busy loop after persistent wait errors. */
+      const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
+      nanosleep(&req, NULL);
+    }
     return;
   }
 

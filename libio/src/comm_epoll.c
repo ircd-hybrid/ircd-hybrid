@@ -127,14 +127,19 @@ comm_select(int timeout_ms)
   void (*hdl)(fde_t *, void *);
 
   num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, timeout_ms);
+  const int wait_errno = errno;
   assert(num <= epollop->nevents);
 
   io_time_update_cache();
 
   if (num < 0)
   {
-    const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
-    nanosleep(&req, NULL);  /* Avoid 99% CPU in comm_select */
+    if (wait_errno != EINTR)
+    {
+      /* Avoid a busy loop after persistent wait errors. */
+      const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
+      nanosleep(&req, NULL);
+    }
     return;
   }
 

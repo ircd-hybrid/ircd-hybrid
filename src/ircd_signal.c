@@ -7,80 +7,117 @@
  * @file ircd_signal.c
  * @brief Implements signal handling for the IRC daemon.
  *
- * This file contains functions for setting up and managing signal handlers
- * for the IRC daemon. It includes handlers for various signals and ensures
- * proper reaping of zombie processes.
+ * Control signals are deferred to the main loop. SIGCHLD reaps child processes
+ * directly using async-signal-safe operations.
  */
 
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
+#include <string.h>
 #include <sys/wait.h>
-#include <errno.h>
 
+#include "io.h"
 #include "io_signal.h"
+
+#include "client.h"
+#include "conf.h"
 #include "ircd.h"
 #include "ircd_exit.h"
 #include "ircd_signal.h"
+#include "motd.h"
+#include "send.h"
+
+static sigset_t deferred_signals;
+
+static volatile sig_atomic_t pending_sigterm;
+static volatile sig_atomic_t pending_sigint;
+static volatile sig_atomic_t pending_sighup;
+static volatile sig_atomic_t pending_sigusr1;
+
 
 /**
- * @var dorehash
- * @brief Flag indicating if the server configuration should be re-read.
+ * @brief Records control requests and reaps child processes.
  *
- * This global variable is set to true when the server receives the SIGHUP signal,
- * indicating that the server configuration should be re-read.
- */
-volatile sig_atomic_t dorehash;
-
-/**
- * @var doremotd
- * @brief Flag indicating if the MOTD file should be re-read.
- *
- * This global variable is set to true when the server receives the SIGUSR1 signal,
- * indicating that the Message of the Day (MOTD) file should be re-read.
- */
-volatile sig_atomic_t doremotd;
-
-/**
- * @brief Unified signal handler for the IRC daemon.
- *
- * This function handles various signals by delegating to specific handlers
- * based on the signal number.
- *
- * @param sig Signal number.
+ * @param signum Signal number.
  */
 static void
-_ircd_signal_handler(int sig)
+_ircd_signal_handler(int signum)
 {
-  switch (sig)
+  switch (signum)
   {
     case SIGTERM:
-      ircd_exit(IRCD_EXIT_TERMINATE, "received signal SIGTERM");
+      pending_sigterm = 1;
       break;
     case SIGINT:
-      ircd_exit(server_state.foreground ? IRCD_EXIT_TERMINATE : IRCD_EXIT_RESTART, "received signal SIGINT");
+      pending_sigint = 1;
       break;
     case SIGHUP:
-      dorehash = 1;
+      pending_sighup = 1;
       break;
     case SIGUSR1:
-      doremotd = 1;
+      pending_sigusr1 = 1;
       break;
     case SIGCHLD:
     {
-      int saved_errno = errno;  /* Save errno to restore it later. */
-      int status;
+      const int saved_errno = errno;
+      pid_t result;
 
-      /* Reap all zombie child processes. */
-      while (waitpid(-1, &status, WNOHANG) > 0)
-        ;
-      errno = saved_errno;  /* Restore errno. */
+      /* Reap all available children, including after nested signals. */
+      do
+        result = waitpid(-1, NULL, WNOHANG);
+      while (result > 0 || (result == -1 && errno == EINTR));
+
+      errno = saved_errno;
       break;
     }
     default:
       break;
   }
 }
+
+
+void
+ircd_signal_process(void)
+{
+  if (!pending_sigterm && !pending_sigint && !pending_sighup && !pending_sigusr1)
+    return;
+
+  sigset_t previous_mask;
+  if (sigprocmask(SIG_BLOCK, &deferred_signals, &previous_mask) == -1)
+    ircd_exit_fmt(IRCD_EXIT_FAILURE, "Unable to block control signals: %s", strerror(errno));
+
+  const sig_atomic_t terminate = pending_sigterm;
+  const sig_atomic_t interrupt = pending_sigint;
+  const sig_atomic_t rehash = pending_sighup;
+  const sig_atomic_t reload_motd = pending_sigusr1;
+
+  pending_sigterm = 0;
+  pending_sigint = 0;
+  pending_sighup = 0;
+  pending_sigusr1 = 0;
+
+  if (sigprocmask(SIG_SETMASK, &previous_mask, NULL) == -1)
+    ircd_exit_fmt(IRCD_EXIT_FAILURE, "Unable to restore signal mask: %s", strerror(errno));
+
+  if (terminate)
+    ircd_exit(IRCD_EXIT_TERMINATE, "received signal SIGTERM");
+
+  if (interrupt)
+    ircd_exit(server_state.foreground ? IRCD_EXIT_TERMINATE : IRCD_EXIT_RESTART, "received signal SIGINT");
+
+  if (rehash)
+    conf_rehash(true);
+
+  if (reload_motd)
+  {
+    motd_recache();
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Got signal SIGUSR1, reloading motd file(s)");
+  }
+}
+
 
 /**
  * @brief Initializes signal handlers for the IRC daemon.
@@ -95,10 +132,10 @@ ircd_signal_init(void)
   const io_signal_t signals[] =
   {
     { SIGTERM, _ircd_signal_handler },
+    { SIGINT, _ircd_signal_handler },
     { SIGHUP, _ircd_signal_handler },
     { SIGUSR1, _ircd_signal_handler },
-    { SIGCHLD, _ircd_signal_handler },
-    { SIGINT, _ircd_signal_handler }
+    { SIGCHLD, _ircd_signal_handler }
   };
 
   const int ignore_signals[] =
@@ -115,6 +152,12 @@ ircd_signal_init(void)
     SIGTRAP,
 #endif
   };
+
+  sigemptyset(&deferred_signals);
+  sigaddset(&deferred_signals, SIGTERM);
+  sigaddset(&deferred_signals, SIGINT);
+  sigaddset(&deferred_signals, SIGHUP);
+  sigaddset(&deferred_signals, SIGUSR1);
 
   if (io_signal_register(signals, IO_ARRAY_LENGTH(signals)) == -1)
   {

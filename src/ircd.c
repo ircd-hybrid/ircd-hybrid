@@ -61,8 +61,6 @@
 #include "ircd_module.h"
 #include "ircd_signal.h"
 #include "links_cache.h"
-#include "motd.h"
-#include "send.h"
 #include "server.h"
 #include "server_capab.h"
 
@@ -170,27 +168,17 @@ _io_loop(void)
 {
   while (true)
   {
+    ircd_signal_process();
+
     comm_select(comm_get_select_timeout(ircd_event_manager));
+
+    ircd_signal_process();
 
     client_process_scheduled_exits();
     client_process_deferred_destroy();
 
     io_time_update_cache();
     event_manager_dispatch_due(ircd_event_manager);
-
-     if (dorehash)
-    {
-      dorehash = 0;
-      conf_rehash(true);
-    }
-
-    if (doremotd)
-    {
-      doremotd = 0;
-      motd_recache();
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Got signal SIGUSR1, reloading motd file(s)");
-    }
   }
 }
 

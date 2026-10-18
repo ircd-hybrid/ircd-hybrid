@@ -126,9 +126,9 @@ am_libio_la_OBJECTS = address.lo address_index.lo address_parse.lo \
 	ident.lo io_daemon.lo io_getopt.lo io_hex.lo io_parse.lo \
 	io_pidfile.lo io_rlimit.lo io_signal.lo io_string.lo \
 	io_time.lo list.lo log.lo match.lo misc.lo memory.lo module.lo \
-	module_loader.lo patricia.lo resolver.lo resolver_config.lo \
-	rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
-	tls_wolfssl.lo
+	module_config.lo module_loader.lo patricia.lo resolver.lo \
+	resolver_config.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
+	tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -164,12 +164,12 @@ am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/io_time.Plo ./$(DEPDIR)/list.Plo \
 	./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
 	./$(DEPDIR)/memory.Plo ./$(DEPDIR)/misc.Plo \
-	./$(DEPDIR)/module.Plo ./$(DEPDIR)/module_loader.Plo \
-	./$(DEPDIR)/patricia.Plo ./$(DEPDIR)/resolver.Plo \
-	./$(DEPDIR)/resolver_config.Plo ./$(DEPDIR)/rng_mt.Plo \
-	./$(DEPDIR)/sha3.Plo ./$(DEPDIR)/tls_gnutls.Plo \
-	./$(DEPDIR)/tls_none.Plo ./$(DEPDIR)/tls_openssl.Plo \
-	./$(DEPDIR)/tls_wolfssl.Plo
+	./$(DEPDIR)/module.Plo ./$(DEPDIR)/module_config.Plo \
+	./$(DEPDIR)/module_loader.Plo ./$(DEPDIR)/patricia.Plo \
+	./$(DEPDIR)/resolver.Plo ./$(DEPDIR)/resolver_config.Plo \
+	./$(DEPDIR)/rng_mt.Plo ./$(DEPDIR)/sha3.Plo \
+	./$(DEPDIR)/tls_gnutls.Plo ./$(DEPDIR)/tls_none.Plo \
+	./$(DEPDIR)/tls_openssl.Plo ./$(DEPDIR)/tls_wolfssl.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -347,7 +347,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/src -DMODULE_LOADER_SUFFIX=\"$(MODULE_FILE_SUFFIX)\"
+AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libio.la
 libio_la_SOURCES = address.c     \
                     address.h     \
@@ -405,6 +405,8 @@ libio_la_SOURCES = address.c     \
                     memory.h      \
                     module.c      \
                     module.h      \
+                    module_config.c \
+                    module_internal.h \
                     module_loader.c \
                     module_loader.h \
                     patricia.c    \
@@ -509,6 +511,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module_config.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module_loader.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/patricia.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver.Plo@am__quote@ # am--include-marker
@@ -711,6 +714,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
+	-rm -f ./$(DEPDIR)/module_config.Plo
 	-rm -f ./$(DEPDIR)/module_loader.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo
@@ -796,6 +800,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/memory.Plo
 	-rm -f ./$(DEPDIR)/misc.Plo
 	-rm -f ./$(DEPDIR)/module.Plo
+	-rm -f ./$(DEPDIR)/module_config.Plo
 	-rm -f ./$(DEPDIR)/module_loader.Plo
 	-rm -f ./$(DEPDIR)/patricia.Plo
 	-rm -f ./$(DEPDIR)/resolver.Plo

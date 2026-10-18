@@ -46,6 +46,7 @@
 #include "defaults.h"
 #include "ipcache.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "ircd_defs.h"
 #include "isupport.h"
 #include "links_cache.h"
@@ -55,6 +56,7 @@
 #include "send.h"
 #include "whowas.h"
 
+extern void yyrestart(FILE *);
 extern int yyparse();  /* Defined in conf_parser.c */
 
 struct config_channel_entry ConfigChannel;
@@ -204,14 +206,53 @@ conf_read(FILE *file)
   conf_line_number = 1;
 
   conf_set_defaults();  /* Set default values prior to conf parsing */
+  conf_parser_ctx.module_config = module_config_create();
+  conf_parser_ctx.module_config_valid = true;
 
   conf_parser_ctx.pass = 1;
-  yyparse();  /* Pick up the classes first */
+  yyrestart(file);
 
-  rewind(file);
+  if (yyparse())
+    conf_parser_ctx.module_config_valid = false;
 
-  conf_parser_ctx.pass = 2;
-  yyparse();  /* Load the values from the conf */
+  if (fseek(file, 0, SEEK_SET))
+  {
+    conf_parser_ctx.module_config_valid = false;
+    conf_error_report("Unable to rewind configuration file");
+  }
+  else
+  {
+    conf_line_number = 1;
+    conf_parser_ctx.pass = 2;
+
+    yyrestart(file);
+
+    if (yyparse())
+      conf_parser_ctx.module_config_valid = false;
+  }
+
+  if (conf_parser_ctx.module_config_valid)
+  {
+    struct module_error_info error;
+    if (module_manager_replace_config(ircd_module_manager_get(), &conf_parser_ctx.module_config, &error) != MODULE_SUCCESS)
+    {
+      conf_parser_ctx.module_config_valid = false;
+      conf_error_report(error.message);
+    }
+  }
+
+  module_config_destroy(&conf_parser_ctx.module_config, NULL);
+
+  if (!conf_parser_ctx.module_config_valid)
+  {
+    if (conf_parser_ctx.boot)
+    {
+      log_write(LOG_TYPE_IRCD, "Module configuration rejected; startup aborted");
+      exit(EXIT_FAILURE);
+    }
+
+    log_write(LOG_TYPE_IRCD, "Module configuration rejected; previous module configuration retained");
+  }
 
   conf_validate();  /* Check to make sure some values are still okay. */
                     /* Some global values are also loaded here. */
@@ -242,9 +283,8 @@ conf_rehash(bool sig)
 
   /* don't close listeners until we know we can go ahead with the rehash */
 
-  conf_read_files(false);
-
-  module_load_all(NULL);
+  if (conf_read_files(false))
+    ircd_module_apply_config();
 
   conf_ban_check_clients();
 }
@@ -301,7 +341,6 @@ conf_clear(void)
   conf_exempt_clear();
   conf_auth_clear();
 
-  module_config_clear();  /* Clear loadmodule items */
 
   motd_clear();  /* Clear motd {} items and re-cache default motd */
 
@@ -405,7 +444,7 @@ conf_handle_tls(bool cold)
                  "Error reloading TLS settings, check the ircd log");
 }
 
-void
+bool
 conf_read_files(bool cold)
 {
   conf_parser_ctx.boot = cold;
@@ -424,7 +463,7 @@ conf_read_files(bool cold)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                      "Unable to read configuration file '%s': %s",
                      ConfigGeneral.configfile, strerror(errno));
-      return;
+      return false;
     }
   }
 
@@ -443,6 +482,7 @@ conf_read_files(bool cold)
 
   conf_read(conf_parser_ctx.conf_file);
   fclose(conf_parser_ctx.conf_file);
+  conf_parser_ctx.conf_file = NULL;
 
   conf_handle_tls(cold);
 
@@ -459,11 +499,13 @@ conf_read_files(bool cold)
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANNELLEN", "%d", CHANNELLEN);
   isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
+  return conf_parser_ctx.module_config_valid;
 }
 
 void
 yyerror(const char *msg)
 {
+  conf_parser_ctx.module_config_valid = false;
   if (conf_parser_ctx.pass != 1)
     return;
 

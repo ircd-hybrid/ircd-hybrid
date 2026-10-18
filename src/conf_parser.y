@@ -44,6 +44,7 @@
 #include "conf_shared.h"
 #include "defaults.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "ircd_defs.h"
 #include "links_cache.h"
 #include "listener.h"
@@ -92,7 +93,6 @@ static struct
     port,
     timeout,
     aftype,
-    attributes,
     ping_freq,
     max_perip_local,
     max_perip_global,
@@ -160,7 +160,6 @@ reset_block_state(void)
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
-%token  CORE
 %token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_FLOODTIME
@@ -271,6 +270,7 @@ reset_block_state(void)
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
+%token  REQUIRED
 %token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
@@ -344,6 +344,9 @@ reset_block_state(void)
 %type  <number> timespec_
 %type  <number> sizespec
 %type  <number> sizespec_
+%type  <number> module_attributes module_attributes_items module_attributes_item
+%type  <string> module_string
+%destructor { io_free($$); } module_string
 
 %%
 conf:
@@ -400,37 +403,66 @@ sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
 /***************************************************************************
  * module_base_path_entry section
  ***************************************************************************/
-module_base_path_entry: MODULE_BASE_PATH '=' QSTRING ';'
+module_base_path_entry: MODULE_BASE_PATH '=' module_string ';'
 {
   if (conf_parser_ctx.pass == 2)
-    module_set_base_path(yylval.string);
+  {
+    struct module_error_info error;
+    if (module_config_set_base_path(conf_parser_ctx.module_config, $3, &error) != MODULE_SUCCESS)
+    {
+      conf_parser_ctx.module_config_valid = false;
+      conf_error_report(error.message);
+    }
+  }
+  io_free($3);
 };
 
 
 /***************************************************************************
  * loadmodule section
  ***************************************************************************/
-loadmodule_entry: LOADMODULE QSTRING module_attributes ';'
+loadmodule_entry: LOADMODULE module_string module_attributes ';'
 {
   if (conf_parser_ctx.pass == 2)
-    module_config_add($2, block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
+  {
+    struct module_error_info error;
+    if (module_config_add(conf_parser_ctx.module_config, $2, (module_flags_t)$3, &error) != MODULE_SUCCESS)
+    {
+      conf_parser_ctx.module_config_valid = false;
+      conf_error_report(error.message);
+    }
+  }
+  io_free($2);
+};
+
+/* Own scanner strings across attribute tokens and input-buffer refills. */
+module_string: QSTRING
+{
+  $$ = io_strdup($1);
 };
 
 module_attributes: /* empty */
 {
-  block_state.attributes.value = 0;
-} | ':' module_attributes_items ;
+  $$ = 0;
+} | ':' module_attributes_items
+{
+  $$ = $2;
+};
 
-module_attributes_items: module_attributes_items ',' module_attributes_item | module_attributes_item;
+module_attributes_items: module_attributes_items ',' module_attributes_item
+{
+  $$ = $1 | $3;
+} | module_attributes_item
+{
+  $$ = $1;
+};
 
 module_attributes_item: RESIDENT
 {
-  if (conf_parser_ctx.pass == 2)
-    block_state.attributes.value |= MODULE_RESIDENT;
-} | CORE
+  $$ = MODULE_FLAG_NO_DEACTIVATE;
+} | REQUIRED
 {
-  if (conf_parser_ctx.pass == 2)
-    block_state.attributes.value |= MODULE_CORE;
+  $$ = MODULE_FLAG_NO_REMOVE;
 };
 
 

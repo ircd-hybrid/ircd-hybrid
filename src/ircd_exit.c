@@ -25,6 +25,7 @@
 #include "defaults.h"
 #include "ircd.h"
 #include "ircd_exit.h"
+#include "ircd_module.h"
 #include "send.h"
 
 /**
@@ -33,7 +34,7 @@
  * This function is responsible for initiating the termination or restart of the IRC server
  * with a formatted message indicating the reason.
  *
- * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param action The termination or restart action, including the exit status.
  * @param format A format string indicating the reason for server termination or restart.
  * @param ... Additional arguments to be formatted into the message.
  */
@@ -59,7 +60,7 @@ ircd_exit_fmt(ircd_exit_action_t action, const char *format, ...)
  * parameter. In the case of a restart, it attempts to execute the server binary with the original
  * command line arguments.
  *
- * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param action The termination or restart action, including the exit status.
  * @param message A message indicating the reason for server termination or restart.
  */
 void
@@ -87,16 +88,15 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   conf_db_save_all(NULL);
 
+  ircd_module_shutdown();
+
   io_pidfile_remove(pidFileName);
   io_pidfile_close();
 
   close_fds();
 
   if (action == IRCD_EXIT_RESTART)
-  {
     execv(SPATH, myargv);
-    exit(EXIT_FAILURE);
-  }
-  else
-    exit(EXIT_SUCCESS);
+
+  exit(action == IRCD_EXIT_TERMINATE ? EXIT_SUCCESS : EXIT_FAILURE);
 }

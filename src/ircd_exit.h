@@ -10,19 +10,19 @@
 
 #ifndef INCLUDED_ircd_exit_h
 #define INCLUDED_ircd_exit_h
-
 #include "io.h"
 
 /**
  * @enum ircd_exit_action_t
  * @brief Actions for server exit.
  *
- * This enum defines the actions for the IRC server exit, either terminating or restarting.
+ * Termination actions perform the same cleanup and differ only in exit status.
  */
 typedef enum
 {
   IRCD_EXIT_TERMINATE,  /**< Terminate the server. */
   IRCD_EXIT_RESTART,  /**< Restart the server. */
+  IRCD_EXIT_FAILURE,  /**< Terminate the server with EXIT_FAILURE. */
 } ircd_exit_action_t;
 
 extern void ircd_exit(ircd_exit_action_t, const char *);

@@ -1,30 +1,28 @@
-MODULE <option> [module_name]
+MODULE <option> [argument]
 
-The MODULE command is used to manage modules within the IRC daemon.
-Available options are:
+Manages modules on the local server.
 
-  LIST
-    - Lists all loaded modules, showing names, memory addresses, and
-      attributes (core, resident). Core modules can be reloaded but not
-      unloaded. Resident modules cannot be unloaded or reloaded. If a
-      match string is provided, only matching modules will be listed.
-    - Usage: MODULE LIST [match_string]
+  LIST [pattern]       Lists names, states and protection flags.
+                       Supports * and ? wildcards.
+  LOAD <module_name>   Loads a configured module not already listed.
+  UNLOAD <module_name> Unloads an active module or removes a failed entry.
+  RELOAD <module_name> Reloads an active module or retries a failed entry.
+  RELOAD *             Reloads listed modules, skipping unconfigured
+                       modules and protected active modules. Stops at
+                       the first error.
 
-  LOAD
-    - Loads a specified module into the ircd. The module name must be
-      provided with a relative path from the configured base directory.
-    - Usage: MODULE LOAD <module_name>
+Names are case-sensitive; omit paths and .so suffixes.
+LOAD and RELOAD require a current configuration entry.
 
-  UNLOAD
-    - Unloads a specified module from the ircd. The module name must be
-      provided with a relative path from the configured base directory.
-      When a module is unloaded, all associated commands are also unloaded.
-    - Usage: MODULE UNLOAD <module_name>
+Protection flags:
+  no_remove     - Blocks UNLOAD.
+  no_deactivate - Blocks UNLOAD and RELOAD of active modules.
 
-  RELOAD
-    - Reloads specified modules. If a module name is provided, that
-      module is reloaded. If * is provided, all configured modules are
-      reloaded.
-    - Usage: MODULE RELOAD [<module_name> | *]
+Modules in state broken are quarantined and require a server restart.
+A failed reload may leave a module inactive. The server terminates if
+any required module is inactive.
+
+MODULE does not change configuration. REHASH CONF may reactivate
+unloaded modules that remain configured.
 
 - Requires Oper Priv: module

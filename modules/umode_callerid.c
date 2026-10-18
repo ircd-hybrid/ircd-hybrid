@@ -9,6 +9,7 @@
 #include "io_time.h"
 #include "module.h"
 
+#include "ircd_module.h"
 #include "accept.h"
 #include "client.h"
 #include "conf.h"
@@ -64,17 +65,21 @@ whois_send_hook(void *ctx_)
   return HOOK_FLOW_CONTINUE;
 }
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&callerid_mode);
+  if (!ircd_module_register_user_mode(&callerid_mode, error_message, error_message_size))
+    return false;
+
   hook_install(ircd_hook_msg_client_target_local, msg_client_target_local_hook, HOOK_PRIORITY_DEFAULT);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
   isupport_add("CALLERID", NULL);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&callerid_mode);
   hook_uninstall(ircd_hook_msg_client_target_local, msg_client_target_local_hook);
@@ -82,8 +87,12 @@ exit_handler(void)
   isupport_delete("CALLERID");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_callerid",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

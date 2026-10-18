@@ -5,6 +5,7 @@
 
 #include "module.h"
 
+#include "ircd_module.h"
 #include "client.h"
 #include "user_mode.h"
 
@@ -15,20 +16,24 @@ static struct UserMode external_mode =
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&external_mode);
+  return ircd_module_register_user_mode(&external_mode, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&external_mode);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_external",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

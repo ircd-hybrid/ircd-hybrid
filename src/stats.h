@@ -46,6 +46,7 @@ typedef enum
   STATS_SUCCESS = 0,  /**< Indicates a successful operation. */
   STATS_ALREADY_REGISTERED,  /**< Indicates that the stats handler for the given character is already registered. */
   STATS_NOT_FOUND,  /**< Indicates that the stats handler for the given character was not found. */
+  STATS_INVALID_ARGUMENT,  /**< Indicates that a required argument is invalid. */
 } stats_result_t;
 
 /**

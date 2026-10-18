@@ -5,19 +5,31 @@
 
 /**
  * @file module_loader.h
- * @brief Native dynamic module loader interface.
+ * @brief Native POSIX dynamic module loader interface.
  */
 
 #ifndef INCLUDED_module_loader_h
 #define INCLUDED_module_loader_h
-#include <stdbool.h>
-#include <stddef.h>
+
+#define MODULE_LOADER_ERROR_CAPACITY 512
 
 typedef void *module_loader_handle_t;
 
-extern bool module_loader_build_path(char *, size_t, const char *, const char *);
-extern bool module_loader_close(module_loader_handle_t);
-extern bool module_loader_symbol(module_loader_handle_t, const char *, void **);
-extern const char *module_loader_get_error(void);
-extern module_loader_handle_t module_loader_open(const char *);
+typedef enum
+{
+  MODULE_LOADER_OK = 0,
+  MODULE_LOADER_INVALID_ARGUMENT,
+  MODULE_LOADER_OPEN_FAILED,
+  MODULE_LOADER_SYMBOL_FAILED,
+  MODULE_LOADER_CLOSE_FAILED
+} module_loader_result_t;
+
+struct module_loader_error
+{
+  char message[MODULE_LOADER_ERROR_CAPACITY];
+};
+
+extern module_loader_result_t module_loader_close(module_loader_handle_t *, struct module_loader_error *);
+extern module_loader_result_t module_loader_open(const char *, module_loader_handle_t *, struct module_loader_error *);
+extern module_loader_result_t module_loader_symbol(module_loader_handle_t, const char *, void **, struct module_loader_error *);
 #endif  /* INCLUDED_module_loader_h */

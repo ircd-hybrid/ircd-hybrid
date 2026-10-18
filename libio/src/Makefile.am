@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir)/src -DMODULE_LOADER_SUFFIX=\"$(MODULE_FILE_SUFFIX)\"
+AM_CPPFLAGS = -I$(top_srcdir)/src
 
 noinst_LTLIBRARIES = libio.la
 
@@ -58,6 +58,8 @@ libio_la_SOURCES =  address.c     \
                     memory.h      \
                     module.c      \
                     module.h      \
+                    module_config.c \
+                    module_internal.h \
                     module_loader.c \
                     module_loader.h \
                     patricia.c    \

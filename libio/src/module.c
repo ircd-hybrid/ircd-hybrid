@@ -5,247 +5,195 @@
 
 /**
  * @file module.c
- * @brief Implements the module management functions.
- *
- * This file contains the implementation of functions for managing modules, including
- * initialization, loading, unloading, and configuration handling. It provides the
- * necessary functionality to dynamically manage modules within the application.
+ * @brief Module ownership, validation, and lifecycle management.
  */
 
-#include <errno.h>
+#include "config.h"
+
+#include <assert.h>
+#include <inttypes.h>
+#include <limits.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 
 #include "io.h"
 #include "io_string.h"
 #include "list.h"
-#include "log.h"
 #include "memory.h"
-#include "module_loader.h"
 #include "module.h"
+#include "module_internal.h"
+#include "module_loader.h"
 
-/**
- * @var module_last_error
- * @brief Buffer for storing the last error message.
- *
- * This buffer stores the last error message encountered during module operations.
- * It provides detailed information about the most recent error for debugging and logging purposes.
- */
-static char module_last_error[MODULE_ERROR_BUFFER_SIZE];
-
-/**
- * @var module_config_list
- * @brief List of module configurations.
- *
- * This variable maintains a doubly linked list of all module configurations.
- * Each element in the list is a ModuleConfig structure representing a specific module configuration.
- */
-static list_t module_config_list;
-
-/**
- * @var module_list
- * @brief List of loaded modules.
- *
- * This variable maintains a doubly linked list of all loaded modules.
- * Each element in the list is a Module structure representing a specific loaded module.
- */
-static list_t module_list;
-
-/**
- * @var module_base_path
- * @brief Base path for module files.
- *
- * This variable stores the base path for resolving module file paths during loading operations.
- * The base path can be set to customize where the application looks for module files.
- */
-static char *module_base_path;
-
-/**
- * @var module_load_callback
- * @brief Callback for module load events.
- *
- * This function pointer stores the callback function that will be called when a module is loaded.
- * The callback can be used to perform additional actions or logging when a module is loaded.
- */
-static void (*module_load_callback)(const char *, const void *, void *);
-
-/**
- * @var module_unload_callback
- * @brief Callback for module unload events.
- *
- * This function pointer stores the callback function that will be called when a module is unloaded.
- * The callback can be used to perform additional actions or logging when a module is unloaded.
- */
-static void (*module_unload_callback)(const char *, const void *, void *);
-
-/**
- * @var module_error_strings
- * @brief Array of error message strings corresponding to module_error_code values.
- *
- * This array stores human-readable error messages for each error code defined in module_error_code.
- * It is used to format detailed error messages for debugging and logging purposes.
- */
-static const char *const module_error_strings[MODULE_ERR_COUNT] =
+struct module_manager
 {
-  [MODULE_SUCCESS] = "Operation completed successfully",
-  [MODULE_ERR_LOAD_FAILED] = "Failed to load module %s: %s",
-  [MODULE_ERR_INVALID_PATH] = "Invalid module path: %s",
-  [MODULE_ERR_NOT_FOUND] = "Module not loaded: %s",
-  [MODULE_ERR_ALREADY_LOADED] = "Module already loaded: %s",
-  [MODULE_ERR_NOT_CONFIGURED] = "Module not configured to be loaded: %s",
-  [MODULE_ERR_ILLEGAL_TRAVERSAL] = "Illegal directory traversal in path: %s",
-  [MODULE_ERR_INVALID_FILE] = "Invalid file for module %s: %s",
-  [MODULE_ERR_CLOSE_FAILED] = "Failed to close module %s: %s",
-  [MODULE_ERR_CONFIG_EXISTS] = "Module configuration already exists: %s",
-  [MODULE_ERR_CORE_UNLOAD] = "Core module cannot be unloaded: %s",
-  [MODULE_ERR_RESIDENT_UNLOAD] = "Resident module cannot be unloaded: %s"
+  list_t modules;
+  module_config_t *config;
+  uint32_t application_abi_version;
+  void *application_context;
+  bool busy;
+  bool shutdown_started;
 };
 
-/**
- * @brief Retrieves the list of loaded modules.
- *
- * This function returns a pointer to the list of loaded modules. The list is used
- * to manage and iterate over all modules that are currently loaded in the application.
- *
- * @return Pointer to the list of loaded modules.
- */
-const list_t *
-module_get_list(void)
+struct module_failure
 {
-  return &module_list;
-}
+  enum module_error_code code;
+  enum module_error_code cause;
+  char message[MODULE_ERROR_MESSAGE_CAPACITY];
+  char cleanup_message[MODULE_ERROR_MESSAGE_CAPACITY];
+};
 
-/**
- * @brief Retrieves the list of module configurations.
- *
- * This function returns a pointer to the list of module configurations. The list is used
- * to manage and iterate over all module configurations that are defined in the application.
- *
- * @return Pointer to the list of module configurations.
- */
-const list_t *
-module_config_get_list(void)
+struct module
 {
-  return &module_config_list;
-}
+  list_node_t node;
+  struct module_manager *manager;
+  char name[MODULE_NAME_CAPACITY];
+  module_loader_handle_t handle;
+  module_exit_fn exit_handler;
+  module_flags_t intrinsic_flags;
+  module_flags_t policy_flags;
+  enum module_state state;
+  struct module_failure failure;
+};
 
-/**
- * @brief Sets the base path for module files.
- *
- * This function sets the base path for module files, freeing any previously set path.
- * The base path is used as a prefix for resolving module file paths during loading operations.
- *
- * @param path Path to set as the base path.
- */
+struct module_candidate
+{
+  module_loader_handle_t handle;
+  module_flags_t intrinsic_flags;
+  module_init_fn init_handler;
+  module_exit_fn exit_handler;
+};
+
+_Static_assert(sizeof(struct module_descriptor) <= UINT32_MAX,
+               "Module descriptor size must fit in uint32_t");
+
 void
-module_set_base_path(const char *path)
+_module_error_clear(struct module_error_info *error)
 {
-  io_free(module_base_path);
-  module_base_path = io_strdup(path);
+  if (error)
+    *error = (struct module_error_info){ 0 };
 }
 
-/**
- * @brief Sets the last error message for module operations.
- *
- * This function sets the last error message using a formatted string. It is used internally
- * to provide detailed error messages for module operations that encounter issues.
- *
- * @param code Error code indicating the type of error.
- * @param ... Additional arguments for formatting the error message.
- */
-static void
-module_set_error(enum module_error_code code, ...)
+enum module_error_code
+_module_error_set(struct module_error_info *error, enum module_error_code code,
+                  const char *module_name, const char *format, ...)
 {
-  va_list args;
-  va_start(args, code);
-  vsnprintf(module_last_error, sizeof(module_last_error), module_error_strings[code], args);
-  va_end(args);
-}
+  assert(code != MODULE_SUCCESS);
+  assert(format);
 
-/**
- * @brief Sets the callback function for module load events.
- *
- * This function sets the callback function that will be called when a module is loaded.
- * The callback function can be used to perform additional actions or logging when a module is loaded.
- *
- * @param callback Function pointer to the load callback.
- */
-void
-module_set_load_callback(void (*callback)(const char *name, const void *handle, void *user_data))
-{
-  module_load_callback = callback;
-}
-
-/**
- * @brief Sets the callback function for module unload events.
- *
- * This function sets the callback function that will be called when a module is unloaded.
- * The callback function can be used to perform additional actions or logging when a module is unloaded.
- *
- * @param callback Function pointer to the unload callback.
- */
-void
-module_set_unload_callback(void (*callback)(const char *name, const void *handle, void *user_data))
-{
-  module_unload_callback = callback;
-}
-
-/**
- * @brief Retrieves the last error message.
- *
- * This function returns the last error message set during module operations. It can be used
- * to obtain detailed information about the most recent error that occurred.
- *
- * @return Pointer to the last error message.
- */
-const char *
-module_get_error(void)
-{
-  return module_last_error;
-}
-
-/**
- * @brief Retrieves the attributes of a module.
- *
- * This function returns a string representation of the attributes (core, resident)
- * of the specified module. The attributes indicate special properties of the module.
- *
- * @param module Pointer to the module structure.
- * @return String representation of the module's attributes.
- */
-const char *
-module_get_attributes(const struct Module *module)
-{
-  static char attributes[18];
-
-  if (module->core || module->resident)
-    snprintf(attributes, sizeof(attributes), "(%s%s%s)",
-             module->core ? "core" : "",
-             (module->core && module->resident) ? ", " : "", module->resident ? "resident" : "");
-  else
-    attributes[0] = '\0';
-
-  return attributes;
-}
-
-/**
- * @brief Finds a loaded module by name.
- *
- * This function searches the list of loaded modules for a module with the specified name.
- * It returns a pointer to the Module structure if found, or NULL if no such module is loaded.
- *
- * @param name Name of the module to find.
- * @return Pointer to the Module structure if found, NULL otherwise.
- */
-struct Module *
-module_find(const char *name)
-{
-  list_node_t *node;
-  LIST_FOREACH(node, module_list.head)
+  if (error)
   {
-    struct Module *const module = node->data;
+    *error = (struct module_error_info){ .code = code };
+    snprintf(error->module_name, sizeof(error->module_name), "%.*s",
+             MODULE_NAME_CAPACITY - 1, string_or_empty(module_name));
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(error->message, sizeof(error->message), format, args);
+    va_end(args);
+  }
+
+  return code;
+}
+
+#ifndef NDEBUG
+/* Transitional states are valid inside native callbacks, but not at operation boundaries. */
+static bool
+_module_is_stable(const struct module *module)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module_name_is_valid(module->name));
+  assert((module->intrinsic_flags & ~MODULE_FLAG_VALID_MASK) == 0);
+  assert((module->policy_flags & ~MODULE_FLAG_VALID_MASK) == 0);
+
+  switch (module->state)
+  {
+    case MODULE_STATE_ACTIVE:
+      return module->handle != NULL && module->failure.code == MODULE_SUCCESS;
+    case MODULE_STATE_FAILED:
+      return module->handle == NULL && module->exit_handler == NULL && module->failure.code != MODULE_SUCCESS;
+    case MODULE_STATE_BROKEN:
+      return module->handle != NULL && module->exit_handler == NULL && module->failure.code == MODULE_ERR_CLOSE_FAILED;
+    default:
+      return false;
+  }
+}
+
+static bool
+_module_manager_is_stable(const struct module_manager *manager)
+{
+  assert(manager);
+  assert(manager->config);
+  assert(manager->application_abi_version != 0);
+
+  list_node_t *node;
+  LIST_FOREACH(node, manager->modules.head)
+  {
+    const struct module *const module = node->data;
+    if (!_module_is_stable(module) || module->manager != manager)
+      return false;
+
+    if (manager->shutdown_started && module->state != MODULE_STATE_BROKEN)
+      return false;
+  }
+
+  return true;
+}
+#endif
+
+static enum module_error_code
+_module_manager_operation_begin(struct module_manager *manager, struct module_error_info *error)
+{
+  if (manager == NULL)
+    return _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Module manager is required");
+  if (manager->busy)
+    return _module_error_set(error, MODULE_ERR_BUSY, NULL, "Module manager is busy");
+
+  assert(_module_manager_is_stable(manager));
+
+  manager->busy = true;
+  return MODULE_SUCCESS;
+}
+
+static enum module_error_code
+_module_manager_operation_end(struct module_manager *manager, enum module_error_code code)
+{
+  assert(manager);
+  assert(manager->busy);
+  assert(_module_manager_is_stable(manager));
+
+  manager->busy = false;
+  return code;
+}
+
+static enum module_error_code
+_module_manager_mutation_begin(struct module_manager *manager, struct module_error_info *error)
+{
+  const enum module_error_code code = _module_manager_operation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  if (manager->shutdown_started)
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_SHUTDOWN_STARTED, NULL, "Module manager has started shutdown"));
+
+  return MODULE_SUCCESS;
+}
+
+static struct module *
+_module_find(const struct module_manager *manager, const char *name)
+{
+  assert(manager);
+  assert(name);
+
+  list_node_t *node;
+  LIST_FOREACH(node, manager->modules.head)
+  {
+    struct module *const module = node->data;
     if (strcmp(module->name, name) == 0)
       return module;
   }
@@ -253,328 +201,908 @@ module_find(const char *name)
   return NULL;
 }
 
-/**
- * @brief Finds a module configuration by name.
- *
- * This function searches the list of module configurations for a configuration with the specified name.
- * It returns a pointer to the ModuleConfig structure if found, or NULL if no such configuration exists.
- *
- * @param name Name of the module configuration to find.
- * @return Pointer to the ModuleConfig structure if found, NULL otherwise.
- */
-struct ModuleConfig *
-module_config_find(const char *name)
+static enum module_error_code
+_module_lookup(struct module_manager *manager, const char *name,
+               struct module **module_out, struct module_error_info *error)
 {
-  list_node_t *node;
-  LIST_FOREACH(node, module_config_list.head)
-  {
-    struct ModuleConfig *const config = node->data;
-    if (strcmp(config->name, name) == 0)
-      return config;
-  }
+  assert(manager);
+  assert(manager->busy);
+  assert(module_out);
 
-  return NULL;
-}
+  if (!module_name_is_valid(name))
+    return _module_error_set(error, MODULE_ERR_INVALID_NAME, name, "Invalid module name");
 
-/**
- * @brief Unloads a module by name.
- *
- * This function unloads the specified module, invoking its exit handler and
- * removing it from the list of loaded modules. It ensures that resources associated
- * with the module are properly released and that the module is safely removed.
- *
- * @param name Name of the module to unload.
- * @param reload Whether to allow reloading of the module.
- * @param user_data User data to pass to the unload callback.
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_unload(const char *name, bool reload, void *user_data)
-{
-  /* Find the module to unload. */
-  struct Module *const module = module_find(name);
-  if (module == NULL)
-  {
-    module_set_error(MODULE_ERR_NOT_FOUND, name);
-    return MODULE_ERR_NOT_FOUND;
-  }
+  *module_out = _module_find(manager, name);
+  if (*module_out == NULL)
+    return _module_error_set(error, MODULE_ERR_NOT_FOUND, name, "Module is not managed");
 
-  /* Core modules cannot be unloaded unless reloaded. */
-  if (reload == false && module->core)
-  {
-    module_set_error(MODULE_ERR_CORE_UNLOAD, name);
-    return MODULE_ERR_CORE_UNLOAD;
-  }
-
-  /* Resident modules cannot be unloaded. */
-  if (module->resident)
-  {
-    module_set_error(MODULE_ERR_RESIDENT_UNLOAD, name);
-    return MODULE_ERR_RESIDENT_UNLOAD;
-  }
-
-  /* Call the module's exit handler, if defined. */
-  if (module->exit_handler)
-    module->exit_handler();
-
-  list_remove(&module->node, &module_list);
-  io_free(module->name);
-
-  /*
-   * Store the module handle before closing it.
-   * This is necessary because the handle is required for the unload callback,
-   * and once the handle is closed, it may no longer be valid or accessible.
-   */
-  const module_loader_handle_t handle = module->handle;
-
-  if (!module_loader_close(module->handle))
-  {
-    module_set_error(MODULE_ERR_CLOSE_FAILED, name, module_loader_get_error());
-    return MODULE_ERR_CLOSE_FAILED;
-  }
-
-  if (module_unload_callback)
-    module_unload_callback(name, handle, user_data);
-
-  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] unloaded", name, handle);
   return MODULE_SUCCESS;
 }
 
-/**
- * @brief Loads a module by name.
- *
- * This function loads the specified module, invoking its initialization handler and
- * adding it to the list of loaded modules. It ensures that the module is properly
- * initialized and that its resources are ready for use.
- *
- * If manual loading is enabled (indicated by the `manual` parameter), the function
- * performs additional checks and validations to ensure the safety and correctness
- * of loading the module. Manual loading typically involves user-initiated module
- * loads, which may include loading modules from non-standard paths.
- *
- * @param name Name of the module to load.
- * @param manual Whether the load is manual.
- * @param user_data User data to pass to the load callback.
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_load(const char *name, bool manual, void *user_data)
+static void
+_module_failure_store(struct module *module, const struct module_error_info *error)
 {
-  /* Ensure manual loads do not use absolute paths. */
-  if (manual && *name == '/')
+  assert(module);
+  assert(error);
+  assert(module->state == MODULE_STATE_FAILED || module->state == MODULE_STATE_BROKEN);
+  assert(error->code != MODULE_SUCCESS);
+
+  module->failure.code = error->code;
+  module->failure.cause = error->cause;
+  memcpy(module->failure.message, error->message, sizeof(module->failure.message));
+  memcpy(module->failure.cleanup_message, error->cleanup_message, sizeof(module->failure.cleanup_message));
+}
+
+static enum module_error_code
+_module_quarantine_error(const struct module *module, struct module_error_info *error)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(module->state == MODULE_STATE_BROKEN);
+  assert(_module_is_stable(module));
+
+  if (error)
   {
-    module_set_error(MODULE_ERR_INVALID_PATH, name);
-    return MODULE_ERR_INVALID_PATH;
+    (void)module_get_failure(module, error);
+    error->cause = error->code;
+    error->code = MODULE_ERR_BROKEN;
   }
 
-  /* Ensure the module is configured before loading. */
-  if (module_config_find(name) == NULL)
+  return MODULE_ERR_BROKEN;
+}
+
+static void
+_module_remove(struct module *module)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(module->state == MODULE_STATE_FAILED || module->state == MODULE_STATE_UNLOADING);
+  assert(module->handle == NULL);
+  assert(module->exit_handler == NULL);
+
+  list_remove(&module->node, &module->manager->modules);
+  io_free(module);
+}
+
+static bool
+_module_is_deactivation_protected(const struct module *module)
+{
+  assert(module);
+  return module->state == MODULE_STATE_ACTIVE &&
+         (module_get_effective_flags(module) & MODULE_FLAG_NO_DEACTIVATE) != 0;
+}
+
+static enum module_error_code
+_module_path_build(const struct module_manager *manager, const char *name,
+                   char *path, size_t path_size, struct module_error_info *error)
+{
+  assert(manager);
+  assert(manager->config);
+  assert(manager->busy);
+  assert(name);
+  assert(path);
+  assert(path_size > 0);
+
+  const char *const base_path = module_config_get_base_path(manager->config);
+  if (base_path == NULL)
+    return _module_error_set(error, MODULE_ERR_BASE_PATH_NOT_SET, name, "Module base path is not set");
+
+  const size_t base_path_length = strlen(base_path);
+  assert(base_path_length > 0);
+
+  const int required_length = snprintf(path, path_size, "%s%s%s.so", base_path,
+                                       base_path[base_path_length - 1] == '/' ? "" : "/", name);
+  if (required_length < 0)
+    return _module_error_set(error, MODULE_ERR_INVALID_PATH, name, "Failed to construct the module path");
+  if ((size_t)required_length >= path_size)
+    return _module_error_set(error, MODULE_ERR_PATH_TOO_LONG, name, "Module path is too long");
+
+  return MODULE_SUCCESS;
+}
+
+static enum module_error_code
+_module_descriptor_validate(const struct module *module,
+                            const struct module_descriptor *descriptor,
+                            struct module_error_info *error)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+
+  if (descriptor == NULL)
+    return _module_error_set(error, MODULE_ERR_INVALID_DESCRIPTOR, module->name,
+                             "Module descriptor is NULL");
+
+  if (descriptor->abi_version != MODULE_DESCRIPTOR_ABI_VERSION)
+    return _module_error_set(error, MODULE_ERR_DESCRIPTOR_ABI_MISMATCH, module->name,
+                             "Module descriptor ABI version mismatch (expected %" PRIu32 ", got %" PRIu32 ")",
+                             MODULE_DESCRIPTOR_ABI_VERSION, descriptor->abi_version);
+
+  if (descriptor->descriptor_size < MODULE_DESCRIPTOR_V1_MIN_SIZE)
+    return _module_error_set(error, MODULE_ERR_INVALID_DESCRIPTOR, module->name,
+                             "Module descriptor is too small (minimum %" PRIu32 " bytes, got %" PRIu32 ")",
+                             MODULE_DESCRIPTOR_V1_MIN_SIZE, descriptor->descriptor_size);
+
+  if (descriptor->application_abi_version != module->manager->application_abi_version)
+    return _module_error_set(error, MODULE_ERR_APPLICATION_ABI_MISMATCH, module->name,
+                             "Module application ABI version mismatch (expected %" PRIu32 ", got %" PRIu32 ")",
+                             module->manager->application_abi_version, descriptor->application_abi_version);
+
+  if (!module_name_is_valid(descriptor->name))
+    return _module_error_set(error, MODULE_ERR_INVALID_DESCRIPTOR, module->name,
+                             "Module descriptor has an invalid name");
+
+  if (strcmp(descriptor->name, module->name) != 0)
+    return _module_error_set(error, MODULE_ERR_NAME_MISMATCH, module->name,
+                             "Module descriptor name mismatch (expected '%s', got '%s')",
+                             module->name, descriptor->name);
+
+  if (descriptor->flags & ~MODULE_FLAG_VALID_MASK)
+    return _module_error_set(error, MODULE_ERR_INVALID_DESCRIPTOR, module->name,
+                             "Module descriptor contains unknown flags (0x%08" PRIx32 ")",
+                             descriptor->flags & ~MODULE_FLAG_VALID_MASK);
+
+  if (descriptor->exit_handler && descriptor->init_handler == NULL)
+    return _module_error_set(error, MODULE_ERR_INVALID_DESCRIPTOR, module->name,
+                             "Module exit handler requires an initialization handler");
+
+  return MODULE_SUCCESS;
+}
+
+static enum module_error_code
+_module_candidate_discard(struct module *module, struct module_candidate *candidate,
+                          struct module_error_info *error)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(module->state == MODULE_STATE_LOADING || module->state == MODULE_STATE_RELOADING);
+  assert(module->handle == NULL);
+  assert(module->exit_handler == NULL);
+  assert(candidate);
+  assert(candidate->handle);
+  assert(error);
+  assert(error->code != MODULE_SUCCESS);
+
+  const enum module_error_code cause = error->code;
+
+  struct module_loader_error cleanup_error;
+  if (module_loader_close(&candidate->handle, &cleanup_error) == MODULE_LOADER_OK)
   {
-    module_set_error(MODULE_ERR_NOT_CONFIGURED, name);
-    return MODULE_ERR_NOT_CONFIGURED;
+    assert(candidate->handle == NULL);
+
+    module->state = MODULE_STATE_FAILED;
+    return cause;
   }
 
-  /* Check if the module is already loaded. */
-  if (module_find(name))
+  assert(candidate->handle);
+
+  module->handle = candidate->handle;
+  candidate->handle = NULL;
+  module->state = MODULE_STATE_BROKEN;
+
+  error->code = MODULE_ERR_CLOSE_FAILED;
+  error->cause = cause;
+  strlcpy(error->cleanup_message, cleanup_error.message, sizeof(error->cleanup_message));
+
+  return MODULE_ERR_CLOSE_FAILED;
+}
+
+static enum module_error_code
+_module_activate_native(struct module *module, const char *path, struct module_error_info *error)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(!module->manager->shutdown_started);
+  assert(module->state == MODULE_STATE_LOADING || module->state == MODULE_STATE_RELOADING);
+  assert(!string_is_empty(path));
+  assert(error);
+  assert(module->handle == NULL);
+  assert(module->exit_handler == NULL);
+
+  struct module_candidate candidate = { 0 };
+  struct module_loader_error loader_error;
+  if (module_loader_open(path, &candidate.handle, &loader_error) != MODULE_LOADER_OK)
   {
-    module_set_error(MODULE_ERR_ALREADY_LOADED, name);
-    return MODULE_ERR_ALREADY_LOADED;
+    assert(candidate.handle == NULL);
+
+    module->state = MODULE_STATE_FAILED;
+    return _module_error_set(error, MODULE_ERR_OPEN_FAILED, module->name, "%s", loader_error.message);
   }
 
-  if (module_base_path == NULL)
+  assert(candidate.handle);
+
+  void *symbol = NULL;
+  if (module_loader_symbol(candidate.handle, MODULE_DESCRIPTOR_SYMBOL, &symbol, &loader_error) != MODULE_LOADER_OK)
   {
-    module_set_error(MODULE_ERR_INVALID_PATH, "Base path is not set");
-    return MODULE_ERR_INVALID_PATH;
+    _module_error_set(error, MODULE_ERR_DESCRIPTOR_LOOKUP_FAILED, module->name, "%s", loader_error.message);
+    return _module_candidate_discard(module, &candidate, error);
   }
+
+  const struct module_descriptor *const descriptor = symbol;
+  const enum module_error_code code = _module_descriptor_validate(module, descriptor, error);
+  if (code != MODULE_SUCCESS)
+    return _module_candidate_discard(module, &candidate, error);
+
+  candidate.intrinsic_flags = descriptor->flags;
+  candidate.init_handler = descriptor->init_handler;
+  candidate.exit_handler = descriptor->exit_handler;
+
+  /* Retain accepted restrictions until a new activation succeeds. */
+  module->intrinsic_flags |= candidate.intrinsic_flags;
+
+  char init_error_message[MODULE_ERROR_MESSAGE_CAPACITY] = "";
+  if (candidate.init_handler &&
+      !candidate.init_handler(module->manager->application_context, init_error_message, sizeof(init_error_message)))
+  {
+    init_error_message[sizeof(init_error_message) - 1] = '\0';
+    _module_error_set(error, MODULE_ERR_INIT_FAILED, module->name, "%s",
+                      string_is_empty(init_error_message) ? "Module initialization failed" : init_error_message);
+    return _module_candidate_discard(module, &candidate, error);
+  }
+
+  module->handle = candidate.handle;
+  candidate.handle = NULL;
+  module->exit_handler = candidate.exit_handler;
+  module->intrinsic_flags = candidate.intrinsic_flags;
+  module->state = MODULE_STATE_ACTIVE;
+
+  return MODULE_SUCCESS;
+}
+
+static enum module_error_code
+_module_activate(struct module *module, const char *path, struct module_error_info *error)
+{
+  struct module_error_info activation_error = { 0 };
+  const enum module_error_code code = _module_activate_native(module, path, &activation_error);
+
+  if (code == MODULE_SUCCESS)
+    module->failure = (struct module_failure){ 0 };
+  else
+    _module_failure_store(module, &activation_error);
+
+  assert(code == activation_error.code);
+  assert(_module_is_stable(module));
+
+  if (error)
+    *error = activation_error;
+
+  return code;
+}
+
+static enum module_error_code
+_module_deactivate(struct module *module, struct module_error_info *error)
+{
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(module->state == MODULE_STATE_RELOADING || module->state == MODULE_STATE_UNLOADING);
+  assert(module->handle);
+
+  const module_exit_fn exit_handler = module->exit_handler;
+  module->exit_handler = NULL;
+
+  if (exit_handler)
+    exit_handler(module->manager->application_context);
+
+  struct module_loader_error loader_error;
+  if (module_loader_close(&module->handle, &loader_error) != MODULE_LOADER_OK)
+  {
+    module->state = MODULE_STATE_BROKEN;
+
+    struct module_error_info close_error;
+    const enum module_error_code code =
+      _module_error_set(&close_error, MODULE_ERR_CLOSE_FAILED, module->name, "%s", loader_error.message);
+    _module_failure_store(module, &close_error);
+
+    assert(_module_is_stable(module));
+
+    if (error)
+      *error = close_error;
+    return code;
+  }
+
+  assert(module->handle == NULL);
+  assert(module->exit_handler == NULL);
+
+  return MODULE_SUCCESS;
+}
+
+static enum module_error_code
+_module_load(struct module_manager *manager, const char *name, struct module_error_info *error)
+{
+  assert(manager);
+  assert(manager->busy);
+  assert(!manager->shutdown_started);
+
+  if (!module_name_is_valid(name))
+    return _module_error_set(error, MODULE_ERR_INVALID_NAME, name, "Invalid module name");
+
+  const struct module_config_entry *const entry = module_config_find(manager->config, name);
+  if (entry == NULL)
+    return _module_error_set(error, MODULE_ERR_NOT_CONFIGURED, name, "Module is not configured");
+
+  if (_module_find(manager, name))
+    return _module_error_set(error, MODULE_ERR_ALREADY_MANAGED, name, "Module is already managed");
+
+  if (list_length(&manager->modules) == UINT_MAX)
+    return _module_error_set(error, MODULE_ERR_CAPACITY_REACHED, name, "Module manager record limit reached");
 
   char path[IO_PATH_MAX];
-  if (!module_loader_build_path(path, sizeof(path), module_base_path, name))
-  {
-    module_set_error(MODULE_ERR_INVALID_PATH, module_loader_get_error());
-    return MODULE_ERR_INVALID_PATH;
-  }
+  enum module_error_code code = _module_path_build(manager, name, path, sizeof(path), error);
+  if (code != MODULE_SUCCESS)
+    return code;
 
-  /* Prevent illegal directory traversal. */
-  if (strstr(path, "../") || strstr(path, "/.."))
-  {
-    module_set_error(MODULE_ERR_ILLEGAL_TRAVERSAL, path);
-    return MODULE_ERR_ILLEGAL_TRAVERSAL;
-  }
+  struct module *const module = io_calloc(sizeof(*module));
+  module->manager = manager;
+  module->policy_flags = entry->policy_flags;
+  module->state = MODULE_STATE_LOADING;
+  strlcpy(module->name, name, sizeof(module->name));
 
-  /* Validate the module file. */
-  struct stat sb;
-  if (stat(path, &sb))
-  {
-    /* stat() failed, likely because the file does not exist or is inaccessible. */
-    module_set_error(MODULE_ERR_INVALID_FILE, name, strerror(errno));
-    return MODULE_ERR_INVALID_FILE;
-  }
+  list_add_tail(module, &module->node, &manager->modules);
 
-  if (!S_ISREG(sb.st_mode))
-  {
-    /* The path exists, but it's not a regular file (e.g., it could be a directory). */
-    module_set_error(MODULE_ERR_INVALID_FILE, name, "Not a regular file");
-    return MODULE_ERR_INVALID_FILE;
-  }
-
-  module_loader_handle_t handle = module_loader_open(path);
-  if (handle == NULL)
-  {
-    module_set_error(MODULE_ERR_LOAD_FAILED, name, module_loader_get_error());
-    return MODULE_ERR_LOAD_FAILED;
-  }
-
-  void *symbol;
-  if (!module_loader_symbol(handle, "module_entry", &symbol))
-  {
-    module_set_error(MODULE_ERR_LOAD_FAILED, name, module_loader_get_error());
-
-    module_loader_close(handle);
-    return MODULE_ERR_LOAD_FAILED;
-  }
-
-  struct Module *const module = symbol;
-  module->handle = handle;
-  module->name = io_strdup(name);
-
-  list_add_tail(module, &module->node, &module_list);
-
-  /* Call the module's initialization handler, if present. */
-  if (module->init_handler)
-    module->init_handler();
-
-  /* Invoke the load callback, if defined. */
-  if (module_load_callback)
-    module_load_callback(name, handle, user_data);
-
-  log_write(LOG_TYPE_IRCD, "Module %s [handle: %p] loaded", name, handle);
-  return MODULE_SUCCESS;
-}
-
-/**
- * @brief Adds a new module configuration.
- *
- * This function adds a new configuration for a module, specifying its name
- * and attributes (resident, core). The configuration is stored in the module
- * configuration list and can be used to control module loading behavior.
- *
- * @param name Name of the module.
- * @param resident Whether the module is resident.
- * @param core Whether the module is core.
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_config_add(const char *name, bool resident, bool core)
-{
-  if (module_config_find(name))
-  {
-    module_set_error(MODULE_ERR_CONFIG_EXISTS, name);
-    return MODULE_ERR_CONFIG_EXISTS;
-  }
-
-  struct ModuleConfig *const config = io_calloc(sizeof(*config));
-  config->name = io_strdup(name);
-  config->resident = resident;
-  config->core = core;
-  list_add_tail(config, &config->node, &module_config_list);
-
-  return MODULE_SUCCESS;
-}
-
-/**
- * @brief Clears all module configurations.
- *
- * This function removes all module configurations from the list,
- * freeing their associated memory. It ensures that no stale configurations
- * remain in the system, allowing for fresh configuration.
- */
-void
-module_config_clear(void)
-{
-  list_node_t *node;
-
-  while ((node = list_pop_head(&module_config_list)))
-  {
-    struct ModuleConfig *const config = node->data;
-    io_free(config->name);
-    io_free(config);
-  }
-}
-
-/**
- * @brief Loads all configured modules.
- *
- * This function loads all modules that have been configured, incrementing the
- * loaded count for each successful load. It ensures that all necessary modules
- * are loaded and ready for use.
- *
- * @param loaded_count Pointer to an unsigned int to store the count of loaded modules.
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_load_all(unsigned int *loaded_count)
-{
-  enum module_error_code code = MODULE_SUCCESS;
-
-  list_node_t *node;
-  LIST_FOREACH(node, module_config_list.head)
-  {
-    struct ModuleConfig *const config = node->data;
-
-    enum module_error_code tmp = module_load(config->name, false, NULL);
-    if (tmp == MODULE_SUCCESS)
-    {
-      if (loaded_count)
-        ++(*loaded_count);
-    }
-    else if (tmp != MODULE_ERR_ALREADY_LOADED)
-    {
-      /*
-       * If loading the module failed for reasons other than the module being already loaded,
-       * update the return code to the specific error and log the failure.
-       * This ensures we log only significant errors and not just already loaded modules.
-       */
-      code = tmp;
-      log_write(LOG_TYPE_IRCD, "Failed to load module %s: %s",
-                config->name, module_get_error());
-    }
-  }
+  code = _module_activate(module, path, error);
+  if (code != MODULE_SUCCESS && module->state != MODULE_STATE_BROKEN)
+    _module_remove(module);
 
   return code;
 }
 
-/**
- * @brief Unloads all non-resident modules.
- *
- * This function unloads all non-resident modules, incrementing the unloaded
- * count for each successful unload. It ensures that only resident modules remain
- * loaded, freeing up resources used by other modules.
- *
- * @param unloaded_count Pointer to an unsigned int to store the count of unloaded modules.
- * @return MODULE_SUCCESS on success, or an appropriate error code on failure.
- */
-enum module_error_code
-module_unload_all(unsigned int *unloaded_count)
+static enum module_error_code
+_module_reload(struct module *module, struct module_error_info *error)
 {
-  enum module_error_code code = MODULE_SUCCESS;
+  assert(module);
+  assert(module->manager);
+  assert(module->manager->busy);
+  assert(!module->manager->shutdown_started);
+  assert(_module_is_stable(module));
 
-  list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, module_list.head)
+  if (module->state == MODULE_STATE_BROKEN)
+    return _module_quarantine_error(module, error);
+
+  if (module_config_find(module->manager->config, module->name) == NULL)
+    return _module_error_set(error, MODULE_ERR_NOT_CONFIGURED, module->name, "Module is not configured");
+
+  assert(module->state == MODULE_STATE_ACTIVE || module->state == MODULE_STATE_FAILED);
+
+  if (_module_is_deactivation_protected(module))
+    return _module_error_set(error, MODULE_ERR_DEACTIVATION_PROTECTED, module->name,
+                             "Active module deactivation is protected");
+
+  char path[IO_PATH_MAX];
+  const enum module_error_code path_code =
+    _module_path_build(module->manager, module->name, path, sizeof(path), error);
+  if (path_code != MODULE_SUCCESS)
+    return path_code;
+
+  const bool was_active = module->state == MODULE_STATE_ACTIVE;
+  module->state = MODULE_STATE_RELOADING;
+
+  if (was_active)
   {
-    struct Module *const module = node->data;
+    const enum module_error_code code = _module_deactivate(module, error);
+    if (code != MODULE_SUCCESS)
+      return code;
+  }
 
-    if (module->resident)
-      continue;
+  return _module_activate(module, path, error);
+}
 
-    enum module_error_code tmp = module_unload(module->name, true, NULL);
-    if (tmp == MODULE_SUCCESS)
-    {
-      if (unloaded_count)
-        ++(*unloaded_count);
-    }
+module_manager_t *
+module_manager_create(const struct module_manager_options *options, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  if (options == NULL)
+  {
+    _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Module manager options are required");
+    return NULL;
+  }
+
+  if (options->application_abi_version == 0)
+  {
+    _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Application ABI version must be nonzero");
+    return NULL;
+  }
+
+  struct module_manager *const manager = io_calloc(sizeof(*manager));
+  manager->config = module_config_create();
+
+  const enum module_error_code code = _module_config_acquire(manager->config, error);
+  assert(code == MODULE_SUCCESS);
+  (void)code;
+
+  manager->application_abi_version = options->application_abi_version;
+  manager->application_context = options->application_context;
+
+  assert(_module_manager_is_stable(manager));
+
+  return manager;
+}
+
+enum module_error_code
+module_manager_shutdown(module_manager_t *manager, module_report_fn report, void *report_context,
+                        struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  enum module_error_code code = _module_manager_operation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  manager->shutdown_started = true;
+
+  list_node_t *node = manager->modules.tail;
+  while (node)
+  {
+    struct module *const module = node->data;
+    node = node->prev;
+
+    char name[MODULE_NAME_CAPACITY];
+    strlcpy(name, module->name, sizeof(name));
+
+    struct module_error_info entry_error = { 0 };
+
+    enum module_error_code entry_code = MODULE_SUCCESS;
+    if (module->state == MODULE_STATE_BROKEN)
+      entry_code = _module_quarantine_error(module, &entry_error);
     else
-      code = tmp;
+    {
+      assert(module->state == MODULE_STATE_ACTIVE || module->state == MODULE_STATE_FAILED);
+
+      if (module->state == MODULE_STATE_ACTIVE)
+      {
+        module->state = MODULE_STATE_UNLOADING;
+        entry_code = _module_deactivate(module, &entry_error);
+      }
+
+      if (entry_code == MODULE_SUCCESS)
+        _module_remove(module);
+    }
+
+    if (entry_code != MODULE_SUCCESS && code == MODULE_SUCCESS)
+    {
+      code = entry_code;
+      if (error)
+        *error = entry_error;
+    }
+
+    if (report)
+      report(name, entry_code == MODULE_SUCCESS ? MODULE_REPORT_SUCCESS : MODULE_REPORT_FAILED,
+             entry_code == MODULE_SUCCESS ? NULL : &entry_error, report_context);
   }
 
-  return code;
+  return _module_manager_operation_end(manager, code);
+}
+
+enum module_error_code
+module_manager_destroy(module_manager_t **manager_slot, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  if (manager_slot == NULL)
+    return _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Module manager ownership slot is required");
+
+  struct module_manager *const manager = *manager_slot;
+  if (manager == NULL)
+    return MODULE_SUCCESS;
+
+  const enum module_error_code code = _module_manager_operation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  if (!list_is_empty(&manager->modules))
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_NOT_EMPTY, NULL, "Module manager is not empty"));
+
+  _module_config_destroy_owned(manager->config);
+  io_free(manager);
+  *manager_slot = NULL;
+
+  return MODULE_SUCCESS;
+}
+
+enum module_error_code
+module_manager_replace_config(module_manager_t *manager, module_config_t **config_slot,
+                              struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  if (config_slot == NULL)
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Module configuration ownership slot is required"));
+
+  code = _module_config_acquire(*config_slot, error);
+  if (code != MODULE_SUCCESS)
+    return _module_manager_operation_end(manager, code);
+
+  module_config_t *const previous = manager->config;
+  manager->config = *config_slot;
+  *config_slot = NULL;
+
+  list_node_t *node;
+  LIST_FOREACH(node, manager->modules.head)
+  {
+    struct module *const module = node->data;
+    const struct module_config_entry *const entry = module_config_find(manager->config, module->name);
+    module->policy_flags = entry ? entry->policy_flags : 0;
+  }
+
+  _module_config_destroy_owned(previous);
+
+  return _module_manager_operation_end(manager, MODULE_SUCCESS);
+}
+
+enum module_error_code
+module_manager_activate_configured(module_manager_t *manager, struct module_activation_result *result,
+                                   module_report_fn report, void *report_context, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  if (result)
+    *result = (struct module_activation_result){ 0 };
+
+  enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  for (size_t i = 0; i < module_config_count(manager->config); ++i)
+  {
+    const struct module_config_entry *const entry = module_config_get(manager->config, i);
+    struct module *const module = _module_find(manager, entry->name);
+
+    if (module && module->state == MODULE_STATE_ACTIVE)
+    {
+      if (result)
+        ++result->skipped;
+
+      if (report)
+        report(entry->name, MODULE_REPORT_SKIPPED, NULL, report_context);
+
+      continue;
+    }
+
+    struct module_error_info entry_error = { 0 };
+    enum module_error_code entry_code;
+
+    if (module && module->state == MODULE_STATE_BROKEN)
+      entry_code = _module_quarantine_error(module, &entry_error);
+    else
+      entry_code = module ? _module_reload(module, &entry_error) : _module_load(manager, entry->name, &entry_error);
+
+    if (result)
+    {
+      if (entry_code == MODULE_SUCCESS)
+        ++result->activated;
+      else
+        ++result->failed;
+    }
+
+    if (entry_code != MODULE_SUCCESS && code == MODULE_SUCCESS)
+    {
+      code = entry_code;
+      if (error)
+        *error = entry_error;
+    }
+
+    if (report)
+      report(entry->name, entry_code == MODULE_SUCCESS ? MODULE_REPORT_SUCCESS : MODULE_REPORT_FAILED,
+             entry_code == MODULE_SUCCESS ? NULL : &entry_error, report_context);
+  }
+
+  return _module_manager_operation_end(manager, code);
+}
+
+enum module_error_code
+module_manager_load(module_manager_t *manager, const char *name, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  const enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  return _module_manager_operation_end(manager, _module_load(manager, name, error));
+}
+
+enum module_error_code
+module_manager_unload(module_manager_t *manager, const char *name, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  struct module *module = NULL;
+  code = _module_lookup(manager, name, &module, error);
+  if (code != MODULE_SUCCESS)
+    return _module_manager_operation_end(manager, code);
+
+  if (module->state == MODULE_STATE_BROKEN)
+    return _module_manager_operation_end(manager, _module_quarantine_error(module, error));
+
+  if (module_get_effective_flags(module) & MODULE_FLAG_NO_REMOVE)
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_REMOVAL_PROTECTED, module->name, "Module removal is protected"));
+
+  if (_module_is_deactivation_protected(module))
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_DEACTIVATION_PROTECTED, module->name,
+                        "Active module deactivation is protected"));
+
+  assert(module->state == MODULE_STATE_ACTIVE || module->state == MODULE_STATE_FAILED);
+
+  if (module->state == MODULE_STATE_ACTIVE)
+  {
+    module->state = MODULE_STATE_UNLOADING;
+    code = _module_deactivate(module, error);
+  }
+
+  if (code == MODULE_SUCCESS)
+    _module_remove(module);
+
+  return _module_manager_operation_end(manager, code);
+}
+
+enum module_error_code
+module_manager_reload(module_manager_t *manager, const char *name, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  struct module *module = NULL;
+  code = _module_lookup(manager, name, &module, error);
+  if (code == MODULE_SUCCESS)
+    code = _module_reload(module, error);
+
+  return _module_manager_operation_end(manager, code);
+}
+
+enum module_error_code
+module_manager_reload_all(module_manager_t *manager, struct module_reload_all_result *result,
+                          module_report_fn report, void *report_context, struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  if (result)
+    *result = (struct module_reload_all_result){ 0 };
+
+  enum module_error_code code = _module_manager_mutation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  list_node_t *node;
+  LIST_FOREACH(node, manager->modules.head)
+  {
+    struct module *const module = node->data;
+    if (module_config_find(manager->config, module->name) == NULL || _module_is_deactivation_protected(module))
+    {
+      if (result)
+        ++result->skipped;
+
+      if (report)
+        report(module->name, MODULE_REPORT_SKIPPED, NULL, report_context);
+
+      continue;
+    }
+
+    struct module_error_info reload_error = { 0 };
+    code = _module_reload(module, &reload_error);
+
+    if (code == MODULE_SUCCESS && result)
+      ++result->reloaded;
+
+    if (report)
+      report(module->name, code == MODULE_SUCCESS ? MODULE_REPORT_SUCCESS : MODULE_REPORT_FAILED,
+             code == MODULE_SUCCESS ? NULL : &reload_error, report_context);
+
+    if (code != MODULE_SUCCESS)
+    {
+      if (error)
+        *error = reload_error;
+
+      break;
+    }
+  }
+
+  return _module_manager_operation_end(manager, code);
+}
+
+const module_config_t *
+module_manager_get_config(const module_manager_t *manager)
+{
+  return manager ? manager->config : NULL;
+}
+
+const module_t *
+module_manager_find(const module_manager_t *manager, const char *name)
+{
+  if (manager == NULL || !module_name_is_valid(name))
+    return NULL;
+
+  return _module_find(manager, name);
+}
+
+size_t
+module_manager_count(const module_manager_t *manager)
+{
+  return manager ? list_length(&manager->modules) : 0;
+}
+
+enum module_error_code
+module_manager_foreach(module_manager_t *manager, module_foreach_fn callback, void *context,
+                       struct module_error_info *error)
+{
+  _module_error_clear(error);
+
+  const enum module_error_code code = _module_manager_operation_begin(manager, error);
+  if (code != MODULE_SUCCESS)
+    return code;
+
+  if (callback == NULL)
+    return _module_manager_operation_end(manager,
+      _module_error_set(error, MODULE_ERR_INVALID_ARGUMENT, NULL, "Enumeration callback is required"));
+
+  list_node_t *node;
+  LIST_FOREACH(node, manager->modules.head)
+    callback(node->data, context);
+
+  return _module_manager_operation_end(manager, MODULE_SUCCESS);
+}
+
+const char *
+module_get_name(const module_t *module)
+{
+  assert(module);
+  return module->name;
+}
+
+enum module_state
+module_get_state(const module_t *module)
+{
+  assert(module);
+  return module->state;
+}
+
+module_flags_t
+module_get_intrinsic_flags(const module_t *module)
+{
+  assert(module);
+  return module->intrinsic_flags;
+}
+
+module_flags_t
+module_get_policy_flags(const module_t *module)
+{
+  assert(module);
+  return module->policy_flags;
+}
+
+module_flags_t
+module_get_effective_flags(const module_t *module)
+{
+  assert(module);
+  return module->intrinsic_flags | module->policy_flags;
+}
+
+bool
+module_get_failure(const module_t *module, struct module_error_info *error)
+{
+  assert(module);
+  assert(error);
+
+  _module_error_clear(error);
+
+  if (module->state != MODULE_STATE_FAILED && module->state != MODULE_STATE_BROKEN)
+    return false;
+
+  assert(module->failure.code != MODULE_SUCCESS);
+
+  error->code = module->failure.code;
+  error->cause = module->failure.cause;
+  memcpy(error->module_name, module->name, sizeof(error->module_name));
+  memcpy(error->message, module->failure.message, sizeof(error->message));
+  memcpy(error->cleanup_message, module->failure.cleanup_message, sizeof(error->cleanup_message));
+
+  return true;
+}
+
+const char *
+module_flags_to_string(module_flags_t flags)
+{
+  switch (flags)
+  {
+    case 0: return "none";
+    case MODULE_FLAG_NO_REMOVE: return "no_remove";
+    case MODULE_FLAG_NO_DEACTIVATE: return "no_deactivate";
+    case MODULE_FLAG_NO_REMOVE | MODULE_FLAG_NO_DEACTIVATE: return "no_remove,no_deactivate";
+  }
+
+  return "unknown";
+}
+
+bool
+module_name_is_valid(const char *name)
+{
+  if (string_is_empty(name))
+    return false;
+
+  const unsigned char first_char = (unsigned char)name[0];
+  if (!io_ascii_is_alpha(first_char))
+    return false;
+
+  for (size_t i = 1; i < MODULE_NAME_CAPACITY; ++i)
+  {
+    const unsigned char ch = (unsigned char)name[i];
+    if (ch == '\0')
+      return true;
+    if (!io_ascii_is_alnum(ch) && ch != '_' && ch != '-')
+      return false;
+  }
+
+  return false;
+}
+
+const char *
+module_state_to_string(enum module_state state)
+{
+  switch (state)
+  {
+    case MODULE_STATE_LOADING: return "loading";
+    case MODULE_STATE_ACTIVE: return "active";
+    case MODULE_STATE_RELOADING: return "reloading";
+    case MODULE_STATE_UNLOADING: return "unloading";
+    case MODULE_STATE_FAILED: return "failed";
+    case MODULE_STATE_BROKEN: return "broken";
+  }
+
+  return "unknown";
+}
+
+const char *
+module_strerror(enum module_error_code code)
+{
+  switch (code)
+  {
+    case MODULE_SUCCESS: return "Success";
+    case MODULE_ERR_INVALID_ARGUMENT: return "Invalid argument";
+    case MODULE_ERR_BUSY: return "Module manager is busy";
+    case MODULE_ERR_SHUTDOWN_STARTED: return "Module manager has started shutdown";
+    case MODULE_ERR_CAPACITY_REACHED: return "Module capacity limit reached";
+    case MODULE_ERR_INVALID_NAME: return "Invalid module name";
+    case MODULE_ERR_INVALID_POLICY: return "Invalid module policy flags";
+    case MODULE_ERR_INVALID_PATH: return "Invalid module path";
+    case MODULE_ERR_BASE_PATH_NOT_SET: return "Module base path is not set";
+    case MODULE_ERR_PATH_TOO_LONG: return "Module path is too long";
+    case MODULE_ERR_NOT_FOUND: return "Module is not managed";
+    case MODULE_ERR_ALREADY_MANAGED: return "Module is already managed";
+    case MODULE_ERR_NOT_EMPTY: return "Module manager is not empty";
+    case MODULE_ERR_REMOVAL_PROTECTED: return "Module removal is protected";
+    case MODULE_ERR_DEACTIVATION_PROTECTED: return "Active module deactivation is protected";
+    case MODULE_ERR_OPEN_FAILED: return "Native module open failed";
+    case MODULE_ERR_DESCRIPTOR_LOOKUP_FAILED: return "Module descriptor symbol lookup failed";
+    case MODULE_ERR_DESCRIPTOR_ABI_MISMATCH: return "Module descriptor ABI version mismatch";
+    case MODULE_ERR_APPLICATION_ABI_MISMATCH: return "Module application ABI version mismatch";
+    case MODULE_ERR_NAME_MISMATCH: return "Module descriptor name mismatch";
+    case MODULE_ERR_INVALID_DESCRIPTOR: return "Invalid module descriptor";
+    case MODULE_ERR_INIT_FAILED: return "Module initialization failed";
+    case MODULE_ERR_CLOSE_FAILED: return "Native module close failed";
+    case MODULE_ERR_BROKEN: return "Module is quarantined";
+    case MODULE_ERR_ALREADY_CONFIGURED: return "Module is already configured";
+    case MODULE_ERR_CONFIG_OWNED: return "Module configuration belongs to a manager";
+    case MODULE_ERR_NOT_CONFIGURED: return "Module is not configured";
+  }
+
+  return "Unknown module error";
 }

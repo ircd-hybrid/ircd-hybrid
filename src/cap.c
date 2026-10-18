@@ -48,12 +48,12 @@ cap_register(unsigned int flag, const char *name, const char *value)
 
   struct Cap *cap = io_calloc(sizeof(*cap));
   cap->flag = flag;
-  cap->name = strdup(name);
+  cap->name = io_strdup(name);
   cap->name_len = strlen(name);
 
   if (value)
   {
-    cap->value = strdup(value);
+    cap->value = io_strdup(value);
     cap->value_len = strlen(value);
   }
 
@@ -90,6 +90,7 @@ _cap_array_update(void)
 
   io_free(cap_array);
   cap_array = NULL;
+  cap_array_size = 0;
 
   if (list_is_empty(&cap_list))
     return;

@@ -5,23 +5,28 @@
 
 #include "module.h"
 
+#include "ircd_module.h"
 #include "cap.h"
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  cap_register(CAP_CAP_NOTIFY, "cap-notify", NULL);
+  return ircd_module_register_cap(CAP_CAP_NOTIFY, "cap-notify", NULL, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   cap_unregister("cap-notify");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "cap_cap_notify",
+  .flags = MODULE_FLAG_NO_DEACTIVATE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .resident = true  /* XXX for now until caps are completely modular */
+  .exit_handler = exit_handler
 };

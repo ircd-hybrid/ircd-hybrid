@@ -160,7 +160,6 @@ cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
 connectfreq                 { return CONNECTFREQ; }
-core                        { return CORE; }
 cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }
@@ -281,6 +280,7 @@ registration_timeout        { return REGISTRATION_TIMEOUT; }
 rehash                      { return REHASH; }
 remote                      { return REMOTE; }
 remoteban                   { return REMOTEBAN; }
+required                    { return REQUIRED; }
 resident                    { return RESIDENT; }
 restart                     { return T_RESTART; }
 resv                        { return RESV; }

@@ -40,13 +40,17 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * is already registered, it returns an error code.
  *
  * @param letter The character representing the stats command.
- * @param handler The function to handle the stats command.
- * @param required_modes The required user modes to access this stats command.
- * @return An error code indicating the result of the operation.
+ * @param handler Non-NULL function to handle the stats command.
+ * @param required_modes Borrowed required-mode flags, or NULL for no requirement.
+ * @return STATS_SUCCESS, STATS_INVALID_ARGUMENT, or STATS_ALREADY_REGISTERED.
+ *         Failure leaves existing registrations unchanged.
  */
 stats_result_t
 stats_register(unsigned char letter, stats_handler_func handler, uint64_t *required_modes)
 {
+  if (handler == NULL)
+    return STATS_INVALID_ARGUMENT;
+
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;
 

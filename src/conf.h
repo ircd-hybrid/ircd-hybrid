@@ -12,6 +12,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "module.h"
+
 struct io_addr;
 struct Client;
 
@@ -35,6 +37,8 @@ struct conf_parser_context
   unsigned int boot;
   unsigned int pass;
   FILE *conf_file;
+  module_config_t *module_config;
+  bool module_config_valid;
 };
 
 struct config_general_entry
@@ -168,7 +172,7 @@ extern void cleanup_tklines(void *);
 extern void conf_ban_apply(struct Client *, enum conf_ban_type, const char *);
 extern void conf_ban_check_clients(void);
 extern void conf_error_report(const char *);
-extern void conf_read_files(bool);
+extern bool conf_read_files(bool);
 extern void conf_rehash(bool);
 extern void yyerror(const char *);
 extern int conf_connect_allowed(const struct io_addr *);

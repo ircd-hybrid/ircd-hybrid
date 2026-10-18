@@ -58,6 +58,7 @@
 #include "ircd.h"
 #include "ircd_exit.h"
 #include "ircd_hook.h"
+#include "ircd_module.h"
 #include "ircd_signal.h"
 #include "links_cache.h"
 #include "motd.h"
@@ -442,6 +443,8 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   ircd_hook_init();
+  if (!ircd_module_init())
+    exit(EXIT_FAILURE);
   class_init();
   cloak_init();
 
@@ -467,7 +470,7 @@ main(int argc, char *argv[])
 
   conf_db_load_all();
 
-  module_load_all(NULL);
+  ircd_module_apply_config();
 
   event_handle_t event_cleanup_tklines =
     event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);

@@ -34,6 +34,7 @@
 #include "hash.h"
 #include "ipcache.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "ircd_hook.h"
 #include "monitor.h"
 #include "numeric.h"
@@ -761,21 +762,25 @@ static struct Command command_table[] =
   }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
+  return ircd_module_register_commands(command_table, IO_ARRAY_LENGTH(command_table), error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_nick",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

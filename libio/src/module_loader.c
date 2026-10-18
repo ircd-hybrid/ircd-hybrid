@@ -8,138 +8,121 @@
  * @brief Native dynamic module loading and symbol resolution.
  */
 
-#include <assert.h>
-#include <dlfcn.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
+#include "config.h"
 
+#include <dlfcn.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "module_loader.h"
 
-enum
-{
-  MODULE_LOADER_ERROR_CAPACITY = 512
-};
-
-static char module_loader_last_error[MODULE_LOADER_ERROR_CAPACITY];
-static const char module_loader_suffix[] = ".so";
-
 static void
-_module_loader_clear_error(void)
+_module_loader_clear_error(struct module_loader_error *error)
 {
-  module_loader_last_error[0] = '\0';
+  if (error)
+    error->message[0] = '\0';
 }
 
 static void
-_module_loader_set_error(const char *error)
+_module_loader_set_error(struct module_loader_error *error, const char *message)
 {
-  assert(error);
-  snprintf(module_loader_last_error, sizeof(module_loader_last_error), "%s", error);
+  if (error)
+    strlcpy(error->message, message, sizeof(error->message));
 }
 
 static void
-_module_loader_set_dlerror(const char *fallback)
+_module_loader_set_dlerror(struct module_loader_error *error, const char *fallback)
 {
-  assert(fallback);
-
-  const char *const error = dlerror();
-  _module_loader_set_error(error ? error : fallback);
+  const char *const message = dlerror();
+  _module_loader_set_error(error, string_is_empty(message) ? fallback : message);
 }
 
-bool
-module_loader_build_path(char *path, size_t path_size, const char *directory, const char *name)
+module_loader_result_t
+module_loader_open(const char *path, module_loader_handle_t *handle,
+                   struct module_loader_error *error)
 {
-  assert(path);
-  assert(path_size);
-  assert(directory);
-  assert(name);
+  _module_loader_clear_error(error);
 
-  _module_loader_clear_error();
-
-  const int length = snprintf(path, path_size, "%s/%s%s", directory, name, module_loader_suffix);
-  if (length < 0)
+  if (handle == NULL || string_is_empty(path))
   {
-    _module_loader_set_error("Failed to construct module path");
-    return false;
+    _module_loader_set_error(error, "A nonempty path and a handle output slot are required");
+    return MODULE_LOADER_INVALID_ARGUMENT;
   }
 
-  if ((size_t)length >= path_size)
+  if (*handle != NULL)
   {
-    _module_loader_set_error("Module path exceeds the maximum supported length");
-    return false;
+    _module_loader_set_error(error, "The handle output slot must be initialized to NULL");
+    return MODULE_LOADER_INVALID_ARGUMENT;
   }
 
-  return true;
+  (void)dlerror();
+
+  const module_loader_handle_t opened_handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+  if (opened_handle == NULL)
+  {
+    _module_loader_set_dlerror(error, "dlopen() failed without an error message");
+    return MODULE_LOADER_OPEN_FAILED;
+  }
+
+  *handle = opened_handle;
+  return MODULE_LOADER_OK;
 }
 
-module_loader_handle_t
-module_loader_open(const char *path)
+module_loader_result_t
+module_loader_symbol(module_loader_handle_t handle, const char *name,
+                     void **symbol, struct module_loader_error *error)
 {
-  assert(path);
+  _module_loader_clear_error(error);
 
-  _module_loader_clear_error();
-
-  dlerror();
-
-  module_loader_handle_t handle = dlopen(path, RTLD_LAZY);
-  if (handle == NULL)
-    _module_loader_set_dlerror("dlopen() failed without an error message");
-
-  return handle;
-}
-
-bool
-module_loader_symbol(module_loader_handle_t handle, const char *name, void **symbol)
-{
-  assert(handle);
-  assert(name);
-  assert(symbol);
+  if (symbol == NULL)
+  {
+    _module_loader_set_error(error, "A symbol output slot is required");
+    return MODULE_LOADER_INVALID_ARGUMENT;
+  }
 
   *symbol = NULL;
 
-  _module_loader_clear_error();
+  if (handle == NULL || string_is_empty(name))
+  {
+    _module_loader_set_error(error, "An open handle and a nonempty symbol name are required");
+    return MODULE_LOADER_INVALID_ARGUMENT;
+  }
 
-  dlerror();
+  (void)dlerror();
 
   void *const address = dlsym(handle, name);
 
-  const char *const error = dlerror();
-  if (error)
+  const char *const message = dlerror();
+  if (message)
   {
-    _module_loader_set_error(error);
-    return false;
-  }
-
-  if (address == NULL)
-  {
-    _module_loader_set_error("Dynamic loader returned a null symbol address");
-    return false;
+    _module_loader_set_error(error, string_is_empty(message) ? "dlsym() failed without an error message" : message);
+    return MODULE_LOADER_SYMBOL_FAILED;
   }
 
   *symbol = address;
-  return true;
+  return MODULE_LOADER_OK;
 }
 
-bool
-module_loader_close(module_loader_handle_t handle)
+module_loader_result_t
+module_loader_close(module_loader_handle_t *handle, struct module_loader_error *error)
 {
-  assert(handle);
+  _module_loader_clear_error(error);
 
-  _module_loader_clear_error();
-
-  dlerror();
-
-  if (dlclose(handle))
+  if (handle == NULL || *handle == NULL)
   {
-    _module_loader_set_dlerror("dlclose() failed without an error message");
-    return false;
+    _module_loader_set_error(error, "A handle slot owning an open reference is required");
+    return MODULE_LOADER_INVALID_ARGUMENT;
   }
 
-  return true;
-}
+  (void)dlerror();
 
-const char *
-module_loader_get_error(void)
-{
-  return module_loader_last_error;
+  if (dlclose(*handle))
+  {
+    _module_loader_set_dlerror(error, "dlclose() failed without an error message");
+    return MODULE_LOADER_CLOSE_FAILED;
+  }
+
+  *handle = NULL;
+  return MODULE_LOADER_OK;
 }

@@ -10,6 +10,7 @@
 #include "io_string.h"
 #include "module.h"
 
+#include "ircd_module.h"
 #include "client.h"
 #include "ircd_hook.h"
 #include "numeric.h"
@@ -54,24 +55,32 @@ whois_send_hook(void *ctx_)
   return HOOK_FLOW_CONTINUE;
 }
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&secure_mode);
+  if (!ircd_module_register_user_mode(&secure_mode, error_message, error_message_size))
+    return false;
+
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&secure_mode);
   hook_uninstall(ircd_hook_who_send, who_send_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_secure",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

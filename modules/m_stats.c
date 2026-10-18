@@ -232,13 +232,9 @@ stats_operator(struct Client *client, size_t parc, char *parv[])
   LIST_FOREACH(node, oper_get_list()->head)
   {
     const struct OperItem *const oper = node->data;
-    if (client_is_oper(client))
-      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
-                         oper->name, oper_privs_as_string(oper->oper_privs),
-                         oper->klass->name);
-    else
-      sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
-                         oper->name, "0", oper->klass->name);
+    sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
+                       oper->name, oper_privs_as_string(oper->oper_privs),
+                       oper->klass->name);
   }
 }
 
@@ -476,16 +472,12 @@ _stats_auth_format_user(const struct Client *client,
     *cursor++ = '=';
   if (auth->flags & CONF_AUTH_FLAG_CAN_FLOOD)
     *cursor++ = '|';
-
-  if (client_is_oper(client))
-  {
-    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE)
-      *cursor++ = '^';
-    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE)
-      *cursor++ = '!';
-    if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
-      *cursor++ = '>';
-  }
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE)
+    *cursor++ = '^';
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE)
+    *cursor++ = '!';
+  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
+    *cursor++ = '>';
 
   strlcpy(cursor, rule->user, buffer_size - (size_t)(cursor - buffer));
   return buffer;
@@ -499,8 +491,6 @@ stats_auth(struct Client *client, size_t parc, char *parv[])
   LIST_FOREACH(auth_node, conf_auth_get_list()->head)
   {
     const struct conf_auth *const auth = auth_node->data;
-    if (!string_is_empty(auth->spoof) && !client_is_oper(client))
-      continue;
 
     list_node_t *rule_node;
     LIST_FOREACH(rule_node, auth->rules.head)

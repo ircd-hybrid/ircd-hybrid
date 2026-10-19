@@ -1,8 +1,6 @@
 Documentation for ircd-hybrid
 -----------------------------
 
-Doxyfile		- Configuration file for generating documentation
-			  with Doxygen
 index.txt		- This file
 ircd.8			- The new revised manpage, read with the following
 			  command in the prefix directory:

@@ -1,4 +1,3 @@
-ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = libio src modules tools doc help
 

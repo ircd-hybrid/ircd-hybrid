@@ -1,5 +1,3 @@
-AUTOMAKE_OPTIONS = foreign
-
 helpfdir = $(pkgdatadir)/help
 
 dist_helpf_DATA = accept    \

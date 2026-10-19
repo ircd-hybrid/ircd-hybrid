@@ -2545,9 +2545,6 @@ as_fn_append ac_header_c_list " sys/stat.h sys_stat_h HAVE_SYS_STAT_H"
 as_fn_append ac_header_c_list " sys/types.h sys_types_h HAVE_SYS_TYPES_H"
 as_fn_append ac_header_c_list " unistd.h unistd_h HAVE_UNISTD_H"
 as_fn_append ac_header_c_list " crypt.h crypt_h HAVE_CRYPT_H"
-as_fn_append ac_header_c_list " socket.h socket_h HAVE_SOCKET_H"
-as_fn_append ac_header_c_list " sys/wait.h sys_wait_h HAVE_SYS_WAIT_H"
-as_fn_append ac_header_c_list " types.h types_h HAVE_TYPES_H"
 as_fn_append ac_func_c_list " strlcat HAVE_STRLCAT"
 as_fn_append ac_func_c_list " strlcpy HAVE_STRLCPY"
 
@@ -17909,78 +17906,6 @@ esac
 fi
 
 
-
-  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing socket" >&5
-printf %s "checking for library containing socket... " >&6; }
-if test ${ac_cv_search_socket+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.
-   The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code supporting it here
-   has little cost and some practical benefit (sr 110532).  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char socket (void);
-int
-main (void)
-{
-return socket ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' socket
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_search_socket=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_socket+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_socket+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_socket=no ;;
-esac
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_socket" >&5
-printf '%s\n' "$ac_cv_search_socket" >&6; }
-ac_res=$ac_cv_search_socket
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-else case e in #(
-  e) as_fn_error $? "socket library not found" "$LINENO" 5 ;;
-esac
-fi
-
-
 { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 printf %s "checking for library containing crypt... " >&6; }
 if test ${ac_cv_search_crypt+y}
@@ -18050,9 +17975,6 @@ else case e in #(
   e) as_fn_error $? "crypt() is required but was not found" "$LINENO" 5 ;;
 esac
 fi
-
-
-
 
 
 

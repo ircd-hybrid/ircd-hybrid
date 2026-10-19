@@ -6,7 +6,7 @@ AC_CONFIG_SRCDIR([src/ircd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 
-AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
+AM_INIT_AUTOMAKE([1.16.5 foreign])
 AM_MAINTAINER_MODE
 
 dnl Toolchain.
@@ -42,15 +42,11 @@ AX_ARG_ENABLE_STACK_PROTECTOR
 
 dnl Required libraries and platform support.
 AX_LIBRARY_JANSSON
-AX_LIBRARY_NET
 AC_SEARCH_LIBS([crypt], [crypt], [], [AC_MSG_ERROR([crypt() is required but was not found])])
 
 dnl Header availability.
 AC_CHECK_HEADERS_ONCE([
   crypt.h
-  socket.h
-  sys/wait.h
-  types.h
 ])
 
 dnl Function availability.

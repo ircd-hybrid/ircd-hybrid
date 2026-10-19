@@ -106,7 +106,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_compile_flags.m4 \
 	$(top_srcdir)/m4/ax_define_build_date.m4 \
 	$(top_srcdir)/m4/ax_define_dir.m4 \
 	$(top_srcdir)/m4/ax_library_jansson.m4 \
-	$(top_srcdir)/m4/ax_library_net.m4 \
 	$(top_srcdir)/m4/ax_require_defined.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
@@ -147,752 +146,363 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(modulesdir)"
 LTLIBRARIES = $(modules_LTLIBRARIES)
 cap_account_notify_la_LIBADD =
-am_cap_account_notify_la_OBJECTS = cap_account_notify.lo
-cap_account_notify_la_OBJECTS = $(am_cap_account_notify_la_OBJECTS)
+cap_account_notify_la_SOURCES = cap_account_notify.c
+cap_account_notify_la_OBJECTS = cap_account_notify.lo
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-cap_account_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_account_notify_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
 cap_away_notify_la_LIBADD =
-am_cap_away_notify_la_OBJECTS = cap_away_notify.lo
-cap_away_notify_la_OBJECTS = $(am_cap_away_notify_la_OBJECTS)
-cap_away_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_away_notify_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_away_notify_la_SOURCES = cap_away_notify.c
+cap_away_notify_la_OBJECTS = cap_away_notify.lo
 cap_cap_notify_la_LIBADD =
-am_cap_cap_notify_la_OBJECTS = cap_cap_notify.lo
-cap_cap_notify_la_OBJECTS = $(am_cap_cap_notify_la_OBJECTS)
-cap_cap_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_cap_notify_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+cap_cap_notify_la_SOURCES = cap_cap_notify.c
+cap_cap_notify_la_OBJECTS = cap_cap_notify.lo
 cap_chghost_la_LIBADD =
-am_cap_chghost_la_OBJECTS = cap_chghost.lo
-cap_chghost_la_OBJECTS = $(am_cap_chghost_la_OBJECTS)
-cap_chghost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_chghost_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
+cap_chghost_la_SOURCES = cap_chghost.c
+cap_chghost_la_OBJECTS = cap_chghost.lo
 cap_extended_join_la_LIBADD =
-am_cap_extended_join_la_OBJECTS = cap_extended_join.lo
-cap_extended_join_la_OBJECTS = $(am_cap_extended_join_la_OBJECTS)
-cap_extended_join_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_extended_join_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_extended_join_la_SOURCES = cap_extended_join.c
+cap_extended_join_la_OBJECTS = cap_extended_join.lo
 cap_invite_notify_la_LIBADD =
-am_cap_invite_notify_la_OBJECTS = cap_invite_notify.lo
-cap_invite_notify_la_OBJECTS = $(am_cap_invite_notify_la_OBJECTS)
-cap_invite_notify_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_invite_notify_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_invite_notify_la_SOURCES = cap_invite_notify.c
+cap_invite_notify_la_OBJECTS = cap_invite_notify.lo
 cap_multi_prefix_la_LIBADD =
-am_cap_multi_prefix_la_OBJECTS = cap_multi_prefix.lo
-cap_multi_prefix_la_OBJECTS = $(am_cap_multi_prefix_la_OBJECTS)
-cap_multi_prefix_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_multi_prefix_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
+cap_multi_prefix_la_OBJECTS = cap_multi_prefix.lo
 cap_standard_replies_la_LIBADD =
-am_cap_standard_replies_la_OBJECTS = cap_standard_replies.lo
-cap_standard_replies_la_OBJECTS =  \
-	$(am_cap_standard_replies_la_OBJECTS)
-cap_standard_replies_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_standard_replies_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_standard_replies_la_SOURCES = cap_standard_replies.c
+cap_standard_replies_la_OBJECTS = cap_standard_replies.lo
 cap_userhost_in_names_la_LIBADD =
-am_cap_userhost_in_names_la_OBJECTS = cap_userhost_in_names.lo
-cap_userhost_in_names_la_OBJECTS =  \
-	$(am_cap_userhost_in_names_la_OBJECTS)
-cap_userhost_in_names_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(cap_userhost_in_names_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
+cap_userhost_in_names_la_OBJECTS = cap_userhost_in_names.lo
 m_accept_la_LIBADD =
-am_m_accept_la_OBJECTS = m_accept.lo
-m_accept_la_OBJECTS = $(am_m_accept_la_OBJECTS)
-m_accept_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_accept_la_LDFLAGS) $(LDFLAGS) -o $@
+m_accept_la_SOURCES = m_accept.c
+m_accept_la_OBJECTS = m_accept.lo
 m_admin_la_LIBADD =
-am_m_admin_la_OBJECTS = m_admin.lo
-m_admin_la_OBJECTS = $(am_m_admin_la_OBJECTS)
-m_admin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_admin_la_LDFLAGS) $(LDFLAGS) -o $@
+m_admin_la_SOURCES = m_admin.c
+m_admin_la_OBJECTS = m_admin.lo
 m_away_la_LIBADD =
-am_m_away_la_OBJECTS = m_away.lo
-m_away_la_OBJECTS = $(am_m_away_la_OBJECTS)
-m_away_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_away_la_LDFLAGS) $(LDFLAGS) -o $@
+m_away_la_SOURCES = m_away.c
+m_away_la_OBJECTS = m_away.lo
 m_bmask_la_LIBADD =
-am_m_bmask_la_OBJECTS = m_bmask.lo
-m_bmask_la_OBJECTS = $(am_m_bmask_la_OBJECTS)
-m_bmask_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_bmask_la_LDFLAGS) $(LDFLAGS) -o $@
+m_bmask_la_SOURCES = m_bmask.c
+m_bmask_la_OBJECTS = m_bmask.lo
 m_cap_la_LIBADD =
-am_m_cap_la_OBJECTS = m_cap.lo
-m_cap_la_OBJECTS = $(am_m_cap_la_OBJECTS)
-m_cap_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_cap_la_LDFLAGS) $(LDFLAGS) -o $@
+m_cap_la_SOURCES = m_cap.c
+m_cap_la_OBJECTS = m_cap.lo
 m_capab_la_LIBADD =
-am_m_capab_la_OBJECTS = m_capab.lo
-m_capab_la_OBJECTS = $(am_m_capab_la_OBJECTS)
-m_capab_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_capab_la_LDFLAGS) $(LDFLAGS) -o $@
+m_capab_la_SOURCES = m_capab.c
+m_capab_la_OBJECTS = m_capab.lo
 m_certfp_la_LIBADD =
-am_m_certfp_la_OBJECTS = m_certfp.lo
-m_certfp_la_OBJECTS = $(am_m_certfp_la_OBJECTS)
-m_certfp_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_certfp_la_LDFLAGS) $(LDFLAGS) -o $@
+m_certfp_la_SOURCES = m_certfp.c
+m_certfp_la_OBJECTS = m_certfp.lo
 m_close_la_LIBADD =
-am_m_close_la_OBJECTS = m_close.lo
-m_close_la_OBJECTS = $(am_m_close_la_OBJECTS)
-m_close_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_close_la_LDFLAGS) $(LDFLAGS) -o $@
+m_close_la_SOURCES = m_close.c
+m_close_la_OBJECTS = m_close.lo
 m_connect_la_LIBADD =
-am_m_connect_la_OBJECTS = m_connect.lo
-m_connect_la_OBJECTS = $(am_m_connect_la_OBJECTS)
-m_connect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_connect_la_LDFLAGS) $(LDFLAGS) -o $@
+m_connect_la_SOURCES = m_connect.c
+m_connect_la_OBJECTS = m_connect.lo
 m_die_la_LIBADD =
-am_m_die_la_OBJECTS = m_die.lo
-m_die_la_OBJECTS = $(am_m_die_la_OBJECTS)
-m_die_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_die_la_LDFLAGS) $(LDFLAGS) -o $@
+m_die_la_SOURCES = m_die.c
+m_die_la_OBJECTS = m_die.lo
 m_dline_la_LIBADD =
-am_m_dline_la_OBJECTS = m_dline.lo
-m_dline_la_OBJECTS = $(am_m_dline_la_OBJECTS)
-m_dline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_dline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_dline_la_SOURCES = m_dline.c
+m_dline_la_OBJECTS = m_dline.lo
 m_encap_la_LIBADD =
-am_m_encap_la_OBJECTS = m_encap.lo
-m_encap_la_OBJECTS = $(am_m_encap_la_OBJECTS)
-m_encap_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_encap_la_LDFLAGS) $(LDFLAGS) -o $@
+m_encap_la_SOURCES = m_encap.c
+m_encap_la_OBJECTS = m_encap.lo
 m_eob_la_LIBADD =
-am_m_eob_la_OBJECTS = m_eob.lo
-m_eob_la_OBJECTS = $(am_m_eob_la_OBJECTS)
-m_eob_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_eob_la_LDFLAGS) $(LDFLAGS) -o $@
+m_eob_la_SOURCES = m_eob.c
+m_eob_la_OBJECTS = m_eob.lo
 m_error_la_LIBADD =
-am_m_error_la_OBJECTS = m_error.lo
-m_error_la_OBJECTS = $(am_m_error_la_OBJECTS)
-m_error_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_error_la_LDFLAGS) $(LDFLAGS) -o $@
+m_error_la_SOURCES = m_error.c
+m_error_la_OBJECTS = m_error.lo
 m_etrace_la_LIBADD =
-am_m_etrace_la_OBJECTS = m_etrace.lo
-m_etrace_la_OBJECTS = $(am_m_etrace_la_OBJECTS)
-m_etrace_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_etrace_la_LDFLAGS) $(LDFLAGS) -o $@
+m_etrace_la_SOURCES = m_etrace.c
+m_etrace_la_OBJECTS = m_etrace.lo
 m_globops_la_LIBADD =
-am_m_globops_la_OBJECTS = m_globops.lo
-m_globops_la_OBJECTS = $(am_m_globops_la_OBJECTS)
-m_globops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_globops_la_LDFLAGS) $(LDFLAGS) -o $@
+m_globops_la_SOURCES = m_globops.c
+m_globops_la_OBJECTS = m_globops.lo
 m_help_la_LIBADD =
-am_m_help_la_OBJECTS = m_help.lo
-m_help_la_OBJECTS = $(am_m_help_la_OBJECTS)
-m_help_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_help_la_LDFLAGS) $(LDFLAGS) -o $@
+m_help_la_SOURCES = m_help.c
+m_help_la_OBJECTS = m_help.lo
 m_info_la_LIBADD =
-am_m_info_la_OBJECTS = m_info.lo
-m_info_la_OBJECTS = $(am_m_info_la_OBJECTS)
-m_info_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_info_la_LDFLAGS) $(LDFLAGS) -o $@
+m_info_la_SOURCES = m_info.c
+m_info_la_OBJECTS = m_info.lo
 m_invite_la_LIBADD =
-am_m_invite_la_OBJECTS = m_invite.lo
-m_invite_la_OBJECTS = $(am_m_invite_la_OBJECTS)
-m_invite_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_invite_la_LDFLAGS) $(LDFLAGS) -o $@
+m_invite_la_SOURCES = m_invite.c
+m_invite_la_OBJECTS = m_invite.lo
 m_ison_la_LIBADD =
-am_m_ison_la_OBJECTS = m_ison.lo
-m_ison_la_OBJECTS = $(am_m_ison_la_OBJECTS)
-m_ison_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_ison_la_LDFLAGS) $(LDFLAGS) -o $@
+m_ison_la_SOURCES = m_ison.c
+m_ison_la_OBJECTS = m_ison.lo
 m_join_la_LIBADD =
-am_m_join_la_OBJECTS = m_join.lo
-m_join_la_OBJECTS = $(am_m_join_la_OBJECTS)
-m_join_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_join_la_LDFLAGS) $(LDFLAGS) -o $@
+m_join_la_SOURCES = m_join.c
+m_join_la_OBJECTS = m_join.lo
 m_kick_la_LIBADD =
-am_m_kick_la_OBJECTS = m_kick.lo
-m_kick_la_OBJECTS = $(am_m_kick_la_OBJECTS)
-m_kick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_kick_la_LDFLAGS) $(LDFLAGS) -o $@
+m_kick_la_SOURCES = m_kick.c
+m_kick_la_OBJECTS = m_kick.lo
 m_kill_la_LIBADD =
-am_m_kill_la_OBJECTS = m_kill.lo
-m_kill_la_OBJECTS = $(am_m_kill_la_OBJECTS)
-m_kill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_kill_la_LDFLAGS) $(LDFLAGS) -o $@
+m_kill_la_SOURCES = m_kill.c
+m_kill_la_OBJECTS = m_kill.lo
 m_kline_la_LIBADD =
-am_m_kline_la_OBJECTS = m_kline.lo
-m_kline_la_OBJECTS = $(am_m_kline_la_OBJECTS)
-m_kline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_kline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_kline_la_SOURCES = m_kline.c
+m_kline_la_OBJECTS = m_kline.lo
 m_knock_la_LIBADD =
-am_m_knock_la_OBJECTS = m_knock.lo
-m_knock_la_OBJECTS = $(am_m_knock_la_OBJECTS)
-m_knock_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_knock_la_LDFLAGS) $(LDFLAGS) -o $@
+m_knock_la_SOURCES = m_knock.c
+m_knock_la_OBJECTS = m_knock.lo
 m_links_la_LIBADD =
-am_m_links_la_OBJECTS = m_links.lo
-m_links_la_OBJECTS = $(am_m_links_la_OBJECTS)
-m_links_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_links_la_LDFLAGS) $(LDFLAGS) -o $@
+m_links_la_SOURCES = m_links.c
+m_links_la_OBJECTS = m_links.lo
 m_list_la_LIBADD =
-am_m_list_la_OBJECTS = m_list.lo
-m_list_la_OBJECTS = $(am_m_list_la_OBJECTS)
-m_list_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_list_la_LDFLAGS) $(LDFLAGS) -o $@
+m_list_la_SOURCES = m_list.c
+m_list_la_OBJECTS = m_list.lo
 m_locops_la_LIBADD =
-am_m_locops_la_OBJECTS = m_locops.lo
-m_locops_la_OBJECTS = $(am_m_locops_la_OBJECTS)
-m_locops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_locops_la_LDFLAGS) $(LDFLAGS) -o $@
+m_locops_la_SOURCES = m_locops.c
+m_locops_la_OBJECTS = m_locops.lo
 m_lusers_la_LIBADD =
-am_m_lusers_la_OBJECTS = m_lusers.lo
-m_lusers_la_OBJECTS = $(am_m_lusers_la_OBJECTS)
-m_lusers_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_lusers_la_LDFLAGS) $(LDFLAGS) -o $@
+m_lusers_la_SOURCES = m_lusers.c
+m_lusers_la_OBJECTS = m_lusers.lo
 m_map_la_LIBADD =
-am_m_map_la_OBJECTS = m_map.lo
-m_map_la_OBJECTS = $(am_m_map_la_OBJECTS)
-m_map_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_map_la_LDFLAGS) $(LDFLAGS) -o $@
+m_map_la_SOURCES = m_map.c
+m_map_la_OBJECTS = m_map.lo
 m_message_la_LIBADD =
-am_m_message_la_OBJECTS = m_message.lo
-m_message_la_OBJECTS = $(am_m_message_la_OBJECTS)
-m_message_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_message_la_LDFLAGS) $(LDFLAGS) -o $@
+m_message_la_SOURCES = m_message.c
+m_message_la_OBJECTS = m_message.lo
 m_metadata_la_LIBADD =
-am_m_metadata_la_OBJECTS = m_metadata.lo
-m_metadata_la_OBJECTS = $(am_m_metadata_la_OBJECTS)
-m_metadata_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_metadata_la_LDFLAGS) $(LDFLAGS) -o $@
+m_metadata_la_SOURCES = m_metadata.c
+m_metadata_la_OBJECTS = m_metadata.lo
 m_mlock_la_LIBADD =
-am_m_mlock_la_OBJECTS = m_mlock.lo
-m_mlock_la_OBJECTS = $(am_m_mlock_la_OBJECTS)
-m_mlock_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_mlock_la_LDFLAGS) $(LDFLAGS) -o $@
+m_mlock_la_SOURCES = m_mlock.c
+m_mlock_la_OBJECTS = m_mlock.lo
 m_mode_la_LIBADD =
-am_m_mode_la_OBJECTS = m_mode.lo
-m_mode_la_OBJECTS = $(am_m_mode_la_OBJECTS)
-m_mode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_mode_la_LDFLAGS) $(LDFLAGS) -o $@
+m_mode_la_SOURCES = m_mode.c
+m_mode_la_OBJECTS = m_mode.lo
 m_module_la_LIBADD =
-am_m_module_la_OBJECTS = m_module.lo
-m_module_la_OBJECTS = $(am_m_module_la_OBJECTS)
-m_module_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_module_la_LDFLAGS) $(LDFLAGS) -o $@
+m_module_la_SOURCES = m_module.c
+m_module_la_OBJECTS = m_module.lo
 m_monitor_la_LIBADD =
-am_m_monitor_la_OBJECTS = m_monitor.lo
-m_monitor_la_OBJECTS = $(am_m_monitor_la_OBJECTS)
-m_monitor_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_monitor_la_LDFLAGS) $(LDFLAGS) -o $@
+m_monitor_la_SOURCES = m_monitor.c
+m_monitor_la_OBJECTS = m_monitor.lo
 m_motd_la_LIBADD =
-am_m_motd_la_OBJECTS = m_motd.lo
-m_motd_la_OBJECTS = $(am_m_motd_la_OBJECTS)
-m_motd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_motd_la_LDFLAGS) $(LDFLAGS) -o $@
+m_motd_la_SOURCES = m_motd.c
+m_motd_la_OBJECTS = m_motd.lo
 m_names_la_LIBADD =
-am_m_names_la_OBJECTS = m_names.lo
-m_names_la_OBJECTS = $(am_m_names_la_OBJECTS)
-m_names_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_names_la_LDFLAGS) $(LDFLAGS) -o $@
+m_names_la_SOURCES = m_names.c
+m_names_la_OBJECTS = m_names.lo
 m_nick_la_LIBADD =
-am_m_nick_la_OBJECTS = m_nick.lo
-m_nick_la_OBJECTS = $(am_m_nick_la_OBJECTS)
-m_nick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_nick_la_LDFLAGS) $(LDFLAGS) -o $@
+m_nick_la_SOURCES = m_nick.c
+m_nick_la_OBJECTS = m_nick.lo
 m_oper_la_LIBADD =
-am_m_oper_la_OBJECTS = m_oper.lo
-m_oper_la_OBJECTS = $(am_m_oper_la_OBJECTS)
-m_oper_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_oper_la_LDFLAGS) $(LDFLAGS) -o $@
+m_oper_la_SOURCES = m_oper.c
+m_oper_la_OBJECTS = m_oper.lo
 m_opme_la_LIBADD =
-am_m_opme_la_OBJECTS = m_opme.lo
-m_opme_la_OBJECTS = $(am_m_opme_la_OBJECTS)
-m_opme_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_opme_la_LDFLAGS) $(LDFLAGS) -o $@
+m_opme_la_SOURCES = m_opme.c
+m_opme_la_OBJECTS = m_opme.lo
 m_part_la_LIBADD =
-am_m_part_la_OBJECTS = m_part.lo
-m_part_la_OBJECTS = $(am_m_part_la_OBJECTS)
-m_part_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_part_la_LDFLAGS) $(LDFLAGS) -o $@
+m_part_la_SOURCES = m_part.c
+m_part_la_OBJECTS = m_part.lo
 m_pass_la_LIBADD =
-am_m_pass_la_OBJECTS = m_pass.lo
-m_pass_la_OBJECTS = $(am_m_pass_la_OBJECTS)
-m_pass_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_pass_la_LDFLAGS) $(LDFLAGS) -o $@
+m_pass_la_SOURCES = m_pass.c
+m_pass_la_OBJECTS = m_pass.lo
 m_ping_la_LIBADD =
-am_m_ping_la_OBJECTS = m_ping.lo
-m_ping_la_OBJECTS = $(am_m_ping_la_OBJECTS)
-m_ping_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_ping_la_LDFLAGS) $(LDFLAGS) -o $@
+m_ping_la_SOURCES = m_ping.c
+m_ping_la_OBJECTS = m_ping.lo
 m_pong_la_LIBADD =
-am_m_pong_la_OBJECTS = m_pong.lo
-m_pong_la_OBJECTS = $(am_m_pong_la_OBJECTS)
-m_pong_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_pong_la_LDFLAGS) $(LDFLAGS) -o $@
+m_pong_la_SOURCES = m_pong.c
+m_pong_la_OBJECTS = m_pong.lo
 m_post_la_LIBADD =
-am_m_post_la_OBJECTS = m_post.lo
-m_post_la_OBJECTS = $(am_m_post_la_OBJECTS)
-m_post_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_post_la_LDFLAGS) $(LDFLAGS) -o $@
+m_post_la_SOURCES = m_post.c
+m_post_la_OBJECTS = m_post.lo
 m_quit_la_LIBADD =
-am_m_quit_la_OBJECTS = m_quit.lo
-m_quit_la_OBJECTS = $(am_m_quit_la_OBJECTS)
-m_quit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_quit_la_LDFLAGS) $(LDFLAGS) -o $@
+m_quit_la_SOURCES = m_quit.c
+m_quit_la_OBJECTS = m_quit.lo
 m_rehash_la_LIBADD =
-am_m_rehash_la_OBJECTS = m_rehash.lo
-m_rehash_la_OBJECTS = $(am_m_rehash_la_OBJECTS)
-m_rehash_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_rehash_la_LDFLAGS) $(LDFLAGS) -o $@
+m_rehash_la_SOURCES = m_rehash.c
+m_rehash_la_OBJECTS = m_rehash.lo
 m_restart_la_LIBADD =
-am_m_restart_la_OBJECTS = m_restart.lo
-m_restart_la_OBJECTS = $(am_m_restart_la_OBJECTS)
-m_restart_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_restart_la_LDFLAGS) $(LDFLAGS) -o $@
+m_restart_la_SOURCES = m_restart.c
+m_restart_la_OBJECTS = m_restart.lo
 m_resv_la_LIBADD =
-am_m_resv_la_OBJECTS = m_resv.lo
-m_resv_la_OBJECTS = $(am_m_resv_la_OBJECTS)
-m_resv_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_resv_la_LDFLAGS) $(LDFLAGS) -o $@
+m_resv_la_SOURCES = m_resv.c
+m_resv_la_OBJECTS = m_resv.lo
 m_resync_la_LIBADD =
-am_m_resync_la_OBJECTS = m_resync.lo
-m_resync_la_OBJECTS = $(am_m_resync_la_OBJECTS)
-m_resync_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_resync_la_LDFLAGS) $(LDFLAGS) -o $@
+m_resync_la_SOURCES = m_resync.c
+m_resync_la_OBJECTS = m_resync.lo
 m_server_la_LIBADD =
-am_m_server_la_OBJECTS = m_server.lo
-m_server_la_OBJECTS = $(am_m_server_la_OBJECTS)
-m_server_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_server_la_LDFLAGS) $(LDFLAGS) -o $@
+m_server_la_SOURCES = m_server.c
+m_server_la_OBJECTS = m_server.lo
 m_set_la_LIBADD =
-am_m_set_la_OBJECTS = m_set.lo
-m_set_la_OBJECTS = $(am_m_set_la_OBJECTS)
-m_set_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_set_la_LDFLAGS) $(LDFLAGS) -o $@
+m_set_la_SOURCES = m_set.c
+m_set_la_OBJECTS = m_set.lo
 m_sjoin_la_LIBADD =
-am_m_sjoin_la_OBJECTS = m_sjoin.lo
-m_sjoin_la_OBJECTS = $(am_m_sjoin_la_OBJECTS)
-m_sjoin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_sjoin_la_LDFLAGS) $(LDFLAGS) -o $@
+m_sjoin_la_SOURCES = m_sjoin.c
+m_sjoin_la_OBJECTS = m_sjoin.lo
 m_squit_la_LIBADD =
-am_m_squit_la_OBJECTS = m_squit.lo
-m_squit_la_OBJECTS = $(am_m_squit_la_OBJECTS)
-m_squit_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_squit_la_LDFLAGS) $(LDFLAGS) -o $@
+m_squit_la_SOURCES = m_squit.c
+m_squit_la_OBJECTS = m_squit.lo
 m_stats_la_LIBADD =
-am_m_stats_la_OBJECTS = m_stats.lo
-m_stats_la_OBJECTS = $(am_m_stats_la_OBJECTS)
-m_stats_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_stats_la_LDFLAGS) $(LDFLAGS) -o $@
+m_stats_la_SOURCES = m_stats.c
+m_stats_la_OBJECTS = m_stats.lo
 m_svinfo_la_LIBADD =
-am_m_svinfo_la_OBJECTS = m_svinfo.lo
-m_svinfo_la_OBJECTS = $(am_m_svinfo_la_OBJECTS)
-m_svinfo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svinfo_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svinfo_la_SOURCES = m_svinfo.c
+m_svinfo_la_OBJECTS = m_svinfo.lo
 m_svsaccount_la_LIBADD =
-am_m_svsaccount_la_OBJECTS = m_svsaccount.lo
-m_svsaccount_la_OBJECTS = $(am_m_svsaccount_la_OBJECTS)
-m_svsaccount_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(m_svsaccount_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+m_svsaccount_la_SOURCES = m_svsaccount.c
+m_svsaccount_la_OBJECTS = m_svsaccount.lo
 m_svshost_la_LIBADD =
-am_m_svshost_la_OBJECTS = m_svshost.lo
-m_svshost_la_OBJECTS = $(am_m_svshost_la_OBJECTS)
-m_svshost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svshost_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svshost_la_SOURCES = m_svshost.c
+m_svshost_la_OBJECTS = m_svshost.lo
 m_svsjoin_la_LIBADD =
-am_m_svsjoin_la_OBJECTS = m_svsjoin.lo
-m_svsjoin_la_OBJECTS = $(am_m_svsjoin_la_OBJECTS)
-m_svsjoin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svsjoin_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svsjoin_la_SOURCES = m_svsjoin.c
+m_svsjoin_la_OBJECTS = m_svsjoin.lo
 m_svskill_la_LIBADD =
-am_m_svskill_la_OBJECTS = m_svskill.lo
-m_svskill_la_OBJECTS = $(am_m_svskill_la_OBJECTS)
-m_svskill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svskill_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svskill_la_SOURCES = m_svskill.c
+m_svskill_la_OBJECTS = m_svskill.lo
 m_svsmode_la_LIBADD =
-am_m_svsmode_la_OBJECTS = m_svsmode.lo
-m_svsmode_la_OBJECTS = $(am_m_svsmode_la_OBJECTS)
-m_svsmode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svsmode_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svsmode_la_SOURCES = m_svsmode.c
+m_svsmode_la_OBJECTS = m_svsmode.lo
 m_svsnick_la_LIBADD =
-am_m_svsnick_la_OBJECTS = m_svsnick.lo
-m_svsnick_la_OBJECTS = $(am_m_svsnick_la_OBJECTS)
-m_svsnick_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svsnick_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svsnick_la_SOURCES = m_svsnick.c
+m_svsnick_la_OBJECTS = m_svsnick.lo
 m_svspart_la_LIBADD =
-am_m_svspart_la_OBJECTS = m_svspart.lo
-m_svspart_la_OBJECTS = $(am_m_svspart_la_OBJECTS)
-m_svspart_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svspart_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svspart_la_SOURCES = m_svspart.c
+m_svspart_la_OBJECTS = m_svspart.lo
 m_svstag_la_LIBADD =
-am_m_svstag_la_OBJECTS = m_svstag.lo
-m_svstag_la_OBJECTS = $(am_m_svstag_la_OBJECTS)
-m_svstag_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_svstag_la_LDFLAGS) $(LDFLAGS) -o $@
+m_svstag_la_SOURCES = m_svstag.c
+m_svstag_la_OBJECTS = m_svstag.lo
 m_tburst_la_LIBADD =
-am_m_tburst_la_OBJECTS = m_tburst.lo
-m_tburst_la_OBJECTS = $(am_m_tburst_la_OBJECTS)
-m_tburst_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_tburst_la_LDFLAGS) $(LDFLAGS) -o $@
+m_tburst_la_SOURCES = m_tburst.c
+m_tburst_la_OBJECTS = m_tburst.lo
 m_time_la_LIBADD =
-am_m_time_la_OBJECTS = m_time.lo
-m_time_la_OBJECTS = $(am_m_time_la_OBJECTS)
-m_time_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_time_la_LDFLAGS) $(LDFLAGS) -o $@
+m_time_la_SOURCES = m_time.c
+m_time_la_OBJECTS = m_time.lo
 m_tmode_la_LIBADD =
-am_m_tmode_la_OBJECTS = m_tmode.lo
-m_tmode_la_OBJECTS = $(am_m_tmode_la_OBJECTS)
-m_tmode_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_tmode_la_LDFLAGS) $(LDFLAGS) -o $@
+m_tmode_la_SOURCES = m_tmode.c
+m_tmode_la_OBJECTS = m_tmode.lo
 m_topic_la_LIBADD =
-am_m_topic_la_OBJECTS = m_topic.lo
-m_topic_la_OBJECTS = $(am_m_topic_la_OBJECTS)
-m_topic_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_topic_la_LDFLAGS) $(LDFLAGS) -o $@
+m_topic_la_SOURCES = m_topic.c
+m_topic_la_OBJECTS = m_topic.lo
 m_trace_la_LIBADD =
-am_m_trace_la_OBJECTS = m_trace.lo
-m_trace_la_OBJECTS = $(am_m_trace_la_OBJECTS)
-m_trace_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_trace_la_LDFLAGS) $(LDFLAGS) -o $@
+m_trace_la_SOURCES = m_trace.c
+m_trace_la_OBJECTS = m_trace.lo
 m_undline_la_LIBADD =
-am_m_undline_la_OBJECTS = m_undline.lo
-m_undline_la_OBJECTS = $(am_m_undline_la_OBJECTS)
-m_undline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_undline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_undline_la_SOURCES = m_undline.c
+m_undline_la_OBJECTS = m_undline.lo
 m_unkline_la_LIBADD =
-am_m_unkline_la_OBJECTS = m_unkline.lo
-m_unkline_la_OBJECTS = $(am_m_unkline_la_OBJECTS)
-m_unkline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_unkline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unkline_la_SOURCES = m_unkline.c
+m_unkline_la_OBJECTS = m_unkline.lo
 m_unresv_la_LIBADD =
-am_m_unresv_la_OBJECTS = m_unresv.lo
-m_unresv_la_OBJECTS = $(am_m_unresv_la_OBJECTS)
-m_unresv_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_unresv_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unresv_la_SOURCES = m_unresv.c
+m_unresv_la_OBJECTS = m_unresv.lo
 m_unxline_la_LIBADD =
-am_m_unxline_la_OBJECTS = m_unxline.lo
-m_unxline_la_OBJECTS = $(am_m_unxline_la_OBJECTS)
-m_unxline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_unxline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_unxline_la_SOURCES = m_unxline.c
+m_unxline_la_OBJECTS = m_unxline.lo
 m_user_la_LIBADD =
-am_m_user_la_OBJECTS = m_user.lo
-m_user_la_OBJECTS = $(am_m_user_la_OBJECTS)
-m_user_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_user_la_LDFLAGS) $(LDFLAGS) -o $@
+m_user_la_SOURCES = m_user.c
+m_user_la_OBJECTS = m_user.lo
 m_userhost_la_LIBADD =
-am_m_userhost_la_OBJECTS = m_userhost.lo
-m_userhost_la_OBJECTS = $(am_m_userhost_la_OBJECTS)
-m_userhost_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_userhost_la_LDFLAGS) $(LDFLAGS) -o $@
+m_userhost_la_SOURCES = m_userhost.c
+m_userhost_la_OBJECTS = m_userhost.lo
 m_version_la_LIBADD =
-am_m_version_la_OBJECTS = m_version.lo
-m_version_la_OBJECTS = $(am_m_version_la_OBJECTS)
-m_version_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_version_la_LDFLAGS) $(LDFLAGS) -o $@
+m_version_la_SOURCES = m_version.c
+m_version_la_OBJECTS = m_version.lo
 m_webirc_la_LIBADD =
-am_m_webirc_la_OBJECTS = m_webirc.lo
-m_webirc_la_OBJECTS = $(am_m_webirc_la_OBJECTS)
-m_webirc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_webirc_la_LDFLAGS) $(LDFLAGS) -o $@
+m_webirc_la_SOURCES = m_webirc.c
+m_webirc_la_OBJECTS = m_webirc.lo
 m_who_la_LIBADD =
-am_m_who_la_OBJECTS = m_who.lo
-m_who_la_OBJECTS = $(am_m_who_la_OBJECTS)
-m_who_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_who_la_LDFLAGS) $(LDFLAGS) -o $@
+m_who_la_SOURCES = m_who.c
+m_who_la_OBJECTS = m_who.lo
 m_whois_la_LIBADD =
-am_m_whois_la_OBJECTS = m_whois.lo
-m_whois_la_OBJECTS = $(am_m_whois_la_OBJECTS)
-m_whois_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_whois_la_LDFLAGS) $(LDFLAGS) -o $@
+m_whois_la_SOURCES = m_whois.c
+m_whois_la_OBJECTS = m_whois.lo
 m_whowas_la_LIBADD =
-am_m_whowas_la_OBJECTS = m_whowas.lo
-m_whowas_la_OBJECTS = $(am_m_whowas_la_OBJECTS)
-m_whowas_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_whowas_la_LDFLAGS) $(LDFLAGS) -o $@
+m_whowas_la_SOURCES = m_whowas.c
+m_whowas_la_OBJECTS = m_whowas.lo
 m_xline_la_LIBADD =
-am_m_xline_la_OBJECTS = m_xline.lo
-m_xline_la_OBJECTS = $(am_m_xline_la_OBJECTS)
-m_xline_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(m_xline_la_LDFLAGS) $(LDFLAGS) -o $@
+m_xline_la_SOURCES = m_xline.c
+m_xline_la_OBJECTS = m_xline.lo
 umode_admin_la_LIBADD =
-am_umode_admin_la_OBJECTS = umode_admin.lo
-umode_admin_la_OBJECTS = $(am_umode_admin_la_OBJECTS)
-umode_admin_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_admin_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
+umode_admin_la_SOURCES = umode_admin.c
+umode_admin_la_OBJECTS = umode_admin.lo
 umode_bot_la_LIBADD =
-am_umode_bot_la_OBJECTS = umode_bot.lo
-umode_bot_la_OBJECTS = $(am_umode_bot_la_OBJECTS)
-umode_bot_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(umode_bot_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_bot_la_SOURCES = umode_bot.c
+umode_bot_la_OBJECTS = umode_bot.lo
 umode_callerid_la_LIBADD =
-am_umode_callerid_la_OBJECTS = umode_callerid.lo
-umode_callerid_la_OBJECTS = $(am_umode_callerid_la_OBJECTS)
-umode_callerid_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_callerid_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_callerid_la_SOURCES = umode_callerid.c
+umode_callerid_la_OBJECTS = umode_callerid.lo
 umode_cloak_la_LIBADD =
-am_umode_cloak_la_OBJECTS = umode_cloak.lo
-umode_cloak_la_OBJECTS = $(am_umode_cloak_la_OBJECTS)
-umode_cloak_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_cloak_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
+umode_cloak_la_SOURCES = umode_cloak.c
+umode_cloak_la_OBJECTS = umode_cloak.lo
 umode_connect_la_LIBADD =
-am_umode_connect_la_OBJECTS = umode_connect.lo
-umode_connect_la_OBJECTS = $(am_umode_connect_la_OBJECTS)
-umode_connect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_connect_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_connect_la_SOURCES = umode_connect.c
+umode_connect_la_OBJECTS = umode_connect.lo
 umode_deaf_la_LIBADD =
-am_umode_deaf_la_OBJECTS = umode_deaf.lo
-umode_deaf_la_OBJECTS = $(am_umode_deaf_la_OBJECTS)
-umode_deaf_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(umode_deaf_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_deaf_la_SOURCES = umode_deaf.c
+umode_deaf_la_OBJECTS = umode_deaf.lo
 umode_expiration_la_LIBADD =
-am_umode_expiration_la_OBJECTS = umode_expiration.lo
-umode_expiration_la_OBJECTS = $(am_umode_expiration_la_OBJECTS)
-umode_expiration_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_expiration_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_expiration_la_SOURCES = umode_expiration.c
+umode_expiration_la_OBJECTS = umode_expiration.lo
 umode_external_la_LIBADD =
-am_umode_external_la_OBJECTS = umode_external.lo
-umode_external_la_OBJECTS = $(am_umode_external_la_OBJECTS)
-umode_external_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_external_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_external_la_SOURCES = umode_external.c
+umode_external_la_OBJECTS = umode_external.lo
 umode_farconnect_la_LIBADD =
-am_umode_farconnect_la_OBJECTS = umode_farconnect.lo
-umode_farconnect_la_OBJECTS = $(am_umode_farconnect_la_OBJECTS)
-umode_farconnect_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_farconnect_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_farconnect_la_SOURCES = umode_farconnect.c
+umode_farconnect_la_OBJECTS = umode_farconnect.lo
 umode_flood_la_LIBADD =
-am_umode_flood_la_OBJECTS = umode_flood.lo
-umode_flood_la_OBJECTS = $(am_umode_flood_la_OBJECTS)
-umode_flood_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_flood_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
+umode_flood_la_SOURCES = umode_flood.c
+umode_flood_la_OBJECTS = umode_flood.lo
 umode_hidden_la_LIBADD =
-am_umode_hidden_la_OBJECTS = umode_hidden.lo
-umode_hidden_la_OBJECTS = $(am_umode_hidden_la_OBJECTS)
-umode_hidden_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_hidden_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_hidden_la_SOURCES = umode_hidden.c
+umode_hidden_la_OBJECTS = umode_hidden.lo
 umode_hidechans_la_LIBADD =
-am_umode_hidechans_la_OBJECTS = umode_hidechans.lo
-umode_hidechans_la_OBJECTS = $(am_umode_hidechans_la_OBJECTS)
-umode_hidechans_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_hidechans_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_hidechans_la_SOURCES = umode_hidechans.c
+umode_hidechans_la_OBJECTS = umode_hidechans.lo
 umode_hideidle_la_LIBADD =
-am_umode_hideidle_la_OBJECTS = umode_hideidle.lo
-umode_hideidle_la_OBJECTS = $(am_umode_hideidle_la_OBJECTS)
-umode_hideidle_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_hideidle_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_hideidle_la_SOURCES = umode_hideidle.c
+umode_hideidle_la_OBJECTS = umode_hideidle.lo
 umode_invisible_la_LIBADD =
-am_umode_invisible_la_OBJECTS = umode_invisible.lo
-umode_invisible_la_OBJECTS = $(am_umode_invisible_la_OBJECTS)
-umode_invisible_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_invisible_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_invisible_la_SOURCES = umode_invisible.c
+umode_invisible_la_OBJECTS = umode_invisible.lo
 umode_locops_la_LIBADD =
-am_umode_locops_la_OBJECTS = umode_locops.lo
-umode_locops_la_OBJECTS = $(am_umode_locops_la_OBJECTS)
-umode_locops_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_locops_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_locops_la_SOURCES = umode_locops.c
+umode_locops_la_OBJECTS = umode_locops.lo
 umode_nickchange_la_LIBADD =
-am_umode_nickchange_la_OBJECTS = umode_nickchange.lo
-umode_nickchange_la_OBJECTS = $(am_umode_nickchange_la_OBJECTS)
-umode_nickchange_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_nickchange_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_nickchange_la_SOURCES = umode_nickchange.c
+umode_nickchange_la_OBJECTS = umode_nickchange.lo
 umode_oper_la_LIBADD =
-am_umode_oper_la_OBJECTS = umode_oper.lo
-umode_oper_la_OBJECTS = $(am_umode_oper_la_OBJECTS)
-umode_oper_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(umode_oper_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_oper_la_SOURCES = umode_oper.c
+umode_oper_la_OBJECTS = umode_oper.lo
 umode_registered_la_LIBADD =
-am_umode_registered_la_OBJECTS = umode_registered.lo
-umode_registered_la_OBJECTS = $(am_umode_registered_la_OBJECTS)
-umode_registered_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_registered_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_registered_la_SOURCES = umode_registered.c
+umode_registered_la_OBJECTS = umode_registered.lo
 umode_regonly_la_LIBADD =
-am_umode_regonly_la_OBJECTS = umode_regonly.lo
-umode_regonly_la_OBJECTS = $(am_umode_regonly_la_OBJECTS)
-umode_regonly_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_regonly_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_regonly_la_SOURCES = umode_regonly.c
+umode_regonly_la_OBJECTS = umode_regonly.lo
 umode_reject_la_LIBADD =
-am_umode_reject_la_OBJECTS = umode_reject.lo
-umode_reject_la_OBJECTS = $(am_umode_reject_la_OBJECTS)
-umode_reject_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_reject_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_reject_la_SOURCES = umode_reject.c
+umode_reject_la_OBJECTS = umode_reject.lo
 umode_secure_la_LIBADD =
-am_umode_secure_la_OBJECTS = umode_secure.lo
-umode_secure_la_OBJECTS = $(am_umode_secure_la_OBJECTS)
-umode_secure_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_secure_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_secure_la_SOURCES = umode_secure.c
+umode_secure_la_OBJECTS = umode_secure.lo
 umode_secureonly_la_LIBADD =
-am_umode_secureonly_la_OBJECTS = umode_secureonly.lo
-umode_secureonly_la_OBJECTS = $(am_umode_secureonly_la_OBJECTS)
-umode_secureonly_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_secureonly_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_secureonly_la_SOURCES = umode_secureonly.c
+umode_secureonly_la_OBJECTS = umode_secureonly.lo
 umode_servnotice_la_LIBADD =
-am_umode_servnotice_la_OBJECTS = umode_servnotice.lo
-umode_servnotice_la_OBJECTS = $(am_umode_servnotice_la_OBJECTS)
-umode_servnotice_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_servnotice_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_servnotice_la_SOURCES = umode_servnotice.c
+umode_servnotice_la_OBJECTS = umode_servnotice.lo
 umode_skill_la_LIBADD =
-am_umode_skill_la_OBJECTS = umode_skill.lo
-umode_skill_la_OBJECTS = $(am_umode_skill_la_OBJECTS)
-umode_skill_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_skill_la_LDFLAGS) $(LDFLAGS) -o \
-	$@
+umode_skill_la_SOURCES = umode_skill.c
+umode_skill_la_OBJECTS = umode_skill.lo
 umode_softcallerid_la_LIBADD =
-am_umode_softcallerid_la_OBJECTS = umode_softcallerid.lo
-umode_softcallerid_la_OBJECTS = $(am_umode_softcallerid_la_OBJECTS)
-umode_softcallerid_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_softcallerid_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+umode_softcallerid_la_SOURCES = umode_softcallerid.c
+umode_softcallerid_la_OBJECTS = umode_softcallerid.lo
 umode_spy_la_LIBADD =
-am_umode_spy_la_OBJECTS = umode_spy.lo
-umode_spy_la_OBJECTS = $(am_umode_spy_la_OBJECTS)
-umode_spy_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(umode_spy_la_LDFLAGS) $(LDFLAGS) -o $@
+umode_spy_la_SOURCES = umode_spy.c
+umode_spy_la_OBJECTS = umode_spy.lo
 umode_webirc_la_LIBADD =
-am_umode_webirc_la_OBJECTS = umode_webirc.lo
-umode_webirc_la_OBJECTS = $(am_umode_webirc_la_OBJECTS)
-umode_webirc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(umode_webirc_la_LDFLAGS) $(LDFLAGS) \
-	-o $@
+umode_webirc_la_SOURCES = umode_webirc.c
+umode_webirc_la_OBJECTS = umode_webirc.lo
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -989,122 +599,58 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(cap_account_notify_la_SOURCES) \
-	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
-	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
-	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
-	$(cap_standard_replies_la_SOURCES) \
-	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
-	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
-	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
-	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
-	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
-	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
-	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_help_la_SOURCES) \
-	$(m_info_la_SOURCES) $(m_invite_la_SOURCES) \
-	$(m_ison_la_SOURCES) $(m_join_la_SOURCES) $(m_kick_la_SOURCES) \
-	$(m_kill_la_SOURCES) $(m_kline_la_SOURCES) \
-	$(m_knock_la_SOURCES) $(m_links_la_SOURCES) \
-	$(m_list_la_SOURCES) $(m_locops_la_SOURCES) \
-	$(m_lusers_la_SOURCES) $(m_map_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_mlock_la_SOURCES) $(m_mode_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_nick_la_SOURCES) $(m_oper_la_SOURCES) $(m_opme_la_SOURCES) \
-	$(m_part_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
-	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
-	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
-	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
-	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svsaccount_la_SOURCES) $(m_svshost_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
-	$(m_tmode_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES) $(umode_admin_la_SOURCES) \
-	$(umode_bot_la_SOURCES) $(umode_callerid_la_SOURCES) \
-	$(umode_cloak_la_SOURCES) $(umode_connect_la_SOURCES) \
-	$(umode_deaf_la_SOURCES) $(umode_expiration_la_SOURCES) \
-	$(umode_external_la_SOURCES) $(umode_farconnect_la_SOURCES) \
-	$(umode_flood_la_SOURCES) $(umode_hidden_la_SOURCES) \
-	$(umode_hidechans_la_SOURCES) $(umode_hideidle_la_SOURCES) \
-	$(umode_invisible_la_SOURCES) $(umode_locops_la_SOURCES) \
-	$(umode_nickchange_la_SOURCES) $(umode_oper_la_SOURCES) \
-	$(umode_registered_la_SOURCES) $(umode_regonly_la_SOURCES) \
-	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
-	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
-	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
-	$(umode_spy_la_SOURCES) $(umode_webirc_la_SOURCES)
-DIST_SOURCES = $(cap_account_notify_la_SOURCES) \
-	$(cap_away_notify_la_SOURCES) $(cap_cap_notify_la_SOURCES) \
-	$(cap_chghost_la_SOURCES) $(cap_extended_join_la_SOURCES) \
-	$(cap_invite_notify_la_SOURCES) $(cap_multi_prefix_la_SOURCES) \
-	$(cap_standard_replies_la_SOURCES) \
-	$(cap_userhost_in_names_la_SOURCES) $(m_accept_la_SOURCES) \
-	$(m_admin_la_SOURCES) $(m_away_la_SOURCES) \
-	$(m_bmask_la_SOURCES) $(m_cap_la_SOURCES) \
-	$(m_capab_la_SOURCES) $(m_certfp_la_SOURCES) \
-	$(m_close_la_SOURCES) $(m_connect_la_SOURCES) \
-	$(m_die_la_SOURCES) $(m_dline_la_SOURCES) \
-	$(m_encap_la_SOURCES) $(m_eob_la_SOURCES) \
-	$(m_error_la_SOURCES) $(m_etrace_la_SOURCES) \
-	$(m_globops_la_SOURCES) $(m_help_la_SOURCES) \
-	$(m_info_la_SOURCES) $(m_invite_la_SOURCES) \
-	$(m_ison_la_SOURCES) $(m_join_la_SOURCES) $(m_kick_la_SOURCES) \
-	$(m_kill_la_SOURCES) $(m_kline_la_SOURCES) \
-	$(m_knock_la_SOURCES) $(m_links_la_SOURCES) \
-	$(m_list_la_SOURCES) $(m_locops_la_SOURCES) \
-	$(m_lusers_la_SOURCES) $(m_map_la_SOURCES) \
-	$(m_message_la_SOURCES) $(m_metadata_la_SOURCES) \
-	$(m_mlock_la_SOURCES) $(m_mode_la_SOURCES) \
-	$(m_module_la_SOURCES) $(m_monitor_la_SOURCES) \
-	$(m_motd_la_SOURCES) $(m_names_la_SOURCES) \
-	$(m_nick_la_SOURCES) $(m_oper_la_SOURCES) $(m_opme_la_SOURCES) \
-	$(m_part_la_SOURCES) $(m_pass_la_SOURCES) $(m_ping_la_SOURCES) \
-	$(m_pong_la_SOURCES) $(m_post_la_SOURCES) $(m_quit_la_SOURCES) \
-	$(m_rehash_la_SOURCES) $(m_restart_la_SOURCES) \
-	$(m_resv_la_SOURCES) $(m_resync_la_SOURCES) \
-	$(m_server_la_SOURCES) $(m_set_la_SOURCES) \
-	$(m_sjoin_la_SOURCES) $(m_squit_la_SOURCES) \
-	$(m_stats_la_SOURCES) $(m_svinfo_la_SOURCES) \
-	$(m_svsaccount_la_SOURCES) $(m_svshost_la_SOURCES) \
-	$(m_svsjoin_la_SOURCES) $(m_svskill_la_SOURCES) \
-	$(m_svsmode_la_SOURCES) $(m_svsnick_la_SOURCES) \
-	$(m_svspart_la_SOURCES) $(m_svstag_la_SOURCES) \
-	$(m_tburst_la_SOURCES) $(m_time_la_SOURCES) \
-	$(m_tmode_la_SOURCES) $(m_topic_la_SOURCES) \
-	$(m_trace_la_SOURCES) $(m_undline_la_SOURCES) \
-	$(m_unkline_la_SOURCES) $(m_unresv_la_SOURCES) \
-	$(m_unxline_la_SOURCES) $(m_user_la_SOURCES) \
-	$(m_userhost_la_SOURCES) $(m_version_la_SOURCES) \
-	$(m_webirc_la_SOURCES) $(m_who_la_SOURCES) \
-	$(m_whois_la_SOURCES) $(m_whowas_la_SOURCES) \
-	$(m_xline_la_SOURCES) $(umode_admin_la_SOURCES) \
-	$(umode_bot_la_SOURCES) $(umode_callerid_la_SOURCES) \
-	$(umode_cloak_la_SOURCES) $(umode_connect_la_SOURCES) \
-	$(umode_deaf_la_SOURCES) $(umode_expiration_la_SOURCES) \
-	$(umode_external_la_SOURCES) $(umode_farconnect_la_SOURCES) \
-	$(umode_flood_la_SOURCES) $(umode_hidden_la_SOURCES) \
-	$(umode_hidechans_la_SOURCES) $(umode_hideidle_la_SOURCES) \
-	$(umode_invisible_la_SOURCES) $(umode_locops_la_SOURCES) \
-	$(umode_nickchange_la_SOURCES) $(umode_oper_la_SOURCES) \
-	$(umode_registered_la_SOURCES) $(umode_regonly_la_SOURCES) \
-	$(umode_reject_la_SOURCES) $(umode_secure_la_SOURCES) \
-	$(umode_secureonly_la_SOURCES) $(umode_servnotice_la_SOURCES) \
-	$(umode_skill_la_SOURCES) $(umode_softcallerid_la_SOURCES) \
-	$(umode_spy_la_SOURCES) $(umode_webirc_la_SOURCES)
+SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
+	cap_chghost.c cap_extended_join.c cap_invite_notify.c \
+	cap_multi_prefix.c cap_standard_replies.c \
+	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
+	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
+	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
+	m_globops.c m_help.c m_info.c m_invite.c m_ison.c m_join.c \
+	m_kick.c m_kill.c m_kline.c m_knock.c m_links.c m_list.c \
+	m_locops.c m_lusers.c m_map.c m_message.c m_metadata.c \
+	m_mlock.c m_mode.c m_module.c m_monitor.c m_motd.c m_names.c \
+	m_nick.c m_oper.c m_opme.c m_part.c m_pass.c m_ping.c m_pong.c \
+	m_post.c m_quit.c m_rehash.c m_restart.c m_resv.c m_resync.c \
+	m_server.c m_set.c m_sjoin.c m_squit.c m_stats.c m_svinfo.c \
+	m_svsaccount.c m_svshost.c m_svsjoin.c m_svskill.c m_svsmode.c \
+	m_svsnick.c m_svspart.c m_svstag.c m_tburst.c m_time.c \
+	m_tmode.c m_topic.c m_trace.c m_undline.c m_unkline.c \
+	m_unresv.c m_unxline.c m_user.c m_userhost.c m_version.c \
+	m_webirc.c m_who.c m_whois.c m_whowas.c m_xline.c \
+	umode_admin.c umode_bot.c umode_callerid.c umode_cloak.c \
+	umode_connect.c umode_deaf.c umode_expiration.c \
+	umode_external.c umode_farconnect.c umode_flood.c \
+	umode_hidden.c umode_hidechans.c umode_hideidle.c \
+	umode_invisible.c umode_locops.c umode_nickchange.c \
+	umode_oper.c umode_registered.c umode_regonly.c umode_reject.c \
+	umode_secure.c umode_secureonly.c umode_servnotice.c \
+	umode_skill.c umode_softcallerid.c umode_spy.c umode_webirc.c
+DIST_SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
+	cap_chghost.c cap_extended_join.c cap_invite_notify.c \
+	cap_multi_prefix.c cap_standard_replies.c \
+	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
+	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
+	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
+	m_globops.c m_help.c m_info.c m_invite.c m_ison.c m_join.c \
+	m_kick.c m_kill.c m_kline.c m_knock.c m_links.c m_list.c \
+	m_locops.c m_lusers.c m_map.c m_message.c m_metadata.c \
+	m_mlock.c m_mode.c m_module.c m_monitor.c m_motd.c m_names.c \
+	m_nick.c m_oper.c m_opme.c m_part.c m_pass.c m_ping.c m_pong.c \
+	m_post.c m_quit.c m_rehash.c m_restart.c m_resv.c m_resync.c \
+	m_server.c m_set.c m_sjoin.c m_squit.c m_stats.c m_svinfo.c \
+	m_svsaccount.c m_svshost.c m_svsjoin.c m_svskill.c m_svsmode.c \
+	m_svsnick.c m_svspart.c m_svstag.c m_tburst.c m_time.c \
+	m_tmode.c m_topic.c m_trace.c m_undline.c m_unkline.c \
+	m_unresv.c m_unxline.c m_user.c m_userhost.c m_version.c \
+	m_webirc.c m_who.c m_whois.c m_whowas.c m_xline.c \
+	umode_admin.c umode_bot.c umode_callerid.c umode_cloak.c \
+	umode_connect.c umode_deaf.c umode_expiration.c \
+	umode_external.c umode_farconnect.c umode_flood.c \
+	umode_hidden.c umode_hidechans.c umode_hideidle.c \
+	umode_invisible.c umode_locops.c umode_nickchange.c \
+	umode_oper.c umode_registered.c umode_regonly.c umode_reject.c \
+	umode_secure.c umode_secureonly.c umode_servnotice.c \
+	umode_skill.c umode_softcallerid.c umode_spy.c umode_webirc.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1261,9 +807,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = foreign
-MODULE_FLAGS = -module -avoid-version -shrext .so
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
+AM_LDFLAGS = -module -avoid-version -shrext .so
 modulesdir = $(pkglibdir)/modules
 modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_away_notify.la       \
@@ -1384,242 +929,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_whowas.la     \
                       m_xline.la
 
-cap_account_notify_la_LDFLAGS = $(MODULE_FLAGS)
-cap_away_notify_la_LDFLAGS = $(MODULE_FLAGS)
-cap_cap_notify_la_LDFLAGS = $(MODULE_FLAGS)
-cap_chghost_la_LDFLAGS = $(MODULE_FLAGS)
-cap_extended_join_la_LDFLAGS = $(MODULE_FLAGS)
-cap_invite_notify_la_LDFLAGS = $(MODULE_FLAGS)
-cap_multi_prefix_la_LDFLAGS = $(MODULE_FLAGS)
-cap_standard_replies_la_LDFLAGS = $(MODULE_FLAGS)
-cap_userhost_in_names_la_LDFLAGS = $(MODULE_FLAGS)
-umode_admin_la_LDFLAGS = $(MODULE_FLAGS)
-umode_bot_la_LDFLAGS = $(MODULE_FLAGS)
-umode_deaf_la_LDFLAGS = $(MODULE_FLAGS)
-umode_callerid_la_LDFLAGS = $(MODULE_FLAGS)
-umode_cloak_la_LDFLAGS = $(MODULE_FLAGS)
-umode_connect_la_LDFLAGS = $(MODULE_FLAGS)
-umode_expiration_la_LDFLAGS = $(MODULE_FLAGS)
-umode_external_la_LDFLAGS = $(MODULE_FLAGS)
-umode_farconnect_la_LDFLAGS = $(MODULE_FLAGS)
-umode_flood_la_LDFLAGS = $(MODULE_FLAGS)
-umode_hidden_la_LDFLAGS = $(MODULE_FLAGS)
-umode_hidechans_la_LDFLAGS = $(MODULE_FLAGS)
-umode_hideidle_la_LDFLAGS = $(MODULE_FLAGS)
-umode_invisible_la_LDFLAGS = $(MODULE_FLAGS)
-umode_locops_la_LDFLAGS = $(MODULE_FLAGS)
-umode_nickchange_la_LDFLAGS = $(MODULE_FLAGS)
-umode_oper_la_LDFLAGS = $(MODULE_FLAGS)
-umode_registered_la_LDFLAGS = $(MODULE_FLAGS)
-umode_regonly_la_LDFLAGS = $(MODULE_FLAGS)
-umode_reject_la_LDFLAGS = $(MODULE_FLAGS)
-umode_secure_la_LDFLAGS = $(MODULE_FLAGS)
-umode_secureonly_la_LDFLAGS = $(MODULE_FLAGS)
-umode_servnotice_la_LDFLAGS = $(MODULE_FLAGS)
-umode_skill_la_LDFLAGS = $(MODULE_FLAGS)
-umode_softcallerid_la_LDFLAGS = $(MODULE_FLAGS)
-umode_spy_la_LDFLAGS = $(MODULE_FLAGS)
-umode_webirc_la_LDFLAGS = $(MODULE_FLAGS)
-m_accept_la_LDFLAGS = $(MODULE_FLAGS)
-m_admin_la_LDFLAGS = $(MODULE_FLAGS)
-m_away_la_LDFLAGS = $(MODULE_FLAGS)
-m_bmask_la_LDFLAGS = $(MODULE_FLAGS)
-m_cap_la_LDFLAGS = $(MODULE_FLAGS)
-m_capab_la_LDFLAGS = $(MODULE_FLAGS)
-m_certfp_la_LDFLAGS = $(MODULE_FLAGS)
-m_close_la_LDFLAGS = $(MODULE_FLAGS)
-m_connect_la_LDFLAGS = $(MODULE_FLAGS)
-m_die_la_LDFLAGS = $(MODULE_FLAGS)
-m_dline_la_LDFLAGS = $(MODULE_FLAGS)
-m_encap_la_LDFLAGS = $(MODULE_FLAGS)
-m_eob_la_LDFLAGS = $(MODULE_FLAGS)
-m_error_la_LDFLAGS = $(MODULE_FLAGS)
-m_etrace_la_LDFLAGS = $(MODULE_FLAGS)
-m_globops_la_LDFLAGS = $(MODULE_FLAGS)
-m_help_la_LDFLAGS = $(MODULE_FLAGS)
-m_info_la_LDFLAGS = $(MODULE_FLAGS)
-m_invite_la_LDFLAGS = $(MODULE_FLAGS)
-m_ison_la_LDFLAGS = $(MODULE_FLAGS)
-m_join_la_LDFLAGS = $(MODULE_FLAGS)
-m_kick_la_LDFLAGS = $(MODULE_FLAGS)
-m_kill_la_LDFLAGS = $(MODULE_FLAGS)
-m_kline_la_LDFLAGS = $(MODULE_FLAGS)
-m_knock_la_LDFLAGS = $(MODULE_FLAGS)
-m_links_la_LDFLAGS = $(MODULE_FLAGS)
-m_list_la_LDFLAGS = $(MODULE_FLAGS)
-m_locops_la_LDFLAGS = $(MODULE_FLAGS)
-m_lusers_la_LDFLAGS = $(MODULE_FLAGS)
-m_map_la_LDFLAGS = $(MODULE_FLAGS)
-m_message_la_LDFLAGS = $(MODULE_FLAGS)
-m_metadata_la_LDFLAGS = $(MODULE_FLAGS)
-m_mlock_la_LDFLAGS = $(MODULE_FLAGS)
-m_mode_la_LDFLAGS = $(MODULE_FLAGS)
-m_module_la_LDFLAGS = $(MODULE_FLAGS)
-m_monitor_la_LDFLAGS = $(MODULE_FLAGS)
-m_motd_la_LDFLAGS = $(MODULE_FLAGS)
-m_names_la_LDFLAGS = $(MODULE_FLAGS)
-m_nick_la_LDFLAGS = $(MODULE_FLAGS)
-m_oper_la_LDFLAGS = $(MODULE_FLAGS)
-m_opme_la_LDFLAGS = $(MODULE_FLAGS)
-m_part_la_LDFLAGS = $(MODULE_FLAGS)
-m_pass_la_LDFLAGS = $(MODULE_FLAGS)
-m_ping_la_LDFLAGS = $(MODULE_FLAGS)
-m_pong_la_LDFLAGS = $(MODULE_FLAGS)
-m_post_la_LDFLAGS = $(MODULE_FLAGS)
-m_quit_la_LDFLAGS = $(MODULE_FLAGS)
-m_rehash_la_LDFLAGS = $(MODULE_FLAGS)
-m_restart_la_LDFLAGS = $(MODULE_FLAGS)
-m_resv_la_LDFLAGS = $(MODULE_FLAGS)
-m_resync_la_LDFLAGS = $(MODULE_FLAGS)
-m_server_la_LDFLAGS = $(MODULE_FLAGS)
-m_set_la_LDFLAGS = $(MODULE_FLAGS)
-m_sjoin_la_LDFLAGS = $(MODULE_FLAGS)
-m_squit_la_LDFLAGS = $(MODULE_FLAGS)
-m_stats_la_LDFLAGS = $(MODULE_FLAGS)
-m_svinfo_la_LDFLAGS = $(MODULE_FLAGS)
-m_svsaccount_la_LDFLAGS = $(MODULE_FLAGS)
-m_svshost_la_LDFLAGS = $(MODULE_FLAGS)
-m_svsjoin_la_LDFLAGS = $(MODULE_FLAGS)
-m_svskill_la_LDFLAGS = $(MODULE_FLAGS)
-m_svsmode_la_LDFLAGS = $(MODULE_FLAGS)
-m_svsnick_la_LDFLAGS = $(MODULE_FLAGS)
-m_svspart_la_LDFLAGS = $(MODULE_FLAGS)
-m_svstag_la_LDFLAGS = $(MODULE_FLAGS)
-m_tburst_la_LDFLAGS = $(MODULE_FLAGS)
-m_time_la_LDFLAGS = $(MODULE_FLAGS)
-m_tmode_la_LDFLAGS = $(MODULE_FLAGS)
-m_topic_la_LDFLAGS = $(MODULE_FLAGS)
-m_trace_la_LDFLAGS = $(MODULE_FLAGS)
-m_undline_la_LDFLAGS = $(MODULE_FLAGS)
-m_unkline_la_LDFLAGS = $(MODULE_FLAGS)
-m_unresv_la_LDFLAGS = $(MODULE_FLAGS)
-m_unxline_la_LDFLAGS = $(MODULE_FLAGS)
-m_user_la_LDFLAGS = $(MODULE_FLAGS)
-m_userhost_la_LDFLAGS = $(MODULE_FLAGS)
-m_version_la_LDFLAGS = $(MODULE_FLAGS)
-m_webirc_la_LDFLAGS = $(MODULE_FLAGS)
-m_who_la_LDFLAGS = $(MODULE_FLAGS)
-m_whois_la_LDFLAGS = $(MODULE_FLAGS)
-m_whowas_la_LDFLAGS = $(MODULE_FLAGS)
-m_xline_la_LDFLAGS = $(MODULE_FLAGS)
-cap_account_notify_la_SOURCES = cap_account_notify.c
-cap_away_notify_la_SOURCES = cap_away_notify.c
-cap_cap_notify_la_SOURCES = cap_cap_notify.c
-cap_chghost_la_SOURCES = cap_chghost.c
-cap_extended_join_la_SOURCES = cap_extended_join.c
-cap_invite_notify_la_SOURCES = cap_invite_notify.c
-cap_multi_prefix_la_SOURCES = cap_multi_prefix.c
-cap_standard_replies_la_SOURCES = cap_standard_replies.c
-cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
-umode_admin_la_SOURCES = umode_admin.c
-umode_bot_la_SOURCES = umode_bot.c
-umode_callerid_la_SOURCES = umode_callerid.c
-umode_cloak_la_SOURCES = umode_cloak.c
-umode_connect_la_SOURCES = umode_connect.c
-umode_deaf_la_SOURCES = umode_deaf.c
-umode_expiration_la_SOURCES = umode_expiration.c
-umode_external_la_SOURCES = umode_external.c
-umode_farconnect_la_SOURCES = umode_farconnect.c
-umode_flood_la_SOURCES = umode_flood.c
-umode_hidden_la_SOURCES = umode_hidden.c
-umode_hidechans_la_SOURCES = umode_hidechans.c
-umode_hideidle_la_SOURCES = umode_hideidle.c
-umode_invisible_la_SOURCES = umode_invisible.c
-umode_locops_la_SOURCES = umode_locops.c
-umode_nickchange_la_SOURCES = umode_nickchange.c
-umode_oper_la_SOURCES = umode_oper.c
-umode_registered_la_SOURCES = umode_registered.c
-umode_regonly_la_SOURCES = umode_regonly.c
-umode_reject_la_SOURCES = umode_reject.c
-umode_secure_la_SOURCES = umode_secure.c
-umode_secureonly_la_SOURCES = umode_secureonly.c
-umode_servnotice_la_SOURCES = umode_servnotice.c
-umode_skill_la_SOURCES = umode_skill.c
-umode_softcallerid_la_SOURCES = umode_softcallerid.c
-umode_spy_la_SOURCES = umode_spy.c
-umode_webirc_la_SOURCES = umode_webirc.c
-m_accept_la_SOURCES = m_accept.c
-m_admin_la_SOURCES = m_admin.c
-m_away_la_SOURCES = m_away.c
-m_bmask_la_SOURCES = m_bmask.c
-m_cap_la_SOURCES = m_cap.c
-m_capab_la_SOURCES = m_capab.c
-m_certfp_la_SOURCES = m_certfp.c
-m_close_la_SOURCES = m_close.c
-m_connect_la_SOURCES = m_connect.c
-m_die_la_SOURCES = m_die.c
-m_dline_la_SOURCES = m_dline.c
-m_encap_la_SOURCES = m_encap.c
-m_eob_la_SOURCES = m_eob.c
-m_error_la_SOURCES = m_error.c
-m_etrace_la_SOURCES = m_etrace.c
-m_globops_la_SOURCES = m_globops.c
-m_help_la_SOURCES = m_help.c
-m_info_la_SOURCES = m_info.c
-m_invite_la_SOURCES = m_invite.c
-m_ison_la_SOURCES = m_ison.c
-m_join_la_SOURCES = m_join.c
-m_kick_la_SOURCES = m_kick.c
-m_kill_la_SOURCES = m_kill.c
-m_kline_la_SOURCES = m_kline.c
-m_knock_la_SOURCES = m_knock.c
-m_links_la_SOURCES = m_links.c
-m_list_la_SOURCES = m_list.c
-m_locops_la_SOURCES = m_locops.c
-m_lusers_la_SOURCES = m_lusers.c
-m_map_la_SOURCES = m_map.c
-m_message_la_SOURCES = m_message.c
-m_metadata_la_SOURCES = m_metadata.c
-m_mlock_la_SOURCES = m_mlock.c
-m_mode_la_SOURCES = m_mode.c
-m_module_la_SOURCES = m_module.c
-m_monitor_la_SOURCES = m_monitor.c
-m_motd_la_SOURCES = m_motd.c
-m_names_la_SOURCES = m_names.c
-m_nick_la_SOURCES = m_nick.c
-m_oper_la_SOURCES = m_oper.c
-m_opme_la_SOURCES = m_opme.c
-m_part_la_SOURCES = m_part.c
-m_pass_la_SOURCES = m_pass.c
-m_ping_la_SOURCES = m_ping.c
-m_pong_la_SOURCES = m_pong.c
-m_post_la_SOURCES = m_post.c
-m_quit_la_SOURCES = m_quit.c
-m_rehash_la_SOURCES = m_rehash.c
-m_restart_la_SOURCES = m_restart.c
-m_resv_la_SOURCES = m_resv.c
-m_resync_la_SOURCES = m_resync.c
-m_server_la_SOURCES = m_server.c
-m_set_la_SOURCES = m_set.c
-m_sjoin_la_SOURCES = m_sjoin.c
-m_squit_la_SOURCES = m_squit.c
-m_stats_la_SOURCES = m_stats.c
-m_svinfo_la_SOURCES = m_svinfo.c
-m_svsaccount_la_SOURCES = m_svsaccount.c
-m_svshost_la_SOURCES = m_svshost.c
-m_svsjoin_la_SOURCES = m_svsjoin.c
-m_svskill_la_SOURCES = m_svskill.c
-m_svsmode_la_SOURCES = m_svsmode.c
-m_svsnick_la_SOURCES = m_svsnick.c
-m_svspart_la_SOURCES = m_svspart.c
-m_svstag_la_SOURCES = m_svstag.c
-m_tburst_la_SOURCES = m_tburst.c
-m_time_la_SOURCES = m_time.c
-m_tmode_la_SOURCES = m_tmode.c
-m_topic_la_SOURCES = m_topic.c
-m_trace_la_SOURCES = m_trace.c
-m_undline_la_SOURCES = m_undline.c
-m_unkline_la_SOURCES = m_unkline.c
-m_unresv_la_SOURCES = m_unresv.c
-m_unxline_la_SOURCES = m_unxline.c
-m_user_la_SOURCES = m_user.c
-m_userhost_la_SOURCES = m_userhost.c
-m_version_la_SOURCES = m_version.c
-m_webirc_la_SOURCES = m_webirc.c
-m_who_la_SOURCES = m_who.c
-m_whois_la_SOURCES = m_whois.c
-m_whowas_la_SOURCES = m_whowas.c
-m_xline_la_SOURCES = m_xline.c
 all: all-am
 
 .SUFFIXES:
@@ -1688,358 +997,358 @@ clean-modulesLTLIBRARIES:
 	$(am__rm_f) $${locs}
 
 cap_account_notify.la: $(cap_account_notify_la_OBJECTS) $(cap_account_notify_la_DEPENDENCIES) $(EXTRA_cap_account_notify_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_account_notify_la_LINK) -rpath $(modulesdir) $(cap_account_notify_la_OBJECTS) $(cap_account_notify_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_account_notify_la_OBJECTS) $(cap_account_notify_la_LIBADD) $(LIBS)
 
 cap_away_notify.la: $(cap_away_notify_la_OBJECTS) $(cap_away_notify_la_DEPENDENCIES) $(EXTRA_cap_away_notify_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_away_notify_la_LINK) -rpath $(modulesdir) $(cap_away_notify_la_OBJECTS) $(cap_away_notify_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_away_notify_la_OBJECTS) $(cap_away_notify_la_LIBADD) $(LIBS)
 
 cap_cap_notify.la: $(cap_cap_notify_la_OBJECTS) $(cap_cap_notify_la_DEPENDENCIES) $(EXTRA_cap_cap_notify_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_cap_notify_la_LINK) -rpath $(modulesdir) $(cap_cap_notify_la_OBJECTS) $(cap_cap_notify_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_cap_notify_la_OBJECTS) $(cap_cap_notify_la_LIBADD) $(LIBS)
 
 cap_chghost.la: $(cap_chghost_la_OBJECTS) $(cap_chghost_la_DEPENDENCIES) $(EXTRA_cap_chghost_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_chghost_la_LINK) -rpath $(modulesdir) $(cap_chghost_la_OBJECTS) $(cap_chghost_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_chghost_la_OBJECTS) $(cap_chghost_la_LIBADD) $(LIBS)
 
 cap_extended_join.la: $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_DEPENDENCIES) $(EXTRA_cap_extended_join_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_extended_join_la_LINK) -rpath $(modulesdir) $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_LIBADD) $(LIBS)
 
 cap_invite_notify.la: $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_DEPENDENCIES) $(EXTRA_cap_invite_notify_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_invite_notify_la_LINK) -rpath $(modulesdir) $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_LIBADD) $(LIBS)
 
 cap_multi_prefix.la: $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_DEPENDENCIES) $(EXTRA_cap_multi_prefix_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_multi_prefix_la_LINK) -rpath $(modulesdir) $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_multi_prefix_la_OBJECTS) $(cap_multi_prefix_la_LIBADD) $(LIBS)
 
 cap_standard_replies.la: $(cap_standard_replies_la_OBJECTS) $(cap_standard_replies_la_DEPENDENCIES) $(EXTRA_cap_standard_replies_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_standard_replies_la_LINK) -rpath $(modulesdir) $(cap_standard_replies_la_OBJECTS) $(cap_standard_replies_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_standard_replies_la_OBJECTS) $(cap_standard_replies_la_LIBADD) $(LIBS)
 
 cap_userhost_in_names.la: $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_DEPENDENCIES) $(EXTRA_cap_userhost_in_names_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(cap_userhost_in_names_la_LINK) -rpath $(modulesdir) $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_LIBADD) $(LIBS)
 
 m_accept.la: $(m_accept_la_OBJECTS) $(m_accept_la_DEPENDENCIES) $(EXTRA_m_accept_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_accept_la_LINK) -rpath $(modulesdir) $(m_accept_la_OBJECTS) $(m_accept_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_accept_la_OBJECTS) $(m_accept_la_LIBADD) $(LIBS)
 
 m_admin.la: $(m_admin_la_OBJECTS) $(m_admin_la_DEPENDENCIES) $(EXTRA_m_admin_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_admin_la_LINK) -rpath $(modulesdir) $(m_admin_la_OBJECTS) $(m_admin_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_admin_la_OBJECTS) $(m_admin_la_LIBADD) $(LIBS)
 
 m_away.la: $(m_away_la_OBJECTS) $(m_away_la_DEPENDENCIES) $(EXTRA_m_away_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_away_la_LINK) -rpath $(modulesdir) $(m_away_la_OBJECTS) $(m_away_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_away_la_OBJECTS) $(m_away_la_LIBADD) $(LIBS)
 
 m_bmask.la: $(m_bmask_la_OBJECTS) $(m_bmask_la_DEPENDENCIES) $(EXTRA_m_bmask_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_bmask_la_LINK) -rpath $(modulesdir) $(m_bmask_la_OBJECTS) $(m_bmask_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_bmask_la_OBJECTS) $(m_bmask_la_LIBADD) $(LIBS)
 
 m_cap.la: $(m_cap_la_OBJECTS) $(m_cap_la_DEPENDENCIES) $(EXTRA_m_cap_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_cap_la_LINK) -rpath $(modulesdir) $(m_cap_la_OBJECTS) $(m_cap_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_cap_la_OBJECTS) $(m_cap_la_LIBADD) $(LIBS)
 
 m_capab.la: $(m_capab_la_OBJECTS) $(m_capab_la_DEPENDENCIES) $(EXTRA_m_capab_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_capab_la_LINK) -rpath $(modulesdir) $(m_capab_la_OBJECTS) $(m_capab_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_capab_la_OBJECTS) $(m_capab_la_LIBADD) $(LIBS)
 
 m_certfp.la: $(m_certfp_la_OBJECTS) $(m_certfp_la_DEPENDENCIES) $(EXTRA_m_certfp_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_certfp_la_LINK) -rpath $(modulesdir) $(m_certfp_la_OBJECTS) $(m_certfp_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_certfp_la_OBJECTS) $(m_certfp_la_LIBADD) $(LIBS)
 
 m_close.la: $(m_close_la_OBJECTS) $(m_close_la_DEPENDENCIES) $(EXTRA_m_close_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_close_la_LINK) -rpath $(modulesdir) $(m_close_la_OBJECTS) $(m_close_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_close_la_OBJECTS) $(m_close_la_LIBADD) $(LIBS)
 
 m_connect.la: $(m_connect_la_OBJECTS) $(m_connect_la_DEPENDENCIES) $(EXTRA_m_connect_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_connect_la_LINK) -rpath $(modulesdir) $(m_connect_la_OBJECTS) $(m_connect_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_connect_la_OBJECTS) $(m_connect_la_LIBADD) $(LIBS)
 
 m_die.la: $(m_die_la_OBJECTS) $(m_die_la_DEPENDENCIES) $(EXTRA_m_die_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_die_la_LINK) -rpath $(modulesdir) $(m_die_la_OBJECTS) $(m_die_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_die_la_OBJECTS) $(m_die_la_LIBADD) $(LIBS)
 
 m_dline.la: $(m_dline_la_OBJECTS) $(m_dline_la_DEPENDENCIES) $(EXTRA_m_dline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_dline_la_LINK) -rpath $(modulesdir) $(m_dline_la_OBJECTS) $(m_dline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_dline_la_OBJECTS) $(m_dline_la_LIBADD) $(LIBS)
 
 m_encap.la: $(m_encap_la_OBJECTS) $(m_encap_la_DEPENDENCIES) $(EXTRA_m_encap_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_encap_la_LINK) -rpath $(modulesdir) $(m_encap_la_OBJECTS) $(m_encap_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_encap_la_OBJECTS) $(m_encap_la_LIBADD) $(LIBS)
 
 m_eob.la: $(m_eob_la_OBJECTS) $(m_eob_la_DEPENDENCIES) $(EXTRA_m_eob_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_eob_la_LINK) -rpath $(modulesdir) $(m_eob_la_OBJECTS) $(m_eob_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_eob_la_OBJECTS) $(m_eob_la_LIBADD) $(LIBS)
 
 m_error.la: $(m_error_la_OBJECTS) $(m_error_la_DEPENDENCIES) $(EXTRA_m_error_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_error_la_LINK) -rpath $(modulesdir) $(m_error_la_OBJECTS) $(m_error_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_error_la_OBJECTS) $(m_error_la_LIBADD) $(LIBS)
 
 m_etrace.la: $(m_etrace_la_OBJECTS) $(m_etrace_la_DEPENDENCIES) $(EXTRA_m_etrace_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_etrace_la_LINK) -rpath $(modulesdir) $(m_etrace_la_OBJECTS) $(m_etrace_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_etrace_la_OBJECTS) $(m_etrace_la_LIBADD) $(LIBS)
 
 m_globops.la: $(m_globops_la_OBJECTS) $(m_globops_la_DEPENDENCIES) $(EXTRA_m_globops_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_globops_la_LINK) -rpath $(modulesdir) $(m_globops_la_OBJECTS) $(m_globops_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_globops_la_OBJECTS) $(m_globops_la_LIBADD) $(LIBS)
 
 m_help.la: $(m_help_la_OBJECTS) $(m_help_la_DEPENDENCIES) $(EXTRA_m_help_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_help_la_LINK) -rpath $(modulesdir) $(m_help_la_OBJECTS) $(m_help_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_help_la_OBJECTS) $(m_help_la_LIBADD) $(LIBS)
 
 m_info.la: $(m_info_la_OBJECTS) $(m_info_la_DEPENDENCIES) $(EXTRA_m_info_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_info_la_LINK) -rpath $(modulesdir) $(m_info_la_OBJECTS) $(m_info_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_info_la_OBJECTS) $(m_info_la_LIBADD) $(LIBS)
 
 m_invite.la: $(m_invite_la_OBJECTS) $(m_invite_la_DEPENDENCIES) $(EXTRA_m_invite_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_invite_la_LINK) -rpath $(modulesdir) $(m_invite_la_OBJECTS) $(m_invite_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_invite_la_OBJECTS) $(m_invite_la_LIBADD) $(LIBS)
 
 m_ison.la: $(m_ison_la_OBJECTS) $(m_ison_la_DEPENDENCIES) $(EXTRA_m_ison_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_ison_la_LINK) -rpath $(modulesdir) $(m_ison_la_OBJECTS) $(m_ison_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_ison_la_OBJECTS) $(m_ison_la_LIBADD) $(LIBS)
 
 m_join.la: $(m_join_la_OBJECTS) $(m_join_la_DEPENDENCIES) $(EXTRA_m_join_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_join_la_LINK) -rpath $(modulesdir) $(m_join_la_OBJECTS) $(m_join_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_join_la_OBJECTS) $(m_join_la_LIBADD) $(LIBS)
 
 m_kick.la: $(m_kick_la_OBJECTS) $(m_kick_la_DEPENDENCIES) $(EXTRA_m_kick_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_kick_la_LINK) -rpath $(modulesdir) $(m_kick_la_OBJECTS) $(m_kick_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_kick_la_OBJECTS) $(m_kick_la_LIBADD) $(LIBS)
 
 m_kill.la: $(m_kill_la_OBJECTS) $(m_kill_la_DEPENDENCIES) $(EXTRA_m_kill_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_kill_la_LINK) -rpath $(modulesdir) $(m_kill_la_OBJECTS) $(m_kill_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_kill_la_OBJECTS) $(m_kill_la_LIBADD) $(LIBS)
 
 m_kline.la: $(m_kline_la_OBJECTS) $(m_kline_la_DEPENDENCIES) $(EXTRA_m_kline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_kline_la_LINK) -rpath $(modulesdir) $(m_kline_la_OBJECTS) $(m_kline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_kline_la_OBJECTS) $(m_kline_la_LIBADD) $(LIBS)
 
 m_knock.la: $(m_knock_la_OBJECTS) $(m_knock_la_DEPENDENCIES) $(EXTRA_m_knock_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_knock_la_LINK) -rpath $(modulesdir) $(m_knock_la_OBJECTS) $(m_knock_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_knock_la_OBJECTS) $(m_knock_la_LIBADD) $(LIBS)
 
 m_links.la: $(m_links_la_OBJECTS) $(m_links_la_DEPENDENCIES) $(EXTRA_m_links_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_links_la_LINK) -rpath $(modulesdir) $(m_links_la_OBJECTS) $(m_links_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_links_la_OBJECTS) $(m_links_la_LIBADD) $(LIBS)
 
 m_list.la: $(m_list_la_OBJECTS) $(m_list_la_DEPENDENCIES) $(EXTRA_m_list_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_list_la_LINK) -rpath $(modulesdir) $(m_list_la_OBJECTS) $(m_list_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_list_la_OBJECTS) $(m_list_la_LIBADD) $(LIBS)
 
 m_locops.la: $(m_locops_la_OBJECTS) $(m_locops_la_DEPENDENCIES) $(EXTRA_m_locops_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_locops_la_LINK) -rpath $(modulesdir) $(m_locops_la_OBJECTS) $(m_locops_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_locops_la_OBJECTS) $(m_locops_la_LIBADD) $(LIBS)
 
 m_lusers.la: $(m_lusers_la_OBJECTS) $(m_lusers_la_DEPENDENCIES) $(EXTRA_m_lusers_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_lusers_la_LINK) -rpath $(modulesdir) $(m_lusers_la_OBJECTS) $(m_lusers_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_lusers_la_OBJECTS) $(m_lusers_la_LIBADD) $(LIBS)
 
 m_map.la: $(m_map_la_OBJECTS) $(m_map_la_DEPENDENCIES) $(EXTRA_m_map_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_map_la_LINK) -rpath $(modulesdir) $(m_map_la_OBJECTS) $(m_map_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_map_la_OBJECTS) $(m_map_la_LIBADD) $(LIBS)
 
 m_message.la: $(m_message_la_OBJECTS) $(m_message_la_DEPENDENCIES) $(EXTRA_m_message_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_message_la_LINK) -rpath $(modulesdir) $(m_message_la_OBJECTS) $(m_message_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_message_la_OBJECTS) $(m_message_la_LIBADD) $(LIBS)
 
 m_metadata.la: $(m_metadata_la_OBJECTS) $(m_metadata_la_DEPENDENCIES) $(EXTRA_m_metadata_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_metadata_la_LINK) -rpath $(modulesdir) $(m_metadata_la_OBJECTS) $(m_metadata_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_metadata_la_OBJECTS) $(m_metadata_la_LIBADD) $(LIBS)
 
 m_mlock.la: $(m_mlock_la_OBJECTS) $(m_mlock_la_DEPENDENCIES) $(EXTRA_m_mlock_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_mlock_la_LINK) -rpath $(modulesdir) $(m_mlock_la_OBJECTS) $(m_mlock_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_mlock_la_OBJECTS) $(m_mlock_la_LIBADD) $(LIBS)
 
 m_mode.la: $(m_mode_la_OBJECTS) $(m_mode_la_DEPENDENCIES) $(EXTRA_m_mode_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_mode_la_LINK) -rpath $(modulesdir) $(m_mode_la_OBJECTS) $(m_mode_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_mode_la_OBJECTS) $(m_mode_la_LIBADD) $(LIBS)
 
 m_module.la: $(m_module_la_OBJECTS) $(m_module_la_DEPENDENCIES) $(EXTRA_m_module_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_module_la_LINK) -rpath $(modulesdir) $(m_module_la_OBJECTS) $(m_module_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_module_la_OBJECTS) $(m_module_la_LIBADD) $(LIBS)
 
 m_monitor.la: $(m_monitor_la_OBJECTS) $(m_monitor_la_DEPENDENCIES) $(EXTRA_m_monitor_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_monitor_la_LINK) -rpath $(modulesdir) $(m_monitor_la_OBJECTS) $(m_monitor_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_monitor_la_OBJECTS) $(m_monitor_la_LIBADD) $(LIBS)
 
 m_motd.la: $(m_motd_la_OBJECTS) $(m_motd_la_DEPENDENCIES) $(EXTRA_m_motd_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_motd_la_LINK) -rpath $(modulesdir) $(m_motd_la_OBJECTS) $(m_motd_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_motd_la_OBJECTS) $(m_motd_la_LIBADD) $(LIBS)
 
 m_names.la: $(m_names_la_OBJECTS) $(m_names_la_DEPENDENCIES) $(EXTRA_m_names_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_names_la_LINK) -rpath $(modulesdir) $(m_names_la_OBJECTS) $(m_names_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_names_la_OBJECTS) $(m_names_la_LIBADD) $(LIBS)
 
 m_nick.la: $(m_nick_la_OBJECTS) $(m_nick_la_DEPENDENCIES) $(EXTRA_m_nick_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_nick_la_LINK) -rpath $(modulesdir) $(m_nick_la_OBJECTS) $(m_nick_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_nick_la_OBJECTS) $(m_nick_la_LIBADD) $(LIBS)
 
 m_oper.la: $(m_oper_la_OBJECTS) $(m_oper_la_DEPENDENCIES) $(EXTRA_m_oper_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_oper_la_LINK) -rpath $(modulesdir) $(m_oper_la_OBJECTS) $(m_oper_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_oper_la_OBJECTS) $(m_oper_la_LIBADD) $(LIBS)
 
 m_opme.la: $(m_opme_la_OBJECTS) $(m_opme_la_DEPENDENCIES) $(EXTRA_m_opme_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_opme_la_LINK) -rpath $(modulesdir) $(m_opme_la_OBJECTS) $(m_opme_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_opme_la_OBJECTS) $(m_opme_la_LIBADD) $(LIBS)
 
 m_part.la: $(m_part_la_OBJECTS) $(m_part_la_DEPENDENCIES) $(EXTRA_m_part_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_part_la_LINK) -rpath $(modulesdir) $(m_part_la_OBJECTS) $(m_part_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_part_la_OBJECTS) $(m_part_la_LIBADD) $(LIBS)
 
 m_pass.la: $(m_pass_la_OBJECTS) $(m_pass_la_DEPENDENCIES) $(EXTRA_m_pass_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_pass_la_LINK) -rpath $(modulesdir) $(m_pass_la_OBJECTS) $(m_pass_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_pass_la_OBJECTS) $(m_pass_la_LIBADD) $(LIBS)
 
 m_ping.la: $(m_ping_la_OBJECTS) $(m_ping_la_DEPENDENCIES) $(EXTRA_m_ping_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_ping_la_LINK) -rpath $(modulesdir) $(m_ping_la_OBJECTS) $(m_ping_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_ping_la_OBJECTS) $(m_ping_la_LIBADD) $(LIBS)
 
 m_pong.la: $(m_pong_la_OBJECTS) $(m_pong_la_DEPENDENCIES) $(EXTRA_m_pong_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_pong_la_LINK) -rpath $(modulesdir) $(m_pong_la_OBJECTS) $(m_pong_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_pong_la_OBJECTS) $(m_pong_la_LIBADD) $(LIBS)
 
 m_post.la: $(m_post_la_OBJECTS) $(m_post_la_DEPENDENCIES) $(EXTRA_m_post_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_post_la_LINK) -rpath $(modulesdir) $(m_post_la_OBJECTS) $(m_post_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_post_la_OBJECTS) $(m_post_la_LIBADD) $(LIBS)
 
 m_quit.la: $(m_quit_la_OBJECTS) $(m_quit_la_DEPENDENCIES) $(EXTRA_m_quit_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_quit_la_LINK) -rpath $(modulesdir) $(m_quit_la_OBJECTS) $(m_quit_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_quit_la_OBJECTS) $(m_quit_la_LIBADD) $(LIBS)
 
 m_rehash.la: $(m_rehash_la_OBJECTS) $(m_rehash_la_DEPENDENCIES) $(EXTRA_m_rehash_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_rehash_la_LINK) -rpath $(modulesdir) $(m_rehash_la_OBJECTS) $(m_rehash_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_rehash_la_OBJECTS) $(m_rehash_la_LIBADD) $(LIBS)
 
 m_restart.la: $(m_restart_la_OBJECTS) $(m_restart_la_DEPENDENCIES) $(EXTRA_m_restart_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_restart_la_LINK) -rpath $(modulesdir) $(m_restart_la_OBJECTS) $(m_restart_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_restart_la_OBJECTS) $(m_restart_la_LIBADD) $(LIBS)
 
 m_resv.la: $(m_resv_la_OBJECTS) $(m_resv_la_DEPENDENCIES) $(EXTRA_m_resv_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_resv_la_LINK) -rpath $(modulesdir) $(m_resv_la_OBJECTS) $(m_resv_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_resv_la_OBJECTS) $(m_resv_la_LIBADD) $(LIBS)
 
 m_resync.la: $(m_resync_la_OBJECTS) $(m_resync_la_DEPENDENCIES) $(EXTRA_m_resync_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_resync_la_LINK) -rpath $(modulesdir) $(m_resync_la_OBJECTS) $(m_resync_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_resync_la_OBJECTS) $(m_resync_la_LIBADD) $(LIBS)
 
 m_server.la: $(m_server_la_OBJECTS) $(m_server_la_DEPENDENCIES) $(EXTRA_m_server_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_server_la_LINK) -rpath $(modulesdir) $(m_server_la_OBJECTS) $(m_server_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_server_la_OBJECTS) $(m_server_la_LIBADD) $(LIBS)
 
 m_set.la: $(m_set_la_OBJECTS) $(m_set_la_DEPENDENCIES) $(EXTRA_m_set_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_set_la_LINK) -rpath $(modulesdir) $(m_set_la_OBJECTS) $(m_set_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_set_la_OBJECTS) $(m_set_la_LIBADD) $(LIBS)
 
 m_sjoin.la: $(m_sjoin_la_OBJECTS) $(m_sjoin_la_DEPENDENCIES) $(EXTRA_m_sjoin_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_sjoin_la_LINK) -rpath $(modulesdir) $(m_sjoin_la_OBJECTS) $(m_sjoin_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_sjoin_la_OBJECTS) $(m_sjoin_la_LIBADD) $(LIBS)
 
 m_squit.la: $(m_squit_la_OBJECTS) $(m_squit_la_DEPENDENCIES) $(EXTRA_m_squit_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_squit_la_LINK) -rpath $(modulesdir) $(m_squit_la_OBJECTS) $(m_squit_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_squit_la_OBJECTS) $(m_squit_la_LIBADD) $(LIBS)
 
 m_stats.la: $(m_stats_la_OBJECTS) $(m_stats_la_DEPENDENCIES) $(EXTRA_m_stats_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_stats_la_LINK) -rpath $(modulesdir) $(m_stats_la_OBJECTS) $(m_stats_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_stats_la_OBJECTS) $(m_stats_la_LIBADD) $(LIBS)
 
 m_svinfo.la: $(m_svinfo_la_OBJECTS) $(m_svinfo_la_DEPENDENCIES) $(EXTRA_m_svinfo_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svinfo_la_LINK) -rpath $(modulesdir) $(m_svinfo_la_OBJECTS) $(m_svinfo_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svinfo_la_OBJECTS) $(m_svinfo_la_LIBADD) $(LIBS)
 
 m_svsaccount.la: $(m_svsaccount_la_OBJECTS) $(m_svsaccount_la_DEPENDENCIES) $(EXTRA_m_svsaccount_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svsaccount_la_LINK) -rpath $(modulesdir) $(m_svsaccount_la_OBJECTS) $(m_svsaccount_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svsaccount_la_OBJECTS) $(m_svsaccount_la_LIBADD) $(LIBS)
 
 m_svshost.la: $(m_svshost_la_OBJECTS) $(m_svshost_la_DEPENDENCIES) $(EXTRA_m_svshost_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svshost_la_LINK) -rpath $(modulesdir) $(m_svshost_la_OBJECTS) $(m_svshost_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svshost_la_OBJECTS) $(m_svshost_la_LIBADD) $(LIBS)
 
 m_svsjoin.la: $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_DEPENDENCIES) $(EXTRA_m_svsjoin_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svsjoin_la_LINK) -rpath $(modulesdir) $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svsjoin_la_OBJECTS) $(m_svsjoin_la_LIBADD) $(LIBS)
 
 m_svskill.la: $(m_svskill_la_OBJECTS) $(m_svskill_la_DEPENDENCIES) $(EXTRA_m_svskill_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svskill_la_LINK) -rpath $(modulesdir) $(m_svskill_la_OBJECTS) $(m_svskill_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svskill_la_OBJECTS) $(m_svskill_la_LIBADD) $(LIBS)
 
 m_svsmode.la: $(m_svsmode_la_OBJECTS) $(m_svsmode_la_DEPENDENCIES) $(EXTRA_m_svsmode_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svsmode_la_LINK) -rpath $(modulesdir) $(m_svsmode_la_OBJECTS) $(m_svsmode_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svsmode_la_OBJECTS) $(m_svsmode_la_LIBADD) $(LIBS)
 
 m_svsnick.la: $(m_svsnick_la_OBJECTS) $(m_svsnick_la_DEPENDENCIES) $(EXTRA_m_svsnick_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svsnick_la_LINK) -rpath $(modulesdir) $(m_svsnick_la_OBJECTS) $(m_svsnick_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svsnick_la_OBJECTS) $(m_svsnick_la_LIBADD) $(LIBS)
 
 m_svspart.la: $(m_svspart_la_OBJECTS) $(m_svspart_la_DEPENDENCIES) $(EXTRA_m_svspart_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svspart_la_LINK) -rpath $(modulesdir) $(m_svspart_la_OBJECTS) $(m_svspart_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svspart_la_OBJECTS) $(m_svspart_la_LIBADD) $(LIBS)
 
 m_svstag.la: $(m_svstag_la_OBJECTS) $(m_svstag_la_DEPENDENCIES) $(EXTRA_m_svstag_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_svstag_la_LINK) -rpath $(modulesdir) $(m_svstag_la_OBJECTS) $(m_svstag_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_svstag_la_OBJECTS) $(m_svstag_la_LIBADD) $(LIBS)
 
 m_tburst.la: $(m_tburst_la_OBJECTS) $(m_tburst_la_DEPENDENCIES) $(EXTRA_m_tburst_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_tburst_la_LINK) -rpath $(modulesdir) $(m_tburst_la_OBJECTS) $(m_tburst_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_tburst_la_OBJECTS) $(m_tburst_la_LIBADD) $(LIBS)
 
 m_time.la: $(m_time_la_OBJECTS) $(m_time_la_DEPENDENCIES) $(EXTRA_m_time_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_time_la_LINK) -rpath $(modulesdir) $(m_time_la_OBJECTS) $(m_time_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_time_la_OBJECTS) $(m_time_la_LIBADD) $(LIBS)
 
 m_tmode.la: $(m_tmode_la_OBJECTS) $(m_tmode_la_DEPENDENCIES) $(EXTRA_m_tmode_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_tmode_la_LINK) -rpath $(modulesdir) $(m_tmode_la_OBJECTS) $(m_tmode_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_tmode_la_OBJECTS) $(m_tmode_la_LIBADD) $(LIBS)
 
 m_topic.la: $(m_topic_la_OBJECTS) $(m_topic_la_DEPENDENCIES) $(EXTRA_m_topic_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_topic_la_LINK) -rpath $(modulesdir) $(m_topic_la_OBJECTS) $(m_topic_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_topic_la_OBJECTS) $(m_topic_la_LIBADD) $(LIBS)
 
 m_trace.la: $(m_trace_la_OBJECTS) $(m_trace_la_DEPENDENCIES) $(EXTRA_m_trace_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_trace_la_LINK) -rpath $(modulesdir) $(m_trace_la_OBJECTS) $(m_trace_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_trace_la_OBJECTS) $(m_trace_la_LIBADD) $(LIBS)
 
 m_undline.la: $(m_undline_la_OBJECTS) $(m_undline_la_DEPENDENCIES) $(EXTRA_m_undline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_undline_la_LINK) -rpath $(modulesdir) $(m_undline_la_OBJECTS) $(m_undline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_undline_la_OBJECTS) $(m_undline_la_LIBADD) $(LIBS)
 
 m_unkline.la: $(m_unkline_la_OBJECTS) $(m_unkline_la_DEPENDENCIES) $(EXTRA_m_unkline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_unkline_la_LINK) -rpath $(modulesdir) $(m_unkline_la_OBJECTS) $(m_unkline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_unkline_la_OBJECTS) $(m_unkline_la_LIBADD) $(LIBS)
 
 m_unresv.la: $(m_unresv_la_OBJECTS) $(m_unresv_la_DEPENDENCIES) $(EXTRA_m_unresv_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_unresv_la_LINK) -rpath $(modulesdir) $(m_unresv_la_OBJECTS) $(m_unresv_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_unresv_la_OBJECTS) $(m_unresv_la_LIBADD) $(LIBS)
 
 m_unxline.la: $(m_unxline_la_OBJECTS) $(m_unxline_la_DEPENDENCIES) $(EXTRA_m_unxline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_unxline_la_LINK) -rpath $(modulesdir) $(m_unxline_la_OBJECTS) $(m_unxline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_unxline_la_OBJECTS) $(m_unxline_la_LIBADD) $(LIBS)
 
 m_user.la: $(m_user_la_OBJECTS) $(m_user_la_DEPENDENCIES) $(EXTRA_m_user_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_user_la_LINK) -rpath $(modulesdir) $(m_user_la_OBJECTS) $(m_user_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_user_la_OBJECTS) $(m_user_la_LIBADD) $(LIBS)
 
 m_userhost.la: $(m_userhost_la_OBJECTS) $(m_userhost_la_DEPENDENCIES) $(EXTRA_m_userhost_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_userhost_la_LINK) -rpath $(modulesdir) $(m_userhost_la_OBJECTS) $(m_userhost_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_userhost_la_OBJECTS) $(m_userhost_la_LIBADD) $(LIBS)
 
 m_version.la: $(m_version_la_OBJECTS) $(m_version_la_DEPENDENCIES) $(EXTRA_m_version_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_version_la_LINK) -rpath $(modulesdir) $(m_version_la_OBJECTS) $(m_version_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_version_la_OBJECTS) $(m_version_la_LIBADD) $(LIBS)
 
 m_webirc.la: $(m_webirc_la_OBJECTS) $(m_webirc_la_DEPENDENCIES) $(EXTRA_m_webirc_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_webirc_la_LINK) -rpath $(modulesdir) $(m_webirc_la_OBJECTS) $(m_webirc_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_webirc_la_OBJECTS) $(m_webirc_la_LIBADD) $(LIBS)
 
 m_who.la: $(m_who_la_OBJECTS) $(m_who_la_DEPENDENCIES) $(EXTRA_m_who_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_who_la_LINK) -rpath $(modulesdir) $(m_who_la_OBJECTS) $(m_who_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_who_la_OBJECTS) $(m_who_la_LIBADD) $(LIBS)
 
 m_whois.la: $(m_whois_la_OBJECTS) $(m_whois_la_DEPENDENCIES) $(EXTRA_m_whois_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_whois_la_LINK) -rpath $(modulesdir) $(m_whois_la_OBJECTS) $(m_whois_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_whois_la_OBJECTS) $(m_whois_la_LIBADD) $(LIBS)
 
 m_whowas.la: $(m_whowas_la_OBJECTS) $(m_whowas_la_DEPENDENCIES) $(EXTRA_m_whowas_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_whowas_la_LINK) -rpath $(modulesdir) $(m_whowas_la_OBJECTS) $(m_whowas_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_whowas_la_OBJECTS) $(m_whowas_la_LIBADD) $(LIBS)
 
 m_xline.la: $(m_xline_la_OBJECTS) $(m_xline_la_DEPENDENCIES) $(EXTRA_m_xline_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(m_xline_la_LINK) -rpath $(modulesdir) $(m_xline_la_OBJECTS) $(m_xline_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_xline_la_OBJECTS) $(m_xline_la_LIBADD) $(LIBS)
 
 umode_admin.la: $(umode_admin_la_OBJECTS) $(umode_admin_la_DEPENDENCIES) $(EXTRA_umode_admin_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_admin_la_LINK) -rpath $(modulesdir) $(umode_admin_la_OBJECTS) $(umode_admin_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_admin_la_OBJECTS) $(umode_admin_la_LIBADD) $(LIBS)
 
 umode_bot.la: $(umode_bot_la_OBJECTS) $(umode_bot_la_DEPENDENCIES) $(EXTRA_umode_bot_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_bot_la_LINK) -rpath $(modulesdir) $(umode_bot_la_OBJECTS) $(umode_bot_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_bot_la_OBJECTS) $(umode_bot_la_LIBADD) $(LIBS)
 
 umode_callerid.la: $(umode_callerid_la_OBJECTS) $(umode_callerid_la_DEPENDENCIES) $(EXTRA_umode_callerid_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_callerid_la_LINK) -rpath $(modulesdir) $(umode_callerid_la_OBJECTS) $(umode_callerid_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_callerid_la_OBJECTS) $(umode_callerid_la_LIBADD) $(LIBS)
 
 umode_cloak.la: $(umode_cloak_la_OBJECTS) $(umode_cloak_la_DEPENDENCIES) $(EXTRA_umode_cloak_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_cloak_la_LINK) -rpath $(modulesdir) $(umode_cloak_la_OBJECTS) $(umode_cloak_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_cloak_la_OBJECTS) $(umode_cloak_la_LIBADD) $(LIBS)
 
 umode_connect.la: $(umode_connect_la_OBJECTS) $(umode_connect_la_DEPENDENCIES) $(EXTRA_umode_connect_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_connect_la_LINK) -rpath $(modulesdir) $(umode_connect_la_OBJECTS) $(umode_connect_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_connect_la_OBJECTS) $(umode_connect_la_LIBADD) $(LIBS)
 
 umode_deaf.la: $(umode_deaf_la_OBJECTS) $(umode_deaf_la_DEPENDENCIES) $(EXTRA_umode_deaf_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_deaf_la_LINK) -rpath $(modulesdir) $(umode_deaf_la_OBJECTS) $(umode_deaf_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_deaf_la_OBJECTS) $(umode_deaf_la_LIBADD) $(LIBS)
 
 umode_expiration.la: $(umode_expiration_la_OBJECTS) $(umode_expiration_la_DEPENDENCIES) $(EXTRA_umode_expiration_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_expiration_la_LINK) -rpath $(modulesdir) $(umode_expiration_la_OBJECTS) $(umode_expiration_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_expiration_la_OBJECTS) $(umode_expiration_la_LIBADD) $(LIBS)
 
 umode_external.la: $(umode_external_la_OBJECTS) $(umode_external_la_DEPENDENCIES) $(EXTRA_umode_external_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_external_la_LINK) -rpath $(modulesdir) $(umode_external_la_OBJECTS) $(umode_external_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_external_la_OBJECTS) $(umode_external_la_LIBADD) $(LIBS)
 
 umode_farconnect.la: $(umode_farconnect_la_OBJECTS) $(umode_farconnect_la_DEPENDENCIES) $(EXTRA_umode_farconnect_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_farconnect_la_LINK) -rpath $(modulesdir) $(umode_farconnect_la_OBJECTS) $(umode_farconnect_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_farconnect_la_OBJECTS) $(umode_farconnect_la_LIBADD) $(LIBS)
 
 umode_flood.la: $(umode_flood_la_OBJECTS) $(umode_flood_la_DEPENDENCIES) $(EXTRA_umode_flood_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_flood_la_LINK) -rpath $(modulesdir) $(umode_flood_la_OBJECTS) $(umode_flood_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_flood_la_OBJECTS) $(umode_flood_la_LIBADD) $(LIBS)
 
 umode_hidden.la: $(umode_hidden_la_OBJECTS) $(umode_hidden_la_DEPENDENCIES) $(EXTRA_umode_hidden_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_hidden_la_LINK) -rpath $(modulesdir) $(umode_hidden_la_OBJECTS) $(umode_hidden_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_hidden_la_OBJECTS) $(umode_hidden_la_LIBADD) $(LIBS)
 
 umode_hidechans.la: $(umode_hidechans_la_OBJECTS) $(umode_hidechans_la_DEPENDENCIES) $(EXTRA_umode_hidechans_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_hidechans_la_LINK) -rpath $(modulesdir) $(umode_hidechans_la_OBJECTS) $(umode_hidechans_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_hidechans_la_OBJECTS) $(umode_hidechans_la_LIBADD) $(LIBS)
 
 umode_hideidle.la: $(umode_hideidle_la_OBJECTS) $(umode_hideidle_la_DEPENDENCIES) $(EXTRA_umode_hideidle_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_hideidle_la_LINK) -rpath $(modulesdir) $(umode_hideidle_la_OBJECTS) $(umode_hideidle_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_hideidle_la_OBJECTS) $(umode_hideidle_la_LIBADD) $(LIBS)
 
 umode_invisible.la: $(umode_invisible_la_OBJECTS) $(umode_invisible_la_DEPENDENCIES) $(EXTRA_umode_invisible_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_invisible_la_LINK) -rpath $(modulesdir) $(umode_invisible_la_OBJECTS) $(umode_invisible_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_invisible_la_OBJECTS) $(umode_invisible_la_LIBADD) $(LIBS)
 
 umode_locops.la: $(umode_locops_la_OBJECTS) $(umode_locops_la_DEPENDENCIES) $(EXTRA_umode_locops_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_locops_la_LINK) -rpath $(modulesdir) $(umode_locops_la_OBJECTS) $(umode_locops_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_locops_la_OBJECTS) $(umode_locops_la_LIBADD) $(LIBS)
 
 umode_nickchange.la: $(umode_nickchange_la_OBJECTS) $(umode_nickchange_la_DEPENDENCIES) $(EXTRA_umode_nickchange_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_nickchange_la_LINK) -rpath $(modulesdir) $(umode_nickchange_la_OBJECTS) $(umode_nickchange_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_nickchange_la_OBJECTS) $(umode_nickchange_la_LIBADD) $(LIBS)
 
 umode_oper.la: $(umode_oper_la_OBJECTS) $(umode_oper_la_DEPENDENCIES) $(EXTRA_umode_oper_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_oper_la_LINK) -rpath $(modulesdir) $(umode_oper_la_OBJECTS) $(umode_oper_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_oper_la_OBJECTS) $(umode_oper_la_LIBADD) $(LIBS)
 
 umode_registered.la: $(umode_registered_la_OBJECTS) $(umode_registered_la_DEPENDENCIES) $(EXTRA_umode_registered_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_registered_la_LINK) -rpath $(modulesdir) $(umode_registered_la_OBJECTS) $(umode_registered_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_registered_la_OBJECTS) $(umode_registered_la_LIBADD) $(LIBS)
 
 umode_regonly.la: $(umode_regonly_la_OBJECTS) $(umode_regonly_la_DEPENDENCIES) $(EXTRA_umode_regonly_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_regonly_la_LINK) -rpath $(modulesdir) $(umode_regonly_la_OBJECTS) $(umode_regonly_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_regonly_la_OBJECTS) $(umode_regonly_la_LIBADD) $(LIBS)
 
 umode_reject.la: $(umode_reject_la_OBJECTS) $(umode_reject_la_DEPENDENCIES) $(EXTRA_umode_reject_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_reject_la_LINK) -rpath $(modulesdir) $(umode_reject_la_OBJECTS) $(umode_reject_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_reject_la_OBJECTS) $(umode_reject_la_LIBADD) $(LIBS)
 
 umode_secure.la: $(umode_secure_la_OBJECTS) $(umode_secure_la_DEPENDENCIES) $(EXTRA_umode_secure_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_secure_la_LINK) -rpath $(modulesdir) $(umode_secure_la_OBJECTS) $(umode_secure_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_secure_la_OBJECTS) $(umode_secure_la_LIBADD) $(LIBS)
 
 umode_secureonly.la: $(umode_secureonly_la_OBJECTS) $(umode_secureonly_la_DEPENDENCIES) $(EXTRA_umode_secureonly_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_secureonly_la_LINK) -rpath $(modulesdir) $(umode_secureonly_la_OBJECTS) $(umode_secureonly_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_secureonly_la_OBJECTS) $(umode_secureonly_la_LIBADD) $(LIBS)
 
 umode_servnotice.la: $(umode_servnotice_la_OBJECTS) $(umode_servnotice_la_DEPENDENCIES) $(EXTRA_umode_servnotice_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_servnotice_la_LINK) -rpath $(modulesdir) $(umode_servnotice_la_OBJECTS) $(umode_servnotice_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_servnotice_la_OBJECTS) $(umode_servnotice_la_LIBADD) $(LIBS)
 
 umode_skill.la: $(umode_skill_la_OBJECTS) $(umode_skill_la_DEPENDENCIES) $(EXTRA_umode_skill_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_skill_la_LINK) -rpath $(modulesdir) $(umode_skill_la_OBJECTS) $(umode_skill_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_skill_la_OBJECTS) $(umode_skill_la_LIBADD) $(LIBS)
 
 umode_softcallerid.la: $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_DEPENDENCIES) $(EXTRA_umode_softcallerid_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_softcallerid_la_LINK) -rpath $(modulesdir) $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_softcallerid_la_OBJECTS) $(umode_softcallerid_la_LIBADD) $(LIBS)
 
 umode_spy.la: $(umode_spy_la_OBJECTS) $(umode_spy_la_DEPENDENCIES) $(EXTRA_umode_spy_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_spy_la_LINK) -rpath $(modulesdir) $(umode_spy_la_OBJECTS) $(umode_spy_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_spy_la_OBJECTS) $(umode_spy_la_LIBADD) $(LIBS)
 
 umode_webirc.la: $(umode_webirc_la_OBJECTS) $(umode_webirc_la_DEPENDENCIES) $(EXTRA_umode_webirc_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(umode_webirc_la_LINK) -rpath $(modulesdir) $(umode_webirc_la_OBJECTS) $(umode_webirc_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(umode_webirc_la_OBJECTS) $(umode_webirc_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -2173,25 +1482,22 @@ $(am__depfiles_remade):
 am--depfiles: $(am__depfiles_remade)
 
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
-@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
@@ -2650,6 +1956,7 @@ uninstall-am: uninstall-modulesLTLIBRARIES
 .PRECIOUS: Makefile
 
 
+.PHONY: modules
 modules: $(modules_LTLIBRARIES)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

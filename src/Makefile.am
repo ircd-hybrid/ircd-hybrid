@@ -1,12 +1,9 @@
-AUTOMAKE_OPTIONS = foreign
-
 bin_PROGRAMS = ircd
 
 AM_YFLAGS = -d
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 ircd_LDFLAGS = -export-dynamic
-ircd_LDADD = ../libio/src/.libs/libio.la
-ircd_DEPENDENCIES = ../libio/src/.libs/libio.la
+ircd_LDADD = $(top_builddir)/libio/src/libio.la
 
 ircd_SOURCES = accept.c          \
                accept.h          \

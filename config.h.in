@@ -48,9 +48,6 @@
 /* Define to 1 if wolfSSL is available. */
 #undef HAVE_LIBWOLFSSL
 
-/* Define to 1 if you have the <socket.h> header file. */
-#undef HAVE_SOCKET_H
-
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -80,12 +77,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the <sys/wait.h> header file. */
-#undef HAVE_SYS_WAIT_H
-
-/* Define to 1 if you have the <types.h> header file. */
-#undef HAVE_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

@@ -539,7 +539,7 @@ sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
     if (exclude_client && (client == exclude_client->nexthop))
       continue;
 
-    if (capab_has_flag(client, required_capab) != required_capab)
+    if ((client->connection->capab_flags & required_capab) != required_capab)
       continue;
 
     if (capab_has_flag(client, excluded_capab))
@@ -581,7 +581,7 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
     if (target->nexthop->connection->last_broadcast_id == broadcast_id)
       continue;
 
-    if (capab_has_flag(target->nexthop, required_capab) != required_capab)
+    if ((target->nexthop->connection->capab_flags & required_capab) != required_capab)
       continue;
 
     if (match(mask, target->name))

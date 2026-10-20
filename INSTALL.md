@@ -100,14 +100,6 @@ The `configure` script accepts several optional parameters for further customiza
   - Adds `-g3` to include standard debugging information.
   - Adds `-O0` to disable all optimizations, ensuring the generated code closely matches the source code for easier debugging.
 
-- `--enable-efence` - Enable linking with the Electric Fence (`efence`) memory debugger library. By default, this is disabled. To enable it:
-
-  ```sh
-  ./configure --enable-efence
-  ```
-
-  This links the application with the Electric Fence memory debugger library. If the library is not found, the configuration process will terminate with an error.
-
 - `--enable-warnings` - Enable comprehensive compiler warnings. By default, these are disabled. To enable them:
 
   ```sh

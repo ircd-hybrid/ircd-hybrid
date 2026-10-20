@@ -198,7 +198,14 @@ conf_validate(void)
     ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
-static int
+enum conf_parse_result
+{
+  CONF_PARSE_ACCEPTED,
+  CONF_PARSE_ABORTED,
+  CONF_PARSE_EXHAUSTED
+};
+
+static enum conf_parse_result
 _conf_parse(FILE *file, unsigned int pass)
 {
   conf_parser_ctx.pass = pass;
@@ -207,7 +214,24 @@ _conf_parse(FILE *file, unsigned int pass)
   const int result = yyparse();
 
   conf_lexer_destroy();
-  return result;
+
+  if (result != 0)
+    conf_parser_ctx.parse_valid = false;
+
+  switch (result)
+  {
+    case 0:
+      return CONF_PARSE_ACCEPTED;
+    case 1:
+      log_write(LOG_TYPE_IRCD, "Configuration parser aborted in pass %u", pass);
+      return CONF_PARSE_ABORTED;
+    case 2:
+      log_write(LOG_TYPE_IRCD, "Configuration parser exhausted its memory or stack in pass %u", pass);
+      return CONF_PARSE_EXHAUSTED;
+    default:
+      log_write(LOG_TYPE_IRCD, "Configuration parser returned unexpected status %d in pass %u", result, pass);
+      return CONF_PARSE_ABORTED;
+  }
 }
 
 static bool
@@ -218,16 +242,17 @@ conf_read(FILE *file)
   conf_parser_ctx.parse_valid = true;
   conf_parser_ctx.module_config_valid = true;
 
-  if (_conf_parse(file, 1))
-    conf_parser_ctx.parse_valid = false;
-
-  if (fseek(file, 0, SEEK_SET))
+  /* Acceptance permits pass 2 even if recovered errors invalidated the configuration. */
+  if (_conf_parse(file, 1) == CONF_PARSE_ACCEPTED)
   {
-    conf_parser_ctx.parse_valid = false;
-    conf_error_report("Unable to rewind configuration file");
+    if (fseek(file, 0, SEEK_SET))
+    {
+      conf_parser_ctx.parse_valid = false;
+      conf_error_report("Unable to rewind configuration file");
+    }
+    else
+      _conf_parse(file, 2);
   }
-  else if (_conf_parse(file, 2))
-    conf_parser_ctx.parse_valid = false;
 
   bool success = conf_parser_ctx.parse_valid && conf_parser_ctx.module_config_valid;
   if (success)

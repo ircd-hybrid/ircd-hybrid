@@ -39,6 +39,7 @@
 #include "conf_deny.h"
 #include "conf_kill.h"
 #include "conf_oper.h"
+#include "conf_parser.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
@@ -55,9 +56,6 @@
 #include "numeric.h"
 #include "send.h"
 #include "whowas.h"
-
-extern void yyrestart(FILE *);
-extern int yyparse();  /* Defined in conf_parser.c */
 
 struct config_channel_entry ConfigChannel;
 struct config_serverhide_entry ConfigServerHide;
@@ -200,19 +198,26 @@ conf_validate(void)
     ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
 }
 
+static int
+_conf_parse(FILE *file, unsigned int pass)
+{
+  conf_parser_ctx.pass = pass;
+  conf_lexer_init(file, ConfigGeneral.configfile);
+
+  const int result = yyparse();
+
+  conf_lexer_destroy();
+  return result;
+}
+
 static void
 conf_read(FILE *file)
 {
-  conf_line_number = 1;
-
   conf_set_defaults();  /* Set default values prior to conf parsing */
   conf_parser_ctx.module_config = module_config_create();
   conf_parser_ctx.module_config_valid = true;
 
-  conf_parser_ctx.pass = 1;
-  yyrestart(file);
-
-  if (yyparse())
+  if (_conf_parse(file, 1))
     conf_parser_ctx.module_config_valid = false;
 
   if (fseek(file, 0, SEEK_SET))
@@ -220,16 +225,8 @@ conf_read(FILE *file)
     conf_parser_ctx.module_config_valid = false;
     conf_error_report("Unable to rewind configuration file");
   }
-  else
-  {
-    conf_line_number = 1;
-    conf_parser_ctx.pass = 2;
-
-    yyrestart(file);
-
-    if (yyparse())
-      conf_parser_ctx.module_config_valid = false;
-  }
+  else if (_conf_parse(file, 2))
+    conf_parser_ctx.module_config_valid = false;
 
   if (conf_parser_ctx.module_config_valid)
   {
@@ -448,9 +445,9 @@ bool
 conf_read_files(bool cold)
 {
   conf_parser_ctx.boot = cold;
-  conf_parser_ctx.conf_file = fopen(ConfigGeneral.configfile, "r");
+  FILE *const file = fopen(ConfigGeneral.configfile, "r");
 
-  if (conf_parser_ctx.conf_file == NULL)
+  if (file == NULL)
   {
     if (cold)
     {
@@ -467,22 +464,11 @@ conf_read_files(bool cold)
     }
   }
 
-  /*
-   * We need to know the initial filename for the yyerror() to report
-   *
-   *  FIXME: The full path is in conffilenamebuf first time since we
-   *          don't know anything else
-   *
-   *  - Gozem 2002-07-21
-   */
-  strlcpy(conf_file_name, ConfigGeneral.configfile, sizeof(conf_file_name));
-
   if (cold == false)
     conf_clear();
 
-  conf_read(conf_parser_ctx.conf_file);
-  fclose(conf_parser_ctx.conf_file);
-  conf_parser_ctx.conf_file = NULL;
+  conf_read(file);
+  fclose(file);
 
   conf_handle_tls(cold);
 

@@ -16,6 +16,7 @@
 %x IN_COMMENT
 
 %{
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -50,6 +51,7 @@ static struct included_file
   unsigned int conf_line_number;
   FILE *file;
   char conf_file_name[IRCD_BUFSIZE];
+  char conf_line_text[IRCD_BUFSIZE];
 } include_stack[MAX_INCLUDE_DEPTH];
 
 
@@ -366,6 +368,33 @@ mb                          { return MBYTES; }
 
 %%
 
+void
+conf_lexer_init(FILE *file, const char *name)
+{
+  assert(file);
+  assert(name);
+  assert(conf_parser_ctx.conf_file == NULL);
+  assert(include_stack_ptr == 0);
+
+  conf_parser_ctx.conf_file = file;
+  conf_line_number = 1;
+  conf_line_text[0] = '\0';
+  strlcpy(conf_file_name, name, sizeof(conf_file_name));
+
+  BEGIN INITIAL;
+  yyrestart(file);
+}
+
+void
+conf_lexer_destroy(void)
+{
+  while (include_stack_ptr)
+    conf_eof();
+
+  yylex_destroy();
+  conf_parser_ctx.conf_file = NULL;
+}
+
 /* C-style .includes. This function will properly swap input conf buffers,
  * and lineno -kre */
 static void
@@ -404,8 +433,10 @@ conf_include(void)
   file->file = conf_parser_ctx.conf_file;
   file->state = YY_CURRENT_BUFFER;
   strlcpy(file->conf_file_name, conf_file_name, sizeof(file->conf_file_name));
+  strlcpy(file->conf_line_text, conf_line_text, sizeof(file->conf_line_text));
 
   conf_line_number = 1;
+  conf_line_text[0] = '\0';
   conf_parser_ctx.conf_file = include_file;
   strlcpy(conf_file_name, include_path, sizeof(conf_file_name));
 
@@ -419,10 +450,7 @@ static bool
 conf_eof(void)
 {
   if (include_stack_ptr == 0)
-  {
-    conf_line_number = 1;
     return true;
-  }
 
   /* switch buffer */
   struct included_file *file = &include_stack[--include_stack_ptr];
@@ -441,6 +469,8 @@ conf_eof(void)
   conf_parser_ctx.conf_file = file->file;
 
   strlcpy(conf_file_name, file->conf_file_name, sizeof(conf_file_name));
+  strlcpy(conf_line_text, file->conf_line_text, sizeof(conf_line_text));
+  memset(file, 0, sizeof(*file));
   return false;
 
   /*

@@ -172,6 +172,8 @@ extern void cleanup_tklines(void *);
 extern void conf_ban_apply(struct Client *, enum conf_ban_type, const char *);
 extern void conf_ban_check_clients(void);
 extern void conf_error_report(const char *);
+extern void conf_lexer_init(FILE *, const char *);
+extern void conf_lexer_destroy(void);
 extern bool conf_read_files(bool);
 extern void conf_rehash(bool);
 extern void yyerror(const char *);

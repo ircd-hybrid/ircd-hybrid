@@ -38,7 +38,8 @@ struct conf_parser_context
   unsigned int pass;
   FILE *conf_file;
   module_config_t *module_config;
-  bool module_config_valid;
+  bool parse_valid;          /**< No parser or input errors detected during this read. */
+  bool module_config_valid;  /**< No errors detected while building the module configuration. */
 };
 
 struct config_general_entry

@@ -210,45 +210,50 @@ _conf_parse(FILE *file, unsigned int pass)
   return result;
 }
 
-static void
+static bool
 conf_read(FILE *file)
 {
   conf_set_defaults();  /* Set default values prior to conf parsing */
   conf_parser_ctx.module_config = module_config_create();
+  conf_parser_ctx.parse_valid = true;
   conf_parser_ctx.module_config_valid = true;
 
   if (_conf_parse(file, 1))
-    conf_parser_ctx.module_config_valid = false;
+    conf_parser_ctx.parse_valid = false;
 
   if (fseek(file, 0, SEEK_SET))
   {
-    conf_parser_ctx.module_config_valid = false;
+    conf_parser_ctx.parse_valid = false;
     conf_error_report("Unable to rewind configuration file");
   }
   else if (_conf_parse(file, 2))
-    conf_parser_ctx.module_config_valid = false;
+    conf_parser_ctx.parse_valid = false;
 
-  if (conf_parser_ctx.module_config_valid)
+  bool success = conf_parser_ctx.parse_valid && conf_parser_ctx.module_config_valid;
+  if (success)
   {
     struct module_error_info error;
     if (module_manager_replace_config(ircd_module_manager_get(), &conf_parser_ctx.module_config, &error) != MODULE_SUCCESS)
     {
-      conf_parser_ctx.module_config_valid = false;
+      success = false;
       conf_error_report(error.message);
     }
   }
 
   module_config_destroy(&conf_parser_ctx.module_config, NULL);
 
-  if (!conf_parser_ctx.module_config_valid)
+  if (!success)
   {
+    const char *const reason = conf_parser_ctx.parse_valid ?
+      "Module configuration rejected" : "Configuration parsing failed";
+
     if (conf_parser_ctx.boot)
     {
-      log_write(LOG_TYPE_IRCD, "Module configuration rejected; startup aborted");
+      log_write(LOG_TYPE_IRCD, "%s; startup aborted", reason);
       exit(EXIT_FAILURE);
     }
 
-    log_write(LOG_TYPE_IRCD, "Module configuration rejected; previous module configuration retained");
+    log_write(LOG_TYPE_IRCD, "%s; previous module configuration retained", reason);
   }
 
   conf_validate();  /* Check to make sure some values are still okay. */
@@ -258,6 +263,7 @@ conf_read(FILE *file)
   connect_sweep_inactive();
 
   class_sweep_inactive();  /* Delete unused classes that are marked for deletion */
+  return success;
 }
 
 /* conf_rehash()
@@ -467,7 +473,7 @@ conf_read_files(bool cold)
   if (cold == false)
     conf_clear();
 
-  conf_read(file);
+  const bool success = conf_read(file);
   fclose(file);
 
   conf_handle_tls(cold);
@@ -485,13 +491,13 @@ conf_read_files(bool cold)
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANNELLEN", "%d", CHANNELLEN);
   isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
-  return conf_parser_ctx.module_config_valid;
+  return success;
 }
 
 void
 yyerror(const char *msg)
 {
-  conf_parser_ctx.module_config_valid = false;
+  conf_parser_ctx.parse_valid = false;
   if (conf_parser_ctx.pass != 1)
     return;
 

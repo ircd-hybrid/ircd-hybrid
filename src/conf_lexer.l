@@ -92,7 +92,7 @@ _conf_lexer_decode_string(const char *text, size_t length)
 static void
 _conf_lexer_error(const char *format, ...)
 {
-  conf_parser_ctx.module_config_valid = false;
+  conf_parser_ctx.parse_valid = false;
 
   char message[IRCD_BUFSIZE];
   va_list args;

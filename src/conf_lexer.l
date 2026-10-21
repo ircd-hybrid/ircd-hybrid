@@ -442,48 +442,46 @@ conf_lexer_destroy(void)
   conf_parser_ctx.conf_file = NULL;
 }
 
-/* C-style .includes. This function will properly swap input conf buffers,
- * and lineno -kre */
 static void
 conf_include(void)
 {
-  char *p = yytext + sizeof(".include") - 1;
-  while (*p == ' ' || *p == '\t')
-    ++p;
-  ++p;  /* Skip the opening delimiter. */
-  yytext[yyleng - 1] = '\0';
+  const char *cursor = yytext + sizeof(".include") - 1;
 
-  if (string_is_empty(p))
+  while (*cursor == ' ' || *cursor == '\t')
+    ++cursor;
+
+  const char closing_delimiter = *cursor++ == '<' ? '>' : '"';
+  const char *const path_end = strchr(cursor, closing_delimiter);
+  assert(path_end);  /* The include rule guarantees a matching delimiter. */
+
+  const size_t path_length = (size_t)(path_end - cursor);
+  if (path_length == 0)
   {
     _conf_lexer_error("Empty include path");
     return;
   }
 
-  /* do stacking and co. */
-  if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
-  {
-    _conf_lexer_error("Includes nested too deep in %s", p);
-    return;
-  }
-
-  char include_path[IRCD_BUFSIZE];
-  int length;
-  if (*p == '/')  /* if it is an absolute path */
-    length = snprintf(include_path, sizeof(include_path), "%s", p);
-  else
-    length = snprintf(include_path, sizeof(include_path), "%s/%s", ETCPATH, p);
-
-  if (length < 0 || (size_t)length >= sizeof(include_path))
+  char path[sizeof(conf_file_name)];
+  if (path_length >= sizeof(path))
   {
     _conf_lexer_error("Include path too long");
     return;
   }
 
-  FILE *include_file = fopen(include_path, "r");
+  memcpy(path, cursor, path_length);
+  path[path_length] = '\0';
+
+  if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
+  {
+    _conf_lexer_error("Includes nested too deep in %s", path);
+    return;
+  }
+
+  FILE *const include_file = fopen(path, "r");
   if (include_file == NULL)
   {
     const int error = errno;
-    _conf_lexer_error("Unable to open include file '%s': %s", include_path, strerror(error));
+    _conf_lexer_error("Unable to open include file '%s': %s", path, strerror(error));
     return;
   }
 
@@ -497,38 +495,32 @@ conf_include(void)
   conf_line_number = 1;
   conf_line_text[0] = '\0';
   conf_parser_ctx.conf_file = include_file;
-  strlcpy(conf_file_name, include_path, sizeof(conf_file_name));
+  strlcpy(conf_file_name, path, sizeof(conf_file_name));
 
   yy_switch_to_buffer(yy_create_buffer(NULL, YY_BUF_SIZE));
 }
 
-/* This is function that will be called on EOF in conf file. It will
- * apropriately close conf if it not main conf and swap input buffers -kre
- * */
 static bool
 conf_eof(void)
 {
   if (include_stack_ptr == 0)
     return true;
 
-  /* switch buffer */
-  struct included_file *file = &include_stack[--include_stack_ptr];
+  if (fclose(conf_parser_ctx.conf_file) == EOF)
+  {
+    const int error = errno;
+    _conf_lexer_error("Unable to close include file: %s", strerror(error));
+  }
 
-  /* close current file */
-  fclose(conf_parser_ctx.conf_file);
-
-  /* switch buffers */
   yy_delete_buffer(YY_CURRENT_BUFFER);
-  yy_switch_to_buffer(file->state);
 
-  /* switch conf_line_number */
-  conf_line_number = file->conf_line_number;
-
-  /* switch file */
+  struct included_file *const file = &include_stack[--include_stack_ptr];
   conf_parser_ctx.conf_file = file->file;
-
+  conf_line_number = file->conf_line_number;
   strlcpy(conf_file_name, file->conf_file_name, sizeof(conf_file_name));
   strlcpy(conf_line_text, file->conf_line_text, sizeof(conf_line_text));
+  yy_switch_to_buffer(file->state);
+
   memset(file, 0, sizeof(*file));
   return false;
 }

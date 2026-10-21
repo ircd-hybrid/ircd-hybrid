@@ -46,7 +46,7 @@ static void
 _rehash_conf(struct Client *source)
 {
   _rehash_report(source, "CONF", "rehashing configuration file(s)");
-  conf_rehash(false);
+  conf_rehash();
 }
 
 /*! \brief REHASH MOTD handler

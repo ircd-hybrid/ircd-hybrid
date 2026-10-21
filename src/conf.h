@@ -176,7 +176,7 @@ extern void conf_error_report(const char *);
 extern void conf_lexer_init(FILE *, const char *);
 extern void conf_lexer_destroy(void);
 extern bool conf_read_files(bool);
-extern void conf_rehash(bool);
+extern void conf_rehash(void);
 extern void yyerror(const char *);
 extern int conf_connect_allowed(const struct io_addr *);
 #endif  /* INCLUDED_conf_h */

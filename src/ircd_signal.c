@@ -20,6 +20,7 @@
 
 #include "io.h"
 #include "io_signal.h"
+#include "log.h"
 
 #include "client.h"
 #include "conf.h"
@@ -108,13 +109,21 @@ ircd_signal_process(void)
     ircd_exit(server_state.foreground ? IRCD_EXIT_TERMINATE : IRCD_EXIT_RESTART, "received signal SIGINT");
 
   if (rehash)
-    conf_rehash(true);
+  {
+    conf_rehash();
+
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Got signal SIGHUP, reloading configuration file(s)");
+    log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
+  }
 
   if (reload_motd)
   {
     motd_recache();
+
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Got signal SIGUSR1, reloading motd file(s)");
+    log_write(LOG_TYPE_IRCD, "Got signal SIGUSR1, reloading motd file(s)");
   }
 }
 

@@ -46,7 +46,6 @@
 #include "conf_shared.h"
 #include "defaults.h"
 #include "ipcache.h"
-#include "ircd.h"
 #include "ircd_module.h"
 #include "ircd_defs.h"
 #include "isupport.h"
@@ -98,7 +97,7 @@ _conf_deny_expire_notice(const struct conf_deny *deny, void *unused)
 }
 
 static void
-conf_set_defaults(void)
+_conf_set_defaults(void)
 {
   ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
   ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
@@ -189,7 +188,7 @@ conf_set_defaults(void)
 }
 
 static void
-conf_validate(void)
+_conf_validate(void)
 {
   if (string_is_empty(ConfigServerInfo.network_name))
     ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
@@ -235,9 +234,10 @@ _conf_parse(FILE *file, unsigned int pass)
 }
 
 static bool
-conf_read(FILE *file)
+_conf_read(FILE *file)
 {
-  conf_set_defaults();  /* Set default values prior to conf parsing */
+  _conf_set_defaults();
+
   conf_parser_ctx.module_config = module_config_create();
   conf_parser_ctx.parse_valid = true;
   conf_parser_ctx.module_config_valid = true;
@@ -281,35 +281,20 @@ conf_read(FILE *file)
     log_write(LOG_TYPE_IRCD, "%s; previous module configuration retained", reason);
   }
 
-  conf_validate();  /* Check to make sure some values are still okay. */
-                    /* Some global values are also loaded here. */
-  whowas_trim();  /* Attempt to trim whowas list if necessary */
+  _conf_validate();
+
+  whowas_trim();
 
   connect_sweep_inactive();
+  class_sweep_inactive();
 
-  class_sweep_inactive();  /* Delete unused classes that are marked for deletion */
   return success;
 }
 
-/* conf_rehash()
- *
- * Actual REHASH service routine. Called with sig == 0 if it has been called
- * as a result of an operator issuing this command, else assume it has been
- * called as a result of the server receiving a HUP signal.
- */
 void
-conf_rehash(bool sig)
+conf_rehash(void)
 {
-  if (sig)
-  {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Got signal SIGHUP, reloading configuration file(s)");
-    log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
-  }
-
   resolver_reload();
-
-  /* don't close listeners until we know we can go ahead with the rehash */
 
   if (conf_read_files(false))
     ircd_module_apply_config();
@@ -354,38 +339,23 @@ cleanup_tklines(void *unused)
 }
 
 static void
-conf_clear(void)
+_conf_clear(void)
 {
   connect_mark_all_inactive();
-
-  /*
-   * Don't delete the class table, rather mark all entries for deletion.
-   * The table is cleaned up by class_delete_marked. - avalon
-   */
   class_mark_all_inactive();
 
   conf_deny_clear_configuration();
   conf_kill_clear_configuration();
   conf_exempt_clear();
   conf_auth_clear();
-
-
-  motd_clear();  /* Clear motd {} items and re-cache default motd */
-
-  cluster_clear();  /* Clear cluster {} items */
-
-  gecos_clear();  /* Clear gecos {} items */
-
-  resv_clear();  /* Clear resv {} items */
-
-  service_clear();  /* Clear service {} items */
-
-  shared_clear();  /* Clear shared {} items */
-
-  pseudo_clear();  /* Clear pseudo {} items */
-
+  motd_clear();
+  cluster_clear();
+  gecos_clear();
+  resv_clear();
+  service_clear();
+  shared_clear();
+  pseudo_clear();
   log_clear();
-
   oper_free_all();
 
   /* Clean out ConfigServerInfo */
@@ -457,7 +427,7 @@ _conf_apply_tls(void)
 }
 
 static void
-conf_handle_tls(bool cold)
+_conf_handle_tls(bool cold)
 {
   if (_conf_apply_tls())
     return;
@@ -495,27 +465,27 @@ conf_read_files(bool cold)
     }
   }
 
-  if (cold == false)
-    conf_clear();
+  if (!cold)
+    _conf_clear();
 
-  const bool success = conf_read(file);
+  const bool success = _conf_read(file);
   fclose(file);
 
-  conf_handle_tls(cold);
+  _conf_handle_tls(cold);
 
   motd_init();
 
   isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("AWAYLEN", "%d", ConfigGeneral.max_away_length);
-  isupport_add("KICKLEN", "%d", ConfigChannel.max_kick_length);
-  isupport_add("NICKLEN", "%d", ConfigServerInfo.max_nick_length);
+  isupport_add("AWAYLEN", "%u", ConfigGeneral.max_away_length);
+  isupport_add("KICKLEN", "%u", ConfigChannel.max_kick_length);
+  isupport_add("NICKLEN", "%u", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
   isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
-  isupport_add("MAXTARGETS", "%d", ConfigGeneral.max_targets);
+  isupport_add("MAXTARGETS", "%u", ConfigGeneral.max_targets);
   isupport_add("CHANTYPES", "%s", "#");
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANNELLEN", "%d", CHANNELLEN);
-  isupport_add("TOPICLEN", "%d", ConfigServerInfo.max_topic_length);
+  isupport_add("TOPICLEN", "%u", ConfigServerInfo.max_topic_length);
   return success;
 }
 
@@ -523,20 +493,15 @@ void
 yyerror(const char *msg)
 {
   conf_parser_ctx.parse_valid = false;
-  if (conf_parser_ctx.pass != 1)
-    return;
 
-  const char *p = stripws(conf_line_text);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-            conf_file_name, conf_line_number, msg, p);
+  if (conf_parser_ctx.pass == 1)
+    conf_error_report(msg);
 }
 
 void
 conf_error_report(const char *msg)
 {
-  const char *p = stripws(conf_line_text);
+  const char *const p = stripws(conf_line_text);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
                  conf_file_name, conf_line_number, msg, p);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",

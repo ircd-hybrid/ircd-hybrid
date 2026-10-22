@@ -25,6 +25,8 @@
 #include "client.h"
 #include "client_format.h"
 #include "client_svstag.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
 #include "conf_gecos.h"
 #include "hash.h"
 #include "ipcache.h"
@@ -38,6 +40,13 @@
 #include "send.h"
 #include "server.h"
 #include "whowas.h"
+
+enum client_connection_policy_result
+{
+  CLIENT_CONNECTION_POLICY_ALLOWED,
+  CLIENT_CONNECTION_POLICY_DLINED,
+  CLIENT_CONNECTION_POLICY_THROTTLED
+};
 
 uint64_t UMODE_BOT;
 uint64_t UMODE_DEAF;
@@ -885,18 +894,33 @@ _client_reject_connection_server_full(fde_t *client_fde, const struct Listener *
   comm_socket_close(client_fde);
 }
 
+static enum client_connection_policy_result
+_client_check_connection_policy(const struct io_addr *addr)
+{
+  if (conf_exempt_find(addr))
+    return CLIENT_CONNECTION_POLICY_ALLOWED;
+
+  if (conf_deny_find(addr))
+    return CLIENT_CONNECTION_POLICY_DLINED;
+
+  if (!ipcache_throttle_allow(addr))
+    return CLIENT_CONNECTION_POLICY_THROTTLED;
+
+  return CLIENT_CONNECTION_POLICY_ALLOWED;
+}
+
 static void
 _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *listener,
-                                    const char *remote_addr_str, int policy_result)
+                                    const char *remote_addr_str, enum client_connection_policy_result result)
 {
   assert(client_fde);
   assert(listener);
   assert(remote_addr_str);
-  assert(policy_result);
+  assert(result == CLIENT_CONNECTION_POLICY_DLINED || result == CLIENT_CONNECTION_POLICY_THROTTLED);
 
   log_write(LOG_TYPE_DEBUG, "Refused connection from %s on listener [%s/%hu]: %s",
             remote_addr_str, listener_get_name(listener), listener_get_port(listener),
-            policy_result == BANNED_CLIENT ? "D-lined" : "Throttled");
+            result == CLIENT_CONNECTION_POLICY_DLINED ? "D-lined" : "Throttled");
 
   comm_socket_close(client_fde);
 }
@@ -1014,10 +1038,10 @@ client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
     return;
   }
 
-  int policy_result = conf_connect_allowed(remote_addr);
-  if (policy_result)
+  const enum client_connection_policy_result result = _client_check_connection_policy(remote_addr);
+  if (result != CLIENT_CONNECTION_POLICY_ALLOWED)
   {
-    _client_reject_connection_by_policy(client_fde, listener, remote_addr_str, policy_result);
+    _client_reject_connection_by_policy(client_fde, listener, remote_addr_str, result);
     return;
   }
 

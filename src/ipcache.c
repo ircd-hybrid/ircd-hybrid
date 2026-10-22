@@ -67,6 +67,27 @@ ipcache_record_find_or_add(const struct io_addr *addr)
   return entry;
 }
 
+bool
+ipcache_throttle_allow(const struct io_addr *addr)
+{
+  struct ip_entry *const entry = ipcache_record_find_or_add(addr);
+  assert(entry);
+
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - entry->throttle_last_allowed_at < ConfigGeneral.throttle_time)
+  {
+    if (entry->throttle_allowed_count >= ConfigGeneral.throttle_count)
+      return false;
+
+    ++entry->throttle_allowed_count;
+  }
+  else
+    entry->throttle_allowed_count = 1;
+
+  entry->throttle_last_allowed_at = now;
+  return true;
+}
+
 static void
 _ipcache_record_delete(patricia_node_t *node)
 {
@@ -76,7 +97,7 @@ _ipcache_record_delete(patricia_node_t *node)
   assert(entry);
 
   if (entry->count_local || entry->count_remote ||
-      (io_time_get(IO_TIME_MONOTONIC_SEC) - entry->last_attempt) < ConfigGeneral.throttle_time)
+      (io_time_get(IO_TIME_MONOTONIC_SEC) - entry->throttle_last_allowed_at) < ConfigGeneral.throttle_time)
     return;
 
   struct ip_entry *const removed_entry = patricia_remove(entry->trie_pointer, node);

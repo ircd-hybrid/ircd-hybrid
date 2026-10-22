@@ -45,7 +45,6 @@
 #include "conf_service.h"
 #include "conf_shared.h"
 #include "defaults.h"
-#include "ipcache.h"
 #include "ircd_module.h"
 #include "ircd_defs.h"
 #include "isupport.h"
@@ -300,30 +299,6 @@ conf_rehash(void)
     ircd_module_apply_config();
 
   conf_ban_check_clients();
-}
-
-int
-conf_connect_allowed(const struct io_addr *addr)
-{
-  if (conf_exempt_find(addr))
-    return 0;
-
-  if (conf_deny_find(addr))
-    return BANNED_CLIENT;
-
-  struct ip_entry *ip_found = ipcache_record_find_or_add(addr);
-  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - ip_found->last_attempt) < ConfigGeneral.throttle_time)
-  {
-    if (ip_found->connection_count >= ConfigGeneral.throttle_count)
-      return TOO_FAST;
-
-    ++ip_found->connection_count;
-  }
-  else
-    ip_found->connection_count = 1;
-
-  ip_found->last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
-  return 0;
 }
 
 void

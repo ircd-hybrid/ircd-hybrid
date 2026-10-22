@@ -14,7 +14,6 @@
 
 #include "module.h"
 
-struct io_addr;
 struct Client;
 
 enum conf_ban_type
@@ -22,12 +21,6 @@ enum conf_ban_type
   CONF_BAN_TYPE_KLINE,
   CONF_BAN_TYPE_DLINE,
   CONF_BAN_TYPE_XLINE,
-};
-
-enum
-{
-  BANNED_CLIENT  = -4,
-  TOO_FAST       = -5
 };
 
 #define CONF_NOREASON "<No reason supplied>"
@@ -178,5 +171,4 @@ extern void conf_lexer_destroy(void);
 extern bool conf_read_files(bool);
 extern void conf_rehash(void);
 extern void yyerror(const char *);
-extern int conf_connect_allowed(const struct io_addr *);
 #endif  /* INCLUDED_conf_h */

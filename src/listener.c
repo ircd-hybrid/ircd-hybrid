@@ -162,7 +162,7 @@ _listener_finalize(struct Listener *listener)
 
   listener->fde = new_fde;
 
-  _listener_accept_connection(listener->fde, listener);
+  comm_setselect(listener->fde, COMM_SELECT_READ, _listener_accept_connection, listener);
   return true;
 }
 

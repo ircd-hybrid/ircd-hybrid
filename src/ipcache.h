@@ -22,11 +22,12 @@ struct ip_entry
   patricia_tree_t *trie_pointer;  /**< Pointer to 'patricia_tree_t' item */
   unsigned int count_local;  /**< Number of local users using this IP */
   unsigned int count_remote;  /**< Number of remote users using this IP */
-  unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  uintmax_t last_attempt;  /**< The last time someone connected from this IP; monotonic time */
+  unsigned int throttle_allowed_count;  /**< Attempts admitted in the current throttle burst. */
+  uintmax_t throttle_last_allowed_at;  /**< Last admitted attempt, in monotonic seconds. */
 };
 
-extern void ipcache_record_remove(const struct io_addr *addr, bool);
+extern void ipcache_record_remove(const struct io_addr *, bool);
 extern void ipcache_init(void);
-extern struct ip_entry *ipcache_record_find_or_add(const struct io_addr *addr);
+extern bool ipcache_throttle_allow(const struct io_addr *);
+extern struct ip_entry *ipcache_record_find_or_add(const struct io_addr *);
 #endif  /* INCLUDED_ipcache_h */

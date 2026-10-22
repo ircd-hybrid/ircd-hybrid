@@ -344,12 +344,12 @@ client_update_name(struct Client *client, const char *new_name)
 {
   assert(client);
   assert(!string_is_empty(new_name));
+  assert(strlen(new_name) < sizeof(client->name));
 
   if (client->name[0])
     hash_del_client(client);
 
-  const size_t len = strlcpy(client->name, new_name, sizeof(client->name));
-  assert(len < sizeof(client->name));
+  strlcpy(client->name, new_name, sizeof(client->name));
 
   hash_add_client(client);
 

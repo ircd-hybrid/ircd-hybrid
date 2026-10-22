@@ -218,15 +218,17 @@ _list_task_timer_schedule(void)
       event_create(ircd_event_manager, "_list_task_pump", _list_task_pump, 50, true, NULL, NULL);
     assert(list_task_timer);
 
-    event_status_t status = event_set_priority(list_task_timer, 2);
+    const event_status_t status = event_set_priority(list_task_timer, 2);
     assert(status == EVENT_SUCCESS);
+    (void)status;
   }
 
   if (event_is_scheduled(list_task_timer))
     return;
 
-  event_status_t status = event_schedule(list_task_timer);
+  const event_status_t status = event_schedule(list_task_timer);
   assert(status == EVENT_SUCCESS);
+  (void)status;
 }
 
 static void

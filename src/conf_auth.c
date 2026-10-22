@@ -62,17 +62,10 @@ struct conf_auth_registry
 
 static struct conf_auth_registry conf_auth_registry;
 
-static bool
-_conf_auth_is_initialized(void)
-{
-  return conf_auth_registry.initialized;
-}
-
 static void
 _conf_auth_assert_initialized(void)
 {
-  const bool initialized = _conf_auth_is_initialized();
-  assert(initialized);
+  assert(conf_auth_registry.initialized);
 
   assert((conf_auth_registry.items.head == NULL) ==
          (conf_auth_registry.items.tail == NULL));
@@ -376,7 +369,7 @@ _conf_auth_admit_to_class(struct ClassItem *klass, struct Client *client,
 void
 conf_auth_init(void)
 {
-  assert(!_conf_auth_is_initialized());
+  assert(!conf_auth_registry.initialized);
   assert(conf_auth_registry.items.head == NULL);
   assert(conf_auth_registry.items.tail == NULL);
 

@@ -1284,6 +1284,7 @@ resolver_init(event_manager_t manager)
   {
     const event_status_t status = event_destroy(timeout_event);
     assert(status == EVENT_SUCCESS);
+    (void)status;
     return false;
   }
 

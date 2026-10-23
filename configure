@@ -796,6 +796,9 @@ enable_assert
 enable_debugging
 enable_warnings
 with_tls
+enable_asan
+enable_ubsan
+enable_lsan
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1461,6 +1464,9 @@ Optional Features:
   --enable-debugging      Enable debugging.
   --enable-warnings       Enable compiler warnings: 'yes', 'no', 'extra', or
                           no argument to default to 'yes'
+  --enable-asan           Enable AddressSanitizer [default=no]
+  --enable-ubsan          Enable UndefinedBehaviorSanitizer [default=no]
+  --enable-lsan           Enable LeakSanitizer [default=no]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -18057,6 +18063,165 @@ printf '%s\n' "#define LOCALSTATEDIR \"$ax_define_dir\"" >>confdefs.h
 
 printf '%s\n' "#define AX_BUILD_DATE \"$BUILD_DATE\"" >>confdefs.h
 
+
+
+
+
+
+
+  # Check whether --enable-asan was given.
+if test ${enable_asan+y}
+then :
+  enableval=$enable_asan; enable_asan=$enableval
+else case e in #(
+  e) enable_asan=no ;;
+esac
+fi
+
+
+  # Check whether --enable-ubsan was given.
+if test ${enable_ubsan+y}
+then :
+  enableval=$enable_ubsan; enable_ubsan=$enableval
+else case e in #(
+  e) enable_ubsan=no ;;
+esac
+fi
+
+
+  # Check whether --enable-lsan was given.
+if test ${enable_lsan+y}
+then :
+  enableval=$enable_lsan; enable_lsan=$enableval
+else case e in #(
+  e) enable_lsan=no ;;
+esac
+fi
+
+
+  case $enable_asan in #(
+  yes|no) :
+     ;; #(
+  *) :
+    as_fn_error $? "invalid value '$enable_asan' for --enable-asan; expected yes or no" "$LINENO" 5 ;;
+esac
+
+  case $enable_ubsan in #(
+  yes|no) :
+     ;; #(
+  *) :
+    as_fn_error $? "invalid value '$enable_ubsan' for --enable-ubsan; expected yes or no" "$LINENO" 5 ;;
+esac
+
+  case $enable_lsan in #(
+  yes|no) :
+     ;; #(
+  *) :
+    as_fn_error $? "invalid value '$enable_lsan' for --enable-lsan; expected yes or no" "$LINENO" 5 ;;
+esac
+
+  case $enable_asan:$enable_ubsan in #(
+  yes:no) :
+    ax_sanitizers=address ;; #(
+  no:yes) :
+    ax_sanitizers=undefined ;; #(
+  yes:yes) :
+    ax_sanitizers=address,undefined ;; #(
+  *) :
+    ax_sanitizers= ;;
+esac
+
+  ax_sanitizers_cflags=-fno-omit-frame-pointer
+  if test -n "$ax_sanitizers"
+then :
+
+    ax_sanitizers_cflags="-fsanitize=$ax_sanitizers $ax_sanitizers_cflags"
+
+fi
+
+    if test "x$enable_lsan" = xyes
+then :
+
+    if test -n "$ax_sanitizers"
+then :
+  ax_sanitizers="$ax_sanitizers,leak"
+else case e in #(
+  e) ax_sanitizers=leak ;;
+esac
+fi
+
+fi
+
+  if test -n "$ax_sanitizers"
+then :
+
+    ax_sanitizers_ldflags="-fsanitize=$ax_sanitizers"
+
+    if test "x$enable_ubsan" = xyes
+then :
+
+      ax_sanitizers_cflags="$ax_sanitizers_cflags -fno-sanitize-recover=undefined"
+
+fi
+
+    ax_sanitizers_save_CFLAGS=$CFLAGS
+    ax_sanitizers_save_LDFLAGS=$LDFLAGS
+    CFLAGS="$CFLAGS $ax_sanitizers_cflags"
+    LDFLAGS="$LDFLAGS $ax_sanitizers_ldflags"
+
+    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking whether $CC can compile and link with $ax_sanitizers sanitizers" >&5
+printf %s "checking whether $CC can compile and link with $ax_sanitizers sanitizers... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+      #include <stdlib.h>
+int
+main (void)
+{
+
+volatile int value = 1;
+void *volatile allocation = malloc(1);
+
+value = value - 1;
+free(allocation);
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_sanitizers_supported=yes
+else case e in #(
+  e) ax_sanitizers_supported=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+    { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $ax_sanitizers_supported" >&5
+printf '%s\n' "$ax_sanitizers_supported" >&6; }
+
+    CFLAGS=$ax_sanitizers_save_CFLAGS
+    LDFLAGS=$ax_sanitizers_save_LDFLAGS
+
+    if test "x$ax_sanitizers_supported" != xyes
+then :
+
+      as_fn_error $? "requested sanitizers '$ax_sanitizers' cannot be compiled and linked; check compiler and sanitizer runtime support in config.log" "$LINENO" 5
+
+fi
+
+    CFLAGS="$CFLAGS $ax_sanitizers_cflags"
+    LDFLAGS="$LDFLAGS $ax_sanitizers_ldflags"
+
+else case e in #(
+  e) ax_sanitizers=none ;;
+esac
+fi
+
+  { printf '%s\n' "$as_me:${as_lineno-$LINENO}: Sanitizers: $ax_sanitizers" >&5
+printf '%s\n' "$as_me: Sanitizers: $ax_sanitizers" >&6;}
 
 
 ac_config_files="$ac_config_files Makefile doc/Makefile help/Makefile libio/Makefile libio/src/Makefile modules/Makefile src/Makefile tools/Makefile"

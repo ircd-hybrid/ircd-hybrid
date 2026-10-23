@@ -66,6 +66,8 @@ AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 dnl Reproducible build metadata.
 AX_DEFINE_BUILD_DATE
 
+AX_ARG_ENABLE_SANITIZERS
+
 dnl Generated files.
 AC_CONFIG_FILES([
   Makefile

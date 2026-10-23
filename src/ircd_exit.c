@@ -93,10 +93,11 @@ ircd_exit(ircd_exit_action_t action, const char *message)
   io_pidfile_remove(pidFileName);
   io_pidfile_close();
 
-  close_fds();
-
   if (action == IRCD_EXIT_RESTART)
+  {
+    close_fds();
     execv(SPATH, myargv);
+  }
 
   exit(action == IRCD_EXIT_TERMINATE ? EXIT_SUCCESS : EXIT_FAILURE);
 }

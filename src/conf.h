@@ -44,8 +44,6 @@ struct config_general_entry
   const char *xlinefile;
   const char *dlinefile;
   const char *resvfile;
-  char *cloak_secret;
-  char *cloak_suffix;
   char *oper_umodes;
 
   unsigned int dline_min_cidr;
@@ -87,12 +85,18 @@ struct config_general_entry
   unsigned int disable_ident;
   unsigned int disable_dns;
   unsigned int cycle_on_host_change;
-  unsigned int cloak_enabled;
-  unsigned int cloak_cidr_len_ipv4;
-  unsigned int cloak_cidr_len_ipv6;
-  unsigned int cloak_num_bits;
   unsigned int ident_timeout;
   unsigned int registration_timeout;
+};
+
+struct config_cloak_entry
+{
+  char *secret;
+  char *suffix;
+  unsigned int enabled;
+  unsigned int cidr_len_ipv4;
+  unsigned int cidr_len_ipv6;
+  unsigned int num_bits;
 };
 
 struct config_channel_entry
@@ -157,6 +161,7 @@ struct config_log_entry
 extern struct conf_parser_context conf_parser_ctx;
 extern struct config_log_entry ConfigLog;
 extern struct config_general_entry ConfigGeneral;
+extern struct config_cloak_entry ConfigCloak;
 extern struct config_channel_entry ConfigChannel;
 extern struct config_serverhide_entry ConfigServerHide;
 extern struct config_serverinfo_entry ConfigServerInfo;

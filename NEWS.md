@@ -22,6 +22,7 @@
   `channel::enable_*` directives have been removed.
 * The `serverinfo::max_topic_length` configuration directive has been moved to
   `channel::max_topic_length`
+* Hostname cloaking settings have been moved from `general {}` to a dedicated `cloak {}` block
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

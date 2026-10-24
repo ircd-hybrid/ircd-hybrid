@@ -193,15 +193,12 @@ can_flood                   { return CAN_FLOOD; }
 channel                     { return CHANNEL; }
 cidr_bitlen_ipv4            { return CIDR_BITLEN_IPV4; }
 cidr_bitlen_ipv6            { return CIDR_BITLEN_IPV6; }
+cidr_len_ipv4               { return CIDR_LEN_IPV4; }
+cidr_len_ipv6               { return CIDR_LEN_IPV6; }
 class                       { return CLASS; }
 client                      { return CLIENT; }
+cloak                       { return CLOAK; }
 close                       { return CLOSE; }
-cloak_enabled               { return CLOAK_ENABLED; }
-cloak_cidr_len_ipv4         { return CLOAK_CIDR_LEN_IPV4; }
-cloak_cidr_len_ipv6         { return CLOAK_CIDR_LEN_IPV6; }
-cloak_num_bits              { return CLOAK_NUM_BITS; }
-cloak_secret                { return CLOAK_SECRET; }
-cloak_suffix                { return CLOAK_SUFFIX; }
 cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
@@ -225,6 +222,7 @@ dline                       { return T_DLINE; }
 dline_min_cidr              { return DLINE_MIN_CIDR; }
 dline_min_cidr6             { return DLINE_MIN_CIDR6; }
 email                       { return EMAIL; }
+enabled                     { return ENABLED; }
 encrypted                   { return ENCRYPTED; }
 exceed_limit                { return EXCEED_LIMIT; }
 exempt                      { return EXEMPT; }
@@ -302,6 +300,7 @@ network_name                { return NETWORK_NAME; }
 nick                        { return NICK; }
 no_oper_flood               { return NO_OPER_FLOOD; }
 no_tilde                    { return NO_TILDE; }
+num_bits                    { return NUM_BITS; }
 number_per_cidr             { return NUMBER_PER_CIDR; }
 number_per_ip_global        { return NUMBER_PER_IP_GLOBAL; }
 number_per_ip_local         { return NUMBER_PER_IP_LOCAL; }
@@ -331,6 +330,7 @@ resident                    { return RESIDENT; }
 restart                     { return T_RESTART; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }
+secret                      { return SECRET; }
 send_password               { return SEND_PASSWORD; }
 sendq                       { return SENDQ; }
 server                      { return T_SERVER; }
@@ -348,6 +348,7 @@ squit                       { return SQUIT; }
 ssl                         { return T_TLS; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_u_oper_only           { return STATS_U_OPER_ONLY; }
+suffix                      { return SUFFIX; }
 target                      { return T_TARGET; }
 throttle_count              { return THROTTLE_COUNT; }
 throttle_time               { return THROTTLE_TIME; }

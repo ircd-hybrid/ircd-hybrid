@@ -149,14 +149,11 @@ reset_block_state(void)
 %token  CHANNEL
 %token  CIDR_BITLEN_IPV4
 %token  CIDR_BITLEN_IPV6
+%token  CIDR_LEN_IPV4
+%token  CIDR_LEN_IPV6
 %token  CLASS
 %token  CLIENT
-%token  CLOAK_ENABLED
-%token  CLOAK_CIDR_LEN_IPV4
-%token  CLOAK_CIDR_LEN_IPV6
-%token  CLOAK_NUM_BITS
-%token  CLOAK_SECRET
-%token  CLOAK_SUFFIX
+%token  CLOAK
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
@@ -177,6 +174,7 @@ reset_block_state(void)
 %token  DLINE_MIN_CIDR
 %token  DLINE_MIN_CIDR6
 %token  EMAIL
+%token  ENABLED
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
@@ -251,6 +249,7 @@ reset_block_state(void)
 %token  NICK
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
+%token  NUM_BITS
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP_GLOBAL
 %token  NUMBER_PER_IP_LOCAL
@@ -274,6 +273,7 @@ reset_block_state(void)
 %token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
+%token  SECRET
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SEND_PASSWORD
 %token  SENDQ
@@ -285,6 +285,7 @@ reset_block_state(void)
 %token  SQUIT
 %token  STATS_E_DISABLED
 %token  STATS_U_OPER_ONLY
+%token  SUFFIX
 %token  T_ALL
 %token  T_BIND
 %token  T_COMMAND
@@ -315,7 +316,7 @@ reset_block_state(void)
 %token  T_UNRESV
 %token  T_UNXLINE
 %token  T_WEBIRC
-%token  TBOOL
+%token  <number> TBOOL
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TIMEOUT
@@ -359,6 +360,7 @@ conf_item:        module_base_path_entry
                 | logging_entry
                 | oper_entry
                 | channel_entry
+                | cloak_entry
                 | class_entry
                 | listen_entry
                 | auth_entry
@@ -2201,12 +2203,6 @@ general_item:       general_away_count |
                     general_stats_e_disabled |
                     general_max_monitor |
                     general_cycle_on_host_change |
-                    general_cloak_enabled |
-                    general_cloak_cidr_len_ipv4 |
-                    general_cloak_cidr_len_ipv6 |
-                    general_cloak_num_bits |
-                    general_cloak_secret |
-                    general_cloak_suffix |
                     general_ident_timeout |
                     general_registration_timeout |
                     error;
@@ -2419,67 +2415,6 @@ general_default_floodtime: DEFAULT_FLOODTIME '=' timespec ';'
   ConfigGeneral.default_floodtime = $3;
 };
 
-general_cloak_enabled: CLOAK_ENABLED '=' TBOOL ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  if (yylval.number)
-  {
-    ConfigGeneral.cloak_enabled = true;
-    cloak_set_enabled();
-  }
-  else
-  {
-    ConfigGeneral.cloak_enabled = false;
-    cloak_set_disabled();
-  }
-};
-
-general_cloak_cidr_len_ipv4: CLOAK_CIDR_LEN_IPV4 '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_cidr_len_ipv4 = $3;
-  cloak_set_cidr_len_ipv4($3);
-};
-
-general_cloak_cidr_len_ipv6: CLOAK_CIDR_LEN_IPV6 '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_cidr_len_ipv6 = $3;
-  cloak_set_cidr_len_ipv6($3);
-};
-
-general_cloak_num_bits: CLOAK_NUM_BITS '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_num_bits = $3;
-  cloak_set_num_bits($3);
-};
-
-general_cloak_secret: CLOAK_SECRET '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  io_free(ConfigGeneral.cloak_secret);
-  ConfigGeneral.cloak_secret = io_strdup(yylval.string);
-  cloak_set_secret(yylval.string);
-};
-
-general_cloak_suffix: CLOAK_SUFFIX '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  io_free(ConfigGeneral.cloak_suffix);
-  ConfigGeneral.cloak_suffix = io_strdup(yylval.string);
-  cloak_set_suffix(yylval.string);
-};
-
 general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
 {
   if ($3 < 1 || $3 > 30)
@@ -2491,6 +2426,85 @@ general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
 general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'
 {
   ConfigGeneral.registration_timeout = $3;
+};
+
+
+/***************************************************************************
+ * cloak {} section
+ ***************************************************************************/
+cloak_entry: CLOAK '{' cloak_items '}' ';';
+
+cloak_items: cloak_items cloak_item | cloak_item;
+cloak_item:  cloak_enabled |
+             cloak_cidr_len_ipv4 |
+             cloak_cidr_len_ipv6 |
+             cloak_num_bits |
+             cloak_secret |
+             cloak_suffix |
+             error;
+
+cloak_enabled: ENABLED '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if ($3)
+  {
+    ConfigCloak.enabled = true;
+    cloak_set_enabled();
+  }
+  else
+  {
+    ConfigCloak.enabled = false;
+    cloak_set_disabled();
+  }
+};
+
+cloak_cidr_len_ipv4: CIDR_LEN_IPV4 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.cidr_len_ipv4 = $3;
+  cloak_set_cidr_len_ipv4($3);
+};
+
+cloak_cidr_len_ipv6: CIDR_LEN_IPV6 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.cidr_len_ipv6 = $3;
+  cloak_set_cidr_len_ipv6($3);
+};
+
+cloak_num_bits: NUM_BITS '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.num_bits = $3;
+  cloak_set_num_bits($3);
+};
+
+cloak_secret: SECRET '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigCloak.secret);
+  ConfigCloak.secret = io_strdup($3);
+  cloak_set_secret($3);
+};
+
+cloak_suffix: SUFFIX '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigCloak.suffix);
+  ConfigCloak.suffix = io_strdup($3);
+  cloak_set_suffix($3);
 };
 
 

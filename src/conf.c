@@ -56,6 +56,7 @@
 #include "whowas.h"
 
 struct config_channel_entry ConfigChannel;
+struct config_cloak_entry ConfigCloak;
 struct config_serverhide_entry ConfigServerHide;
 struct config_general_entry ConfigGeneral;
 struct config_log_entry ConfigLog = { .use_logging = 1 };
@@ -176,14 +177,14 @@ _conf_set_defaults(void)
   ConfigGeneral.ident_timeout = 3;
   ConfigGeneral.registration_timeout = 30;
 
-  ConfigGeneral.cloak_enabled = false;
+  ConfigCloak.enabled = false;
   cloak_set_disabled();
-  ConfigGeneral.cloak_cidr_len_ipv4 = 32;
-  cloak_set_cidr_len_ipv4(ConfigGeneral.cloak_cidr_len_ipv4);
-  ConfigGeneral.cloak_cidr_len_ipv6 = 64;
-  cloak_set_cidr_len_ipv6(ConfigGeneral.cloak_cidr_len_ipv6);
-  ConfigGeneral.cloak_num_bits = 80;
-  cloak_set_num_bits(ConfigGeneral.cloak_num_bits);
+  ConfigCloak.cidr_len_ipv4 = 32;
+  cloak_set_cidr_len_ipv4(ConfigCloak.cidr_len_ipv4);
+  ConfigCloak.cidr_len_ipv6 = 64;
+  cloak_set_cidr_len_ipv6(ConfigCloak.cidr_len_ipv6);
+  ConfigCloak.num_bits = 80;
+  cloak_set_num_bits(ConfigCloak.num_bits);
 }
 
 static void
@@ -361,11 +362,13 @@ _conf_clear(void)
   io_free(ConfigServerHide.hidden_name);
   ConfigServerHide.hidden_name = NULL;
 
+  /* Clean out ConfigCloak */
+  io_free(ConfigCloak.secret);
+  ConfigCloak.secret = NULL;
+  io_free(ConfigCloak.suffix);
+  ConfigCloak.suffix = NULL;
+
   /* Clean out ConfigGeneral */
-  io_free(ConfigGeneral.cloak_secret);
-  ConfigGeneral.cloak_secret = NULL;
-  io_free(ConfigGeneral.cloak_suffix);
-  ConfigGeneral.cloak_suffix = NULL;
   io_free(ConfigGeneral.oper_umodes);
   ConfigGeneral.oper_umodes = NULL;
 

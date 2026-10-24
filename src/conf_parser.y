@@ -479,7 +479,6 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_network_description |
                         serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
-                        serverinfo_max_topic_length |
                         serverinfo_motd_file |
                         serverinfo_tls_private_key_file |
                         serverinfo_sid |
@@ -612,14 +611,6 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
   }
   else
     ConfigServerInfo.max_nick_length = $3;
-};
-
-serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
-{
-  if ($3 < 1 || $3 > TOPICLEN)
-    ConfigServerInfo.max_topic_length = TOPICLEN;
-  else
-    ConfigServerInfo.max_topic_length = $3;
 };
 
 serverinfo_motd_file: MOTD_FILE '=' QSTRING ';'
@@ -2521,6 +2512,7 @@ channel_item:       channel_max_bans |
                     channel_max_channels |
                     channel_max_invites |
                     channel_max_kick_length |
+                    channel_max_topic_length |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
@@ -2607,6 +2599,14 @@ channel_max_kick_length: MAX_KICK_LENGTH '=' NUMBER ';'
   }
   else
     ConfigChannel.max_kick_length = $3;
+};
+
+channel_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
+{
+  if ($3 < 1 || $3 > TOPICLEN)
+    ConfigChannel.max_topic_length = TOPICLEN;
+  else
+    ConfigChannel.max_topic_length = $3;
 };
 
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'

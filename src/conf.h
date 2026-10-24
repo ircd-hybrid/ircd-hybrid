@@ -110,6 +110,7 @@ struct config_channel_entry
   unsigned int max_bans_large;
   unsigned int max_channels;
   unsigned int max_kick_length;
+  unsigned int max_topic_length;
   unsigned int default_join_flood_count;
   unsigned int default_join_flood_time;
 };
@@ -139,7 +140,6 @@ struct config_serverinfo_entry
   unsigned int hub;
   unsigned int default_max_clients;
   unsigned int max_nick_length;
-  unsigned int max_topic_length;
 };
 
 struct config_admin_entry

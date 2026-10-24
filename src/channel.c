@@ -680,7 +680,7 @@ channel_set_topic(struct Channel *channel, const char *topic, const char *topic_
 
   if (!string_is_empty(topic))
   {
-    const size_t max_length = local ? ConfigServerInfo.max_topic_length : TOPICLEN;
+    const size_t max_length = local ? ConfigChannel.max_topic_length : TOPICLEN;
     channel->topic = io_strndup(topic, max_length);
   }
 

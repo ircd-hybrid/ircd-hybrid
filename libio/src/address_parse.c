@@ -1,5 +1,4 @@
 /*
- * SPDX-FileCopyrightText: 1997 Jukka Santala (Donwulff)
  * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
  * SPDX-License-Identifier: GPL-2.0-or-later
  */

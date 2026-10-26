@@ -445,44 +445,6 @@ stats_hubleaf(struct Client *client, size_t parc, char *parv[])
   }
 }
 
-static const char *
-_stats_auth_format_user(const struct Client *client,
-                        const struct conf_auth *auth,
-                        const struct conf_auth_rule *rule, char *buffer, size_t buffer_size)
-{
-  assert(client);
-  assert(auth);
-  assert(rule);
-  assert(buffer);
-  assert(buffer_size >= USERLEN + 16);
-
-  char *cursor = buffer;
-
-  if (auth->flags & CONF_AUTH_FLAG_WEBIRC)
-    *cursor++ = '<';
-  if (auth->flags & CONF_AUTH_FLAG_NO_TILDE)
-    *cursor++ = '-';
-  if (auth->flags & CONF_AUTH_FLAG_REQUIRE_IDENT)
-    *cursor++ = '+';
-  if ((auth->flags & CONF_AUTH_FLAG_REJECT_PASSWORD_MISMATCH) == 0)
-    *cursor++ = '&';
-  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_RESV)
-    *cursor++ = '$';
-  if (!string_is_empty(auth->spoof))
-    *cursor++ = '=';
-  if (auth->flags & CONF_AUTH_FLAG_CAN_FLOOD)
-    *cursor++ = '|';
-  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE)
-    *cursor++ = '^';
-  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE)
-    *cursor++ = '!';
-  if (auth->flags & CONF_AUTH_FLAG_EXEMPT_LIMITS)
-    *cursor++ = '>';
-
-  strlcpy(cursor, rule->user, buffer_size - (size_t)(cursor - buffer));
-  return buffer;
-}
-
 static void
 stats_auth(struct Client *client, size_t parc, char *parv[])
 {
@@ -496,12 +458,8 @@ stats_auth(struct Client *client, size_t parc, char *parv[])
     LIST_FOREACH(rule_node, auth->rules.head)
     {
       const struct conf_auth_rule *const rule = rule_node->data;
-      char user[USERLEN + 16];
-
       sendto_one_numeric(client, &me, RPL_STATSILINE, 'I',
-                         string_or_default(auth->spoof, "*"),
-                         _stats_auth_format_user(client, auth, rule, user, sizeof(user)),
-                         rule->host, 0U, auth->klass->name);
+                         string_or_default(auth->spoof, "*"), rule->user, rule->host, 0U, auth->klass->name);
     }
   }
 }

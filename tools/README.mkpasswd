@@ -1,17 +1,17 @@
 This is documentation for the mkpasswd.c included in ircd-hybrid.
 
 This version of mkpasswd can create Blowfish, SHA-256 and SHA-512
-passwords, with either randomly generated or user provided salts.
+passwords. Passwords are prompted for using getpass(); salts are generated
+automatically: 16 characters for SHA-256/SHA-512 and 22 for Blowfish.
+
+Password input follows the system's getpass() behavior, which may fall back
+to standard input if no controlling terminal is available.
 
 Options:
 -5 - Create a SHA-256 password
 -6 - Create a SHA-512 password
 -b - Create a Blowfish password
--R - Specify a raw salt passed directly to crypt()
--l - Specify the length of a random SHA-256/SHA-512 or Blowfish salt
 -r - Specify a number of rounds for a Blowfish password
--p - Specify the plaintext password at the command line
--s - Specify the salt at the command line
 -h - Get full usage help
 -? - Get brief usage help
 

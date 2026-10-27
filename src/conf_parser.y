@@ -157,7 +157,6 @@ reset_block_state(void)
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
-%token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_FLOODTIME
 %token  DEFAULT_JOIN_FLOOD_COUNT
@@ -2202,7 +2201,6 @@ general_item:       general_away_count |
                     general_kline_min_cidr6 |
                     general_stats_e_disabled |
                     general_max_monitor |
-                    general_cycle_on_host_change |
                     general_ident_timeout |
                     general_registration_timeout |
                     error;
@@ -2226,11 +2224,6 @@ general_max_monitor: MAX_MONITOR '=' NUMBER ';'
 general_whowas_history_length: WHOWAS_HISTORY_LENGTH '=' NUMBER ';'
 {
   ConfigGeneral.whowas_history_length = $3;
-};
-
-general_cycle_on_host_change: CYCLE_ON_HOST_CHANGE '=' TBOOL ';'
-{
-  ConfigGeneral.cycle_on_host_change = yylval.number;
 };
 
 general_dline_min_cidr: DLINE_MIN_CIDR '=' NUMBER ';'

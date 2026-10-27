@@ -65,7 +65,6 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "away_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.away_count, "How many AWAY attempts are permitted in away_time"),
   INFO_ENTRY_INIT("general", "away_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.away_time, "How many away_count aways are allowed in this time"),
   INFO_ENTRY_INIT("general", "caller_id_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.caller_id_wait, "Minimum delay between notifying UMODE +g users of messages"),
-  INFO_ENTRY_INIT("general", "cycle_on_host_change", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.cycle_on_host_change, "Send a fake QUIT/JOIN combination on host change"),
   INFO_ENTRY_INIT("general", "default_floodcount", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.default_floodcount, "Startup value of FLOODCOUNT"),
   INFO_ENTRY_INIT("general", "default_floodtime", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.default_floodtime, "Startup value of FLOODTIME"),
   INFO_ENTRY_INIT("general", "disable_dns", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.disable_dns, "Disable DNS lookups for client hostname resolution"),

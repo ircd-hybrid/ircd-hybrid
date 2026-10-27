@@ -203,7 +203,6 @@ cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
 connectfreq                 { return CONNECTFREQ; }
-cycle_on_host_change        { return CYCLE_ON_HOST_CHANGE; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }
 default_floodtime           { return DEFAULT_FLOODTIME; }

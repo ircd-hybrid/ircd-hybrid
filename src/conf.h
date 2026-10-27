@@ -84,7 +84,6 @@ struct config_general_entry
   unsigned int ping_cookie;
   unsigned int disable_ident;
   unsigned int disable_dns;
-  unsigned int cycle_on_host_change;
   unsigned int ident_timeout;
   unsigned int registration_timeout;
 };

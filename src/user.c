@@ -478,9 +478,8 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   if (strcmp(client->host, hostname) == 0)
     return;
 
-  if (ConfigGeneral.cycle_on_host_change)
-    sendto_common_channels_local(client, false, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
-                                 client->name, client->username, client->host);
+  sendto_common_channels_local(client, false, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
+                               client->name, client->username, client->host);
 
   sendto_common_channels_local(client, true, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
                                client->name, client->username, client->host, client->username, hostname);
@@ -496,9 +495,6 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     sendto_one_numeric(client, &me, RPL_VISIBLEHOST, client->host);
     clear_ban_cache_list(&client->channel_member_list);
   }
-
-  if (ConfigGeneral.cycle_on_host_change == 0)
-    return;
 
   list_node_t *node;
   LIST_FOREACH(node, client->channel_member_list.head)

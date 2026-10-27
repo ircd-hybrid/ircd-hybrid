@@ -8,15 +8,15 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 
-#include "io_string.h"
 #include "memory.h"
 #include "module.h"
 
-#include "ircd_module.h"
 #include "client.h"
-#include "parse.h"
+#include "command.h"
+#include "ircd_module.h"
 
 /*! \brief PASS command handler
  *

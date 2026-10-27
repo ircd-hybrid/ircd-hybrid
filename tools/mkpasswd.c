@@ -156,15 +156,14 @@ make_sha512_salt(void)
 static const char *
 make_blowfish_salt(unsigned int rounds)
 {
-  static char salt[BLOWFISH_SALT_LENGTH + sizeof("$2a$00$$")];
+  static char salt[BLOWFISH_SALT_LENGTH + sizeof("$2b$00$")];
   char tbuf[3];
 
   snprintf(tbuf, sizeof(tbuf), "%02u", rounds);
-  snprintf(salt, sizeof(salt), "$2a$%s$", tbuf);
+  snprintf(salt, sizeof(salt), "$2b$%s$", tbuf);
 
   generate_random_salt(&salt[7], BLOWFISH_SALT_LENGTH);
 
-  salt[sizeof(salt) - 2] = '$';
   salt[sizeof(salt) - 1] = '\0';
 
   return salt;

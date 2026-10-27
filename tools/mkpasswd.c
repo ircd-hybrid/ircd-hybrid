@@ -10,6 +10,7 @@
 **
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -51,7 +52,6 @@ main(int argc, char *argv[])
   const char *plaintext = NULL;
   const char *saltpara = NULL;
   const char *salt = NULL;
-  const char *ret = NULL;
   unsigned int flag = 0;
   int length = 0; /* Not Set */
   int rounds = 0; /* Not set, since extended DES needs 25 and blowfish needs
@@ -162,12 +162,20 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  if ((ret = crypt(plaintext, salt)))
-    printf("%s\n", ret);
-  else
-    printf("crypt() failed: invalid or unsupported setting\n");
+  errno = 0;
+  const char *const hash = crypt(plaintext, salt);
+  if (hash == NULL || hash[0] == '*')
+  {
+    if (errno)
+      fprintf(stderr, "crypt() failed: %s\n", strerror(errno));
+    else
+      fprintf(stderr, "crypt() failed\n");
 
-  return 0;
+    return EXIT_FAILURE;
+  }
+
+  printf("%s\n", hash);
+  return EXIT_SUCCESS;
 }
 
 static const char *

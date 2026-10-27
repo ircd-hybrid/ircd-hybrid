@@ -11,10 +11,10 @@
 */
 
 #include <errno.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 #define _XOPEN_SOURCE
 #include <unistd.h>
 #include <fcntl.h>
@@ -35,14 +35,11 @@ enum
 static const char *make_sha256_salt(void);
 static const char *make_sha512_salt(void);
 static const char *make_blowfish_salt(unsigned int);
-static const char *generate_random_salt(char *, unsigned int);
-static const char *generate_poor_salt(char *, unsigned int);
+static void generate_random_salt(char *, size_t);
 static void full_usage(void);
 static void brief_usage(void);
 
-static const char saltChars[] =
-       "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-       /* 0 .. 63, ascii - 64 */
+static const char salt_alphabet[] = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 int
 main(int argc, char *argv[])
@@ -173,43 +170,43 @@ make_blowfish_salt(unsigned int rounds)
   return salt;
 }
 
-static const char *
-generate_poor_salt(char *salt, unsigned int length)
+static void
+generate_random_salt(char *salt, size_t length)
 {
-  srandom(time(NULL));
+  const int fd = open("/dev/random", O_RDONLY);
 
-  for (unsigned int i = 0; i < length; ++i)
-    salt[i] = saltChars[random() % 64];
-
-  return salt;
-}
-
-static const char *
-generate_random_salt(char *salt, unsigned int length)
-{
-  char *buf;
-  int fd;
-
-  if ((fd = open("/dev/random", O_RDONLY)) < 0)
-    return generate_poor_salt(salt, length);
-
-  buf = calloc(1, length);
-
-  if (read(fd, buf, length) != (ssize_t)length)
+  if (fd < 0)
   {
-    close(fd);
-    free(buf);
-
-    return generate_poor_salt(salt, length);
+    perror("Unable to open random source");
+    exit(EXIT_FAILURE);
   }
 
-  for (unsigned int i = 0; i < length; ++i)
-    salt[i] = saltChars[abs(buf[i]) % 64];
+  size_t offset = 0;
+  while (offset < length)
+  {
+    const ssize_t count = read(fd, salt + offset, length - offset);
+    if (count < 0 && errno == EINTR)
+      continue;
 
-  close(fd);
-  free(buf);
+    if (count <= 0)
+    {
+      const int error = count == 0 ? EIO : errno;
+      close(fd);
+      fprintf(stderr, "Unable to read random source: %s\n", strerror(error));
+      exit(EXIT_FAILURE);
+    }
 
-  return salt;
+    offset += (size_t)count;
+  }
+
+  if (close(fd) < 0)
+  {
+    perror("Unable to close random source");
+    exit(EXIT_FAILURE);
+  }
+
+  for (size_t i = 0; i < length; ++i)
+    salt[i] = salt_alphabet[(unsigned char)salt[i] & 0x3fU];
 }
 
 static void
@@ -223,6 +220,7 @@ full_usage(void)
   printf("   default is 4, no more than 6 recommended\n");
   printf("The password is prompted for; salts are generated automatically.\n");
   printf("Example: mkpasswd -6\n");
+
   exit(EXIT_SUCCESS);
 }
 
@@ -234,5 +232,6 @@ brief_usage(void)
   printf(" SHA-512:  mkpasswd -6\n");
   printf("Blowfish:  mkpasswd -b [-r rounds]\n");
   printf("Use -h for full usage\n");
+
   exit(EXIT_SUCCESS);
 }

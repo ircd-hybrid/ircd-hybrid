@@ -36,7 +36,7 @@ mr_pass(struct Client *source, size_t parc, char *parv[])
   assert(client_is_local(source));
 
   if (source->connection->password == NULL)
-    source->connection->password = io_strndup(password, PASSWDLEN);
+    source->connection->password = io_strdup(password);
 }
 
 static struct Command command_table =

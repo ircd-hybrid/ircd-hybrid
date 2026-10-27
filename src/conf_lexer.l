@@ -188,6 +188,7 @@ autoconn                    { return AUTOCONN; }
 away_count                  { return AWAY_COUNT; }
 away_time                   { return AWAY_TIME; }
 bind                        { return T_BIND; }
+bypass                      { return BYPASS; }
 caller_id_wait              { return CALLER_ID_WAIT; }
 can_flood                   { return CAN_FLOOD; }
 channel                     { return CHANNEL; }
@@ -245,6 +246,7 @@ host                        { return HOST; }
 hub                         { return HUB; }
 hub_mask                    { return HUB_MASK; }
 ident_timeout               { return IDENT_TIMEOUT; }
+input_flood                 { return INPUT_FLOOD; }
 invisible_on_connect        { return INVISIBLE_ON_CONNECT; }
 invite_client_count         { return INVITE_CLIENT_COUNT; }
 invite_client_time          { return INVITE_CLIENT_TIME; }
@@ -297,7 +299,6 @@ need_password               { return NEED_PASSWORD; }
 network_description         { return NETWORK_DESCRIPTION; }
 network_name                { return NETWORK_NAME; }
 nick                        { return NICK; }
-no_oper_flood               { return NO_OPER_FLOOD; }
 no_tilde                    { return NO_TILDE; }
 num_bits                    { return NUM_BITS; }
 number_per_cidr             { return NUMBER_PER_CIDR; }

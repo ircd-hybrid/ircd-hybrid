@@ -21,6 +21,8 @@
 * The `general::cycle_on_host_change` directive has been removed. Hostname changes
   now always use `CHGHOST` for clients supporting it and a QUIT/JOIN fallback for
   other clients.
+* The `general::no_oper_flood` directive has been removed. Grant the `bypass:input_flood`
+  operator flag to exempt selected opers from local input throttling.
 * Extended bans and owner/admin channel modes are now always enabled; the corresponding
   `channel::enable_*` directives have been removed.
 * The `serverinfo::max_topic_length` configuration directive has been moved to

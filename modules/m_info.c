@@ -84,7 +84,6 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "max_targets", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_targets, "The maximum number of PRIVMSG/NOTICE targets"),
   INFO_ENTRY_INIT("general", "min_nonwildcard", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard, "Minimum non-wildcard chars in K/D lines"),
   INFO_ENTRY_INIT("general", "min_nonwildcard_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard_simple, "Minimum non-wildcards in gecos bans"),
-  INFO_ENTRY_INIT("general", "no_oper_flood", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.no_oper_flood, "Reduce flood control for operators"),
   INFO_ENTRY_INIT("general", "oper_umodes", INFO_OUTPUT_STRING, &ConfigGeneral.oper_umodes, "Default user modes assigned to operators upon successful OPER"),
   INFO_ENTRY_INIT("general", "opers_bypass_callerid", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.opers_bypass_callerid, "Allows IRC operators to message users who are +g (callerid)"),
   INFO_ENTRY_INIT("general", "pace_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait, "Minimum delay between uses of certain commands"),

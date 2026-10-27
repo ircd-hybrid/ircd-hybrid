@@ -143,6 +143,7 @@ reset_block_state(void)
 %token  AUTOCONN
 %token  AWAY_COUNT
 %token  AWAY_TIME
+%token  BYPASS
 %token  BYTES KBYTES MBYTES
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
@@ -193,6 +194,7 @@ reset_block_state(void)
 %token  HUB
 %token  HUB_MASK
 %token  IDENT_TIMEOUT
+%token  INPUT_FLOOD
 %token  INVISIBLE_ON_CONNECT
 %token  INVITE_CLIENT_COUNT
 %token  INVITE_CLIENT_TIME
@@ -246,7 +248,6 @@ reset_block_state(void)
 %token  NETWORK_DESCRIPTION
 %token  NETWORK_NAME
 %token  NICK
-%token  NO_OPER_FLOOD
 %token  NO_TILDE
 %token  NUM_BITS
 %token  NUMBER_PER_CIDR
@@ -1129,6 +1130,10 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MESSAGE_MASS;
+} | BYPASS ':' INPUT_FLOOD
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.port.value |= OPER_FLAG_BYPASS_INPUT_FLOOD;
 };
 
 
@@ -2180,7 +2185,6 @@ general_item:       general_away_count |
                     general_pace_wait |
                     general_pace_wait_simple |
                     general_short_motd |
-                    general_no_oper_flood |
                     general_max_targets |
                     general_max_away_length |
                     general_oper_umodes |
@@ -2337,11 +2341,6 @@ general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'
 general_short_motd: SHORT_MOTD '=' TBOOL ';'
 {
   ConfigGeneral.short_motd = yylval.number;
-};
-
-general_no_oper_flood: NO_OPER_FLOOD '=' TBOOL ';'
-{
-  ConfigGeneral.no_oper_flood = yylval.number;
 };
 
 general_specials_in_ident: SPECIALS_IN_IDENT '=' NUMBER ';'

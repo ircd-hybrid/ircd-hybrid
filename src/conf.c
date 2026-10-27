@@ -168,7 +168,6 @@ _conf_set_defaults(void)
   ConfigGeneral.pace_wait_simple = 1;
   ConfigGeneral.short_motd = 0;
   ConfigGeneral.ping_cookie = 0;
-  ConfigGeneral.no_oper_flood = 0;
   ConfigGeneral.max_targets = 4;
   ConfigGeneral.oper_umodes = io_strdup("+flsw");
   ConfigGeneral.throttle_count = 1;

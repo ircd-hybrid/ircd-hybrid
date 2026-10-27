@@ -15,7 +15,7 @@
 
 #include "client.h"
 #include "client_input.h"
-#include "conf.h"
+#include "conf_oper.h"
 #include "ircd.h"
 #include "parse.h"
 
@@ -243,7 +243,7 @@ _client_input_should_enforce_user_limits(const struct Client *client)
   assert(client && client_is_local(client));
   assert(client_is_user(client));
 
-  if (ConfigGeneral.no_oper_flood && client_is_oper(client))
+  if (client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_BYPASS_INPUT_FLOOD))
     return false;
 
   if (client_has_flag(client, FLAGS_CANFLOOD))

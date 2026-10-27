@@ -63,6 +63,7 @@ typedef enum
   OPER_FLAG_UNXLINE        = 1 << 26,  /**< Oper can use UNXLINE command */
   OPER_FLAG_XLINE          = 1 << 27,  /**< Oper can use XLINE command */
   OPER_FLAG_MESSAGE_MASS   = 1 << 28,  /**< Oper can send mass messages */
+  OPER_FLAG_BYPASS_INPUT_FLOOD = 1 << 29,  /**< Oper can bypass local input throttling */
 } oper_priv_flags_t;
 
 struct OperItem

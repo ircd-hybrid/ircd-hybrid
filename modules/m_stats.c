@@ -57,59 +57,6 @@
 #include "user_mode.h"
 #include "whowas.h"
 
-static const char *
-oper_privs_as_string(uint32_t flags)
-{
-  static const struct oper_flags
-  {
-    uint32_t flag;
-    unsigned char letter;
-  } flag_table[] = {
-    { OPER_FLAG_ADMIN,          'A' },
-    { OPER_FLAG_CLOSE,          'B' },
-    { OPER_FLAG_CONNECT,        'C' },
-    { OPER_FLAG_CONNECT_REMOTE, 'D' },
-    { OPER_FLAG_DIE,            'E' },
-    { OPER_FLAG_DLINE,          'F' },
-    { OPER_FLAG_GLOBOPS,        'G' },
-    { OPER_FLAG_JOIN_RESV,      'H' },
-    { OPER_FLAG_KILL,           'I' },
-    { OPER_FLAG_KILL_REMOTE,    'J' },
-    { OPER_FLAG_KLINE,          'K' },
-    { OPER_FLAG_LOCOPS,         'L' },
-    { OPER_FLAG_MODULE,         'M' },
-    { OPER_FLAG_NICK_RESV,      'N' },
-    { OPER_FLAG_OPME,           'O' },
-    { OPER_FLAG_REHASH,         'P' },
-    { OPER_FLAG_REMOTEBAN,      'Q' },
-    { OPER_FLAG_RESTART,        'R' },
-    { OPER_FLAG_RESV,           'S' },
-    { OPER_FLAG_SET,            'T' },
-    { OPER_FLAG_SQUIT,          'U' },
-    { OPER_FLAG_SQUIT_REMOTE,   'V' },
-    { OPER_FLAG_UNDLINE,        'W' },
-    { OPER_FLAG_UNKLINE,        'X' },
-    { OPER_FLAG_UNRESV,         'Y' },
-    { OPER_FLAG_UNXLINE,        'Z' },
-    { OPER_FLAG_XLINE,          'b' },
-    { 0, '\0' }
-  };
-
-  static char buf[IO_ARRAY_LENGTH(flag_table)];
-  char *bufptr = buf;
-
-  for (const struct oper_flags *tab = flag_table; tab->flag; ++tab)
-    if (flags & tab->flag)
-      *bufptr++ = tab->letter;
-
-  if (bufptr == buf)
-    *bufptr++ = '0';
-
-  *bufptr = '\0';
-
-  return buf;
-}
-
 static void
 report_shared(struct Client *client)
 {
@@ -233,8 +180,7 @@ stats_operator(struct Client *client, size_t parc, char *parv[])
   {
     const struct OperItem *const oper = node->data;
     sendto_one_numeric(client, &me, RPL_STATSOLINE, 'O', oper->user, oper->host,
-                       oper->name, oper_privs_as_string(oper->oper_privs),
-                       oper->klass->name);
+                       oper->name, oper->klass->name);
   }
 }
 
@@ -536,15 +482,9 @@ stats_operedup(struct Client *client, size_t parc, char *parv[])
     if (client_is_oper(client) || !user_mode_has_flag(target, UMODE_HIDEIDLE))
       duration = time_format_duration(client_get_idle_time(client, target));
 
-    if (client_is_local(client) && client_is_oper(client))
-      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c][%s] %s (%s@%s) Idle: %s",
-                         client_is_admin(target) ? 'A' : 'O',
-                         oper_privs_as_string(target->connection->oper_flags),
-                         target->name, target->username, target->host, duration);
-    else
-      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
-                         client_is_admin(target) ? 'A' : 'O',
-                         target->name, target->username, target->host, duration);
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
+                       client_is_admin(target) ? 'A' : 'O',
+                       target->name, target->username, target->host, duration);
     ++count;
   }
 

@@ -107,11 +107,16 @@ _isupport_clear_lines(void)
 static void
 _isupport_build_lines(void)
 {
-  char buf[IRCD_BUFSIZE];
-  char *bufptr = buf;
-  unsigned int tokens = 0;
-  size_t len = 0;
-  const size_t reserve = HOSTLEN + NICKLEN + strlen(numeric_form(RPL_ISUPPORT)) + 3;  /* +3 for \r\n\0 */
+  char line[IRCD_BUFSIZE];
+  const size_t overhead = HOSTLEN + NICKLEN + sizeof(": 005  \r\n") - 1;
+  const int suffix_length = snprintf(NULL, 0, numeric_form(RPL_ISUPPORT), "");
+
+  if (suffix_length < 0 || (size_t)suffix_length >= sizeof(line) - overhead)
+    return;
+
+  const size_t line_limit = sizeof(line) - overhead - (size_t)suffix_length;
+  size_t line_length = 0;
+  unsigned int token_count = 0;
 
   _isupport_clear_lines();
 
@@ -119,29 +124,41 @@ _isupport_build_lines(void)
   LIST_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *const support = node->data;
-    size_t token_len = snprintf(NULL, 0, len ? " %s" : "%s", support->name);
 
-    if (support->options)
-      token_len += snprintf(NULL, 0, "=%s", support->options);
+    const size_t name_length = strlen(support->name);
+    const size_t options_length = support->options ? strlen(support->options) : 0;
+    if (name_length == 0 || name_length > line_limit ||
+        (support->options && options_length >= line_limit - name_length))
+      continue;
 
-    if (tokens == ISUPPORT_TOKENS_PER_LINE || (len + token_len >= sizeof(buf) - reserve))
+    const size_t token_length = name_length + (support->options ? options_length + 1 : 0);
+    if (token_count && (token_count == ISUPPORT_TOKENS_PER_LINE ||
+                        token_length >= line_limit - line_length))
     {
-      list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
-      bufptr = buf;
-      len = 0;
-      tokens = 0;
+      list_add_tail(io_strdup(line), list_make_node(), &isupport_list_lines);
+      line_length = 0;
+      token_count = 0;
     }
 
-    ++tokens;
+    if (token_count)
+      line[line_length++] = ' ';
 
-    len += snprintf(bufptr + len, sizeof(buf) - len, len ? " %s" : "%s", support->name);
+    memcpy(line + line_length, support->name, name_length);
+    line_length += name_length;
+
     if (support->options)
-      len += snprintf(bufptr + len, sizeof(buf) - len, "=%s", support->options);
+    {
+      line[line_length++] = '=';
+      memcpy(line + line_length, support->options, options_length);
+      line_length += options_length;
+    }
 
+    line[line_length] = '\0';
+    ++token_count;
   }
 
-  if (len > 0)
-    list_add_tail(io_strdup(buf), list_make_node(), &isupport_list_lines);
+  if (token_count)
+    list_add_tail(io_strdup(line), list_make_node(), &isupport_list_lines);
 }
 
 /**

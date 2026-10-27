@@ -143,8 +143,7 @@ mo_rehash(struct Client *source, size_t parc, char *parv[])
   const struct RehashOption *const option = _rehash_option_find(option_name);
   if (option == NULL)
   {
-    sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
-                      option_name);
+    sendto_one_notice(source, &me, ":Invalid REHASH option: %s", option_name);
     return;
   }
 

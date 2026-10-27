@@ -215,8 +215,7 @@ mo_module(struct Client *source, size_t parc, char *parv[])
   const struct module_subcommand *const subcommand = _module_subcommand_find(subcommand_name);
   if (subcommand == NULL)
   {
-    sendto_one_notice(source, &me, ":%s is not a valid option. Choose from LOAD, UNLOAD, RELOAD, LIST",
-                      subcommand_name);
+    sendto_one_notice(source, &me, ":Invalid MODULE option: %s", subcommand_name);
     return;
   }
 

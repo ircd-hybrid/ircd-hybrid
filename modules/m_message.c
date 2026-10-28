@@ -99,7 +99,7 @@ target_is_duplicate(const void *const ptr)
 static bool
 target_check_limit_exceeded(struct Client *source, const char *name)
 {
-  if (target_count >= ConfigGeneral.max_targets)
+  if (ConfigGeneral.max_targets && target_count >= ConfigGeneral.max_targets)
   {
     sendto_one_numeric(source, &me, ERR_TOOMANYTARGETS, name, ConfigGeneral.max_targets);
     return true;

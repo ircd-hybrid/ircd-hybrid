@@ -457,7 +457,12 @@ conf_read_files(bool cold)
   isupport_add("NICKLEN", "%u", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
   isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
-  isupport_add("MAXTARGETS", "%u", ConfigGeneral.max_targets);
+
+  if (ConfigGeneral.max_targets == 0)
+    isupport_add("TARGMAX", "%s", "PRIVMSG:,NOTICE:");
+  else
+    isupport_add("TARGMAX", "PRIVMSG:%u,NOTICE:%u", ConfigGeneral.max_targets, ConfigGeneral.max_targets);
+
   isupport_add("CHANTYPES", "%s", "#");
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANNELLEN", "%d", CHANNELLEN);

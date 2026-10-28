@@ -81,7 +81,7 @@ static const struct InfoEntry info_table[] =
   INFO_ENTRY_INIT("general", "max_monitor", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_monitor, "Maximum nicknames on monitor list"),
   INFO_ENTRY_INIT("general", "max_nick_changes", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_changes, "NICK change threshold setting"),
   INFO_ENTRY_INIT("general", "max_nick_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_time, "NICK flood protection time interval"),
-  INFO_ENTRY_INIT("general", "max_targets", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_targets, "The maximum number of PRIVMSG/NOTICE targets"),
+  INFO_ENTRY_INIT("general", "max_targets", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_targets, "Maximum PRIVMSG/NOTICE targets per message (0 = unlimited)"),
   INFO_ENTRY_INIT("general", "min_nonwildcard", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard, "Minimum non-wildcard chars in K/D lines"),
   INFO_ENTRY_INIT("general", "min_nonwildcard_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard_simple, "Minimum non-wildcards in gecos bans"),
   INFO_ENTRY_INIT("general", "oper_umodes", INFO_OUTPUT_STRING, &ConfigGeneral.oper_umodes, "Default user modes assigned to operators upon successful OPER"),

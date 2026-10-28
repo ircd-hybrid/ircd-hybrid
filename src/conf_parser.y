@@ -1850,6 +1850,10 @@ shared_type_item: KLINE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNXLINE;
+} | REHASH
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.flags.value |= SHARED_REHASH;
 } | RESV
 {
   if (conf_parser_ctx.pass == 2)

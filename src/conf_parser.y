@@ -245,8 +245,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  GENERAL
 %token  HIDDEN
 %token  HIDDEN_NAME
-%token  HIDE_CHANS
-%token  HIDE_IDLE
 %token  HIDE_IDLE_FROM_OPERS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
@@ -319,7 +317,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  PACE_WAIT
 %token  PACE_WAIT_SIMPLE
 %token  PASSWORD
-%token  PATH
 %token  PING_COOKIE
 %token  PING_TIME
 %token  PORT
@@ -392,8 +389,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  UNKLINE
 %token  USE_LOGGING
 %token  USER
-%token  VHOST
-%token  VHOST6
 %token  WARN_NO_CONNECT_BLOCK
 %token  WHOIS
 %token  WHOWAS_HISTORY_LENGTH

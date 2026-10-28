@@ -239,7 +239,6 @@ general                     { return GENERAL; }
 kline_min_cidr              { return KLINE_MIN_CIDR; }
 kline_min_cidr6             { return KLINE_MIN_CIDR6; }
 globops                     { return T_GLOBOPS; }
-have_ident                  { return NEED_IDENT; }
 hidden                      { return HIDDEN; }
 hidden_name                 { return HIDDEN_NAME; }
 hide_idle_from_opers        { return HIDE_IDLE_FROM_OPERS; }
@@ -315,7 +314,6 @@ opme                        { return T_OPME; }
 pace_wait                   { return PACE_WAIT; }
 pace_wait_simple            { return PACE_WAIT_SIMPLE; }
 password                    { return PASSWORD; }
-path                        { return PATH; }
 ping_cookie                 { return PING_COOKIE; }
 ping_time                   { return PING_TIME; }
 port                        { return PORT; }
@@ -349,7 +347,6 @@ size                        { return T_SIZE; }
 specials_in_ident           { return SPECIALS_IN_IDENT; }
 spoof                       { return SPOOF; }
 squit                       { return SQUIT; }
-ssl                         { return T_TLS; }
 stats_e_disabled            { return STATS_E_DISABLED; }
 stats_u_oper_only           { return STATS_U_OPER_ONLY; }
 suffix                      { return SUFFIX; }

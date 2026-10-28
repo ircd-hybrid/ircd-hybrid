@@ -19,7 +19,6 @@
 #include "client.h"
 #include "client_format.h"
 #include "conf.h"
-#include "defaults.h"
 #include "ircd.h"
 #include "ircd_module.h"
 #include "numeric.h"
@@ -73,14 +72,14 @@ static const struct SetOption set_options[] =
     .name = "SPAMNUM",
     .type = SET_OPTION_UINT,
     .value = &GlobalSetOptions.spam_num,
-    .value_min = MIN_SPAM_NUM,
+    .value_min = 0,
     .value_max = INT_MAX
   },
   {
     .name = "SPAMTIME",
     .type = SET_OPTION_UINT,
     .value = &GlobalSetOptions.spam_time,
-    .value_min = MIN_SPAM_TIME,
+    .value_min = 0,
     .value_max = INT_MAX
   },
   {

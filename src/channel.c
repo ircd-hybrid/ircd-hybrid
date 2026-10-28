@@ -632,8 +632,14 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 static void
 _channel_check_spambot_warning(struct Client *client, const char *name)
 {
-  if (GlobalSetOptions.spam_num &&
-      (client->connection->join_part_count >= GlobalSetOptions.spam_num))
+  if (GlobalSetOptions.spam_num == 0 || GlobalSetOptions.spam_time == 0)
+  {
+    client->connection->join_part_count = 0;
+    client->connection->oper_warn_count_down = 0;
+    return;
+  }
+
+  if (client->connection->join_part_count >= GlobalSetOptions.spam_num)
   {
     if (client->connection->oper_warn_count_down)
       --client->connection->oper_warn_count_down;

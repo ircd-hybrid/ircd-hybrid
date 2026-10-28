@@ -142,7 +142,7 @@ DIGIT     [[:digit:]]+
 COMMENT   ("//"|"#").*
 qstring   \"([^\"\\\n]|\\[^\n])*\"
 unclosed  \"([^\"\\\n]|\\[^\n])*\\?
-include   \.include{WS}(\<[^>\n]*\>|\"[^\"\n]*\")
+include   \.include{WS}\"[^\"\n]*\"{WS}";"
 
 %%
 
@@ -446,16 +446,11 @@ conf_lexer_destroy(void)
 static void
 conf_include(void)
 {
-  const char *cursor = yytext + sizeof(".include") - 1;
-
-  while (*cursor == ' ' || *cursor == '\t')
-    ++cursor;
-
-  const char closing_delimiter = *cursor++ == '<' ? '>' : '"';
-  const char *const path_end = strchr(cursor, closing_delimiter);
+  const char *const path_begin = strchr(yytext, '"') + 1;
+  const char *const path_end = strchr(path_begin, '"');
   assert(path_end);  /* The include rule guarantees a matching delimiter. */
 
-  const size_t path_length = (size_t)(path_end - cursor);
+  const size_t path_length = (size_t)(path_end - path_begin);
   if (path_length == 0)
   {
     _conf_lexer_error("Empty include path");
@@ -469,7 +464,7 @@ conf_include(void)
     return;
   }
 
-  memcpy(path, cursor, path_length);
+  memcpy(path, path_begin, path_length);
   path[path_length] = '\0';
 
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)

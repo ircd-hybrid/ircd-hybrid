@@ -31,6 +31,9 @@
 * The `class::connectfreq` configuration directive has been replaced by `connect::retry_delay`
 * Configuration include directives now require double-quoted paths and a terminating
   semicolon: `.include "filename";`. Angle-bracket paths are no longer supported.
+* Configuration sizes and durations now support decimal values, such as `1.5 MiB`
+  and `0.5 minutes`. Each component must resolve exactly to whole bytes or seconds;
+  values are never rounded.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

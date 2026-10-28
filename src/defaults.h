@@ -65,9 +65,6 @@
 #define NETWORK_NAME_DEFAULT "2600net"  /* default for network_name */
 #define NETWORK_DESCRIPTION_DEFAULT "2600net IRC Network"  /* default for network_description */
 
-/* General defaults */
-#define CONNECTTIMEOUT  30      /* Recommended value: 30 */
-
 #define OPER_SPAM_COUNTDOWN   5
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 

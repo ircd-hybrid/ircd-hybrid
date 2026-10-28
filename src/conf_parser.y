@@ -1822,7 +1822,7 @@ connect_entry: CONNECT
 
   reset_block_state();
   block_state.aftype.value = AF_INET;
-  block_state.timeout.value = CONNECTTIMEOUT;
+  block_state.timeout.value = CONNECT_DEFAULT_TIMEOUT_SEC;
 } '{' connect_items '}' ';'
 {
   if (conf_parser_ctx.pass != 2)

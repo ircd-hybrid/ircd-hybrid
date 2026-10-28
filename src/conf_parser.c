@@ -5432,7 +5432,7 @@ yyreduce:
 
   reset_block_state();
   block_state.aftype.value = AF_INET;
-  block_state.timeout.value = CONNECTTIMEOUT;
+  block_state.timeout.value = CONNECT_DEFAULT_TIMEOUT_SEC;
 }
 #line 5438 "conf_parser.c"
     break;

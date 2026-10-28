@@ -13,6 +13,11 @@
 
 #include "conf_class.h"
 
+enum
+{
+  CONNECT_DEFAULT_TIMEOUT_SEC = 30,
+};
+
 typedef enum
 {
   CONNECT_FLAG_ALLOW_AUTO_CONN    = 1 << 0,

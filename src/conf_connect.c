@@ -71,6 +71,7 @@ connect_create(void)
   struct ConnectItem *const connect = io_calloc(sizeof(*connect));
   connect->active = true;
   connect->address_family = AF_INET;
+  connect->timeout = CONNECT_DEFAULT_TIMEOUT_SEC;
 
   list_add_tail(connect, &connect->node, &connect_items);
   return connect;

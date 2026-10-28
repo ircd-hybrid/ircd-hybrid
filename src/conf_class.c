@@ -46,7 +46,6 @@ class_create(void)
 {
   struct ClassItem *const klass = io_calloc(sizeof(*klass));
   klass->active = true;
-  klass->con_freq = CLASS_DEFAULT_CONNECT_FREQ;
   klass->ping_freq = CLASS_DEFAULT_PING_FREQ;
   klass->max_sendq = CLASS_DEFAULT_MAX_SENDQ;
   klass->max_recvq = CLASS_DEFAULT_MAX_RECVQ;

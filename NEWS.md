@@ -28,6 +28,7 @@
 * The `serverinfo::max_topic_length` configuration directive has been moved to
   `channel::max_topic_length`
 * Hostname cloaking settings have been moved from `general {}` to a dedicated `cloak {}` block
+* The `class::connectfreq` configuration directive has been replaced by `connect::retry_delay`
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

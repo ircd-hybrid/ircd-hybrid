@@ -16,6 +16,7 @@
 enum
 {
   CONNECT_DEFAULT_TIMEOUT_SEC = 30,
+  CONNECT_DEFAULT_RETRY_DELAY_SEC = 600,
 };
 
 typedef enum
@@ -53,6 +54,7 @@ struct ConnectItem
   uint32_t flags;
   uint32_t timeout;
   uint32_t ref_count;
+  uintmax_t retry_delay_sec;
   uintmax_t autoconnect_hold_until;
   bool active;
   bool dns_pending;

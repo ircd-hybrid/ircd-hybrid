@@ -96,7 +96,6 @@ static struct
     ping_freq,
     max_perip_local,
     max_perip_global,
-    con_freq,
     min_idle,
     max_idle,
     max_total,
@@ -106,6 +105,11 @@ static struct
     cidr_bitlen_ipv4,
     cidr_bitlen_ipv6,
     number_per_cidr;
+
+  struct
+  {
+    uintmax_t value;
+  } retry_delay_sec;
 } block_state;
 
 static void
@@ -157,7 +161,6 @@ reset_block_state(void)
 %token  CLOAK
 %token  CLOSE
 %token  CONNECT
-%token  CONNECTFREQ
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_FLOODTIME
 %token  DEFAULT_JOIN_FLOOD_COUNT
@@ -273,6 +276,7 @@ reset_block_state(void)
 %token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
+%token  RETRY_DELAY
 %token  SECRET
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SEND_PASSWORD
@@ -1148,7 +1152,6 @@ class_entry: CLASS
   reset_block_state();
 
   block_state.ping_freq.value = CLASS_DEFAULT_PING_FREQ;
-  block_state.con_freq.value  = CLASS_DEFAULT_CONNECT_FREQ;
   block_state.max_sendq.value = CLASS_DEFAULT_MAX_SENDQ;
   block_state.max_recvq.value = CLASS_DEFAULT_MAX_RECVQ;
 } '{' class_items '}' ';'
@@ -1169,7 +1172,6 @@ class_entry: CLASS
   klass->ping_freq = block_state.ping_freq.value;
   klass->max_perip_local = block_state.max_perip_local.value;
   klass->max_perip_global = block_state.max_perip_global.value;
-  klass->con_freq = block_state.con_freq.value;
   klass->max_total = block_state.max_total.value;
   klass->max_sendq = block_state.max_sendq.value;
   klass->max_recvq = block_state.max_recvq.value;
@@ -1204,7 +1206,6 @@ class_item:     class_name |
                 class_number_per_cidr |
                 class_number_per_ip_local |
                 class_number_per_ip_global |
-                class_connectfreq |
                 class_max_channels |
                 class_max_number |
                 class_sendq |
@@ -1236,12 +1237,6 @@ class_number_per_ip_global: NUMBER_PER_IP_GLOBAL '=' NUMBER ';'
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_perip_global.value = $3;
-};
-
-class_connectfreq: CONNECTFREQ '=' timespec ';'
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.con_freq.value = $3;
 };
 
 class_max_channels: MAX_CHANNELS '=' NUMBER ';'
@@ -1823,6 +1818,7 @@ connect_entry: CONNECT
   reset_block_state();
   block_state.aftype.value = AF_INET;
   block_state.timeout.value = CONNECT_DEFAULT_TIMEOUT_SEC;
+  block_state.retry_delay_sec.value = CONNECT_DEFAULT_RETRY_DELAY_SEC;
 } '{' connect_items '}' ';'
 {
   if (conf_parser_ctx.pass != 2)
@@ -1851,6 +1847,7 @@ connect_entry: CONNECT
 
   connect->port = block_state.port.value;
   connect->timeout = block_state.timeout.value;
+  connect->retry_delay_sec = block_state.retry_delay_sec.value;
   connect->address_family = block_state.aftype.value;
   connect->flags = block_state.flags.value;
 
@@ -1872,6 +1869,7 @@ connect_items:  connect_items connect_item | connect_item;
 connect_item:   connect_name |
                 connect_host |
                 connect_timeout |
+                connect_retry_delay |
                 connect_bind |
                 connect_send_password |
                 connect_accept_password |
@@ -1901,6 +1899,12 @@ connect_timeout: TIMEOUT '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
     block_state.timeout.value = $3;
+};
+
+connect_retry_delay: RETRY_DELAY '=' timespec ';'
+{
+  if (conf_parser_ctx.pass == 2)
+    block_state.retry_delay_sec.value = $3;
 };
 
 connect_bind: T_BIND '=' QSTRING ';'

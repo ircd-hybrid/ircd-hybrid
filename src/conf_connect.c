@@ -72,6 +72,7 @@ connect_create(void)
   connect->active = true;
   connect->address_family = AF_INET;
   connect->timeout = CONNECT_DEFAULT_TIMEOUT_SEC;
+  connect->retry_delay_sec = CONNECT_DEFAULT_RETRY_DELAY_SEC;
 
   list_add_tail(connect, &connect->node, &connect_items);
   return connect;

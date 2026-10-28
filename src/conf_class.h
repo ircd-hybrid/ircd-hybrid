@@ -22,7 +22,6 @@
 enum
 {
   CLASS_DEFAULT_PING_FREQ = 120,  /**< Default ping frequency in seconds. */
-  CLASS_DEFAULT_CONNECT_FREQ = 600,  /**< Default server autoconnect frequency in seconds. */
   CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,  /**< Default max send queue size in bytes. */
   CLASS_DEFAULT_MAX_RECVQ = 2560,  /**< Default max receive queue size in bytes. */
 };
@@ -61,7 +60,6 @@ struct ClassItem
   unsigned int ref_count;  /**< Reference count for the class. */
   unsigned int max_sendq;  /**< Maximum send queue size for clients in this class. */
   unsigned int max_recvq;  /**< Maximum receive queue size for clients in this class. */
-  unsigned int con_freq;  /**< Connection frequency for servers in this class. */
   unsigned int ping_freq;  /**< Ping frequency for clients in this class. */
   unsigned int max_total;  /**< Maximum total number of clients in this class. */
   unsigned int max_perip_local;  /**< Maximum number of local clients per IP in this class. */

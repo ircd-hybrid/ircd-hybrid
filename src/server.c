@@ -449,7 +449,7 @@ server_connect_auto(void *unused)
     const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
     if (connect->autoconnect_hold_until > now)
       continue;
-    connect->autoconnect_hold_until = now + connect->klass->con_freq;
+    connect->autoconnect_hold_until = now + connect->retry_delay_sec;
 
     if (connect->klass->ref_count >= connect->klass->max_total)
       continue;
@@ -496,7 +496,7 @@ server_schedule_reconnect(struct Client *client)
     return;
 
   connect->autoconnect_hold_until =
-    io_time_get(IO_TIME_MONOTONIC_SEC) + client_get_active_class(client)->con_freq;
+    io_time_get(IO_TIME_MONOTONIC_SEC) + connect->retry_delay_sec;
 }
 
 struct ConnectItem *

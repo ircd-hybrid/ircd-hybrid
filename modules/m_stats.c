@@ -579,7 +579,6 @@ stats_class(struct Client *client, size_t parc, char *parv[])
     const struct ClassItem *const klass = node->data;
     sendto_one_numeric(client, &me, RPL_STATSYLINE, 'Y',
                        klass->name, klass->ping_freq,
-                       klass->con_freq,
                        klass->max_total, klass->max_sendq,
                        klass->max_recvq,
                        klass->ref_count,

@@ -203,7 +203,6 @@ close                       { return CLOSE; }
 cluster                     { return T_CLUSTER; }
 command                     { return T_COMMAND; }
 connect                     { return CONNECT; }
-connectfreq                 { return CONNECTFREQ; }
 debug                       { return T_DEBUG; }
 default_floodcount          { return DEFAULT_FLOODCOUNT; }
 default_floodtime           { return DEFAULT_FLOODTIME; }
@@ -328,6 +327,7 @@ remoteban                   { return REMOTEBAN; }
 required                    { return REQUIRED; }
 resident                    { return RESIDENT; }
 restart                     { return T_RESTART; }
+retry_delay                 { return RETRY_DELAY; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }
 secret                      { return SECRET; }

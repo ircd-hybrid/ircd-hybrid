@@ -158,13 +158,13 @@ include   \.include{WS}\"[^\"\n]*\"{WS}";"
 {COMMENT}       ;
 {DIGIT}         {
                   unsigned int value;
-                  if (io_parse_uint_range(yytext, 0, INT_MAX, &value) != IO_PARSE_OK)
+                  if (io_parse_uint_range(yytext, 0, UINT_MAX, &value) != IO_PARSE_OK)
                   {
                     _conf_lexer_error("Integer literal out of range");
                     return YYerror;
                   }
 
-                  yylval.number = (int)value;
+                  yylval.number = value;
                   return NUMBER;
                 }
 {qstring}       {
@@ -379,10 +379,6 @@ xline_exempt                { return XLINE_EXEMPT; }
 yes                         { yylval.number = 1; return TBOOL; }
 no                          { yylval.number = 0; return TBOOL; }
 
-years                       { return YEARS; }
-year                        { return YEARS; }
-months                      { return MONTHS; }
-month                       { return MONTHS; }
 weeks                       { return WEEKS; }
 week                        { return WEEKS; }
 days                        { return DAYS; }
@@ -401,11 +397,25 @@ kilobyte                    { return KBYTES; }
 kbytes                      { return KBYTES; }
 kbyte                       { return KBYTES; }
 kb                          { return KBYTES; }
+kibibytes                   { return KIBYTES; }
+kibibyte                    { return KIBYTES; }
+kib                         { return KIBYTES; }
 megabytes                   { return MBYTES; }
 megabyte                    { return MBYTES; }
 mbytes                      { return MBYTES; }
 mbyte                       { return MBYTES; }
 mb                          { return MBYTES; }
+mebibytes                   { return MIBYTES; }
+mebibyte                    { return MIBYTES; }
+mib                         { return MIBYTES; }
+gigabytes                   { return GBYTES; }
+gigabyte                    { return GBYTES; }
+gbytes                      { return GBYTES; }
+gbyte                       { return GBYTES; }
+gb                          { return GBYTES; }
+gibibytes                   { return GIBYTES; }
+gibibyte                    { return GIBYTES; }
+gib                         { return GIBYTES; }
 \.\.                        { return TWODOTS; }
 
 .                           { return (unsigned char)yytext[0]; }

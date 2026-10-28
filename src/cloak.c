@@ -90,7 +90,7 @@ cloak_set_disabled(void)
  * @param value The CIDR length value.
  */
 void
-cloak_set_cidr_len_ipv4(int value)
+cloak_set_cidr_len_ipv4(unsigned int value)
 {
   if (value > 32)
     value = 32;
@@ -108,7 +108,7 @@ cloak_set_cidr_len_ipv4(int value)
  * @param value The CIDR length value.
  */
 void
-cloak_set_cidr_len_ipv6(int value)
+cloak_set_cidr_len_ipv6(unsigned int value)
 {
   if (value > 128)
     value = 128;
@@ -127,7 +127,7 @@ cloak_set_cidr_len_ipv6(int value)
  * @param value The number of bits value.
  */
 void
-cloak_set_num_bits(int value)
+cloak_set_num_bits(unsigned int value)
 {
   if (value == 0)
     value = 64;

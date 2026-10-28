@@ -10,6 +10,7 @@
 %define parse.error verbose
 
 %{
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -132,10 +133,20 @@ reset_block_state(void)
   memset(&block_state, 0, sizeof(block_state));
 }
 
+static bool
+_conf_parser_quantity_add(unsigned int total, unsigned int amount, unsigned int unit, unsigned int *result)
+{
+  if (amount > (UINT_MAX - total) / unit)
+    return false;
+
+  *result = total + amount * unit;
+  return true;
+}
+
 %}
 
 %union {
-  int number;
+  unsigned int number;
   char *string;
 }
 
@@ -148,7 +159,7 @@ reset_block_state(void)
 %token  AWAY_COUNT
 %token  AWAY_TIME
 %token  BYPASS
-%token  BYTES KBYTES MBYTES
+%token  BYTES KBYTES KIBYTES MBYTES MIBYTES GBYTES GIBYTES
 %token  CALLER_ID_WAIT
 %token  CAN_FLOOD
 %token  CHANNEL
@@ -278,7 +289,7 @@ reset_block_state(void)
 %token  RESV_EXEMPT
 %token  RETRY_DELAY
 %token  SECRET
-%token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
+%token  SECONDS MINUTES HOURS DAYS WEEKS
 %token  SEND_PASSWORD
 %token  SENDQ
 %token  SERVERHIDE
@@ -345,10 +356,9 @@ reset_block_state(void)
 
 %token  <string> QSTRING
 %token  <number> NUMBER
-%type  <number> timespec
-%type  <number> timespec_
-%type  <number> sizespec
-%type  <number> sizespec_
+%type  <number> timespec time_components time_unit
+%type  <number> sizespec size_components size_unit
+%type  <number> port_number
 %type  <number> module_attributes module_attributes_items module_attributes_item
 %type  <string> module_string
 %destructor { io_free($$); } module_string
@@ -387,23 +397,86 @@ conf_item:        module_base_path_entry
         ;
 
 
-timespec_: { $$ = 0; } | timespec;
-timespec:  NUMBER timespec_         { $$ = $1 + $2; } |
-           NUMBER SECONDS timespec_ { $$ = $1 + $3; } |
-           NUMBER MINUTES timespec_ { $$ = $1 * 60 + $3; } |
-           NUMBER HOURS timespec_   { $$ = $1 * 60 * 60 + $3; } |
-           NUMBER DAYS timespec_    { $$ = $1 * 60 * 60 * 24 + $3; } |
-           NUMBER WEEKS timespec_   { $$ = $1 * 60 * 60 * 24 * 7 + $3; } |
-           NUMBER MONTHS timespec_  { $$ = $1 * 60 * 60 * 24 * 7 * 4 + $3; } |
-           NUMBER YEARS timespec_   { $$ = $1 * 60 * 60 * 24 * 365 + $3; }
+timespec: NUMBER
+{
+  if ($1 != 0)
+  {
+    yyerror("Nonzero durations require a unit");
+    YYERROR;
+  }
+
+  $$ = 0;
+} | time_components;
+
+time_components: NUMBER time_unit
+{
+  if (!_conf_parser_quantity_add(0, $1, $2, &$$))
+  {
+    yyerror("Duration out of range");
+    YYERROR;
+  }
+} | time_components NUMBER time_unit
+{
+  if (!_conf_parser_quantity_add($1, $2, $3, &$$))
+  {
+    yyerror("Duration out of range");
+    YYERROR;
+  }
+};
+
+time_unit: SECONDS { $$ = 1U; } |
+           MINUTES { $$ = 60U; } |
+           HOURS   { $$ = 60U * 60U; } |
+           DAYS    { $$ = 60U * 60U * 24U; } |
+           WEEKS   { $$ = 60U * 60U * 24U * 7U; }
            ;
 
-sizespec_:  { $$ = 0; } | sizespec;
-sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
-            NUMBER BYTES sizespec_ { $$ = $1 + $3; } |
-            NUMBER KBYTES sizespec_ { $$ = $1 * 1024 + $3; } |
-            NUMBER MBYTES sizespec_ { $$ = $1 * 1024 * 1024 + $3; }
-            ;
+sizespec: NUMBER
+{
+  if ($1 != 0)
+  {
+    yyerror("Nonzero sizes require a unit");
+    YYERROR;
+  }
+
+  $$ = 0;
+} | size_components;
+
+size_components: NUMBER size_unit
+{
+  if (!_conf_parser_quantity_add(0, $1, $2, &$$))
+  {
+    yyerror("Size out of range");
+    YYERROR;
+  }
+} | size_components NUMBER size_unit
+{
+  if (!_conf_parser_quantity_add($1, $2, $3, &$$))
+  {
+    yyerror("Size out of range");
+    YYERROR;
+  }
+};
+
+size_unit: BYTES   { $$ = 1U; } |
+           KBYTES  { $$ = 1000U; } |
+           KIBYTES { $$ = 1024U; } |
+           MBYTES  { $$ = 1000U * 1000U; } |
+           MIBYTES { $$ = 1024U * 1024U; } |
+           GBYTES  { $$ = 1000U * 1000U * 1000U; } |
+           GIBYTES { $$ = 1024U * 1024U * 1024U; }
+           ;
+
+port_number: NUMBER
+{
+  if ($1 > UINT16_MAX)
+  {
+    yyerror("Port out of range");
+    YYERROR;
+  }
+
+  $$ = $1;
+};
 
 
 /***************************************************************************
@@ -583,14 +656,14 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
     conf_error_report("default_max_clients too low, setting to 1");
     ConfigServerInfo.default_max_clients = 1;
   }
-  else if ($3 > MAXCLIENTS_MAX)
+  else if ($3 > (unsigned int)MAXCLIENTS_MAX)
   {
     char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
     conf_error_report(buf);
 
-    ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
+    ConfigServerInfo.default_max_clients = (unsigned int)MAXCLIENTS_MAX;
   }
   else
     ConfigServerInfo.default_max_clients = $3;
@@ -1362,7 +1435,7 @@ listen_port: PORT '=' port_items { reset_block_state(); } ';';
 
 port_items: port_items ',' port_item | port_item;
 
-port_item: NUMBER
+port_item: port_number
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -1373,9 +1446,9 @@ port_item: NUMBER
       break;
     }
 #endif
-    listener_add($1, block_state.addr.buf, block_state.flags.value);
+    listener_add((uint16_t)$1, block_state.addr.buf, block_state.flags.value);
   }
-} | NUMBER TWODOTS NUMBER
+} | port_number TWODOTS port_number
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -1387,8 +1460,8 @@ port_item: NUMBER
     }
 #endif
 
-    for (int i = $1; i <= $3; ++i)
-      listener_add(i, block_state.addr.buf, block_state.flags.value);
+    for (unsigned int port = $1; port <= $3; ++port)
+      listener_add((uint16_t)port, block_state.addr.buf, block_state.flags.value);
   }
 };
 
@@ -1845,7 +1918,7 @@ connect_entry: CONNECT
   connect->accept_password = io_strdup(block_state.rpass.buf);
   connect->send_password = io_strdup(block_state.spass.buf);
 
-  connect->port = block_state.port.value;
+  connect->port = (uint16_t)block_state.port.value;
   connect->timeout = block_state.timeout.value;
   connect->retry_delay_sec = block_state.retry_delay_sec.value;
   connect->address_family = block_state.aftype.value;
@@ -1945,7 +2018,7 @@ connect_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 };
 
-connect_port: PORT '=' NUMBER ';'
+connect_port: PORT '=' port_number ';'
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = $3;

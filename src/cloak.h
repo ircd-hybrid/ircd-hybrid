@@ -16,11 +16,11 @@
 #include "address.h"
 
 extern void cloak_init(void);
-extern void cloak_set_cidr_len_ipv4(int);
-extern void cloak_set_cidr_len_ipv6(int);
+extern void cloak_set_cidr_len_ipv4(unsigned int);
+extern void cloak_set_cidr_len_ipv6(unsigned int);
 extern void cloak_set_disabled(void);
 extern void cloak_set_enabled(void);
-extern void cloak_set_num_bits(int);
+extern void cloak_set_num_bits(unsigned int);
 extern void cloak_set_secret(const char *);
 extern void cloak_set_suffix(const char *);
 extern const char *cloak_compute(const struct io_addr *);

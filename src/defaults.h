@@ -68,8 +68,6 @@
 /* General defaults */
 #define CONNECTTIMEOUT  30      /* Recommended value: 30 */
 
-#define MIN_JOIN_LEAVE_TIME  60
-#define MAX_JOIN_LEAVE_COUNT  25
 #define OPER_SPAM_COUNTDOWN   5
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 

@@ -115,7 +115,7 @@ struct Connection
   uint32_t capab_flags;  /**< Bitmask of server-announced CAPAB features. */
   uint32_t oper_flags;  /**< Bitmask of IRC Operator privilege flags. */
   uint32_t ping_cookie_token;  /**< The challenge token for "ping cookie" authentication, 0 if none pending. */
-  uint32_t join_part_count;  /**< Count of JOIN/PART in less than MIN_JOIN_LEAVE_TIME seconds */
+  uint32_t join_part_count;   /**< JOIN/PART activity counter for spambot detection. */
   uint32_t oper_warn_count_down;  /**< Warn opers of this possible spambot every time this gets to 0 */
   uint32_t received_privmsg_count;
   uintmax_t last_broadcast_id;  /**< ID of the last broadcast this nexthop was part of; for send de-duplication. */

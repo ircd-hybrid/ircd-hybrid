@@ -143,6 +143,48 @@ _conf_parser_quantity_add(unsigned int total, unsigned int amount, unsigned int 
   return true;
 }
 
+enum conf_quantity_status
+{
+  CONF_QUANTITY_OK,
+  CONF_QUANTITY_OUT_OF_RANGE,
+  CONF_QUANTITY_INEXACT,
+};
+
+static enum conf_quantity_status
+_conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned int *result)
+{
+  unsigned int whole = 0;
+
+  const char *fraction = text;
+  while (*fraction != '.')
+  {
+    const unsigned int digit = (unsigned int)(*fraction++ - '0');
+    if (whole > (UINT_MAX - digit) / 10U)
+      return CONF_QUANTITY_OUT_OF_RANGE;
+
+    whole = whole * 10U + digit;
+  }
+
+  ++fraction;
+
+  unsigned int scaled_fraction = 0;
+
+  for (const char *cursor = fraction + strlen(fraction); cursor != fraction;)
+  {
+    const unsigned int digit = (unsigned int)(*--cursor - '0');
+    const unsigned int decimal_tail = digit * (unit % 10U) + scaled_fraction % 10U;
+    if (decimal_tail % 10U != 0)
+      return CONF_QUANTITY_INEXACT;
+
+    scaled_fraction = digit * (unit / 10U) + scaled_fraction / 10U + decimal_tail / 10U;
+  }
+
+  if (!_conf_parser_quantity_add(scaled_fraction, whole, unit, result))
+    return CONF_QUANTITY_OUT_OF_RANGE;
+
+  return CONF_QUANTITY_OK;
+}
+
 %}
 
 %union {
@@ -355,13 +397,14 @@ _conf_parser_quantity_add(unsigned int total, unsigned int amount, unsigned int 
 %token  XLINE_EXEMPT
 
 %token  <string> QSTRING
+%token  <string> DECIMAL
 %token  <number> NUMBER
-%type  <number> timespec time_components time_unit
-%type  <number> sizespec size_components size_unit
+%type  <number> timespec time_components time_component time_unit
+%type  <number> sizespec size_components size_component size_unit
 %type  <number> port_number
 %type  <number> module_attributes module_attributes_items module_attributes_item
 %type  <string> module_string
-%destructor { io_free($$); } module_string
+%destructor { io_free($$); } DECIMAL module_string
 
 %%
 conf:
@@ -408,18 +451,30 @@ timespec: NUMBER
   $$ = 0;
 } | time_components;
 
-time_components: NUMBER time_unit
+time_components: time_component | time_components time_component
+{
+  if (!_conf_parser_quantity_add($1, $2, 1U, &$$))
+  {
+    yyerror("Duration out of range");
+    YYERROR;
+  }
+};
+
+time_component: NUMBER time_unit
 {
   if (!_conf_parser_quantity_add(0, $1, $2, &$$))
   {
     yyerror("Duration out of range");
     YYERROR;
   }
-} | time_components NUMBER time_unit
+} | DECIMAL time_unit
 {
-  if (!_conf_parser_quantity_add($1, $2, $3, &$$))
+  const enum conf_quantity_status status = _conf_parser_quantity_from_decimal($1, $2, &$$);
+  io_free($1);
+
+  if (status != CONF_QUANTITY_OK)
   {
-    yyerror("Duration out of range");
+    yyerror(status == CONF_QUANTITY_INEXACT ? "Duration component must resolve to whole seconds" : "Duration out of range");
     YYERROR;
   }
 };
@@ -442,18 +497,30 @@ sizespec: NUMBER
   $$ = 0;
 } | size_components;
 
-size_components: NUMBER size_unit
+size_components: size_component | size_components size_component
+{
+  if (!_conf_parser_quantity_add($1, $2, 1U, &$$))
+  {
+    yyerror("Size out of range");
+    YYERROR;
+  }
+};
+
+size_component: NUMBER size_unit
 {
   if (!_conf_parser_quantity_add(0, $1, $2, &$$))
   {
     yyerror("Size out of range");
     YYERROR;
   }
-} | size_components NUMBER size_unit
+} | DECIMAL size_unit
 {
-  if (!_conf_parser_quantity_add($1, $2, $3, &$$))
+  const enum conf_quantity_status status = _conf_parser_quantity_from_decimal($1, $2, &$$);
+  io_free($1);
+
+  if (status != CONF_QUANTITY_OK)
   {
-    yyerror("Size out of range");
+    yyerror(status == CONF_QUANTITY_INEXACT ? "Size component must resolve to whole bytes" : "Size out of range");
     YYERROR;
   }
 };

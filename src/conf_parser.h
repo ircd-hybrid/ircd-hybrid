@@ -268,7 +268,8 @@ extern int yydebug;
     XLINE = 469,                   /* XLINE  */
     XLINE_EXEMPT = 470,            /* XLINE_EXEMPT  */
     QSTRING = 471,                 /* QSTRING  */
-    NUMBER = 472                   /* NUMBER  */
+    DECIMAL = 472,                 /* DECIMAL  */
+    NUMBER = 473                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -491,18 +492,19 @@ extern int yydebug;
 #define XLINE 469
 #define XLINE_EXEMPT 470
 #define QSTRING 471
-#define NUMBER 472
+#define DECIMAL 472
+#define NUMBER 473
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 148 "conf_parser.y"
+#line 190 "conf_parser.y"
 
   unsigned int number;
   char *string;
 
-#line 506 "conf_parser.h"
+#line 508 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

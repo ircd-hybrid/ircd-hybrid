@@ -138,7 +138,8 @@ _conf_lexer_read(char *buf, int size)
 %}
 
 WS        [[:blank:]]*
-DIGIT     [[:digit:]]+
+DIGIT     [0-9]+
+decimal   {DIGIT}"."{DIGIT}
 COMMENT   ("//"|"#").*
 qstring   \"([^\"\\\n]|\\[^\n])*\"
 unclosed  \"([^\"\\\n]|\\[^\n])*\\?
@@ -156,6 +157,10 @@ include   \.include{WS}\"[^\"\n]*\"{WS}";"
 \n.*            { strlcpy(conf_line_text, yytext + 1, sizeof(conf_line_text)); ++conf_line_number; yyless(1); }
 {WS}            ;
 {COMMENT}       ;
+{decimal}       {
+                  yylval.string = io_strdup(yytext);
+                  return DECIMAL;
+                }
 {DIGIT}         {
                   unsigned int value;
                   if (io_parse_uint_range(yytext, 0, UINT_MAX, &value) != IO_PARSE_OK)

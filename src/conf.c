@@ -59,7 +59,7 @@ struct config_channel_entry ConfigChannel;
 struct config_cloak_entry ConfigCloak;
 struct config_serverhide_entry ConfigServerHide;
 struct config_general_entry ConfigGeneral;
-struct config_log_entry ConfigLog = { .use_logging = 1 };
+struct config_log_entry ConfigLog = { .use_logging = true };
 struct config_serverinfo_entry ConfigServerInfo;
 struct config_admin_entry ConfigAdminInfo;
 struct conf_parser_context conf_parser_ctx;
@@ -103,12 +103,12 @@ _conf_set_defaults(void)
   ConfigServerInfo.network_description = io_strdup(NETWORK_DESCRIPTION_DEFAULT);
   ConfigServerInfo.default_max_clients = MAXCLIENTS_MAX;
   ConfigServerInfo.max_nick_length = 9;
-  ConfigServerInfo.hub = 0;
+  ConfigServerInfo.hub = false;
 
-  ConfigLog.use_logging = 1;
+  ConfigLog.use_logging = true;
   log_set_enabled(ConfigLog.use_logging);
 
-  ConfigChannel.disable_fake_channels = 0;
+  ConfigChannel.disable_fake_channels = false;
   ConfigChannel.invite_client_count = 10;
   ConfigChannel.invite_client_time = 300;
   ConfigChannel.invite_delay_channel = 5;
@@ -125,14 +125,14 @@ _conf_set_defaults(void)
   ConfigChannel.default_join_flood_count = 18;
   ConfigChannel.default_join_flood_time = 6;
 
-  ConfigServerHide.flatten_links = 0;
+  ConfigServerHide.flatten_links = false;
   ConfigServerHide.flatten_links_delay = 300;
   links_cache_set_timer(ConfigServerHide.flatten_links_delay);
-  ConfigServerHide.hidden = 0;
-  ConfigServerHide.hide_servers = 0;
-  ConfigServerHide.hide_services = 0;
+  ConfigServerHide.hidden = false;
+  ConfigServerHide.hide_servers = false;
+  ConfigServerHide.hide_services = false;
   ConfigServerHide.hidden_name = io_strdup(NETWORK_NAME_DEFAULT);
-  ConfigServerHide.disable_remote_commands = 0;
+  ConfigServerHide.disable_remote_commands = false;
 
   ConfigGeneral.away_count = 2;
   ConfigGeneral.away_time = 10;
@@ -142,9 +142,9 @@ _conf_set_defaults(void)
   ConfigGeneral.dline_min_cidr6 = 48;
   ConfigGeneral.kline_min_cidr = 16;
   ConfigGeneral.kline_min_cidr6 = 48;
-  ConfigGeneral.invisible_on_connect = 1;
-  ConfigGeneral.disable_ident = 0;
-  ConfigGeneral.disable_dns = 0;
+  ConfigGeneral.invisible_on_connect = true;
+  ConfigGeneral.disable_ident = false;
+  ConfigGeneral.disable_dns = false;
   ConfigGeneral.kill_chase_time_limit = 90;
   ConfigGeneral.default_floodcount = 8;
   ConfigGeneral.default_floodtime = 1;
@@ -158,15 +158,15 @@ _conf_set_defaults(void)
   ConfigGeneral.anti_spam_exit_message_time = 0;
   ConfigGeneral.ts_warn_delta = 30;
   ConfigGeneral.ts_max_delta = 600;
-  ConfigGeneral.warn_no_connect_block = 1;
-  ConfigGeneral.stats_e_disabled = 0;
-  ConfigGeneral.stats_u_oper_only = 0;
+  ConfigGeneral.warn_no_connect_block = true;
+  ConfigGeneral.stats_e_disabled = false;
+  ConfigGeneral.stats_u_oper_only = false;
   ConfigGeneral.caller_id_wait = 60;
-  ConfigGeneral.opers_bypass_callerid = 1;
+  ConfigGeneral.opers_bypass_callerid = true;
   ConfigGeneral.pace_wait = 10;
   ConfigGeneral.pace_wait_simple = 1;
-  ConfigGeneral.short_motd = 0;
-  ConfigGeneral.ping_cookie = 0;
+  ConfigGeneral.short_motd = false;
+  ConfigGeneral.ping_cookie = false;
   ConfigGeneral.max_targets = 4;
   ConfigGeneral.oper_umodes = io_strdup("+flsw");
   ConfigGeneral.throttle_count = 1;

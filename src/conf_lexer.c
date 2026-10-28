@@ -3066,12 +3066,12 @@ YY_RULE_SETUP
 case 211:
 YY_RULE_SETUP
 #line 383 "conf_lexer.l"
-{ yylval.number = 1; return TBOOL; }
+{ yylval.boolean = true; return TBOOL; }
 	YY_BREAK
 case 212:
 YY_RULE_SETUP
 #line 384 "conf_lexer.l"
-{ yylval.number = 0; return TBOOL; }
+{ yylval.boolean = false; return TBOOL; }
 	YY_BREAK
 case 213:
 YY_RULE_SETUP

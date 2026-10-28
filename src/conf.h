@@ -27,10 +27,11 @@ enum conf_ban_type
 
 struct conf_parser_context
 {
-  unsigned int boot;
-  unsigned int pass;
   FILE *conf_file;
   module_config_t *module_config;
+  unsigned int pass;
+
+  bool boot;
   bool parse_valid;          /**< No parser or input errors detected during this read. */
   bool module_config_valid;  /**< No errors detected while building the module configuration. */
 };
@@ -61,12 +62,6 @@ struct config_general_entry
   unsigned int max_nick_changes;
   unsigned int ts_max_delta;
   unsigned int ts_warn_delta;
-  unsigned int warn_no_connect_block;
-  unsigned int invisible_on_connect;
-  unsigned int stats_e_disabled;
-  unsigned int stats_u_oper_only;
-  unsigned int short_motd;
-  unsigned int opers_bypass_callerid;
   unsigned int pace_wait;
   unsigned int pace_wait_simple;
   unsigned int max_away_length;
@@ -79,26 +74,31 @@ struct config_general_entry
   unsigned int default_floodtime;
   unsigned int throttle_count;
   unsigned int throttle_time;
-  unsigned int ping_cookie;
-  unsigned int disable_ident;
-  unsigned int disable_dns;
   unsigned int ident_timeout;
   unsigned int registration_timeout;
+  bool warn_no_connect_block;
+  bool invisible_on_connect;
+  bool stats_e_disabled;
+  bool stats_u_oper_only;
+  bool short_motd;
+  bool opers_bypass_callerid;
+  bool ping_cookie;
+  bool disable_ident;
+  bool disable_dns;
 };
 
 struct config_cloak_entry
 {
   char *secret;
   char *suffix;
-  unsigned int enabled;
   unsigned int cidr_len_ipv4;
   unsigned int cidr_len_ipv6;
   unsigned int num_bits;
+  bool enabled;
 };
 
 struct config_channel_entry
 {
-  unsigned int disable_fake_channels;
   unsigned int invite_client_count;
   unsigned int invite_client_time;
   unsigned int invite_delay_channel;
@@ -114,18 +114,19 @@ struct config_channel_entry
   unsigned int max_topic_length;
   unsigned int default_join_flood_count;
   unsigned int default_join_flood_time;
+  bool disable_fake_channels;
 };
 
 struct config_serverhide_entry
 {
   char *hidden_name;
   char *flatten_links_file;
-  unsigned int flatten_links;
   unsigned int flatten_links_delay;
-  unsigned int disable_remote_commands;
-  unsigned int hide_servers;
-  unsigned int hide_services;
-  unsigned int hidden;
+  bool flatten_links;
+  bool disable_remote_commands;
+  bool hide_servers;
+  bool hide_services;
+  bool hidden;
 };
 
 struct config_serverinfo_entry
@@ -138,9 +139,9 @@ struct config_serverinfo_entry
   char *network_description;
   char *tls_private_key_file;
   char *tls_certificate_file;
-  unsigned int hub;
   unsigned int default_max_clients;
   unsigned int max_nick_length;
+  bool hub;
 };
 
 struct config_admin_entry
@@ -152,7 +153,7 @@ struct config_admin_entry
 
 struct config_log_entry
 {
-  unsigned int use_logging;
+  bool use_logging;
 };
 
 extern struct conf_parser_context conf_parser_ctx;

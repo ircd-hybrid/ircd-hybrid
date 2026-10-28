@@ -15,6 +15,7 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include "list.h"
 #include "memory.h"
@@ -247,7 +248,7 @@ info_send(struct Client *client)
         value = buf;
         break;
       case INFO_OUTPUT_BOOLEAN:
-        value = (info->option && *((const unsigned int *const)info->option)) ? "YES" : "NO";
+        value = (info->option && *((const bool *const)info->option)) ? "YES" : "NO";
         break;
       case INFO_OUTPUT_FLOAT:
         snprintf(buf, sizeof(buf), "%f", *((const float *const)info->option));

@@ -380,8 +380,8 @@ whowas_history_length       { return WHOWAS_HISTORY_LENGTH; }
 xline                       { return XLINE; }
 xline_exempt                { return XLINE_EXEMPT; }
 
-yes                         { yylval.number = 1; return TBOOL; }
-no                          { yylval.number = 0; return TBOOL; }
+yes                         { yylval.boolean = true; return TBOOL; }
+no                          { yylval.boolean = false; return TBOOL; }
 
 weeks                       { return WEEKS; }
 week                        { return WEEKS; }

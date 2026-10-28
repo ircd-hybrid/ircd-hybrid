@@ -9,6 +9,10 @@
 
 %define parse.error verbose
 
+%code requires {
+#include <stdbool.h>
+}
+
 %{
 #include <limits.h>
 #include <stdbool.h>
@@ -188,6 +192,7 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %}
 
 %union {
+  bool boolean;
   unsigned int number;
   char *string;
 }
@@ -372,7 +377,7 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  T_UNRESV
 %token  T_UNXLINE
 %token  T_WEBIRC
-%token  <number> TBOOL
+%token  <boolean> TBOOL
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TIMEOUT
@@ -770,7 +775,7 @@ serverinfo_motd_file: MOTD_FILE '=' QSTRING ';'
 serverinfo_hub: HUB '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerInfo.hub = yylval.number;
+    ConfigServerInfo.hub = $3;
 };
 
 
@@ -926,7 +931,7 @@ logging_use_logging: USE_LOGGING '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    ConfigLog.use_logging = yylval.number;
+    ConfigLog.use_logging = $3;
     log_set_enabled(ConfigLog.use_logging);
   }
 };
@@ -1115,7 +1120,7 @@ oper_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (yylval.number)
+  if ($3)
     block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
   else
     block_state.flags.value &= ~OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
@@ -1132,7 +1137,7 @@ oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (yylval.number)
+  if ($3)
     block_state.flags.value |= OPER_CONF_FLAG_REQUIRE_TLS;
   else
     block_state.flags.value &= ~OPER_CONF_FLAG_REQUIRE_TLS;
@@ -1634,7 +1639,7 @@ auth_encrypted: ENCRYPTED '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if (yylval.number)
+    if ($3)
       block_state.flags.value |= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
     else
       block_state.flags.value &= ~CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
@@ -2120,7 +2125,7 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if (yylval.number)
+    if ($3)
       block_state.flags.value |= CONNECT_FLAG_ENCRYPTED_PASSWORD;
     else
       block_state.flags.value &= ~CONNECT_FLAG_ENCRYPTED_PASSWORD;
@@ -2437,22 +2442,22 @@ general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'
 
 general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'
 {
-  ConfigGeneral.invisible_on_connect = yylval.number;
+  ConfigGeneral.invisible_on_connect = $3;
 };
 
 general_warn_no_connect_block: WARN_NO_CONNECT_BLOCK '=' TBOOL ';'
 {
-  ConfigGeneral.warn_no_connect_block = yylval.number;
+  ConfigGeneral.warn_no_connect_block = $3;
 };
 
 general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'
 {
-  ConfigGeneral.stats_e_disabled = yylval.number;
+  ConfigGeneral.stats_e_disabled = $3;
 };
 
 general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'
 {
-  ConfigGeneral.stats_u_oper_only = yylval.number;
+  ConfigGeneral.stats_u_oper_only = $3;
 };
 
 general_pace_wait: PACE_WAIT '=' timespec ';'
@@ -2467,7 +2472,7 @@ general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'
 
 general_opers_bypass_callerid: OPERS_BYPASS_CALLERID '=' TBOOL ';'
 {
-  ConfigGeneral.opers_bypass_callerid = yylval.number;
+  ConfigGeneral.opers_bypass_callerid = $3;
 };
 
 general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'
@@ -2477,7 +2482,7 @@ general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'
 
 general_short_motd: SHORT_MOTD '=' TBOOL ';'
 {
-  ConfigGeneral.short_motd = yylval.number;
+  ConfigGeneral.short_motd = $3;
 };
 
 general_specials_in_ident: SPECIALS_IN_IDENT '=' NUMBER ';'
@@ -2492,17 +2497,17 @@ general_max_targets: MAX_TARGETS '=' NUMBER ';'
 
 general_ping_cookie: PING_COOKIE '=' TBOOL ';'
 {
-  ConfigGeneral.ping_cookie = yylval.number;
+  ConfigGeneral.ping_cookie = $3;
 };
 
 general_disable_ident: DISABLE_IDENT '=' TBOOL ';'
 {
-  ConfigGeneral.disable_ident = yylval.number;
+  ConfigGeneral.disable_ident = $3;
 };
 
 general_disable_dns: DISABLE_DNS '=' TBOOL ';'
 {
-  ConfigGeneral.disable_dns = yylval.number;
+  ConfigGeneral.disable_dns = $3;
 };
 
 general_throttle_count: THROTTLE_COUNT '=' NUMBER ';'
@@ -2577,16 +2582,11 @@ cloak_enabled: ENABLED '=' TBOOL ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if ($3)
-  {
-    ConfigCloak.enabled = true;
+  ConfigCloak.enabled = $3;
+  if (ConfigCloak.enabled)
     cloak_set_enabled();
-  }
   else
-  {
-    ConfigCloak.enabled = false;
     cloak_set_disabled();
-  }
 };
 
 cloak_cidr_len_ipv4: CIDR_LEN_IPV4 '=' NUMBER ';'
@@ -2663,7 +2663,7 @@ channel_item:       channel_max_bans |
 
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {
-  ConfigChannel.disable_fake_channels = yylval.number;
+  ConfigChannel.disable_fake_channels = $3;
 };
 
 channel_invite_client_count: INVITE_CLIENT_COUNT '=' NUMBER ';'
@@ -2754,7 +2754,7 @@ channel_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
 
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'
 {
-  ConfigChannel.default_join_flood_count = yylval.number;
+  ConfigChannel.default_join_flood_count = $3;
 };
 
 channel_default_join_flood_time: DEFAULT_JOIN_FLOOD_TIME '=' timespec ';'
@@ -2782,7 +2782,7 @@ serverhide_item:    serverhide_flatten_links |
 serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.flatten_links = yylval.number;
+    ConfigServerHide.flatten_links = $3;
 };
 
 serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
@@ -2808,19 +2808,19 @@ serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'
 serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.disable_remote_commands = yylval.number;
+    ConfigServerHide.disable_remote_commands = $3;
 };
 
 serverhide_hide_servers: HIDE_SERVERS '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_servers = yylval.number;
+    ConfigServerHide.hide_servers = $3;
 };
 
 serverhide_hide_services: HIDE_SERVICES '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_services = yylval.number;
+    ConfigServerHide.hide_services = $3;
 };
 
 serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
@@ -2835,5 +2835,5 @@ serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'
 serverhide_hidden: HIDDEN '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hidden = yylval.number;
+    ConfigServerHide.hidden = $3;
 };

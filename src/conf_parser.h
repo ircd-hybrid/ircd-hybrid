@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 12 "conf_parser.y"
+
+#include <stdbool.h>
+
+#line 53 "conf_parser.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -497,12 +503,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 190 "conf_parser.y"
+#line 194 "conf_parser.y"
 
+  bool boolean;
   unsigned int number;
   char *string;
 
-#line 506 "conf_parser.h"
+#line 513 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

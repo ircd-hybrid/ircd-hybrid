@@ -195,7 +195,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  ACCEPT_PASSWORD
 %token  ADMIN
 %token  AFTYPE
-%token  ANTI_NICK_FLOOD
 %token  ANTI_SPAM_EXIT_MESSAGE_TIME
 %token  AUTOCONN
 %token  AWAY_COUNT
@@ -2313,7 +2312,6 @@ general_entry: GENERAL '{' general_items '}' ';';
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
                     general_away_time |
-                    general_anti_nick_flood |
                     general_max_nick_time |
                     general_max_nick_changes |
                     general_max_accept |
@@ -2397,11 +2395,6 @@ general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
   ConfigGeneral.kill_chase_time_limit = $3;
-};
-
-general_anti_nick_flood: ANTI_NICK_FLOOD '=' TBOOL ';'
-{
-  ConfigGeneral.anti_nick_flood = yylval.number;
 };
 
 general_max_nick_time: MAX_NICK_TIME '=' timespec ';'

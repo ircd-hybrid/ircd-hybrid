@@ -153,9 +153,8 @@ _conf_set_defaults(void)
   ConfigGeneral.min_nonwildcard_simple = 3;
   ConfigGeneral.max_accept = 50;
   ConfigGeneral.max_away_length = AWAYLEN;
-  ConfigGeneral.anti_nick_flood = 0;
   ConfigGeneral.max_nick_time = 20;
-  ConfigGeneral.max_nick_changes = 5;
+  ConfigGeneral.max_nick_changes = 0;
   ConfigGeneral.anti_spam_exit_message_time = 0;
   ConfigGeneral.ts_warn_delta = 30;
   ConfigGeneral.ts_max_delta = 600;

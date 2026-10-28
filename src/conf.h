@@ -61,7 +61,6 @@ struct config_general_entry
   unsigned int max_nick_changes;
   unsigned int ts_max_delta;
   unsigned int ts_warn_delta;
-  unsigned int anti_nick_flood;
   unsigned int warn_no_connect_block;
   unsigned int invisible_on_connect;
   unsigned int stats_e_disabled;

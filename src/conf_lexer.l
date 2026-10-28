@@ -186,7 +186,6 @@ admin                       { return ADMIN; }
 administrator               { return ADMIN; }
 aftype                      { return AFTYPE; }
 all                         { return T_ALL; }
-anti_nick_flood             { return ANTI_NICK_FLOOD; }
 anti_spam_exit_message_time { return ANTI_SPAM_EXIT_MESSAGE_TIME; }
 auth                        { return IRCD_AUTH; }
 autoconn                    { return AUTOCONN; }

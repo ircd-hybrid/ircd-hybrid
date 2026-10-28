@@ -140,20 +140,22 @@ nick_change_local(struct Client *source, const char *nick)
   assert(source->name[0] && !string_is_empty(nick));
   assert(client_is_local_user(source));
 
-  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
-  if (now - source->connection->nick.last_attempt > ConfigGeneral.max_nick_time)
-    source->connection->nick.count = 0;
-
-  if (ConfigGeneral.anti_nick_flood && !client_is_oper(source) &&
-      (source->connection->nick.count > ConfigGeneral.max_nick_changes))
+  if (ConfigGeneral.max_nick_changes)
   {
-    sendto_one_numeric(source, &me, ERR_NICKTOOFAST,
-                       nick, ConfigGeneral.max_nick_time);
-    return;
-  }
+    const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+    if (now - source->connection->nick.last_attempt > ConfigGeneral.max_nick_time)
+      source->connection->nick.count = 0;
 
-  source->connection->nick.last_attempt = now;
-  source->connection->nick.count++;
+    if (!client_is_oper(source) && source->connection->nick.count > ConfigGeneral.max_nick_changes)
+    {
+      sendto_one_numeric(source, &me, ERR_NICKTOOFAST,
+                         nick, ConfigGeneral.max_nick_time);
+      return;
+    }
+
+    source->connection->nick.last_attempt = now;
+    source->connection->nick.count++;
+  }
 
   bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)

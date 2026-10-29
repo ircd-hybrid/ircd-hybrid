@@ -101,6 +101,13 @@ _conf_lexer_error(const char *format, ...)
   conf_report_error(message);
 }
 
+static void
+_conf_lexer_file_error(const char *operation, int error)
+{
+  conf_parser_ctx.parse_valid = false;
+  conf_report_file_error(operation, conf_file_name, error);
+}
+
 static int
 _conf_lexer_read(char *buf, int size)
 {
@@ -114,7 +121,7 @@ _conf_lexer_read(char *buf, int size)
     {
       if (error != EINTR)
       {
-        _conf_lexer_error("Unable to read configuration file: %s", strerror(error ? error : EIO));
+        _conf_lexer_file_error("read", error ? error : EIO);
         return 0;
       }
 
@@ -486,7 +493,7 @@ conf_include(void)
   if (include_file == NULL)
   {
     const int error = errno;
-    _conf_lexer_error("Unable to open include file '%s': %s", path, strerror(error));
+    _conf_lexer_error("Unable to open include file: %s (path: '%s')", strerror(error), path);
     return;
   }
 
@@ -514,7 +521,7 @@ conf_eof(void)
   if (fclose(conf_parser_ctx.conf_file) == EOF)
   {
     const int error = errno;
-    _conf_lexer_error("Unable to close include file: %s", strerror(error));
+    _conf_lexer_file_error("close", error);
   }
 
   yy_delete_buffer(YY_CURRENT_BUFFER);

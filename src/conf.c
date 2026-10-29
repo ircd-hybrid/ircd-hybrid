@@ -69,14 +69,14 @@ extern unsigned int conf_line_number;
 extern char conf_line_text[];
 extern char conf_file_name[IRCD_BUFSIZE];
 
-static void
-_conf_report_file_error(const char *operation, int error)
+void
+conf_report_file_error(const char *operation, const char *path, int error)
 {
   log_write(LOG_TYPE_IRCD, "Unable to %s configuration file: %s (path: '%s')",
-            operation, strerror(error), ConfigGeneral.configfile);
+            operation, strerror(error), path);
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                  "Unable to %s configuration file: %s (path: '%s')",
-                 operation, strerror(error), ConfigGeneral.configfile);
+                 operation, strerror(error), path);
 }
 
 static void
@@ -257,7 +257,7 @@ _conf_read(FILE *file)
     {
       const int error = errno;
       conf_parser_ctx.parse_valid = false;
-      _conf_report_file_error("rewind", error);
+      conf_report_file_error("rewind", ConfigGeneral.configfile, error);
     }
     else
       _conf_parse(file, 2);
@@ -427,7 +427,7 @@ conf_read_files(bool cold)
   if (file == NULL)
   {
     const int error = errno;
-    _conf_report_file_error("open", error);
+    conf_report_file_error("open", ConfigGeneral.configfile, error);
 
     if (cold)
       exit(EXIT_FAILURE);
@@ -443,7 +443,7 @@ conf_read_files(bool cold)
   if (fclose(file) == EOF)
   {
     const int error = errno;
-    _conf_report_file_error("close", error);
+    conf_report_file_error("close", ConfigGeneral.configfile, error);
   }
 
   if (!success)

@@ -172,6 +172,7 @@ extern void conf_lexer_destroy(void);
 extern bool conf_read_files(bool);
 extern void conf_rehash(void);
 extern void conf_report_error(const char *);
+extern void conf_report_file_error(const char *, const char *, int);
 extern void conf_report_module_error(const char *);
 extern void conf_report_warning(const char *);
 extern void yyerror(const char *);

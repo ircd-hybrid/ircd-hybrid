@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -14,6 +13,7 @@
 #include "client.h"
 #include "conf.h"
 #include "conf_oper.h"
+#include "ircd_defs.h"
 #include "nuh.h"
 #include "numeric.h"
 #include "send.h"

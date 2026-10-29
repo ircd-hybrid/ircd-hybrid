@@ -38,6 +38,8 @@
   `general::max_nick_changes` now enables `NICK` flood protection
 * The `class::min_idle`, `class::max_idle`, and `class::flags` configuration directives
   have been removed
+* The `pseudo::target` directive now accepts server IDs in addition to server names,
+  for example `target = "NickServ@00A";`
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

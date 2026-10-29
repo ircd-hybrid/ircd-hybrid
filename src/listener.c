@@ -119,6 +119,7 @@ static bool
 _listener_finalize(struct Listener *listener)
 {
   char buf[HOSTIPLEN + 1];
+
   if (!address_to_string(&listener->addr, buf, sizeof(buf)))
   {
     log_write(LOG_TYPE_IRCD, "listener_finalize: address_to_string() failed for listener");
@@ -133,7 +134,7 @@ _listener_finalize(struct Listener *listener)
 
   listener->name = io_strdup(buf);
 
-  fde_t *new_fde = comm_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
+  fde_t *const new_fde = comm_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
   if (new_fde == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu",
@@ -144,8 +145,15 @@ _listener_finalize(struct Listener *listener)
 #ifdef TCP_DEFER_ACCEPT
   if (listener_has_flag(listener, LISTENER_DEFER))
   {
-    int timeout = 1;
-    setsockopt(new_fde->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
+    const int timeout = 1;
+
+    if (setsockopt(new_fde->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout)) == -1)
+    {
+      log_write(LOG_TYPE_IRCD, "Failed to set TCP_DEFER_ACCEPT for listener %s/%hu: %s",
+                listener_get_name(listener), listener_get_port(listener), strerror(errno));
+      comm_socket_close(new_fde);
+      return false;
+    }
   }
 #endif
 
@@ -156,7 +164,14 @@ _listener_finalize(struct Listener *listener)
     memset(&afa, 0, sizeof(afa));
 
     strlcpy(afa.af_name, "dataready", sizeof(afa.af_name));
-    setsockopt(new_fde->fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa));
+
+    if (setsockopt(new_fde->fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa)) == -1)
+    {
+      log_write(LOG_TYPE_IRCD, "Failed to set SO_ACCEPTFILTER for listener %s/%hu: %s",
+                listener_get_name(listener), listener_get_port(listener), strerror(errno));
+      comm_socket_close(new_fde);
+      return false;
+    }
   }
 #endif
 

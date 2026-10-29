@@ -92,15 +92,13 @@ _conf_lexer_decode_string(const char *text, size_t length)
 static void
 _conf_lexer_error(const char *format, ...)
 {
-  conf_parser_ctx.parse_valid = false;
-
   char message[IRCD_BUFSIZE];
   va_list args;
   va_start(args, format);
   vsnprintf(message, sizeof(message), format, args);
   va_end(args);
 
-  conf_error_report(message);
+  conf_report_error(message);
 }
 
 static int

@@ -31,7 +31,7 @@ struct conf_parser_context
   module_config_t *module_config;
   unsigned int pass;
 
-  bool parse_valid;          /**< No parser or input errors detected during this read. */
+  bool parse_valid;          /**< No syntax, input, or semantic configuration errors detected during this read. */
   bool module_config_valid;  /**< No errors detected while building the module configuration. */
 };
 
@@ -167,10 +167,12 @@ extern struct config_admin_entry ConfigAdminInfo;
 extern void cleanup_tklines(void *);
 extern void conf_ban_apply(struct Client *, enum conf_ban_type, const char *);
 extern void conf_ban_check_clients(void);
-extern void conf_error_report(const char *);
 extern void conf_lexer_init(FILE *, const char *);
 extern void conf_lexer_destroy(void);
 extern bool conf_read_files(bool);
 extern void conf_rehash(void);
+extern void conf_report_error(const char *);
+extern void conf_report_module_error(const char *);
+extern void conf_report_warning(const char *);
 extern void yyerror(const char *);
 #endif  /* INCLUDED_conf_h */

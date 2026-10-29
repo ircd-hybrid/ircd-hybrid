@@ -553,10 +553,7 @@ module_base_path_entry: MODULE_BASE_PATH '=' module_string ';'
   {
     struct module_error_info error;
     if (module_config_set_base_path(conf_parser_ctx.module_config, $3, &error) != MODULE_SUCCESS)
-    {
-      conf_parser_ctx.module_config_valid = false;
-      conf_error_report(error.message);
-    }
+      conf_report_module_error(error.message);
   }
   io_free($3);
 };
@@ -571,10 +568,7 @@ loadmodule_entry: LOADMODULE module_string module_attributes ';'
   {
     struct module_error_info error;
     if (module_config_add(conf_parser_ctx.module_config, $2, (module_flags_t)$3, &error) != MODULE_SUCCESS)
-    {
-      conf_parser_ctx.module_config_valid = false;
-      conf_error_report(error.message);
-    }
+      conf_report_module_error(error.message);
   }
   io_free($2);
 };
@@ -655,7 +649,7 @@ serverinfo_name: NAME '=' QSTRING ';'
 
   if (!server_is_valid_name($3))
   {
-    conf_error_report("Invalid serverinfo::name");
+    conf_report_error("Invalid serverinfo::name");
     YYABORT;
   }
 
@@ -669,7 +663,7 @@ serverinfo_sid: IRCD_SID '=' QSTRING ';'
 
   if (!client_id_is_valid_sid($3))
   {
-    conf_error_report("Invalid serverinfo::sid");
+    conf_report_error("Invalid serverinfo::sid");
     YYABORT;
   }
 
@@ -716,7 +710,7 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
 
   if ($3 < 1)
   {
-    conf_error_report("default_max_clients too low, setting to 1");
+    conf_report_warning("default_max_clients too low, setting to 1");
     ConfigServerInfo.default_max_clients = 1;
   }
   else if ($3 > (unsigned int)MAXCLIENTS_MAX)
@@ -724,7 +718,7 @@ serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'
     char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "default_max_clients too high, setting to %d", MAXCLIENTS_MAX);
-    conf_error_report(buf);
+    conf_report_warning(buf);
 
     ConfigServerInfo.default_max_clients = (unsigned int)MAXCLIENTS_MAX;
   }
@@ -739,7 +733,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
 
   if ($3 < 9)
   {
-    conf_error_report("max_nick_length too low, setting to 9");
+    conf_report_warning("max_nick_length too low, setting to 9");
     ConfigServerInfo.max_nick_length = 9;
   }
   else if ($3 > NICKLEN)
@@ -747,7 +741,7 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
     char buf[IRCD_BUFSIZE];
 
     snprintf(buf, sizeof(buf), "max_nick_length too high, setting to %d", NICKLEN);
-    conf_error_report(buf);
+    conf_report_warning(buf);
 
     ConfigServerInfo.max_nick_length = NICKLEN;
   }
@@ -1505,7 +1499,7 @@ port_item: port_number
 #ifndef HAVE_TLS
     if (block_state.flags.value & LISTENER_TLS)
     {
-      conf_error_report("TLS not available - port closed");
+      conf_report_error("TLS not available - port closed");
       break;
     }
 #endif
@@ -1518,7 +1512,7 @@ port_item: port_number
 #ifndef HAVE_TLS
     if (block_state.flags.value & LISTENER_TLS)
     {
-      conf_error_report("TLS not available - port closed");
+      conf_report_error("TLS not available - port closed");
       break;
     }
 #endif
@@ -1579,7 +1573,7 @@ auth_entry: IRCD_AUTH
     if (auth)
     {
       if (!conf_auth_add_rule(auth, block_state.user.buf, block_state.host.buf))
-        conf_error_report("Unable to add auth rule");
+        conf_report_error("Unable to add auth rule");
 
       continue;
     }
@@ -1596,7 +1590,7 @@ auth_entry: IRCD_AUTH
 
     auth = conf_auth_add(&spec);
     if (auth == NULL)
-      conf_error_report("Unable to add auth block");
+      conf_report_error("Unable to add auth block");
   }
 };
 
@@ -1692,8 +1686,7 @@ auth_spoof: SPOOF '=' QSTRING ';'
   if (hostname_is_valid(yylval.string))
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
   else
-    log_write(LOG_TYPE_IRCD,
-              "Spoof either is too long or contains invalid characters. Ignoring it.");
+    conf_report_warning("Invalid auth::spoof; ignoring value");
 };
 
 /***************************************************************************
@@ -1999,7 +1992,7 @@ connect_entry: CONNECT
 
   if (block_state.bind.buf[0])
     if (!address_from_string(block_state.bind.buf, &connect->bind_addr))
-      conf_error_report("Invalid IP address for bind address");
+      conf_report_error("Invalid IP address for bind address");
 
   connect_assign_class(connect, block_state.klass.buf);
   connect_dns_lookup(connect);
@@ -2059,9 +2052,9 @@ connect_send_password: SEND_PASSWORD '=' QSTRING ';'
     break;
 
   if (*yylval.string == ':')
-    conf_error_report("Server passwords cannot begin with a colon");
+    conf_report_error("Server passwords cannot begin with a colon");
   else if (strchr(yylval.string, ' '))
-    conf_error_report("Server passwords cannot contain spaces");
+    conf_report_error("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
 };
@@ -2072,9 +2065,9 @@ connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
     break;
 
   if (*yylval.string == ':')
-    conf_error_report("Server passwords cannot begin with a colon");
+    conf_report_error("Server passwords cannot begin with a colon");
   else if (strchr(yylval.string, ' '))
-    conf_error_report("Server passwords cannot contain spaces");
+    conf_report_error("Server passwords cannot contain spaces");
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 };
@@ -2172,7 +2165,7 @@ kill_entry: KILL
   };
 
   if (conf_kill_add(&spec) == NULL)
-    conf_error_report("Unable to add K-line");
+    conf_report_error("Unable to add K-line");
 };
 
 kill_items:     kill_items kill_item | kill_item;
@@ -2228,7 +2221,7 @@ deny_entry: DENY
   };
 
   if (conf_deny_add(&spec) == NULL)
-    conf_error_report("Unable to add D-line");
+    conf_report_error("Unable to add D-line");
 };
 
 deny_items:     deny_items deny_item | deny_item;
@@ -2261,7 +2254,7 @@ exempt_ip: IP '=' QSTRING ';'
     break;
 
   if (conf_exempt_add(yylval.string) == NULL)
-    conf_error_report("Unable to add D-line exemption");
+    conf_report_error("Unable to add D-line exemption");
 };
 
 
@@ -2722,17 +2715,12 @@ channel_max_kick_length: MAX_KICK_LENGTH '=' NUMBER ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if ($3 < 1)
-  {
-    conf_error_report("max_kick_length too low, setting to 9");
-    ConfigChannel.max_kick_length = KICKLEN;
-  }
-  else if ($3 > KICKLEN)
+  if ($3 < 1 || $3 > KICKLEN)
   {
     char buf[IRCD_BUFSIZE];
 
-    snprintf(buf, sizeof(buf), "max_kick_length too high, setting to %d", KICKLEN);
-    conf_error_report(buf);
+    snprintf(buf, sizeof(buf), "max_kick_length out of range, setting to %d", KICKLEN);
+    conf_report_warning(buf);
 
     ConfigChannel.max_kick_length = KICKLEN;
   }

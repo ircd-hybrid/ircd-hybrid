@@ -483,23 +483,44 @@ conf_read_files(bool cold)
   return success;
 }
 
+static void
+_conf_report_diagnostic(const char *severity, const char *message)
+{
+  const char *const line = stripws(conf_line_text);
+  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s: %s",
+            conf_file_name, conf_line_number, severity, message, line);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                 "\"%s\", line %u: %s: %s: %s",
+                 conf_file_name, conf_line_number, severity, message, line);
+}
+
 void
-yyerror(const char *msg)
+conf_report_error(const char *message)
+{
+  conf_parser_ctx.parse_valid = false;
+  _conf_report_diagnostic("Error", message);
+}
+
+void
+conf_report_module_error(const char *message)
+{
+  conf_parser_ctx.module_config_valid = false;
+  _conf_report_diagnostic("Error", message);
+}
+
+void
+conf_report_warning(const char *message)
+{
+  _conf_report_diagnostic("Warning", message);
+}
+
+void
+yyerror(const char *message)
 {
   conf_parser_ctx.parse_valid = false;
 
   if (conf_parser_ctx.pass == 1)
-    conf_error_report(msg);
-}
-
-void
-conf_error_report(const char *msg)
-{
-  const char *const p = stripws(conf_line_text);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "\"%s\", line %u: %s: %s",
-                 conf_file_name, conf_line_number, msg, p);
-  log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s",
-            conf_file_name, conf_line_number, msg, p);
+    _conf_report_diagnostic("Error", message);
 }
 
 static const char *

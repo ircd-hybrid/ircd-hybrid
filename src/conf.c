@@ -380,6 +380,27 @@ _conf_apply_tls(void)
   return tls_configure(&config);
 }
 
+static void
+_conf_update_isupport(void)
+{
+  isupport_add("CASEMAPPING", "%s", "ascii");
+  isupport_add("AWAYLEN", "%u", ConfigGeneral.max_away_length);
+  isupport_add("KICKLEN", "%u", ConfigChannel.max_kick_length);
+  isupport_add("NICKLEN", "%u", ConfigServerInfo.max_nick_length);
+  isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
+  isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
+
+  if (ConfigGeneral.max_targets == 0)
+    isupport_add("TARGMAX", "%s", "PRIVMSG:,NOTICE:");
+  else
+    isupport_add("TARGMAX", "PRIVMSG:%u,NOTICE:%u", ConfigGeneral.max_targets, ConfigGeneral.max_targets);
+
+  isupport_add("CHANTYPES", "%s", "#");
+  isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
+  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
+  isupport_add("TOPICLEN", "%u", ConfigChannel.max_topic_length);
+}
+
 bool
 conf_read_files(bool cold)
 {
@@ -440,23 +461,8 @@ conf_read_files(bool cold)
   }
 
   motd_init();
+  _conf_update_isupport();
 
-  isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("AWAYLEN", "%u", ConfigGeneral.max_away_length);
-  isupport_add("KICKLEN", "%u", ConfigChannel.max_kick_length);
-  isupport_add("NICKLEN", "%u", ConfigServerInfo.max_nick_length);
-  isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
-  isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
-
-  if (ConfigGeneral.max_targets == 0)
-    isupport_add("TARGMAX", "%s", "PRIVMSG:,NOTICE:");
-  else
-    isupport_add("TARGMAX", "PRIVMSG:%u,NOTICE:%u", ConfigGeneral.max_targets, ConfigGeneral.max_targets);
-
-  isupport_add("CHANTYPES", "%s", "#");
-  isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
-  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
-  isupport_add("TOPICLEN", "%u", ConfigChannel.max_topic_length);
   return success;
 }
 

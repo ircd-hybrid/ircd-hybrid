@@ -264,27 +264,6 @@ _conf_read(FILE *file)
 
   module_config_destroy(&conf_parser_ctx.module_config, NULL);
 
-  if (!success)
-  {
-    const char *const reason = conf_parser_ctx.parse_valid ?
-      "Module configuration rejected" : "Configuration parsing failed";
-
-    if (conf_parser_ctx.boot)
-    {
-      log_write(LOG_TYPE_IRCD, "%s; startup aborted", reason);
-      exit(EXIT_FAILURE);
-    }
-
-    log_write(LOG_TYPE_IRCD, "%s; previous module configuration retained", reason);
-  }
-
-  _conf_validate();
-
-  whowas_trim();
-
-  connect_sweep_inactive();
-  class_sweep_inactive();
-
   return success;
 }
 
@@ -401,26 +380,9 @@ _conf_apply_tls(void)
   return tls_configure(&config);
 }
 
-static void
-_conf_handle_tls(bool cold)
-{
-  if (_conf_apply_tls())
-    return;
-
-  if (cold)
-  {
-    log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
-    exit(EXIT_FAILURE);
-  }
-
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "Error reloading TLS settings, check the ircd log");
-}
-
 bool
 conf_read_files(bool cold)
 {
-  conf_parser_ctx.boot = cold;
   FILE *const file = fopen(ConfigGeneral.configfile, "r");
 
   if (file == NULL)
@@ -446,7 +408,36 @@ conf_read_files(bool cold)
   const bool success = _conf_read(file);
   fclose(file);
 
-  _conf_handle_tls(cold);
+  if (!success)
+  {
+    const char *const reason = conf_parser_ctx.parse_valid ?
+      "Module configuration rejected" : "Configuration parsing failed";
+
+    if (cold)
+    {
+      log_write(LOG_TYPE_IRCD, "%s; startup aborted", reason);
+      exit(EXIT_FAILURE);
+    }
+
+    log_write(LOG_TYPE_IRCD, "%s; previous module configuration retained", reason);
+  }
+
+  _conf_validate();
+  whowas_trim();
+  connect_sweep_inactive();
+  class_sweep_inactive();
+
+  if (!_conf_apply_tls())
+  {
+    if (cold)
+    {
+      log_write(LOG_TYPE_IRCD, "Error while initializing TLS");
+      exit(EXIT_FAILURE);
+    }
+
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Error reloading TLS settings, check the ircd log");
+  }
 
   motd_init();
 

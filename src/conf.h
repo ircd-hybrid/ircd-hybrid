@@ -31,7 +31,6 @@ struct conf_parser_context
   module_config_t *module_config;
   unsigned int pass;
 
-  bool boot;
   bool parse_valid;          /**< No parser or input errors detected during this read. */
   bool module_config_valid;  /**< No errors detected while building the module configuration. */
 };

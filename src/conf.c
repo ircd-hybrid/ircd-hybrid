@@ -25,6 +25,7 @@
 #include "misc.h"
 #include "module.h"
 #include "resolver.h"
+#include "tls.h"
 
 #include "client.h"
 #include "client_format.h"
@@ -67,6 +68,16 @@ struct conf_parser_context conf_parser_ctx;
 extern unsigned int conf_line_number;
 extern char conf_line_text[];
 extern char conf_file_name[IRCD_BUFSIZE];
+
+static void
+_conf_report_file_error(const char *operation, int error)
+{
+  log_write(LOG_TYPE_IRCD, "Unable to %s configuration file: %s (path: '%s')",
+            operation, strerror(error), ConfigGeneral.configfile);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                 "Unable to %s configuration file: %s (path: '%s')",
+                 operation, strerror(error), ConfigGeneral.configfile);
+}
 
 static void
 _conf_kill_expire_notice(const struct conf_kill *kill, void *unused)
@@ -244,8 +255,9 @@ _conf_read(FILE *file)
   {
     if (fseek(file, 0, SEEK_SET))
     {
+      const int error = errno;
       conf_parser_ctx.parse_valid = false;
-      conf_error_report("Unable to rewind configuration file");
+      _conf_report_file_error("rewind", error);
     }
     else
       _conf_parse(file, 2);
@@ -258,7 +270,13 @@ _conf_read(FILE *file)
     if (module_manager_replace_config(ircd_module_manager_get(), &conf_parser_ctx.module_config, &error) != MODULE_SUCCESS)
     {
       success = false;
-      conf_error_report(error.message);
+
+      ircd_module_log_error("configuration replacement", &error);
+
+      char message[IRCD_BUFSIZE];
+      ircd_module_format_error("configuration replacement", &error, message, sizeof(message));
+
+      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", message);
     }
   }
 
@@ -408,26 +426,25 @@ conf_read_files(bool cold)
 
   if (file == NULL)
   {
+    const int error = errno;
+    _conf_report_file_error("open", error);
+
     if (cold)
-    {
-      log_write(LOG_TYPE_IRCD, "Unable to read configuration file '%s': %s",
-           ConfigGeneral.configfile, strerror(errno));
       exit(EXIT_FAILURE);
-    }
-    else
-    {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-                     "Unable to read configuration file '%s': %s",
-                     ConfigGeneral.configfile, strerror(errno));
-      return false;
-    }
+
+    return false;
   }
 
   if (!cold)
     _conf_clear();
 
   const bool success = _conf_read(file);
-  fclose(file);
+
+  if (fclose(file) == EOF)
+  {
+    const int error = errno;
+    _conf_report_file_error("close", error);
+  }
 
   if (!success)
   {

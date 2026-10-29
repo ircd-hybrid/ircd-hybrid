@@ -231,7 +231,7 @@ _whois_send_idle_numeric(struct Client *source, const struct Client *target)
     return;
 
   sendto_one_numeric(source, &me, RPL_WHOISIDLE,
-                     target->name, client_get_idle_time(source, target), target->connection->created_real);
+                     target->name, client_get_idle_duration(target), target->connection->created_real);
 }
 
 static void

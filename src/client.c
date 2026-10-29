@@ -17,7 +17,6 @@
 #include "log.h"
 #include "memory.h"
 #include "misc.h"
-#include "rng_mt.h"
 
 #include "accept.h"
 #include "channel_invite.h"
@@ -1048,50 +1047,4 @@ client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
   struct Client *const client =
     _client_create_accepted_local_connection(client_fde, listener, remote_addr, remote_addr_str);
   _client_begin_local_connection_ingress(client);
-}
-
-/**
- * @brief Retrieves the (fake) idle time for a target client.
- *
- * This function calculates the (fake) idle time for a target client based on the
- * configuration of the class it belongs to. If fake idle is not enabled or the
- * target client is the same as the source client, the actual idle time is returned.
- * If the source client has oper mode and hiding idle from opers is not enabled, the
- * actual idle time is also returned. Otherwise, the (fake) idle time is calculated
- * based on the class configuration.
- *
- * @param source Pointer to the source client.
- * @param target Pointer to the target client.
- * @return The calculated (fake) idle time for the target client.
- */
-unsigned int
-client_get_idle_time(const struct Client *source, const struct Client *target)
-{
-  const struct ClassItem *const klass = client_get_active_class(target);
-  if (!(klass->flags & CLASS_FLAGS_FAKE_IDLE) || target == source)
-    return client_get_idle_duration(target);
-
-  if (client_is_oper(source) && !(klass->flags & CLASS_FLAGS_HIDE_IDLE_FROM_OPERS))
-    return client_get_idle_duration(target);
-
-  const unsigned int min_idle = klass->min_idle;
-  const unsigned int max_idle = klass->max_idle;
-  if (min_idle == max_idle)
-    return min_idle;
-
-  unsigned int idle = 0;
-  if (klass->flags & CLASS_FLAGS_RANDOM_IDLE)
-    idle = genrand_int32();
-  else
-    idle = client_get_idle_duration(target);
-
-  if (max_idle)
-    idle %= max_idle;
-  else
-    idle = 0;
-
-  if (idle < min_idle)
-    idle = min_idle + (idle % (max_idle - min_idle));
-
-  return idle;
 }

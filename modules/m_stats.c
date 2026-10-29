@@ -480,7 +480,7 @@ stats_operedup(struct Client *client, size_t parc, char *parv[])
 
     const char *duration = "n/a";
     if (client_is_oper(client) || !user_mode_has_flag(target, UMODE_HIDEIDLE))
-      duration = time_format_duration(client_get_idle_time(client, target));
+      duration = time_format_duration(client_get_idle_duration(target));
 
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",
                        client_is_admin(target) ? 'A' : 'O',

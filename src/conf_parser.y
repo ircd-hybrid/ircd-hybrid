@@ -100,8 +100,6 @@ static struct
     ping_freq,
     max_perip_local,
     max_perip_global,
-    min_idle,
-    max_idle,
     max_total,
     max_sendq,
     max_recvq,
@@ -244,7 +242,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  GENERAL
 %token  HIDDEN
 %token  HIDDEN_NAME
-%token  HIDE_IDLE_FROM_OPERS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
 %token  HOST
@@ -281,7 +278,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  MAX_BANS
 %token  MAX_BANS_LARGE
 %token  MAX_CHANNELS
-%token  MAX_IDLE
 %token  MAX_INVITES
 %token  MAX_KICK_LENGTH
 %token  MAX_MONITOR
@@ -292,7 +288,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  MAX_TARGETS
 %token  MAX_TOPIC_LENGTH
 %token  MESSAGE
-%token  MIN_IDLE
 %token  MIN_NONWILDCARD
 %token  MIN_NONWILDCARD_SIMPLE
 %token  MODULE
@@ -319,7 +314,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  PING_COOKIE
 %token  PING_TIME
 %token  PORT
-%token  RANDOM_IDLE
 %token  REASON
 %token  REGISTRATION_TIMEOUT
 %token  REHASH
@@ -1307,17 +1301,6 @@ class_entry: CLASS
   klass->max_recvq = block_state.max_recvq.value;
   klass->max_channels = block_state.max_channels.value;
 
-  if (block_state.min_idle.value > block_state.max_idle.value)
-  {
-    block_state.min_idle.value = 0;
-    block_state.max_idle.value = 0;
-    block_state.flags.value &= ~CLASS_FLAGS_FAKE_IDLE;
-  }
-
-  klass->flags = block_state.flags.value;
-  klass->min_idle = block_state.min_idle.value;
-  klass->max_idle = block_state.max_idle.value;
-
   bool diff = (klass->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
                klass->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
   klass->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
@@ -1340,9 +1323,6 @@ class_item:     class_name |
                 class_max_number |
                 class_sendq |
                 class_recvq |
-                class_min_idle |
-                class_max_idle |
-                class_flags |
                 error ';' ;
 
 class_name: NAME '=' QSTRING ';'
@@ -1411,42 +1391,6 @@ class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'
   if (conf_parser_ctx.pass == 1)
     block_state.number_per_cidr.value = $3;
 };
-
-class_min_idle: MIN_IDLE '=' timespec ';'
-{
-  if (conf_parser_ctx.pass != 1)
-    break;
-
-  block_state.min_idle.value = $3;
-  block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
-};
-
-class_max_idle: MAX_IDLE '=' timespec ';'
-{
-  if (conf_parser_ctx.pass != 1)
-    break;
-
-  block_state.max_idle.value = $3;
-  block_state.flags.value |= CLASS_FLAGS_FAKE_IDLE;
-};
-
-class_flags: IRCD_FLAGS
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.flags.value &= CLASS_FLAGS_FAKE_IDLE;
-} '=' class_flags_items ';';
-
-class_flags_items: class_flags_items ',' class_flags_item | class_flags_item;
-class_flags_item: RANDOM_IDLE
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.flags.value |= CLASS_FLAGS_RANDOM_IDLE;
-} | HIDE_IDLE_FROM_OPERS
-{
-  if (conf_parser_ctx.pass == 1)
-    block_state.flags.value |= CLASS_FLAGS_HIDE_IDLE_FROM_OPERS;
-};
-
 
 /***************************************************************************
  * listen {} section

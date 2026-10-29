@@ -246,7 +246,6 @@ kline_min_cidr6             { return KLINE_MIN_CIDR6; }
 globops                     { return T_GLOBOPS; }
 hidden                      { return HIDDEN; }
 hidden_name                 { return HIDDEN_NAME; }
-hide_idle_from_opers        { return HIDE_IDLE_FROM_OPERS; }
 hide_servers                { return HIDE_SERVERS; }
 hide_services               { return HIDE_SERVICES; }
 host                        { return HOST; }
@@ -282,7 +281,6 @@ max_away_length             { return MAX_AWAY_LENGTH; }
 max_bans                    { return MAX_BANS; }
 max_bans_large              { return MAX_BANS_LARGE; }
 max_channels                { return MAX_CHANNELS; }
-max_idle                    { return MAX_IDLE; }
 max_invites                 { return MAX_INVITES; }
 max_kick_length             { return MAX_KICK_LENGTH; }
 max_monitor                 { return MAX_MONITOR; }
@@ -293,7 +291,6 @@ max_number                  { return MAX_NUMBER; }
 max_targets                 { return MAX_TARGETS; }
 max_topic_length            { return MAX_TOPIC_LENGTH; }
 message                     { return MESSAGE; }
-min_idle                    { return MIN_IDLE; }
 min_nonwildcard             { return MIN_NONWILDCARD; }
 min_nonwildcard_simple      { return MIN_NONWILDCARD_SIMPLE; }
 module                      { return MODULE; }
@@ -324,7 +321,6 @@ ping_time                   { return PING_TIME; }
 port                        { return PORT; }
 prepend                     { return T_PREPEND; }
 pseudo                      { return T_PSEUDO; }
-random_idle                 { return RANDOM_IDLE; }
 reason                      { return REASON; }
 recvq                       { return T_RECVQ; }
 registration_timeout        { return REGISTRATION_TIMEOUT; }

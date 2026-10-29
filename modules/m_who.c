@@ -200,7 +200,7 @@ _who_send(struct Client *source, const struct Client *target,
   if (_who_reply_includes(who, WHO_FIELD_IDL))
   {
     if (client_is_local(target) && (client_is_oper(source) || target == source))
-      p += snprintf(p, sizeof(buf) - (p - buf), " %u", client_get_idle_time(source, target));
+      p += snprintf(p, sizeof(buf) - (p - buf), " %ju", client_get_idle_duration(target));
     else
       p += snprintf(p, sizeof(buf) - (p - buf), " %u", 0);
   }

@@ -26,16 +26,6 @@ enum
   CLASS_DEFAULT_MAX_RECVQ = 2560,  /**< Default max receive queue size in bytes. */
 };
 
-/**
- * @brief Flags for controlling class behavior.
- */
-enum
-{
-  CLASS_FLAGS_FAKE_IDLE            = 1 << 0,  /**< Flag indicating fake idle is enabled. */
-  CLASS_FLAGS_RANDOM_IDLE          = 1 << 1,  /**< Flag indicating random idle is enabled. */
-  CLASS_FLAGS_HIDE_IDLE_FROM_OPERS = 1 << 2,  /**< Flag indicating idle is hidden from operators. */
-};
-
 enum class_ip_limit_mode
 {
   CLASS_IP_LIMIT_ENFORCE,
@@ -47,8 +37,7 @@ enum class_ip_limit_mode
  * @brief Structure representing a class configuration.
  *
  * This structure contains information about a class configuration,
- * including its name, flags, and various settings such as send/receive
- * queue sizes, idle time limits, and IP address limits.
+ * including its name, ping interval, send/receive queue sizes, and IP address limits.
  */
 struct ClassItem
 {
@@ -64,13 +53,10 @@ struct ClassItem
   unsigned int max_total;  /**< Maximum total number of clients in this class. */
   unsigned int max_perip_local;  /**< Maximum number of local clients per IP in this class. */
   unsigned int max_perip_global;  /**< Maximum number of global clients per IP in this class. */
-  unsigned int min_idle;  /**< Minimum idle time shown in WHOIS for clients in this class. */
-  unsigned int max_idle;  /**< Maximum idle time shown in WHOIS for clients in this class. */
   unsigned int max_channels;  /**< Maximum number of channels clients in this class can join. */
   unsigned int cidr_bitlen_ipv4;  /**< CIDR bit length for IPv4 subnets. */
   unsigned int cidr_bitlen_ipv6;  /**< CIDR bit length for IPv6 subnets. */
   unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet; 0 disables the limit. */
-  unsigned int flags;  /**< Bitwise flags indicating class configuration options. */
 };
 
 /**

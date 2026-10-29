@@ -114,162 +114,158 @@ extern int yydebug;
     GENERAL = 309,                 /* GENERAL  */
     HIDDEN = 310,                  /* HIDDEN  */
     HIDDEN_NAME = 311,             /* HIDDEN_NAME  */
-    HIDE_IDLE_FROM_OPERS = 312,    /* HIDE_IDLE_FROM_OPERS  */
-    HIDE_SERVERS = 313,            /* HIDE_SERVERS  */
-    HIDE_SERVICES = 314,           /* HIDE_SERVICES  */
-    HOST = 315,                    /* HOST  */
-    HUB = 316,                     /* HUB  */
-    HUB_MASK = 317,                /* HUB_MASK  */
-    IDENT_TIMEOUT = 318,           /* IDENT_TIMEOUT  */
-    INPUT_FLOOD = 319,             /* INPUT_FLOOD  */
-    INVISIBLE_ON_CONNECT = 320,    /* INVISIBLE_ON_CONNECT  */
-    INVITE_CLIENT_COUNT = 321,     /* INVITE_CLIENT_COUNT  */
-    INVITE_CLIENT_TIME = 322,      /* INVITE_CLIENT_TIME  */
-    INVITE_DELAY_CHANNEL = 323,    /* INVITE_DELAY_CHANNEL  */
-    INVITE_EXPIRE_TIME = 324,      /* INVITE_EXPIRE_TIME  */
-    IP = 325,                      /* IP  */
-    IRCD_AUTH = 326,               /* IRCD_AUTH  */
-    IRCD_FLAGS = 327,              /* IRCD_FLAGS  */
-    IRCD_SID = 328,                /* IRCD_SID  */
-    JOIN = 329,                    /* JOIN  */
-    KILL = 330,                    /* KILL  */
-    KILL_CHASE_TIME_LIMIT = 331,   /* KILL_CHASE_TIME_LIMIT  */
-    KLINE = 332,                   /* KLINE  */
-    KLINE_EXEMPT = 333,            /* KLINE_EXEMPT  */
-    KLINE_MIN_CIDR = 334,          /* KLINE_MIN_CIDR  */
-    KLINE_MIN_CIDR6 = 335,         /* KLINE_MIN_CIDR6  */
-    KNOCK_CLIENT_COUNT = 336,      /* KNOCK_CLIENT_COUNT  */
-    KNOCK_CLIENT_TIME = 337,       /* KNOCK_CLIENT_TIME  */
-    KNOCK_DELAY_CHANNEL = 338,     /* KNOCK_DELAY_CHANNEL  */
-    LEAF_MASK = 339,               /* LEAF_MASK  */
-    LISTEN = 340,                  /* LISTEN  */
-    LOADMODULE = 341,              /* LOADMODULE  */
-    MASK = 342,                    /* MASK  */
-    MASS = 343,                    /* MASS  */
-    MAX_ACCEPT = 344,              /* MAX_ACCEPT  */
-    MAX_AWAY_LENGTH = 345,         /* MAX_AWAY_LENGTH  */
-    MAX_BANS = 346,                /* MAX_BANS  */
-    MAX_BANS_LARGE = 347,          /* MAX_BANS_LARGE  */
-    MAX_CHANNELS = 348,            /* MAX_CHANNELS  */
-    MAX_IDLE = 349,                /* MAX_IDLE  */
-    MAX_INVITES = 350,             /* MAX_INVITES  */
-    MAX_KICK_LENGTH = 351,         /* MAX_KICK_LENGTH  */
-    MAX_MONITOR = 352,             /* MAX_MONITOR  */
-    MAX_NICK_CHANGES = 353,        /* MAX_NICK_CHANGES  */
-    MAX_NICK_LENGTH = 354,         /* MAX_NICK_LENGTH  */
-    MAX_NICK_TIME = 355,           /* MAX_NICK_TIME  */
-    MAX_NUMBER = 356,              /* MAX_NUMBER  */
-    MAX_TARGETS = 357,             /* MAX_TARGETS  */
-    MAX_TOPIC_LENGTH = 358,        /* MAX_TOPIC_LENGTH  */
-    MESSAGE = 359,                 /* MESSAGE  */
-    MIN_IDLE = 360,                /* MIN_IDLE  */
-    MIN_NONWILDCARD = 361,         /* MIN_NONWILDCARD  */
-    MIN_NONWILDCARD_SIMPLE = 362,  /* MIN_NONWILDCARD_SIMPLE  */
-    MODULE = 363,                  /* MODULE  */
-    MODULE_BASE_PATH = 364,        /* MODULE_BASE_PATH  */
-    MOTD = 365,                    /* MOTD  */
-    MOTD_FILE = 366,               /* MOTD_FILE  */
-    NAME = 367,                    /* NAME  */
-    NEED_IDENT = 368,              /* NEED_IDENT  */
-    NEED_PASSWORD = 369,           /* NEED_PASSWORD  */
-    NETWORK_DESCRIPTION = 370,     /* NETWORK_DESCRIPTION  */
-    NETWORK_NAME = 371,            /* NETWORK_NAME  */
-    NICK = 372,                    /* NICK  */
-    NO_TILDE = 373,                /* NO_TILDE  */
-    NUM_BITS = 374,                /* NUM_BITS  */
-    NUMBER_PER_CIDR = 375,         /* NUMBER_PER_CIDR  */
-    NUMBER_PER_IP_GLOBAL = 376,    /* NUMBER_PER_IP_GLOBAL  */
-    NUMBER_PER_IP_LOCAL = 377,     /* NUMBER_PER_IP_LOCAL  */
-    OPER_UMODES = 378,             /* OPER_UMODES  */
-    OPERATOR = 379,                /* OPERATOR  */
-    OPERS_BYPASS_CALLERID = 380,   /* OPERS_BYPASS_CALLERID  */
-    PACE_WAIT = 381,               /* PACE_WAIT  */
-    PACE_WAIT_SIMPLE = 382,        /* PACE_WAIT_SIMPLE  */
-    PASSWORD = 383,                /* PASSWORD  */
-    PING_COOKIE = 384,             /* PING_COOKIE  */
-    PING_TIME = 385,               /* PING_TIME  */
-    PORT = 386,                    /* PORT  */
-    RANDOM_IDLE = 387,             /* RANDOM_IDLE  */
-    REASON = 388,                  /* REASON  */
-    REGISTRATION_TIMEOUT = 389,    /* REGISTRATION_TIMEOUT  */
-    REHASH = 390,                  /* REHASH  */
-    REMOTE = 391,                  /* REMOTE  */
-    REMOTEBAN = 392,               /* REMOTEBAN  */
-    REQUIRED = 393,                /* REQUIRED  */
-    RESIDENT = 394,                /* RESIDENT  */
-    RESV = 395,                    /* RESV  */
-    RESV_EXEMPT = 396,             /* RESV_EXEMPT  */
-    RETRY_DELAY = 397,             /* RETRY_DELAY  */
-    SECRET = 398,                  /* SECRET  */
-    SECONDS = 399,                 /* SECONDS  */
-    MINUTES = 400,                 /* MINUTES  */
-    HOURS = 401,                   /* HOURS  */
-    DAYS = 402,                    /* DAYS  */
-    WEEKS = 403,                   /* WEEKS  */
-    SEND_PASSWORD = 404,           /* SEND_PASSWORD  */
-    SENDQ = 405,                   /* SENDQ  */
-    SERVERHIDE = 406,              /* SERVERHIDE  */
-    SERVERINFO = 407,              /* SERVERINFO  */
-    SHORT_MOTD = 408,              /* SHORT_MOTD  */
-    SPECIALS_IN_IDENT = 409,       /* SPECIALS_IN_IDENT  */
-    SPOOF = 410,                   /* SPOOF  */
-    SQUIT = 411,                   /* SQUIT  */
-    STATS_E_DISABLED = 412,        /* STATS_E_DISABLED  */
-    STATS_U_OPER_ONLY = 413,       /* STATS_U_OPER_ONLY  */
-    SUFFIX = 414,                  /* SUFFIX  */
-    T_ALL = 415,                   /* T_ALL  */
-    T_BIND = 416,                  /* T_BIND  */
-    T_COMMAND = 417,               /* T_COMMAND  */
-    T_CLUSTER = 418,               /* T_CLUSTER  */
-    T_DEBUG = 419,                 /* T_DEBUG  */
-    T_DLINE = 420,                 /* T_DLINE  */
-    T_FILE = 421,                  /* T_FILE  */
-    T_GLOBOPS = 422,               /* T_GLOBOPS  */
-    T_IPV4 = 423,                  /* T_IPV4  */
-    T_IPV6 = 424,                  /* T_IPV6  */
-    T_LOCOPS = 425,                /* T_LOCOPS  */
-    T_LOG = 426,                   /* T_LOG  */
-    T_OPME = 427,                  /* T_OPME  */
-    T_PREPEND = 428,               /* T_PREPEND  */
-    T_PSEUDO = 429,                /* T_PSEUDO  */
-    T_RECVQ = 430,                 /* T_RECVQ  */
-    T_RESTART = 431,               /* T_RESTART  */
-    T_SERVER = 432,                /* T_SERVER  */
-    T_SERVICE = 433,               /* T_SERVICE  */
-    T_SET = 434,                   /* T_SET  */
-    T_SHARED = 435,                /* T_SHARED  */
-    T_SIZE = 436,                  /* T_SIZE  */
-    T_TARGET = 437,                /* T_TARGET  */
-    T_TLS = 438,                   /* T_TLS  */
-    T_UMODES = 439,                /* T_UMODES  */
-    T_UNDLINE = 440,               /* T_UNDLINE  */
-    T_UNLIMITED = 441,             /* T_UNLIMITED  */
-    T_UNRESV = 442,                /* T_UNRESV  */
-    T_UNXLINE = 443,               /* T_UNXLINE  */
-    T_WEBIRC = 444,                /* T_WEBIRC  */
-    TBOOL = 445,                   /* TBOOL  */
-    THROTTLE_COUNT = 446,          /* THROTTLE_COUNT  */
-    THROTTLE_TIME = 447,           /* THROTTLE_TIME  */
-    TIMEOUT = 448,                 /* TIMEOUT  */
-    TLS_CERTIFICATE_FILE = 449,    /* TLS_CERTIFICATE_FILE  */
-    TLS_CERTIFICATE_FINGERPRINT = 450, /* TLS_CERTIFICATE_FINGERPRINT  */
-    TLS_PRIVATE_KEY_FILE = 451,    /* TLS_PRIVATE_KEY_FILE  */
-    TLS_CONNECTION_REQUIRED = 452, /* TLS_CONNECTION_REQUIRED  */
-    TS_MAX_DELTA = 453,            /* TS_MAX_DELTA  */
-    TS_WARN_DELTA = 454,           /* TS_WARN_DELTA  */
-    TWODOTS = 455,                 /* TWODOTS  */
-    TYPE = 456,                    /* TYPE  */
-    UNKLINE = 457,                 /* UNKLINE  */
-    USE_LOGGING = 458,             /* USE_LOGGING  */
-    USER = 459,                    /* USER  */
-    WARN_NO_CONNECT_BLOCK = 460,   /* WARN_NO_CONNECT_BLOCK  */
-    WHOIS = 461,                   /* WHOIS  */
-    WHOWAS_HISTORY_LENGTH = 462,   /* WHOWAS_HISTORY_LENGTH  */
-    XLINE = 463,                   /* XLINE  */
-    XLINE_EXEMPT = 464,            /* XLINE_EXEMPT  */
-    QSTRING = 465,                 /* QSTRING  */
-    DECIMAL = 466,                 /* DECIMAL  */
-    NUMBER = 467                   /* NUMBER  */
+    HIDE_SERVERS = 312,            /* HIDE_SERVERS  */
+    HIDE_SERVICES = 313,           /* HIDE_SERVICES  */
+    HOST = 314,                    /* HOST  */
+    HUB = 315,                     /* HUB  */
+    HUB_MASK = 316,                /* HUB_MASK  */
+    IDENT_TIMEOUT = 317,           /* IDENT_TIMEOUT  */
+    INPUT_FLOOD = 318,             /* INPUT_FLOOD  */
+    INVISIBLE_ON_CONNECT = 319,    /* INVISIBLE_ON_CONNECT  */
+    INVITE_CLIENT_COUNT = 320,     /* INVITE_CLIENT_COUNT  */
+    INVITE_CLIENT_TIME = 321,      /* INVITE_CLIENT_TIME  */
+    INVITE_DELAY_CHANNEL = 322,    /* INVITE_DELAY_CHANNEL  */
+    INVITE_EXPIRE_TIME = 323,      /* INVITE_EXPIRE_TIME  */
+    IP = 324,                      /* IP  */
+    IRCD_AUTH = 325,               /* IRCD_AUTH  */
+    IRCD_FLAGS = 326,              /* IRCD_FLAGS  */
+    IRCD_SID = 327,                /* IRCD_SID  */
+    JOIN = 328,                    /* JOIN  */
+    KILL = 329,                    /* KILL  */
+    KILL_CHASE_TIME_LIMIT = 330,   /* KILL_CHASE_TIME_LIMIT  */
+    KLINE = 331,                   /* KLINE  */
+    KLINE_EXEMPT = 332,            /* KLINE_EXEMPT  */
+    KLINE_MIN_CIDR = 333,          /* KLINE_MIN_CIDR  */
+    KLINE_MIN_CIDR6 = 334,         /* KLINE_MIN_CIDR6  */
+    KNOCK_CLIENT_COUNT = 335,      /* KNOCK_CLIENT_COUNT  */
+    KNOCK_CLIENT_TIME = 336,       /* KNOCK_CLIENT_TIME  */
+    KNOCK_DELAY_CHANNEL = 337,     /* KNOCK_DELAY_CHANNEL  */
+    LEAF_MASK = 338,               /* LEAF_MASK  */
+    LISTEN = 339,                  /* LISTEN  */
+    LOADMODULE = 340,              /* LOADMODULE  */
+    MASK = 341,                    /* MASK  */
+    MASS = 342,                    /* MASS  */
+    MAX_ACCEPT = 343,              /* MAX_ACCEPT  */
+    MAX_AWAY_LENGTH = 344,         /* MAX_AWAY_LENGTH  */
+    MAX_BANS = 345,                /* MAX_BANS  */
+    MAX_BANS_LARGE = 346,          /* MAX_BANS_LARGE  */
+    MAX_CHANNELS = 347,            /* MAX_CHANNELS  */
+    MAX_INVITES = 348,             /* MAX_INVITES  */
+    MAX_KICK_LENGTH = 349,         /* MAX_KICK_LENGTH  */
+    MAX_MONITOR = 350,             /* MAX_MONITOR  */
+    MAX_NICK_CHANGES = 351,        /* MAX_NICK_CHANGES  */
+    MAX_NICK_LENGTH = 352,         /* MAX_NICK_LENGTH  */
+    MAX_NICK_TIME = 353,           /* MAX_NICK_TIME  */
+    MAX_NUMBER = 354,              /* MAX_NUMBER  */
+    MAX_TARGETS = 355,             /* MAX_TARGETS  */
+    MAX_TOPIC_LENGTH = 356,        /* MAX_TOPIC_LENGTH  */
+    MESSAGE = 357,                 /* MESSAGE  */
+    MIN_NONWILDCARD = 358,         /* MIN_NONWILDCARD  */
+    MIN_NONWILDCARD_SIMPLE = 359,  /* MIN_NONWILDCARD_SIMPLE  */
+    MODULE = 360,                  /* MODULE  */
+    MODULE_BASE_PATH = 361,        /* MODULE_BASE_PATH  */
+    MOTD = 362,                    /* MOTD  */
+    MOTD_FILE = 363,               /* MOTD_FILE  */
+    NAME = 364,                    /* NAME  */
+    NEED_IDENT = 365,              /* NEED_IDENT  */
+    NEED_PASSWORD = 366,           /* NEED_PASSWORD  */
+    NETWORK_DESCRIPTION = 367,     /* NETWORK_DESCRIPTION  */
+    NETWORK_NAME = 368,            /* NETWORK_NAME  */
+    NICK = 369,                    /* NICK  */
+    NO_TILDE = 370,                /* NO_TILDE  */
+    NUM_BITS = 371,                /* NUM_BITS  */
+    NUMBER_PER_CIDR = 372,         /* NUMBER_PER_CIDR  */
+    NUMBER_PER_IP_GLOBAL = 373,    /* NUMBER_PER_IP_GLOBAL  */
+    NUMBER_PER_IP_LOCAL = 374,     /* NUMBER_PER_IP_LOCAL  */
+    OPER_UMODES = 375,             /* OPER_UMODES  */
+    OPERATOR = 376,                /* OPERATOR  */
+    OPERS_BYPASS_CALLERID = 377,   /* OPERS_BYPASS_CALLERID  */
+    PACE_WAIT = 378,               /* PACE_WAIT  */
+    PACE_WAIT_SIMPLE = 379,        /* PACE_WAIT_SIMPLE  */
+    PASSWORD = 380,                /* PASSWORD  */
+    PING_COOKIE = 381,             /* PING_COOKIE  */
+    PING_TIME = 382,               /* PING_TIME  */
+    PORT = 383,                    /* PORT  */
+    REASON = 384,                  /* REASON  */
+    REGISTRATION_TIMEOUT = 385,    /* REGISTRATION_TIMEOUT  */
+    REHASH = 386,                  /* REHASH  */
+    REMOTE = 387,                  /* REMOTE  */
+    REMOTEBAN = 388,               /* REMOTEBAN  */
+    REQUIRED = 389,                /* REQUIRED  */
+    RESIDENT = 390,                /* RESIDENT  */
+    RESV = 391,                    /* RESV  */
+    RESV_EXEMPT = 392,             /* RESV_EXEMPT  */
+    RETRY_DELAY = 393,             /* RETRY_DELAY  */
+    SECRET = 394,                  /* SECRET  */
+    SECONDS = 395,                 /* SECONDS  */
+    MINUTES = 396,                 /* MINUTES  */
+    HOURS = 397,                   /* HOURS  */
+    DAYS = 398,                    /* DAYS  */
+    WEEKS = 399,                   /* WEEKS  */
+    SEND_PASSWORD = 400,           /* SEND_PASSWORD  */
+    SENDQ = 401,                   /* SENDQ  */
+    SERVERHIDE = 402,              /* SERVERHIDE  */
+    SERVERINFO = 403,              /* SERVERINFO  */
+    SHORT_MOTD = 404,              /* SHORT_MOTD  */
+    SPECIALS_IN_IDENT = 405,       /* SPECIALS_IN_IDENT  */
+    SPOOF = 406,                   /* SPOOF  */
+    SQUIT = 407,                   /* SQUIT  */
+    STATS_E_DISABLED = 408,        /* STATS_E_DISABLED  */
+    STATS_U_OPER_ONLY = 409,       /* STATS_U_OPER_ONLY  */
+    SUFFIX = 410,                  /* SUFFIX  */
+    T_ALL = 411,                   /* T_ALL  */
+    T_BIND = 412,                  /* T_BIND  */
+    T_COMMAND = 413,               /* T_COMMAND  */
+    T_CLUSTER = 414,               /* T_CLUSTER  */
+    T_DEBUG = 415,                 /* T_DEBUG  */
+    T_DLINE = 416,                 /* T_DLINE  */
+    T_FILE = 417,                  /* T_FILE  */
+    T_GLOBOPS = 418,               /* T_GLOBOPS  */
+    T_IPV4 = 419,                  /* T_IPV4  */
+    T_IPV6 = 420,                  /* T_IPV6  */
+    T_LOCOPS = 421,                /* T_LOCOPS  */
+    T_LOG = 422,                   /* T_LOG  */
+    T_OPME = 423,                  /* T_OPME  */
+    T_PREPEND = 424,               /* T_PREPEND  */
+    T_PSEUDO = 425,                /* T_PSEUDO  */
+    T_RECVQ = 426,                 /* T_RECVQ  */
+    T_RESTART = 427,               /* T_RESTART  */
+    T_SERVER = 428,                /* T_SERVER  */
+    T_SERVICE = 429,               /* T_SERVICE  */
+    T_SET = 430,                   /* T_SET  */
+    T_SHARED = 431,                /* T_SHARED  */
+    T_SIZE = 432,                  /* T_SIZE  */
+    T_TARGET = 433,                /* T_TARGET  */
+    T_TLS = 434,                   /* T_TLS  */
+    T_UMODES = 435,                /* T_UMODES  */
+    T_UNDLINE = 436,               /* T_UNDLINE  */
+    T_UNLIMITED = 437,             /* T_UNLIMITED  */
+    T_UNRESV = 438,                /* T_UNRESV  */
+    T_UNXLINE = 439,               /* T_UNXLINE  */
+    T_WEBIRC = 440,                /* T_WEBIRC  */
+    TBOOL = 441,                   /* TBOOL  */
+    THROTTLE_COUNT = 442,          /* THROTTLE_COUNT  */
+    THROTTLE_TIME = 443,           /* THROTTLE_TIME  */
+    TIMEOUT = 444,                 /* TIMEOUT  */
+    TLS_CERTIFICATE_FILE = 445,    /* TLS_CERTIFICATE_FILE  */
+    TLS_CERTIFICATE_FINGERPRINT = 446, /* TLS_CERTIFICATE_FINGERPRINT  */
+    TLS_PRIVATE_KEY_FILE = 447,    /* TLS_PRIVATE_KEY_FILE  */
+    TLS_CONNECTION_REQUIRED = 448, /* TLS_CONNECTION_REQUIRED  */
+    TS_MAX_DELTA = 449,            /* TS_MAX_DELTA  */
+    TS_WARN_DELTA = 450,           /* TS_WARN_DELTA  */
+    TWODOTS = 451,                 /* TWODOTS  */
+    TYPE = 452,                    /* TYPE  */
+    UNKLINE = 453,                 /* UNKLINE  */
+    USE_LOGGING = 454,             /* USE_LOGGING  */
+    USER = 455,                    /* USER  */
+    WARN_NO_CONNECT_BLOCK = 456,   /* WARN_NO_CONNECT_BLOCK  */
+    WHOIS = 457,                   /* WHOIS  */
+    WHOWAS_HISTORY_LENGTH = 458,   /* WHOWAS_HISTORY_LENGTH  */
+    XLINE = 459,                   /* XLINE  */
+    XLINE_EXEMPT = 460,            /* XLINE_EXEMPT  */
+    QSTRING = 461,                 /* QSTRING  */
+    DECIMAL = 462,                 /* DECIMAL  */
+    NUMBER = 463                   /* NUMBER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -332,174 +328,170 @@ extern int yydebug;
 #define GENERAL 309
 #define HIDDEN 310
 #define HIDDEN_NAME 311
-#define HIDE_IDLE_FROM_OPERS 312
-#define HIDE_SERVERS 313
-#define HIDE_SERVICES 314
-#define HOST 315
-#define HUB 316
-#define HUB_MASK 317
-#define IDENT_TIMEOUT 318
-#define INPUT_FLOOD 319
-#define INVISIBLE_ON_CONNECT 320
-#define INVITE_CLIENT_COUNT 321
-#define INVITE_CLIENT_TIME 322
-#define INVITE_DELAY_CHANNEL 323
-#define INVITE_EXPIRE_TIME 324
-#define IP 325
-#define IRCD_AUTH 326
-#define IRCD_FLAGS 327
-#define IRCD_SID 328
-#define JOIN 329
-#define KILL 330
-#define KILL_CHASE_TIME_LIMIT 331
-#define KLINE 332
-#define KLINE_EXEMPT 333
-#define KLINE_MIN_CIDR 334
-#define KLINE_MIN_CIDR6 335
-#define KNOCK_CLIENT_COUNT 336
-#define KNOCK_CLIENT_TIME 337
-#define KNOCK_DELAY_CHANNEL 338
-#define LEAF_MASK 339
-#define LISTEN 340
-#define LOADMODULE 341
-#define MASK 342
-#define MASS 343
-#define MAX_ACCEPT 344
-#define MAX_AWAY_LENGTH 345
-#define MAX_BANS 346
-#define MAX_BANS_LARGE 347
-#define MAX_CHANNELS 348
-#define MAX_IDLE 349
-#define MAX_INVITES 350
-#define MAX_KICK_LENGTH 351
-#define MAX_MONITOR 352
-#define MAX_NICK_CHANGES 353
-#define MAX_NICK_LENGTH 354
-#define MAX_NICK_TIME 355
-#define MAX_NUMBER 356
-#define MAX_TARGETS 357
-#define MAX_TOPIC_LENGTH 358
-#define MESSAGE 359
-#define MIN_IDLE 360
-#define MIN_NONWILDCARD 361
-#define MIN_NONWILDCARD_SIMPLE 362
-#define MODULE 363
-#define MODULE_BASE_PATH 364
-#define MOTD 365
-#define MOTD_FILE 366
-#define NAME 367
-#define NEED_IDENT 368
-#define NEED_PASSWORD 369
-#define NETWORK_DESCRIPTION 370
-#define NETWORK_NAME 371
-#define NICK 372
-#define NO_TILDE 373
-#define NUM_BITS 374
-#define NUMBER_PER_CIDR 375
-#define NUMBER_PER_IP_GLOBAL 376
-#define NUMBER_PER_IP_LOCAL 377
-#define OPER_UMODES 378
-#define OPERATOR 379
-#define OPERS_BYPASS_CALLERID 380
-#define PACE_WAIT 381
-#define PACE_WAIT_SIMPLE 382
-#define PASSWORD 383
-#define PING_COOKIE 384
-#define PING_TIME 385
-#define PORT 386
-#define RANDOM_IDLE 387
-#define REASON 388
-#define REGISTRATION_TIMEOUT 389
-#define REHASH 390
-#define REMOTE 391
-#define REMOTEBAN 392
-#define REQUIRED 393
-#define RESIDENT 394
-#define RESV 395
-#define RESV_EXEMPT 396
-#define RETRY_DELAY 397
-#define SECRET 398
-#define SECONDS 399
-#define MINUTES 400
-#define HOURS 401
-#define DAYS 402
-#define WEEKS 403
-#define SEND_PASSWORD 404
-#define SENDQ 405
-#define SERVERHIDE 406
-#define SERVERINFO 407
-#define SHORT_MOTD 408
-#define SPECIALS_IN_IDENT 409
-#define SPOOF 410
-#define SQUIT 411
-#define STATS_E_DISABLED 412
-#define STATS_U_OPER_ONLY 413
-#define SUFFIX 414
-#define T_ALL 415
-#define T_BIND 416
-#define T_COMMAND 417
-#define T_CLUSTER 418
-#define T_DEBUG 419
-#define T_DLINE 420
-#define T_FILE 421
-#define T_GLOBOPS 422
-#define T_IPV4 423
-#define T_IPV6 424
-#define T_LOCOPS 425
-#define T_LOG 426
-#define T_OPME 427
-#define T_PREPEND 428
-#define T_PSEUDO 429
-#define T_RECVQ 430
-#define T_RESTART 431
-#define T_SERVER 432
-#define T_SERVICE 433
-#define T_SET 434
-#define T_SHARED 435
-#define T_SIZE 436
-#define T_TARGET 437
-#define T_TLS 438
-#define T_UMODES 439
-#define T_UNDLINE 440
-#define T_UNLIMITED 441
-#define T_UNRESV 442
-#define T_UNXLINE 443
-#define T_WEBIRC 444
-#define TBOOL 445
-#define THROTTLE_COUNT 446
-#define THROTTLE_TIME 447
-#define TIMEOUT 448
-#define TLS_CERTIFICATE_FILE 449
-#define TLS_CERTIFICATE_FINGERPRINT 450
-#define TLS_PRIVATE_KEY_FILE 451
-#define TLS_CONNECTION_REQUIRED 452
-#define TS_MAX_DELTA 453
-#define TS_WARN_DELTA 454
-#define TWODOTS 455
-#define TYPE 456
-#define UNKLINE 457
-#define USE_LOGGING 458
-#define USER 459
-#define WARN_NO_CONNECT_BLOCK 460
-#define WHOIS 461
-#define WHOWAS_HISTORY_LENGTH 462
-#define XLINE 463
-#define XLINE_EXEMPT 464
-#define QSTRING 465
-#define DECIMAL 466
-#define NUMBER 467
+#define HIDE_SERVERS 312
+#define HIDE_SERVICES 313
+#define HOST 314
+#define HUB 315
+#define HUB_MASK 316
+#define IDENT_TIMEOUT 317
+#define INPUT_FLOOD 318
+#define INVISIBLE_ON_CONNECT 319
+#define INVITE_CLIENT_COUNT 320
+#define INVITE_CLIENT_TIME 321
+#define INVITE_DELAY_CHANNEL 322
+#define INVITE_EXPIRE_TIME 323
+#define IP 324
+#define IRCD_AUTH 325
+#define IRCD_FLAGS 326
+#define IRCD_SID 327
+#define JOIN 328
+#define KILL 329
+#define KILL_CHASE_TIME_LIMIT 330
+#define KLINE 331
+#define KLINE_EXEMPT 332
+#define KLINE_MIN_CIDR 333
+#define KLINE_MIN_CIDR6 334
+#define KNOCK_CLIENT_COUNT 335
+#define KNOCK_CLIENT_TIME 336
+#define KNOCK_DELAY_CHANNEL 337
+#define LEAF_MASK 338
+#define LISTEN 339
+#define LOADMODULE 340
+#define MASK 341
+#define MASS 342
+#define MAX_ACCEPT 343
+#define MAX_AWAY_LENGTH 344
+#define MAX_BANS 345
+#define MAX_BANS_LARGE 346
+#define MAX_CHANNELS 347
+#define MAX_INVITES 348
+#define MAX_KICK_LENGTH 349
+#define MAX_MONITOR 350
+#define MAX_NICK_CHANGES 351
+#define MAX_NICK_LENGTH 352
+#define MAX_NICK_TIME 353
+#define MAX_NUMBER 354
+#define MAX_TARGETS 355
+#define MAX_TOPIC_LENGTH 356
+#define MESSAGE 357
+#define MIN_NONWILDCARD 358
+#define MIN_NONWILDCARD_SIMPLE 359
+#define MODULE 360
+#define MODULE_BASE_PATH 361
+#define MOTD 362
+#define MOTD_FILE 363
+#define NAME 364
+#define NEED_IDENT 365
+#define NEED_PASSWORD 366
+#define NETWORK_DESCRIPTION 367
+#define NETWORK_NAME 368
+#define NICK 369
+#define NO_TILDE 370
+#define NUM_BITS 371
+#define NUMBER_PER_CIDR 372
+#define NUMBER_PER_IP_GLOBAL 373
+#define NUMBER_PER_IP_LOCAL 374
+#define OPER_UMODES 375
+#define OPERATOR 376
+#define OPERS_BYPASS_CALLERID 377
+#define PACE_WAIT 378
+#define PACE_WAIT_SIMPLE 379
+#define PASSWORD 380
+#define PING_COOKIE 381
+#define PING_TIME 382
+#define PORT 383
+#define REASON 384
+#define REGISTRATION_TIMEOUT 385
+#define REHASH 386
+#define REMOTE 387
+#define REMOTEBAN 388
+#define REQUIRED 389
+#define RESIDENT 390
+#define RESV 391
+#define RESV_EXEMPT 392
+#define RETRY_DELAY 393
+#define SECRET 394
+#define SECONDS 395
+#define MINUTES 396
+#define HOURS 397
+#define DAYS 398
+#define WEEKS 399
+#define SEND_PASSWORD 400
+#define SENDQ 401
+#define SERVERHIDE 402
+#define SERVERINFO 403
+#define SHORT_MOTD 404
+#define SPECIALS_IN_IDENT 405
+#define SPOOF 406
+#define SQUIT 407
+#define STATS_E_DISABLED 408
+#define STATS_U_OPER_ONLY 409
+#define SUFFIX 410
+#define T_ALL 411
+#define T_BIND 412
+#define T_COMMAND 413
+#define T_CLUSTER 414
+#define T_DEBUG 415
+#define T_DLINE 416
+#define T_FILE 417
+#define T_GLOBOPS 418
+#define T_IPV4 419
+#define T_IPV6 420
+#define T_LOCOPS 421
+#define T_LOG 422
+#define T_OPME 423
+#define T_PREPEND 424
+#define T_PSEUDO 425
+#define T_RECVQ 426
+#define T_RESTART 427
+#define T_SERVER 428
+#define T_SERVICE 429
+#define T_SET 430
+#define T_SHARED 431
+#define T_SIZE 432
+#define T_TARGET 433
+#define T_TLS 434
+#define T_UMODES 435
+#define T_UNDLINE 436
+#define T_UNLIMITED 437
+#define T_UNRESV 438
+#define T_UNXLINE 439
+#define T_WEBIRC 440
+#define TBOOL 441
+#define THROTTLE_COUNT 442
+#define THROTTLE_TIME 443
+#define TIMEOUT 444
+#define TLS_CERTIFICATE_FILE 445
+#define TLS_CERTIFICATE_FINGERPRINT 446
+#define TLS_PRIVATE_KEY_FILE 447
+#define TLS_CONNECTION_REQUIRED 448
+#define TS_MAX_DELTA 449
+#define TS_WARN_DELTA 450
+#define TWODOTS 451
+#define TYPE 452
+#define UNKLINE 453
+#define USE_LOGGING 454
+#define USER 455
+#define WARN_NO_CONNECT_BLOCK 456
+#define WHOIS 457
+#define WHOWAS_HISTORY_LENGTH 458
+#define XLINE 459
+#define XLINE_EXEMPT 460
+#define QSTRING 461
+#define DECIMAL 462
+#define NUMBER 463
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 193 "conf_parser.y"
+#line 191 "conf_parser.y"
 
   bool boolean;
   unsigned int number;
   char *string;
 
-#line 503 "conf_parser.h"
+#line 495 "conf_parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

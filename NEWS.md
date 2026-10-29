@@ -36,6 +36,8 @@
   values are never rounded.
 * The `general::anti_nick_flood` directive has been removed. A positive
   `general::max_nick_changes` now enables `NICK` flood protection
+* The `class::min_idle`, `class::max_idle`, and `class::flags` configuration directives
+  have been removed
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

@@ -71,11 +71,11 @@ _trace_send_target_status(struct Client *source, const struct Client *target)
       if (client_is_oper(target))
         sendto_one_numeric(source, &me, RPL_TRACEOPERATOR,
                            class_name, target_name, target->sockhost, client_get_socket_idle_duration(target),
-                           client_get_idle_time(source, target));
+                           client_get_idle_duration(target));
       else
         sendto_one_numeric(source, &me, RPL_TRACEUSER,
                            class_name, target_name, target->sockhost, client_get_socket_idle_duration(target),
-                           client_get_idle_time(source, target));
+                           client_get_idle_duration(target));
       break;
     case CLIENT_STATE_SERVER:
     {

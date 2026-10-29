@@ -266,7 +266,6 @@ extern void client_schedule_exit_on_io_failure(struct Client *, enum client_io_o
 extern void client_set_class(struct Client *, struct ClassItem *, enum client_class_type);
 extern void client_set_state(struct Client *, enum client_state);
 extern void client_update_name(struct Client *, const char *);
-extern unsigned int client_get_idle_time(const struct Client *, const struct Client *);
 extern struct Client *client_create_local(void);
 extern struct Client *client_create_remote(struct Client *);
 extern const char *client_get_visible_server_name(const struct Client *);

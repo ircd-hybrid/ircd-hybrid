@@ -19,7 +19,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "address.h"
@@ -651,32 +650,30 @@ serverinfo_tls_private_key_file: TLS_PRIVATE_KEY_FILE '=' QSTRING ';'
 
 serverinfo_name: NAME '=' QSTRING ';'
 {
-  /* This isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
+  if (conf_parser_ctx.pass != 2 || ConfigServerInfo.name)
+    break;
+
+  if (!server_is_valid_name($3))
   {
-    if (server_is_valid_name(yylval.string))
-      ConfigServerInfo.name = io_strdup(yylval.string);
-    else
-    {
-      conf_error_report("Ignoring serverinfo::name -- invalid name. Aborting.");
-      exit(EXIT_FAILURE);
-    }
+    conf_error_report("Invalid serverinfo::name");
+    YYABORT;
   }
+
+  ConfigServerInfo.name = io_strdup($3);
 };
 
 serverinfo_sid: IRCD_SID '=' QSTRING ';'
 {
-  /* This isn't rehashable */
-  if (conf_parser_ctx.pass == 2 && ConfigServerInfo.sid == NULL)
+  if (conf_parser_ctx.pass != 2 || ConfigServerInfo.sid)
+    break;
+
+  if (!client_id_is_valid_sid($3))
   {
-    if (client_id_is_valid_sid(yylval.string))
-      ConfigServerInfo.sid = io_strdup(yylval.string);
-    else
-    {
-      conf_error_report("Ignoring serverinfo::sid -- invalid SID. Aborting.");
-      exit(EXIT_FAILURE);
-    }
+    conf_error_report("Invalid serverinfo::sid");
+    YYABORT;
   }
+
+  ConfigServerInfo.sid = io_strdup($3);
 };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'

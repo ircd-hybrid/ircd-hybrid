@@ -493,7 +493,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 194 "conf_parser.y"
+#line 193 "conf_parser.y"
 
   bool boolean;
   unsigned int number;

@@ -431,8 +431,10 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   ircd_hook_init();
+
   if (!ircd_module_init())
     exit(EXIT_FAILURE);
+
   class_init();
   cloak_init();
 
@@ -440,7 +442,7 @@ main(int argc, char *argv[])
   conf_deny_init();
   conf_exempt_init();
   conf_kill_init();
-  conf_read_files(true);   /* cold start init conf files */
+  conf_read_files(true);
 
   if (!resolver_init(ircd_event_manager))
   {

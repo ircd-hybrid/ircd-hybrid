@@ -77,13 +77,11 @@ read_packet(fde_t *fde, void *data_)
     client->connection->ping_sent_time = 0;
     client_update_activity_timeout(client);
 
-    /* Attempt to parse what we have */
     client_input_process_recvq(client);
 
     if (client_is_defunct(client))
       return;
 
-    /* Check to make sure we're not flooding */
     const unsigned int max_recvq = client_get_max_recvq(client);
     const size_t current_recvq = dbuf_queue_length(&client->connection->recv_queue);
     if (current_recvq > max_recvq)

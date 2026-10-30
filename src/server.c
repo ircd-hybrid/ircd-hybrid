@@ -467,15 +467,6 @@ server_connect_auto(void *unused)
       list_add_tail(connect, node, list);
     }
 
-    /*
-     * We used to only print this if server_connect() actually
-     * succeeded, but since comm_tcp_connect() can call the callback
-     * immediately if there is an error, we were getting error messages
-     * in the wrong order. SO, we just print out the activated line,
-     * and let server_connect() / _server_connect_callback() print an
-     * error afterwards if it fails.
-     *   -- adrian
-     */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Connection to %s[%s] activated.",
                    connect->name, connect->host);
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Connection to %s activated.",

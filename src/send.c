@@ -201,7 +201,6 @@ send_queued_write(struct Client *to)
 
     dbuf_queue_consume(&to->connection->send_queue, retlen);
 
-    /* We have some data written .. update counters */
     to->connection->send.bytes += retlen;
     me.connection->send.bytes += retlen;
   }

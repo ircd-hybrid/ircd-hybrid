@@ -241,31 +241,15 @@ ircd_module_register_info_entries(const struct InfoEntry *entries, size_t count,
   assert(error_message);
   assert(error_message_size > 0);
 
-  for (size_t i = 0; i < count; ++i)
-  {
-    const struct InfoEntry *const entry = &entries[i];
+  size_t failed_index;
+  const info_result_t result = info_register_array(entries, count, &failed_index);
+  if (result == INFO_SUCCESS)
+    return true;
 
-    assert(entry->name);
-    assert(entry->description);
-
-    const info_result_t result =
-      info_register(entry->namespace, entry->name, entry->output_type, entry->option, entry->description);
-    if (result != INFO_SUCCESS)
-    {
-      snprintf(error_message, error_message_size, "Cannot register info %s/%s (result %u)",
-               entry->namespace ? entry->namespace : "(global)", entry->name, (unsigned int)result);
-
-      while (i)
-      {
-        const struct InfoEntry *const previous = &entries[--i];
-        info_unregister(previous->namespace, previous->name);
-      }
-
-      return false;
-    }
-  }
-
-  return true;
+  const struct InfoEntry *const entry = &entries[failed_index];
+  snprintf(error_message, error_message_size, "Cannot register info %s/%s (result %u)",
+           entry->namespace ? entry->namespace : "(global)", entry->name, (unsigned int)result);
+  return false;
 }
 
 bool

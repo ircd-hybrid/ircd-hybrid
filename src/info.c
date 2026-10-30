@@ -80,6 +80,9 @@ _info_compare(const void *const a_, const void *const b_)
 info_result_t
 info_register(const char *namespace, const char *name, info_output_type_t output_type, const void *option, const char *description)
 {
+  assert(name);
+  assert(description);
+
   if (info_find(namespace, name))
     return INFO_ALREADY_REGISTERED;
 
@@ -139,19 +142,43 @@ info_unregister(const char *namespace, const char *name)
 /**
  * @brief Registers an array of info entries.
  *
- * This function registers an entire array of info entries to the info API.
+ * If registration fails, all entries added by this call are unregistered
+ * in reverse order. Previously registered entries remain unchanged.
  *
- * @param entries The array of InfoEntry structures to be registered.
+ * @param entries The array of InfoEntry structures, or NULL when elements is zero.
  * @param elements The number of elements in the entries array.
+ * @param failed_index Optional output for the first failing index, or elements on success.
+ * @return INFO_SUCCESS if all entries were registered, otherwise the first registration error.
  */
-void
-info_register_array(const struct InfoEntry *entries, size_t elements)
+info_result_t
+info_register_array(const struct InfoEntry *entries, size_t elements, size_t *failed_index)
 {
+  assert(entries || elements == 0);
+
+  if (failed_index)
+    *failed_index = elements;
+
   for (size_t i = 0; i < elements; ++i)
   {
-    const struct InfoEntry *const tmp = &entries[i];
-    info_register(tmp->namespace, tmp->name, tmp->output_type, tmp->option, tmp->description);
+    const struct InfoEntry *const entry = &entries[i];
+    const info_result_t result =
+      info_register(entry->namespace, entry->name, entry->output_type, entry->option, entry->description);
+    if (result != INFO_SUCCESS)
+    {
+      if (failed_index)
+        *failed_index = i;
+
+      while (i)
+      {
+        const struct InfoEntry *const previous = &entries[--i];
+        info_unregister(previous->namespace, previous->name);
+      }
+
+      return result;
+    }
   }
+
+  return INFO_SUCCESS;
 }
 
 /**

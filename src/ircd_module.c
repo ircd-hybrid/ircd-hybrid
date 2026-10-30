@@ -212,36 +212,25 @@ ircd_module_register_commands(struct Command *commands, size_t count,
   assert(error_message);
   assert(error_message_size > 0);
 
-  for (size_t i = 0; i < count; ++i)
+  size_t failed_index;
+  const command_result_t result = command_add_array(commands, count, &failed_index);
+  switch (result)
   {
-    if (string_is_empty(commands[i].name))
-    {
-      snprintf(error_message, error_message_size, "Command %zu has an empty name", i);
-      return false;
-    }
+    case COMMAND_SUCCESS:
+      return true;
 
-    if (command_find(commands[i].name))
-    {
-      snprintf(error_message, error_message_size, "Command %s is already registered", commands[i].name);
+    case COMMAND_INVALID_NAME:
+      snprintf(error_message, error_message_size, "Command %zu has an invalid name: %s",
+               failed_index, string_or_default(commands[failed_index].name, "(empty)"));
       return false;
-    }
+
+    case COMMAND_ALREADY_REGISTERED:
+      snprintf(error_message, error_message_size, "Command %s is already registered",
+               commands[failed_index].name);
+      return false;
   }
 
-  for (size_t i = 0; i < count; ++i)
-  {
-    command_add(&commands[i]);
-
-    if (command_find(commands[i].name) != &commands[i])
-    {
-      snprintf(error_message, error_message_size, "Cannot register command %s", commands[i].name);
-
-      while (i)
-        command_del(&commands[--i]);
-      return false;
-    }
-  }
-
-  return true;
+  return false;
 }
 
 bool

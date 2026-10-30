@@ -116,6 +116,17 @@ _pseudo_message_handler(struct Client *source, size_t parc, char *parv[])
   sendto_one_command(target, source, "PRIVMSG", ":%s", dispatch_message);
 }
 
+static void
+_pseudo_free(struct PseudoItem *pseudo)
+{
+  io_free(pseudo->name);
+  io_free(pseudo->nick);
+  io_free(pseudo->server);
+  io_free(pseudo->prepend);
+  io_free(pseudo->command);
+  io_free(pseudo);
+}
+
 /**
  * @brief Registers a new pseudo command or service alias.
  *
@@ -130,7 +141,7 @@ _pseudo_message_handler(struct Client *source, size_t parc, char *parv[])
 void
 pseudo_register(const char *name, const char *nick, const char *server, const char *prepend, const char *command)
 {
-  if (command_find(command))
+  if (string_is_empty(command))
     return;
 
   struct PseudoItem *const pseudo = io_calloc(sizeof(*pseudo));
@@ -149,9 +160,13 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
     .handlers[COMMAND_HANDLER_OPER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 
-  list_add_tail(pseudo, &pseudo->node, &pseudo_list);
+  if (command_add(&pseudo->command_struct) != COMMAND_SUCCESS)
+  {
+    _pseudo_free(pseudo);
+    return;
+  }
 
-  command_add(&pseudo->command_struct);
+  list_add_tail(pseudo, &pseudo->node, &pseudo_list);
 }
 
 /**
@@ -169,15 +184,9 @@ pseudo_clear(void)
   {
     struct PseudoItem *const pseudo = node->data;
     assert(pseudo);
-    assert(command_find(pseudo->command_struct.name));
+    assert(command_find(pseudo->command_struct.name) == &pseudo->command_struct);
 
     command_del(&pseudo->command_struct);
-
-    io_free(pseudo->name);
-    io_free(pseudo->nick);
-    io_free(pseudo->server);
-    io_free(pseudo->prepend);
-    io_free(pseudo->command);
-    io_free(pseudo);
+    _pseudo_free(pseudo);
   }
 }

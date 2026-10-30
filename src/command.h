@@ -16,6 +16,13 @@ enum
   COMMAND_NAME_BUFFER_SIZE = COMMAND_NAME_LENGTH_MAX + 1
 };
 
+typedef enum
+{
+  COMMAND_SUCCESS = 0,
+  COMMAND_INVALID_NAME,
+  COMMAND_ALREADY_REGISTERED
+} command_result_t;
+
 /*
  * m_functions execute protocol messages on this server:
  * int m_func(struct Client *source_p, size_t parc, char *parv[]);
@@ -75,8 +82,6 @@ struct Command
   struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];  /**< Command dispatch handlers. */
 };
 
-extern void command_add(struct Command *);
-extern void command_add_array(struct Command *, size_t);
 extern void command_del(struct Command *);
 extern void command_del_array(struct Command *, size_t);
 extern void command_report(struct Client *);
@@ -85,4 +90,6 @@ extern void command_handler_ignore(struct Client *, size_t, char *[]);
 extern void command_handler_reject_not_oper(struct Client *, size_t, char *[]);
 extern void command_handler_reject_not_registered(struct Client *, size_t, char *[]);
 extern void command_handler_reject_already_registered(struct Client *, size_t, char *[]);
+extern command_result_t command_add(struct Command *);
+extern command_result_t command_add_array(struct Command *, size_t, size_t *);
 #endif  /* INCLUDED_command_h */

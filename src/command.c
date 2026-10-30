@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "io_string.h"
 #include "memory.h"
@@ -87,33 +88,29 @@ _command_trie_index(const char ch)
  * The links (reference count) is incremented as they are created
  * in the parent.
  */
-static void
+static command_result_t
 _command_trie_add_element(struct CommandTrieNode *node, struct Command *command, const char *const name)
 {
   if (*name == '\0')
   {
-    node->command = command;
-    node->link_count++;  /* Have msg pointer, so up ref count */
-  }
-  else
-  {
-    /*
-     * *name & (COMMAND_TRIE_CHILD_COUNT - 1)
-     * convert the char pointed to at *name from ASCII to an integer
-     * between 0 and COMMAND_TRIE_CHILD_COUNT.
-     * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
-     */
-    const unsigned int index = _command_trie_index(*name);
-    struct CommandTrieNode *current = node->children[index];
-    if (current == NULL)
-    {
-      current = io_calloc(sizeof(*current));
-      node->children[index] = current;
-      node->link_count++;  /* Have new pointer, so up ref count */
-    }
+    if (node->command)
+      return COMMAND_ALREADY_REGISTERED;
 
-    _command_trie_add_element(current, command, name + 1);
+    node->command = command;
+    node->link_count++;
+    return COMMAND_SUCCESS;
   }
+
+  const unsigned int index = _command_trie_index(*name);
+  struct CommandTrieNode *current = node->children[index];
+  if (current == NULL)
+  {
+    current = io_calloc(sizeof(*current));
+    node->children[index] = current;
+    node->link_count++;
+  }
+
+  return _command_trie_add_element(current, command, name + 1);
 }
 
 /*
@@ -209,18 +206,15 @@ _command_trie_find(const char *name)
   return node->command;
 }
 
-void
+command_result_t
 command_add(struct Command *command)
 {
   assert(command);
-  assert(command->name);
 
   if (!_command_name_is_valid(command->name))
-    return;
+    return COMMAND_INVALID_NAME;
 
-  /* Command already added? */
-  if (_command_trie_find(command->name) == NULL)
-    _command_trie_add_element(&command_trie_root, command, command->name);
+  return _command_trie_add_element(&command_trie_root, command, command->name);
 }
 
 void
@@ -236,14 +230,30 @@ command_del(struct Command *command)
     _command_trie_del_element(&command_trie_root, command->name);
 }
 
-void
-command_add_array(struct Command *commands, size_t elements)
+command_result_t
+command_add_array(struct Command *commands, size_t elements, size_t *failed_index)
 {
+  assert(commands || elements == 0);
+
+  if (failed_index)
+    *failed_index = elements;
+
   for (size_t i = 0; i < elements; ++i)
   {
-    struct Command *const command = &commands[i];
-    command_add(command);
+    const command_result_t result = command_add(&commands[i]);
+    if (result != COMMAND_SUCCESS)
+    {
+      if (failed_index)
+        *failed_index = i;
+
+      while (i)
+        command_del(&commands[--i]);
+
+      return result;
+    }
   }
+
+  return COMMAND_SUCCESS;
 }
 
 void

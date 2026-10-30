@@ -130,33 +130,32 @@ _command_trie_add_element(struct CommandTrieNode *node, struct Command *command,
  * Thus, we continue to go back up removing all unused CommandTrieNode(s)
  */
 static void
-_command_trie_del_element(struct CommandTrieNode *node, const char *const name)
+_command_trie_del_element(struct CommandTrieNode *node, const struct Command *command,
+                          const char *const name)
 {
-  /*
-   * In case this is called for a nonexistent command
-   * check that there is a command pointer here, else links-- goes -ve
-   * -db
-   */
-  if (*name == '\0' && node->command)
+  if (*name == '\0')
   {
-    node->command = NULL;
-    node->link_count--;
-  }
-  else
-  {
-    const unsigned int index = _command_trie_index(*name);
-    struct CommandTrieNode *const current = node->children[index];
-    if (current)
+    if (node->command == command)
     {
-      _command_trie_del_element(current, name + 1);
-
-      if (current->link_count == 0)
-      {
-        node->children[index] = NULL;
-        node->link_count--;
-        io_free(current);
-      }
+      node->command = NULL;
+      node->link_count--;
     }
+
+    return;
+  }
+
+  const unsigned int index = _command_trie_index(*name);
+  struct CommandTrieNode *const current = node->children[index];
+  if (current == NULL)
+    return;
+
+  _command_trie_del_element(current, command, name + 1);
+
+  if (current->link_count == 0)
+  {
+    node->children[index] = NULL;
+    node->link_count--;
+    io_free(current);
   }
 }
 
@@ -226,8 +225,7 @@ command_del(struct Command *command)
   if (!_command_name_is_valid(command->name))
     return;
 
-  if (_command_trie_find(command->name))
-    _command_trie_del_element(&command_trie_root, command->name);
+  _command_trie_del_element(&command_trie_root, command, command->name);
 }
 
 command_result_t

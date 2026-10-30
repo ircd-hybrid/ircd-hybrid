@@ -57,7 +57,6 @@ extern struct Extban extban_mute;
 extern struct Extban extban_nick;
 extern struct Extban extban_operclass;
 extern struct Extban extban_server;
-extern struct Extban extban_tlsinfo;
 extern struct Extban extban_usermode;
 
 extern void extban_init(void);

@@ -138,9 +138,9 @@ am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	extban_join.$(OBJEXT) extban_knock.$(OBJEXT) \
 	extban_mute.$(OBJEXT) extban_nick.$(OBJEXT) \
 	extban_operclass.$(OBJEXT) extban_server.$(OBJEXT) \
-	extban_tlsinfo.$(OBJEXT) extban_usermode.$(OBJEXT) \
-	hash.$(OBJEXT) info.$(OBJEXT) ipcache.$(OBJEXT) ircd.$(OBJEXT) \
-	ircd_exit.$(OBJEXT) ircd_hook.$(OBJEXT) ircd_module.$(OBJEXT) \
+	extban_usermode.$(OBJEXT) hash.$(OBJEXT) info.$(OBJEXT) \
+	ipcache.$(OBJEXT) ircd.$(OBJEXT) ircd_exit.$(OBJEXT) \
+	ircd_hook.$(OBJEXT) ircd_module.$(OBJEXT) \
 	ircd_signal.$(OBJEXT) isupport.$(OBJEXT) links_cache.$(OBJEXT) \
 	list_task.$(OBJEXT) listener.$(OBJEXT) lookup.$(OBJEXT) \
 	monitor.$(OBJEXT) motd.$(OBJEXT) nuh.$(OBJEXT) \
@@ -194,19 +194,18 @@ am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/extban_join.Po ./$(DEPDIR)/extban_knock.Po \
 	./$(DEPDIR)/extban_mute.Po ./$(DEPDIR)/extban_nick.Po \
 	./$(DEPDIR)/extban_operclass.Po ./$(DEPDIR)/extban_server.Po \
-	./$(DEPDIR)/extban_tlsinfo.Po ./$(DEPDIR)/extban_usermode.Po \
-	./$(DEPDIR)/hash.Po ./$(DEPDIR)/info.Po ./$(DEPDIR)/ipcache.Po \
-	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_exit.Po \
-	./$(DEPDIR)/ircd_hook.Po ./$(DEPDIR)/ircd_module.Po \
-	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/isupport.Po \
-	./$(DEPDIR)/links_cache.Po ./$(DEPDIR)/list_task.Po \
-	./$(DEPDIR)/listener.Po ./$(DEPDIR)/lookup.Po \
-	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po \
-	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
-	./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po ./$(DEPDIR)/server.Po \
-	./$(DEPDIR)/server_capab.Po ./$(DEPDIR)/stats.Po \
-	./$(DEPDIR)/user.Po ./$(DEPDIR)/user_mode.Po \
-	./$(DEPDIR)/whowas.Po
+	./$(DEPDIR)/extban_usermode.Po ./$(DEPDIR)/hash.Po \
+	./$(DEPDIR)/info.Po ./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
+	./$(DEPDIR)/ircd_exit.Po ./$(DEPDIR)/ircd_hook.Po \
+	./$(DEPDIR)/ircd_module.Po ./$(DEPDIR)/ircd_signal.Po \
+	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/links_cache.Po \
+	./$(DEPDIR)/list_task.Po ./$(DEPDIR)/listener.Po \
+	./$(DEPDIR)/lookup.Po ./$(DEPDIR)/monitor.Po \
+	./$(DEPDIR)/motd.Po ./$(DEPDIR)/nuh.Po ./$(DEPDIR)/numeric.Po \
+	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po ./$(DEPDIR)/send.Po \
+	./$(DEPDIR)/server.Po ./$(DEPDIR)/server_capab.Po \
+	./$(DEPDIR)/stats.Po ./$(DEPDIR)/user.Po \
+	./$(DEPDIR)/user_mode.Po ./$(DEPDIR)/whowas.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -484,7 +483,6 @@ ircd_SOURCES = accept.c          \
                extban_nick.c     \
                extban_operclass.c \
                extban_server.c   \
-               extban_tlsinfo.c  \
                extban_usermode.c \
                hash.c            \
                hash.h            \
@@ -674,7 +672,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_nick.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_operclass.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_server.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_tlsinfo.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/info.Po@am__quote@ # am--include-marker
@@ -916,7 +913,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/extban_nick.Po
 	-rm -f ./$(DEPDIR)/extban_operclass.Po
 	-rm -f ./$(DEPDIR)/extban_server.Po
-	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/info.Po
@@ -1033,7 +1029,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/extban_nick.Po
 	-rm -f ./$(DEPDIR)/extban_operclass.Po
 	-rm -f ./$(DEPDIR)/extban_server.Po
-	-rm -f ./$(DEPDIR)/extban_tlsinfo.Po
 	-rm -f ./$(DEPDIR)/extban_usermode.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/info.Po

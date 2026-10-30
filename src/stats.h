@@ -72,10 +72,10 @@ struct StatsHandler
   bool enabled;  /**< Indicates if the handler is enabled. */
 };
 
-extern void stats_register_array(const struct StatsHandler *, size_t);
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
 extern bool stats_allowed(const struct StatsHandler *, uint64_t);
 extern stats_result_t stats_register(unsigned char, stats_handler_func, uint64_t *);
+extern stats_result_t stats_register_array(const struct StatsHandler *, size_t, size_t *);
 extern stats_result_t stats_unregister(unsigned char);
 extern stats_result_t stats_set_enabled(unsigned char);
 extern stats_result_t stats_set_disabled(unsigned char);

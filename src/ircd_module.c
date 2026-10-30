@@ -260,22 +260,14 @@ ircd_module_register_stats_handlers(const struct StatsHandler *handlers, size_t 
   assert(error_message);
   assert(error_message_size > 0);
 
-  for (size_t i = 0; i < count; ++i)
-  {
-    const struct StatsHandler *const handler = &handlers[i];
-    const stats_result_t result = stats_register(handler->letter, handler->handler, handler->required_modes);
-    if (result != STATS_SUCCESS)
-    {
-      snprintf(error_message, error_message_size, "Cannot register stats %c (result %u)",
-               handler->letter, (unsigned int)result);
+  size_t failed_index;
+  const stats_result_t result = stats_register_array(handlers, count, &failed_index);
+  if (result == STATS_SUCCESS)
+    return true;
 
-      while (i)
-        stats_unregister(handlers[--i].letter);
-      return false;
-    }
-  }
-
-  return true;
+  snprintf(error_message, error_message_size, "Cannot register stats %c (result %u)",
+           handlers[failed_index].letter, (unsigned int)result);
+  return false;
 }
 
 bool

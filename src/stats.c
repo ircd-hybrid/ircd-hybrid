@@ -12,6 +12,8 @@
  * unregister them upon unloading.
  */
 
+#include <assert.h>
+
 #include "memory.h"
 #include "stats.h"
 
@@ -67,19 +69,39 @@ stats_register(unsigned char letter, stats_handler_func handler, uint64_t *requi
 /**
  * @brief Registers an array of stats handlers.
  *
- * This function registers an entire array of stats handlers to the stats API.
+ * If registration fails, all handlers added by this call are unregistered
+ * in reverse order. Previously registered handlers remain unchanged.
  *
- * @param handlers The array of StatsHandler structures to be registered.
+ * @param handlers The array of StatsHandler structures, or NULL when elements is zero.
  * @param elements The number of elements in the handlers array.
+ * @param failed_index Optional output for the first failing index, or elements on success.
+ * @return STATS_SUCCESS if all handlers were registered, otherwise the first registration error.
  */
-void
-stats_register_array(const struct StatsHandler *handlers, size_t elements)
+stats_result_t
+stats_register_array(const struct StatsHandler *handlers, size_t elements, size_t *failed_index)
 {
+  assert(handlers || elements == 0);
+
+  if (failed_index)
+    *failed_index = elements;
+
   for (size_t i = 0; i < elements; ++i)
   {
-    const struct StatsHandler *const tmp = &handlers[i];
-    stats_register(tmp->letter, tmp->handler, tmp->required_modes);
+    const struct StatsHandler *const handler = &handlers[i];
+    const stats_result_t result = stats_register(handler->letter, handler->handler, handler->required_modes);
+    if (result != STATS_SUCCESS)
+    {
+      if (failed_index)
+        *failed_index = i;
+
+      while (i)
+        stats_unregister(handlers[--i].letter);
+
+      return result;
+    }
   }
+
+  return STATS_SUCCESS;
 }
 
 /**

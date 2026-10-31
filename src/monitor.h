@@ -10,7 +10,6 @@
 
 #ifndef INCLUDED_monitor_h
 #define INCLUDED_monitor_h
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -24,10 +23,17 @@ struct Monitor
   list_t monitored_by;  /**< List of clients that have this entry on their monitor list */
 };
 
+typedef enum
+{
+  MONITOR_SUBSCRIBE_SUCCESS = 0,
+  MONITOR_SUBSCRIBE_ALREADY_EXISTS,
+  MONITOR_SUBSCRIBE_LIMIT_EXCEEDED
+} monitor_subscribe_result_t;
+
 extern void monitor_clear_list(struct Client *);
 extern void monitor_count_memory(uint32_t *const, size_t *const);
 extern void monitor_notify_signoff(const struct Client *);
 extern void monitor_notify_signon(const struct Client *);
 extern void monitor_unsubscribe(struct Client *, const char *);
-extern bool monitor_subscribe(struct Client *, const char *);
+extern monitor_subscribe_result_t monitor_subscribe(struct Client *, const char *, size_t);
 #endif  /* INCLUDED_monitor_h */

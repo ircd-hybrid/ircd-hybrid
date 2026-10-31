@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -119,17 +118,18 @@ monitor_notify_signoff(const struct Client *client)
   }
 }
 
-/*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
- * \param name   Nick name to add
- * \param client Pointer to Client struct
- * \return false if the target is already being monitored, true otherwise
- */
-bool
-monitor_subscribe(struct Client *client, const char *name)
+monitor_subscribe_result_t
+monitor_subscribe(struct Client *client, const char *name, size_t limit)
 {
   assert(client_is_local(client));
 
   struct Monitor *monitor = _monitor_find(name);
+  if (monitor && list_find(&monitor->monitored_by, client))
+    return MONITOR_SUBSCRIBE_ALREADY_EXISTS;
+
+  if (list_length(&client->connection->monitor_list) >= limit)
+    return MONITOR_SUBSCRIBE_LIMIT_EXCEEDED;
+
   if (monitor == NULL)
   {
     /* Create the shared monitor entry for the first subscriber. */
@@ -137,13 +137,11 @@ monitor_subscribe(struct Client *client, const char *name)
     monitor->name = io_strdup(name);
     list_add(monitor, &monitor->node, &monitor_hash[hash_string(monitor->name)]);
   }
-  else if (list_find(&monitor->monitored_by, client))
-    return false;
 
   /* Link both directions: monitor -> client and client -> monitor. */
   list_add(client, list_make_node(), &monitor->monitored_by);
   list_add(monitor, list_make_node(), &client->connection->monitor_list);
-  return true;
+  return MONITOR_SUBSCRIBE_SUCCESS;
 }
 
 /*! \brief Removes a single entry from client's monitor list

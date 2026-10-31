@@ -33,8 +33,10 @@ monitor_add(struct Client *source, char *list)
 {
   char onbuf[IRCD_BUFSIZE];
   char ofbuf[IRCD_BUFSIZE];
+  char fullbuf[IRCD_BUFSIZE];
   char *onbufptr = onbuf;
   char *ofbufptr = ofbuf;
+  char *fullbufptr = fullbuf;
 
   /* :me.name 730 source->name :nick!user@host,...\r\n */
   /* 1       23456            78                  9 0  */
@@ -47,27 +49,17 @@ monitor_add(struct Client *source, char *list)
     if (!nickname_is_valid(name, true))
       continue;
 
-    if (list_length(&source->connection->monitor_list) >= ConfigGeneral.max_monitor)
+    switch (monitor_subscribe(source, name, ConfigGeneral.max_monitor))
     {
-      char buf[IRCD_BUFSIZE];
-
-      if (onbufptr != onbuf)
-        sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
-      if (ofbufptr != ofbuf)
-        sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
-
-      if (string_is_empty(saveptr))
-        snprintf(buf, sizeof(buf), "%s", name);
-      else
-        snprintf(buf, sizeof(buf), "%s,%s", name, saveptr);
-
-      sendto_one_numeric(source, &me, ERR_MONLISTFULL,
-                         ConfigGeneral.max_monitor, buf);
-      return;
+      case MONITOR_SUBSCRIBE_ALREADY_EXISTS:
+        continue;
+      case MONITOR_SUBSCRIBE_LIMIT_EXCEEDED:
+        fullbufptr += snprintf(fullbufptr, sizeof(fullbuf) - (fullbufptr - fullbuf),
+                               fullbufptr != fullbuf ? ",%s" : "%s", name);
+        continue;
+      case MONITOR_SUBSCRIBE_SUCCESS:
+        break;
     }
-
-    if (!monitor_subscribe(source, name))
-      continue;  /* Name is already being monitored */
 
     const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
@@ -100,6 +92,9 @@ monitor_add(struct Client *source, char *list)
     sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
   if (ofbufptr != ofbuf)
     sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
+  if (fullbufptr != fullbuf)
+    sendto_one_numeric(source, &me, ERR_MONLISTFULL,
+                       ConfigGeneral.max_monitor, fullbuf);
 }
 
 static void

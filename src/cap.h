@@ -11,16 +11,17 @@
 
 enum
 {
-  CAP_MULTI_PREFIX     = 1 << 0,  /**< multi-prefix client capability */
-  CAP_AWAY_NOTIFY      = 1 << 1,  /**< away-notify client capability */
-  CAP_UHNAMES          = 1 << 2,  /**< userhost-in-names client capability */
-  CAP_EXTENDED_JOIN    = 1 << 3,  /**< extended-join client capability */
-  CAP_ACCOUNT_NOTIFY   = 1 << 4,  /**< account-notify client capability */
-  CAP_INVITE_NOTIFY    = 1 << 5,  /**< invite-notify client capability */
-  CAP_CHGHOST          = 1 << 6,  /**< chghost client capability */
-  CAP_CAP_NOTIFY       = 1 << 7,  /**< CAP LS 302 cap-notify client capability */
-  CAP_STANDARD_REPLIES = 1 << 8,  /**< standard-replies client capability */
-  CAP_EXTENDED_MONITOR = 1 << 9,  /**< extended-monitor client capability */
+  CAP_MULTI_PREFIX      = 1 << 0,   /**< multi-prefix client capability */
+  CAP_AWAY_NOTIFY       = 1 << 1,   /**< away-notify client capability */
+  CAP_UHNAMES           = 1 << 2,   /**< userhost-in-names client capability */
+  CAP_EXTENDED_JOIN     = 1 << 3,   /**< extended-join client capability */
+  CAP_ACCOUNT_NOTIFY    = 1 << 4,   /**< account-notify client capability */
+  CAP_INVITE_NOTIFY     = 1 << 5,   /**< invite-notify client capability */
+  CAP_CHGHOST           = 1 << 6,   /**< chghost client capability */
+  CAP_CAP_NOTIFY        = 1 << 7,   /**< CAP LS 302 cap-notify client capability */
+  CAP_STANDARD_REPLIES  = 1 << 8,   /**< standard-replies client capability */
+  CAP_EXTENDED_MONITOR  = 1 << 9,   /**< extended-monitor client capability */
+  CAP_NO_IMPLICIT_NAMES = 1 << 10,  /**< no-implicit-names client capability */
 };
 
 struct Cap

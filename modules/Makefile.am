@@ -11,6 +11,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_extended_monitor.la  \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
+                      cap_no_implicit_names.la \
                       cap_standard_replies.la  \
                       cap_userhost_in_names.la \
                       umode_admin.la           \

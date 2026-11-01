@@ -827,7 +827,8 @@ channel_join(struct Client *client, const char *name, const char *key)
                        channel->name, channel->topic_setter, channel->topic_time);
   }
 
-  channel_send_namereply(client, channel);
+  if (!client_has_cap(client, CAP_NO_IMPLICIT_NAMES))
+    channel_send_namereply(client, channel);
 }
 
 void

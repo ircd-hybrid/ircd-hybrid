@@ -41,6 +41,7 @@
 * The `pseudo::target` directive now accepts server IDs in addition to server names,
   for example `target = "NickServ@00A";`
 * Added support for the IRCv3 `extended-monitor` capability
+* Added support for the IRCv3 `no-implicit-names` capability
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

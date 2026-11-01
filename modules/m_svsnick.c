@@ -94,9 +94,12 @@ ms_svsnick(struct Client *source, size_t parc, char *parv[])
     }
   }
 
+  const bool samenick = io_strcasecmp(target->name, new_nick) == 0;
+
   whowas_add_history(target, true);
 
-  monitor_notify_signoff(target);
+  if (samenick == false)
+    monitor_notify_signoff(target);
 
   clear_ban_cache_list(&target->channel_member_list);
 
@@ -115,7 +118,8 @@ ms_svsnick(struct Client *source, size_t parc, char *parv[])
   client_update_name(target, new_nick);
   target->nick_timestamp = new_nick_timestamp;
 
-  monitor_notify_signon(target);
+  if (samenick == false)
+    monitor_notify_signon(target);
 }
 
 static struct Command command_table =

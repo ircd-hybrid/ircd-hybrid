@@ -12,6 +12,7 @@ struct HookContainer *ircd_hook_client_exit_local;
 struct HookContainer *ircd_hook_client_exit_remote;
 struct HookContainer *ircd_hook_msg_client_source_local;
 struct HookContainer *ircd_hook_msg_client_target_local;
+struct HookContainer *ircd_hook_msg_sent;
 struct HookContainer *ircd_hook_nick_change_local;
 struct HookContainer *ircd_hook_nick_change_remote;
 struct HookContainer *ircd_hook_spy_request;
@@ -27,6 +28,7 @@ ircd_hook_init(void)
   ircd_hook_client_exit_remote = hook_container_register("client_exit_remote");
   ircd_hook_msg_client_source_local = hook_container_register("msg_client_source_local");
   ircd_hook_msg_client_target_local = hook_container_register("msg_client_target_local");
+  ircd_hook_msg_sent = hook_container_register("msg_sent");
   ircd_hook_nick_change_local = hook_container_register("nick_change_local");
   ircd_hook_nick_change_remote = hook_container_register("nick_change_remote");
   ircd_hook_spy_request = hook_container_register("spy_request");

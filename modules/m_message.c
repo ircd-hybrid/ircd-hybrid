@@ -10,17 +10,14 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "hook.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "module.h"
 
-#include "accept.h"
 #include "channel.h"
 #include "channel_member.h"
 #include "channel_mode.h"
@@ -215,13 +212,26 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
 }
 
 static void
+msg_dispatch_sent_hook(bool notice, struct Client *source, char status_prefix,
+                       const char *target, const char *text)
+{
+  hook_dispatch(ircd_hook_msg_sent, &(ircd_hook_msg_sent_ctx){
+    .source = source,
+    .command = command[notice],
+    .status_prefix = status_prefix,
+    .target = target,
+    .text = text
+  });
+}
+
+static void
 msg_channel(bool notice, struct Client *source, struct Channel *channel,
             unsigned int rank, const char *text)
 {
   const char *error = NULL;
 
   /* Chanops and voiced can flood their own channel with impunity */
-  channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, rank, text, notice, &error);
+  const channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, rank, text, notice, &error);
   if (perm == CHANNEL_SEND_PERM_FORBIDDEN)
   {
     if (notice == false)
@@ -231,9 +241,10 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 
   if (perm == CHANNEL_SEND_PERM_ELEVATED || !flood_attack_channel(notice, source, channel))
   {
-    const char *const prefix = channel_member_rank_to_prefix(rank);
+    const char prefix[] = { channel_member_rank_to_prefix(rank)[0], '\0' };
     sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
                           command[notice], prefix, channel->name, text);
+    msg_dispatch_sent_hook(notice, source, prefix[0], channel->name, text);
   }
 }
 
@@ -260,7 +271,8 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
   }
 
-  sendto_one_command(target, source, command[notice], ":%s", text);
+  sendto_one_command(target, source, command[notice], ":%s", ctx.text);
+  msg_dispatch_sent_hook(notice, source, '\0', target->name, ctx.text);
 }
 
 /* handle_special()
@@ -319,6 +331,7 @@ target_handle_masked(struct Client *source, const char *nick, const char *text, 
   target_mask_ctx_t ctx = { .mask = mask };
 
   sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);
+  msg_dispatch_sent_hook(notice, source, '\0', nick, text);
 }
 
 static void
@@ -338,6 +351,7 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
   if (!client_is_me(target))
   {
     sendto_one(target, ":%s %s %s :%s", source->id, command[notice], nick, text);
+    msg_dispatch_sent_hook(notice, source, '\0', nick, text);
     return;
   }
 

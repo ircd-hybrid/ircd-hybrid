@@ -5,10 +5,10 @@
 
 #include "module.h"
 
-#include "ircd_module.h"
 #include "cap.h"
 #include "client.h"
 #include "ircd_hook.h"
+#include "ircd_module.h"
 #include "send.h"
 
 static hook_flow_t
@@ -31,8 +31,7 @@ msg_sent_hook(void *ctx_)
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  if (!ircd_module_register_cap(CAP_ECHO_MESSAGE, "echo-message", NULL,
-                                error_message, error_message_size))
+  if (!ircd_module_register_cap(CAP_ECHO_MESSAGE, "echo-message", NULL, error_message, error_message_size))
     return false;
 
   hook_install(ircd_hook_msg_sent, msg_sent_hook, HOOK_PRIORITY_DEFAULT);

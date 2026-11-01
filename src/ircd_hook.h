@@ -28,6 +28,15 @@ typedef struct
 
 typedef struct
 {
+  struct Client *source;
+  const char *command;
+  char status_prefix;
+  const char *target;
+  const char *text;
+} ircd_hook_msg_sent_ctx;
+
+typedef struct
+{
   struct Client *client;
   const char *nick;
 } ircd_hook_nick_change_ctx;
@@ -62,6 +71,7 @@ extern struct HookContainer *ircd_hook_client_exit_local;
 extern struct HookContainer *ircd_hook_client_exit_remote;
 extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
+extern struct HookContainer *ircd_hook_msg_sent;
 extern struct HookContainer *ircd_hook_nick_change_local;
 extern struct HookContainer *ircd_hook_nick_change_remote;
 extern struct HookContainer *ircd_hook_spy_request;

@@ -22,6 +22,7 @@ enum
   CAP_STANDARD_REPLIES  = 1 << 8,   /**< standard-replies client capability */
   CAP_EXTENDED_MONITOR  = 1 << 9,   /**< extended-monitor client capability */
   CAP_NO_IMPLICIT_NAMES = 1 << 10,  /**< no-implicit-names client capability */
+  CAP_ECHO_MESSAGE      = 1 << 11,  /**< echo-message client capability */
 };
 
 struct Cap

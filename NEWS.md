@@ -43,6 +43,7 @@
 * Added support for the IRCv3 `extended-monitor` capability
 * Added support for the IRCv3 `no-implicit-names` capability
 * Added support for the IRCv3 `ACCOUNTEXTBAN` ISUPPORT token
+* Added support for the IRCv3 `echo-message` capability
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

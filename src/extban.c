@@ -56,7 +56,10 @@ extban_init(void)
 
   const char *ptr = extban_get_isupport();
   if (ptr)
+  {
     isupport_add("EXTBAN", "%s", ptr);
+    isupport_add("ACCOUNTEXTBAN", "%c", extban_account.character); /* XXX - extban modules still static */
+  }
 }
 
 void

@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -18,6 +19,7 @@
 #include "list.h"
 #include "memory.h"
 
+#include "cap.h"
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
@@ -71,6 +73,55 @@ _monitor_destroy(struct Monitor *monitor)
   list_remove(&monitor->node, &monitor_hash[hash_string(monitor->name)]);
   io_free(monitor->name);
   io_free(monitor);
+}
+
+/*! \brief Notifies common-channel peers and eligible extended-monitor subscribers.
+ * \param target           Client whose metadata changed
+ * \param notification_cap Capability associated with the notification
+ * \param format           Notification format string
+ */
+void
+monitor_notify_extended(struct Client *target, uint32_t notification_cap,
+                        const char *format, ...)
+{
+  assert(client_is_user(target));
+  assert(notification_cap);
+  assert((notification_cap & (notification_cap - 1)) == 0);
+  assert((notification_cap & CAP_EXTENDED_MONITOR) == 0);
+  assert(format);
+
+  char message[IRCD_BUFSIZE];
+  va_list args;
+  va_start(args, format);
+  const int length = vsnprintf(message, sizeof(message), format, args);
+  va_end(args);
+
+  assert(length >= 0 && (size_t)length <= IRCD_BUFSIZE - 2);
+  if (length < 0 || (size_t)length > IRCD_BUFSIZE - 2)
+    return;
+
+  const uintmax_t broadcast_id =
+    sendto_common_channels_local(target, true, notification_cap, 0, "%s", message);
+
+  const struct Monitor *const monitor = _monitor_find(target->name);
+  if (monitor == NULL)
+    return;
+
+  const uint32_t required_caps = CAP_EXTENDED_MONITOR | notification_cap;
+  list_node_t *node;
+  LIST_FOREACH(node, monitor->monitored_by.head)
+  {
+    struct Client *const subscriber = node->data;
+    assert(client_is_local_user(subscriber));
+
+    if ((subscriber->connection->cap_flags & required_caps) != required_caps)
+      continue;
+
+    if (subscriber == target || subscriber->connection->last_broadcast_id == broadcast_id)
+      continue;
+
+    sendto_one(subscriber, "%s", message);
+  }
 }
 
 /*! \brief Notifies all clients that have client's name on

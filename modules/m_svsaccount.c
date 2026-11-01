@@ -18,6 +18,7 @@
 #include "cap.h"
 #include "client.h"
 #include "client_find.h"
+#include "monitor.h"
 #include "parse.h"
 #include "send.h"
 #include "user.h"
@@ -49,8 +50,8 @@ ms_svsaccount(struct Client *source, size_t parc, char *parv[])
 
   sendto_servers(source, 0, 0, ":%s SVSACCOUNT %s 0 %s",
                  source->id, target->id, target->account);
-  sendto_common_channels_local(target, true, CAP_ACCOUNT_NOTIFY, 0, ":%s!%s@%s ACCOUNT %s",
-                               target->name, target->username, target->host, target->account);
+  monitor_notify_extended(target, CAP_ACCOUNT_NOTIFY, ":%s!%s@%s ACCOUNT %s",
+                          target->name, target->username, target->host, target->account);
 }
 
 static struct Command command_table =

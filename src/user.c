@@ -481,8 +481,8 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   sendto_common_channels_local(client, false, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
                                client->name, client->username, client->host);
 
-  sendto_common_channels_local(client, true, CAP_CHGHOST, 0, ":%s!%s@%s CHGHOST %s %s",
-                               client->name, client->username, client->host, client->username, hostname);
+  monitor_notify_extended(client, CAP_CHGHOST, ":%s!%s@%s CHGHOST %s %s",
+                          client->name, client->username, client->host, client->username, hostname);
 
   strlcpy(client->host, hostname, sizeof(client->host));
 

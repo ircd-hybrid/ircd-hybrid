@@ -164,6 +164,9 @@ cap_chghost_la_OBJECTS = cap_chghost.lo
 cap_extended_join_la_LIBADD =
 cap_extended_join_la_SOURCES = cap_extended_join.c
 cap_extended_join_la_OBJECTS = cap_extended_join.lo
+cap_extended_monitor_la_LIBADD =
+cap_extended_monitor_la_SOURCES = cap_extended_monitor.c
+cap_extended_monitor_la_OBJECTS = cap_extended_monitor.lo
 cap_invite_notify_la_LIBADD =
 cap_invite_notify_la_SOURCES = cap_invite_notify.c
 cap_invite_notify_la_OBJECTS = cap_invite_notify.lo
@@ -521,6 +524,7 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/cap_away_notify.Plo ./$(DEPDIR)/cap_cap_notify.Plo \
 	./$(DEPDIR)/cap_chghost.Plo ./$(DEPDIR)/cap_extended_join.Plo \
+	./$(DEPDIR)/cap_extended_monitor.Plo \
 	./$(DEPDIR)/cap_invite_notify.Plo \
 	./$(DEPDIR)/cap_multi_prefix.Plo \
 	./$(DEPDIR)/cap_standard_replies.Plo \
@@ -600,8 +604,8 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
-	cap_chghost.c cap_extended_join.c cap_invite_notify.c \
-	cap_multi_prefix.c cap_standard_replies.c \
+	cap_chghost.c cap_extended_join.c cap_extended_monitor.c \
+	cap_invite_notify.c cap_multi_prefix.c cap_standard_replies.c \
 	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
 	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
 	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
@@ -626,8 +630,8 @@ SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
 	umode_secure.c umode_secureonly.c umode_servnotice.c \
 	umode_skill.c umode_softcallerid.c umode_spy.c umode_webirc.c
 DIST_SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
-	cap_chghost.c cap_extended_join.c cap_invite_notify.c \
-	cap_multi_prefix.c cap_standard_replies.c \
+	cap_chghost.c cap_extended_join.c cap_extended_monitor.c \
+	cap_invite_notify.c cap_multi_prefix.c cap_standard_replies.c \
 	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
 	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
 	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
@@ -816,6 +820,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_cap_notify.la        \
                       cap_chghost.la           \
                       cap_extended_join.la     \
+                      cap_extended_monitor.la  \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
                       cap_standard_replies.la  \
@@ -1011,6 +1016,9 @@ cap_chghost.la: $(cap_chghost_la_OBJECTS) $(cap_chghost_la_DEPENDENCIES) $(EXTRA
 
 cap_extended_join.la: $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_DEPENDENCIES) $(EXTRA_cap_extended_join_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_extended_join_la_OBJECTS) $(cap_extended_join_la_LIBADD) $(LIBS)
+
+cap_extended_monitor.la: $(cap_extended_monitor_la_OBJECTS) $(cap_extended_monitor_la_DEPENDENCIES) $(EXTRA_cap_extended_monitor_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_extended_monitor_la_OBJECTS) $(cap_extended_monitor_la_LIBADD) $(LIBS)
 
 cap_invite_notify.la: $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_DEPENDENCIES) $(EXTRA_cap_invite_notify_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_invite_notify_la_OBJECTS) $(cap_invite_notify_la_LIBADD) $(LIBS)
@@ -1362,6 +1370,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_cap_notify.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_chghost.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_extended_join.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_extended_monitor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_invite_notify.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_multi_prefix.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_standard_replies.Plo@am__quote@ # am--include-marker
@@ -1643,6 +1652,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/cap_cap_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_chghost.Plo
 	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
+	-rm -f ./$(DEPDIR)/cap_extended_monitor.Plo
 	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
 	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo
@@ -1806,6 +1816,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/cap_cap_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_chghost.Plo
 	-rm -f ./$(DEPDIR)/cap_extended_join.Plo
+	-rm -f ./$(DEPDIR)/cap_extended_monitor.Plo
 	-rm -f ./$(DEPDIR)/cap_invite_notify.Plo
 	-rm -f ./$(DEPDIR)/cap_multi_prefix.Plo
 	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo

@@ -20,6 +20,7 @@ enum
   CAP_CHGHOST          = 1 << 6,  /**< chghost client capability */
   CAP_CAP_NOTIFY       = 1 << 7,  /**< CAP LS 302 cap-notify client capability */
   CAP_STANDARD_REPLIES = 1 << 8,  /**< standard-replies client capability */
+  CAP_EXTENDED_MONITOR = 1 << 9,  /**< extended-monitor client capability */
 };
 
 struct Cap

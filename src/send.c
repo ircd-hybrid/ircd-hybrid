@@ -593,7 +593,7 @@ sendto_match_servs(const struct Client *source, const char *mask, uint32_t requi
   dbuf_block_unref(block);
 }
 
-void
+uintmax_t
 sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
                              uint32_t excluded_cap, const char *format, ...)
 {
@@ -604,7 +604,7 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   _send_finalize_message(block, format, args);
   va_end(args);
 
-  ++broadcast_id;
+  const uintmax_t current_broadcast_id = ++broadcast_id;
 
   list_node_t *node, *node2;
   LIST_FOREACH(node, user->channel_member_list.head)
@@ -623,7 +623,7 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
       if (target == user)
         continue;
 
-      if (target->connection->last_broadcast_id == broadcast_id)
+      if (target->connection->last_broadcast_id == current_broadcast_id)
         continue;
 
       if (required_cap && (target->connection->cap_flags & required_cap) != required_cap)
@@ -632,7 +632,7 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
       if (excluded_cap && (target->connection->cap_flags & excluded_cap))
         continue;
 
-      target->connection->last_broadcast_id = broadcast_id;
+      target->connection->last_broadcast_id = current_broadcast_id;
       _send_block_to_client(target, block);
     }
   }
@@ -645,6 +645,7 @@ sendto_common_channels_local(struct Client *user, bool touser, uint32_t required
   }
 
   dbuf_block_unref(block);
+  return current_broadcast_id;
 }
 
 void

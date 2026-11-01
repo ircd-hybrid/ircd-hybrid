@@ -8,6 +8,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_cap_notify.la        \
                       cap_chghost.la           \
                       cap_extended_join.la     \
+                      cap_extended_monitor.la  \
                       cap_invite_notify.la     \
                       cap_multi_prefix.la      \
                       cap_standard_replies.la  \

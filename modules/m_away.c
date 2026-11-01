@@ -23,6 +23,7 @@
 #include "conf.h"
 #include "ircd.h"
 #include "ircd_module.h"
+#include "monitor.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -59,8 +60,8 @@ static void
 _away_send_unset(struct Client *source)
 {
   sendto_servers(source, 0, 0, ":%s AWAY", source->id);
-  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                               source->name, source->username, source->host);
+  monitor_notify_extended(source, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY",
+                          source->name, source->username, source->host);
 }
 
 static void
@@ -70,8 +71,8 @@ _away_send_set(struct Client *source)
 
   sendto_servers(source, 0, 0, ":%s AWAY :%s",
                  source->id, source->away_message);
-  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source->name, source->username, source->host, source->away_message);
+  monitor_notify_extended(source, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
+                          source->name, source->username, source->host, source->away_message);
 }
 
 static void

@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "io.h"
 #include "list.h"
 
 /** Monitor structure */
@@ -32,6 +33,7 @@ typedef enum
 
 extern void monitor_clear_list(struct Client *);
 extern void monitor_count_memory(uint32_t *const, size_t *const);
+extern void monitor_notify_extended(struct Client *, uint32_t, const char *, ...) IO_AFP(3,4);
 extern void monitor_notify_signoff(const struct Client *);
 extern void monitor_notify_signon(const struct Client *);
 extern void monitor_unsubscribe(struct Client *, const char *);

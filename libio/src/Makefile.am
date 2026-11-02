@@ -33,6 +33,8 @@ libio_la_SOURCES =  address.c     \
                     io_daemon.h   \
                     io_getopt.c   \
                     io_getopt.h   \
+                    io_hash.c     \
+                    io_hash.h     \
                     io_hex.c      \
                     io_hex.h      \
                     io_parse.c    \

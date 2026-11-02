@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "hostmask_index.h"
+#include "io_hash.h"
 #include "io_string.h"
 #include "memory.h"
 
@@ -201,13 +202,8 @@ static inline uint64_t
 _hostmask_hash_finalize(uint64_t hash_state, size_t length)
 {
   hash_state ^= (uint64_t)length * UINT64_C(0x9e3779b97f4a7c15);
-  hash_state ^= hash_state >> 33;
-  hash_state *= UINT64_C(0xff51afd7ed558ccd);
-  hash_state ^= hash_state >> 33;
-  hash_state *= UINT64_C(0xc4ceb9fe1a85ec53);
-  hash_state ^= hash_state >> 33;
 
-  return hash_state;
+  return io_hash_mix64(hash_state);
 }
 
 static uint64_t

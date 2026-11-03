@@ -220,6 +220,15 @@ static const char *const replies[] =
   /* 742 */  [ERR_MLOCKRESTRICTED] = "%s %c %s :MODE cannot be set due to the channel having an active MLOCK restriction policy",
   /* 743 */  [ERR_INVALIDBAN] = "%s :Invalid ban mask",
   /* 759 */  [RPL_ETRACEEND] = "%s :End of ETRACE",
+  /* 900 */  [RPL_LOGGEDIN] = "%s!%s@%s %s :You are now logged in as %s",
+  /* 901 */  [RPL_LOGGEDOUT] = "%s!%s@%s :You are now logged out",
+  /* 902 */  [ERR_NICKLOCKED] = ":You must use a nick assigned to you",
+  /* 903 */  [RPL_SASLSUCCESS] = ":SASL authentication successful",
+  /* 904 */  [ERR_SASLFAIL] = ":SASL authentication failed",
+  /* 905 */  [ERR_SASLTOOLONG] = ":SASL message too long",
+  /* 906 */  [ERR_SASLABORTED] = ":SASL authentication aborted",
+  /* 907 */  [ERR_SASLALREADY] = ":You have already authenticated using SASL",
+  /* 908 */  [RPL_SASLMECHS] = "%s :are available SASL mechanisms",
   /* 999 */  [ERR_LAST_ERR_MSG] = ":Last error message"
 };
 

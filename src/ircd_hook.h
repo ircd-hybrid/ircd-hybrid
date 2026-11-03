@@ -7,10 +7,18 @@
 #define INCLUDED_ircd_hook_h
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "hook.h"
 
 #include "client.h"
+
+typedef struct
+{
+  struct Client *client;
+  uint32_t added;
+  uint32_t removed;
+} ircd_hook_cap_change_ctx;
 
 typedef struct
 {
@@ -67,8 +75,10 @@ typedef struct
   struct Client *target;
 } ircd_hook_whois_send_ctx;
 
+extern struct HookContainer *ircd_hook_cap_change;
 extern struct HookContainer *ircd_hook_client_exit_local;
 extern struct HookContainer *ircd_hook_client_exit_remote;
+extern struct HookContainer *ircd_hook_conf_read;
 extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
 extern struct HookContainer *ircd_hook_msg_sent;
@@ -76,6 +86,7 @@ extern struct HookContainer *ircd_hook_nick_change_local;
 extern struct HookContainer *ircd_hook_nick_change_remote;
 extern struct HookContainer *ircd_hook_spy_request;
 extern struct HookContainer *ircd_hook_user_register_local;
+extern struct HookContainer *ircd_hook_user_register_local_prepare;
 extern struct HookContainer *ircd_hook_user_register_remote;
 extern struct HookContainer *ircd_hook_who_send;
 extern struct HookContainer *ircd_hook_whois_send;

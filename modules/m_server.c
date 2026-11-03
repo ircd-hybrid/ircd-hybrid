@@ -473,6 +473,12 @@ mr_server(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
+  if (!string_is_empty(source->id))
+  {
+    client_exit(source, "Cannot register a server after starting client registration");
+    return;
+  }
+
   const char *const name = parv[1];
   if (!server_is_valid_name(name))
   {

@@ -5,9 +5,12 @@
 
 #ifndef INCLUDED_cap_h
 #define INCLUDED_cap_h
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "list.h"
+
+struct Client;
 
 enum
 {
@@ -23,20 +26,43 @@ enum
   CAP_EXTENDED_MONITOR  = 1 << 9,   /**< extended-monitor client capability */
   CAP_NO_IMPLICIT_NAMES = 1 << 10,  /**< no-implicit-names client capability */
   CAP_ECHO_MESSAGE      = 1 << 11,  /**< echo-message client capability */
+  CAP_SASL              = 1 << 12,  /**< sasl client capability */
 };
 
-struct Cap
+typedef enum
+{
+  CAP_SUCCESS = 0,
+  CAP_INVALID_NAME,
+  CAP_INVALID_FLAG,
+  CAP_INVALID_VALUE,
+  CAP_ALREADY_REGISTERED,
+  CAP_FLAG_CONFLICT
+} cap_result_t;
+
+struct CapConfig
 {
   const char *name;
   const char *value;
   uint32_t flag;
+  bool available;
+};
+
+struct Cap
+{
+  char *name;
+  char *value;
+  uint32_t flag;
   size_t name_len;
   size_t value_len;
+  bool available;
+  bool notifying;
   list_node_t node;
 };
 
-extern void cap_register(unsigned int, const char *, const char *);
-extern void cap_unregister(const char *);
-extern struct Cap *cap_find(const char *);
+extern cap_result_t cap_register(const struct CapConfig *, struct Cap **);
+extern cap_result_t cap_update(struct Cap *, const char *, bool);
+extern void cap_unregister(struct Cap **);
+extern void cap_client_set(struct Client *, uint32_t);
+extern const struct Cap *cap_find(const char *);
 extern const list_t *cap_get_list(void);
 #endif  /* INCLUDED_cap_h */

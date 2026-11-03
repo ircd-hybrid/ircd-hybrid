@@ -49,6 +49,54 @@
 #include "user.h"
 #include "user_mode.h"
 
+bool
+user_account_is_valid(const char *account)
+{
+  if (string_is_empty(account) || strlen(account) > ACCOUNTLEN || *account == ':')
+    return false;
+
+  for (const unsigned char *p = (const unsigned char *)account; *p; ++p)
+    if (*p <= ' ' || *p == 0x7f)
+      return false;
+
+  return true;
+}
+
+static void
+_user_send_account_status(struct Client *client)
+{
+  assert(client_is_local(client));
+
+  const char *const nick = string_is_empty(client->name) ? "*" : client->name;
+  const char *const user = string_is_empty(client->username) ? "*" : client->username;
+  if (client_has_account(client))
+    sendto_one_numeric(client, &me, RPL_LOGGEDIN, nick, user, client->host,
+                       client->account, client->account);
+  else
+    sendto_one_numeric(client, &me, RPL_LOGGEDOUT, nick, user, client->host);
+}
+
+bool
+user_set_account(struct Client *client, const char *account)
+{
+  if (!user_account_is_valid(account))
+    return false;
+
+  const bool changed = strcmp(client->account, account) != 0;
+  if (changed)
+    strlcpy(client->account, account, sizeof(client->account));
+
+  /* Confirm every accepted update; notify observers only when the account changes. */
+  if (client_is_local(client))
+    _user_send_account_status(client);
+
+  if (changed && client_is_user(client))
+    monitor_notify_extended(client, CAP_ACCOUNT_NOTIFY, ":%s!%s@%s ACCOUNT %s",
+                            client->name, client->username, client->host, client->account);
+
+  return true;
+}
+
 void
 show_lusers(struct Client *client)
 {
@@ -286,15 +334,24 @@ user_register_local(struct Client *client)
     }
   }
 
-  if (!client_id_allocate_uid(client))
-  {
-    client_exit(client, "Local client ID generator exhausted");
+  hook_dispatch(ircd_hook_user_register_local_prepare, &(ircd_hook_user_register_ctx){ .client = client });
+  if (client_is_dead(client))
     return;
+
+  if (string_is_empty(client->id))
+  {
+    if (!client_id_allocate_uid(client))
+    {
+      client_exit(client, "Local client ID generator exhausted");
+      return;
+    }
+
+    hash_add_id(client);
   }
 
-  hash_add_id(client);
-
   hook_dispatch(ircd_hook_user_register_local, &(ircd_hook_user_register_ctx){ .client = client });
+  if (client_is_dead(client))
+    return;
 
   client_set_state(client, CLIENT_STATE_USER);
   client_update_activity_timeout(client);

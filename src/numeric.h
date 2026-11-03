@@ -252,6 +252,15 @@ enum irc_numerics
   ERR_MLOCKRESTRICTED      = 742,
   ERR_INVALIDBAN           = 743,
   RPL_ETRACEEND            = 759,
+  RPL_LOGGEDIN             = 900,
+  RPL_LOGGEDOUT            = 901,
+  ERR_NICKLOCKED           = 902,
+  RPL_SASLSUCCESS          = 903,
+  ERR_SASLFAIL             = 904,
+  ERR_SASLTOOLONG          = 905,
+  ERR_SASLABORTED          = 906,
+  ERR_SASLALREADY          = 907,
+  RPL_SASLMECHS            = 908,
   ERR_LAST_ERR_MSG         = 999
 };
 

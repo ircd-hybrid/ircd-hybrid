@@ -9,16 +9,12 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <string.h>
 
-#include "io_string.h"
 #include "module.h"
 
 #include "ircd_module.h"
-#include "cap.h"
 #include "client.h"
 #include "client_find.h"
-#include "monitor.h"
 #include "parse.h"
 #include "send.h"
 #include "user.h"
@@ -46,12 +42,11 @@ ms_svsaccount(struct Client *source, size_t parc, char *parv[])
   if (target == NULL)
     return;
 
-  strlcpy(target->account, parv[3], sizeof(target->account));
+  if (!user_set_account(target, parv[3]))
+    return;
 
   sendto_servers(source, 0, 0, ":%s SVSACCOUNT %s 0 %s",
                  source->id, target->id, target->account);
-  monitor_notify_extended(target, CAP_ACCOUNT_NOTIFY, ":%s!%s@%s ACCOUNT %s",
-                          target->name, target->username, target->host, target->account);
 }
 
 static struct Command command_table =

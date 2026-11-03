@@ -46,6 +46,7 @@
 #include "conf_service.h"
 #include "conf_shared.h"
 #include "defaults.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
 #include "ircd_defs.h"
 #include "isupport.h"
@@ -365,6 +366,8 @@ _conf_clear(void)
   /* Clean out ConfigGeneral */
   io_free(ConfigGeneral.oper_umodes);
   ConfigGeneral.oper_umodes = NULL;
+  io_free(ConfigGeneral.sasl_service);
+  ConfigGeneral.sasl_service = NULL;
 
   /* Clean out listeners */
   listener_close_marked();
@@ -479,6 +482,7 @@ conf_read_files(bool cold)
 
   motd_init();
   _conf_update_isupport();
+  hook_dispatch(ircd_hook_conf_read, NULL);
 
   return success;
 }

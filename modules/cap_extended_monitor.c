@@ -8,17 +8,24 @@
 #include "ircd_module.h"
 #include "cap.h"
 
+static struct Cap *capability;
+static const struct CapConfig capability_config =
+{
+  .name = "extended-monitor",
+  .flag = CAP_EXTENDED_MONITOR,
+  .available = true
+};
+
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  return ircd_module_register_cap(CAP_EXTENDED_MONITOR, "extended-monitor", NULL,
-                                  error_message, error_message_size);
+  return ircd_module_register_cap(&capability_config, &capability, error_message, error_message_size);
 }
 
 static void
 exit_handler(void *context)
 {
-  cap_unregister("extended-monitor");
+  cap_unregister(&capability);
 }
 
 const struct module_descriptor module_entry_v1 =

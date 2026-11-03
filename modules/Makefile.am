@@ -93,6 +93,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_restart.la    \
                       m_resv.la       \
                       m_resync.la     \
+                      m_sasl.la       \
                       m_server.la     \
                       m_set.la        \
                       m_sjoin.la      \

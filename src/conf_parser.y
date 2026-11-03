@@ -324,6 +324,7 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  RESV
 %token  RESV_EXEMPT
 %token  RETRY_DELAY
+%token  SASL_SERVICE
 %token  SECRET
 %token  SECONDS MINUTES HOURS DAYS WEEKS
 %token  SEND_PASSWORD
@@ -2287,6 +2288,7 @@ general_item:       general_away_count |
                     general_max_monitor |
                     general_ident_timeout |
                     general_registration_timeout |
+                    general_sasl_service |
                     error;
 
 
@@ -2493,6 +2495,26 @@ general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
 general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'
 {
   ConfigGeneral.registration_timeout = $3;
+};
+
+general_sasl_service: SASL_SERVICE '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigGeneral.sasl_service);
+  ConfigGeneral.sasl_service = NULL;
+
+  if (string_is_empty($3))
+    break;
+
+  if (!server_is_valid_name($3))
+  {
+    conf_report_error("Invalid general::sasl_service");
+    YYABORT;
+  }
+
+  ConfigGeneral.sasl_service = io_strdup($3);
 };
 
 

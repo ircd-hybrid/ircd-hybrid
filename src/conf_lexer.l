@@ -333,6 +333,7 @@ restart                     { return T_RESTART; }
 retry_delay                 { return RETRY_DELAY; }
 resv                        { return RESV; }
 resv_exempt                 { return RESV_EXEMPT; }
+sasl_service                { return SASL_SERVICE; }
 secret                      { return SECRET; }
 send_password               { return SEND_PASSWORD; }
 sendq                       { return SENDQ; }

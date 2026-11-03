@@ -48,11 +48,10 @@ ms_encap(struct Client *source, size_t parc, char *parv[])
     bufptr += len;
   }
 
-  /* If it's a command without parameters, don't prepend a ':' */
-  if (parc == 3)
-    snprintf(bufptr, sizeof(buf) - cur_len, "%s", parv[2]);
-  else
-    snprintf(bufptr, sizeof(buf) - cur_len, ":%s", parv[parc - 1]);
+  /* Preserve parameters without expanding a line that already fills the wire limit. */
+  const char *const last = parv[parc - 1];
+  const bool trailing = string_is_empty(last) || *last == ':' || strchr(last, ' ');
+  snprintf(bufptr, sizeof(buf) - cur_len, "%s%s", trailing ? ":" : "", last);
 
   sendto_match_servs(source, parv[1], CAPAB_ENCAP, "ENCAP %s", buf);
 

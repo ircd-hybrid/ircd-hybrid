@@ -287,19 +287,19 @@ ircd_module_register_user_mode(struct UserMode *mode, char *error_message, size_
 }
 
 bool
-ircd_module_register_cap(unsigned int flag, const char *name, const char *value,
+ircd_module_register_cap(const struct CapConfig *config, struct Cap **cap_out,
                          char *error_message, size_t error_message_size)
 {
-  assert(!string_is_empty(name));
+  assert(config);
+  assert(cap_out);
   assert(error_message);
   assert(error_message_size > 0);
 
-  if (cap_find(name))
-  {
-    snprintf(error_message, error_message_size, "Capability %s is already registered", name);
-    return false;
-  }
+  const cap_result_t result = cap_register(config, cap_out);
+  if (result == CAP_SUCCESS)
+    return true;
 
-  cap_register(flag, name, value);
-  return true;
+  snprintf(error_message, error_message_size, "Cannot register capability %s (result %u)",
+           string_is_empty(config->name) ? "<unnamed>" : config->name, (unsigned int)result);
+  return false;
 }

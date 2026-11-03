@@ -11,6 +11,14 @@
 #include "ircd_module.h"
 #include "send.h"
 
+static struct Cap *capability;
+static const struct CapConfig capability_config =
+{
+  .name = "echo-message",
+  .flag = CAP_ECHO_MESSAGE,
+  .available = true
+};
+
 static hook_flow_t
 msg_sent_hook(void *ctx_)
 {
@@ -31,7 +39,7 @@ msg_sent_hook(void *ctx_)
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  if (!ircd_module_register_cap(CAP_ECHO_MESSAGE, "echo-message", NULL, error_message, error_message_size))
+  if (!ircd_module_register_cap(&capability_config, &capability, error_message, error_message_size))
     return false;
 
   hook_install(ircd_hook_msg_sent, msg_sent_hook, HOOK_PRIORITY_DEFAULT);
@@ -42,7 +50,7 @@ static void
 exit_handler(void *context)
 {
   hook_uninstall(ircd_hook_msg_sent, msg_sent_hook);
-  cap_unregister("echo-message");
+  cap_unregister(&capability);
 }
 
 const struct module_descriptor module_entry_v1 =

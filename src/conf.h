@@ -45,6 +45,7 @@ struct config_general_entry
   const char *dlinefile;
   const char *resvfile;
   char *oper_umodes;
+  char *sasl_service;
 
   unsigned int dline_min_cidr;
   unsigned int dline_min_cidr6;

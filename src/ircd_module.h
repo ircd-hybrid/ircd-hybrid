@@ -37,5 +37,10 @@ extern bool ircd_module_register_commands(struct Command *, size_t, char *, size
 extern bool ircd_module_register_info_entries(const struct InfoEntry *, size_t, char *, size_t);
 extern bool ircd_module_register_stats_handlers(const struct StatsHandler *, size_t, char *, size_t);
 extern bool ircd_module_register_user_mode(struct UserMode *, char *, size_t);
+extern enum module_error_code ircd_module_load(const char *, struct module_error_info *);
+extern enum module_error_code ircd_module_unload(const char *, struct module_error_info *);
+extern enum module_error_code ircd_module_reload(const char *, struct module_error_info *);
+extern enum module_error_code ircd_module_reload_all(struct module_reload_all_result *, module_report_fn,
+                                                     void *, struct module_error_info *);
 extern module_manager_t *ircd_module_manager_get(void);
 #endif  /* INCLUDED_ircd_module_h */

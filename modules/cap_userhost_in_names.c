@@ -12,7 +12,7 @@ static struct Cap *capability;
 static const struct CapConfig capability_config =
 {
   .name = "userhost-in-names",
-  .flag = CAP_UHNAMES,
+  .flag = CAP_USERHOST_IN_NAMES,
   .available = true
 };
 

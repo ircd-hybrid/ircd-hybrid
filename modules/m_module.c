@@ -97,7 +97,7 @@ _module_cmd_load(struct module_command_context *command, const char *name)
 {
   struct module_error_info error;
 
-  if (module_manager_load(ircd_module_manager_get(), name, &error) != MODULE_SUCCESS)
+  if (ircd_module_load(name, &error) != MODULE_SUCCESS)
     _module_report_error(command, "load", &error);
   else
     _module_announce(command, name, "loaded");
@@ -110,7 +110,7 @@ _module_cmd_unload(struct module_command_context *command, const char *name)
 {
   struct module_error_info error;
 
-  if (module_manager_unload(ircd_module_manager_get(), name, &error) != MODULE_SUCCESS)
+  if (ircd_module_unload(name, &error) != MODULE_SUCCESS)
     _module_report_error(command, "unload", &error);
   else
     _module_announce(command, name, "unloaded");
@@ -127,14 +127,14 @@ _module_cmd_reload(struct module_command_context *command, const char *name)
   {
     struct module_reload_all_result result;
     const enum module_error_code code =
-      module_manager_reload_all(ircd_module_manager_get(), &result, _module_reload_report, command, &error);
+      ircd_module_reload_all(&result, _module_reload_report, command, &error);
 
     if (code != MODULE_SUCCESS)
       _module_report_error(command, "reload", &error);
 
     _module_reload_summary(command, code, &result, &error);
   }
-  else if (module_manager_reload(ircd_module_manager_get(), name, &error) != MODULE_SUCCESS)
+  else if (ircd_module_reload(name, &error) != MODULE_SUCCESS)
     _module_report_error(command, "reload", &error);
   else
     _module_announce(command, name, "reloaded");

@@ -260,7 +260,7 @@ cap_ls(struct Client *source, const char *arg)
   if (cap302)
   {
     client_set_flag(source, FLAGS_CAP302);
-    cap_client_set(source, source->connection->cap_flags | CAP_CAP_NOTIFY);
+    cap_client_set_flags(source, source->connection->cap_flags | CAP_CAP_NOTIFY);
   }
 
   _cap_reply_send_list(source, NULL, NULL, "LS", cap302);  /* Send list of capabilities */
@@ -312,7 +312,7 @@ cap_req(struct Client *source, const char *arg)
   /* Notify client of accepted changes and copy over results. */
   _cap_reply_send_list(source, &set, &rem, "ACK", client_has_flag(source, FLAGS_CAP302));
 
-  cap_client_set(source, flags);
+  cap_client_set_flags(source, flags);
 }
 
 static void

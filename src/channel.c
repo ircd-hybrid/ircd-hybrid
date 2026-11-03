@@ -360,7 +360,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
   const bool is_member = channel_member_find(channel, client) != NULL;
   const bool multi_prefix = client_has_cap(client, CAP_MULTI_PREFIX);
-  const bool uhnames = client_has_cap(client, CAP_UHNAMES);
+  const bool userhost_in_names = client_has_cap(client, CAP_USERHOST_IN_NAMES);
 
   if (channel_is_public(channel) || is_member)
   {
@@ -378,7 +378,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
         continue;
 
       size_t masklen = 0;
-      if (uhnames)
+      if (userhost_in_names)
         masklen = strlen(member->client->name) + strlen(member->client->username) +
                   strlen(member->client->host) + 3;  /* +3 for ! + @ + space */
       else
@@ -393,7 +393,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
         bufptr = buf;
       }
 
-      if (uhnames)
+      if (userhost_in_names)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
                            channel_member_get_prefix(member, multi_prefix),
                            member->client->name, member->client->username, member->client->host);

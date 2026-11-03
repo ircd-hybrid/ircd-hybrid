@@ -27,6 +27,7 @@
 #include "user_mode.h"
 
 static module_manager_t *module_manager;
+static bool module_operation_active;
 
 void
 ircd_module_format_error(const char *action, const struct module_error_info *error,
@@ -78,8 +79,8 @@ ircd_module_init(void)
   {
     .application_abi_version = IRCD_MODULE_ABI_VERSION
   };
-  struct module_error_info error;
 
+  struct module_error_info error;
   module_manager = module_manager_create(&options, &error);
   if (module_manager == NULL)
     ircd_module_log_error("manager initialization", &error);
@@ -92,6 +93,90 @@ ircd_module_manager_get(void)
 {
   assert(module_manager);
   return module_manager;
+}
+
+static bool
+_ircd_module_operation_begin(struct module_error_info *error)
+{
+  assert(module_manager);
+
+  if (module_operation_active)
+  {
+    if (error)
+    {
+      *error = (struct module_error_info){ .code = MODULE_ERR_BUSY };
+      strlcpy(error->message, "A module operation is already in progress", sizeof(error->message));
+    }
+
+    return false;
+  }
+
+  module_operation_active = true;
+  cap_notify_batch_begin();
+  return true;
+}
+
+static void
+_ircd_module_operation_end(void)
+{
+  assert(module_operation_active);
+
+  /* Keep module mutations protected while CAP hooks observe the result. */
+  cap_notify_batch_end();
+  module_operation_active = false;
+}
+
+enum module_error_code
+ircd_module_load(const char *name, struct module_error_info *error)
+{
+  if (!_ircd_module_operation_begin(error))
+    return MODULE_ERR_BUSY;
+
+  const enum module_error_code code = module_manager_load(module_manager, name, error);
+  _ircd_module_operation_end();
+
+  return code;
+}
+
+enum module_error_code
+ircd_module_unload(const char *name, struct module_error_info *error)
+{
+  if (!_ircd_module_operation_begin(error))
+    return MODULE_ERR_BUSY;
+
+  const enum module_error_code code = module_manager_unload(module_manager, name, error);
+  _ircd_module_operation_end();
+
+  return code;
+}
+
+enum module_error_code
+ircd_module_reload(const char *name, struct module_error_info *error)
+{
+  if (!_ircd_module_operation_begin(error))
+    return MODULE_ERR_BUSY;
+
+  const enum module_error_code code = module_manager_reload(module_manager, name, error);
+  _ircd_module_operation_end();
+
+  return code;
+}
+
+enum module_error_code
+ircd_module_reload_all(struct module_reload_all_result *result, module_report_fn report,
+                        void *report_context, struct module_error_info *error)
+{
+  if (result)
+    *result = (struct module_reload_all_result){ 0 };
+
+  if (!_ircd_module_operation_begin(error))
+    return MODULE_ERR_BUSY;
+
+  const enum module_error_code code =
+    module_manager_reload_all(module_manager, result, report, report_context, error);
+  _ircd_module_operation_end();
+
+  return code;
 }
 
 static void
@@ -111,8 +196,16 @@ ircd_module_shutdown(void)
     return;
 
   struct module_error_info error;
+  if (!_ircd_module_operation_begin(&error))
+  {
+    ircd_module_log_error("shutdown", &error);
+    return;
+  }
+
   const enum module_error_code code =
     module_manager_shutdown(module_manager, _ircd_module_shutdown_report, NULL, &error);
+  _ircd_module_operation_end();
+
   if (code == MODULE_ERR_BUSY)
     ircd_module_log_error("shutdown", &error);
 
@@ -193,8 +286,16 @@ ircd_module_apply_config(void)
 
   struct module_error_info error;
   struct module_activation_result result;
+  if (!_ircd_module_operation_begin(&error))
+  {
+    ircd_module_log_error("configured activation", &error);
+    return;
+  }
+
   const enum module_error_code code =
     module_manager_activate_configured(module_manager, &result, _ircd_module_activation_report, NULL, &error);
+  _ircd_module_operation_end();
+
   if (code != MODULE_SUCCESS && result.failed == 0)
   {
     ircd_module_log_error("configured activation", &error);

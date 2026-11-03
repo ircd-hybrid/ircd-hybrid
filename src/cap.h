@@ -16,7 +16,7 @@ enum
 {
   CAP_MULTI_PREFIX      = 1 << 0,   /**< multi-prefix client capability */
   CAP_AWAY_NOTIFY       = 1 << 1,   /**< away-notify client capability */
-  CAP_UHNAMES           = 1 << 2,   /**< userhost-in-names client capability */
+  CAP_USERHOST_IN_NAMES = 1 << 2,   /**< userhost-in-names client capability */
   CAP_EXTENDED_JOIN     = 1 << 3,   /**< extended-join client capability */
   CAP_ACCOUNT_NOTIFY    = 1 << 4,   /**< account-notify client capability */
   CAP_INVITE_NOTIFY     = 1 << 5,   /**< invite-notify client capability */
@@ -55,14 +55,16 @@ struct Cap
   size_t name_len;
   size_t value_len;
   bool available;
-  bool notifying;
   list_node_t node;
 };
 
+/* Group synchronous notifications; every begin requires an end, including on failure. */
+extern void cap_notify_batch_begin(void);
+extern void cap_notify_batch_end(void);
 extern cap_result_t cap_register(const struct CapConfig *, struct Cap **);
 extern cap_result_t cap_update(struct Cap *, const char *, bool);
 extern void cap_unregister(struct Cap **);
-extern void cap_client_set(struct Client *, uint32_t);
+extern void cap_client_set_flags(struct Client *, uint32_t);
 extern const struct Cap *cap_find(const char *);
 extern const list_t *cap_get_list(void);
 #endif  /* INCLUDED_cap_h */

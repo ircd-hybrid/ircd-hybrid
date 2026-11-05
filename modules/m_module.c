@@ -178,11 +178,11 @@ _module_cmd_list(struct module_command_context *command, const char *pattern)
 
 enum
 {
-  MODULE_INFO_LABEL_WIDTH = 24
+  MODULE_FIELD_LABEL_WIDTH = 24
 };
 
 static const char *
-_module_info_flags_to_string(module_flags_t flags)
+_module_flags_to_string(module_flags_t flags)
 {
   switch (flags)
   {
@@ -196,11 +196,11 @@ _module_info_flags_to_string(module_flags_t flags)
 }
 
 static void
-_module_info_field(struct Client *source, const char *label, const char *value)
+_module_send_field(struct Client *source, const char *label, const char *value)
 {
   assert(source);
   assert(label);
-  assert(strlen(label) <= MODULE_INFO_LABEL_WIDTH);
+  assert(strlen(label) <= MODULE_FIELD_LABEL_WIDTH);
   assert(value);
 
   const char *const prefix = client_get_id_or_name(&me, source);
@@ -209,7 +209,7 @@ _module_info_field(struct Client *source, const char *label, const char *value)
     destination = "*";
 
   const size_t overhead = strlen(prefix) + strlen(destination) +
-    sizeof(": NOTICE  :  \r\n") - 1 + MODULE_INFO_LABEL_WIDTH;
+    sizeof(": NOTICE  :  \r\n") - 1 + MODULE_FIELD_LABEL_WIDTH;
   assert(overhead < IRCD_BUFSIZE);
 
   const size_t value_limit = IRCD_BUFSIZE - overhead;
@@ -230,7 +230,7 @@ _module_info_field(struct Client *source, const char *label, const char *value)
         length = boundary;
     }
 
-    sendto_one_notice(source, &me, ":  %-*s%.*s", MODULE_INFO_LABEL_WIDTH, label, (int)length, value);
+    sendto_one_notice(source, &me, ":  %-*s%.*s", MODULE_FIELD_LABEL_WIDTH, label, (int)length, value);
     value += length;
     while (*value == '\r' || *value == '\n')
       ++value;
@@ -243,7 +243,7 @@ _module_info_count(struct Client *source, const char *label, size_t count)
 {
   char value[sizeof(count) * CHAR_BIT + 1];
   snprintf(value, sizeof(value), "%zu", count);
-  _module_info_field(source, label, value);
+  _module_send_field(source, label, value);
 }
 
 static void
@@ -252,17 +252,17 @@ _module_info_failure(struct Client *source, const struct module_error_info *erro
   const char *const failure = module_strerror(error->code);
   const char *const cause = error->cause != MODULE_SUCCESS ? module_strerror(error->cause) : NULL;
 
-  _module_info_field(source, "Failure:", failure);
+  _module_send_field(source, "Failure:", failure);
 
   if (cause && strcmp(cause, failure))
-    _module_info_field(source, "Cause:", cause);
+    _module_send_field(source, "Cause:", cause);
 
   if (!string_is_empty(error->message) && strcmp(error->message, failure) &&
       (cause == NULL || strcmp(error->message, cause)))
-    _module_info_field(source, "Detail:", error->message);
+    _module_send_field(source, "Detail:", error->message);
 
   if (!string_is_empty(error->cleanup_message))
-    _module_info_field(source, "Cleanup failure:", error->cleanup_message);
+    _module_send_field(source, "Cleanup failure:", error->cleanup_message);
 }
 
 struct module_info_summary
@@ -313,7 +313,7 @@ _module_info_summary(struct module_command_context *command, module_manager_t *m
   struct Client *const source = command->source;
 
   sendto_one_notice(source, &me, ":Module manager:");
-  _module_info_field(source, "Configured path:", path ? path : "not set");
+  _module_send_field(source, "Configured path:", path ? path : "not set");
   _module_info_count(source, "Configured modules:", configured);
   _module_info_count(source, "Managed modules:", summary.managed);
   _module_info_count(source, "Active modules:", summary.active);
@@ -352,18 +352,79 @@ _module_cmd_info(struct module_command_context *command, const char *name)
   }
 
   sendto_one_notice(source, &me, ":Module: %s", name);
-  _module_info_field(source, "Configured:", entry ? "yes" : "no");
-  _module_info_field(source, "State:", module ? module_state_to_string(module_get_state(module)) : "not loaded");
-  _module_info_field(source, "Intrinsic flags:", module ?
-                     _module_info_flags_to_string(module_get_intrinsic_flags(module)) : "unavailable");
-  _module_info_field(source, "Configured flags:", entry ?
-                     _module_info_flags_to_string(entry->policy_flags) : "n/a");
-  _module_info_field(source, "Effective flags:", module ?
-                     _module_info_flags_to_string(module_get_effective_flags(module)) : "unavailable");
+  _module_send_field(source, "Configured:", entry ? "yes" : "no");
+  _module_send_field(source, "State:", module ? module_state_to_string(module_get_state(module)) : "not loaded");
+  _module_send_field(source, "Intrinsic flags:", module ?
+                     _module_flags_to_string(module_get_intrinsic_flags(module)) : "unavailable");
+  _module_send_field(source, "Configured flags:", entry ?
+                     _module_flags_to_string(entry->policy_flags) : "n/a");
+  _module_send_field(source, "Effective flags:", module ?
+                     _module_flags_to_string(module_get_effective_flags(module)) : "unavailable");
 
   struct module_error_info error;
   if (module && module_get_failure(module, &error))
     _module_info_failure(source, &error);
+}
+
+static void
+_module_cmd_config(struct module_command_context *command, const char *pattern)
+{
+  module_manager_t *const manager = ircd_module_manager_get();
+  const module_config_t *const configuration = module_manager_get_config(manager);
+  const size_t count = module_config_count(configuration);
+  const bool filtered = !string_is_empty(pattern);
+  size_t matched = 0;
+  int name_width = sizeof("Module") - 1;
+
+  for (size_t i = 0; i < count; ++i)
+  {
+    const struct module_config_entry *const entry = module_config_get(configuration, i);
+    if (filtered && match(pattern, entry->name))
+      continue;
+
+    ++matched;
+    const int length = (int)strlen(entry->name);
+    if (length > name_width)
+      name_width = length;
+  }
+
+  struct Client *const source = command->source;
+  const char *const path = module_config_get_base_path(configuration);
+
+  sendto_one_notice(source, &me, ":Module configuration:");
+  _module_send_field(source, "Configured path:", path ? path : "not set");
+  if (filtered)
+    _module_send_field(source, "Pattern:", pattern);
+
+  if (matched)
+  {
+    int position_width = 1;
+    for (size_t value = count; value >= 10; value /= 10)
+      ++position_width;
+
+    const int flags_width = sizeof("required,resident") - 1;
+    sendto_one_notice(source, &me, ":  %*s  %-*s  %-*s  %s",
+                      position_width, "#", name_width, "Module", flags_width, "Configured flags", "State");
+
+    for (size_t i = 0; i < count; ++i)
+    {
+      const struct module_config_entry *const entry = module_config_get(configuration, i);
+      if (filtered && match(pattern, entry->name))
+        continue;
+
+      const module_t *const module = module_manager_find(manager, entry->name);
+      sendto_one_notice(source, &me, ":  %*zu  %-*s  %-*s  %s",
+                        position_width, i + 1, name_width, entry->name,
+                        flags_width, _module_flags_to_string(entry->policy_flags),
+                        module ? module_state_to_string(module_get_state(module)) : "not loaded");
+    }
+  }
+
+  const char *const entry_label = count == 1 ? "entry" : "entries";
+  if (filtered)
+    sendto_one_notice(source, &me, ":End of module configuration: %zu of %zu %s shown.", matched, count, entry_label);
+  else
+    sendto_one_notice(source, &me, ":End of module configuration: %zu %s.", count, entry_label);
 }
 
 struct module_subcommand
@@ -375,6 +436,7 @@ struct module_subcommand
 
 static const struct module_subcommand module_subcommands[] =
 {
+  { .name = "CONFIG", .handler = _module_cmd_config },
   { .name = "INFO", .handler = _module_cmd_info },
   { .name = "LIST", .handler = _module_cmd_list },
   { .name = "LOAD", .handler = _module_cmd_load, .argument_required = true },

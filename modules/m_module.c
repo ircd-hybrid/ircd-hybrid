@@ -144,41 +144,11 @@ _module_cmd_reload(struct module_command_context *command, const char *name)
   ircd_module_post_update();
 }
 
-struct module_list_context
-{
-  struct Client *source;
-  const char *pattern;
-};
-
-static void
-_module_list_entry(const module_t *module, void *context)
-{
-  const struct module_list_context *const list = context;
-  const char *const name = module_get_name(module);
-
-  if (!string_is_empty(list->pattern) && match(list->pattern, name))
-    return;
-
-  sendto_one_numeric(list->source, &me, RPL_MODLIST, name,
-                     module_state_to_string(module_get_state(module)),
-                     module_flags_to_string(module_get_effective_flags(module)));
-}
-
-static void
-_module_cmd_list(struct module_command_context *command, const char *pattern)
-{
-  struct module_list_context context = { .source = command->source, .pattern = pattern };
-  struct module_error_info error;
-
-  if (module_manager_foreach(ircd_module_manager_get(), _module_list_entry, &context, &error) != MODULE_SUCCESS)
-    _module_report_error(command, "enumeration", &error);
-
-  sendto_one_numeric(command->source, &me, RPL_ENDOFMODLIST);
-}
-
 enum
 {
-  MODULE_FIELD_LABEL_WIDTH = 24
+  MODULE_FIELD_LABEL_WIDTH = 24,
+  MODULE_CONFIGURED_COLUMN_WIDTH = sizeof("Configured") - 1,
+  MODULE_FLAGS_COLUMN_WIDTH = sizeof("required,resident") - 1
 };
 
 static const char *
@@ -236,6 +206,94 @@ _module_send_field(struct Client *source, const char *label, const char *value)
       ++value;
     label = "...";
   } while (*value);
+}
+
+struct module_list_context
+{
+  struct Client *source;
+  const module_config_t *configuration;
+  const char *pattern;
+  size_t count;
+  size_t matched;
+  int name_width;
+};
+
+static void
+_module_list_measure(const module_t *module, void *context)
+{
+  struct module_list_context *const list = context;
+  const char *const name = module_get_name(module);
+
+  ++list->count;
+  if (!string_is_empty(list->pattern) && match(list->pattern, name))
+    return;
+
+  ++list->matched;
+  const int length = (int)strlen(name);
+  if (length > list->name_width)
+    list->name_width = length;
+}
+
+static void
+_module_list_entry(const module_t *module, void *context)
+{
+  const struct module_list_context *const list = context;
+  const char *const name = module_get_name(module);
+
+  if (!string_is_empty(list->pattern) && match(list->pattern, name))
+    return;
+
+  const bool configured = module_config_find(list->configuration, name) != NULL;
+  sendto_one_notice(list->source, &me, ":  %-*s  %-*s  %-*s  %s",
+                    list->name_width, name,
+                    MODULE_CONFIGURED_COLUMN_WIDTH, configured ? "yes" : "no",
+                    MODULE_FLAGS_COLUMN_WIDTH, _module_flags_to_string(module_get_effective_flags(module)),
+                    module_state_to_string(module_get_state(module)));
+}
+
+static void
+_module_cmd_list(struct module_command_context *command, const char *pattern)
+{
+  module_manager_t *const manager = ircd_module_manager_get();
+  struct Client *const source = command->source;
+  struct module_list_context context =
+  {
+    .source = source,
+    .configuration = module_manager_get_config(manager),
+    .pattern = pattern,
+    .name_width = sizeof("Module") - 1
+  };
+
+  struct module_error_info error;
+  if (module_manager_foreach(manager, _module_list_measure, &context, &error) != MODULE_SUCCESS)
+  {
+    _module_report_error(command, "enumeration", &error);
+    return;
+  }
+
+  sendto_one_notice(source, &me, ":Module list:");
+  if (!string_is_empty(pattern))
+    _module_send_field(source, "Pattern:", pattern);
+
+  if (context.matched)
+  {
+    sendto_one_notice(source, &me, ":  %-*s  %-*s  %-*s  %s",
+                      context.name_width, "Module", MODULE_CONFIGURED_COLUMN_WIDTH, "Configured",
+                      MODULE_FLAGS_COLUMN_WIDTH, "Effective flags", "State");
+
+    if (module_manager_foreach(manager, _module_list_entry, &context, &error) != MODULE_SUCCESS)
+    {
+      _module_report_error(command, "enumeration", &error);
+      return;
+    }
+  }
+
+  const char *const entry_label = context.count == 1 ? "entry" : "entries";
+  if (!string_is_empty(pattern))
+    sendto_one_notice(source, &me, ":End of module list: %zu of %zu %s shown.",
+                      context.matched, context.count, entry_label);
+  else
+    sendto_one_notice(source, &me, ":End of module list: %zu %s.", context.count, entry_label);
 }
 
 static void
@@ -300,8 +358,8 @@ static void
 _module_info_summary(struct module_command_context *command, module_manager_t *manager)
 {
   struct module_info_summary summary = { .configuration = module_manager_get_config(manager) };
-  struct module_error_info error;
 
+  struct module_error_info error;
   if (module_manager_foreach(manager, _module_info_summary_entry, &summary, &error) != MODULE_SUCCESS)
   {
     _module_report_error(command, "enumeration", &error);
@@ -402,7 +460,7 @@ _module_cmd_config(struct module_command_context *command, const char *pattern)
     for (size_t value = count; value >= 10; value /= 10)
       ++position_width;
 
-    const int flags_width = sizeof("required,resident") - 1;
+    const int flags_width = MODULE_FLAGS_COLUMN_WIDTH;
     sendto_one_notice(source, &me, ":  %*s  %-*s  %-*s  %s",
                       position_width, "#", name_width, "Module", flags_width, "Configured flags", "State");
 

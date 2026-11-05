@@ -228,8 +228,6 @@ enum irc_numerics
   ERR_HELPNOTFOUND         = 524,
   ERR_CANNOTSENDTOUSER     = 531,
   RPL_WHOISSECURE          = 671,
-  RPL_MODLIST              = 702,
-  RPL_ENDOFMODLIST         = 703,
   RPL_HELPSTART            = 704,
   RPL_HELPTXT              = 705,
   RPL_ENDOFHELP            = 706,

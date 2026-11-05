@@ -418,7 +418,7 @@ _conf_update_isupport(void)
 
   isupport_add("CHANTYPES", "%s", "#");
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
-  isupport_add("CHANNELLEN", "%d", CHANNELLEN);
+  isupport_add("CHANNELLEN", "%u", (unsigned int)CHANNELLEN);
   isupport_add("TOPICLEN", "%u", ConfigChannel.max_topic_length);
 }
 

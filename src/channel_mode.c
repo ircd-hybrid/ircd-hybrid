@@ -884,7 +884,7 @@ channel_mode_init(void)
 
   isupport_add("PREFIX", "(%s)%s", letter, prefix);
   isupport_add("STATUSMSG", "%s", prefix);
-  isupport_add("MODES", "%d", MAXMODEPARAMS);
+  isupport_add("MODES", "%u", (unsigned int)MAXMODEPARAMS);
   isupport_add("EXCEPTS", NULL);
   isupport_add("INVEX", NULL);
 

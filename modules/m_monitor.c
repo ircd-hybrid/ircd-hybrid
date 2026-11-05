@@ -255,7 +255,7 @@ init_handler(void *context, char *error_message, size_t error_message_size)
   if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
     return false;
 
-  isupport_add("MONITOR", "%d", ConfigGeneral.max_monitor);
+  isupport_add("MONITOR", "%u", ConfigGeneral.max_monitor);
 
   return true;
 }

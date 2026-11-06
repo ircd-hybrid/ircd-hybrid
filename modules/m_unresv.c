@@ -68,7 +68,7 @@ _unresv_remove(struct Client *source, const struct aline_ctx *aline)
 
   _unresv_report_removed(source, resv);
 
-  resv_delete(resv, false);
+  resv_delete(resv);
 }
 
 /*! \brief UNRESV command handler

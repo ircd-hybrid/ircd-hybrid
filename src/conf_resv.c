@@ -16,19 +16,34 @@
 #include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "misc.h"
 
 #include "channel.h"
 #include "client.h"
-#include "conf.h"
 #include "conf_resv.h"
-#include "ircd.h"
 #include "ircd_defs.h"
 #include "nuh.h"
-#include "send.h"
 
 static list_t resv_chan_list;
 static list_t resv_nick_list;
+
+#ifndef NDEBUG
+static bool resv_expire_callback_active;
+#endif
+
+static void
+_resv_assert_mutation_allowed(void)
+{
+#ifndef NDEBUG
+  assert(!resv_expire_callback_active);
+#endif
+}
+
+static bool
+_resv_is_expired(const struct ResvItem *resv, uintmax_t now)
+{
+  assert(resv);
+  return resv->expires_at != 0 && resv->expires_at <= now;
+}
 
 const list_t *
 resv_chan_get_list(void)
@@ -43,11 +58,10 @@ resv_nick_get_list(void)
 }
 
 void
-resv_delete(struct ResvItem *resv, bool expired)
+resv_delete(struct ResvItem *resv)
 {
-  if (expired)
-    sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Temporary RESV for [%s] expired",
-                   resv->mask);
+  assert(resv);
+  _resv_assert_mutation_allowed();
 
   list_node_t *node;
   while ((node = list_pop_head(&resv->exempt_list)))
@@ -70,6 +84,8 @@ resv_delete(struct ResvItem *resv, bool expired)
 struct ResvItem *
 resv_make(const char *mask, const char *reason, const list_t *elist)
 {
+  _resv_assert_mutation_allowed();
+
   list_t *const list = channel_is_valid_prefix_char(*mask) ? &resv_chan_list : &resv_nick_list;
   struct ResvItem *const resv = io_calloc(sizeof(*resv));
   resv->list = list;
@@ -115,16 +131,14 @@ resv_make(const char *mask, const char *reason, const list_t *elist)
 struct ResvItem *
 resv_find(const char *name, int (*compare)(const char *, const char *))
 {
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
   list_t *const list = channel_is_valid_prefix_char(*name) ? &resv_chan_list : &resv_nick_list;
 
-  list_node_t *node, *node_next;
-  LIST_FOREACH_SAFE(node, node_next, list->head)
+  list_node_t *node;
+  LIST_FOREACH(node, list->head)
   {
-    struct ResvItem *resv = node->data;
-    if (resv->expires_at &&
-        (resv->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
-      resv_delete(resv, true);
-    else if (compare(resv->mask, name) == 0)
+    struct ResvItem *const resv = node->data;
+    if (!_resv_is_expired(resv, now) && compare(resv->mask, name) == 0)
       return resv;
   }
 
@@ -159,6 +173,8 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 void
 resv_clear(void)
 {
+  _resv_assert_mutation_allowed();
+
   list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
 
   for (list_t **list = tab; *list; ++list)
@@ -169,14 +185,16 @@ resv_clear(void)
     {
       struct ResvItem *const resv = node->data;
       if (resv->in_database == false)
-        resv_delete(resv, false);
+        resv_delete(resv);
     }
   }
 }
 
 void
-resv_expire(void)
+resv_expire(uintmax_t now, resv_expire_callback_fn callback, void *callback_ctx)
 {
+  _resv_assert_mutation_allowed();
+
   list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
 
   for (list_t **list = tab; *list; ++list)
@@ -186,9 +204,25 @@ resv_expire(void)
     LIST_FOREACH_SAFE(node, node_next, (*list)->head)
     {
       struct ResvItem *const resv = node->data;
-      if (resv->expires_at &&
-          (resv->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
-        resv_delete(resv, true);
+      if (!_resv_is_expired(resv, now))
+        continue;
+
+      if (callback)
+      {
+#ifndef NDEBUG
+        assert(!resv_expire_callback_active);
+        resv_expire_callback_active = true;
+#endif
+
+        callback(resv, callback_ctx);
+
+#ifndef NDEBUG
+        assert(resv_expire_callback_active);
+        resv_expire_callback_active = false;
+#endif
+      }
+
+      resv_delete(resv);
     }
   }
 }

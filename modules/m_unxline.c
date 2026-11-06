@@ -68,7 +68,7 @@ _unxline_remove(struct Client *source, const struct aline_ctx *aline)
 
   _unxline_report_removed(source, gecos);
 
-  gecos_delete(gecos, false);
+  gecos_delete(gecos);
 }
 
 /*! \brief UNXLINE command handler

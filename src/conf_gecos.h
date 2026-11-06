@@ -9,6 +9,10 @@
 
 #ifndef INCLUDED_conf_gecos_h
 #define INCLUDED_conf_gecos_h
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "list.h"
 
 struct GecosItem
 {
@@ -20,9 +24,11 @@ struct GecosItem
   bool in_database;
 };
 
-extern void gecos_delete(struct GecosItem *, bool);
+typedef void (*gecos_expire_callback_fn)(const struct GecosItem *, void *);
+
 extern void gecos_clear(void);
-extern void gecos_expire(void);
+extern void gecos_delete(struct GecosItem *);
+extern void gecos_expire(uintmax_t, gecos_expire_callback_fn, void *);
 extern struct GecosItem *gecos_make(void);
 extern struct GecosItem *gecos_find(const char *, int (*)(const char *, const char *));
 extern const list_t *gecos_get_list(void);

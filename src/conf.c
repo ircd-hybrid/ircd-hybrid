@@ -109,6 +109,20 @@ _conf_deny_expire_notice(const struct conf_deny *deny, void *unused)
 }
 
 static void
+_conf_gecos_expire_notice(const struct GecosItem *gecos, void *unused)
+{
+  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Temporary X-line for [%s] expired", gecos->mask);
+}
+
+static void
+_conf_resv_expire_notice(const struct ResvItem *resv, void *unused)
+{
+  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Temporary RESV for [%s] expired", resv->mask);
+}
+
+static void
 _conf_set_defaults(void)
 {
   ConfigServerInfo.network_name = io_strdup(NETWORK_NAME_DEFAULT);
@@ -304,9 +318,8 @@ cleanup_tklines(void *unused)
 
   conf_deny_expire(now, _conf_deny_expire_notice, NULL);
   conf_kill_expire(now, _conf_kill_expire_notice, NULL);
-
-  gecos_expire();
-  resv_expire();
+  gecos_expire(now, _conf_gecos_expire_notice, NULL);
+  resv_expire(now, _conf_resv_expire_notice, NULL);
 }
 
 static void

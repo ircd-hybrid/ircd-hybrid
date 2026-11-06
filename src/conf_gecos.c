@@ -7,6 +7,7 @@
  * \brief Implements gecos {} block configuration management.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -14,11 +15,28 @@
 #include "list.h"
 #include "memory.h"
 
-#include "client.h"
 #include "conf_gecos.h"
-#include "send.h"
 
 static list_t gecos_list;
+
+#ifndef NDEBUG
+static bool gecos_expire_callback_active;
+#endif
+
+static void
+_gecos_assert_mutation_allowed(void)
+{
+#ifndef NDEBUG
+  assert(!gecos_expire_callback_active);
+#endif
+}
+
+static bool
+_gecos_is_expired(const struct GecosItem *gecos, uintmax_t now)
+{
+  assert(gecos);
+  return gecos->expires_at != 0 && gecos->expires_at <= now;
+}
 
 const list_t *
 gecos_get_list(void)
@@ -29,22 +47,23 @@ gecos_get_list(void)
 void
 gecos_clear(void)
 {
+  _gecos_assert_mutation_allowed();
+
   list_node_t *node, *node_next;
 
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *const gecos = node->data;
     if (gecos->in_database == false)
-      gecos_delete(gecos, false);
+      gecos_delete(gecos);
   }
 }
 
 void
-gecos_delete(struct GecosItem *gecos, bool expired)
+gecos_delete(struct GecosItem *gecos)
 {
-  if (expired)
-    sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Temporary X-line for [%s] expired",
-                   gecos->mask);
+  assert(gecos);
+  _gecos_assert_mutation_allowed();
 
   list_remove(&gecos->node, &gecos_list);
   io_free(gecos->mask);
@@ -55,6 +74,8 @@ gecos_delete(struct GecosItem *gecos, bool expired)
 struct GecosItem *
 gecos_make(void)
 {
+  _gecos_assert_mutation_allowed();
+
   struct GecosItem *const gecos = io_calloc(sizeof(*gecos));
   list_add_tail(gecos, &gecos->node, &gecos_list);
 
@@ -64,15 +85,13 @@ gecos_make(void)
 struct GecosItem *
 gecos_find(const char *name, int (*compare)(const char *, const char *))
 {
-  list_node_t *node, *node_next;
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
 
-  LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
+  list_node_t *node;
+  LIST_FOREACH(node, gecos_list.head)
   {
     struct GecosItem *const gecos = node->data;
-    if (gecos->expires_at &&
-        (gecos->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
-      gecos_delete(gecos, true);
-    else if (compare(gecos->mask, name) == 0)
+    if (!_gecos_is_expired(gecos, now) && compare(gecos->mask, name) == 0)
       return gecos;
   }
 
@@ -80,15 +99,33 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
 }
 
 void
-gecos_expire(void)
+gecos_expire(uintmax_t now, gecos_expire_callback_fn callback, void *callback_ctx)
 {
+  _gecos_assert_mutation_allowed();
+
   list_node_t *node, *node_next;
 
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
     struct GecosItem *const gecos = node->data;
-    if (gecos->expires_at &&
-        (gecos->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
-      gecos_delete(gecos, true);
+    if (!_gecos_is_expired(gecos, now))
+      continue;
+
+    if (callback)
+    {
+#ifndef NDEBUG
+      assert(!gecos_expire_callback_active);
+      gecos_expire_callback_active = true;
+#endif
+
+      callback(gecos, callback_ctx);
+
+#ifndef NDEBUG
+      assert(gecos_expire_callback_active);
+      gecos_expire_callback_active = false;
+#endif
+    }
+
+    gecos_delete(gecos);
   }
 }

@@ -46,6 +46,8 @@
 * Added support for the IRCv3 `echo-message` capability
 * Added support for IRCv3 SASL 3.1 and 3.2 authentication. The new `general::sasl_service`
   directive selects the services server used for SASL authentication.
+* Added the `MODULE INFO` and `MODULE CONFIG` subcommands to inspect module configuration,
+  state, protection flags, and failure details.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

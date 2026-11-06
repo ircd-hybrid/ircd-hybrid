@@ -34,7 +34,6 @@ const struct module_descriptor module_entry_v1 =
   .descriptor_size = sizeof(struct module_descriptor),
   .application_abi_version = IRCD_MODULE_ABI_VERSION,
   .name = "cap_extended_join",
-  .flags = MODULE_FLAG_NO_DEACTIVATE,
   .init_handler = init_handler,
   .exit_handler = exit_handler
 };

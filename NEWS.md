@@ -1,4 +1,4 @@
-#### Noteworthy changes in version 8.2.48 (2025-??-??)
+#### Noteworthy changes in version 8.4.0-alpha.1 (202?-??-??)
 * The `LIST` command now implements the standard ELIST `C<` and `C>` creation-time
   filters correctly: `C<num` matches channels created within the last `<num>` minutes,
   while `C>num` matches channels created more than `<num>` minutes ago.

@@ -1,7 +1,7 @@
 AC_PREREQ([2.71])
 
 dnl Project initialization.
-AC_INIT([ircd-hybrid],[8.2.48],[bugs@ircd-hybrid.org],[ircd-hybrid],[https://www.ircd-hybrid.org/])
+AC_INIT([ircd-hybrid],[8.4.0-alpha.1],[bugs@ircd-hybrid.org],[ircd-hybrid],[https://www.ircd-hybrid.org/])
 AC_CONFIG_SRCDIR([src/ircd.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])

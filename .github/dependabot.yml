@@ -5,4 +5,3 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "8.2.x"

@@ -1,35 +1,25 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2003-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2003-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_encap.c
  * \brief Includes required functions for processing the ENCAP command.
  */
 
-#include "stdinc.h"
-#include "module.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_string.h"
+#include "module.h"
+
+#include "ircd_module.h"
 #include "client.h"
 #include "parse.h"
-#include "server_capab.h"
 #include "send.h"
+#include "server_capab.h"
 
 /*
  * ms_encap()
@@ -39,13 +29,13 @@
  * side effects	- propagates subcommand to locally connected servers
  */
 static void
-ms_encap(struct Client *source, int parc, char *parv[])
+ms_encap(struct Client *source, size_t parc, char *parv[])
 {
   char buf[IRCD_BUFSIZE];
   char *bufptr = buf;
   size_t cur_len = 0, len;
 
-  for (unsigned int i = 1; i < (unsigned int)parc - 1; ++i)
+  for (size_t i = 1; i + 1 < parc; ++i)
   {
     len = strlen(parv[i]) + 1;  /* +1 for the space */
 
@@ -69,51 +59,59 @@ ms_encap(struct Client *source, int parc, char *parv[])
   if (match(parv[1], me.name))
     return;
 
-  struct Command *command = command_find(parv[2]);
+  struct Command *const command = command_find(parv[2]);
   if (command == NULL)
     return;
 
-  const struct CommandHandler *const handler = &command->handlers[ENCAP_HANDLER];
+  const struct CommandHandler *const handler = &command->handlers[COMMAND_HANDLER_ENCAP];
   command->bytes += strlen(buf);
   command->ecount++;
 
-  parv += 2;
-  parc -= 2;
+  char **const handler_parv = parv + 2;
+  const size_t handler_parc = parc - 2;
 
   if (handler->args_min &&
-      (((unsigned int)parc < handler->args_min) ||
-       (handler->empty_last_arg != true && string_is_empty(parv[handler->args_min - 1]))))
+      (handler_parc < handler->args_min ||
+       (!handler->empty_last_arg && string_is_empty(handler_parv[handler->args_min - 1]))))
     return;
 
-  handler->handler(source, parc, parv);
+  handler->handler(source, handler_parc, handler_parv);
 }
 
 static struct Command command_table =
 {
   .name = "ENCAP",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_encap, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_encap, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   capab_add("ENCAP", CAPAB_ENCAP, true);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   capab_del("ENCAP");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_encap",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

@@ -1,169 +1,242 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_list.c
  * \brief Includes required functions for processing the LIST command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_parse.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "client.h"
-#include "hash.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
 #include "memory.h"
-#include "isupport.h"
+#include "module.h"
 
+#include "channel.h"
+#include "client.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "isupport.h"
+#include "list_task.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+
+static uintmax_t
+_list_age_filter_cutoff(uintmax_t now, unsigned int minutes)
+{
+  const uintmax_t seconds = (uintmax_t)minutes * 60ULL;
+  return seconds > now ? 0 : now - seconds;
+}
+
+static bool
+_parse_list_user_count_filter(struct ListTask *task, char modifier, const char *value_text)
+{
+  assert(modifier == '<' || modifier == '>');
+
+  unsigned int value;
+
+  /*
+   * ELIST <val matches channels with less than val users.
+   * ELIST >val matches channels with more than val users.
+   */
+  if (modifier == '<')
+  {
+    if (io_parse_uint_range(value_text, 1, UINT_MAX, &value) != IO_PARSE_OK)
+      return false;
+
+    task->users_max = value - 1;
+    return true;
+  }
+  else
+  {
+    if (io_parse_uint_range(value_text, 0, UINT_MAX - 1U, &value) != IO_PARSE_OK)
+      return false;
+
+    task->users_min = value + 1;
+  }
+
+  return true;
+}
+
+static bool
+_parse_list_creation_time_filter(struct ListTask *task, char modifier, const char *value_text, uintmax_t now)
+{
+  if (modifier != '<' && modifier != '>')
+    return false;
+
+  unsigned int minutes;
+  if (io_parse_uint(value_text, &minutes) != IO_PARSE_OK)
+    return false;
+
+  const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);
+
+  /*
+   * ELIST C<val matches channels created less than val minutes ago.
+   * ELIST C>val matches channels created more than val minutes ago.
+   */
+  if (modifier == '<')
+    task->creation_time_min = cutoff_time;
+  else
+    task->creation_time_max = cutoff_time;
+
+  task->has_creation_time_filter = true;
+  return true;
+}
+
+static bool
+_parse_list_topic_filter(struct ListTask *task, char modifier, const char *value_text, uintmax_t now)
+{
+  if (modifier == ':')
+  {
+    if (string_is_empty(value_text))
+      return false;
+
+    io_free(task->topic);
+    task->topic = io_strdup(value_text);
+    return true;
+  }
+
+  if (modifier != '<' && modifier != '>')
+    return false;
+
+  unsigned int minutes;
+  if (io_parse_uint(value_text, &minutes) != IO_PARSE_OK)
+    return false;
+
+  const uintmax_t cutoff_time = _list_age_filter_cutoff(now, minutes);
+
+  /*
+   * ELIST T<val matches topics set less than val minutes ago.
+   * ELIST T>val matches topics set more than val minutes ago.
+   */
+  if (modifier == '<')
+    task->topic_time_min = cutoff_time;
+  else
+    task->topic_time_max = cutoff_time;
+
+  task->has_topic_time_filter = true;
+  return true;
+}
+
+static bool
+_parse_list_mask_filter(struct ListTask *task, const char *option)
+{
+  if (string_is_empty(option))
+    return false;
+
+  list_t *target_list = &task->include_masks;
+  const char *mask = option;
+
+  /* Handle exclusion masks. */
+  if (*mask == '!')
+  {
+    target_list = &task->exclude_masks;
+    ++mask;
+  }
+
+  if (string_is_empty(mask))
+    return false;
+
+  const bool has_channel_prefix = channel_is_valid_prefix_char(*mask);
+  const char *const name = has_channel_prefix ? mask + 1 : mask;
+  if (has_channel_prefix && string_is_empty(name))
+    return false;
+
+  if (has_wildcards(name))
+  {
+    /*
+     * exact_match only describes the include side. Exclusion masks are still
+     * evaluated after an exact channel lookup.
+     */
+    if (target_list == &task->include_masks)
+      task->exact_match = false;
+  }
+  else if (has_channel_prefix == false)
+    return false;  /* Exact matches must have a valid channel prefix. */
+
+  list_add_tail(io_strdup(mask), list_make_node(), target_list);
+  return true;
+}
+
+static bool
+_parse_list_option(struct ListTask *task, const char *option, uintmax_t now)
+{
+  if (string_is_empty(option))
+    return false;
+
+  if (option[0] == '<' || option[0] == '>')
+    return _parse_list_user_count_filter(task, option[0], option + 1);
+
+  if (option[0] == 'C' || option[0] == 'c')
+  {
+    const char modifier = option[1];
+    return _parse_list_creation_time_filter(task, modifier, modifier ? option + 2 : "", now);
+  }
+
+  if (option[0] == 'T' || option[0] == 't')
+  {
+    const char modifier = option[1];
+    return _parse_list_topic_filter(task, modifier, modifier ? option + 2 : "", now);
+  }
+
+  return _parse_list_mask_filter(task, option);
+}
+
+static bool
+_parse_list_args(struct ListTask *task, char *args)
+{
+  if (string_is_empty(args))
+    return true;
+
+  task->exact_match = true;
+
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
+  char *saveptr = NULL;
+  for (char *option = strtok_r(args, ",", &saveptr); option;
+             option = strtok_r(NULL, ",", &saveptr))
+  {
+    if (!_parse_list_option(task, option, now))
+      return false;
+  }
+
+  if (list_is_empty(&task->include_masks))
+    task->exact_match = false;
+
+  return true;
+}
 
 static void
-do_list(struct Client *source, char *arg)
+_list_process_request(struct Client *client, char *arg)
 {
-  if (source->connection->list_task)
+  if (client->connection->list_task)
   {
-    free_list_task(source);
-    sendto_one_numeric(source, &me, RPL_LISTEND);
+    list_task_destroy(client->connection->list_task);
+    sendto_one_numeric(client, &me, RPL_LISTEND);
     return;
   }
 
-  struct ListTask *lt = io_calloc(sizeof(*lt));
-  lt->users_max = UINT_MAX;
-  lt->created_max = UINT_MAX;
-  lt->topicts_max = UINT_MAX;
-  source->connection->list_task = lt;
-  list_add(source, &lt->node, &listing_client_list);
-
-  bool no_masked_channels = true;
-  if (!string_is_empty(arg))
+  struct ListTask *const task = list_task_create(client);
+  if (!string_is_empty(arg) && !_parse_list_args(task, arg))
   {
-    list_t *list;
-    char *opt, *save = NULL;
-    const char *topic;
-    bool error = false;
-    int i;
-
-    for (opt = strtok_r(arg,  ",", &save); opt;
-         opt = strtok_r(NULL, ",", &save))
-    {
-      switch (*opt)
-      {
-        case '<':
-          if ((i = atoi(opt + 1)) > 0)
-            lt->users_max = (unsigned int)i - 1;
-          else
-            error = true;
-          break;
-        case '>':
-          if ((i = atoi(opt + 1)) >= 0)
-            lt->users_min = (unsigned int)i + 1;
-          else
-            error = true;
-          break;
-        case 'C':
-        case 'c':
-          switch (*++opt)
-          {
-            case '<':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->created_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case '>':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->created_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            default:
-              error = true;
-          }
-
-          break;
-
-        case 'T':
-        case 't':
-          switch (*++opt)
-          {
-            case '<':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_min = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case '>':
-              if ((i = atoi(opt + 1)) >= 0)
-                lt->topicts_max = (unsigned int)(io_time_get(IO_TIME_REALTIME_SEC) - 60 * i);
-              else
-                error = true;
-              break;
-            case ':':
-              topic = opt + 1;
-              if (!string_is_empty(topic))
-                lt->topic = io_strndup(topic, TOPICLEN);
-              else
-                error = true;
-              break;
-            default:
-              error = true;
-          }
-
-          break;
-
-        default:
-          if (*opt == '!')
-          {
-            list = &lt->hide_mask;
-            opt++;
-          }
-          else
-            list = &lt->show_mask;
-
-          if (has_wildcards(opt + !!IsChanPrefix(*opt)))
-          {
-            if (list == &lt->show_mask)
-              no_masked_channels = false;
-          }
-          else if (!IsChanPrefix(*opt))
-            error = true;
-
-          if (error == false)
-            list_add(io_strdup(opt), list_make_node(), list);
-      }
-    }
-
-    if (error)
-    {
-      free_list_task(source);
-      sendto_one_numeric(source, &me, ERR_LISTSYNTAX);
-      return;
-    }
+    list_task_destroy(task);
+    sendto_one_numeric(client, &me, ERR_LISTSYNTAX);
+    sendto_one_numeric(client, &me, RPL_LISTEND);
+    return;
   }
 
-  sendto_one_numeric(source, &me, RPL_LISTSTART);
-  safe_list_channels(source, no_masked_channels && lt->show_mask.head != NULL);
+  sendto_one_numeric(client, &me, RPL_LISTSTART);
+  list_task_start(task);
 }
 
 /*! \brief LIST command handler
@@ -178,39 +251,47 @@ do_list(struct Client *source, char *arg)
  *      - parv[1] = channel name/list options
  */
 static void
-m_list(struct Client *source, int parc, char *parv[])
+m_list(struct Client *source, size_t parc, char *parv[])
 {
-  do_list(source, parv[1]);
+  _list_process_request(source, parv[1]);
 }
 
 static struct Command command_table =
 {
   .name = "LIST",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_list },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_list },
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_list },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_list },
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   isupport_add("ELIST", "%s", "CMNTU");
   isupport_add("SAFELIST", NULL);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   isupport_delete("ELIST");
   isupport_delete("SAFELIST");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_list",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

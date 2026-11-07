@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -28,10 +12,11 @@
  * and these capabilities can be dynamically added or removed during runtime.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "memory.h"
+#include <stdio.h>
+
 #include "io_string.h"
+#include "memory.h"
+
 #include "client.h"
 #include "ircd_defs.h"
 #include "server_capab.h"
@@ -66,9 +51,9 @@ capab_init(void)
  * @param active Boolean indicating whether the capability is initially active.
  */
 void
-capab_add(const char *name, unsigned int flag, bool active)
+capab_add(const char *name, uint32_t flag, bool active)
 {
-  struct Capability *cap = io_calloc(sizeof(*cap));
+  struct Capability *const cap = io_calloc(sizeof(*cap));
   cap->name = io_strdup(name);
   cap->flag = flag;
   cap->active = active;
@@ -90,9 +75,8 @@ capab_del(const char *name)
 
   LIST_FOREACH_SAFE(node, node_next, capab_list.head)
   {
-    struct Capability *cap = node->data;
-
-    if (irccmp(cap->name, name) == 0)
+    struct Capability *const cap = node->data;
+    if (io_strcasecmp(cap->name, name) == 0)
     {
       list_remove(node, &capab_list);
       io_free(cap->name);
@@ -110,15 +94,15 @@ capab_del(const char *name)
  * @param name String name of the capability to find.
  * @return Integer flag value of the capability; returns 0 if not found.
  */
-unsigned int
+uint32_t
 capab_find(const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, capab_list.head)
   {
-    const struct Capability *cap = node->data;
-    if (irccmp(cap->name, name) == 0)
+    const struct Capability *const cap = node->data;
+    if (io_strcasecmp(cap->name, name) == 0)
       return cap->flag;
   }
 
@@ -148,9 +132,10 @@ capab_get(const struct Client *client, bool active)
   list_node_t *node;
   LIST_FOREACH(node, capab_list.head)
   {
-    const struct Capability *cap = node->data;
+    const struct Capability *const cap = node->data;
     if (active && cap->active == false)
       continue;
+
     if (client && !capab_has_flag(client, cap->flag))
       continue;
 

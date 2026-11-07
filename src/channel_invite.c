@@ -1,54 +1,41 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file channel_invite.c
  * \brief Channel invitation related functions
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
 #include "io_time.h"
-#include "memory.h"
 #include "list.h"
+#include "memory.h"
+
 #include "channel.h"
 #include "channel_invite.h"
+#include "client.h"
 #include "conf.h"
 
 /*! \brief Checks whether a client is invited to a certain channel. While walking the
  *         shortest invitation list, expired invitations are vaccumed automatically.
  * \param channel Pointer to channel block
  * \param client  Pointer to client
- * \return A struct Invite pointer or NULL
+ * \return A struct ChannelInvite pointer or NULL
  */
-struct Invite *
-invite_find(struct Channel *channel, struct Client *client)
+struct ChannelInvite *
+channel_invite_find(struct Channel *channel, struct Client *client)
 {
-  list_t *list = list_get_shorter(&client->connection->invited, &channel->invites);
+  list_t *const list = list_get_shorter(&client->connection->channel_invite_list, &channel->invite_list);
 
   list_node_t *node, *node_next;
   LIST_FOREACH_SAFE(node, node_next, list->head)
   {
-    struct Invite *invite = node->data;
+    struct ChannelInvite *const invite = node->data;
     if (ConfigChannel.invite_expire_time &&
         ConfigChannel.invite_expire_time + invite->when < io_time_get(IO_TIME_MONOTONIC_SEC))
-      invite_del(invite);
+      channel_invite_remove(invite);
     else if (invite->channel == channel && invite->client == client)
       return invite;
   }
@@ -61,11 +48,11 @@ invite_find(struct Channel *channel, struct Client *client)
  * \param client  Pointer to client to add invite to
  */
 void
-invite_add(struct Channel *channel, struct Client *client)
+channel_invite_add(struct Channel *channel, struct Client *client)
 {
-  struct Invite *invite = invite_find(channel, client);
+  struct ChannelInvite *invite = channel_invite_find(channel, client);
   if (invite)
-    invite_del(invite);
+    channel_invite_remove(invite);
 
   invite = io_calloc(sizeof(*invite));
   invite->client = client;
@@ -73,15 +60,15 @@ invite_add(struct Channel *channel, struct Client *client)
   invite->when = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   /* Delete last link in chain if the list is max length */
-  while (list_length(&client->connection->invited) &&
-         list_length(&client->connection->invited) >= ConfigChannel.max_invites)
-    invite_del(list_peek_tail(&client->connection->invited));
+  while (list_length(&client->connection->channel_invite_list) &&
+         list_length(&client->connection->channel_invite_list) >= ConfigChannel.max_invites)
+    channel_invite_remove(list_peek_tail(&client->connection->channel_invite_list));
 
   /* Add client to channel invite list */
-  list_add(invite, &invite->chan_node, &channel->invites);
+  list_add(invite, &invite->channel_node, &channel->invite_list);
 
   /* Add channel to the end of the client invite list */
-  list_add(invite, &invite->user_node, &client->connection->invited);
+  list_add(invite, &invite->client_node, &client->connection->channel_invite_list);
 }
 
 /*! \brief Delete Invite block from channel invite list
@@ -89,10 +76,10 @@ invite_add(struct Channel *channel, struct Client *client)
  * \param invite Pointer to Invite struct
  */
 void
-invite_del(struct Invite *invite)
+channel_invite_remove(struct ChannelInvite *invite)
 {
-  list_remove(&invite->user_node, &invite->client->connection->invited);
-  list_remove(&invite->chan_node, &invite->channel->invites);
+  list_remove(&invite->client_node, &invite->client->connection->channel_invite_list);
+  list_remove(&invite->channel_node, &invite->channel->invite_list);
   io_free(invite);
 }
 
@@ -100,8 +87,22 @@ invite_del(struct Invite *invite)
  * \param list Pointer to a list_t
  */
 void
-invite_clear_list(list_t *list)
+channel_invite_remove_all(list_t *list)
 {
   while (list->head)
-    invite_del(list->head->data);
+    channel_invite_remove(list->head->data);
+}
+
+bool
+channel_invite_consume(struct Channel *channel, struct Client *client)
+{
+  assert(channel);
+  assert(client_is_local_user(client));
+
+  struct ChannelInvite *const invite = channel_invite_find(channel, client);
+  if (invite == NULL)
+    return false;
+
+  channel_invite_remove(invite);
+  return true;
 }

@@ -1,23 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (C) 2003 Piotr Nizynski, Advanced IRC Services Project Tea
- *  Copyright (c) 2005-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -32,9 +15,9 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "hook.h"
 #include "list.h"
 #include "memory.h"
-#include "hook.h"
 
 /**
  * @var hook_container_list
@@ -92,12 +75,9 @@ hook_container_unregister(const char *name)
   if (container == NULL)
     return;
 
-  while (container->chain.head)
-  {
-    list_node_t *node = container->chain.head;
-    list_remove(node, &container->chain);
+  list_node_t *node;
+  while ((node = list_pop_head(&container->chain)))
     list_free_node(node);
-  }
 
   list_remove(&container->node, &hook_container_list);
   io_free(container->name);
@@ -160,7 +140,7 @@ hook_container_find(const char *name)
   LIST_FOREACH(node, hook_container_list.head)
   {
     struct HookContainer *container = node->data;
-    if (strcasecmp(container->name, name) == 0)
+    if (strcmp(container->name, name) == 0)
       return container;
   }
 
@@ -177,9 +157,8 @@ hook_container_find(const char *name)
  * @param container Pointer to the HookContainer structure.
  * @param function Address of the hook function.
  * @param priority Priority level to insert the hook in the chain.
- * @return list_node_t* Pointer to the list_node_t of the installed hook.
  */
-list_node_t *
+void
 hook_install(struct HookContainer *container, hook_function_t function, hook_priority_t priority)
 {
   unsigned int length = list_length(&container->chain);
@@ -222,9 +201,7 @@ hook_install(struct HookContainer *container, hook_function_t function, hook_pri
   }
 
   list_node_t *node = io_calloc(sizeof(*node));
-  list_add_at(function, insert_position, node, &container->chain);
-
-  return node;
+  list_add_at(&container->chain, insert_position, function, node);
 }
 
 /**

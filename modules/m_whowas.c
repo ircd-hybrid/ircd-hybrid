@@ -1,56 +1,56 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_whowas.c
  * \brief Includes required functions for processing the WHOWAS command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "misc.h"
-#include "module.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "whowas.h"
+#include "misc.h"
+#include "module.h"
+
 #include "client.h"
-#include "hash.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "conf.h"
 #include "conf_service.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
 #include "parse.h"
+#include "send.h"
+#include "server.h"
+#include "whowas.h"
 
 /** Maximum number of lines to send in response to a /WHOWAS. Only applies to remote clients. */
 enum { WHOWAS_MAX_REPLIES = 20 };
 
+static bool
+_whowas_should_hide_server(const struct Client *source, const struct Whowas *whowas)
+{
+  if (client_is_oper(source))
+    return false;
+
+  if (whowas->server_hidden || ConfigServerHide.hide_servers)
+    return true;
+
+  return ConfigServerHide.hide_services && service_find(whowas->servername);
+}
+
 static void
-whowas_send(struct Client *source, const struct Whowas *whowas)
+_whowas_send_record(struct Client *source, const struct Whowas *whowas)
 {
   sendto_one_numeric(source, &me, RPL_WHOWASUSER,
                      whowas->name, whowas->username, whowas->hostname, whowas->realname);
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
                        whowas->name, whowas->username, whowas->realhost, whowas->sockhost);
 
@@ -58,52 +58,54 @@ whowas_send(struct Client *source, const struct Whowas *whowas)
     sendto_one_numeric(source, &me, RPL_WHOISACCOUNT,
                        whowas->name, whowas->account, "was");
 
-  bool server_hidden = false;
-  if (user_mode_has_flag(source, UMODE_OPER) == false)
-  {
-    if (whowas->server_hidden || ConfigServerHide.hide_servers)
-      server_hidden = true;
-    else if (ConfigServerHide.hide_services && service_find(whowas->servername, irccmp))
-      server_hidden = true;
-  }
-
-  if (server_hidden)
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       whowas->name, ConfigServerInfo.network_name, date_ctime(whowas->logoff));
-  else
-    sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       whowas->name, whowas->servername, date_ctime(whowas->logoff));
+  const char *const server_name =
+    _whowas_should_hide_server(source, whowas) ? ConfigServerInfo.network_name : whowas->servername;
+  sendto_one_numeric(source, &me, RPL_WHOISSERVER,
+                     whowas->name, server_name, date_ctime(whowas->recorded_at));
 }
 
 static void
-whowas_do(struct Client *source, char *parv[])
+_whowas_send_record_cb(const struct Whowas *whowas, void *user_data)
 {
-  int count = 0, max = -1;
+  struct Client *const source = user_data;
+  _whowas_send_record(source, whowas);
+}
 
-  if (!string_is_empty(parv[2]))
-    max = atoi(parv[2]);
+static unsigned int
+_whowas_parse_max_results(const char *text)
+{
+  if (string_is_empty(text))
+    return 0;
 
-  if (!MyConnect(source) && (max <= 0 || max > WHOWAS_MAX_REPLIES))
-    max = WHOWAS_MAX_REPLIES;
+  const bool negative = *text == '-';
+  const char *const magnitude = negative ? text + 1 : text;
 
-  const struct WhowasGroup *group = whowas_group_find(parv[1]);
-  if (group)
-  {
-    list_node_t *node;
-    LIST_FOREACH(node, group->whowas_records.head)
-    {
-      const struct Whowas *whowas = node->data;
-      whowas_send(source, whowas);
+  unsigned int value;
+  const io_parse_status_t status = io_parse_uint(magnitude, &value);
 
-      if (++count == max)
-        break;
-    }
-  }
+  if (status == IO_PARSE_RANGE)
+    return negative ? 0 : UINT_MAX;
 
-  if (count == 0)
-    sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, parv[1]);
+  if (status != IO_PARSE_OK || negative)
+    return 0;
 
-  sendto_one_numeric(source, &me, RPL_ENDOFWHOWAS, parv[1]);
+  return value;
+}
+
+static void
+_whowas_process_request(struct Client *source, const char *name, const char *limit_str)
+{
+  unsigned int max_results = _whowas_parse_max_results(limit_str);
+  if (!client_is_local(source) &&
+      (max_results == 0 || max_results > WHOWAS_MAX_REPLIES))
+    max_results = WHOWAS_MAX_REPLIES;
+
+  const unsigned int records_found =
+    whowas_query(name, max_results, _whowas_send_record_cb, source);
+  if (records_found == 0)
+    sendto_one_numeric(source, &me, ERR_WASNOSUCHNICK, name);
+
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOWAS, name);
 }
 
 /*! \brief WHOWAS command handler
@@ -120,16 +122,15 @@ whowas_do(struct Client *source, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-m_whowas(struct Client *source, int parc, char *parv[])
+m_whowas(struct Client *source, size_t parc, char *parv[])
 {
-  static uintmax_t last_used = 0;
-
   if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
+  static uintmax_t last_used = 0;
   if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOWAS");
@@ -142,7 +143,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
     if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
       return;
 
-  whowas_do(source, parv);
+  _whowas_process_request(source, parv[1], parv[2]);
 }
 
 /*! \brief WHOWAS command handler
@@ -159,7 +160,7 @@ m_whowas(struct Client *source, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_whowas(struct Client *source, int parc, char *parv[])
+ms_whowas(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {
@@ -170,33 +171,37 @@ ms_whowas(struct Client *source, int parc, char *parv[])
   if (server_route_command(source, ":%s WHOWAS %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;
 
-  whowas_do(source, parv);
+  _whowas_process_request(source, parv[1], parv[2]);
 }
 
 static struct Command command_table =
 {
   .name = "WHOWAS",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_whowas },
-  .handlers[SERVER_HANDLER] = { .handler = ms_whowas },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = ms_whowas }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_whowas },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_whowas },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = ms_whowas }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_whowas",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

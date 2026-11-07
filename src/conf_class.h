@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -33,6 +17,16 @@
 #include "list.h"
 #include "patricia.h"
 
+#define CLASS_DEFAULT_NAME "default"
+
+enum
+{
+  CLASS_DEFAULT_PING_FREQ = 120,  /**< Default ping frequency in seconds. */
+  CLASS_DEFAULT_CONNECT_FREQ = 600,  /**< Default server autoconnect frequency in seconds. */
+  CLASS_DEFAULT_MAX_SENDQ = 512 * 1024,  /**< Default max send queue size in bytes. */
+  CLASS_DEFAULT_MAX_RECVQ = 2560,  /**< Default max receive queue size in bytes. */
+};
+
 /**
  * @brief Flags for controlling class behavior.
  */
@@ -41,6 +35,12 @@ enum
   CLASS_FLAGS_FAKE_IDLE            = 1 << 0,  /**< Flag indicating fake idle is enabled. */
   CLASS_FLAGS_RANDOM_IDLE          = 1 << 1,  /**< Flag indicating random idle is enabled. */
   CLASS_FLAGS_HIDE_IDLE_FROM_OPERS = 1 << 2,  /**< Flag indicating idle is hidden from operators. */
+};
+
+enum class_ip_limit_mode
+{
+  CLASS_IP_LIMIT_ENFORCE,
+  CLASS_IP_LIMIT_ACCOUNT_ONLY,
 };
 
 /**
@@ -71,7 +71,7 @@ struct ClassItem
   unsigned int max_channels;  /**< Maximum number of channels clients in this class can join. */
   unsigned int cidr_bitlen_ipv4;  /**< CIDR bit length for IPv4 subnets. */
   unsigned int cidr_bitlen_ipv6;  /**< CIDR bit length for IPv6 subnets. */
-  unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet. */
+  unsigned int number_per_cidr;  /**< Maximum number of clients allowed per CIDR subnet; 0 disables the limit. */
   unsigned int flags;  /**< Bitwise flags indicating class configuration options. */
 };
 
@@ -80,19 +80,46 @@ struct ClassItem
  */
 extern struct ClassItem *class_default;
 
-extern void class_free(struct ClassItem *const);
+extern void class_decref(struct ClassItem *);
+extern void class_destroy(struct ClassItem *const);
+extern void class_incref(struct ClassItem *);
 extern void class_init(void);
-extern void class_mark_for_deletion(void);
-extern void class_delete_marked(void);
 extern void class_ip_limit_rebuild(struct ClassItem *);
-extern bool class_ip_limit_add(struct ClassItem *, void *, bool);
-extern bool class_ip_limit_remove(struct ClassItem *, void *);
-extern unsigned int class_get_ping_freq(const list_t *const);
-extern unsigned int class_get_sendq(const list_t *const);
-extern unsigned int class_get_recvq(const list_t *const);
-extern struct ClassItem *class_make(void);
+extern void class_mark_all_inactive(void);
+extern void class_sweep_inactive(void);
+extern bool class_ip_limit_add(struct ClassItem *, const struct io_addr *addr, enum class_ip_limit_mode);
+extern bool class_ip_limit_remove(struct ClassItem *, const struct io_addr *addr);
+extern struct ClassItem *class_create(void);
 extern struct ClassItem *class_find(const char *, bool);
 extern const list_t *class_get_list(void);
-extern const char *class_get_name(const list_t *const);
-extern const struct ClassItem *class_get_ptr(const list_t *const);
+
+static inline unsigned int
+class_get_max_channels(const struct ClassItem *klass)
+{
+  return klass->max_channels;
+}
+
+static inline unsigned int
+class_get_max_recvq(const struct ClassItem *klass)
+{
+  return klass->max_recvq;
+}
+
+static inline unsigned int
+class_get_max_sendq(const struct ClassItem *klass)
+{
+  return klass->max_sendq;
+}
+
+static inline const char *
+class_get_name(const struct ClassItem *klass)
+{
+  return klass->name;
+}
+
+static inline unsigned int
+class_get_ping_freq(const struct ClassItem *klass)
+{
+  return klass->ping_freq;
+}
 #endif  /* INCLUDED_conf_class_h */

@@ -1,47 +1,39 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_whois.c
  * \brief Includes required functions for processing the WHOIS command.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
+#include "io_time.h"
 #include "list.h"
 #include "misc.h"
 #include "module.h"
-#include "io_string.h"
-#include "io_time.h"
-#include "client.h"
-#include "client_svstag.h"
-#include "hash.h"
+
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
-#include "ircd.h"
-#include "numeric.h"
+#include "client.h"
+#include "client_find.h"
+#include "client_svstag.h"
 #include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "ircd_hook.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 #include "server.h"
 #include "user_mode.h"
-#include "send.h"
-#include "parse.h"
-#include "ircd_hook.h"
 
 /**
  * @enum whois_channel_visibility_t
@@ -73,15 +65,15 @@ typedef enum
  * @return A whois_channel_visibility_t value indicating the visibility level of the channel.
 */
 static whois_channel_visibility_t
-whois_channel_visibility_get(struct Channel *channel, struct Client *source, struct Client *target)
+_whois_get_channel_visibility(const struct Channel *channel, const struct Client *source, const struct Client *target)
 {
-  if (channel_is_public(channel) && user_mode_has_flag(target, UMODE_HIDECHANS) == false)
+  if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
-  if (source == target || member_find_link(source, channel))
+  if (source == target || channel_member_find(channel, source))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
   {
     if (!channel_is_public(channel))
       return WHOIS_CHANNEL_VISIBILITY_LIMITED;
@@ -92,140 +84,183 @@ whois_channel_visibility_get(struct Channel *channel, struct Client *source, str
   return WHOIS_CHANNEL_VISIBILITY_NONE;
 }
 
-/* whois_person()
- *
- * inputs	- source client to report to
- *		- target client to report on
- * output	- NONE
- * side effects	- 
- */
-static void
-whois_send(struct Client *source, struct Client *target)
+static const char *
+_whois_get_channel_visibility_prefix(whois_channel_visibility_t visibility)
 {
-  list_node_t *node;
+  switch (visibility)
+  {
+    case WHOIS_CHANNEL_VISIBILITY_LIMITED:
+      return "?";
+    case WHOIS_CHANNEL_VISIBILITY_HIDDEN:
+      return "!";
+    case WHOIS_CHANNEL_VISIBILITY_FULL:
+    case WHOIS_CHANNEL_VISIBILITY_NONE:
+    default:
+      return "";
+  }
+}
 
+static void
+_whois_send_user_numeric(struct Client *source, const struct Client *target)
+{
   sendto_one_numeric(source, &me, RPL_WHOISUSER,
                      target->name, target->username, target->host, target->info);
+}
 
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
-                       target->name, target->username, target->realhost, target->sockhost);
+static void
+_whois_send_actual_host_numeric(struct Client *source, const struct Client *target)
+{
+  if (!client_is_oper(source) && source != target)
+    return;
 
-  if (list_length(&target->channel))
+  sendto_one_numeric(source, &me, RPL_WHOISACTUALLY,
+                     target->name, target->username, target->realhost, target->sockhost);
+}
+
+static void
+_whois_send_channels_numeric(struct Client *source, const struct Client *target)
+{
+  if (list_is_empty(&target->channel_member_list))
+    return;
+
+  /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
+  /* 1       23456            7            89                           0 1  */
+  size_t len = strlen(target->name) + 11;
+  if (client_is_local(source))
+    len += strlen(me.name) + strlen(source->name);
+  else
+    len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
+
+  char buf[IRCD_BUFSIZE];
+  char *bufptr = buf;
+
+  list_node_t *node;
+  LIST_FOREACH(node, target->channel_member_list.head)
   {
-    char buf[IRCD_BUFSIZE];
-    char *bufptr = buf;
+    const struct ChannelMember *const member = node->data;
+    whois_channel_visibility_t vis = _whois_get_channel_visibility(member->channel, source, target);
 
-    /* :me.name 319 source->name target->name :~@#chan1 +#chan2 #chan3 ...\r\n */
-    /* 1       23456            7            89                           0 1  */
-    size_t len = strlen(target->name) + 11;
+    if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
+      continue;
 
-    if (MyConnect(source))
-      len += strlen(me.name) + strlen(source->name);
-    else
-      len += IO_MAX(strlen(me.name), strlen(me.id)) + IO_MAX(strlen(source->name), strlen(source->id));
-
-    LIST_FOREACH(node, target->channel.head)
+    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + channel_member_get_prefix_length(member, true) + len > sizeof(buf))
     {
-      const struct ChannelMember *member = node->data;
-      whois_channel_visibility_t vis = whois_channel_visibility_get(member->channel, source, target);
-
-      if (vis != WHOIS_CHANNEL_VISIBILITY_NONE)
-      {
-        if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + member_get_prefix_len(member, true) + len > sizeof(buf))
-        {
-          sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
-          bufptr = buf;
-        }
-
-        const char *channel_prefix = "";
-        if (vis == WHOIS_CHANNEL_VISIBILITY_LIMITED)
-          channel_prefix = "?";
-        else if (vis == WHOIS_CHANNEL_VISIBILITY_HIDDEN)
-          channel_prefix = "!";
-
-        bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
-                           channel_prefix, member_get_prefix(member, true), member->channel->name);
-      }
+      sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+      bufptr = buf;
     }
 
-    if (bufptr != buf)
-      sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+    const char *const channel_prefix = _whois_get_channel_visibility_prefix(vis);
+    bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
+                       channel_prefix, channel_member_get_prefix(member, true), member->channel->name);
   }
 
-  if ((ConfigServerHide.hide_servers || IsHidden(target->servptr)) &&
-      !(user_mode_has_flag(source, UMODE_OPER) || source == target))
+  if (bufptr != buf)
+    sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
+}
+
+static void
+_whois_send_server_numeric(struct Client *source, const struct Client *target)
+{
+  if ((ConfigServerHide.hide_servers || client_is_hidden(target->uplink)) &&
+      !(client_is_oper(source) || source == target))
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
                        target->name, ConfigServerHide.hidden_name, ConfigServerInfo.network_description);
   else
     sendto_one_numeric(source, &me, RPL_WHOISSERVER,
-                       target->name, target->servptr->name, target->servptr->info);
-
-  if (target->away)
-    sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
-
-  if (user_mode_has_flag(target, UMODE_OPER) || HasFlag(target, FLAGS_SERVICE))
-  {
-    if (user_mode_has_flag(target, UMODE_HIDDEN) == false || user_mode_has_flag(source, UMODE_OPER))
-    {
-      const struct ServicesTag *svstag = list_peek_head(&target->svstags);
-      if (svstag == NULL || svstag->numeric != RPL_WHOISOPERATOR)
-      {
-        const char *text;
-        if (HasFlag(target, FLAGS_SERVICE))
-          text = "is a Network Service";
-        else if (user_mode_has_flag(target, UMODE_ADMIN))
-          text = "is a Server Administrator";
-        else  /* user_mode_has_flag(target, UMODE_OPER) == true */
-          text = "is an IRC Operator";
-        sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
-      }
-    }
-  }
-
-  LIST_FOREACH(node, target->svstags.head)
-  {
-    const struct ServicesTag *svstag = node->data;
-    if (svstag->numeric == RPL_WHOISOPERATOR)
-      if (user_mode_has_flag(target, UMODE_HIDDEN) && user_mode_has_flag(source, UMODE_OPER) == false)
-        continue;
-
-    if (svstag->umodes == 0 || user_mode_has_flag(source, svstag->umodes))
-      sendto_one_numeric(source, &me, svstag->numeric | SND_EXPLICIT, "%s :%s",
-                         target->name, svstag->tag);
-  }
-
-  if (user_mode_has_flag(source, UMODE_OPER) || source == target)
-    sendto_one_numeric(source, &me, RPL_WHOISMODES,
-                       target->name, user_mode_to_str(target->umodes));
-
-  hook_dispatch(ircd_hook_whois_send, &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
-
-  if (MyConnect(target))
-    if (user_mode_has_flag(target, UMODE_HIDEIDLE) == false || user_mode_has_flag(source, UMODE_OPER) || source == target)
-      sendto_one_numeric(source, &me, RPL_WHOISIDLE,
-                         target->name, client_get_idle_time(source, target), target->connection->created_real);
+                       target->name, target->uplink->name, target->uplink->info);
 }
 
-/* do_whois()
- *
- * inputs       - pointer to /whois source
- *              - number of parameters
- *              - pointer to parameters array
- * output       - pointer to void
- * side effects - Does whois
- */
 static void
-do_whois(struct Client *source, const char *name)
+_whois_send_away_numeric(struct Client *source, const struct Client *target)
 {
-  struct Client *target = hash_find_client(name);
+  if (target->away_message == NULL)
+    return;
 
-  if (target && IsClient(target))
-    whois_send(source, target);
+  sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
+}
+
+static void
+_whois_send_operator_numeric(struct Client *source, const struct Client *target)
+{
+  if (!client_is_oper(target) && !client_is_service(target))
+    return;
+
+  if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+    return;
+
+  if (list_is_empty(&target->svstag_list))
+  {
+    const char *text;
+
+    if (client_is_service(target))
+      text = "is a Network Service";
+    else if (client_is_admin(target))
+      text = "is a Server Administrator";
+    else
+      text = "is an IRC Operator";
+
+    sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, text);
+    return;
+  }
+
+  list_node_t *node;
+  LIST_FOREACH(node, target->svstag_list.head)
+  {
+    const struct ServicesTag *const svstag = node->data;
+    sendto_one_numeric(source, &me, RPL_WHOISOPERATOR, target->name, svstag->text);
+  }
+}
+
+static void
+_whois_send_modes_numeric(struct Client *source, const struct Client *target)
+{
+  if (!client_is_oper(source) && source != target)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_WHOISMODES,
+                     target->name, user_mode_to_str(target->user_mode_flags));
+}
+
+static void
+_whois_send_idle_numeric(struct Client *source, const struct Client *target)
+{
+  if (!client_is_local(target))
+    return;
+
+  if (user_mode_has_flag(target, UMODE_HIDEIDLE) && !client_is_oper(source) && source != target)
+    return;
+
+  sendto_one_numeric(source, &me, RPL_WHOISIDLE,
+                     target->name, client_get_idle_time(source, target), target->connection->created_real);
+}
+
+static void
+_whois_send_target_reply(struct Client *source, struct Client *target)
+{
+  _whois_send_user_numeric(source, target);
+  _whois_send_actual_host_numeric(source, target);
+  _whois_send_channels_numeric(source, target);
+  _whois_send_server_numeric(source, target);
+  _whois_send_away_numeric(source, target);
+  _whois_send_operator_numeric(source, target);
+  _whois_send_modes_numeric(source, target);
+
+  hook_dispatch(ircd_hook_whois_send,
+                &(ircd_hook_whois_send_ctx){ .source = source, .target = target });
+
+  _whois_send_idle_numeric(source, target);
+}
+
+static void
+_whois_process_request(struct Client *source, const char *target_name)
+{
+  struct Client *const target = client_find_user(source, target_name);
+  if (target)
+    _whois_send_target_reply(source, target);
   else
-    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
 
-  sendto_one_numeric(source, &me, RPL_ENDOFWHOIS, name);
+  sendto_one_numeric(source, &me, RPL_ENDOFWHOIS, target_name);
 }
 
 /*! \brief WHOIS command handler
@@ -241,42 +276,41 @@ do_whois(struct Client *source, const char *name)
  *      - parv[2] = nickname
  */
 static void
-m_whois(struct Client *source, int parc, char *parv[])
+m_whois(struct Client *source, size_t parc, char *parv[])
 {
+  if (string_is_empty(parv[1]))
+  {
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
+    return;
+  }
+
+  if (string_is_empty(parv[2]))
+  {
+    _whois_process_request(source, parv[1]);
+    return;
+  }
+
   static uintmax_t last_used = 0;
-
-  if (string_is_empty(parv[1]))
+  if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
   {
-    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
+    sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
     return;
   }
 
-  if (!string_is_empty(parv[2]))
-  {
-    /* seeing as this is going across servers, we should limit it */
-    if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHOIS");
-      return;
-    }
+  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-    last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-    /*
-     * if we have serverhide enabled, they can either ask the clients
-     * server, or our server.. I don't see why they would need to ask
-     * anything else for info about the client.. --fl_
-     */
-    if (ConfigServerHide.disable_remote_commands)
-      parv[1] = parv[2];
-
-    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
-      return;
-
+  /*
+   * if we have serverhide enabled, they can either ask the clients
+   * server, or our server.. I don't see why they would need to ask
+   * anything else for info about the client.. --fl_
+   */
+  if (ConfigServerHide.disable_remote_commands)
     parv[1] = parv[2];
-  }
 
-  do_whois(source, parv[1]);
+  if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
+    return;
+
+  _whois_process_request(source, parv[2]);
 }
 
 /*! \brief WHOIS command handler
@@ -292,7 +326,7 @@ m_whois(struct Client *source, int parc, char *parv[])
  *      - parv[2] = nickname
  */
 static void
-mo_whois(struct Client *source, int parc, char *parv[])
+mo_whois(struct Client *source, size_t parc, char *parv[])
 {
   if (string_is_empty(parv[1]))
   {
@@ -300,41 +334,46 @@ mo_whois(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  if (!string_is_empty(parv[2]))
+  if (string_is_empty(parv[2]))
   {
-    if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
-      return;
-
-    parv[1] = parv[2];
+    _whois_process_request(source, parv[1]);
+    return;
   }
 
-  do_whois(source, parv[1]);
+  if (server_route_command(source, ":%s WHOIS %s :%s", 1, parv)->result != SERVER_ROUTE_ISME)
+    return;
+
+  _whois_process_request(source, parv[2]);
 }
 
 static struct Command command_table =
 {
   .name = "WHOIS",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_whois },
-  .handlers[SERVER_HANDLER] = { .handler = mo_whois },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_whois }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_whois },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = mo_whois },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_whois }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_whois",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file server.h
@@ -25,9 +9,12 @@
 
 #ifndef INCLUDED_server_h
 #define INCLUDED_server_h
+#include <stdbool.h>
+
+#include "list.h"
 
 struct Client;
-struct MaskItem;
+struct ConnectItem;
 
 /**
  * @enum server_ts_protocol_version_t
@@ -70,10 +57,22 @@ typedef struct
   struct Client *target;  /**< Pointer to the target client or server. */
 } server_route_t;
 
+/** Server structure */
+struct Server
+{
+  list_t child_server_list;  /**< List of servers that are directly connected to this server. */
+  list_t child_user_list;  /**< List of users that are directly connected to this server. */
+  char *initiator_name;  /**< The name of the oper who initiated an outbound link, or "AutoConn." */
+  struct ConnectItem *conf;  /**< Pointer to the `connect {}` block that defines this server link. */
+};
+
+extern void server_conf_set(struct Client *, struct ConnectItem *);
 extern void server_connect_auto(void *);
-extern bool server_connect(struct MaskItem *, struct Client *);
-extern bool server_valid_name(const char *);
-extern struct Client *find_servconn_in_progress(const char *);
-extern struct Server *server_make(struct Client *);
-extern const server_route_t *server_route_command(struct Client *, const char *, const int, char *[]);
+extern void server_destroy(struct Server *);
+extern void server_schedule_reconnect(struct Client *);
+extern bool server_connect(struct ConnectItem *, const struct Client *);
+extern bool server_is_valid_name(const char *);
+extern struct ConnectItem *server_conf_get(const struct Client *);
+extern struct Server *server_get_or_create(struct Client *);
+extern const server_route_t *server_route_command(struct Client *, const char *, size_t, char *[]);
 #endif  /* INCLUDED_server_h */

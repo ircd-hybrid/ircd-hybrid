@@ -1,39 +1,30 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997 Jukka Santala (Donwulff)
- *  Copyright (c) 2005-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997 Jukka Santala (Donwulff)
+ * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file monitor.c
  * \brief File including functions for MONITOR support
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "io_string.h"
+
 #include "client.h"
 #include "hash.h"
 #include "ircd.h"
+#include "monitor.h"
 #include "numeric.h"
 #include "send.h"
-#include "monitor.h"
 
 static list_t monitor_hash[HASHSIZE];
 
@@ -50,83 +41,22 @@ static list_t monitor_hash[HASHSIZE];
  *       |- client1
  */
 
-/*! \brief Counts up memory used by monitor list headers
- */
-void
-monitor_count_memory(unsigned int *const count, size_t *const bytes)
-{
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
-  {
-    (*count) += list_length(&monitor_hash[i]);
-
-    list_node_t *node;
-    LIST_FOREACH(node, monitor_hash[i].head)
-    {
-      const struct Monitor *const monitor = node->data;
-      (*bytes) += strlen(monitor->name) + 1;  /* +1 for '\0' */
-    }
-  }
-
-  (*bytes) += *count * sizeof(struct Monitor);
-}
-
 /*! \brief Looks up the monitor table for a given name
  * \param name Nick name to look up
  */
 static struct Monitor *
-monitor_find_hash(const char *name)
+_monitor_find(const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, monitor_hash[hash_string(name)].head)
   {
-    struct Monitor *monitor = node->data;
-    if (irccmp(monitor->name, name) == 0)
+    struct Monitor *const monitor = node->data;
+    if (io_strcasecmp(monitor->name, name) == 0)
       return monitor;
   }
 
   return NULL;
-}
-
-/*! \brief Notifies all clients that have client's name on
- *         their monitor list.
- * \param client Pointer to Client struct
- */
-void
-monitor_signon(const struct Client *client)
-{
-  assert(IsClient(client));
-
-  struct Monitor *monitor = monitor_find_hash(client->name);
-  if (monitor == NULL)
-    return;  /* This name isn't on monitor */
-
-  char buf[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
-  snprintf(buf, sizeof(buf), "%s!%s@%s", client->name, client->username, client->host);
-
-  /* Send notifies out to everybody on the list in header */
-  list_node_t *node;
-  LIST_FOREACH(node, monitor->monitored_by.head)
-    sendto_one_numeric(node->data, &me, RPL_MONONLINE, buf);
-}
-
-/*! \brief Notifies all clients that have client's name on
- *         their monitor list.
- * \param client Pointer to Client struct
- */
-void
-monitor_signoff(const struct Client *client)
-{
-  assert(IsClient(client));
-
-  struct Monitor *monitor = monitor_find_hash(client->name);
-  if (monitor == NULL)
-    return;  /* This name isn't on monitor */
-
-  /* Send notifies out to everybody on the list in header */
-  list_node_t *node;
-  LIST_FOREACH(node, monitor->monitored_by.head)
-    sendto_one_numeric(node->data, &me, RPL_MONOFFLINE, client->name);
 }
 
 /*! \brief Unlinks a Monitor struct from its associated hash table
@@ -134,14 +64,59 @@ monitor_signoff(const struct Client *client)
  * \param monitor Name to remove
  */
 static void
-monitor_free(struct Monitor *monitor)
+_monitor_destroy(struct Monitor *monitor)
 {
   assert(monitor->monitored_by.head == NULL);
-  assert(list_find(&monitor_hash[monitor->hash_value], monitor));
+  assert(list_find(&monitor_hash[hash_string(monitor->name)], monitor));
 
-  list_remove(&monitor->node, &monitor_hash[monitor->hash_value]);
+  list_remove(&monitor->node, &monitor_hash[hash_string(monitor->name)]);
   io_free(monitor->name);
   io_free(monitor);
+}
+
+/*! \brief Notifies all clients that have client's name on
+ *         their monitor list.
+ * \param client Pointer to Client struct
+ */
+void
+monitor_notify_signon(const struct Client *client)
+{
+  assert(client_is_user(client));
+
+  struct Monitor *const monitor = _monitor_find(client->name);
+  if (monitor == NULL)
+    return;
+
+  char buf[NICKLEN + USERLEN + HOSTLEN + 3];  /* +3 for !, @, \0 */
+  snprintf(buf, sizeof(buf), "%s!%s@%s", client->name, client->username, client->host);
+
+  list_node_t *node;
+  LIST_FOREACH(node, monitor->monitored_by.head)
+  {
+    struct Client *const subscriber = node->data;
+    sendto_one_numeric(subscriber, &me, RPL_MONONLINE, buf);
+  }
+}
+
+/*! \brief Notifies all clients that have client's name on
+ *         their monitor list.
+ * \param client Pointer to Client struct
+ */
+void
+monitor_notify_signoff(const struct Client *client)
+{
+  assert(client_is_user(client));
+
+  struct Monitor *const monitor = _monitor_find(client->name);
+  if (monitor == NULL)
+    return;
+
+  list_node_t *node;
+  LIST_FOREACH(node, monitor->monitored_by.head)
+  {
+    struct Client *const subscriber = node->data;
+    sendto_one_numeric(subscriber, &me, RPL_MONOFFLINE, client->name);
+  }
 }
 
 /*! \brief Adds a monitor entry to client's monitor list if it doesn't exist
@@ -150,34 +125,25 @@ monitor_free(struct Monitor *monitor)
  * \return false if the target is already being monitored, true otherwise
  */
 bool
-monitor_add_to_hash_table(const char *name, struct Client *client)
+monitor_subscribe(struct Client *client, const char *name)
 {
-  list_node_t *node = NULL;
+  assert(client_is_local(client));
 
-  /* If found NULL (no header for this name), make one... */
-  struct Monitor *monitor = monitor_find_hash(name);
+  struct Monitor *monitor = _monitor_find(name);
   if (monitor == NULL)
   {
+    /* Create the shared monitor entry for the first subscriber. */
     monitor = io_calloc(sizeof(*monitor));
     monitor->name = io_strdup(name);
-    monitor->hash_value = hash_string(monitor->name);
-    list_add(monitor, &monitor->node, &monitor_hash[monitor->hash_value]);
+    list_add(monitor, &monitor->node, &monitor_hash[hash_string(monitor->name)]);
   }
-  else
-  {
-    /* Is this client already on the monitor-list? */
-    node = list_find(&monitor->monitored_by, client);
-  }
+  else if (list_find(&monitor->monitored_by, client))
+    return false;
 
-  if (node == NULL)
-  {
-    /* No it isn't, so add it in the bucket and client adding it */
-    list_add(client, list_make_node(), &monitor->monitored_by);
-    list_add(monitor, list_make_node(), &client->connection->monitors);
-    return true;
-  }
-
-  return false;
+  /* Link both directions: monitor -> client and client -> monitor. */
+  list_add(client, list_make_node(), &monitor->monitored_by);
+  list_add(monitor, list_make_node(), &client->connection->monitor_list);
+  return true;
 }
 
 /*! \brief Removes a single entry from client's monitor list
@@ -185,25 +151,28 @@ monitor_add_to_hash_table(const char *name, struct Client *client)
  * \param client Pointer to Client struct
  */
 void
-monitor_del_from_hash_table(const char *name, struct Client *client)
+monitor_unsubscribe(struct Client *client, const char *name)
 {
-  struct Monitor *monitor = monitor_find_hash(name);
+  assert(client_is_local(client));
+
+  struct Monitor *const monitor = _monitor_find(name);
   if (monitor == NULL)
-    return;  /* No header found for that name. i.e. it's not being monitored */
+    return;
 
-  list_node_t *node = list_find_remove(&monitor->monitored_by, client);
-  if (node == NULL)
-    return;  /* This name isn't being monitored by client */
+  list_node_t *const subscriber_node = list_find_remove(&monitor->monitored_by, client);
+  if (subscriber_node == NULL)
+    return;  /* This name is not being monitored by this client. */
+  list_free_node(subscriber_node);
 
-  list_free_node(node);
+  list_node_t *const monitor_node = list_find_remove(&client->connection->monitor_list, monitor);
+  assert(monitor_node);
+  if (monitor_node == NULL)
+    return;
+  list_free_node(monitor_node);
 
-  node = list_find_remove(&client->connection->monitors, monitor);
-  if (node)
-    list_free_node(node);
-
-  /* In case this header is now empty of notices, remove it */
+  /* Destroy the monitor entry when it has no subscribers left. */
   if (list_is_empty(&monitor->monitored_by))
-    monitor_free(monitor);
+    _monitor_destroy(monitor);
 }
 
 /*! \brief Removes all entries from client's monitor list
@@ -213,25 +182,26 @@ monitor_del_from_hash_table(const char *name, struct Client *client)
 void
 monitor_clear_list(struct Client *client)
 {
-  while (client->connection->monitors.head)
+  assert(client_is_local(client));
+
+  list_node_t *monitor_node;
+  while ((monitor_node = list_pop_head(&client->connection->monitor_list)))
   {
-    list_node_t *node = client->connection->monitors.head;
-    struct Monitor *monitor = node->data;
+    struct Monitor *const monitor = monitor_node->data;
+    assert(monitor);
 
-    assert(list_find(&monitor->monitored_by, client));
+    list_free_node(monitor_node);
 
-    list_node_t *temp = list_find_remove(&monitor->monitored_by, client);
-    if (temp)
-      list_free_node(temp);
+    list_node_t *const subscriber_node = list_find_remove(&monitor->monitored_by, client);
+    assert(subscriber_node);
 
-    /* If this leaves a header without notifies, remove it. */
+    if (subscriber_node)
+      list_free_node(subscriber_node);
+
+    /* Destroy the monitor entry when it has no subscribers left. */
     if (list_is_empty(&monitor->monitored_by))
-      monitor_free(monitor);
-
-    list_remove(node, &client->connection->monitors);
-    list_free_node(node);
+      _monitor_destroy(monitor);
   }
 
-  assert(client->connection->monitors.head == NULL);
-  assert(client->connection->monitors.tail == NULL);
+  assert(list_is_empty(&client->connection->monitor_list));
 }

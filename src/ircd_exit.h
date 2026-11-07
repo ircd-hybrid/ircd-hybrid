@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -26,19 +10,19 @@
 
 #ifndef INCLUDED_ircd_exit_h
 #define INCLUDED_ircd_exit_h
-
 #include "io.h"
 
 /**
  * @enum ircd_exit_action_t
  * @brief Actions for server exit.
  *
- * This enum defines the actions for the IRC server exit, either terminating or restarting.
+ * Termination actions perform the same cleanup and differ only in exit status.
  */
 typedef enum
 {
   IRCD_EXIT_TERMINATE,  /**< Terminate the server. */
   IRCD_EXIT_RESTART,  /**< Restart the server. */
+  IRCD_EXIT_FAILURE,  /**< Terminate the server with EXIT_FAILURE. */
 } ircd_exit_action_t;
 
 extern void ircd_exit(ircd_exit_action_t, const char *);

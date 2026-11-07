@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file channel_invite.h
@@ -25,19 +9,24 @@
 
 #ifndef INCLUDED_channel_invite_h
 #define INCLUDED_channel_invite_h
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "list.h"
 
 /** Invite structure */
-struct Invite
+struct ChannelInvite
 {
-  list_node_t user_node;  /**< link to client->connection->invited */
-  list_node_t chan_node;  /**< link to channel->invites */
+  list_node_t client_node;  /**< link to client->connection->channel_invite_list */
+  list_node_t channel_node;  /**< link to channel->invite_list */
   struct Channel *channel;  /**< Channel pointer */
   struct Client *client;  /**< Client pointer */
   uintmax_t when;  /**< Time the invite has been created; monotonic time */
 };
 
-extern void invite_add(struct Channel *, struct Client *);
-extern void invite_del(struct Invite *);
-extern void invite_clear_list(list_t *);
-extern struct Invite *invite_find(struct Channel *, struct Client *);
+extern void channel_invite_add(struct Channel *, struct Client *);
+extern void channel_invite_remove(struct ChannelInvite *);
+extern void channel_invite_remove_all(list_t *);
+extern bool channel_invite_consume(struct Channel *, struct Client *);
+extern struct ChannelInvite *channel_invite_find(struct Channel *, struct Client *);
 #endif  /* INCLUDED_channel_invite_h */

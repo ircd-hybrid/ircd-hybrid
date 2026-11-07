@@ -1,33 +1,20 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2000-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2000-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
-#include "io_string.h"
+
+#include "accept.h"
 #include "channel.h"
+#include "channel_member.h"
 #include "client.h"
 #include "conf.h"
 #include "user_mode.h"
-#include "accept.h"
 
 /*
  * accept processing, this adds a form of "caller ID" to ircd
@@ -50,29 +37,25 @@
 void
 accept_add(const char *nick, const char *user, const char *host, list_t *list)
 {
-  struct AcceptItem *accept = io_calloc(sizeof(*accept));
+  struct AcceptItem *const accept = io_calloc(sizeof(*accept));
   accept->nick = io_strdup(nick);
   accept->user = io_strdup(user);
   accept->host = io_strdup(host);
-  list_add(accept, &accept->node, list);
+
+  list_add_tail(accept, &accept->node, list);
 }
 
 void
 accept_del(struct AcceptItem *accept, list_t *list)
 {
   list_remove(&accept->node, list);
+
   io_free(accept->nick);
   io_free(accept->user);
   io_free(accept->host);
   io_free(accept);
 }
 
-/* del_all_accepts()
- *
- * inputs       - pointer to exiting client
- * output       - NONE
- * side effects - Walk through given clients acceptlist and remove all entries
- */
 void
 accept_clear_list(list_t *list)
 {
@@ -88,8 +71,7 @@ accept_find(const char *nick, const char *user, const char *host, list_t *list,
 
   LIST_FOREACH(node, list->head)
   {
-    struct AcceptItem *accept = node->data;
-
+    struct AcceptItem *const accept = node->data;
     if (compare(accept->nick, nick) == 0 &&
         compare(accept->user, user) == 0 &&
         compare(accept->host, host) == 0)
@@ -99,29 +81,21 @@ accept_find(const char *nick, const char *user, const char *host, list_t *list,
   return NULL;
 }
 
-/* accept_message()
- *
- * inputs       - pointer to source client
- *              - pointer to target client
- * output       - 1 if accept this message 0 if not
- * side effects - See if source is on target's allow list
- */
 bool
 accept_message(struct Client *source, struct Client *target)
 {
   list_node_t *node;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      (user_mode_has_flag(source, UMODE_OPER) && ConfigGeneral.opers_bypass_callerid))
+  if (client_is_service(source) || (client_is_oper(source) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
   if (source == target || accept_find(source->name, source->username, source->host,
-                                      &target->connection->acceptlist, match))
+                                      &target->connection->accept_list, match))
     return true;
 
-  if (user_mode_has_flag(target, UMODE_CALLERID) == false && user_mode_has_flag(target, UMODE_SOFTCALLERID))
-    LIST_FOREACH(node, target->channel.head)
-      if (member_find_link(source, ((struct ChannelMember *)node->data)->channel))
+  if (!user_mode_has_flag(target, UMODE_CALLERID) && user_mode_has_flag(target, UMODE_SOFTCALLERID))
+    LIST_FOREACH(node, target->channel_member_list.head)
+      if (channel_member_find(((struct ChannelMember *)node->data)->channel, source))
         return true;
 
   return false;

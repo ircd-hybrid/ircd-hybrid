@@ -1,6 +1,6 @@
 #ifndef INCLUDED_sha3_h
 #define INCLUDED_sha3_h
-
+#include <stddef.h>
 #include <stdint.h>
 
 /* -------------------------------------------------------------------------

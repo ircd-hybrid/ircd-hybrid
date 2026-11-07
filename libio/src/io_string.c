@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -24,8 +8,9 @@
  * @brief String manipulation functions.
  */
 
-#include "config.h"
-#include "stdinc.h"
+#include <assert.h>
+#include <string.h>
+
 #include "io_string.h"
 
 /**
@@ -44,16 +29,23 @@
 bool
 has_wildcards(const char *str)
 {
-  const unsigned char *p = (const unsigned char *)str;
+  bool escaped = false;
 
-  for (; *p; ++p)
+  for (const unsigned char *p = (const unsigned char *)str; *p; ++p)
   {
+    if (escaped)
+    {
+      escaped = false;
+      continue;
+    }
+
     if (*p == '\\')
     {
-      if (*++p == '\0')
-        return false;
+      escaped = true;
+      continue;
     }
-    else if (IsMWildChar(*p))
+
+    if (*p == '*' || *p == '?')
       return true;
   }
 
@@ -88,52 +80,6 @@ stripws(char *str)
 }
 
 /**
- * @brief Tokenize a delimited input list into a vector of tokens.
- *
- * This function splits an input buffer, 'names', using a specified delimiter, 'token'.
- * The resulting tokens are stored in the 'vector' array, up to the specified 'size'.
- * Empty tokens, occurring at the start or end of the list or adjacent to each other, are ignored.
- * The function returns the number of tokens written to the vector.
- *
- * @param names Input buffer containing the list to be tokenized.
- * @param token Delimiter used to split the list into tokens.
- * @param vector Output array to store the tokens.
- * @param size Maximum number of elements in the vector.
- * @return Number of tokens written to the vector.
- */
-unsigned int
-token_vector(char *names, char token, char *vector[], unsigned int size)
-{
-  unsigned int count = 0;
-  char *start = names;
-
-  assert(names);
-  assert(vector);
-  assert(size > 1);
-
-  vector[count++] = start;
-
-  for (char *end = strchr(start, token); end;
-             end = strchr(start, token))
-  {
-    *end++ = '\0';
-    start = end;
-
-    if (*start)
-    {
-      vector[count++] = start;
-
-      if (count < size)
-        continue;
-    }
-
-    break;
-  }
-
-  return count;
-}
-
-/**
  * @brief Extracts the base name of a path.
  *
  * This function returns a pointer to the base name portion of a file path.
@@ -150,14 +96,8 @@ token_vector(char *names, char token, char *vector[], unsigned int size)
 const char *
 io_basename(const char *path)
 {
-  const char *s = strrchr(path, '/');
-
-  if (s)
-    s++;
-  else
-    s = path;
-
-  return s;
+  const char *const s = strrchr(path, '/');
+  return s ? s + 1 : path;
 }
 
 /*    $OpenBSD: strlcat.c,v 1.18 2016/10/16 17:37:39 dtucker Exp $    */

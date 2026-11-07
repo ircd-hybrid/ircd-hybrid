@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -24,17 +8,25 @@
  * @brief Functions to facilitate the restart and termination of the IRC server.
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "fdlist.h"
-#include "log.h"
 #include "io_pidfile.h"
 #include "io_string.h"
-#include "defaults.h"
-#include "ircd.h"
-#include "send.h"
+#include "log.h"
+
 #include "client.h"
 #include "conf_db.h"
+#include "defaults.h"
+#include "ircd.h"
 #include "ircd_exit.h"
+#include "ircd_module.h"
+#include "send.h"
 
 /**
  * @brief Initiates server termination or restart with a formatted message.
@@ -42,7 +34,7 @@
  * This function is responsible for initiating the termination or restart of the IRC server
  * with a formatted message indicating the reason.
  *
- * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param action The termination or restart action, including the exit status.
  * @param format A format string indicating the reason for server termination or restart.
  * @param ... Additional arguments to be formatted into the message.
  */
@@ -68,20 +60,17 @@ ircd_exit_fmt(ircd_exit_action_t action, const char *format, ...)
  * parameter. In the case of a restart, it attempts to execute the server binary with the original
  * command line arguments.
  *
- * @param action The action to perform, either IRCD_EXIT_TERMINATE or IRCD_EXIT_RESTART.
+ * @param action The termination or restart action, including the exit status.
  * @param message A message indicating the reason for server termination or restart.
  */
 void
 ircd_exit(ircd_exit_action_t action, const char *message)
 {
-  if (action == IRCD_EXIT_RESTART)
-  {
-    static bool was_here = false;
-    if (was_here)
-      abort();
+  static bool was_here = false;
 
-    was_here = true;
-  }
+  if (was_here)
+    abort();
+  was_here = true;
 
   char buf[IRCD_BUFSIZE];
   if (string_is_empty(message))
@@ -97,18 +86,18 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   log_write(LOG_TYPE_IRCD, "%s", buf);
 
-  save_all_databases(NULL);
+  conf_db_save_all(NULL);
+
+  ircd_module_shutdown();
 
   io_pidfile_remove(pidFileName);
   io_pidfile_close();
 
-  close_fds();
-
   if (action == IRCD_EXIT_RESTART)
   {
+    close_fds();
     execv(SPATH, myargv);
-    exit(EXIT_FAILURE);
   }
-  else
-    exit(EXIT_SUCCESS);
+
+  exit(action == IRCD_EXIT_TERMINATE ? EXIT_SUCCESS : EXIT_FAILURE);
 }

@@ -1,191 +1,128 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "io_parse.h"
 #include "io_string.h"
+
+#include "aline.h"
+#include "client.h"
+#include "conf.h"
+#include "conf_oper.h"
 #include "nuh.h"
 #include "numeric.h"
-#include "conf.h"
-#include "client.h"
 #include "send.h"
-#include "aline.h"
 
-/* valid_wild_card_simple()
- *
- * inputs       - data to check for sufficient non-wildcard characters
- * outputs      - 1 if valid, else 0
- * side effects - none
- */
+enum
+{
+  ALINE_MAX_DURATION_MINUTES = 24 * 60 * 360
+};
+
 bool
 aline_valid_mask_simple(const char *data)
 {
-  const unsigned char *p = (const unsigned char *)data;
-  unsigned char tmpch = '\0';
-  unsigned int nonwild = 0, wild = 0;
+  const unsigned int minimum = ConfigGeneral.min_nonwildcard_simple;
+  if (minimum == 0)
+    return true;
 
-  while ((tmpch = *p++))
+  unsigned int nonwild = 0;
+  bool has_wildcard = false;
+
+  for (const unsigned char *p = (const unsigned char *)data; *p; ++p)
   {
-    if (tmpch == '\\' && *p)
-    {
+    if (*p == '\\' && p[1] != '\0')
       ++p;
-      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return true;
-    }
-    else if (!IsMWildChar(tmpch))
+    else if (*p == '*' || *p == '?')
     {
-      if (++nonwild >= ConfigGeneral.min_nonwildcard_simple)
-        return true;
+      has_wildcard = true;
+      continue;
     }
-    else
-      ++wild;
+
+    if (++nonwild >= minimum)
+      return true;
   }
 
-  return wild == 0;
+  return has_wildcard == false;
 }
 
-/* valid_wild_card()
- *
- * input        - pointer to client
- *		- int flag, 0 for no warning oper 1 for warning oper
- *		- count of following varargs to check
- * output       - 0 if not valid, 1 if valid
- * side effects - NOTICE is given to client if warn is 1
- */
-bool
-aline_valid_mask(int count, ...)
+static bool
+_aline_mask_char_is_nonwild(unsigned char ch)
 {
-  unsigned char tmpch = '\0';
+  return ch != '*' &&
+         ch != '?' &&
+         ch != ':' &&
+         ch != '.';
+}
+
+bool
+aline_valid_mask(size_t count, const char *const masks[])
+{
+  const unsigned int minimum = ConfigGeneral.min_nonwildcard;
+  if (minimum == 0)
+    return true;
+
   unsigned int nonwild = 0;
 
-  /*
-   * Now we must check the user and host to make sure there
-   * are at least NONWILDCHARS non-wildcard characters in
-   * them, otherwise assume they are attempting to kline
-   * *@* or some variant of that. This code will also catch
-   * people attempting to kline *@*.tld, as long as NONWILDCHARS
-   * is greater than 3. In that case, there are only 3 non-wild
-   * characters (tld), so if NONWILDCHARS is 4, the kline will
-   * be disallowed.
-   * -wnder
-   */
-  va_list args;
-  va_start(args, count);
-
-  while (count--)
+  for (size_t i = 0; i < count; ++i)
   {
-    const unsigned char *p = va_arg(args, const unsigned char *);
-    if (p == NULL)
+    if (masks[i] == NULL)
       continue;
 
-    while ((tmpch = *p++))
+    for (const unsigned char *p = (const unsigned char *)masks[i]; *p; ++p)
     {
-      if (!IsKWildChar(tmpch))
-      {
-        /*
-         * If we find enough non-wild characters, we can
-         * break - no point in searching further.
-         */
-        if (++nonwild >= ConfigGeneral.min_nonwildcard)
-        {
-          va_end(args);
-          return true;
-        }
-      }
+      if (!_aline_mask_char_is_nonwild(*p))
+        continue;
+
+      if (++nonwild >= minimum)
+        return true;
     }
   }
 
-  va_end(args);
   return false;
 }
 
-static intmax_t
-aline_valid_time(const char *data)
+static bool
+_aline_parse_duration(const char *text, uintmax_t *duration_out)
 {
-  static const unsigned int max_aline_time = 24*60*360;
-  const unsigned char *p = (const unsigned char *)data;
-  unsigned char tmpch = '\0';
-  intmax_t result = 0;
+  uintmax_t minutes;
 
-  while ((tmpch = *p++))
-  {
-    if (!IsDigit(tmpch))
-      return -1;
+  const io_parse_status_t status =
+    io_parse_uintmax_range(text, 0, ALINE_MAX_DURATION_MINUTES, &minutes);
+  if (status == IO_PARSE_RANGE)
+    minutes = ALINE_MAX_DURATION_MINUTES;
+  else if (status != IO_PARSE_OK)
+    return false;
 
-    result *= 10;
-    result += (tmpch & 0xF);
-  }
-
-  if (result > max_aline_time)
-    result = max_aline_time;
-
-  result = result * 60;  /* Turn it into seconds */
-
-  return result;
+  *duration_out = minutes * 60U;
+  return true;
 }
 
-/* parse_aline
- *
- * input        - pointer to cmd name being used
- *              - pointer to client using cmd
- *              - parc parameter count
- *              - parv[] list of parameters to parse
- *		- parse_flags bit map of things to test
- *		- pointer to user or string to parse into
- *              - pointer to host or NULL to parse into if non NULL
- *              - pointer to optional tkline time or NULL
- *              - pointer to target_server to parse into if non NULL
- *              - pointer to reason to parse into
- *
- * output       - 1 if valid, 0 if not valid
- * side effects - A generalised k/d/x etc. line parser,
- *               "ALINE [time] user@host|string [ON] target :reason"
- *                will parse returning a parsed user, host if
- *                h_p pointer is non NULL, string otherwise.
- *                if tkline_time pointer is non NULL a tk line will be set
- *                to non zero if found.
- *                if tkline_time pointer is NULL and tk line is found,
- *                error is reported.
- *                if target_server is NULL and an "ON" is found error
- *                is reported.
- *                if reason pointer is NULL ignore pointer,
- *                this allows use of parse_a_line in unkline etc.
- *
- * - Dianora
- */
 bool
-aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], struct aline_ctx *aline)
+aline_parse(const char *cmd, struct Client *client, size_t parc, char *parv[], struct aline_ctx *aline)
 {
   static char default_reason[] = CONF_NOREASON;
   static char user[USERLEN * 2 + 1];
   static char host[HOSTLEN * 2 + 1];
-  intmax_t duration;
 
   ++parv;
   --parc;
 
-  if (aline->add && (duration = aline_valid_time(*parv)) >= 0)
+  if (aline->add)
   {
-    aline->duration = duration;
-    ++parv;
-    --parc;
+    aline->duration = 0;
+
+    uintmax_t duration;
+    if (parc > 0 && _aline_parse_duration(*parv, &duration))
+    {
+      aline->duration = duration;
+      ++parv;
+      --parc;
+    }
   }
 
   if (parc == 0 || string_is_empty(*parv))
@@ -225,12 +162,12 @@ aline_parse(const char *cmd, struct Client *client, int parc, char *parv[], stru
 
   if (parc)
   {
-    if (irccmp(*parv, "ON") == 0)
+    if (io_strcasecmp(*parv, "ON") == 0)
     {
       ++parv;
       --parc;
 
-      if (!HasOFlag(client, OPER_FLAG_REMOTEBAN))
+      if (!client_has_oper_flag(client, OPER_FLAG_REMOTEBAN))
       {
         sendto_one_numeric(client, &me, ERR_NOPRIVS, "remoteban");
         return false;

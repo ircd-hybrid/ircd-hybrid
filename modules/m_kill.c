@@ -1,44 +1,55 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_kill.c
  * \brief Includes required functions for processing the KILL command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "hash.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "log.h"
-#include "server.h"
-#include "conf.h"
-#include "send.h"
-#include "user_mode.h"
-#include "whowas.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
 #include "io_string.h"
-#include "parse.h"
+#include "log.h"
 #include "module.h"
 
+#include "client.h"
+#include "client_find.h"
+#include "conf.h"
+#include "conf_oper.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+
+static const struct Client *
+_kill_source_for_target(const struct Client *source, const struct Client *target)
+{
+  if (client_is_user(source))
+    return source;
+
+  if (client_is_oper(target))
+    return source;
+
+  return client_get_visible_server(source);
+}
+
+static void
+_kill_send_to_target(const struct Client *source, struct Client *target, const char *reason)
+{
+  assert(source);
+  assert(client_is_user(source) || client_is_server(source));
+  assert(client_is_local_user(target));
+  assert(reason);
+
+  const struct Client *const visible_source =
+    _kill_source_for_target(source, target);
+  sendto_one_command(target, visible_source, "KILL", ":%.*s", REASONLEN, reason);
+}
 
 /*! \brief KILL command handler
  *
@@ -53,50 +64,37 @@
  *      - parv[2] = reason
  */
 static void
-mo_kill(struct Client *source, int parc, char *parv[])
+mo_kill(struct Client *source, size_t parc, char *parv[])
 {
-  struct Client *target = find_person(source, parv[1]);
+  bool from_history = false;
+
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user_with_history(source, target_name, &from_history);
   if (target == NULL)
   {
-    /*
-     * If the user has recently changed nick, automatically
-     * rewrite the KILL for this new nickname--this keeps
-     * servers in synch when nick change and kill collide
-     */
-    target = whowas_get_history(parv[1], ConfigGeneral.kill_chase_time_limit);
-    if (target == NULL)
-    {
-      sendto_one_numeric(source, &me, ERR_NOSUCHNICK, parv[1]);
-      return;
-    }
-
-    sendto_one_notice(source, &me, ":KILL changed from %s to %s",
-                      parv[1], target->name);
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
+    return;
   }
 
-  if (!MyConnect(target) && !HasOFlag(source, OPER_FLAG_KILL_REMOTE))
+  if (from_history)
+    sendto_one_notice(source, &me, ":KILL changed from %s to %s",
+                      target_name, target->name);
+
+  if (!client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL_REMOTE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill:remote");
     return;
   }
 
-  if (MyConnect(target) && !HasOFlag(source, OPER_FLAG_KILL))
+  if (client_is_local(target) && !client_has_oper_flag(source, OPER_FLAG_KILL))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "kill");
     return;
   }
 
-  if (IsServer(target) || IsMe(target))
-  {
-    sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
-    return;
-  }
-
-  const char *reason = string_default(parv[2], CONF_NOREASON);
-  if (MyConnect(target))
-    sendto_one(target, ":%s!%s@%s KILL %s :%.*s",
-               source->name, source->username, source->host,
-               target->name, REASONLEN, reason);
+  const char *const reason = string_or_default(parv[2], CONF_NOREASON);
+  if (client_is_local(target))
+    _kill_send_to_target(source, target, reason);
 
   /*
    * Do not change the format of this message. There's no point in changing messages
@@ -105,7 +103,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
                  target->name, target->username, target->host,
-                 target->servptr->name, source->name, me.name, REASONLEN, reason);
+                 target->uplink->name, source->name, me.name, REASONLEN, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s (%.*s)",
             source->name, target->name, me.name, REASONLEN, reason);
@@ -114,7 +112,7 @@ mo_kill(struct Client *source, int parc, char *parv[])
    * And pass on the message to other servers. Note, that if KILL was changed,
    * the message has to be sent to all links, also back.
    */
-  if (!MyConnect(target))
+  if (!client_is_local(target))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s!%s!%s!%s (%.*s)",
                    source->id, target->id, me.name, source->host,
@@ -125,10 +123,19 @@ mo_kill(struct Client *source, int parc, char *parv[])
      * the unnecessary QUIT for this. (This flag should never be
      * set in any other place)
      */
-    AddFlag(target, FLAGS_KILLED);
+    client_set_flag(target, FLAGS_KILLED);
   }
 
   client_exit_fmt(target, "Killed (%s (%.*s))", source->name, REASONLEN, reason);
+}
+
+static const char *
+_kill_source_name_for_exit_reason(const struct Client *source)
+{
+  if (client_is_server(source) || client_is_me(source))
+    return client_get_visible_server_name(source);
+
+  return source->name;
 }
 
 /*! \brief KILL command handler
@@ -144,11 +151,11 @@ mo_kill(struct Client *source, int parc, char *parv[])
  *      - parv[2] = kill path and reason
  */
 static void
-ms_kill(struct Client *source, int parc, char *parv[])
+ms_kill(struct Client *source, size_t parc, char *parv[])
 {
   char def_reason[] = CONF_NOREASON;
 
-  struct Client *target = find_person(source, parv[1]);
+  struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
 
@@ -158,28 +165,8 @@ ms_kill(struct Client *source, int parc, char *parv[])
   else
     reason = def_reason;
 
-  if (IsServer(target) || IsMe(target))
-  {
-    sendto_one_numeric(source, &me, ERR_CANTKILLSERVER);
-    return;
-  }
-
-  if (MyConnect(target))
-  {
-    if (IsServer(source))
-    {
-      /* Don't send clients kills from a hidden server */
-      if ((IsHidden(source) || ConfigServerHide.hide_servers) && user_mode_has_flag(target, UMODE_OPER) == false)
-        sendto_one(target, ":%s KILL %s :%s",
-                   me.name, target->name, reason);
-      else
-        sendto_one(target, ":%s KILL %s :%s",
-                   source->name, target->name, reason);
-    }
-    else
-      sendto_one(target, ":%s!%s@%s KILL %s :%s",
-                 source->name, source->username, source->host, target->name, reason);
-  }
+  if (client_is_local(target))
+    _kill_send_to_target(source, target, reason);
 
   /*
    * Be warned, this message must be From %s, or it confuses clients
@@ -189,58 +176,59 @@ ms_kill(struct Client *source, int parc, char *parv[])
    * Path must contain at least 2 !'s, or bitchx falsely declares it
    * local --fl
    */
-  if (IsClient(source))  /* Send it normally */
+  if (client_is_user(source))  /* Send it normally */
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
                    target->name, target->username, target->host,
-                   target->servptr->name, source->name,
-                   source->servptr->name, source->host, source->username, source->name, reason);
+                   target->uplink->name, source->name,
+                   source->uplink->name, source->host, source->username, source->name, reason);
   else
     sendto_clients(UMODE_SKILL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s %s",
                    target->name, target->username, target->host,
-                   target->servptr->name, source->name, reason);
+                   target->uplink->name, source->name, reason);
 
   log_write(LOG_TYPE_KILL, "KILL From %s For %s Path %s %s",
             source->name, target->name, source->name, reason);
 
   sendto_servers(source, 0, 0, ":%s KILL %s :%s %s",
                  source->id, target->id, parv[2], reason);
-  AddFlag(target, FLAGS_KILLED);
 
+  client_set_flag(target, FLAGS_KILLED);
   /* Reason comes supplied with its own ()'s */
-  if (IsServer(source) && (IsHidden(source) || ConfigServerHide.hide_servers))
-    client_exit_fmt(target, "Killed (%s %s)", me.name, reason);
-  else
-    client_exit_fmt(target, "Killed (%s %s)", source->name, reason);
+  client_exit_fmt(target, "Killed (%s %s)",
+                  _kill_source_name_for_exit_reason(source), reason);
 }
-
 
 static struct Command command_table =
 {
   .name = "KILL",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_kill, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_kill, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_kill, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_kill, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_kill",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

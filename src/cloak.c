@@ -1,26 +1,7 @@
 /*
- * MIT License
- *
- * Copyright (c) 2019 Shivaram Lingamneni
- * Copyright (c) 2024-2025 ircd-hybrid development team
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SPDX-FileCopyrightText: 2019 Shivaram Lingamneni
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: MIT
  */
 
 /**
@@ -33,14 +14,16 @@
  * followed by appending a configurable suffix to the cloaked hostname.
  */
 
-#include "stdinc.h"
-#include "address.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "base32.h"
+#include "io_string.h"
 #include "memory.h"
 #include "sha3.h"
-#include "io_string.h"
-#include "ircd_defs.h"
 #include "cloak.h"
+#include "ircd_defs.h"
 
 /**
  * @struct cloak_config
@@ -213,7 +196,6 @@ cloak_init(void)
   cloak_set_num_bits(80);
   cloak_set_cidr_len_ipv4(32);
   cloak_set_cidr_len_ipv6(64);
-  cloak_set_secret("_WPJFgJb2M9rDC3tZmPTTzvyfcWerKebmEG84bKeTdNw");
   cloak_set_suffix("irc");
 }
 
@@ -228,35 +210,20 @@ cloak_init(void)
  * @return The statically allocated cloaked hostname string.
  */
 static const char *
-cloak_mac_and_compose(const struct io_addr *addr)
+_cloak_mac_and_compose(const struct io_addr *addr)
 {
-  const void *addr_ptr;
+  const unsigned char *addr_bytes;
   size_t addr_len;
 
-  /* Determine the address pointer and length based on the address family (IPv4 or IPv6). */
-  if (address_is_ipv6(addr))
-  {
-    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *const)addr;
-    addr_ptr = &v6->sin6_addr;
-    addr_len = sizeof(struct in6_addr);
-  }
-  else
-  {
-    const struct sockaddr_in *const v4 = (const struct sockaddr_in *const)addr;
-    addr_ptr = &v4->sin_addr;
-    addr_len = sizeof(struct in_addr);
-  }
-
-  /* Create input buffer by concatenating the secret key and address. */
-  unsigned char input[config->secret_len + addr_len];
-  memcpy(input, config->secret, config->secret_len);
-  memcpy(input + config->secret_len, addr_ptr, addr_len);
+  if (!address_get_bytes(addr, &addr_bytes, &addr_len))
+    return NULL;
 
   /* Compute SHA3 hash. */
   sha3_context_t ctx_sha3;
   sha3_init512(&ctx_sha3);
-  sha3_update(&ctx_sha3, input, config->secret_len + addr_len);
-  const uint8_t *digest_sha3 = sha3_finalize(&ctx_sha3);
+  sha3_update(&ctx_sha3, config->secret, config->secret_len);
+  sha3_update(&ctx_sha3, addr_bytes, addr_len);
+  const uint8_t *const digest_sha3 = sha3_finalize(&ctx_sha3);
 
   /* Encode the hash in base32. */
   unsigned char digest_b32[BASE32_LEN(config->num_bytes) + 1];
@@ -286,18 +253,26 @@ cloak_mac_and_compose(const struct io_addr *addr)
 const char *
 cloak_compute(const struct io_addr *addr)
 {
-  if (config->enabled == 0)
+  if (!config->enabled ||
+      config->num_bits == 0 ||
+      string_is_empty(config->secret) ||
+      string_is_empty(config->suffix))
     return NULL;
-  if (config->num_bits == 0 || string_is_empty(config->secret))
+
+  unsigned int prefix_length;
+
+  if (address_is_ipv4(addr))
+    prefix_length = config->cidr_len_ipv4;
+  else if (address_is_ipv6(addr))
+    prefix_length = config->cidr_len_ipv6;
+  else
     return NULL;
 
-  struct io_addr tmp;
-  address_copy(&tmp, addr);
+  struct io_addr masked_addr;
+  address_copy(&masked_addr, addr);
 
-  if (address_is_ipv6(addr))
-    address_mask(&tmp, config->cidr_len_ipv6);
-  else /* address_is_ipv4(addr) == true */
-    address_mask(&tmp, config->cidr_len_ipv4);
+  if (!address_mask(&masked_addr, prefix_length))
+    return NULL;
 
-  return cloak_mac_and_compose(&tmp);
+  return _cloak_mac_and_compose(&masked_addr);
 }

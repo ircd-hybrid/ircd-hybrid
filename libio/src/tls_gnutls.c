@@ -1,168 +1,153 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015 Attila Molnar <attilamolnar@hush.com>
- *  Copyright (c) 2015 Adam <Adam@anope.org>
- *  Copyright (c) 2015-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015 Attila Molnar <attilamolnar@hush.com>
+ * SPDX-FileCopyrightText: 2015 Adam <Adam@anope.org>
+ * SPDX-FileCopyrightText: 2015-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file tls_gnutls.c
  * \brief Includes all GnuTLS-specific TLS functions
  */
 
-#include "stdinc.h"
-#include "tls.h"
-#include "conf.h"
+#include <errno.h>
+#include <stdio.h>
+
+#include "io_hex.h"
 #include "log.h"
-#include "misc.h"
 #include "memory.h"
+#include "tls.h"
 
 #ifdef HAVE_TLS_GNUTLS
-static bool TLS_initialized;
-static const char tls_default_priority_string[] =
-  "NORMAL:"
-  "%SERVER_PRECEDENCE:"
-  "!VERS-TLS1.1:"
-  "!VERS-TLS1.0:"
-  "!VERS-SSL3.0";
+static const char tls_priority_overrides[] =
+  "-VERS-SSL3.0:"
+  "-VERS-TLS1.0:"
+  "-VERS-TLS1.1:"
+  "%SERVER_PRECEDENCE";
 
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
+
+static void
+_tls_context_free(tls_context_t context)
+{
+  if (context->priorities)
+    gnutls_priority_deinit(context->priorities);
+  if (context->x509_cred)
+    gnutls_certificate_free_credentials(context->x509_cred);
+
+  io_free(context);
+}
+
+static void
+_tls_context_ref(tls_context_t context)
+{
+  ++context->ref_count;
+}
+
+static void
+_tls_context_unref(tls_context_t context)
+{
+  if (--context->ref_count == 0)
+    _tls_context_free(context);
+}
 
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
-  return TLS_initialized;
+  return tls_ctx != NULL;
 }
 
 void
-tls_init(void)
+tls_clear_config(void)
+{
+  tls_context_t context = tls_ctx;
+
+  tls_ctx = NULL;
+
+  if (context)
+    _tls_context_unref(context);
+}
+
+void
+tls_library_init(void)
 {
 }
 
 static void
-tls_free_credentials(tls_context_t cred)
+_tls_report_error(const char *operation, int error)
 {
-  gnutls_priority_deinit(cred->priorities);
-  gnutls_dh_params_deinit(cred->dh_params);
-  gnutls_certificate_free_credentials(cred->x509_cred);
+  log_write(LOG_TYPE_IRCD, "GnuTLS error: %s: %s", operation, gnutls_strerror(error));
+}
 
-  gnutls_global_deinit();
+static tls_context_t
+_tls_context_new(void)
+{
+  tls_context_t context = io_calloc(sizeof(*context));
+  _tls_context_ref(context);
 
-  io_free(cred);
+  int ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    _tls_report_error("Could not allocate certificate credentials", ret);
+    goto fail;
+  }
+
+  ret = gnutls_priority_init2(&context->priorities, tls_priority_overrides, NULL, GNUTLS_PRIORITY_INIT_DEF_APPEND);
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    _tls_report_error("Could not initialize TLS priorities", ret);
+    goto fail;
+  }
+
+  return context;
+
+fail:
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  const int ret =
+    gnutls_certificate_set_x509_key_file(context->x509_cred,
+                                         config->certificate_file,
+                                         config->private_key_file, GNUTLS_X509_FMT_PEM);
+  if (ret != GNUTLS_E_SUCCESS)
+  {
+    _tls_report_error("Could not load TLS certificate/private key", ret);
+    return false;
+  }
+
+  return true;
 }
 
 bool
-tls_new_credentials(void)
+tls_configure(const tls_config_t *config)
 {
-  struct gnutls_context *context;
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
 
-  TLS_initialized = false;
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
-
-  context = io_calloc(sizeof(*context));
-
-  int ret = gnutls_global_init();
-  if (ret != GNUTLS_E_SUCCESS)
+  if (!_tls_context_load_credentials(context, config))
   {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize GnuTLS library -- %s", gnutls_strerror(ret));
-    io_free(context);
+    _tls_context_unref(context);
     return false;
   }
 
-  ret = gnutls_certificate_allocate_credentials(&context->x509_cred);
-  if (ret != GNUTLS_E_SUCCESS)
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS credentials -- %s", gnutls_strerror(ret));
-    io_free(context);
-    return false;
-  }
-
-  /* TBD: set ciphers based on serverinfo::tls_cipher_list */
-
-  gnutls_priority_init(&context->priorities, tls_default_priority_string, NULL);
-
-  ret = gnutls_certificate_set_x509_key_file(context->x509_cred, ConfigServerInfo.tls_certificate_file, ConfigServerInfo.rsa_private_key_file, GNUTLS_X509_FMT_PEM);
-  if (ret != GNUTLS_E_SUCCESS)
-  {
-    log_write(LOG_TYPE_IRCD, "Could not set TLS keys -- %s", gnutls_strerror(ret));
-
-    gnutls_certificate_free_credentials(context->x509_cred);
-    gnutls_priority_deinit(context->priorities);
-    io_free(context);
-    return false;
-  }
-
-  ret = gnutls_dh_params_init(&context->dh_params);
-  if (ret != GNUTLS_E_SUCCESS)
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the DH parameters -- %s", gnutls_strerror(ret));
-    io_free(context);
-    return false;
-  }
-
-  if (ConfigServerInfo.tls_dh_param_file)
-  {
-    gnutls_datum_t data;
-
-    ret = gnutls_load_file(ConfigServerInfo.tls_dh_param_file, &data);
-    if (ret != GNUTLS_E_SUCCESS)
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to load file -- %s", gnutls_strerror(ret));
-    else
-    {
-      ret = gnutls_dh_params_import_pkcs3(context->dh_params, &data, GNUTLS_X509_FMT_PEM);
-      if (ret != GNUTLS_E_SUCCESS)
-        log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- unable to import dh params -- %s", gnutls_strerror(ret));
-      else
-        /* TBR once 3.6 is our minimum supported version */
-        gnutls_certificate_set_dh_params(context->x509_cred, context->dh_params);
-
-      gnutls_free(data.data);
-    }
-  }
-
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = GNUTLS_DIG_SHA256;
-  else
-  {
-    message_digest_algorithm = gnutls_digest_get_id(ConfigServerInfo.tls_message_digest_algorithm);
-
-    if (message_digest_algorithm == GNUTLS_DIG_UNKNOWN)
-    {
-      message_digest_algorithm = GNUTLS_DIG_SHA256;
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-    }
-  }
-
-  if (tls_ctx && --tls_ctx->refs == 0)
-    tls_free_credentials(tls_ctx);
-
+  tls_context_t old_context = tls_ctx;
   tls_ctx = context;
-  ++context->refs;
 
-  TLS_initialized = true;
+  if (old_context)
+    _tls_context_unref(old_context);
+
   return true;
 }
 
 const char *
-tls_get_cipher(const tls_data_t *tls_data)
+tls_session_get_cipher(const tls_data_t *tls_data)
 {
   static char buf[128];
 
@@ -174,187 +159,233 @@ tls_get_cipher(const tls_data_t *tls_data)
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_library_get_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "GnuTLS version: library: %s, header: %s",
-           gnutls_check_version(NULL), GNUTLS_VERSION);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "GnuTLS",
+    .runtime_version = gnutls_check_version(NULL),
+    .compile_version = GNUTLS_VERSION
+  };
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_session_is_active(const tls_data_t *tls_data)
 {
   return tls_data->session != NULL;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_session_deinit(tls_data_t *tls_data)
 {
-  gnutls_deinit(tls_data->session);
+  if (tls_data->session == NULL)
+    return;
+
+  gnutls_session_t session = tls_data->session;
+  tls_context_t context = tls_data->context;
+
+  tls_data->session = NULL;
+  tls_data->context = NULL;
+
+  gnutls_deinit(session);
+  _tls_context_unref(context);
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
-  ssize_t ret = gnutls_record_recv(tls_data->session, buf, bufsize);
+  *want_write = false;
 
-  if (ret <= 0)
+  errno = 0;
+
+  gnutls_session_t session = tls_data->session;
+  const ssize_t ret = gnutls_record_recv(session, buf, bufsize);
+  if (ret > 0)
+    return ret;
+
+  if (ret == 0)
   {
-    switch (ret)
-    {
-      case GNUTLS_E_AGAIN:
-      case GNUTLS_E_INTERRUPTED:
-        errno = EWOULDBLOCK;
-        return -1;
-      case 0:  /* Closed */
-      default:  /* Other error */
-        /* XXX can gnutls_strerror(ret) if <0 for gnutls's idea of the reason */
-        return 0;
-    }
+    errno = 0;
+    return 0;
   }
 
-  return ret;
+  const int saved_errno = errno;
+
+  switch (ret)
+  {
+    case GNUTLS_E_AGAIN:
+    case GNUTLS_E_INTERRUPTED:
+      *want_write = gnutls_record_get_direction(session) != 0;
+      errno = EWOULDBLOCK;
+      return -1;
+    case GNUTLS_E_PULL_ERROR:
+    case GNUTLS_E_PUSH_ERROR:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    default:
+      errno = EPROTO;
+      return -1;
+  }
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
-  ssize_t ret = gnutls_record_send(tls_data->session, buf, bufsize);
+  *want_read = false;
 
-  if (ret <= 0)
+  errno = 0;
+
+  gnutls_session_t session = tls_data->session;
+  const ssize_t ret = gnutls_record_send(session, buf, bufsize);
+  if (ret > 0)
+    return ret;
+
+  if (ret == 0)
   {
-    switch (ret)
-    {
-      case GNUTLS_E_AGAIN:
-      case GNUTLS_E_INTERRUPTED:
-      case 0:
-        errno = EWOULDBLOCK;
-        return -1;
-      default:
-        return 0;
-    }
+    errno = EIO;
+    return -1;
   }
 
-  return ret;
+  const int saved_errno = errno;
+
+  switch (ret)
+  {
+    case GNUTLS_E_AGAIN:
+    case GNUTLS_E_INTERRUPTED:
+      *want_read = gnutls_record_get_direction(session) == 0;
+      errno = EWOULDBLOCK;
+      return -1;
+    case GNUTLS_E_PULL_ERROR:
+    case GNUTLS_E_PUSH_ERROR:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    default:
+      errno = EPROTO;
+      return -1;
+  }
 }
 
 void
-tls_shutdown(tls_data_t *tls_data)
+tls_session_close_notify(tls_data_t *tls_data)
 {
   gnutls_bye(tls_data->session, GNUTLS_SHUT_WR);
-
-  if (--tls_data->context->refs == 0)
-    tls_free_credentials(tls_data->context);
 }
 
 bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  if (TLS_initialized == false)
+  if (tls_ctx == NULL)
     return false;
 
-  gnutls_init(&tls_data->session, role == TLS_ROLE_SERVER ? GNUTLS_SERVER : GNUTLS_CLIENT);
+  unsigned int flags;
 
-  tls_data->context = tls_ctx;
-  ++tls_data->context->refs;
+  switch (role)
+  {
+    case TLS_ROLE_SERVER:
+      flags = GNUTLS_SERVER | GNUTLS_NONBLOCK;
+      break;
+    case TLS_ROLE_CLIENT:
+      flags = GNUTLS_CLIENT | GNUTLS_NONBLOCK;
+      break;
+    default:
+      return false;
+  }
 
-  gnutls_priority_set(tls_data->session, tls_data->context->priorities);
-  gnutls_credentials_set(tls_data->session, GNUTLS_CRD_CERTIFICATE, tls_data->context->x509_cred);
-  gnutls_dh_set_prime_bits(tls_data->session, 1024);
-  gnutls_transport_set_int(tls_data->session, fd);
+  tls_context_t context = tls_ctx;
+  _tls_context_ref(context);
 
-  if (role == TLS_ROLE_SERVER)
-    /* Request client certificate if any. */
-    gnutls_certificate_server_set_request(tls_data->session, GNUTLS_CERT_REQUEST);
-
-  return true;
-}
-
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  const char *prioerror;
-
-  gnutls_priority_deinit(tls_data->context->priorities);
-
-  int ret = gnutls_priority_init(&tls_data->context->priorities, cipher_list, &prioerror);
+  gnutls_session_t session = NULL;
+  int ret = gnutls_init(&session, flags);
   if (ret != GNUTLS_E_SUCCESS)
   {
-    /* GnuTLS did not understand the user supplied string, log and fall back to the default priorities */
-    log_write(LOG_TYPE_IRCD, "Failed to set GnuTLS priorities to \"%s\": %s Syntax error at position %u, falling back to default %s",
-         cipher_list, gnutls_strerror(ret), (unsigned int)(prioerror - cipher_list), tls_default_priority_string);
-    gnutls_priority_init(&tls_data->context->priorities, tls_default_priority_string, NULL);
+    _tls_context_unref(context);
     return false;
   }
 
+  ret = gnutls_priority_set(session, context->priorities);
+  if (ret != GNUTLS_E_SUCCESS)
+    goto fail;
+
+  ret = gnutls_credentials_set(session, GNUTLS_CRD_CERTIFICATE, context->x509_cred);
+  if (ret != GNUTLS_E_SUCCESS)
+    goto fail;
+
+  gnutls_transport_set_int(session, fd);
+
+  if (role == TLS_ROLE_SERVER)
+    gnutls_certificate_server_set_request(session, GNUTLS_CERT_REQUEST);
+
+  tls_data->session = session;
+  tls_data->context = context;
   return true;
+
+fail:
+  gnutls_deinit(session);
+  _tls_context_unref(context);
+  return false;
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
 {
-  int ret = gnutls_handshake(tls_data->session);
+  if (errstr)
+    *errstr = NULL;
 
-  if (ret >= 0)
+  gnutls_session_t session = tls_data->session;
+  const int ret = gnutls_handshake(session);
+  if (ret == GNUTLS_E_SUCCESS)
     return TLS_HANDSHAKE_DONE;
 
   if (ret == GNUTLS_E_AGAIN || ret == GNUTLS_E_INTERRUPTED)
   {
-    /* Handshake needs resuming later, read() or write() would have blocked. */
-
-    if (gnutls_record_get_direction(tls_data->session) == 0)
-      /* gnutls_handshake() wants to read() again. */
+    if (gnutls_record_get_direction(session) == 0)
       return TLS_HANDSHAKE_WANT_READ;
-    else
-      /* gnutls_handshake() wants to write() again. */
-      return TLS_HANDSHAKE_WANT_WRITE;
+
+    return TLS_HANDSHAKE_WANT_WRITE;
   }
-  else
+
+  if (errstr)
   {
-    const char *error = gnutls_strerror(ret);
+    if (ret == GNUTLS_E_WARNING_ALERT_RECEIVED || ret == GNUTLS_E_FATAL_ALERT_RECEIVED)
+    {
+      const gnutls_alert_description_t alert = gnutls_alert_get(session);
+      const char *const reason = gnutls_alert_get_name(alert);
 
-    if (errstr)
-      *errstr = error;
-
-    return TLS_HANDSHAKE_ERROR;
+      *errstr = reason ? reason : gnutls_strerror(ret);
+    }
+    else
+      *errstr = gnutls_strerror(ret);
   }
+
+  return TLS_HANDSHAKE_ERROR;
 }
 
 bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
-  gnutls_x509_crt_t cert;
-  unsigned char digestbuf[TLS_GNUTLS_MAX_HASH_SIZE];
-  size_t digest_size = sizeof(digestbuf);
-  char buf[TLS_GNUTLS_MAX_HASH_SIZE * 2 + 1];
+  io_free(*fingerprint);
+  *fingerprint = NULL;
 
-  const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(tls_data->session, NULL);
-  if (cert_list == NULL)
-    return true;  /* No certificate */
+  gnutls_session_t session = tls_data->session;
+  if (gnutls_certificate_type_get2(session, GNUTLS_CTYPE_PEERS) != GNUTLS_CRT_X509)
+    return false;
 
-  int ret = gnutls_x509_crt_init(&cert);
-  if (ret != GNUTLS_E_SUCCESS)
-    return true;
+  unsigned int cert_list_size = 0;
+  const gnutls_datum_t *cert_list = gnutls_certificate_get_peers(session, &cert_list_size);
+  if (cert_list == NULL || cert_list_size == 0)
+    return false;
 
-  ret = gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
-  if (ret != GNUTLS_E_SUCCESS)
-    goto info_done_dealloc;
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
+  size_t digest_len = sizeof(digest);
+  if (gnutls_fingerprint(GNUTLS_DIG_SHA256, &cert_list[0], digest, &digest_len) != GNUTLS_E_SUCCESS)
+    return false;
 
-  ret = gnutls_x509_crt_get_fingerprint(cert, message_digest_algorithm, digestbuf, &digest_size);
-  if (ret != GNUTLS_E_SUCCESS)
-    goto info_done_dealloc;
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
+  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+    return false;
 
-  binary_to_hex(digestbuf, buf, digest_size);
-  *fingerprint = io_strdup(buf);
-
-  gnutls_x509_crt_deinit(cert);
+  *fingerprint = io_strdup(hex_digest);
   return true;
-
-info_done_dealloc:
-  gnutls_x509_crt_deinit(cert);
-  return false;
 }
 #endif  /* HAVE_TLS_GNUTLS */

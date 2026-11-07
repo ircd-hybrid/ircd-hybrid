@@ -1,40 +1,32 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2012-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2012-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_webirc.c
  * \brief Includes required functions for processing the WEBIRC command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "address.h"
 #include "io_string.h"
-#include "parse.h"
 #include "module.h"
-#include "conf.h"
+
+#include "client.h"
+#include "conf_auth.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
+#include "conf_kill.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "parse.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
-
 
 /*! \brief WEBIRC command handler
  *
@@ -51,48 +43,55 @@
  *      - parv[4] = fake ip
  */
 static void
-mr_webirc(struct Client *source, int parc, char *parv[])
+mr_webirc(struct Client *source, size_t parc, char *parv[])
 {
   const char *const pass = parv[1];
   const char *const host = parv[3];
   const char *const addr = parv[4];
 
-  assert(MyConnect(source));
+  assert(client_is_local(source));
 
-  if (!valid_hostname(host))
+  if (!hostname_is_valid(host))
   {
     client_exit(source, "Invalid WebIRC hostname");
     return;
   }
 
-  const struct MaskItem *conf =
-    find_address_conf(source->host, HasFlag(source, FLAGS_GOTID) ?
-                      source->username : "webirc", &source->addr, pass);
-  if (conf == NULL)
+  const char *const username =
+    client_has_flag(source, FLAGS_GOTID) ? source->username : "webirc";
+  const struct conf_auth *auth = NULL;
+  const enum conf_auth_lookup_result lookup_result =
+    conf_auth_find(source->host, &source->addr, username, pass, &auth);
+
+  if (lookup_result == CONF_AUTH_LOOKUP_NONE)
+    return;
+  assert(auth);
+
+  if ((auth->flags & CONF_AUTH_FLAG_EXEMPT_KLINE) == 0 &&
+      conf_kill_find(&source->addr, username, source->host))
     return;
 
-  if (!IsConfClient(conf))
-    return;  /* It's a CONF_KLINE */
-
-  if (!IsConfWebIRC(conf))
+  if ((auth->flags & CONF_AUTH_FLAG_WEBIRC) == 0)
   {
     client_exit(source, "Not a WebIRC auth block");
     return;
   }
 
-  if (string_is_empty(conf->passwd))
+  if (string_is_empty(auth->password))
   {
     client_exit(source, "WebIRC auth blocks must have a password");
     return;
   }
 
-  if (conf_match_password(pass, conf) == false)
+  if (lookup_result != CONF_AUTH_LOOKUP_MATCH)
   {
+    assert(lookup_result == CONF_AUTH_LOOKUP_PASSWORD_MISMATCH);
+
     client_exit(source, "Invalid WebIRC password");
     return;
   }
 
-  if (address_from_string(addr, &source->addr) == false)
+  if (!address_from_string(addr, &source->addr))
   {
     client_exit(source, "Invalid WebIRC IP address");
     return;
@@ -110,14 +109,10 @@ mr_webirc(struct Client *source, int parc, char *parv[])
   strlcpy(source->realhost, host, sizeof(source->realhost));
 
   /* Check dlines now, k-lines will be checked on registration */
-  conf = find_dline_conf(&source->addr);
-  if (conf)
+  if (conf_deny_find(&source->addr) && conf_exempt_find(&source->addr) == NULL)
   {
-    if (conf->type == CONF_DLINE)
-    {
-      client_exit(source, "D-lined");
-      return;
-    }
+    client_exit(source, "D-lined");
+    return;
   }
 
   user_mode_set_flag(source, UMODE_WEBIRC);
@@ -127,27 +122,31 @@ mr_webirc(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "WEBIRC",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = mr_webirc, .args_min = 5 },
-  .handlers[CLIENT_HANDLER] = { .handler = m_registered },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_registered }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_webirc, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_already_registered },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_reject_already_registered }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_webirc",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

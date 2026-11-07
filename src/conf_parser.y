@@ -1,60 +1,57 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2000-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2000-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file conf_parser.y
  * \brief Parses the ircd configuration file.
  */
 
-
 %define parse.error verbose
 
 %{
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "stdinc.h"
-#include "defaults.h"
+#include "address.h"
 #include "io_string.h"
-#include "ircd.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "module.h"
+
+#include "client.h"
+#include "client_id.h"
+#include "cloak.h"
 #include "command.h"
 #include "conf.h"
+#include "conf_auth.h"
 #include "conf_class.h"
 #include "conf_cluster.h"
+#include "conf_connect.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
 #include "conf_gecos.h"
+#include "conf_kill.h"
+#include "conf_oper.h"
 #include "conf_pseudo.h"
 #include "conf_resv.h"
 #include "conf_service.h"
 #include "conf_shared.h"
-#include "event.h"
-#include "id.h"
-#include "log.h"
-#include "memory.h"
-#include "module.h"
+#include "defaults.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "ircd_defs.h"
+#include "links_cache.h"
+#include "listener.h"
+#include "motd.h"
 #include "nuh.h"
 #include "server.h"
-#include "address.h"
-#include "listener.h"
 #include "user.h"
-#include "motd.h"
-#include "cloak.h"
-#include "flatten_links.h"
 
 int yylex(void);
 
@@ -77,13 +74,12 @@ static struct
     addr,
     bind,
     file,
-    ciph,
     cert,
     rpass,
     spass,
     whois,
     modes,
-    class,
+    klass,
     target,
     prepend,
     command;
@@ -97,7 +93,6 @@ static struct
     port,
     timeout,
     aftype,
-    attributes,
     ping_freq,
     max_perip_local,
     max_perip_global,
@@ -154,18 +149,14 @@ reset_block_state(void)
 %token  CHANNEL
 %token  CIDR_BITLEN_IPV4
 %token  CIDR_BITLEN_IPV6
+%token  CIDR_LEN_IPV4
+%token  CIDR_LEN_IPV6
 %token  CLASS
 %token  CLIENT
-%token  CLOAK_ENABLED
-%token  CLOAK_CIDR_LEN_IPV4
-%token  CLOAK_CIDR_LEN_IPV6
-%token  CLOAK_NUM_BITS
-%token  CLOAK_SECRET
-%token  CLOAK_SUFFIX
+%token  CLOAK
 %token  CLOSE
 %token  CONNECT
 %token  CONNECTFREQ
-%token  CORE
 %token  CYCLE_ON_HOST_CHANGE
 %token  DEFAULT_FLOODCOUNT
 %token  DEFAULT_FLOODTIME
@@ -176,20 +167,17 @@ reset_block_state(void)
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
-%token  DISABLE_AUTH
 %token  DISABLE_DNS
+%token  DISABLE_IDENT
 %token  DISABLE_FAKE_CHANNELS
 %token  DISABLE_REMOTE_COMMANDS
 %token  DLINE_MIN_CIDR
 %token  DLINE_MIN_CIDR6
 %token  EMAIL
-%token  ENABLE_ADMIN
-%token  ENABLE_EXTBANS
-%token  ENABLE_OWNER
+%token  ENABLED
 %token  ENCRYPTED
 %token  EXCEED_LIMIT
 %token  EXEMPT
-%token  FAILED_OPER_NOTICE
 %token  FLATTEN_LINKS
 %token  FLATTEN_LINKS_DELAY
 %token  FLATTEN_LINKS_FILE
@@ -200,7 +188,6 @@ reset_block_state(void)
 %token  HIDE_CHANS
 %token  HIDE_IDLE
 %token  HIDE_IDLE_FROM_OPERS
-%token  HIDE_SERVER_IPS
 %token  HIDE_SERVERS
 %token  HIDE_SERVICES
 %token  HOST
@@ -262,6 +249,7 @@ reset_block_state(void)
 %token  NICK
 %token  NO_OPER_FLOOD
 %token  NO_TILDE
+%token  NUM_BITS
 %token  NUMBER_PER_CIDR
 %token  NUMBER_PER_IP_GLOBAL
 %token  NUMBER_PER_IP_LOCAL
@@ -277,15 +265,15 @@ reset_block_state(void)
 %token  PORT
 %token  RANDOM_IDLE
 %token  REASON
-%token  REDIRPORT
-%token  REDIRSERV
+%token  REGISTRATION_TIMEOUT
 %token  REHASH
 %token  REMOTE
 %token  REMOTEBAN
+%token  REQUIRED
 %token  RESIDENT
 %token  RESV
 %token  RESV_EXEMPT
-%token  RSA_PRIVATE_KEY_FILE
+%token  SECRET
 %token  SECONDS MINUTES HOURS DAYS WEEKS MONTHS YEARS
 %token  SEND_PASSWORD
 %token  SENDQ
@@ -296,12 +284,8 @@ reset_block_state(void)
 %token  SPOOF
 %token  SQUIT
 %token  STATS_E_DISABLED
-%token  STATS_I_OPER_ONLY
-%token  STATS_K_OPER_ONLY
-%token  STATS_M_OPER_ONLY
-%token  STATS_O_OPER_ONLY
-%token  STATS_P_OPER_ONLY
 %token  STATS_U_OPER_ONLY
+%token  SUFFIX
 %token  T_ALL
 %token  T_BIND
 %token  T_COMMAND
@@ -332,18 +316,14 @@ reset_block_state(void)
 %token  T_UNRESV
 %token  T_UNXLINE
 %token  T_WEBIRC
-%token  TBOOL
+%token  <number> TBOOL
 %token  THROTTLE_COUNT
 %token  THROTTLE_TIME
 %token  TIMEOUT
 %token  TLS_CERTIFICATE_FILE
 %token  TLS_CERTIFICATE_FINGERPRINT
-%token  TLS_CIPHER_LIST
-%token  TLS_CIPHER_SUITES
+%token  TLS_PRIVATE_KEY_FILE
 %token  TLS_CONNECTION_REQUIRED
-%token  TLS_DH_PARAM_FILE
-%token  TLS_MESSAGE_DIGEST_ALGORITHM
-%token  TLS_SUPPORTED_GROUPS
 %token  TS_MAX_DELTA
 %token  TS_WARN_DELTA
 %token  TWODOTS
@@ -365,6 +345,9 @@ reset_block_state(void)
 %type  <number> timespec_
 %type  <number> sizespec
 %type  <number> sizespec_
+%type  <number> module_attributes module_attributes_items module_attributes_item
+%type  <string> module_string
+%destructor { io_free($$); } module_string
 
 %%
 conf:
@@ -377,6 +360,7 @@ conf_item:        module_base_path_entry
                 | logging_entry
                 | oper_entry
                 | channel_entry
+                | cloak_entry
                 | class_entry
                 | listen_entry
                 | auth_entry
@@ -421,37 +405,66 @@ sizespec:   NUMBER sizespec_ { $$ = $1 + $2; } |
 /***************************************************************************
  * module_base_path_entry section
  ***************************************************************************/
-module_base_path_entry: MODULE_BASE_PATH '=' QSTRING ';'
+module_base_path_entry: MODULE_BASE_PATH '=' module_string ';'
 {
   if (conf_parser_ctx.pass == 2)
-    module_set_base_path(yylval.string);
+  {
+    struct module_error_info error;
+    if (module_config_set_base_path(conf_parser_ctx.module_config, $3, &error) != MODULE_SUCCESS)
+    {
+      conf_parser_ctx.module_config_valid = false;
+      conf_error_report(error.message);
+    }
+  }
+  io_free($3);
 };
 
 
 /***************************************************************************
  * loadmodule section
  ***************************************************************************/
-loadmodule_entry: LOADMODULE QSTRING module_attributes ';'
+loadmodule_entry: LOADMODULE module_string module_attributes ';'
 {
   if (conf_parser_ctx.pass == 2)
-    module_config_add($2, block_state.attributes.value & MODULE_RESIDENT, block_state.attributes.value & MODULE_CORE);
+  {
+    struct module_error_info error;
+    if (module_config_add(conf_parser_ctx.module_config, $2, (module_flags_t)$3, &error) != MODULE_SUCCESS)
+    {
+      conf_parser_ctx.module_config_valid = false;
+      conf_error_report(error.message);
+    }
+  }
+  io_free($2);
+};
+
+/* Own scanner strings across attribute tokens and input-buffer refills. */
+module_string: QSTRING
+{
+  $$ = io_strdup($1);
 };
 
 module_attributes: /* empty */
 {
-  block_state.attributes.value = 0;
-} | ':' module_attributes_items ;
+  $$ = 0;
+} | ':' module_attributes_items
+{
+  $$ = $2;
+};
 
-module_attributes_items: module_attributes_items ',' module_attributes_item | module_attributes_item;
+module_attributes_items: module_attributes_items ',' module_attributes_item
+{
+  $$ = $1 | $3;
+} | module_attributes_item
+{
+  $$ = $1;
+};
 
 module_attributes_item: RESIDENT
 {
-  if (conf_parser_ctx.pass == 2)
-    block_state.attributes.value |= MODULE_RESIDENT;
-} | CORE
+  $$ = MODULE_FLAG_NO_DEACTIVATE;
+} | REQUIRED
 {
-  if (conf_parser_ctx.pass == 2)
-    block_state.attributes.value |= MODULE_CORE;
+  $$ = MODULE_FLAG_NO_REMOVE;
 };
 
 
@@ -468,16 +481,10 @@ serverinfo_item:        serverinfo_name |
                         serverinfo_network_description |
                         serverinfo_default_max_clients |
                         serverinfo_max_nick_length |
-                        serverinfo_max_topic_length |
                         serverinfo_motd_file |
-                        serverinfo_tls_dh_param_file |
-                        serverinfo_tls_supported_groups |
-                        serverinfo_rsa_private_key_file |
+                        serverinfo_tls_private_key_file |
                         serverinfo_sid |
                         serverinfo_tls_certificate_file |
-                        serverinfo_tls_cipher_list |
-                        serverinfo_tls_cipher_suites |
-                        serverinfo_tls_message_digest_algorithm |
                         error ';' ;
 
 
@@ -490,57 +497,12 @@ serverinfo_tls_certificate_file: TLS_CERTIFICATE_FILE '=' QSTRING ';'
   }
 };
 
-serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
+serverinfo_tls_private_key_file: TLS_PRIVATE_KEY_FILE '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    io_free(ConfigServerInfo.rsa_private_key_file);
-    ConfigServerInfo.rsa_private_key_file = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_dh_param_file: TLS_DH_PARAM_FILE '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_dh_param_file);
-    ConfigServerInfo.tls_dh_param_file = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_cipher_list);
-    ConfigServerInfo.tls_cipher_list = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_cipher_suites: TLS_CIPHER_SUITES '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_cipher_suites);
-    ConfigServerInfo.tls_cipher_suites = io_strdup(yylval.string);
-  }
-};
-
-serverinfo_tls_message_digest_algorithm: TLS_MESSAGE_DIGEST_ALGORITHM '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_message_digest_algorithm);
-    ConfigServerInfo.tls_message_digest_algorithm = io_strdup(yylval.string);
-  }
-}
-
-serverinfo_tls_supported_groups: TLS_SUPPORTED_GROUPS '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass == 2)
-  {
-    io_free(ConfigServerInfo.tls_supported_groups);
-    ConfigServerInfo.tls_supported_groups = io_strdup(yylval.string);
+    io_free(ConfigServerInfo.tls_private_key_file);
+    ConfigServerInfo.tls_private_key_file = io_strdup(yylval.string);
   }
 };
 
@@ -549,7 +511,7 @@ serverinfo_name: NAME '=' QSTRING ';'
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.name == NULL)
   {
-    if (server_valid_name(yylval.string))
+    if (server_is_valid_name(yylval.string))
       ConfigServerInfo.name = io_strdup(yylval.string);
     else
     {
@@ -564,7 +526,7 @@ serverinfo_sid: IRCD_SID '=' QSTRING ';'
   /* This isn't rehashable */
   if (conf_parser_ctx.pass == 2 && ConfigServerInfo.sid == NULL)
   {
-    if (valid_sid(yylval.string))
+    if (client_id_is_valid_sid(yylval.string))
       ConfigServerInfo.sid = io_strdup(yylval.string);
     else
     {
@@ -651,14 +613,6 @@ serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'
   }
   else
     ConfigServerInfo.max_nick_length = $3;
-};
-
-serverinfo_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
-{
-  if ($3 < 1 || $3 > TOPICLEN)
-    ConfigServerInfo.max_topic_length = TOPICLEN;
-  else
-    ConfigServerInfo.max_topic_length = $3;
 };
 
 serverinfo_motd_file: MOTD_FILE '=' QSTRING ';'
@@ -828,7 +782,10 @@ logging_item:           logging_use_logging | logging_file_entry |
 logging_use_logging: USE_LOGGING '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
+  {
     ConfigLog.use_logging = yylval.number;
+    log_set_enabled(ConfigLog.use_logging);
+  }
 };
 
 logging_file_entry:
@@ -917,7 +874,7 @@ oper_entry: OPERATOR
     break;
 
   reset_block_state();
-  block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+  block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 } '{' oper_items '}' ';'
 {
   list_node_t *node;
@@ -951,29 +908,25 @@ oper_entry: OPERATOR
 
     nuh_split(&nuh);
 
-    struct MaskItem *conf = conf_make(CONF_OPER);
-    conf->addr = io_calloc(sizeof(*conf->addr));
-    conf->name = io_strdup(block_state.name.buf);
-    conf->user = io_strdup(block_state.user.buf);
-    conf->host = io_strdup(block_state.host.buf);
+    struct OperItem *const oper = oper_create();
+    oper->name = io_strdup(block_state.name.buf);
+    oper->user = io_strdup(block_state.user.buf);
+    oper->host = io_strdup(block_state.host.buf);
 
     if (block_state.cert.buf[0])
-      conf->certfp = io_strdup(block_state.cert.buf);
-
+      oper->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
     if (block_state.rpass.buf[0])
-      conf->passwd = io_strdup(block_state.rpass.buf);
-
+      oper->password = io_strdup(block_state.rpass.buf);
     if (block_state.whois.buf[0])
-      conf->whois = io_strdup(block_state.whois.buf);
-
+      oper->whois_text = io_strdup(block_state.whois.buf);
     if (block_state.modes.buf[0])
-      conf->modes = io_strdup(block_state.modes.buf);
+      oper->modes = io_strdup(block_state.modes.buf);
 
-    conf->flags = block_state.flags.value;
-    conf->port  = block_state.port.value;
-    conf->htype = address_parse_netmask(conf->host, conf->addr, &conf->bits);
+    oper->flags = block_state.flags.value;
+    oper->oper_privs = block_state.port.value;
+    address_parse_prefix(oper->host, &oper->addr, &oper->bits);
 
-    conf_assign_class(conf, block_state.class.buf);
+    oper_assign_class(oper, block_state.klass.buf);
   }
 };
 
@@ -1020,9 +973,9 @@ oper_encrypted: ENCRYPTED '=' TBOOL ';'
     break;
 
   if (yylval.number)
-    block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
   else
-    block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+    block_state.flags.value &= ~OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 };
 
 oper_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'
@@ -1037,15 +990,15 @@ oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'
     break;
 
   if (yylval.number)
-    block_state.flags.value |= CONF_FLAGS_TLS;
+    block_state.flags.value |= OPER_CONF_FLAG_REQUIRE_TLS;
   else
-    block_state.flags.value &= ~CONF_FLAGS_TLS;
+    block_state.flags.value &= ~OPER_CONF_FLAG_REQUIRE_TLS;
 };
 
 oper_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 oper_umodes: T_UMODES '=' QSTRING ';'
@@ -1190,33 +1143,33 @@ class_entry: CLASS
 
   reset_block_state();
 
-  block_state.ping_freq.value = DEFAULT_PINGFREQUENCY;
-  block_state.con_freq.value  = DEFAULT_CONNECTFREQUENCY;
-  block_state.max_sendq.value = DEFAULT_SENDQ;
-  block_state.max_recvq.value = DEFAULT_RECVQ;
+  block_state.ping_freq.value = CLASS_DEFAULT_PING_FREQ;
+  block_state.con_freq.value  = CLASS_DEFAULT_CONNECT_FREQ;
+  block_state.max_sendq.value = CLASS_DEFAULT_MAX_SENDQ;
+  block_state.max_recvq.value = CLASS_DEFAULT_MAX_RECVQ;
 } '{' class_items '}' ';'
 {
   if (conf_parser_ctx.pass != 1)
     break;
 
-  if (!block_state.class.buf[0])
+  if (!block_state.klass.buf[0])
     break;
 
-  struct ClassItem *class = class_find(block_state.class.buf, false);
-  if (class == NULL)
-    class = class_make();
+  struct ClassItem *klass = class_find(block_state.klass.buf, false);
+  if (klass == NULL)
+    klass = class_create();
 
-  class->active = true;
-  io_free(class->name);
-  class->name = io_strdup(block_state.class.buf);
-  class->ping_freq = block_state.ping_freq.value;
-  class->max_perip_local = block_state.max_perip_local.value;
-  class->max_perip_global = block_state.max_perip_global.value;
-  class->con_freq = block_state.con_freq.value;
-  class->max_total = block_state.max_total.value;
-  class->max_sendq = block_state.max_sendq.value;
-  class->max_recvq = block_state.max_recvq.value;
-  class->max_channels = block_state.max_channels.value;
+  klass->active = true;
+  io_free(klass->name);
+  klass->name = io_strdup(block_state.klass.buf);
+  klass->ping_freq = block_state.ping_freq.value;
+  klass->max_perip_local = block_state.max_perip_local.value;
+  klass->max_perip_global = block_state.max_perip_global.value;
+  klass->con_freq = block_state.con_freq.value;
+  klass->max_total = block_state.max_total.value;
+  klass->max_sendq = block_state.max_sendq.value;
+  klass->max_recvq = block_state.max_recvq.value;
+  klass->max_channels = block_state.max_channels.value;
 
   if (block_state.min_idle.value > block_state.max_idle.value)
   {
@@ -1225,18 +1178,18 @@ class_entry: CLASS
     block_state.flags.value &= ~CLASS_FLAGS_FAKE_IDLE;
   }
 
-  class->flags = block_state.flags.value;
-  class->min_idle = block_state.min_idle.value;
-  class->max_idle = block_state.max_idle.value;
+  klass->flags = block_state.flags.value;
+  klass->min_idle = block_state.min_idle.value;
+  klass->max_idle = block_state.max_idle.value;
 
-  bool diff = (class->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
-               class->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
-  class->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
-  class->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
-  class->number_per_cidr = block_state.number_per_cidr.value;
+  bool diff = (klass->cidr_bitlen_ipv4 != block_state.cidr_bitlen_ipv4.value ||
+               klass->cidr_bitlen_ipv6 != block_state.cidr_bitlen_ipv6.value);
+  klass->cidr_bitlen_ipv4 = block_state.cidr_bitlen_ipv4.value;
+  klass->cidr_bitlen_ipv6 = block_state.cidr_bitlen_ipv6.value;
+  klass->number_per_cidr = block_state.number_per_cidr.value;
 
   if (diff)
-    class_ip_limit_rebuild(class);
+    class_ip_limit_rebuild(klass);
 };
 
 class_items:    class_items class_item | class_item;
@@ -1260,7 +1213,7 @@ class_item:     class_name |
 class_name: NAME '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 1)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 class_ping_time: PING_TIME '=' timespec ';'
@@ -1308,7 +1261,7 @@ class_sendq: SENDQ '=' sizespec ';'
 class_recvq: T_RECVQ '=' sizespec ';'
 {
   if (conf_parser_ctx.pass == 1)
-    if ($3 >= CLIENT_FLOOD_MIN && $3 <= CLIENT_FLOOD_MAX)
+    if ($3 >= CLIENT_FLOOD_MIN)
       block_state.max_recvq.value = $3;
 };
 
@@ -1462,6 +1415,7 @@ auth_entry: IRCD_AUTH
     reset_block_state();
 } '{' auth_items '}' ';'
 {
+  struct conf_auth *auth = NULL;
   list_node_t *node;
 
   if (conf_parser_ctx.pass != 2)
@@ -1469,14 +1423,14 @@ auth_entry: IRCD_AUTH
 
   LIST_FOREACH(node, block_state.mask.list.head)
   {
-    char *s = node->data;
+    char *const mask = node->data;
 
-    if (string_is_empty(s))
+    if (string_is_empty(mask))
       continue;
 
     struct nuh_split nuh =
     {
-      .nuhmask = s,
+      .nuhmask = mask,
       .nickptr = NULL,
       .userptr = block_state.user.buf,
       .hostptr = block_state.host.buf,
@@ -1487,33 +1441,38 @@ auth_entry: IRCD_AUTH
 
     nuh_split(&nuh);
 
-    struct MaskItem *conf = conf_make(CONF_CLIENT);
-    conf->user = io_strdup(block_state.user.buf);
-    conf->host = io_strdup(block_state.host.buf);
+    if (auth)
+    {
+      if (!conf_auth_add_rule(auth, block_state.user.buf, block_state.host.buf))
+        conf_error_report("Unable to add auth rule");
 
-    if (block_state.rpass.buf[0])
-      conf->passwd = io_strdup(block_state.rpass.buf);
-    if (block_state.name.buf[0])
-      conf->name = io_strdup(block_state.name.buf);
+      continue;
+    }
 
-    conf->flags = block_state.flags.value;
-    conf->port = block_state.port.value;
+    const struct conf_auth_spec spec =
+    {
+      .user = block_state.user.buf,
+      .host = block_state.host.buf,
+      .password = block_state.rpass.buf,
+      .spoof = block_state.name.buf,
+      .class_name = block_state.klass.buf,
+      .flags = block_state.flags.value
+    };
 
-    conf_assign_class(conf, block_state.class.buf);
-    add_conf_by_address(CONF_CLIENT, conf);
+    auth = conf_auth_add(&spec);
+    if (auth == NULL)
+      conf_error_report("Unable to add auth block");
   }
 };
 
-auth_items:     auth_items auth_item | auth_item;
-auth_item:      auth_user |
-                auth_passwd |
-                auth_class |
-                auth_flags |
-                auth_spoof |
-                auth_redir_serv |
-                auth_redir_port |
-                auth_encrypted |
-                error ';' ;
+auth_items: auth_items auth_item | auth_item;
+auth_item: auth_user |
+           auth_passwd |
+           auth_class |
+           auth_flags |
+           auth_spoof |
+           auth_encrypted |
+           error ';' ;
 
 auth_user: USER '=' QSTRING ';'
 {
@@ -1530,7 +1489,7 @@ auth_passwd: PASSWORD '=' QSTRING ';'
 auth_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 auth_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -1538,55 +1497,56 @@ auth_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass == 2)
   {
     if (yylval.number)
-      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value |= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
     else
-      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value &= ~CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
   }
 };
 
 auth_flags: IRCD_FLAGS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value &= (CONF_FLAGS_ENCRYPTED | CONF_FLAGS_SPOOF_IP);
+    block_state.flags.value &= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
 } '=' auth_flags_items ';';
 
 auth_flags_items: auth_flags_items ',' auth_flags_item | auth_flags_item;
+
 auth_flags_item: EXCEED_LIMIT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NOLIMIT;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_LIMITS;
 } | KLINE_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTKLINE;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_KLINE;
 } | XLINE_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTXLINE;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_XLINE;
 } | NEED_IDENT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NEED_IDENTD;
+    block_state.flags.value |= CONF_AUTH_FLAG_REQUIRE_IDENT;
 } | CAN_FLOOD
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_CAN_FLOOD;
+    block_state.flags.value |= CONF_AUTH_FLAG_CAN_FLOOD;
 } | NO_TILDE
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NO_TILDE;
+    block_state.flags.value |= CONF_AUTH_FLAG_NO_TILDE;
 } | RESV_EXEMPT
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_EXEMPTRESV;
+    block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_RESV;
 } | T_WEBIRC
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_WEBIRC;
+    block_state.flags.value |= CONF_AUTH_FLAG_WEBIRC;
 } | NEED_PASSWORD
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_NEED_PASSWORD;
+    block_state.flags.value |= CONF_AUTH_FLAG_REJECT_PASSWORD_MISMATCH;
 };
 
 auth_spoof: SPOOF '=' QSTRING ';'
@@ -1594,33 +1554,12 @@ auth_spoof: SPOOF '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (valid_hostname(yylval.string))
-  {
+  if (hostname_is_valid(yylval.string))
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
-    block_state.flags.value |= CONF_FLAGS_SPOOF_IP;
-  }
   else
-    log_write(LOG_TYPE_IRCD, "Spoof either is too long or contains invalid characters. Ignoring it.");
+    log_write(LOG_TYPE_IRCD,
+              "Spoof either is too long or contains invalid characters. Ignoring it.");
 };
-
-auth_redir_serv: REDIRSERV '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
-  block_state.flags.value |= CONF_FLAGS_REDIR;
-};
-
-auth_redir_port: REDIRPORT '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  block_state.flags.value |= CONF_FLAGS_REDIR;
-  block_state.port.value = $3;
-};
-
 
 /***************************************************************************
  * resv {} section
@@ -1675,7 +1614,7 @@ service_name: NAME '=' QSTRING ';'
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (server_valid_name(yylval.string))
+  if (server_is_valid_name(yylval.string))
   {
     struct ServiceItem *service = service_make();
     service->name = io_strdup(yylval.string);
@@ -1879,7 +1818,6 @@ connect_entry: CONNECT
 
   reset_block_state();
   block_state.aftype.value = AF_INET;
-  block_state.port.value = PORTNUM;
   block_state.timeout.value = CONNECTTIMEOUT;
 } '{' connect_items '}' ';'
 {
@@ -1894,47 +1832,36 @@ connect_entry: CONNECT
       !block_state.spass.buf[0])
     break;
 
-  if (server_valid_name(block_state.name.buf) == false)
+  if (!server_is_valid_name(block_state.name.buf))
     break;
 
   if (has_wildcards(block_state.name.buf) ||
       has_wildcards(block_state.host.buf))
     break;
 
-  struct MaskItem *conf = conf_make(CONF_SERVER);
-  conf->addr = io_calloc(sizeof(*conf->addr));
-  conf->port = block_state.port.value;
-  conf->timeout = block_state.timeout.value;
-  conf->flags = block_state.flags.value;
-  conf->aftype = block_state.aftype.value;
-  conf->host = io_strdup(block_state.host.buf);
-  conf->name = io_strdup(block_state.name.buf);
-  conf->passwd = io_strdup(block_state.rpass.buf);
-  conf->spasswd = io_strdup(block_state.spass.buf);
+  struct ConnectItem *connect = connect_create();
+  connect->name = io_strdup(block_state.name.buf);
+  connect->host = io_strdup(block_state.host.buf);
+  connect->accept_password = io_strdup(block_state.rpass.buf);
+  connect->send_password = io_strdup(block_state.spass.buf);
+
+  connect->port = block_state.port.value;
+  connect->timeout = block_state.timeout.value;
+  connect->address_family = block_state.aftype.value;
+  connect->flags = block_state.flags.value;
 
   if (block_state.cert.buf[0])
-    conf->certfp = io_strdup(block_state.cert.buf);
+    connect->tls_cert_fingerprint = io_strdup(block_state.cert.buf);
 
-  if (block_state.ciph.buf[0])
-    conf->cipher_list = io_strdup(block_state.ciph.buf);
-
-  list_move_list(&block_state.leaf.list, &conf->leaf_list);
-  list_move_list(&block_state.hub.list, &conf->hub_list);
+  list_concat(&connect->hub_masks, &block_state.hub.list);
+  list_concat(&connect->leaf_masks, &block_state.leaf.list);
 
   if (block_state.bind.buf[0])
-  {
-    struct io_addr tmp;
-    if (address_from_string(block_state.bind.buf, &tmp) == false)
-      log_write(LOG_TYPE_IRCD, "Invalid netmask for server bind(%s)", block_state.bind.buf);
-    else
-    {
-      conf->bind = io_calloc(sizeof(*conf->bind));
-      address_copy(conf->bind, &tmp);
-    }
-  }
+    if (!address_from_string(block_state.bind.buf, &connect->bind_addr))
+      conf_error_report("Invalid IP address for bind address");
 
-  conf_assign_class(conf, block_state.class.buf);
-  conf_dns_lookup(conf);
+  connect_assign_class(connect, block_state.klass.buf);
+  connect_dns_lookup(connect);
 };
 
 connect_items:  connect_items connect_item | connect_item;
@@ -1947,7 +1874,6 @@ connect_item:   connect_name |
                 connect_tls_certificate_fingerprint |
                 connect_aftype |
                 connect_port |
-                connect_tls_cipher_list |
                 connect_flags |
                 connect_hub_mask |
                 connect_leaf_mask |
@@ -2029,18 +1955,18 @@ connect_aftype: AFTYPE '=' T_IPV4 ';'
 
 connect_flags: IRCD_FLAGS
 {
-  block_state.flags.value &= CONF_FLAGS_ENCRYPTED;
+  block_state.flags.value &= CONNECT_FLAG_ENCRYPTED_PASSWORD;
 } '=' connect_flags_items ';';
 
 connect_flags_items: connect_flags_items ',' connect_flags_item | connect_flags_item;
 connect_flags_item: AUTOCONN
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_ALLOW_AUTO_CONN;
+    block_state.flags.value |= CONNECT_FLAG_ALLOW_AUTO_CONN;
 } | T_TLS
 {
   if (conf_parser_ctx.pass == 2)
-    block_state.flags.value |= CONF_FLAGS_TLS;
+    block_state.flags.value |= CONNECT_FLAG_USE_TLS;
 };
 
 connect_encrypted: ENCRYPTED '=' TBOOL ';'
@@ -2048,9 +1974,9 @@ connect_encrypted: ENCRYPTED '=' TBOOL ';'
   if (conf_parser_ctx.pass == 2)
   {
     if (yylval.number)
-      block_state.flags.value |= CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value |= CONNECT_FLAG_ENCRYPTED_PASSWORD;
     else
-      block_state.flags.value &= ~CONF_FLAGS_ENCRYPTED;
+      block_state.flags.value &= ~CONNECT_FLAG_ENCRYPTED_PASSWORD;
   }
 };
 
@@ -2069,18 +1995,7 @@ connect_leaf_mask: LEAF_MASK '=' QSTRING ';'
 connect_class: CLASS '=' QSTRING ';'
 {
   if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.class.buf, yylval.string, sizeof(block_state.class.buf));
-};
-
-connect_tls_cipher_list: TLS_CIPHER_LIST '=' QSTRING ';'
-{
-#ifdef HAVE_TLS
-  if (conf_parser_ctx.pass == 2)
-    strlcpy(block_state.ciph.buf, yylval.string, sizeof(block_state.ciph.buf));
-#else
-  if (conf_parser_ctx.pass == 2)
-    conf_error_report("Ignoring connect::tls_cipher_list -- no TLS support");
-#endif
+    strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 };
 
 
@@ -2100,15 +2015,16 @@ kill_entry: KILL
       !block_state.host.buf[0])
     break;
 
-  struct MaskItem *conf = conf_make(CONF_KLINE);
-  conf->user = io_strdup(block_state.user.buf);
-  conf->host = io_strdup(block_state.host.buf);
+  const struct conf_kill_spec spec =
+  {
+    .user = block_state.user.buf,
+    .host = block_state.host.buf,
+    .reason = block_state.rpass.buf[0] ? block_state.rpass.buf : CONF_NOREASON,
+    .origin = CONF_KILL_ORIGIN_CONFIG
+  };
 
-  if (block_state.rpass.buf[0])
-    conf->reason = io_strdup(block_state.rpass.buf);
-  else
-    conf->reason = io_strdup(CONF_NOREASON);
-  add_conf_by_address(CONF_KLINE, conf);
+  if (conf_kill_add(&spec) == NULL)
+    conf_error_report("Unable to add K-line");
 };
 
 kill_items:     kill_items kill_item | kill_item;
@@ -2156,17 +2072,15 @@ deny_entry: DENY
   if (!block_state.addr.buf[0])
     break;
 
-  if (address_parse_netmask(block_state.addr.buf, NULL, NULL) != HM_HOST)
+  const struct conf_deny_spec spec =
   {
-    struct MaskItem *conf = conf_make(CONF_DLINE);
-    conf->host = io_strdup(block_state.addr.buf);
+    .prefix = block_state.addr.buf,
+    .reason = block_state.rpass.buf[0] ? block_state.rpass.buf : CONF_NOREASON,
+    .origin = CONF_DENY_ORIGIN_CONFIG
+  };
 
-    if (block_state.rpass.buf[0])
-      conf->reason = io_strdup(block_state.rpass.buf);
-    else
-      conf->reason = io_strdup(CONF_NOREASON);
-    add_conf_by_address(CONF_DLINE, conf);
-  }
+  if (conf_deny_add(&spec) == NULL)
+    conf_error_report("Unable to add D-line");
 };
 
 deny_items:     deny_items deny_item | deny_item;
@@ -2195,17 +2109,13 @@ exempt_item:  exempt_ip | error;
 
 exempt_ip: IP '=' QSTRING ';'
 {
-  if (conf_parser_ctx.pass == 2)
-  {
-    if (*yylval.string && address_parse_netmask(yylval.string, NULL, NULL) != HM_HOST)
-    {
-      struct MaskItem *conf = conf_make(CONF_EXEMPT);
-      conf->host = io_strdup(yylval.string);
+  if (conf_parser_ctx.pass != 2)
+    break;
 
-      add_conf_by_address(CONF_EXEMPT, conf);
-    }
-  }
+  if (conf_exempt_add(yylval.string) == NULL)
+    conf_error_report("Unable to add D-line exemption");
 };
+
 
 /***************************************************************************
  * gecos {} section
@@ -2255,7 +2165,6 @@ general_entry: GENERAL '{' general_items '}' ';';
 general_items:      general_items general_item | general_item;
 general_item:       general_away_count |
                     general_away_time |
-                    general_failed_oper_notice |
                     general_anti_nick_flood |
                     general_max_nick_time |
                     general_max_nick_changes |
@@ -2268,11 +2177,6 @@ general_item:       general_away_count |
                     general_invisible_on_connect |
                     general_warn_no_connect_block |
                     general_specials_in_ident |
-                    general_stats_i_oper_only |
-                    general_stats_k_oper_only |
-                    general_stats_m_oper_only |
-                    general_stats_o_oper_only |
-                    general_stats_P_oper_only |
                     general_stats_u_oper_only |
                     general_pace_wait |
                     general_pace_wait_simple |
@@ -2290,7 +2194,7 @@ general_item:       general_away_count |
                     general_throttle_count |
                     general_throttle_time |
                     general_ping_cookie |
-                    general_disable_auth |
+                    general_disable_ident |
                     general_disable_dns |
                     general_dline_min_cidr |
                     general_dline_min_cidr6 |
@@ -2299,13 +2203,8 @@ general_item:       general_away_count |
                     general_stats_e_disabled |
                     general_max_monitor |
                     general_cycle_on_host_change |
-                    general_cloak_enabled |
-                    general_cloak_cidr_len_ipv4 |
-                    general_cloak_cidr_len_ipv6 |
-                    general_cloak_num_bits |
-                    general_cloak_secret |
-                    general_cloak_suffix |
                     general_ident_timeout |
+                    general_registration_timeout |
                     error;
 
 
@@ -2357,11 +2256,6 @@ general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'
 general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'
 {
   ConfigGeneral.kill_chase_time_limit = $3;
-};
-
-general_failed_oper_notice: FAILED_OPER_NOTICE '=' TBOOL ';'
-{
-  ConfigGeneral.failed_oper_notice = yylval.number;
 };
 
 general_anti_nick_flood: ANTI_NICK_FLOOD '=' TBOOL ';'
@@ -2422,34 +2316,9 @@ general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'
   ConfigGeneral.stats_e_disabled = yylval.number;
 };
 
-general_stats_m_oper_only: STATS_M_OPER_ONLY '=' TBOOL ';'
-{
-  ConfigGeneral.stats_m_oper_only = yylval.number;
-};
-
-general_stats_o_oper_only: STATS_O_OPER_ONLY '=' TBOOL ';'
-{
-  ConfigGeneral.stats_o_oper_only = yylval.number;
-};
-
-general_stats_P_oper_only: STATS_P_OPER_ONLY '=' TBOOL ';'
-{
-  ConfigGeneral.stats_P_oper_only = yylval.number;
-};
-
 general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'
 {
   ConfigGeneral.stats_u_oper_only = yylval.number;
-};
-
-general_stats_k_oper_only: STATS_K_OPER_ONLY '=' TBOOL ';'
-{
-  ConfigGeneral.stats_k_oper_only = yylval.number;
-};
-
-general_stats_i_oper_only: STATS_I_OPER_ONLY '=' TBOOL ';'
-{
-  ConfigGeneral.stats_i_oper_only = yylval.number;
 };
 
 general_pace_wait: PACE_WAIT '=' timespec ';'
@@ -2497,9 +2366,9 @@ general_ping_cookie: PING_COOKIE '=' TBOOL ';'
   ConfigGeneral.ping_cookie = yylval.number;
 };
 
-general_disable_auth: DISABLE_AUTH '=' TBOOL ';'
+general_disable_ident: DISABLE_IDENT '=' TBOOL ';'
 {
-  ConfigGeneral.disable_auth = yylval.number;
+  ConfigGeneral.disable_ident = yylval.number;
 };
 
 general_disable_dns: DISABLE_DNS '=' TBOOL ';'
@@ -2546,67 +2415,6 @@ general_default_floodtime: DEFAULT_FLOODTIME '=' timespec ';'
   ConfigGeneral.default_floodtime = $3;
 };
 
-general_cloak_enabled: CLOAK_ENABLED '=' TBOOL ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  if (yylval.number)
-  {
-    ConfigGeneral.cloak_enabled = true;
-    cloak_set_enabled();
-  }
-  else
-  {
-    ConfigGeneral.cloak_enabled = false;
-    cloak_set_disabled();
-  }
-};
-
-general_cloak_cidr_len_ipv4: CLOAK_CIDR_LEN_IPV4 '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_cidr_len_ipv4 = $3;
-  cloak_set_cidr_len_ipv4($3);
-};
-
-general_cloak_cidr_len_ipv6: CLOAK_CIDR_LEN_IPV6 '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_cidr_len_ipv6 = $3;
-  cloak_set_cidr_len_ipv6($3);
-};
-
-general_cloak_num_bits: CLOAK_NUM_BITS '=' NUMBER ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-  ConfigGeneral.cloak_num_bits = $3;
-  cloak_set_num_bits($3);
-};
-
-general_cloak_secret: CLOAK_SECRET '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  io_free(ConfigGeneral.cloak_secret);
-  ConfigGeneral.cloak_secret = io_strdup(yylval.string);
-  cloak_set_secret(yylval.string);
-};
-
-general_cloak_suffix: CLOAK_SUFFIX '=' QSTRING ';'
-{
-  if (conf_parser_ctx.pass != 2)
-    break;
-
-  io_free(ConfigGeneral.cloak_suffix);
-  ConfigGeneral.cloak_suffix = io_strdup(yylval.string);
-  cloak_set_suffix(yylval.string);
-};
-
 general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
 {
   if ($3 < 1 || $3 > 30)
@@ -2614,6 +2422,91 @@ general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'
 
   ConfigGeneral.ident_timeout = $3;
 };
+
+general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'
+{
+  ConfigGeneral.registration_timeout = $3;
+};
+
+
+/***************************************************************************
+ * cloak {} section
+ ***************************************************************************/
+cloak_entry: CLOAK '{' cloak_items '}' ';';
+
+cloak_items: cloak_items cloak_item | cloak_item;
+cloak_item:  cloak_enabled |
+             cloak_cidr_len_ipv4 |
+             cloak_cidr_len_ipv6 |
+             cloak_num_bits |
+             cloak_secret |
+             cloak_suffix |
+             error;
+
+cloak_enabled: ENABLED '=' TBOOL ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  if ($3)
+  {
+    ConfigCloak.enabled = true;
+    cloak_set_enabled();
+  }
+  else
+  {
+    ConfigCloak.enabled = false;
+    cloak_set_disabled();
+  }
+};
+
+cloak_cidr_len_ipv4: CIDR_LEN_IPV4 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.cidr_len_ipv4 = $3;
+  cloak_set_cidr_len_ipv4($3);
+};
+
+cloak_cidr_len_ipv6: CIDR_LEN_IPV6 '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.cidr_len_ipv6 = $3;
+  cloak_set_cidr_len_ipv6($3);
+};
+
+cloak_num_bits: NUM_BITS '=' NUMBER ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  ConfigCloak.num_bits = $3;
+  cloak_set_num_bits($3);
+};
+
+cloak_secret: SECRET '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigCloak.secret);
+  ConfigCloak.secret = io_strdup($3);
+  cloak_set_secret($3);
+};
+
+cloak_suffix: SUFFIX '=' QSTRING ';'
+{
+  if (conf_parser_ctx.pass != 2)
+    break;
+
+  io_free(ConfigCloak.suffix);
+  ConfigCloak.suffix = io_strdup($3);
+  cloak_set_suffix($3);
+};
+
 
 /***************************************************************************
  * channel {} section
@@ -2633,30 +2526,11 @@ channel_item:       channel_max_bans |
                     channel_max_channels |
                     channel_max_invites |
                     channel_max_kick_length |
+                    channel_max_topic_length |
                     channel_default_join_flood_count |
                     channel_default_join_flood_time |
                     channel_disable_fake_channels |
-                    channel_enable_extbans |
-                    channel_enable_owner |
-                    channel_enable_admin |
                     error;
-
-channel_enable_extbans: ENABLE_EXTBANS '=' TBOOL ';'
-{
-  ConfigChannel.enable_extbans = yylval.number;
-};
-
-channel_enable_owner: ENABLE_OWNER '=' TBOOL ';'
-{
-  if (conf_parser_ctx.boot)
-    ConfigChannel.enable_owner = yylval.number;
-};
-
-channel_enable_admin: ENABLE_ADMIN '=' TBOOL ';'
-{
-  if (conf_parser_ctx.boot)
-    ConfigChannel.enable_admin = yylval.number;
-};
 
 channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'
 {
@@ -2741,6 +2615,14 @@ channel_max_kick_length: MAX_KICK_LENGTH '=' NUMBER ';'
     ConfigChannel.max_kick_length = $3;
 };
 
+channel_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'
+{
+  if ($3 < 1 || $3 > TOPICLEN)
+    ConfigChannel.max_topic_length = TOPICLEN;
+  else
+    ConfigChannel.max_topic_length = $3;
+};
+
 channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'
 {
   ConfigChannel.default_join_flood_count = yylval.number;
@@ -2766,7 +2648,6 @@ serverhide_item:    serverhide_flatten_links |
                     serverhide_hide_services |
                     serverhide_hidden |
                     serverhide_hidden_name |
-                    serverhide_hide_server_ips |
                     error;
 
 serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'
@@ -2779,15 +2660,10 @@ serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'
 {
   if (conf_parser_ctx.pass == 2)
   {
-    if ($3 > 0)
-    {
-      event_flatten_links_write_file.when = $3;
-      event_add(&event_flatten_links_write_file, NULL);
-    }
-    else
-     event_delete(&event_flatten_links_write_file);
+    uintmax_t interval_seconds = $3;
+    ConfigServerHide.flatten_links_delay = interval_seconds;
 
-    ConfigServerHide.flatten_links_delay = $3;
+    links_cache_set_timer(interval_seconds);
   }
 };
 
@@ -2831,10 +2707,4 @@ serverhide_hidden: HIDDEN '=' TBOOL ';'
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = yylval.number;
-};
-
-serverhide_hide_server_ips: HIDE_SERVER_IPS '=' TBOOL ';'
-{
-  if (conf_parser_ctx.pass == 2)
-    ConfigServerHide.hide_server_ips = yylval.number;
 };

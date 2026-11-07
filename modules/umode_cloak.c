@@ -1,26 +1,14 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
+#include "ircd_module.h"
 #include "client.h"
 #include "cloak.h"
 #include "user.h"
@@ -35,16 +23,16 @@ set_callback(struct Client *client, user_mode_source_t source)
   if (user_mode_has_flag(client, UMODE_CLOAK))
     return false;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
   {
-    if (HasFlag(client, FLAGS_SPOOF))
+    if (client_has_flag(client, FLAGS_SPOOF))
       return false;
 
     const char *const cloak = cloak_compute(&client->addr);
     if (cloak == NULL)
       return false;
 
-    bool svshost = HasFlag(client, FLAGS_INTRODUCED) != 0;
+    bool svshost = client_has_flag(client, FLAGS_INTRODUCED);
     user_set_hostmask(client, cloak, svshost);
   }
 
@@ -57,10 +45,10 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (source != USER_MODE_SOURCE_REGULAR)
     return false;
 
-  if (user_mode_has_flag(client, UMODE_CLOAK) == false)
+  if (!user_mode_has_flag(client, UMODE_CLOAK))
     return false;
 
-  if (MyConnect(client))
+  if (client_is_local(client))
     user_set_hostmask(client, client->realhost, true);
   return true;
 }
@@ -73,21 +61,25 @@ static struct UserMode cloak_mode =
   .unset_callback = unset_callback
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&cloak_mode);
+  return ircd_module_register_user_mode(&cloak_mode, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&cloak_mode);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_cloak",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

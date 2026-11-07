@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2014-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2014-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -27,16 +11,20 @@
  * commands and service aliases within the IRC daemon.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "memory.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
+
 #include "io_string.h"
+#include "memory.h"
+
 #include "client.h"
-#include "parse.h"
-#include "hash.h"
-#include "numeric.h"
-#include "send.h"
+#include "client_id.h"
+#include "client_find.h"
 #include "conf_pseudo.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 static list_t pseudo_list;  /**< List to manage pseudo items. */
 
@@ -53,6 +41,45 @@ pseudo_get_list(void)
   return &pseudo_list;
 }
 
+static struct Client *
+_pseudo_find_target_server(const char *name)
+{
+  if (client_id_is_valid_sid(name))
+    return client_find_server_by_sid(name);
+
+  return client_find_server_by_name(name);
+}
+
+static struct Client *
+_pseudo_find_target(const struct PseudoItem *pseudo)
+{
+  struct Client *const target = client_find_user_by_name(pseudo->nick);
+  if (target == NULL)
+    return NULL;
+
+  const struct Client *const server = _pseudo_find_target_server(pseudo->server);
+  if (server == NULL)
+    return NULL;
+
+  if (client_is_me(server))
+    return NULL;
+
+  if (target->uplink != server)
+    return NULL;
+
+  return target;
+}
+
+static const char *
+_pseudo_format_message(const struct PseudoItem *pseudo, const char *message, char *buffer, size_t buffer_size)
+{
+  if (pseudo->prepend == NULL)
+    return message;
+
+  snprintf(buffer, buffer_size, "%s%s", pseudo->prepend, message);
+  return buffer;
+}
+
 /**
  * @brief Handles incoming pseudo messages and forwards them accordingly.
  *
@@ -64,36 +91,29 @@ pseudo_get_list(void)
  * @param parv Array of parameters in the message.
  */
 static void
-pseudo_message_handler(struct Client *source, int parc, char *parv[])
+_pseudo_message_handler(struct Client *source, size_t parc, char *parv[])
 {
-  char buf[IRCD_BUFSIZE];
-  const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];
-  const char *msg = parv[parc - 1];
+  const struct PseudoItem *const pseudo = (const struct PseudoItem *)parv[1];  /* XXX */
 
-  if (parc < 3 || string_is_empty(msg))
+  const char *const message = parv[parc - 1];
+  if (parc < 3 || string_is_empty(message))
   {
     sendto_one_numeric(source, &me, ERR_NOTEXTTOSEND);
     return;
   }
 
-  if (pseudo->prepend)
+  struct Client *const target = _pseudo_find_target(pseudo);
+  if (target == NULL)
   {
-    snprintf(buf, sizeof(buf), "%s%s", pseudo->prepend, msg);
-    msg = buf;
-  }
-
-  struct Client *target = find_person(source, pseudo->nick);
-  if (target)
-  {
-    const struct Client *server = hash_find_server(pseudo->server);
-    if (server == NULL || target->servptr != server || IsMe(server))
-      target = NULL;
-  }
-
-  if (target)
-    sendto_one(target, ":%s PRIVMSG %s :%s", source->id, target->id, msg);
-  else
     sendto_one_numeric(source, &me, ERR_SERVICESDOWN, pseudo->name);
+    return;
+  }
+
+  char message_buffer[IRCD_BUFSIZE];
+  const char *const dispatch_message =
+    _pseudo_format_message(pseudo, message, message_buffer, sizeof(message_buffer));
+
+  sendto_one_command(target, source, "PRIVMSG", ":%s", dispatch_message);
 }
 
 /**
@@ -113,7 +133,7 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   if (command_find(command))
     return;
 
-  struct PseudoItem *pseudo = io_calloc(sizeof(*pseudo));
+  struct PseudoItem *const pseudo = io_calloc(sizeof(*pseudo));
   pseudo->name = io_strdup(name);
   pseudo->nick = io_strdup(nick);
   pseudo->server = io_strdup(server);
@@ -122,14 +142,14 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
   pseudo->command_struct = (struct Command) {
     .name = pseudo->command,
     .extra = pseudo,
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = pseudo_message_handler, .args_max = 2 }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = _pseudo_message_handler, .args_max = 2 },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 
-  list_add(pseudo, &pseudo->node, &pseudo_list);
+  list_add_tail(pseudo, &pseudo->node, &pseudo_list);
 
   command_add(&pseudo->command_struct);
 }
@@ -143,13 +163,15 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
 void
 pseudo_clear(void)
 {
-  while (pseudo_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&pseudo_list)))
   {
-    struct PseudoItem *pseudo = pseudo_list.head->data;
+    struct PseudoItem *const pseudo = node->data;
+    assert(pseudo);
     assert(command_find(pseudo->command_struct.name));
 
     command_del(&pseudo->command_struct);
-    list_remove(&pseudo->node, &pseudo_list);
 
     io_free(pseudo->name);
     io_free(pseudo->nick);

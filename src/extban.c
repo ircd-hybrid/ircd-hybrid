@@ -1,52 +1,38 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015-2016 plexus development team
- *  Copyright (c) 2019-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015-2016 plexus development team
+ * SPDX-FileCopyrightText: 2019-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file extban.c
  * \brief Implements extended channel bans.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <string.h>
+
 #include "io_string.h"
 #include "client.h"
-#include "isupport.h"
 #include "extban.h"
+#include "isupport.h"
+
+static const char extban_prefix_char = '$';
 
 static list_t extban_list;
-static unsigned int matching_mask, acting_mask;
+static uint32_t matching_mask, acting_mask;
 
-static unsigned int
-extban_find_mask(void)
+static uint32_t
+_extban_find_mask(void)
 {
-  list_node_t *node;
-  unsigned int used = 0;
-  unsigned int i;
+  uint32_t used = 0;
 
+  list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    const struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     used |= extban->flag;
   }
 
+  uint32_t i;
   for (i = 1; (i < EXTBAN_MASK) && (used & i); i <<= 1)
     ;
 
@@ -77,7 +63,7 @@ extban_init(void)
 void
 extban_add(struct Extban *extban)
 {
-  unsigned int mask = extban_find_mask();
+  const uint32_t mask = _extban_find_mask();
   if (mask == 0)
     return;
 
@@ -109,7 +95,7 @@ extban_find(unsigned char c)
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    struct Extban *const extban = node->data;
     if (extban->character == c)
       return extban;
   }
@@ -118,13 +104,13 @@ extban_find(unsigned char c)
 }
 
 struct Extban *
-extban_find_flag(unsigned int flag)
+extban_find_flag(uint32_t flag)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    struct Extban *const extban = node->data;
     if (extban->flag == flag)
       return extban;
   }
@@ -133,112 +119,99 @@ extban_find_flag(unsigned int flag)
 }
 
 enum extban_type
-extban_parse(const char *mask, unsigned int *input_extbans, unsigned int *offset)
+extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
 {
-  *input_extbans = 0;
-  *offset = 0;
+  *input_extbans = *offset = 0;
 
-  if (*mask == '$' && IsAlpha(*(mask + 1)) && *(mask + 2) == ':')
-  {
-    struct Extban *extban = extban_find(*(mask + 1));
-    if (extban == NULL)
-      return EXTBAN_INVALID;
+  if (!(mask[0] == extban_prefix_char && io_ascii_is_alpha(mask[1]) && mask[2] == ':'))
+    return EXTBAN_NONE;
 
-    *input_extbans |= extban->flag;
-    *offset += 3;
-    mask += 3;
+  const struct Extban *extban = extban_find(*(mask + 1));
+  if (extban == NULL)
+    return EXTBAN_INVALID;
 
-    /* Matching extbans take a special parameter, so stop reading */
-    if (extban->type == EXTBAN_MATCHING)
-      return EXTBAN_MATCHING;
+  *input_extbans |= extban->flag;
+  *offset += 3;
+  mask += 3;
 
-    if (IsAlpha(*mask) && *(mask + 1) == ':')
-    {
-      extban = extban_find(*mask);
-      if (extban == NULL)
-        return EXTBAN_INVALID;
+  /* Matching extbans take a special parameter, so stop reading */
+  if (extban->type == EXTBAN_MATCHING)
+    return EXTBAN_MATCHING;
 
-      /* Two acting extbans make no sense */
-      if (extban->type == EXTBAN_ACTING)
-        return EXTBAN_INVALID;
-
-      /* Check parameter */
-      if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
-        return EXTBAN_INVALID;
-
-      *input_extbans |= extban->flag;
-      *offset += 2;
-      mask += 2;
-
-      return EXTBAN_MATCHING;
-    }
-
+  if (!(io_ascii_is_alpha(mask[0]) && mask[1] == ':'))
     return EXTBAN_ACTING;
-  }
 
-  return EXTBAN_NONE;
+  extban = extban_find(mask[0]);
+  if (extban == NULL)
+    return EXTBAN_INVALID;
+
+  /* Two acting extbans make no sense */
+  if (extban->type == EXTBAN_ACTING)
+    return EXTBAN_INVALID;
+
+  /* Check parameter */
+  if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
+    return EXTBAN_INVALID;
+
+  *input_extbans |= extban->flag;
+  *offset += 2;
+  return EXTBAN_MATCHING;
 }
 
 size_t
-extban_format(unsigned int e, char *buf)
+extban_format(uint32_t e, char *buf)
 {
-  list_node_t *node;
   size_t written = 0;
 
+  list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
-    if (extban->type != EXTBAN_ACTING)
+    const struct Extban *const extban = node->data;
+    if (extban->type != EXTBAN_ACTING || !(extban->flag & e))
       continue;
 
-    if (extban->flag & e)
+    if (written == 0)
     {
-      if (written == 0)
-      {
-        written++;
-        *buf++ = '$';
-      }
-
-      *buf++ = extban->character;
-      *buf++ = ':';
-      written += 2;
-
-      break;
+      ++written;
+      *buf++ = extban_prefix_char;
     }
+
+    *buf++ = extban->character;
+    *buf++ = ':';
+    written += 2;
+
+    break;
   }
 
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
-    if (extban->type != EXTBAN_MATCHING)
+    const struct Extban *const extban = node->data;
+    if (extban->type != EXTBAN_MATCHING || !(extban->flag & e))
       continue;
 
-    if (extban->flag & e)
+    if (written == 0)
     {
-      if (written == 0)
-      {
-        written++;
-        *buf++ = '$';
-      }
-
-      *buf++ = extban->character;
-      *buf++ = ':';
-      written += 2;
-
-      break;
+      ++written;
+      *buf++ = extban_prefix_char;
     }
+
+    *buf++ = extban->character;
+    *buf++ = ':';
+    written += 2;
+
+    break;
   }
 
   return written;
 }
 
-unsigned int
+uint32_t
 extban_matching_mask(void)
 {
   return matching_mask;
 }
 
-unsigned int
+uint32_t
 extban_acting_mask(void)
 {
   return acting_mask;
@@ -247,26 +220,28 @@ extban_acting_mask(void)
 const char *
 extban_get_isupport(void)
 {
-  char extban_chars[256] = { 0 };
-  static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
-
   if (list_is_empty(&extban_list))
     return NULL;
+
+  char extban_chars[256] = { 0 };
 
   list_node_t *node;
   LIST_FOREACH(node, extban_list.head)
   {
-    struct Extban *extban = node->data;
+    const struct Extban *const extban = node->data;
     extban_chars[extban->character] = extban->character;
   }
 
-  char *p = buf + strlcpy(buf, "$,", sizeof(buf));
+  static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
+  char *p = buf;
+  *p++ = extban_prefix_char;
+  *p++ = ',';
 
-  for (unsigned int i = 0; i < 256; ++i)
+  for (size_t i = 0; i < sizeof(extban_chars); ++i)
     if (extban_chars[i])
       *p++ = extban_chars[i];
+
   *p = '\0';
 
   return buf;
 }
-

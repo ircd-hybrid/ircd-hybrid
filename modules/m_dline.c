@@ -1,201 +1,304 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_dline.c
  * \brief Includes required functions for processing the DLINE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "address.h"
+#include "io_parse.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "client.h"
-#include "io_string.h"
-#include "conf.h"
-#include "conf_cluster.h"
-#include "conf_shared.h"
-#include "ircd.h"
-#include "address.h"
-#include "numeric.h"
 #include "log.h"
 #include "misc.h"
+#include "module.h"
+
+#include "aline.h"
+#include "client.h"
+#include "client_format.h"
+#include "conf.h"
+#include "conf_cluster.h"
+#include "conf_deny.h"
+#include "conf_oper.h"
+#include "conf_shared.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
 
+static uintmax_t
+_dline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
+{
+  assert(duration_seconds > 0);
+
+  if (duration_seconds > UINTMAX_MAX - created_at)
+    return UINTMAX_MAX;
+
+  return created_at + duration_seconds;
+}
+
+static bool
+_dline_validate_prefix(struct Client *source, const char *prefix)
+{
+  assert(source);
+  assert(!string_is_empty(prefix));
+
+  struct io_addr network;
+  unsigned int prefix_length;
+
+  if (!address_parse_prefix(prefix, &network, &prefix_length))
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Invalid D-Line");
+
+    return false;
+  }
+
+  const unsigned int minimum_prefix_length =
+    address_is_ipv4(&network) ? ConfigGeneral.dline_min_cidr :
+                                ConfigGeneral.dline_min_cidr6;
+
+  if (minimum_prefix_length == 0 || client_is_service(source) ||
+      prefix_length >= minimum_prefix_length)
+    return true;
+
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.",
+                      minimum_prefix_length);
+
+  return false;
+}
 
 static void
-dline_check(const struct AddressRec *arec)
+_dline_enforce_clients(const struct conf_deny *deny)
 {
-  list_t *tab[] = { &local_client_list, &unknown_list, NULL };
+  assert(deny);
 
-  for (list_t **list = tab; *list; ++list)
+  list_t *const lists[] = { &local_client_list, &unknown_list };
+
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(lists); ++i)
   {
     list_node_t *node, *node_next;
-
-    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, lists[i]->head)
     {
-      struct Client *client = node->data;
-
-      if (IsDead(client))
+      struct Client *const client = node->data;
+      if (client_is_dead(client) || !conf_deny_matches(deny, &client->addr))
         continue;
 
-      switch (arec->masktype)
-      {
-        case HM_IPV6:
-        case HM_IPV4:
-          if (address_match(&client->addr, &arec->Mask.ipa.addr, false, false, arec->Mask.ipa.bits))
-            conf_try_ban(client, CLIENT_BAN_DLINE, arec->conf->reason);
-          break;
-        default:
-          assert(0);
-      }
+      conf_ban_apply(client, CONF_BAN_TYPE_DLINE, deny->reason);
     }
   }
 }
 
-/* dline_add()
- *
- * inputs	-
- * output	- NONE
- * side effects	- dline as given is placed
- */
 static void
-dline_handle(struct Client *source, const struct aline_ctx *aline)
+_dline_notice_added(struct Client *source, const char *prefix,
+                    const char *input_prefix, uintmax_t duration_seconds)
 {
-  char buf[IRCD_BUFSIZE];
-  struct io_addr addr;
-  int bits = 0;
-  unsigned int min_cidr = 0;
+  assert(source);
+  assert(!string_is_empty(prefix));
+  assert(!string_is_empty(input_prefix));
 
-  switch (address_parse_netmask(aline->host, &addr, &bits))
-  {
-    case HM_IPV4:
-      min_cidr = ConfigGeneral.dline_min_cidr;
-      break;
-    case HM_IPV6:
-      min_cidr = ConfigGeneral.dline_min_cidr6;
-      break;
-    default:  /* HM_HOST */
-      if (IsClient(source))
-        sendto_one_notice(source, &me, ":Invalid D-Line");
-      return;
-  }
-
-  if (min_cidr > 0 && !HasFlag(source, FLAGS_SERVICE) && (unsigned int)bits < min_cidr)
-  {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":For safety, bitmasks less than %u require conf access.", min_cidr);
+  if (!client_is_user(source))
     return;
-  }
 
-  struct MaskItem *conf;
-  if ((conf = find_conf_by_address(NULL, &addr, CONF_DLINE, NULL, NULL, 1)))
+  const bool normalized = strcmp(input_prefix, prefix) != 0;
+
+  if (duration_seconds)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":[%s] already D-lined by [%s] - %s",
-                        aline->host, conf->host, conf->reason);
-    return;
-  }
+    const uintmax_t duration_minutes = duration_seconds / 60;
 
-  if (aline->duration)
-    snprintf(buf, sizeof(buf), "Temporary D-line %ju min. - %.*s (%s)",
-             aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
-  else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
-
-  conf = conf_make(CONF_DLINE);
-  conf->host = io_strdup(aline->host);
-  conf->reason = io_strdup(buf);
-  conf->setat = io_time_get(IO_TIME_REALTIME_SEC);
-  SetConfDatabase(conf);
-
-  if (aline->duration)
-  {
-    conf->until = conf->setat + aline->duration;
-
-    if (IsClient(source))
+    if (normalized)
+      sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s] (normalized from %s)",
+                        duration_minutes, prefix, input_prefix);
+    else
       sendto_one_notice(source, &me, ":Added temporary %ju min. D-Line [%s]",
-                        aline->duration / 60, conf->host);
+                        duration_minutes, prefix);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. D-Line for [%s] [%s]",
-                   get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
-    log_write(LOG_TYPE_DLINE, "%s added temporary %ju min. D-Line for [%s] [%s]",
-              get_oper_name(source), aline->duration / 60, conf->host, conf->reason);
+    return;
   }
+
+  if (normalized)
+    sendto_one_notice(source, &me,
+                      ":Added D-Line [%s] (normalized from %s)",
+                      prefix, input_prefix);
   else
-  {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":Added D-Line [%s]", conf->host);
-
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added D-Line for [%s] [%s]",
-                   get_oper_name(source), conf->host, conf->reason);
-    log_write(LOG_TYPE_DLINE, "%s added D-Line for [%s] [%s]",
-              get_oper_name(source), conf->host, conf->reason);
-  }
-
-  dline_check(add_conf_by_address(CONF_DLINE, conf));
+    sendto_one_notice(source, &me, ":Added D-Line [%s]", prefix);
 }
 
-/* mo_dline()
- *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - D line is added
- *
- */
 static void
-mo_dline(struct Client *source, int parc, char *parv[])
+_dline_notice_existing(struct Client *source, const struct aline_ctx *aline,
+                       const struct conf_deny *existing)
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = false };
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->mask));
+  assert(existing);
 
-  if (!HasOFlag(source, OPER_FLAG_DLINE))
+  if (!client_is_user(source))
+    return;
+
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(existing, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    log_write(LOG_TYPE_IRCD, "Unable to format existing D-line prefix for [%s]",
+              aline->mask);
+    sendto_one_notice(source, &me, ":[%s] is already covered by an existing D-Line",
+                      aline->mask);
+    return;
+  }
+
+  sendto_one_notice(source, &me, ":[%s] already D-Lined by [%s] - %s",
+                    aline->mask, prefix, existing->reason);
+}
+
+static void
+_dline_report_added(struct Client *source, const struct conf_deny *deny,
+                    const char *prefix, uintmax_t duration_seconds)
+{
+  assert(source);
+  assert(deny);
+  assert(!string_is_empty(prefix));
+
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  if (duration_seconds)
+  {
+    const uintmax_t duration_minutes = duration_seconds / 60;
+
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary D-line added by %s for [%s] (%ju min) [%s]",
+                   source_name, prefix, duration_minutes, deny->reason);
+    log_write(LOG_TYPE_DLINE,
+              "Temporary D-line added by %s for [%s] (%ju min) [%s]",
+              source_name, prefix, duration_minutes, deny->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "D-line added by %s for [%s] [%s]",
+                 source_name, prefix, deny->reason);
+  log_write(LOG_TYPE_DLINE, "D-line added by %s for [%s] [%s]",
+            source_name, prefix, deny->reason);
+}
+
+static void
+_dline_add(struct Client *source, const struct aline_ctx *aline)
+{
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->mask));
+  assert(aline->reason);
+
+  if (!_dline_validate_prefix(source, aline->mask))
+    return;
+
+  const struct conf_deny *const existing = conf_deny_find_covering(aline->mask);
+  if (existing)
+  {
+    _dline_notice_existing(source, aline, existing);
+    return;
+  }
+
+  const uintmax_t created_at = io_time_get(IO_TIME_REALTIME_SEC);
+  const uintmax_t expires_at =
+    aline->duration ? _dline_expiration_time(created_at, aline->duration) : 0;
+  const char *const created_date = date_iso8601(0);
+
+  char reason[IRCD_BUFSIZE];
+  if (aline->duration)
+  {
+    const uintmax_t duration_minutes = aline->duration / 60;
+    snprintf(reason, sizeof(reason), "Temporary D-line %ju min. - %.*s (%s)",
+             duration_minutes, REASONLEN, aline->reason, created_date);
+  }
+  else
+    snprintf(reason, sizeof(reason), "%.*s (%s)",
+             REASONLEN, aline->reason, created_date);
+
+  const struct conf_deny_spec spec =
+  {
+    .prefix = aline->mask,
+    .reason = reason,
+    .created_at = created_at,
+    .expires_at = expires_at,
+    .origin = CONF_DENY_ORIGIN_DATABASE
+  };
+
+  struct conf_deny *const deny = conf_deny_add(&spec);
+  if (deny == NULL)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
+                        aline->mask);
+
+    log_write(LOG_TYPE_IRCD, "Unable to add D-line for [%s]", aline->mask);
+    return;
+  }
+
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add D-Line [%s]",
+                        aline->mask);
+
+    log_write(LOG_TYPE_IRCD, "Unable to format newly added D-line prefix for [%s]",
+              aline->mask);
+    conf_deny_delete(deny);
+    return;
+  }
+
+  _dline_notice_added(source, prefix, aline->mask, aline->duration);
+  _dline_report_added(source, deny, prefix, aline->duration);
+  _dline_enforce_clients(deny);
+}
+
+static void
+mo_dline(struct Client *source, size_t parc, char *parv[])
+{
+  if (!client_has_oper_flag(source, OPER_FLAG_DLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "dline");
     return;
   }
 
-  if (aline_parse("DLINE", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
+  if (!aline_parse("DLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
   {
     sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
-                       aline.server, aline.duration, aline.host, aline.reason);
+                       aline.server, aline.duration, aline.mask, aline.reason);
 
-    /* Allow ON to apply local dline as well if it matches */
+    /* Apply the D-line locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }
   else
     cluster_distribute(source, "DLINE", CAPAB_DLN, CLUSTER_DLINE, "%ju %s :%s",
-                       aline.duration, aline.host, aline.reason);
+                       aline.duration, aline.mask, aline.reason);
 
-  dline_handle(source, &aline);
+  _dline_add(source, &aline);
 }
 
 /*! \brief DLINE command handler
@@ -213,55 +316,67 @@ mo_dline(struct Client *source, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_dline(struct Client *source, int parc, char *parv[])
+ms_dline(struct Client *source, size_t parc, char *parv[])
 {
+  uintmax_t duration_seconds;
+  if (io_parse_uintmax(parv[2], &duration_seconds) != IO_PARSE_OK)
+    return;
+
   struct aline_ctx aline =
   {
     .add = true,
-    .simple_mask = false,
-    .host = parv[3],
+    .simple_mask = true,
+    .mask = parv[3],
     .reason = parv[4],
     .server = parv[1],
-    .duration = strtoumax(parv[2], NULL, 10)
+    .duration = duration_seconds
   };
 
   sendto_match_servs(source, aline.server, CAPAB_DLN, "DLINE %s %ju %s :%s",
-                     aline.server, aline.duration, aline.host, aline.reason);
+                     aline.server, aline.duration, aline.mask, aline.reason);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_DLINE, source->servptr->name, source->username, source->host))
-    dline_handle(source, &aline);
+  if (client_is_service(source) ||
+      shared_find(SHARED_DLINE, source->uplink->name, source->username, source->host))
+    _dline_add(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "DLINE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_dline, .args_min = 5 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_dline, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_dline, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_dline, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   capab_add("DLN", CAPAB_DLN, true);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   capab_del("DLN");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_dline",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

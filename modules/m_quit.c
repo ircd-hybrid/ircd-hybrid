@@ -1,38 +1,20 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_quit.c
  * \brief Includes required functions for processing the QUIT command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
-#include "ircd.h"
 #include "io_string.h"
-#include "parse.h"
-#include "user_mode.h"
+#include "io_time.h"
 #include "module.h"
-#include "conf.h"
 
+#include "ircd_module.h"
+#include "client.h"
+#include "conf.h"
+#include "parse.h"
 
 /*! \brief QUIT command handler
  *
@@ -46,14 +28,14 @@
  *      - parv[1] = quit message
  */
 static void
-m_quit(struct Client *source, int parc, char *parv[])
+m_quit(struct Client *source, size_t parc, char *parv[])
 {
   const char *reason = "";
 
-  if (!string_is_empty(parv[1]) && (user_mode_has_flag(source, UMODE_OPER) ||
-      (source->connection->created_monotonic + ConfigGeneral.anti_spam_exit_message_time)
-      < io_time_get(IO_TIME_MONOTONIC_SEC)))
-    reason = parv[1];
+  if (!string_is_empty(parv[1]))
+    if (client_is_oper(source) ||
+        (client_get_session_duration(source) > ConfigGeneral.anti_spam_exit_message_time))
+      reason = parv[1];
 
   client_exit_fmt(source, "Quit: %.*s", KICKLEN, reason);
 }
@@ -70,37 +52,41 @@ m_quit(struct Client *source, int parc, char *parv[])
  *      - parv[1] = quit message
  */
 static void
-ms_quit(struct Client *source, int parc, char *parv[])
+ms_quit(struct Client *source, size_t parc, char *parv[])
 {
-  const char *reason = string_default(parv[1], "");
+  const char *const reason = string_or_default(parv[1], "");
   client_exit_fmt(source, "%.*s", KICKLEN, reason);
 }
 
 static struct Command command_table =
 {
   .name = "QUIT",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_quit },
-  .handlers[CLIENT_HANDLER] = { .handler = m_quit },
-  .handlers[SERVER_HANDLER] = { .handler = ms_quit },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_quit }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = m_quit },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_quit },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_quit },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_quit }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_quit",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

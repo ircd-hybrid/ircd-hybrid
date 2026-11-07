@@ -1,39 +1,28 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2001-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2001-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file hostmask.h
+/*! \file address.h
  * \brief A header for the hostmask code.
  */
 
 #ifndef INCLUDED_address_h
 #define INCLUDED_address_h
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-enum hostmask_type
+enum
 {
-  HM_HOST,
-  HM_IPV4,
-  HM_IPV6
+  ADDRESS_STRING_BUFSIZE = INET6_ADDRSTRLEN,
+  ADDRESS_PREFIX_BUFSIZE = INET6_ADDRSTRLEN + sizeof("/128") - 1,
+  ADDRESS_REVERSE_NAME_BUFSIZE = 74
 };
-
-enum { ADDRESS_HASHSIZE = 0x1000 }; /* XXX */
 
 /**
  * @struct io_addr
@@ -47,19 +36,19 @@ struct io_addr
   struct sockaddr_storage ss;  /**< Underlying sockaddr_storage structure. */
 };
 
-extern void address_strip_ipv4(struct io_addr *);
-extern void address_mask(struct io_addr *, int);
+extern void address_unmap_ipv4(struct io_addr *);
+extern bool address_equal(const struct io_addr *, const struct io_addr *);
+extern bool address_equal_with_port(const struct io_addr *, const struct io_addr *);
 extern bool address_from_bytes(struct io_addr *, int, const void *, size_t);
 extern bool address_from_string(const char *, struct io_addr *);
+extern bool address_get_bytes(const struct io_addr *, const unsigned char **, size_t *);
+extern bool address_mask(struct io_addr *, unsigned int);
+extern bool address_match_prefix(const struct io_addr *, const struct io_addr *, unsigned int);
+extern bool address_parse_prefix(const char *, struct io_addr *, unsigned int *);
+extern bool address_prefix_to_string(const struct io_addr *, unsigned int, char *, size_t);
+extern bool address_to_bytes(const struct io_addr *, void *, size_t);
+extern bool address_to_reverse_name(const struct io_addr *, char *, size_t);
 extern bool address_to_string(const struct io_addr *, char *, size_t);
-extern bool address_match(const struct io_addr *, const struct io_addr *, bool, bool, int);
-extern bool address_match_ipv6(const struct io_addr *, const struct io_addr *, int);
-extern bool address_match_ipv4(const struct io_addr *, const struct io_addr *, int);
-extern int address_parse_netmask(const char *, struct io_addr *, int *);
-extern uint32_t hash_ipv4(const struct io_addr *, int);
-extern uint32_t hash_ipv6(const struct io_addr *, int);
-extern uint32_t hash_text(const char *);
-extern uint32_t get_mask_hash(const char *);
 
 static inline bool
 address_is_ipv4(const struct io_addr *addr)
@@ -76,10 +65,10 @@ address_is_ipv6(const struct io_addr *addr)
 static inline bool
 address_is_ipv4_mapped(const struct io_addr *addr)
 {
-  if (address_is_ipv6(addr) == false)
+  if (!address_is_ipv6(addr))
     return false;
 
-  const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+  const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
   return IN6_IS_ADDR_V4MAPPED(&v6->sin6_addr);
 }
 
@@ -88,16 +77,23 @@ address_is_unspecified(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     return v4->sin_addr.s_addr == INADDR_ANY;
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
     return IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr);
   }
 
   return false;
+}
+
+static inline bool
+address_is_specified(const struct io_addr *addr)
+{
+  return (address_is_ipv4(addr) || address_is_ipv6(addr)) && !address_is_unspecified(addr);
 }
 
 static inline int
@@ -111,12 +107,13 @@ address_get_port(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
   {
-    const struct sockaddr_in *v4 = (const struct sockaddr_in *)&addr->ss;
+    const struct sockaddr_in *const v4 = (const struct sockaddr_in *)&addr->ss;
     return ntohs(v4->sin_port);
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
     return ntohs(v6->sin6_port);
   }
 
@@ -128,13 +125,14 @@ address_set_port(struct io_addr *addr, uint16_t port)
 {
   if (address_is_ipv4(addr))
   {
-    struct sockaddr_in *v4 = (struct sockaddr_in *)&addr->ss;
+    struct sockaddr_in *const v4 = (struct sockaddr_in *)&addr->ss;
     v4->sin_port = htons(port);
     return true;
   }
-  else if (address_is_ipv6(addr))
+
+  if (address_is_ipv6(addr))
   {
-    struct sockaddr_in6 *v6 = (struct sockaddr_in6 *)&addr->ss;
+    struct sockaddr_in6 *const v6 = (struct sockaddr_in6 *)&addr->ss;
     v6->sin6_port = htons(port);
     return true;
   }
@@ -142,13 +140,32 @@ address_set_port(struct io_addr *addr, uint16_t port)
   return false;
 }
 
+static inline const struct sockaddr *
+address_get_sockaddr(const struct io_addr *addr)
+{
+  assert(addr);
+  return (const struct sockaddr *)&addr->ss;
+}
+
 static inline socklen_t
-address_length(const struct io_addr *addr)
+address_get_sockaddr_length(const struct io_addr *addr)
 {
   if (address_is_ipv4(addr))
     return sizeof(struct sockaddr_in);
   if (address_is_ipv6(addr))
     return sizeof(struct sockaddr_in6);
+
+  return 0;
+}
+
+static inline unsigned int
+address_get_bit_length(const struct io_addr *addr)
+{
+  if (address_is_ipv4(addr))
+    return 32;
+
+  if (address_is_ipv6(addr))
+    return 128;
 
   return 0;
 }
@@ -163,6 +180,9 @@ address_clear(struct io_addr *addr)
 static inline void
 address_copy(struct io_addr *dst, const struct io_addr *src)
 {
-  memcpy(dst, src, sizeof(*dst));
+  assert(dst);
+  assert(src);
+
+  *dst = *src;
 }
 #endif  /* INCLUDED_address_h */

@@ -1,88 +1,98 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_undline.c
  * \brief Includes required functions for processing the UNDLINE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "conf.h"
+#include "log.h"
+#include "module.h"
+
+#include "aline.h"
+#include "client.h"
+#include "client_format.h"
 #include "conf_cluster.h"
+#include "conf_deny.h"
+#include "conf_oper.h"
 #include "conf_shared.h"
 #include "ircd.h"
-#include "address.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "log.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
 
-
-/* static int remove_tdline_match(const char *host, const char *user)
- * Input: An ip to undline.
- * Output: returns YES on success, NO if no tdline removed.
- * Side effects: Any matching tdlines are removed.
- */
 static void
-dline_remove(struct Client *source, const struct aline_ctx *aline)
+_undline_report_removed(struct Client *source, const struct conf_deny *deny, const char *prefix)
 {
-  struct io_addr iphost, *piphost;
-  struct MaskItem *conf;
+  assert(source);
+  assert(deny);
+  assert(!string_is_empty(prefix));
 
-  if (address_parse_netmask(aline->host, &iphost, NULL) != HM_HOST)
-    piphost = &iphost;
-  else
-    piphost = NULL;
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  if ((conf = find_conf_by_address(NULL, piphost, CONF_DLINE, NULL, NULL, 0)) == NULL)
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "D-line removed by %s for [%s]",
+                 source_name, prefix);
+  log_write(LOG_TYPE_DLINE, "D-line removed by %s for [%s]",
+            source_name, prefix);
+}
+
+static void
+_undline_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  assert(source);
+  assert(aline);
+  assert(!string_is_empty(aline->mask));
+
+  struct conf_deny *const deny = conf_deny_find_exact(aline->mask);
+  if (deny == NULL)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":No D-Line for [%s] found", aline->host);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":No D-line for [%s] found",
+                        aline->mask);
     return;
   }
 
-  if (!IsConfDatabase(conf))
+  char prefix[IRCD_BUFSIZE];
+  const bool formatted = conf_deny_format_prefix(deny, prefix, sizeof(prefix));
+  assert(formatted);
+
+  if (!formatted)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":The D-Line for [%s] is in the configuration file and must be removed by hand",
-                        conf->host);
+    log_write(LOG_TYPE_IRCD, "Unable to format D-line prefix for [%s]",
+              aline->mask);
     return;
   }
 
-  if (IsClient(source))
-    sendto_one_notice(source, &me, ":D-Line for [%s] is removed",
-                      conf->host);
+  switch (deny->origin)
+  {
+    case CONF_DENY_ORIGIN_CONFIG:
+      if (client_is_user(source))
+        sendto_one_notice(source, &me,
+                          ":D-line for [%s] is in the configuration file and must be removed by hand",
+                          prefix);
+      return;
+    case CONF_DENY_ORIGIN_DATABASE:
+      break;
+    default:
+      assert(false);
+      return;
+  }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the D-Line for: [%s]",
-                 get_oper_name(source), conf->host);
-  log_write(LOG_TYPE_DLINE, "%s removed D-Line for [%s]",
-            get_oper_name(source), conf->host);
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":Removed D-line [%s]", prefix);
 
-  delete_one_address_conf(aline->host, conf);
+  _undline_report_removed(source, deny, prefix);
+  conf_deny_delete(deny);
 }
 
 /*! \brief UNDLINE command handler
@@ -99,33 +109,32 @@ dline_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_undline(struct Client *source, int parc, char *parv[])
+mo_undline(struct Client *source, size_t parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = false };
-
-  if (!HasOFlag(source, OPER_FLAG_UNDLINE))
+  if (!client_has_oper_flag(source, OPER_FLAG_UNDLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "undline");
     return;
   }
 
-  if (aline_parse("UNDLINE", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
+  if (!aline_parse("UNDLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
   {
     sendto_match_servs(source, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
-                       aline.server, aline.host);
+                       aline.server, aline.mask);
 
-    /* Allow ON to apply local undline as well if it matches */
+    /* Apply the UNDLINE locally as well when the ON mask matches this server. */
     if (match(aline.server, me.name))
       return;
   }
   else
     cluster_distribute(source, "UNDLINE", CAPAB_UNDLN, CLUSTER_UNDLINE, "%s",
-                       aline.host);
+                       aline.mask);
 
-  dline_remove(source, &aline);
+  _undline_remove(source, &aline);
 }
 
 /*! \brief UNDLINE command handler
@@ -141,53 +150,61 @@ mo_undline(struct Client *source, int parc, char *parv[])
  *      - parv[2] = IP address
  */
 static void
-ms_undline(struct Client *source, int parc, char *parv[])
+ms_undline(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {
     .add = false,
-    .simple_mask = false,
-    .host = parv[2],
+    .simple_mask = true,
+    .mask = parv[2],
     .server = parv[1]
   };
 
   sendto_match_servs(source, aline.server, CAPAB_UNDLN, "UNDLINE %s %s",
-                     aline.server, aline.host);
+                     aline.server, aline.mask);
 
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNDLINE, source->servptr->name, source->username, source->host))
-    dline_remove(source, &aline);
+  if (client_is_service(source) ||
+      shared_find(SHARED_UNDLINE, source->uplink->name, source->username, source->host))
+    _undline_remove(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "UNDLINE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_undline, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_undline, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_undline, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_undline, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   capab_add("UNDLN", CAPAB_UNDLN, true);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   capab_del("UNDLN");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_undline",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

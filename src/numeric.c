@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -26,7 +10,9 @@
  * This file contains the implementation of IRC numeric replies and their corresponding strings.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+
 #include "numeric.h"
 
 /**
@@ -39,11 +25,10 @@
 static const char *const replies[] =
 {
   /* 001 */  [RPL_WELCOME] = ":Welcome to the %s Internet Relay Chat Network %s!%s@%s",
-  /* 002 */  [RPL_YOURHOST] = ":Your host is %s[%s/%hu], running version %s",
+  /* 002 */  [RPL_YOURHOST] = ":Your host is %s, running version %s",
   /* 003 */  [RPL_CREATED] = ":This server was created %s",
   /* 004 */  [RPL_MYINFO] = "%s %s %s %s %s",
   /* 005 */  [RPL_ISUPPORT] = "%s :are supported by this server",
-  /* 010 */  [RPL_REDIR] = "%s %u :Please use this Server/Port instead",
   /* 015 */  [RPL_MAP] = ":%s%s",
   /* 016 */  [RPL_MAPMORE] = ":%s%s --> *more*",
   /* 017 */  [RPL_MAPEND] = ":End of /MAP",
@@ -56,9 +41,9 @@ static const char *const replies[] =
   /* 206 */  [RPL_TRACESERVER] = "Serv %s %uS %uC %s %s!%s@%s %ju",
   /* 208 */  [RPL_TRACENEWTYPE] = "<newtype> 0 %s",
   /* 209 */  [RPL_TRACECLASS] = "Class %s %u",
-  /* 211 */  [RPL_STATSLINKINFO] = "%s %u %u %zu %u %zu :%ju %ju %s",
+  /* 211 */  [RPL_STATSLINKINFO] = "%s %zu %ju %ju %ju %ju :%ju %ju %s",
   /* 212 */  [RPL_STATSCOMMANDS] = "%s %u %zu %u %u",
-  /* 213 */  [RPL_STATSCLINE] = "%c %s %s %s %u %s",
+  /* 213 */  [RPL_STATSCLINE] = "%c %s %s %s %u %s %s",
   /* 215 */  [RPL_STATSILINE] = "%c %s * %s@%s %u %s",
   /* 216 */  [RPL_STATSKLINE] = "%c %s * %s :%s",
   /* 217 */  [RPL_STATSQLINE] = "%c %s :%s",
@@ -77,7 +62,7 @@ static const char *const replies[] =
   /* 246 */  [RPL_STATSSERVICE] = "S %s * %s %u %u",
   /* 247 */  [RPL_STATSXLINE] = "%c %s :%s",
   /* 248 */  [RPL_STATSULINE] = "U %s %s@%s %s",
-  /* 250 */  [RPL_STATSCONN] = ":Highest connection count: %u (%u clients) (%ju connections received)",
+  /* 250 */  [RPL_STATSCONN] = ":Highest connection count: %u (%u clients) (%" PRIu64 " connections received)",
   /* 251 */  [RPL_LUSERCLIENT] = ":There are %u users and %u invisible on %u servers",
   /* 252 */  [RPL_LUSEROP] = "%u :IRC Operators online",
   /* 253 */  [RPL_LUSERUNKNOWN] = "%u :unknown connection(s)",
@@ -211,7 +196,7 @@ static const char *const replies[] =
   /* 524 */  [ERR_HELPNOTFOUND] = "%s :Help not found",
   /* 531 */  [ERR_CANNOTSENDTOUSER] = "%s :%s",
   /* 671 */  [RPL_WHOISSECURE] = "%s :%s",
-  /* 702 */  [RPL_MODLIST] = "%s %p %s %s",
+  /* 702 */  [RPL_MODLIST] = "%s %s :%s",
   /* 703 */  [RPL_ENDOFMODLIST] = ":End of /MODULE LIST.",
   /* 704 */  [RPL_HELPSTART] = "%s :%s",
   /* 705 */  [RPL_HELPTXT] = "%s :%s",
@@ -223,9 +208,9 @@ static const char *const replies[] =
   /* 713 */  [ERR_CHANOPEN] = "%s :Channel is open.",
   /* 714 */  [ERR_KNOCKONCHAN] = "%s :You are already on that channel.",
   /* 715 */  [ERR_TOOMANYINVITE] = "%s :Too many INVITEs (%s).",
-  /* 716 */  [RPL_TARGUMODEG] = "%s :is in %s mode (%s)",
+  /* 716 */  [RPL_TARGUMODEG] = "%s :is in +%c mode (%s)",
   /* 717 */  [RPL_TARGNOTIFY] = "%s :has been informed that you messaged them.",
-  /* 718 */  [RPL_UMODEGMSG] = "%s %s@%s :is messaging you, and you are umode %s.",
+  /* 718 */  [RPL_UMODEGMSG] = "%s %s@%s :is messaging you, and you are umode +%c.",
   /* 723 */  [ERR_NOPRIVS] = "%s :Insufficient oper privileges.",
   /* 730 */  [RPL_MONONLINE] = ":%s",
   /* 731 */  [RPL_MONOFFLINE] = ":%s",

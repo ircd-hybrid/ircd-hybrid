@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file listener.h
@@ -25,9 +9,13 @@
 
 #ifndef INCLUDED_listener_h
 #define INCLUDED_listener_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "fdlist.h"
 #include "address.h"
+#include "fdlist.h"
+#include "list.h"
 
 /** Listener flags */
 typedef enum
@@ -46,14 +34,14 @@ struct Listener
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   listener_flag_t flags;  /**< Listener flags (tls, hidden, server, client, defer) */
-  fde_t *fd;  /**< File descriptor (NULL if inactive) */
-  unsigned int ref_count;  /**< Number of connection references */
+  fde_t *fde;  /**< File descriptor (NULL if inactive) */
+  uint32_t ref_count;  /**< Number of connection references */
 };
 
 extern void listener_add(uint16_t, const char *, listener_flag_t);
 extern void listener_release(struct Listener *);
+extern void listener_retain(struct Listener *);
 extern void listener_close_marked(void);
-extern void listener_count_memory(unsigned int *, size_t *);
 extern const list_t *listener_get_list(void);
 
 static inline const char *
@@ -77,6 +65,6 @@ listener_has_flag(const struct Listener *listener, listener_flag_t flags)
 static inline bool
 listener_is_active(const struct Listener *listener)
 {
-  return listener->fd && listener->fd->flags.open;
+  return listener->fde && listener->fde->flags.open;
 }
 #endif  /* INCLUDED_listener_h */

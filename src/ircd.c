@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -28,8 +12,22 @@
  * components, sets up event handlers, and manages server configurations.
  */
 
-#include <jansson.h>
-#include "stdinc.h"
+#include <jansson.h>  /**< Jansson JSON library. */
+
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "comm.h"
+#include "event.h"
+#include "fdlist.h"
+#include "io_daemon.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
 #include "io_rlimit.h"
@@ -39,34 +37,34 @@
 #include "log.h"
 #include "memory.h"
 #include "module.h"
-#include "event.h"
-#include "fdlist.h"
-#include "comm.h"
-#include "res.h"
+#include "resolver.h"
 #include "rng_mt.h"
-#include "defaults.h"
-#include "user.h"
-#include "ircd.h"
-#include "channel.h"
+
 #include "channel_mode.h"
 #include "client.h"
+#include "client_id.h"
 #include "cloak.h"
-#include "hash.h"
-#include "id.h"
-#include "ircd_signal.h"
-#include "motd.h"
 #include "conf.h"
-#include "parse.h"
-#include "server.h"
-#include "server_capab.h"
-#include "send.h"
-#include "conf_db.h"
+#include "conf_auth.h"
 #include "conf_class.h"
-#include "ipcache.h"
+#include "conf_db.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
+#include "conf_kill.h"
+#include "defaults.h"
 #include "extban.h"
+#include "hash.h"
+#include "ipcache.h"
+#include "ircd.h"
 #include "ircd_exit.h"
 #include "ircd_hook.h"
-#include "flatten_links.h"
+#include "ircd_module.h"
+#include "ircd_signal.h"
+#include "links_cache.h"
+#include "server.h"
+#include "server_capab.h"
+
+event_manager_t ircd_event_manager;
 
 /**
  * @struct SetOptions
@@ -96,16 +94,6 @@ struct Counter Count;
  * '-foreground' when launching the ircd process.
  */
 struct ServerState_t server_state;
-
-/**
- * @struct ServerStatistics
- * @brief Structure for server communication and connection statistics.
- *
- * The `ServerStatistics` structure contains statistics related to server communication
- * and connections. These metrics provide insights into data transmission, connection
- * durations, and various activities between clients and servers.
- */
-struct ServerStatistics ServerStats;
 
 /**
  * @struct Connection
@@ -169,34 +157,6 @@ static struct io_getopt myopts[] =
   { NULL, 0, NULL, STRING, NULL }
 };
 
-static struct event event_cleanup_tklines =
-{
-  .name = "cleanup_tklines",
-  .handler = cleanup_tklines,
-  .when = 30
-};
-
-static struct event event_server_connect_auto =
-{
-  .name = "server_connect_auto",
-  .handler = server_connect_auto,
-  .when = 15
-};
-
-static struct event event_comm_checktimeouts =
-{
-  .name = "comm_checktimeouts",
-  .handler = comm_checktimeouts,
-  .when = 1
-};
-
-static struct event event_save_all_databases =
-{
-  .name = "save_all_databases",
-  .handler = save_all_databases,
-  .when = 300
-};
-
 /**
  * @brief Main IO loop for processing events and managing server activities.
  *
@@ -204,38 +164,21 @@ static struct event event_save_all_databases =
  * processing events, checking for rehash signals, and managing client connections.
  */
 static void
-io_loop(void)
+_io_loop(void)
 {
   while (true)
   {
-    if (listing_client_list.head)
-    {
-      list_node_t *node, *node_next;
-      LIST_FOREACH_SAFE(node, node_next, listing_client_list.head)
-        safe_list_channels(node->data, false);
-    }
+    ircd_signal_process();
 
-    /* Run pending events */
-    event_run();
+    comm_select(comm_get_select_timeout(ircd_event_manager));
 
-    comm_select();
-    exit_aborted_clients();
-    free_exited_clients();
+    ircd_signal_process();
 
-    /* Check to see whether we have to rehash the configuration. */
-    if (dorehash)
-    {
-      conf_rehash(true);
-      dorehash = 0;
-    }
+    client_process_scheduled_exits();
+    client_process_deferred_destroy();
 
-    if (doremotd)
-    {
-      motd_recache();
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Got signal SIGUSR1, reloading motd file(s)");
-      doremotd = 0;
-    }
+    io_time_update_cache();
+    event_manager_dispatch_due(ircd_event_manager);
   }
 }
 
@@ -247,7 +190,7 @@ io_loop(void)
  * structure, which holds key settings that can be modified using the SET irc command.
  */
 static void
-initialize_global_set_options(void)
+_initialize_global_set_options(void)
 {
   GlobalSetOptions.maxclients = ConfigServerInfo.default_max_clients;
   GlobalSetOptions.autoconnect = true;
@@ -265,7 +208,7 @@ initialize_global_set_options(void)
  * This function reports an out-of-memory condition and restarts the program.
  */
 static void
-ircd_oom(void)
+_ircd_oom(void)
 {
   ircd_exit(IRCD_EXIT_RESTART, "out of memory");
 }
@@ -280,7 +223,7 @@ ircd_oom(void)
  * @param message The error message providing details about the time provider API error.
  */
 static void
-ircd_time_failure(enum io_time_error_code error_code, const char *message)
+_ircd_time_failure(enum io_time_error_code error_code, const char *message)
 {
   if (error_code == IO_TIME_ERR_INIT)
   {
@@ -300,57 +243,93 @@ ircd_time_failure(enum io_time_error_code error_code, const char *message)
  * @param pid Process ID of the ircd server.
  */
 static void
-print_startup(int pid)
+_ircd_print_startup(pid_t pid)
 {
   printf("ircd: version %s\n", IRCD_VERSION);
   printf("ircd: pid %d\n", pid);
   printf("ircd: running in %s mode from %s\n",
-         server_state.foreground ? "foreground": "background", ConfigGeneral.dpath);
+         server_state.foreground ? "foreground" : "background", ConfigGeneral.dpath);
 }
 
-/**
- * @brief Transforms the current process into a daemon for background execution.
- *
- * This function creates a child process using fork(), allowing the parent process
- * to exit. The child becomes a daemon by detaching from the terminal and setting
- * up a new session using setsid(). Standard input, output, and error are redirected
- * to /dev/null to isolate the daemon from the terminal.
- */
 static void
-make_daemon(void)
+_ircd_init_me(void)
 {
-  int pid = fork();
-  if (pid == -1)
+  if (string_is_empty(ConfigServerInfo.name))
   {
-    perror("fork");
-    exit(EXIT_FAILURE);
-  }
-  else if (pid > 0)
-  {
-    print_startup(pid);
-    exit(EXIT_SUCCESS);
-  }
-
-  if (setsid() == -1)
-  {
-    perror("setsid");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server name configured.");
     exit(EXIT_FAILURE);
   }
 
-  /* Connect stdin, stdout, and stderr to /dev/null */
-  int fd = open("/dev/null", O_RDWR);
-  if (fd == -1)
+  strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
+
+  if (string_is_empty(ConfigServerInfo.description))
   {
-    perror("open");
+    log_write(LOG_TYPE_IRCD, "ERROR: No server description configured.");
     exit(EXIT_FAILURE);
   }
 
-  dup2(fd, STDIN_FILENO);
-  dup2(fd, STDOUT_FILENO);
-  dup2(fd, STDERR_FILENO);
+  strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
 
-  if (fd > STDERR_FILENO)
-    close(fd);
+  if (string_is_empty(ConfigServerInfo.sid))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: No server ID configured.");
+    exit(EXIT_FAILURE);
+  }
+
+  if (!client_id_is_valid_sid(ConfigServerInfo.sid))
+  {
+    log_write(LOG_TYPE_IRCD,
+              "ERROR: Invalid server ID configured; expected a TS6 SID in the "
+              "form [0-9][A-Z0-9][A-Z0-9].");
+    exit(EXIT_FAILURE);
+  }
+
+  if (!client_id_set_local_sid(&me, ConfigServerInfo.sid))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize local server ID.");
+    exit(EXIT_FAILURE);
+  }
+
+  if (!client_id_init_generator(&me))
+  {
+    log_write(LOG_TYPE_IRCD, "ERROR: Failed to initialize local UID generator.");
+    exit(EXIT_FAILURE);
+  }
+
+  me.uplink = &me;
+  me.nexthop = &me;
+  me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
+  me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+
+  client_set_state(&me, CLIENT_STATE_ME);
+  server_get_or_create(&me);
+
+  hash_add_id(&me);
+  hash_add_client(&me);
+
+  list_add(&me, &me.global_node, &global_server_list);
+}
+
+static void
+_ircd_daemonize(void)
+{
+  pid_t child_pid;
+  const io_daemon_result_t result = io_daemonize(&child_pid);
+
+  switch (result)
+  {
+    case IO_DAEMON_PARENT:
+      _ircd_print_startup(child_pid);
+      exit(EXIT_SUCCESS);
+    case IO_DAEMON_CHILD:
+      return;
+    case IO_DAEMON_ERROR:
+      perror("daemonize");
+      exit(EXIT_FAILURE);
+    default:
+      assert(!"invalid io_daemonize result");
+      exit(EXIT_FAILURE);
+  }
 }
 
 /**
@@ -374,13 +353,13 @@ main(int argc, char *argv[])
     return -1;
   }
 
-  io_set_oom_handler(ircd_oom);
+  io_set_oom_handler(_ircd_oom);
 
   io_rlimit_set_max_core();
 
   io_rlimit_set_max_nofile();
 
-  io_time_set_error_callback(ircd_time_failure);
+  io_time_set_error_callback(_ircd_time_failure);
   io_time_init();
 
   /* Configure libjansson to use io_calloc and io_free. */
@@ -404,11 +383,11 @@ main(int argc, char *argv[])
 
   ConfigGeneral.dpath      = DPATH;
   ConfigGeneral.spath      = SPATH;
-  ConfigGeneral.configfile = CPATH;    /* Server configuration file */
-  ConfigGeneral.klinefile  = KPATH;    /* Server kline file         */
-  ConfigGeneral.xlinefile  = XPATH;    /* Server xline file         */
-  ConfigGeneral.dlinefile  = DLPATH;   /* dline file                */
-  ConfigGeneral.resvfile   = RESVPATH; /* resv file                 */
+  ConfigGeneral.configfile = CPATH;
+  ConfigGeneral.klinefile  = KPATH;
+  ConfigGeneral.xlinefile  = XPATH;
+  ConfigGeneral.dlinefile  = DLPATH;
+  ConfigGeneral.resvfile   = RESVPATH;
 
   myargv = argv;
   umask(077);  /* umask 077: u=rwx,g=,o= */
@@ -428,98 +407,73 @@ main(int argc, char *argv[])
   }
 
   if (server_state.foreground)
-    print_startup(getpid());
+    _ircd_print_startup(getpid());
   else
-    make_daemon();
+    _ircd_daemonize();
 
   ircd_signal_init();
+
+  ircd_event_manager = event_manager_create(NULL);
+  if (ircd_event_manager == NULL)
+  {
+    exit(EXIT_FAILURE);
+  }
 
   /* We need this to initialise the fd array before anything else */
   fdlist_init();
   log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
-  comm_select_init();  /* This needs to be setup early ! -- adrian */
-  tls_init();
+  comm_init(ircd_event_manager);  /* This needs to be setup early ! -- adrian */
+  tls_library_init();
 
   /* Check if there is pidfile and daemon already running */
   if (io_pidfile_create(pidFileName))
     exit(EXIT_FAILURE);
 
   ircd_hook_init();
-  ipcache_init();
-  client_init();
+  if (!ircd_module_init())
+    exit(EXIT_FAILURE);
   class_init();
   cloak_init();
-  resolver_init();      /* Needs to be setup before the io loop */
-  module_init();
+
+  conf_auth_init();
+  conf_deny_init();
+  conf_exempt_init();
+  conf_kill_init();
   conf_read_files(true);   /* cold start init conf files */
+
+  if (!resolver_init(ircd_event_manager))
+  {
+    log_write(LOG_TYPE_IRCD, "Failed to initialize resolver");
+    exit(EXIT_FAILURE);
+  }
+
+  ipcache_init();
   channel_mode_init();
   extban_init();
-  capab_init();  /* Set up default_server_capabs */
-  initialize_global_set_options();  /* Has to be called after conf_read_files() */
-  flatten_links_init();
+  capab_init();
+  _initialize_global_set_options();  /* Has to be called after conf_read_files() */
+  links_cache_init();
+  _ircd_init_me();
 
-  if (string_is_empty(ConfigServerInfo.name))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server name specified in serverinfo block.");
-    exit(EXIT_FAILURE);
-  }
+  conf_db_load_all();
 
-  strlcpy(me.name, ConfigServerInfo.name, sizeof(me.name));
+  ircd_module_apply_config();
 
-  /* serverinfo {} description must exist.  If not, error out.*/
-  if (string_is_empty(ConfigServerInfo.description))
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: No server description specified in serverinfo block.");
-    exit(EXIT_FAILURE);
-  }
+  event_handle_t event_cleanup_tklines =
+    event_create(ircd_event_manager, "cleanup_tklines", cleanup_tklines, 30000, false, NULL, NULL);
+  event_schedule(event_cleanup_tklines);
 
-  strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
+  event_handle_t event_conf_db_save_all =
+    event_create(ircd_event_manager, "conf_db_save_all", conf_db_save_all, 300000, false, NULL, NULL);
+  event_schedule(event_conf_db_save_all);
 
-  if (string_is_empty(ConfigServerInfo.sid))
-  {
-    log_write(LOG_TYPE_IRCD, "Generating server ID");
-    generate_sid();
-    ConfigServerInfo.sid = io_strdup(me.id);
-  }
-  else
-    strlcpy(me.id, ConfigServerInfo.sid, sizeof(me.id));
-
-  init_uid();
-
-  me.from = &me;
-  me.servptr = &me;
-  me.connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  me.connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
-
-  SetMe(&me);
-  server_make(&me);
-
-  hash_add_id(&me);
-  hash_add_client(&me);
-
-  list_add(&me, &me.node, &global_server_list);
-
-  load_kline_database(ConfigGeneral.klinefile);
-  load_dline_database(ConfigGeneral.dlinefile);
-  load_xline_database(ConfigGeneral.xlinefile);
-  load_resv_database(ConfigGeneral.resvfile);
-
-  module_load_all(NULL);
-
-  event_addish(&event_cleanup_tklines, NULL);
-
-  /* We want server_connect_auto to be called as soon as possible now! -- adrian */
-  /* No, 'cause after a restart it would cause all sorts of nick collides */
-  event_addish(&event_server_connect_auto, NULL);
-
-  /* Setup the timeout check. I'll shift it later :)  -- adrian */
-  event_add(&event_comm_checktimeouts, NULL);
-
-  event_addish(&event_save_all_databases, NULL);
+  event_handle_t event_server_connect_auto =
+    event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
+  event_schedule_jittered(event_server_connect_auto);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
-  io_loop();
+  _io_loop();
 
   return 0;
 }

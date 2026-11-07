@@ -1,45 +1,28 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_mode.c
  * \brief Includes required functions for processing the MODE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "client_svstag.h"
-#include "cloak.h"
-#include "hash.h"
-#include "io_string.h"
+#include "client_find.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "user_mode.h"
-#include "conf.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-
+#include "send.h"
+#include "user_mode.h"
 
 /* set_user_mode()
  *
@@ -49,13 +32,15 @@
  * parv[2] - modes to change
  */
 static void
-set_user_mode(struct Client *source, const int parc, char *parv[])
+set_user_mode(struct Client *source, size_t parc, char *parv[])
 {
-  const struct Client *target = find_person(source, parv[1]);
+  const char *const target_name = parv[1];
+
+  const struct Client *const target = client_find_user(source, target_name);
   if (target == NULL)
   {
-    if (MyConnect(source))
-      sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    if (client_is_local(source))
+      sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, target_name);
     return;
   }
 
@@ -68,15 +53,14 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
   if (parc < 3)
   {
     sendto_one_numeric(source, &me, RPL_UMODEIS,
-                       user_mode_to_str(source->umodes));
+                       user_mode_to_str(source->user_mode_flags));
     return;
   }
 
-  const uint64_t mode_flags_old = source->umodes;
+  const uint64_t mode_flags_old = source->user_mode_flags;
   user_mode_action_t action = USER_MODE_ACTION_ADD;
   bool badmode = false;
 
-  /* Parse user mode change string */
   for (const char *m = parv[2]; *m; ++m)
   {
     switch (*m)
@@ -89,7 +73,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
         break;
       default:
         if (user_mode_change(source, *m, USER_MODE_SOURCE_REGULAR, action) == USER_MODE_RESULT_MODE_NOT_FOUND)
-          if (MyConnect(source))
+          if (client_is_local(source))
             badmode = true;
         break;
     }
@@ -103,7 +87,7 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
    * servers to update correctly.
    */
   user_mode_send(source, mode_flags_old,
-                 (MyConnect(source) ? USER_MODE_SEND_CLIENT : 0) | USER_MODE_SEND_SERVER);
+                 (client_is_local(source) ? USER_MODE_SEND_USER : 0) | USER_MODE_SEND_SERVER);
 }
 
 /*! \brief MODE command handler
@@ -119,26 +103,22 @@ set_user_mode(struct Client *source, const int parc, char *parv[])
  *      - parv[2] = modes to be added or removed
  */
 static void
-m_mode(struct Client *source, int parc, char *parv[])
+m_mode(struct Client *source, size_t parc, char *parv[])
 {
   const char *const name = parv[1];
-
-  /* Now, try to find the channel in question */
-  if (!IsChanPrefix(*name))
+  if (!channel_is_valid_prefix_char(*name))
   {
-    /* If here, it has to be a non-channel name */
     set_user_mode(source, parc, parv);
     return;
   }
 
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *const channel = channel_find(name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  /* Now known the channel exists */
   if (parc < 3)
   {
     sendto_one_numeric(source, &me, RPL_CHANNELMODEIS,
@@ -154,28 +134,32 @@ m_mode(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "MODE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_mode, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = m_mode, .args_min = 2 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_mode, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_mode, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_mode, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_mode, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_mode",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

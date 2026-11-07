@@ -1,5 +1,3 @@
-AUTOMAKE_OPTIONS = foreign
-
 helpfdir = $(pkgdatadir)/help
 
 dist_helpf_DATA = accept    \
@@ -12,7 +10,6 @@ dist_helpf_DATA = accept    \
                   dline     \
                   etrace    \
                   extban    \
-                  hash      \
                   help      \
                   index     \
                   info      \

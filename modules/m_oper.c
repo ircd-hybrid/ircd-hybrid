@@ -1,42 +1,32 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_oper.c
  * \brief Includes required functions for processing the OPER command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "client_svstag.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
+#include "list.h"
 #include "log.h"
-#include "user_mode.h"
-#include "send.h"
-#include "parse.h"
+#include "memory.h"
 #include "module.h"
 
+#include "client.h"
+#include "client_format.h"
+#include "client_svstag.h"
+#include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "user_mode.h"
+#include "send.h"
 
 /*! \brief Blindly opers up given client, using conf info.
  *         All checks on passwords have already been done.
@@ -44,37 +34,45 @@
  * \param conf operator {} configuration record
  */
 static void
-oper_up(struct Client *client, const struct MaskItem *conf)
+_oper_commit(struct Client *client, const struct OperItem *oper)
 {
-  AddOFlag(client, conf->port);
+  client_set_class(client, oper->klass, CLIENT_CLASS_OPER);
 
-  uint64_t mode_flags_old = client->umodes;
+  assert(client->connection->oper_auth_name == NULL);
+  io_free(client->connection->oper_auth_name);
+  client->connection->oper_auth_name = io_strdup(oper->name);
+
+  client_set_oper_flag(client, oper->oper_privs);
+
+  uint64_t mode_flags_old = client->user_mode_flags;
   uint64_t mode_flags_add = UMODE_OPER | UMODE_ADMIN;
 
-  if (conf->modes)
-    mode_flags_add |= user_mode_string_to_flags(conf->modes);
+  if (oper->modes)
+    mode_flags_add |= user_mode_string_to_flags(oper->modes);
   else if (ConfigGeneral.oper_umodes)
     mode_flags_add |= user_mode_string_to_flags(ConfigGeneral.oper_umodes);
 
   user_mode_set_flag_exec(client, mode_flags_add, USER_MODE_SOURCE_REGULAR);
-  user_mode_send(client, mode_flags_old, USER_MODE_SEND_CLIENT | USER_MODE_SEND_SERVER);
+  user_mode_send(client, mode_flags_old, USER_MODE_SEND_USER | USER_MODE_SEND_SERVER);
 
   sendto_one_numeric(client, &me, RPL_YOUREOPER);
 
-  if (!string_is_empty(conf->whois))
-  {
-    svstag_attach(&client->svstags, RPL_WHOISOPERATOR, "+", conf->whois);
-    sendto_servers(NULL, 0, 0, ":%s SVSTAG %s %ju %u + :%s",
-                   me.id, client->id, client->tsinfo, RPL_WHOISOPERATOR, conf->whois);
-  }
+  if (!string_is_empty(oper->whois_text) && svstag_attach(&client->svstag_list, oper->whois_text))
+    sendto_servers(NULL, 0, 0, ":%s SVSTAG %s 0 %u + :%s",
+                   me.id, client->id, RPL_WHOISOPERATOR, oper->whois_text);
+
+  client_format_name_buffer_t client_name_buffer;
+  client_format_oper_name_buffer_t oper_name_buffer;
+  const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
+  const char *const oper_name = client_format_oper_name(client, &oper_name_buffer);
 
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
-            conf->name, client_get_name(client, HIDE_IP));
+            oper->name, client_name);
 
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
-                 get_oper_name(client));
+                 oper_name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
-                 me.id, get_oper_name(client));
+                 me.id, oper_name);
 }
 
 /*! \brief Notices all opers of the failed oper attempt if enabled
@@ -84,19 +82,19 @@ oper_up(struct Client *client, const struct MaskItem *conf)
  * \param reason   The reason why they have failed
  */
 static void
-failed_oper_notice(struct Client *source, enum irc_numerics numeric,
-                   const char *name, const char *reason)
+_oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_result_t result)
 {
-  if (numeric)
-    sendto_one_numeric(source, &me, numeric);
+  const char *const reason = oper_auth_result_to_string(result);
 
-  if (ConfigGeneral.failed_oper_notice)
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "Failed OPER attempt as %s by %s - %s",
-                   name, client_get_name(source, HIDE_IP), reason);
+  client_format_name_buffer_t client_name_buffer;
+  const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-  log_write(LOG_TYPE_OPER, "Failed OPER attempt as %s by %s - %s",
-            name, client_get_name(source, HIDE_IP), reason);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "Failed OPER attempt as [%s] by %s (%s)",
+                 name, client_name, reason);
+
+  log_write(LOG_TYPE_OPER, "Failed OPER attempt as [%s] by %s (%s)",
+            name, client_name, reason);
 }
 
 /*! \brief OPER command handler
@@ -112,48 +110,32 @@ failed_oper_notice(struct Client *source, enum irc_numerics numeric,
  *      - parv[2] = oper password
  */
 static void
-m_oper(struct Client *source, int parc, char *parv[])
+m_oper(struct Client *source, size_t parc, char *parv[])
 {
   const char *const opername = parv[1];
   const char *const password = parv[2];
 
-  struct MaskItem *conf = operator_find(source, opername);
-  if (conf == NULL)
+  const struct OperItem *oper = NULL;
+  oper_auth_result_t result = oper_authenticate(source, opername, password, &oper);
+  if (result == OPER_AUTH_SUCCESS)
   {
-    conf = operator_find(NULL, opername);
-    failed_oper_notice(source, ERR_NOOPERHOST, opername, conf ? "host mismatch" : "no operator {} block");
+    assert(oper);
+
+    _oper_commit(source, oper);
     return;
   }
 
-  if (IsConfTLS(conf) && user_mode_has_flag(source, UMODE_SECURE) == false)
-  {
-    failed_oper_notice(source, ERR_NOOPERHOST, opername, "requires TLS");
-    return;
-  }
+  _oper_report_failed_attempt(source, opername, result);
 
-  if (!string_is_empty(conf->certfp))
+  switch (result)
   {
-    if (string_is_empty(source->tls_certfp) || strcasecmp(source->tls_certfp, conf->certfp))
-    {
-      failed_oper_notice(source, ERR_NOOPERHOST, opername, "client certificate fingerprint mismatch");
-      return;
-    }
+    case OPER_AUTH_FAIL_PASSWORD:
+      sendto_one_numeric(source, &me, ERR_PASSWDMISMATCH);
+      break;
+    default:
+      sendto_one_numeric(source, &me, ERR_NOOPERHOST);
+      break;
   }
-
-  if (conf_match_password(password, conf) == false)
-  {
-    failed_oper_notice(source, ERR_PASSWDMISMATCH, opername, "password mismatch");
-    return;
-  }
-
-  if (conf_attach(source, conf))
-  {
-    sendto_one_notice(source, &me, ":Can't attach conf!");
-    failed_oper_notice(source, 0, opername, "can't attach conf!");
-    return;
-  }
-
-  oper_up(source, conf);
 }
 
 /*! \brief OPER command handler
@@ -169,7 +151,7 @@ m_oper(struct Client *source, int parc, char *parv[])
  *      - parv[2] = oper password
  */
 static void
-mo_oper(struct Client *source, int parc, char *parv[])
+mo_oper(struct Client *source, size_t parc, char *parv[])
 {
   sendto_one_numeric(source, &me, RPL_YOUREOPER);
 }
@@ -177,27 +159,31 @@ mo_oper(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "OPER",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_oper, .args_min = 3, .end_grace_period = true },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_oper, .args_min = 3, .end_grace_period = true }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_oper, .args_min = 3, .end_grace_period = true },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_oper, .args_min = 3, .end_grace_period = true }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_oper",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

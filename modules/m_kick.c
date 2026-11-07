@@ -1,41 +1,68 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_kick.c
  * \brief Includes required functions for processing the KICK command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
-#include "io_string.h"
 #include "ircd.h"
+#include "ircd_module.h"
+#include "list.h"
 #include "numeric.h"
-#include "send.h"
-#include "module.h"
 #include "parse.h"
-#include "hash.h"
+#include "send.h"
+
+static const char *
+_kick_get_reason(const struct Client *source, const char *reason)
+{
+  if (!string_is_empty(reason))
+    return reason;
+
+  if (client_is_user(source))
+    return source->name;
+
+  return client_get_visible_server_name(source);
+}
+
+static void
+_kick_notify_channel_members(struct Client *source, const struct Channel *channel,
+                             const struct Client *target, const char *reason)
+{
+  if (client_is_user(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
+                         source->name, source->username, source->host,
+                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
+                         client_get_visible_server_name(source),
+                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
+}
+
+static void
+_kick_commit(struct Client *source, struct Channel *channel,
+             struct Client *target, struct ChannelMember *member_target, const char *reason)
+{
+  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
+                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
+
+  _kick_notify_channel_members(source, channel, target, reason);
+
+  channel_member_remove(member_target);
+}
 
 
 /*! \brief KICK command handler
@@ -52,40 +79,47 @@
  *      - parv[3] = reason
  */
 static void
-m_kick(struct Client *source, int parc, char *parv[])
+m_kick(struct Client *source, size_t parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  const char *const channel_name = parv[1];
+
+  struct Channel *const channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, parv[1]);
+    sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, channel_name);
     return;
   }
 
-  struct ChannelMember *member_source = member_find_link(source, channel);
+  struct ChannelMember *const member_source = channel_member_find(channel, source);
   if (member_source == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
     return;
   }
 
-  if (member_highest_rank(member_source) < CHACCESS_HALFOP)
+  if (channel_member_get_highest_rank(member_source) < CHACCESS_HALFOP)
   {
     sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
   }
 
-  struct Client *target = find_chasing(source, parv[2]);
+  const char *const target_name = parv[2];
+  struct Client *const target = client_find_user_with_history(source, target_name, NULL);
   if (target == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
+  {
+    sendto_one_numeric(source, &me, ERR_NOSUCHNICK, target_name);
+    return;
+  }
 
-  struct ChannelMember *member_target = member_find_link(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(channel, target);
   if (member_target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);
     return;
   }
 
-  if (member_highest_rank(member_source) < member_highest_rank(member_target))
+  if (channel_member_get_highest_rank(member_source) <
+      channel_member_get_highest_rank(member_target))
   {
     sendto_one_numeric(source, &me, ERR_CHANOPRIVSNEEDED, channel->name);
     return;
@@ -97,14 +131,8 @@ m_kick(struct Client *source, int parc, char *parv[])
     return;
   }
 
-  const char *reason = string_default(parv[3], source->name);
-  sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                       source->name, source->username, source->host, channel->name,
-                       target->name, ConfigChannel.max_kick_length, reason);
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
-
-  channel_remove_user(member_target);
+  const char *const reason = _kick_get_reason(source, parv[3]);
+  _kick_commit(source, channel, target, member_target, reason);
 }
 
 /*! \brief KICK command handler
@@ -121,61 +149,53 @@ m_kick(struct Client *source, int parc, char *parv[])
  *      - parv[3] = reason
  */
 static void
-ms_kick(struct Client *source, int parc, char *parv[])
+ms_kick(struct Client *source, size_t parc, char *parv[])
 {
-  struct Channel *channel = hash_find_channel(parv[1]);
+  struct Channel *const channel = channel_find(parv[1]);
   if (channel == NULL)
     return;
 
-  struct Client *target = find_person(source, parv[2]);
+  struct Client *const target = client_find_user(source, parv[2]);
   if (target == NULL)
     return;
 
-  struct ChannelMember *member_target = member_find_link(target, channel);
+  struct ChannelMember *const member_target = channel_member_find(channel, target);
   if (member_target == NULL)
     return;
 
-  const char *reason = string_default(parv[3], source->name);
-  if (IsClient(source))
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s KICK %s %s :%.*s",
-                         source->name, source->username, source->host, channel->name,
-                         target->name, ConfigChannel.max_kick_length, reason);
-  else
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s KICK %s %s :%.*s",
-                         IsHidden(source) || ConfigServerHide.hide_servers ? me.name : source->name,
-                         channel->name, target->name, ConfigChannel.max_kick_length, reason);
-
-  sendto_servers(source, 0, 0, ":%s KICK %s %s :%.*s",
-                 source->id, channel->name, target->id, ConfigChannel.max_kick_length, reason);
-
-  channel_remove_user(member_target);
+  const char *const reason = _kick_get_reason(source, parv[3]);
+  _kick_commit(source, channel, target, member_target, reason);
 }
 
 static struct Command command_table =
 {
   .name = "KICK",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true },
-  .handlers[SERVER_HANDLER] = { .handler = ms_kick, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_kick, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_kick, .args_min = 3, .end_grace_period = true }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_kick",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

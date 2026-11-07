@@ -1,41 +1,63 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2022-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2022-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_mlock.c
  * \brief Includes required functions for processing the MLOCK command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+#include "io_parse.h"
+#include "io_string.h"
 #include "list.h"
 #include "module.h"
-#include "io_string.h"
+
 #include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
 #include "ircd.h"
-#include "send.h"
+#include "ircd_module.h"
 #include "parse.h"
+#include "send.h"
 #include "server_capab.h"
 
+static bool
+_mlock_should_accept(const struct Client *source, const struct Channel *channel,
+                     uintmax_t channel_ts, uintmax_t mode_lock_ts,
+                     const char *mode_lock)
+{
+  if (channel_ts > channel->creation_time)
+    return false;
+
+  if (client_is_service(source))
+    return true;
+
+  if (channel_ts < channel->creation_time)
+    return true;
+
+  if (mode_lock_ts > channel->mode_lock_time)
+    return true;
+
+  if (mode_lock_ts < channel->mode_lock_time)
+    return false;
+
+  return strcmp(string_or_empty(channel->mode_lock), mode_lock) == 0;
+}
+
+static void
+_mlock_commit(struct Client *source, struct Channel *channel, uintmax_t channel_ts, uintmax_t mode_lock_ts,
+              const char *mode_lock)
+{
+  channel_set_mode_lock(source, channel, mode_lock);
+  channel->mode_lock_time = mode_lock_ts;
+
+  sendto_servers(source, 0, 0, ":%s MLOCK %ju %s %ju :%s",
+                 source->id, channel_ts, channel->name, mode_lock_ts, string_or_empty(channel->mode_lock));
+}
 
 /*! \brief MLOCK command handler
  *
@@ -52,53 +74,65 @@
  *      - parv[4] = modes to be locked
  */
 static void
-ms_mlock(struct Client *source, int parc, char *parv[])
+ms_mlock(struct Client *source, size_t parc, char *parv[])
 {
-  assert(!MyClient(source));
+  if (!client_is_service(source) && !client_is_server(source))
+    return;
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 
-  if (strtoumax(parv[1], NULL, 10) <= channel->creation_time)
-    channel_set_mode_lock(source, channel, parv[4]);
+  uintmax_t channel_ts;
+  if (io_parse_uintmax(parv[1], &channel_ts) != IO_PARSE_OK)
+    return;
 
-  uintmax_t timestamp = strtoumax(parv[3], NULL, 10);
-  if (timestamp)
-    channel->mode_lock_time = timestamp;
+  uintmax_t mode_lock_ts;
+  if (io_parse_uintmax(parv[3], &mode_lock_ts) != IO_PARSE_OK)
+    return;
 
-  sendto_servers(source, CAPAB_MLOCK, 0, ":%s MLOCK %ju %s %ju :%s",
-                 source->id, channel->creation_time, channel->name, channel->mode_lock_time,
-                 string_or_empty(channel->mode_lock));
+  const char *const mode_lock = parv[4];
+  if (!_mlock_should_accept(source, channel, channel_ts, mode_lock_ts, mode_lock))
+    return;
+
+  _mlock_commit(source, channel, channel_ts, mode_lock_ts, mode_lock);
 }
 
 static struct Command command_table =
 {
   .name = "MLOCK",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_mlock, .args_min = 5, .empty_last_arg = true },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   capab_add("MLOCK", CAPAB_MLOCK, true);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   capab_del("MLOCK");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_mlock",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

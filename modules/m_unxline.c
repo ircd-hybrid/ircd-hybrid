@@ -1,79 +1,72 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2003-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2003-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_unxline.c
  * \brief Includes required functions for processing the UNXLINE command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
+#include "log.h"
+#include "module.h"
+
+#include "aline.h"
+#include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
 #include "conf_shared.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "log.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
 
-
-/* static int remove_tkline_match(const char *host, const char *user)
- *
- * Inputs:      gecos
- * Output:      returns YES on success, NO if no tkline removed.
- * Side effects: Any matching tklines are removed.
- */
 static void
-xline_remove(struct Client *source, const struct aline_ctx *aline)
+_unxline_report_removed(struct Client *source, const struct GecosItem *gecos)
 {
-  struct GecosItem *gecos = gecos_find(aline->mask, irccmp);
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "X-line removed by %s for [%s]",
+                 source_name, gecos->mask);
+  log_write(LOG_TYPE_XLINE, "X-line removed by %s for [%s]",
+            source_name, gecos->mask);
+}
+
+static void
+_unxline_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct GecosItem *const gecos = gecos_find(aline->mask, io_strcasecmp);
   if (gecos == NULL)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":No X-Line for %s", aline->mask);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":No X-line for [%s] found",
+                        aline->mask);
     return;
   }
 
   if (gecos->in_database == false)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":The X-Line for %s is in the configuration file and must be removed by hand",
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":X-line for [%s] is in the configuration file and must be removed by hand",
                         gecos->mask);
     return;
   }
 
-  if (IsClient(source))
-    sendto_one_notice(source, &me, ":X-Line for [%s] is removed", gecos->mask);
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":Removed X-line [%s]",
+                      gecos->mask);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the X-Line for: [%s]",
-                 get_oper_name(source), gecos->mask);
-  log_write(LOG_TYPE_XLINE, "%s removed X-Line for [%s]",
-            get_oper_name(source), gecos->mask);
+  _unxline_report_removed(source, gecos);
 
   gecos_delete(gecos, false);
 }
@@ -92,17 +85,16 @@ xline_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unxline(struct Client *source, int parc, char *parv[])
+mo_unxline(struct Client *source, size_t parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = true };
-
-  if (!HasOFlag(source, OPER_FLAG_UNXLINE))
+  if (!client_has_oper_flag(source, OPER_FLAG_UNXLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unxline");
     return;
   }
 
-  if (aline_parse("UNXLINE", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
+  if (!aline_parse("UNXLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
@@ -118,7 +110,7 @@ mo_unxline(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNXLINE", CAPAB_CLUSTER, CLUSTER_UNXLINE, "%s",
                        aline.mask);
 
-  xline_remove(source, &aline);
+  _unxline_remove(source, &aline);
 }
 
 /*! \brief UNXLINE command handler
@@ -134,7 +126,7 @@ mo_unxline(struct Client *source, int parc, char *parv[])
  *      - parv[2] = gecos
  */
 static void
-ms_unxline(struct Client *source, int parc, char *parv[])
+ms_unxline(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -150,35 +142,39 @@ ms_unxline(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNXLINE, source->servptr->name, source->username, source->host))
-    xline_remove(source, &aline);
+  if (client_is_service(source) ||
+      shared_find(SHARED_UNXLINE, source->uplink->name, source->username, source->host))
+    _unxline_remove(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "UNXLINE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_unxline, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_unxline, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_unxline, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_unxline, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_unxline",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

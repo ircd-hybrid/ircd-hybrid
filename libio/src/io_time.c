@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -27,11 +11,11 @@
  * monotonic time values, perform sanity checks, and handle errors.
  */
 
-#include <time.h>
 #include <errno.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "io_time.h"
 
@@ -58,7 +42,7 @@ static struct timespec previous_monotonic;
  * @brief Stores the current real-time and monotonic time values.
  *
  * This variable maintains the current real-time and monotonic time values, updated by
- * the io_time_set function. It provides the latest time values to the io_time_get function.
+ * the io_time_update_cache function. It provides the latest time values to the io_time_get function.
  */
 static io_time_t current_time_data;
 
@@ -165,7 +149,7 @@ io_time_get_error(void)
 /**
  * @brief Initializes the time provider API.
  *
- * This function initializes the time provider API by calling io_time_set to retrieve the current
+ * This function initializes the time provider API by calling io_time_update_cache to retrieve the current
  * time data. If the initialization fails, it calls the error callback with an appropriate error code
  * and message.
  *
@@ -174,7 +158,7 @@ io_time_get_error(void)
 int
 io_time_init(void)
 {
-  const io_time_t *const iotime = io_time_set();
+  const io_time_t *const iotime = io_time_update_cache();
   if (iotime == NULL)
   {
     if (io_time_error_callback)
@@ -207,8 +191,10 @@ io_internal_gettime(clockid_t clock_id, struct timespec *ts)
         return IO_TIME_ERR_GET_REAL;
       case CLOCK_MONOTONIC:
         return IO_TIME_ERR_GET_MONO;
+#ifdef CLOCK_MONOTONIC_RAW
       case CLOCK_MONOTONIC_RAW:
         return IO_TIME_ERR_GET_MONO_RAW;
+#endif
       default:
         abort();  /* Invalid clock_id, abort the program. */
     }
@@ -264,7 +250,7 @@ io_time_sanity_check(const struct timespec *new_time, const struct timespec *old
  *                        Returns NULL on failure.
  */
 const io_time_t *
-io_time_set(void)
+io_time_update_cache(void)
 {
   struct timespec current_realtime, current_monotonic;
 
@@ -278,13 +264,7 @@ io_time_set(void)
     return NULL;
   }
 
-#ifdef CLOCK_MONOTONIC_RAW
-  ret = io_internal_gettime(CLOCK_MONOTONIC_RAW, &current_monotonic);
-  if (ret != IO_TIME_OK)
-    ret = io_internal_gettime(CLOCK_MONOTONIC, &current_monotonic);
-#else
   ret = io_internal_gettime(CLOCK_MONOTONIC, &current_monotonic);
-#endif
   if (ret != IO_TIME_OK)
   {
     io_time_set_error(ret, &current_monotonic, &previous_monotonic);
@@ -323,8 +303,10 @@ io_time_set(void)
 
   /* Update the public io_time_t structure. */
   current_time_data.sec_real = current_realtime.tv_sec;
+  current_time_data.msec_real = current_realtime.tv_nsec / 1000000;
   current_time_data.nsec_real = current_realtime.tv_nsec;
   current_time_data.sec_monotonic = current_monotonic.tv_sec;
+  current_time_data.msec_monotonic = current_monotonic.tv_nsec / 1000000;
   current_time_data.nsec_monotonic = current_monotonic.tv_nsec;
 
   initialized = true;
@@ -347,13 +329,47 @@ io_time_get(io_time_type_t type)
   {
     case IO_TIME_REALTIME_SEC:
       return current_time_data.sec_real;
+    case IO_TIME_REALTIME_MSEC:
+      return current_time_data.msec_real;
     case IO_TIME_REALTIME_NSEC:
       return current_time_data.nsec_real;
     case IO_TIME_MONOTONIC_SEC:
       return current_time_data.sec_monotonic;
+    case IO_TIME_MONOTONIC_MSEC:
+      return current_time_data.msec_monotonic;
     case IO_TIME_MONOTONIC_NSEC:
       return current_time_data.nsec_monotonic;
     default:
       abort();  /* Invalid type, abort the program. */
   }
+}
+
+/**
+ * @brief Retrieves the total monotonic time in milliseconds since its epoch.
+ *
+ * This function computes the total monotonic time in milliseconds by combining
+ * the cached seconds and milliseconds components stored in current_time_data.
+ * These cached values are updated by io_time_update_cache().
+ *
+ * @return uintmax_t Total monotonic time in milliseconds, derived from cached data.
+ */
+uintmax_t
+io_time_get_monotonic_ms_total(void)
+{
+  return (current_time_data.sec_monotonic * 1000ULL) + current_time_data.msec_monotonic;
+}
+
+/**
+ * @brief Retrieves the total monotonic time in nanoseconds since its epoch.
+ *
+ * This function computes the total monotonic time in nanoseconds by combining
+ * the cached seconds and nanoseconds components stored in current_time_data.
+ * These cached values are updated by io_time_update_cache().
+ *
+ * @return uintmax_t Total monotonic time in nanoseconds, derived from cached data.
+ */
+uintmax_t
+io_time_get_monotonic_ns_total(void)
+{
+  return (current_time_data.sec_monotonic * 1000000000ULL) + current_time_data.nsec_monotonic;
 }

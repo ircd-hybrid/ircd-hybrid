@@ -1,11 +1,12 @@
-AM_CPPFLAGS = $(LTDLINCL) -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src
+
 noinst_LTLIBRARIES = libio.la
-libio_la_DEPENDENCIES = $(LTDLDEPS)
-libio_la_LIBADD = @LTLIBOBJS@ $(LIBLTDL)
-libio_la_LDFLAGS = -export-dynamic -avoid-version
 
 libio_la_SOURCES =  address.c     \
                     address.h     \
+                    address_index.c \
+                    address_index.h \
+                    address_parse.c \
                     base32.c      \
                     base32.h      \
                     comm.c        \
@@ -15,17 +16,27 @@ libio_la_SOURCES =  address.c     \
                     comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
+                    dns.c         \
+                    dns.h         \
                     event.c       \
                     event.h       \
                     fdlist.c      \
                     fdlist.h      \
                     hook.c        \
                     hook.h        \
+                    hostmask_index.c \
+                    hostmask_index.h \
                     ident.c       \
                     ident.h       \
                     io.h          \
+                    io_daemon.c   \
+                    io_daemon.h   \
                     io_getopt.c   \
                     io_getopt.h   \
+                    io_hex.c      \
+                    io_hex.h      \
+                    io_parse.c    \
+                    io_parse.h    \
                     io_pidfile.c  \
                     io_pidfile.h  \
                     io_rlimit.c   \
@@ -47,12 +58,16 @@ libio_la_SOURCES =  address.c     \
                     memory.h      \
                     module.c      \
                     module.h      \
+                    module_config.c \
+                    module_internal.h \
+                    module_loader.c \
+                    module_loader.h \
                     patricia.c    \
                     patricia.h    \
-                    res.c         \
-                    res.h         \
-                    reslib.c      \
-                    reslib.h      \
+                    resolver.c    \
+                    resolver.h    \
+                    resolver_config.c \
+                    resolver_config.h \
                     rng_mt.c      \
                     rng_mt.h      \
                     sha3.c        \

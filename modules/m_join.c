@@ -1,65 +1,45 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_join.c
  * \brief Includes required functions for processing the JOIN command.
  */
 
-#include "stdinc.h"
-#include "list.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "io_parse.h"
+#include "io_string.h"
+#include "module.h"
+
 #include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
-#include "hash.h"
-#include "io_string.h"
+#include "conf.h"
 #include "ircd.h"
-#include "numeric.h"
+#include "ircd_module.h"
+#include "parse.h"
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
-#include "conf.h"
-#include "parse.h"
-#include "module.h"
 
-
-/* set_final_mode
- *
- * inputs       - channel mode
- *              - old channel mode
- * output       - NONE
- * side effects - walk through all the channel modes turning off modes
- *                that were on in oldmode but aren't on in mode.
- *                Then walk through turning on modes that are on in mode
- *                but were not set in oldmode.
- */
 static void
-set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, char *pbuf)
+set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode, char *mbuf, char *pbuf)
 {
   int what = MODE_NONE;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & mode->mode) && !(tab->mode & oldmode->mode))
+    if (tab->mode && (tab->mode & mode->flags) && !(tab->mode & oldmode->flags))
     {
       if (what != MODE_ADD)
       {
@@ -73,7 +53,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
   {
-    if (tab->mode && (tab->mode & oldmode->mode) && !(tab->mode & mode->mode))
+    if (tab->mode && (tab->mode & oldmode->flags) && !(tab->mode & mode->flags))
     {
       if (what != MODE_DEL)
       {
@@ -85,7 +65,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
     }
   }
 
-  if (oldmode->limit && mode->limit == 0)
+  if (oldmode->member_limit && mode->member_limit == 0)
   {
     if (what != MODE_DEL)
     {
@@ -108,7 +88,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
     pbuf += sprintf(pbuf, "%s ", oldmode->key);
   }
 
-  if (mode->limit && oldmode->limit != mode->limit)
+  if (mode->member_limit && oldmode->member_limit != mode->member_limit)
   {
     if (what != MODE_ADD)
     {
@@ -117,7 +97,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
     }
 
     *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->limit);
+    pbuf += sprintf(pbuf, "%u ", mode->member_limit);
   }
 
   if (mode->key[0] && strcmp(oldmode->key, mode->key))
@@ -149,7 +129,7 @@ set_final_mode(const struct Mode *mode, const struct Mode *oldmode, char *mbuf, 
  *      - parv[2] = channel password (key)
  */
 static void
-m_join(struct Client *source, int parc, char *parv[])
+m_join(struct Client *source, size_t parc, char *parv[])
 {
   channel_join_list(source, parv[1], parv[2]);
 }
@@ -168,34 +148,37 @@ m_join(struct Client *source, int parc, char *parv[])
  *		  and use it for the TimeStamp on a new channel.
  */
 static void
-ms_join(struct Client *source, int parc, char *parv[])
+ms_join(struct Client *source, size_t parc, char *parv[])
 {
-  bool keep_our_modes = true;
-
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
-  if (channel_check_name(parv[2], false) == false)
+  const char *const channel_name = parv[2];
+  if (!channel_is_valid_name(channel_name, false))
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
-                   source->name, source->from->name, parv[2]);
+                   source->name, source->nexthop->name, channel_name);
     return;
   }
 
-  uintmax_t newts = strtoumax(parv[1], NULL, 10);
-  uintmax_t oldts = 0;
+  uintmax_t newts;
+  if (io_parse_uintmax(parv[1], &newts) != IO_PARSE_OK)
+    return;
 
-  struct Channel *channel = hash_find_channel(parv[2]);
+  uintmax_t oldts = 0;
+  bool keep_our_modes = true;
+
+  struct Channel *channel = channel_find(channel_name);
   if (channel == NULL)
   {
-    if (capab_has_flag(source->from, CAPAB_RESYNC))
+    if (capab_has_flag(source->nexthop, CAPAB_RESYNC))
     {
-      sendto_one(source, ":%s RESYNC %s", me.id, parv[2]);
+      sendto_one(source, ":%s RESYNC %s", me.id, channel_name);
       return;
     }
 
-    channel = channel_make(parv[2]);
+    channel = channel_create(channel_name);
     channel->creation_time = newts;
   }
   else if (newts < channel->creation_time)
@@ -205,14 +188,10 @@ ms_join(struct Client *source, int parc, char *parv[])
     channel->creation_time = newts;
   }
 
-  const struct Client *origin = source->servptr;
-  if (IsHidden(source->servptr) || ConfigServerHide.hide_servers)
-    origin = &me;
-
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    struct Mode mode = { .mode = 0, .limit = 0, .key[0] = '\0' };
+    struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
 
@@ -220,33 +199,37 @@ ms_join(struct Client *source, int parc, char *parv[])
     channel->mode = mode;
 
     /* Update channel name to be the correct case */
-    strlcpy(channel->name, parv[2], sizeof(channel->name));
+    strlcpy(channel->name, channel_name, sizeof(channel->name));
 
     sendto_channel_local(NULL, channel, 0, 0, 0,
                          ":%s NOTICE %s :*** Notice -- TS for %s changed from %ju to %ju",
                          me.name, channel->name, channel->name, oldts, newts);
 
-    channel_demote_members(channel, origin);
+    const char *const origin_name = client_get_visible_server_name(source->uplink);
+    channel_mode_clear_member_statuses(channel, origin_name);
 
-    invite_clear_list(&channel->invites);
+    channel_invite_remove_all(&channel->invite_list);
 
-    channel_set_mode_lock(source->from, channel, NULL);
+    channel_set_mode_lock(source->nexthop, channel, NULL);
 
     if (modebuf[0])
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
-                           origin->name, channel->name, modebuf, parabuf);
+                           origin_name, channel->name, modebuf, parabuf);
 
-    if (channel->topic)
+    if (!string_is_empty(channel->topic))
     {
       channel_set_topic(channel, NULL, NULL, 0, false);
       sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :",
-                           origin->name, channel->name);
+                           origin_name, channel->name);
     }
   }
 
-  if (member_find_link(source, channel) == NULL)
+  if (channel_member_find(channel, source) == NULL)
   {
-    channel_add_user(channel, source, 0, true);
+    channel_member_add(channel, source, 0);
+
+    if (client_has_flag(source->nexthop, FLAGS_EOB))
+      channel_flood_record_join(channel, source);
 
     sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
                          source->name, source->username, source->host, channel->name,
@@ -254,9 +237,9 @@ ms_join(struct Client *source, int parc, char *parv[])
     sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
                          source->name, source->username, source->host, channel->name);
 
-    if (source->away)
+    if (source->away_message)
       sendto_channel_local(source, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           source->name, source->username, source->host, source->away);
+                           source->name, source->username, source->host, source->away_message);
   }
 
   sendto_servers(source, 0, 0, ":%s JOIN %ju %s +",
@@ -266,28 +249,32 @@ ms_join(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "JOIN",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_join, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = ms_join, .args_min = 4 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_join, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_join, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_join, .args_min = 4 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_join, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_join",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

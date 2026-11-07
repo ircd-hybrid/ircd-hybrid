@@ -1,3 +1,30 @@
+#### Noteworthy changes in version 8.2.48 (2025-??-??)
+* The `LIST` command now implements the standard ELIST `C<` and `C>` creation-time
+  filters correctly: `C<num` matches channels created within the last `<num>` minutes,
+  while `C>num` matches channels created more than `<num>` minutes ago.
+* The `serverinfo::sid` configuration directive is no longer optional. Server IDs are
+  no longer generated automatically.
+* The `general::disable_auth` configuration directive has been renamed to `general::disable_ident`
+* The `serverinfo::rsa_private_key_file` configuration directive has been renamed to
+  `serverinfo::tls_private_key_file`
+* The `serverinfo::tls_dh_param_file`, `serverinfo::tls_supported_groups`,
+  `serverinfo::tls_cipher_list`, `serverinfo::tls_cipher_suites`, and
+  `serverinfo::tls_message_digest_algorithm` configuration directives have been removed.
+  TLS cipher suites, supported groups, and related cryptographic parameters are now
+  selected by the configured TLS library and its system defaults. TLS certificate
+  fingerprints now always use SHA-256.
+* Module names in `modules.conf` no longer include file suffixes
+* `STATS i/I`, `k/K`, `m/M`, `o/O`, and `P` are now always restricted to IRC operators;
+  the corresponding `general::stats_*_oper_only` directives have been removed.
+* The `general::failed_oper_notice` directive has been removed. Failed `OPER`
+  attempts are now always reported.
+* Extended bans and owner/admin channel modes are now always enabled; the corresponding
+  `channel::enable_*` directives have been removed.
+* The `serverinfo::max_topic_length` configuration directive has been moved to
+  `channel::max_topic_length`
+* Hostname cloaking settings have been moved from `general {}` to a dedicated `cloak {}` block
+
+
 #### Noteworthy changes in version 8.2.47 (2025-04-04)
 * The `general::max_away_length` configuration directive has been added, allowing
   servers to specify the maximum length of a `AWAY` message that the server will

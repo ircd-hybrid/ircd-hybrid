@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -30,40 +14,14 @@
 
 #ifndef INCLUDED_dbuf_h
 #define INCLUDED_dbuf_h
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
 
+#include "io.h"
 #include "list.h"
 
-/**
- * @def dbuf_length(x)
- * @brief Macro to get the total length of a dbuf queue.
- * @param x Pointer to the dbuf_queue.
- * @return Total length of the dbuf queue.
- */
-#define dbuf_length(x) ((x)->total_size)
-
-/**
- * @def dbuf_clear(x)
- * @brief Macro to clear a dbuf queue.
- * @param x Pointer to the dbuf_queue.
- */
-#define dbuf_clear(x) dbuf_delete(x, dbuf_length(x))
-
-/**
- * @var DBUF_BLOCK_SIZE
- * @brief Size of each data block within the dynamic buffer.
- */
-enum { DBUF_BLOCK_SIZE = 1024 };
-
-/**
- * @struct dbuf_block
- * @brief Structure representing a block of data within the dynamic buffer.
- */
-struct dbuf_block
-{
-  int ref_count;  /**< Reference count for the data block. */
-  size_t size;  /**< Size of the data block. */
-  char data[DBUF_BLOCK_SIZE];  /**< Actual data stored in the block. */
-};
+struct dbuf_block;
 
 /**
  * @struct dbuf_queue
@@ -71,16 +29,53 @@ struct dbuf_block
  */
 struct dbuf_queue
 {
-  list_t blocks;  /**< List of data blocks. */
-  size_t total_size;  /**< Total size of the dynamic buffer. */
-  size_t pos;  /**< Current position within the dynamic buffer. */
+  list_t block_list;  /**< List of data blocks. */
+  size_t length;  /**< Total size of the dynamic buffer. */
+  size_t head_offset;  /**< Current position within the dynamic buffer. */
 };
 
-extern void dbuf_ref_free(struct dbuf_block *);
-extern void dbuf_add(struct dbuf_queue *, struct dbuf_block *);
-extern void dbuf_delete(struct dbuf_queue *, size_t);
-extern void dbuf_put_fmt(struct dbuf_block *, const char *, ...);
-extern void dbuf_put_args(struct dbuf_block *, const char *, va_list);
-extern void dbuf_put(struct dbuf_queue *, const char *, size_t);
-extern struct dbuf_block *dbuf_alloc(void);
+struct dbuf_view
+{
+  const void *data;
+  size_t length;
+};
+
+struct dbuf_queue_iterator
+{
+  const struct dbuf_queue *queue;
+  const list_node_t *cursor;
+};
+
+extern void dbuf_block_append_fmt(struct dbuf_block *, const char *, ...) IO_AFP(2,3);
+extern void dbuf_block_append_vfmt(struct dbuf_block *, const char *, va_list);
+extern void dbuf_block_ref(struct dbuf_block *);
+extern void dbuf_block_truncate(struct dbuf_block *, size_t);
+extern void dbuf_block_unref(struct dbuf_block *);
+extern void dbuf_queue_append(struct dbuf_queue *, const void *, size_t);
+extern void dbuf_queue_append_block(struct dbuf_queue *, struct dbuf_block *);
+extern void dbuf_queue_clear(struct dbuf_queue *);
+extern void dbuf_queue_consume(struct dbuf_queue *, size_t);
+extern void dbuf_queue_iterator_init(const struct dbuf_queue *, struct dbuf_queue_iterator *);
+extern bool dbuf_block_append(struct dbuf_block *, const void *, size_t);
+extern bool dbuf_queue_iterator_next(struct dbuf_queue_iterator *, struct dbuf_view *);
+extern bool dbuf_queue_peek_head(const struct dbuf_queue *, struct dbuf_view *);
+extern size_t dbuf_block_length(const struct dbuf_block *);
+extern struct dbuf_block *dbuf_block_create(void);
+
+/**
+ * @brief Get the total length of data available in the dbuf queue.
+ * @param queue Pointer to the dbuf_queue.
+ * @return Total number of bytes available for reading.
+ */
+static inline size_t
+dbuf_queue_length(const struct dbuf_queue *queue)
+{
+  return queue->length;
+}
+
+static inline bool
+dbuf_queue_is_empty(const struct dbuf_queue *queue)
+{
+  return dbuf_queue_length(queue) == 0;
+}
 #endif  /* INCLUDED_dbuf_h */

@@ -1,37 +1,26 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file fdlist.c
  * \brief Maintains a list of file descriptors.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "comm.h"
 #include "defaults.h"
+#include "fdlist.h"
 #include "io_rlimit.h"
 #include "io_string.h"
-#include "fdlist.h"
-#include "comm.h"   /* comm_setselect */
 #include "memory.h"
-#include "misc.h"
-
 
 fde_t *fd_table;
 int number_fd = LEAKED_FDS;
@@ -79,7 +68,6 @@ fdlist_update_highest_fd(int fd, bool opening)
     --highest_fd;
 }
 
-/* Called to open a given filedescriptor */
 fde_t *
 fd_open(int fd, bool is_socket, const char *desc)
 {
@@ -107,18 +95,20 @@ fd_open(int fd, bool is_socket, const char *desc)
   return F;
 }
 
-/* Called to close a given filedescriptor */
 fde_t *
 fd_close(fde_t *F)
 {
   assert(F->fd >= 0);
   assert(F->flags.open == true);
 
-  if (F->flags.is_socket)
-    comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+  if (F->cleanup_handler)
+    F->cleanup_handler(F->cleanup_data);
 
-  if (tls_isusing(&F->tls))
-    tls_free(&F->tls);
+  if (F->flags.is_socket)
+    comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
+
+  if (tls_session_is_active(&F->tls))
+    tls_session_deinit(&F->tls);
 
   io_free(F->desc);
   /* Unlike squid, we're actually closing the FD here! -- adrian */
@@ -133,12 +123,6 @@ fd_close(fde_t *F)
   return F;
 }
 
-/*
- * fd_note() - set the fd note
- *
- * Note: must be careful not to overflow fd_table[fd].desc when
- *       calling.
- */
 void
 fd_note(fde_t *F, const char *format, ...)
 {

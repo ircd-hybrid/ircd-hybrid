@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*
@@ -28,6 +12,7 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include "config.h"  /**< Autotools-generated HAVE_STRFTIME_MINUS_E. */
 #include "io_time.h"
 #include "misc.h"
 
@@ -53,7 +38,13 @@ date(uintmax_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
-    strftime(buf, sizeof(buf), "%A %B %-e %Y -- %T %z", localtime((time_t *)&lclock));
+
+#if defined(HAVE_STRFTIME_MINUS_E) && HAVE_STRFTIME_MINUS_E
+    const char *const date_format = "%A %B %-e %Y -- %T %z";
+#else
+    const char *const date_format = "%A %B %e %Y -- %T %z";
+#endif
+    strftime(buf, sizeof(buf), date_format, localtime((time_t *)&lclock));
   }
 
   return buf;
@@ -101,7 +92,7 @@ const char *
 date_iso8601_usec(uintmax_t unused)
 {
   static char buf[64];
-  const io_time_t *const iotime = io_time_set();
+  const io_time_t *const iotime = io_time_update_cache();
   uintmax_t current_time = iotime->sec_real;
 
   /* Convert to local time. */
@@ -141,7 +132,13 @@ date_ctime(uintmax_t lclock)
   if (lclock_last != lclock)
   {
     lclock_last = lclock;  /* Cache value to avoid repetitive strftime() calls. */
-    strftime(buf, sizeof(buf), "%a %b %-e %T %Y", localtime((time_t *)&lclock));
+
+#if defined(HAVE_STRFTIME_MINUS_E) && HAVE_STRFTIME_MINUS_E
+    const char *const date_format = "%a %b %-e %T %Y";
+#else
+    const char *const date_format = "%a %b %e %T %Y";
+#endif
+    strftime(buf, sizeof(buf), date_format, localtime((time_t *)&lclock));
   }
 
   return buf;
@@ -169,27 +166,4 @@ time_format_duration(uintmax_t duration)
   snprintf(buf, sizeof(buf), "%u day%s, %02u:%02u:%02u",
            days, days == 1 ? "" : "s", hours, minutes, seconds);
   return buf;
-}
-
-/**
- * @brief Converts binary data to a hexadecimal string.
- *
- * This function takes binary data and converts it into a hexadecimal string.
- *
- * @param bin Binary data to convert.
- * @param hex Output buffer for the hexadecimal string.
- * @param length Length of the binary data.
- */
-void
-binary_to_hex(const unsigned char *bin, char *hex, unsigned int length)
-{
-  static const char trans[] = "0123456789ABCDEF";
-
-  for (const unsigned char *const end = bin + length; bin < end; ++bin)
-  {
-    *hex++ = trans[*bin >>  4];
-    *hex++ = trans[*bin & 0xf];
-  }
-
-  *hex = '\0';
 }

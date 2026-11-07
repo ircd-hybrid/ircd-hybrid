@@ -1,30 +1,18 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
+#include "ircd_module.h"
 #include "client.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode regonly_mode =
@@ -37,8 +25,7 @@ static hook_flow_t
 msg_client_source_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
-
-  if (user_mode_has_flag(ctx->target, UMODE_REGONLY) == false || ctx->target == ctx->source)
+  if (!user_mode_has_flag(ctx->target, UMODE_REGONLY) || ctx->target == ctx->source)
     return HOOK_FLOW_CONTINUE;
 
   if (user_mode_has_flag(ctx->source, UMODE_REGISTERED | UMODE_OPER))
@@ -51,22 +38,30 @@ msg_client_source_local_hook(void *ctx_)
   return HOOK_FLOW_STOP;
 }
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&regonly_mode);
+  if (!ircd_module_register_user_mode(&regonly_mode, error_message, error_message_size))
+    return false;
+
   hook_install(ircd_hook_msg_client_source_local, msg_client_source_local_hook, HOOK_PRIORITY_DEFAULT);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&regonly_mode);
   hook_uninstall(ircd_hook_msg_client_source_local, msg_client_source_local_hook);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_regonly",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

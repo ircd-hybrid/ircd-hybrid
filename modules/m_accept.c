@@ -1,42 +1,30 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2000-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2000-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_accept.c
  * \brief Includes required functions for processing the ACCEPT command.
  */
 
-#include "stdinc.h"
-#include "client.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_string.h"
-#include "ircd.h"
 #include "list.h"
+#include "memory.h"
+#include "module.h"
+
+#include "accept.h"
+#include "client.h"
+#include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "nuh.h"
 #include "numeric.h"
-#include "conf.h"
-#include "send.h"
 #include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "accept.h"
-
+#include "send.h"
 
 /*! \brief Sends a list of nick!user\@host masks a Client
  *         has on its acceptlist.
@@ -54,7 +42,7 @@ accept_list(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->acceptlist.head)
+  LIST_FOREACH(node, source->connection->accept_list.head)
   {
     const struct AcceptItem *const accept = node->data;
     size_t masklen = strlen(accept->nick) +
@@ -89,7 +77,7 @@ accept_list(struct Client *source)
  *      - parv[1] = comma-separated list of masks to be accepted or removed
  */
 static void
-m_accept(struct Client *source, int parc, char *parv[])
+m_accept(struct Client *source, size_t parc, char *parv[])
 {
   char *mask = collapse(parv[1]);
 
@@ -112,9 +100,9 @@ m_accept(struct Client *source, int parc, char *parv[])
     .hostsize = sizeof(host)
   };
 
-  char *p = NULL;
-  for (mask = strtok_r(mask, ",", &p); mask;
-       mask = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (mask = strtok_r(mask, ",", &saveptr); mask;
+       mask = strtok_r(NULL, ",", &saveptr))
   {
     if (*mask == '-' && *++mask)
     {
@@ -122,18 +110,18 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, io_strcasecmp);
       if (accept == NULL)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTNOT, nick, user, host);
         continue;
       }
 
-      accept_del(accept, &source->connection->acceptlist);
+      accept_del(accept, &source->connection->accept_list);
     }
     else if (*mask)
     {
-      if (list_length(&source->connection->acceptlist) >= ConfigGeneral.max_accept)
+      if (list_length(&source->connection->accept_list) >= ConfigGeneral.max_accept)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTFULL);
         return;
@@ -143,14 +131,14 @@ m_accept(struct Client *source, int parc, char *parv[])
       nuh_split(&nuh);
 
       struct AcceptItem *accept =
-        accept_find(nick, user, host, &source->connection->acceptlist, irccmp);
+        accept_find(nick, user, host, &source->connection->accept_list, io_strcasecmp);
       if (accept)
       {
         sendto_one_numeric(source, &me, ERR_ACCEPTEXIST, nick, user, host);
         continue;
       }
 
-      accept_add(nick, user, host, &source->connection->acceptlist);
+      accept_add(nick, user, host, &source->connection->accept_list);
       accept_list(source);
     }
   }
@@ -159,27 +147,31 @@ m_accept(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "ACCEPT",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_accept },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_accept }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_accept },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_accept }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_accept",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

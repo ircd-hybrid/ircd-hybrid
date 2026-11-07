@@ -1,112 +1,102 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015 Attila Molnar <attilamolnar@hush.com>
- *  Copyright (c) 2015 Adam <Adam@anope.org>
- *  Copyright (c) 2015-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015 Attila Molnar <attilamolnar@hush.com>
+ * SPDX-FileCopyrightText: 2015 Adam <Adam@anope.org>
+ * SPDX-FileCopyrightText: 2015-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file tls_none.c
  * \brief Dummy file for no TLS support
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <sys/types.h>
+
 #include "tls.h"
 
 #ifndef HAVE_TLS
-
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
   return false;
 }
 
 void
-tls_init(void)
+tls_library_init(void)
 {
 }
 
 bool
-tls_new_credentials(void)
-{
-  return true;
-}
-
-const char *
-tls_get_cipher(const tls_data_t *tls_data)
-{
-  return NULL;
-}
-
-const char *
-tls_get_version(void)
-{
-  return NULL;
-}
-
-bool
-tls_isusing(tls_data_t *tls_data)
+tls_configure(const tls_config_t *config)
 {
   return false;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_clear_config(void)
+{
+}
+
+const char *
+tls_session_get_cipher(const tls_data_t *tls_data)
+{
+  return NULL;
+}
+
+tls_library_info_t
+tls_library_get_info(void)
+{
+  return (tls_library_info_t){ 0 };
+}
+
+bool
+tls_session_is_active(const tls_data_t *tls_data)
+{
+  return false;
+}
+
+void
+tls_session_deinit(tls_data_t *tls_data)
 {
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
+  *want_write = false;
   return -1;
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
+  *want_read = false;
   return -1;
 }
 
 void
-tls_shutdown(tls_data_t *tls_data)
+tls_session_close_notify(tls_data_t *tls_data)
 {
 }
 
 bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
 {
   return false;
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
 {
-  return 0;
+  if (errstr)
+    *errstr = NULL;
+
+  return TLS_HANDSHAKE_ERROR;
 }
 
 bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  return false;
-}
-
-bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
 {
   return false;
 }

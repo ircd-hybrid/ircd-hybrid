@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -31,7 +15,6 @@
 
 #ifndef INCLUDED_io_time_h
 #define INCLUDED_io_time_h
-
 #include <stdint.h>
 
 /**
@@ -70,37 +53,44 @@ enum io_time_error_code
  * @brief Enumeration for specifying the type of time value to retrieve.
  *
  * This enumeration defines constants for selecting which part of the time data
- * to retrieve (seconds or nanoseconds, real-time or monotonic). These values
- * are used as parameters in the io_time_get function to specify the required
- * time component.
+ * to retrieve (seconds, milliseconds, or nanoseconds, real-time or monotonic).
+ * These values are used as parameters in the io_time_get function to specify the
+ * required time component.
  */
 typedef enum
 {
   IO_TIME_REALTIME_SEC,  /**< Real-time clock, seconds part. */
-  IO_TIME_REALTIME_NSEC,  /**< Real-time clock, nanoseconds part. */
+  IO_TIME_REALTIME_MSEC,  /**< Real-time clock, milliseconds part (0-999). */
+  IO_TIME_REALTIME_NSEC,  /**< Real-time clock, nanoseconds part (0-999,999,999). */
   IO_TIME_MONOTONIC_SEC,  /**< Monotonic clock, seconds part. */
-  IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part. */
+  IO_TIME_MONOTONIC_MSEC,  /**< Monotonic clock, milliseconds part (0-999). */
+  IO_TIME_MONOTONIC_NSEC,  /**< Monotonic clock, nanoseconds part (0-999,999,999). */
 } io_time_type_t;
 
 /**
  * @struct io_time_t
  * @brief Structure holding real-time and monotonic time values.
  *
- * This structure stores both real-time and monotonic time values in seconds and nanoseconds.
- * It is updated by the io_time_set function and accessed by the io_time_get function.
+ * This structure stores both real-time and monotonic time values in seconds,
+ * milliseconds, and nanoseconds. It is updated by the io_time_set function
+ * and accessed by the io_time_get function.
  */
 typedef struct
 {
   uintmax_t sec_real;  /**< Seconds part of the real-time clock. */
-  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock. */
+  uintmax_t msec_real;  /**< Milliseconds part of the real-time clock (0-999). */
+  uintmax_t nsec_real;  /**< Nanoseconds part of the real-time clock (0-999,999,999). */
   uintmax_t sec_monotonic;  /**< Seconds part of the monotonic clock. */
-  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock. */
+  uintmax_t msec_monotonic;  /**< Milliseconds part of the monotonic clock (0-999). */
+  uintmax_t nsec_monotonic;  /**< Nanoseconds part of the monotonic clock (0-999,999,999). */
 } io_time_t;
 
 extern void io_time_set_error_callback(void (*)(enum io_time_error_code, const char *));
 extern const char *io_time_get_error(void);
 extern int io_time_init(void);
-extern const io_time_t *io_time_set(void);
+extern const io_time_t *io_time_update_cache(void);
 extern uintmax_t io_time_get(io_time_type_t);
+extern uintmax_t io_time_get_monotonic_ms_total(void);
+extern uintmax_t io_time_get_monotonic_ns_total(void);
 #endif  /* INCLUDED_io_time_h */
 

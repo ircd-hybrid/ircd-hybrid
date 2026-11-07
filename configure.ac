@@ -1,77 +1,80 @@
-dnl Process this file with autoconf to produce a configure script.
-
 AC_PREREQ([2.71])
-AC_INIT([ircd-hybrid], [8.2.47], [bugs@ircd-hybrid.org])
-AM_INIT_AUTOMAKE([1.16.5 subdir-objects])
-AM_MAINTAINER_MODE
-AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_SRCDIR([src/ircd.c])
 
-# Checks for programs.
+dnl Project initialization.
+AC_INIT([ircd-hybrid],[8.2.48],[bugs@ircd-hybrid.org],[ircd-hybrid],[https://www.ircd-hybrid.org/])
+AC_CONFIG_SRCDIR([src/ircd.c])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
+
+AM_INIT_AUTOMAKE([1.16.5 foreign])
+AM_MAINTAINER_MODE
+
+dnl Toolchain.
 AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_LEX([noyywrap])
 AC_PROG_INSTALL
 
-# Initializing libtool.
-LT_CONFIG_LTDL_DIR([libltdl])
+dnl Libtool.
 LT_INIT([dlopen disable-static])
-LTDL_INIT([recursive convenience])
-LIBTOOL="$LIBTOOL --silent"
 
-# Checks for libraries.
-AX_GCC_STACK_PROTECT_CC
-AX_GCC_STACK_PROTECT_LIB
-AX_LIBRARY_JANSSON
-AX_LIBRARY_NET
+dnl Native dynamic module loader.
+AC_CHECK_HEADERS([dlfcn.h], [], [AC_MSG_ERROR([dlfcn.h is required])])
+AC_SEARCH_LIBS([dlopen], [dl], [], [AC_MSG_ERROR([dlopen() is required])])
+AC_CHECK_FUNCS([dlsym dlclose dlerror], [], [AC_MSG_ERROR([a POSIX dynamic loader is required])])
 
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_BIGENDIAN
-
-# Checks for library functions.
-AC_CHECK_FUNCS_ONCE([strlcat strlcpy])
-
-# Checks for header files.
-AC_CHECK_HEADERS_ONCE([
-  crypt.h
-  socket.h
-  sys/param.h
-  sys/wait.h
-  types.h
-])
-
-AC_SEARCH_LIBS([crypt], [crypt])
-
-# Force Clang to error on unknown warning options so AX_CHECK_COMPILE_FLAG detects unsupported flags.
+dnl Compiler flag handling.
+dnl Make Clang reject unknown warning options so feature tests detect them.
 AX_APPEND_COMPILE_FLAGS([-Werror=unknown-warning-option])
-
-# Disable -Wformat-truncation specifically for gcc.
+dnl Disable GCC's format-truncation warning when supported.
 AX_APPEND_COMPILE_FLAGS([-Wno-format-truncation])
 
-# Argument processing.
+dnl Build options and feature selection.
 AX_ARG_IOLOOP_MECHANISM
 AX_ARG_ENABLE_ASSERT
 AX_ARG_ENABLE_DEBUGGING
 AX_ARG_ENABLE_WARNINGS
-AX_ARG_ENABLE_EFENCE
 AX_ARG_WITH_TLS
 
+dnl Build hardening.
+AX_ARG_ENABLE_STACK_PROTECTOR
+
+dnl Required libraries and platform support.
+AX_LIBRARY_JANSSON
+AC_SEARCH_LIBS([crypt], [crypt], [], [AC_MSG_ERROR([crypt() is required but was not found])])
+
+dnl Header availability.
+AC_CHECK_HEADERS_ONCE([
+  crypt.h
+])
+
+dnl Function availability.
+AC_CHECK_FUNCS_ONCE([
+  strlcat
+  strlcpy
+])
+
+AX_CHECK_STRFTIME_MINUS_E
+
+dnl Compile-time installation paths.
 AX_DEFINE_DIR([PREFIX], [prefix], [Set to prefix.])
 AX_DEFINE_DIR([SYSCONFDIR], [sysconfdir], [Set to sysconfdir.])
 AX_DEFINE_DIR([LIBDIR], [libdir], [Set to libdir.])
 AX_DEFINE_DIR([DATADIR], [datadir], [Set to datadir.])
 AX_DEFINE_DIR([LOCALSTATEDIR], [localstatedir], [Set to localstatedir.])
 
+dnl Reproducible build metadata.
 AX_DEFINE_BUILD_DATE
 
+AX_ARG_ENABLE_SANITIZERS
+
+dnl Generated files.
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
   help/Makefile
   libio/Makefile
   libio/src/Makefile
-  libltdl/Makefile
   modules/Makefile
   src/Makefile
   tools/Makefile
@@ -79,9 +82,6 @@ AC_CONFIG_FILES([
 
 AC_OUTPUT
 
-echo "###############################################################################"
-echo "Configuration complete.  Type make (or gmake on some *BSD machines) to compile."
-echo
-echo "ircd-hybrid will be installed in ${prefix}.  To change this, run:"
-echo "   ./configure --prefix=DIRECTORY"
-echo "###############################################################################"
+AC_MSG_NOTICE([Configuration complete.])
+AC_MSG_NOTICE([Installation prefix: ${prefix}])
+AC_MSG_NOTICE([Run 'make' (or 'gmake' on some BSD systems) to build ircd-hybrid.])

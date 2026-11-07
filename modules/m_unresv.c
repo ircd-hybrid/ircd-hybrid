@@ -1,73 +1,72 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2001-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2001-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_unresv.c
  * \brief Includes required functions for processing the UNRESV command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
+#include "log.h"
+#include "module.h"
+
+#include "aline.h"
+#include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
 #include "conf_shared.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "log.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
-
 
 static void
-resv_remove(struct Client *source, const struct aline_ctx *aline)
+_unresv_report_removed(struct Client *source, const struct ResvItem *resv)
 {
-  struct ResvItem *resv = resv_find(aline->mask, irccmp);
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "RESV removed by %s for [%s]",
+                 source_name, resv->mask);
+  log_write(LOG_TYPE_RESV, "RESV removed by %s for [%s]",
+            source_name, resv->mask);
+}
+
+static void
+_unresv_remove(struct Client *source, const struct aline_ctx *aline)
+{
+  struct ResvItem *const resv = resv_find(aline->mask, io_strcasecmp);
   if (resv == NULL)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":No RESV for %s", aline->mask);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":No RESV for [%s] found",
+                        aline->mask);
     return;
   }
 
   if (resv->in_database == false)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":The RESV for %s is in the configuration file and must be removed by hand",
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":RESV for [%s] is in the configuration file and must be removed by hand",
                         resv->mask);
     return;
   }
 
-  if (IsClient(source))
-    sendto_one_notice(source, &me, ":RESV for [%s] is removed", resv->mask);
+  if (client_is_user(source))
+    sendto_one_notice(source, &me, ":Removed RESV [%s]",
+                      resv->mask);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s has removed the RESV for: [%s]",
-                 get_oper_name(source), resv->mask);
-  log_write(LOG_TYPE_RESV, "%s removed RESV for [%s]",
-            get_oper_name(source), resv->mask);
+  _unresv_report_removed(source, resv);
 
   resv_delete(resv, false);
 }
@@ -86,17 +85,16 @@ resv_remove(struct Client *source, const struct aline_ctx *aline)
  *      - parv[3] = target server
  */
 static void
-mo_unresv(struct Client *source, int parc, char *parv[])
+mo_unresv(struct Client *source, size_t parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = false, .simple_mask = true };
-
-  if (!HasOFlag(source, OPER_FLAG_UNRESV))
+  if (!client_has_oper_flag(source, OPER_FLAG_UNRESV))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "unresv");
     return;
   }
 
-  if (aline_parse("UNRESV", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = false, .simple_mask = true };
+  if (!aline_parse("UNRESV", source, parc, parv, &aline))
     return;
 
   if (aline.server)
@@ -112,7 +110,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
     cluster_distribute(source, "UNRESV", CAPAB_KLN, CLUSTER_UNRESV, "%s",
                        aline.mask);
 
-  resv_remove(source, &aline);
+  _unresv_remove(source, &aline);
 }
 
 /*! \brief UNRESV command handler
@@ -128,7 +126,7 @@ mo_unresv(struct Client *source, int parc, char *parv[])
  *      - parv[2] = name mask
  */
 static void
-ms_unresv(struct Client *source, int parc, char *parv[])
+ms_unresv(struct Client *source, size_t parc, char *parv[])
 {
   struct aline_ctx aline =
   {
@@ -144,35 +142,39 @@ ms_unresv(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_UNRESV, source->servptr->name, source->username, source->host))
-    resv_remove(source, &aline);
+  if (client_is_service(source) ||
+      shared_find(SHARED_UNRESV, source->uplink->name, source->username, source->host))
+    _unresv_remove(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "UNRESV",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_unresv, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_unresv, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_unresv, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_unresv, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_unresv",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

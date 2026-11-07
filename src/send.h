@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file send.h
@@ -25,6 +9,7 @@
 
 #ifndef INCLUDED_send_h
 #define INCLUDED_send_h
+#include <stdint.h>
 
 #include "io.h"
 #include "fdlist.h"
@@ -59,38 +44,31 @@ typedef enum
   SEND_TYPE_LOCOPS,  /**< A notice message sent to local operators. Prefix: "LocOps". */
 } send_type_t;
 
-/**
- * @enum send_match_type_t
- * @brief Enum for representing the type of match to perform.
- *
- * This enum lists the possible types of matches for sending messages using the sendto_match_butone function.
- * Each type specifies whether to match based on the client's hostname or server name.
- */
-typedef enum
-{
-  SEND_MATCH_HOST,  /**< Match based on the client's hostname. */
-  SEND_MATCH_SERVER,  /**< Match based on the client's server name. */
-} send_match_type_t;
-
 /*
  * struct decls
  */
 struct Channel;
 struct Client;
 
+typedef bool (*send_filter_fn)(const struct Client *client, void *context);
+
 /* send.c prototypes */
-extern void sendq_unblocked(fde_t *, void *);
+extern void send_write_ready(fde_t *, void *);
 extern void send_queued_write(struct Client *);
+
+extern void sendto_one_fail(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
+extern void sendto_one_warn(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
+extern void sendto_one_note(struct Client *, const struct Client *, const char *, const char *, const char *[], size_t, const char *, ...) IO_AFP(7,8);
 extern void sendto_one(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void sendto_one_numeric(struct Client *, const struct Client *, enum irc_numerics, ...);
 extern void sendto_one_notice(struct Client *, const struct Client *, const char *, ...) IO_AFP(3,4);
-extern void sendto_one_anywhere(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
+extern void sendto_one_command(struct Client *, const struct Client *, const char *, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients(uint64_t, send_recipient_t, send_type_t, const char *, ...) IO_AFP(4,5);
 extern void sendto_clients_ratelimited(uintmax_t *, const char *, ...) IO_AFP(2,3);
-extern void sendto_match_butone(const struct Client *, const struct Client *, const char *, send_match_type_t, const char *, ...) IO_AFP(5,6);
-extern void sendto_servers(const struct Client *, const unsigned int, const unsigned int, const char *, ...) IO_AFP(4,5);
-extern void sendto_match_servs(const struct Client *, const char *, unsigned int, const char *, ...) IO_AFP(4,5);
-extern void sendto_common_channels_local(struct Client *, bool, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
-extern void sendto_channel_local(const struct Client *, struct Channel *, int, unsigned int, unsigned int, const char *, ...) IO_AFP(6,7);
-extern void sendto_channel_butone(struct Client *, const struct Client *, struct Channel *, int, const char *, ...) IO_AFP(5,6);
+extern void sendto_filtered_butone(const struct Client *, const struct Client *, send_filter_fn, void *, const char *, ...) IO_AFP(5,6);
+extern void sendto_servers(const struct Client *, uint32_t, uint32_t, const char *, ...) IO_AFP(4,5);
+extern void sendto_match_servs(const struct Client *, const char *, uint32_t, const char *, ...) IO_AFP(4,5);
+extern void sendto_common_channels_local(struct Client *, bool, uint32_t, uint32_t, const char *, ...) IO_AFP(5,6);
+extern void sendto_channel_local(const struct Client *, const struct Channel *, int, uint32_t, uint32_t, const char *, ...) IO_AFP(6,7);
+extern void sendto_channel_butone(const struct Client *, const struct Client *, const struct Channel *, int, const char *, ...) IO_AFP(5,6);
 #endif  /* INCLUDED_send_h */

@@ -1,34 +1,24 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #ifndef INCLUDED_command_h
 #define INCLUDED_command_h
-
+#include <stdbool.h>
+#include <stddef.h>
 
 struct Client;
 
+enum
+{
+  COMMAND_NAME_LENGTH_MAX = 32,
+  COMMAND_NAME_BUFFER_SIZE = COMMAND_NAME_LENGTH_MAX + 1
+};
 
 /*
  * m_functions execute protocol messages on this server:
- * int m_func(struct Client *source_p, int parc, char *parv[]);
+ * int m_func(struct Client *source_p, size_t parc, char *parv[]);
  *
  * source_p is the source of the message, defined by the
  * prefix part of the message if present. If not
@@ -47,27 +37,28 @@ struct Client;
  * note: it is guaranteed that parv[0]..parv[parc - 1] are all
  * non-NULL pointers.
  */
+typedef void (*command_handler_fn)(struct Client *source, size_t parc, char *parv[]);
 
 /** Enumerated type for client command handlers. */
-typedef enum HandlerType
+enum command_handler_type
 {
-  UNREGISTERED_HANDLER,  /**< Used for unregistered clients. */
-  CLIENT_HANDLER,  /**< Used for local users. */
-  SERVER_HANDLER,  /**< Used for server connections. */
-  ENCAP_HANDLER,  /**< Used for encapsulated commands (ENCAP). */
-  OPER_HANDLER,  /**< Used for IRC operators. */
-  LAST_HANDLER_TYPE,  /**< Number of handler types. */
-} HandlerType;
+  COMMAND_HANDLER_UNREGISTERED,  /**< Used for unregistered clients. */
+  COMMAND_HANDLER_USER,  /**< Used for local users. */
+  COMMAND_HANDLER_SERVER,  /**< Used for server connections. */
+  COMMAND_HANDLER_ENCAP,  /**< Used for encapsulated commands (ENCAP). */
+  COMMAND_HANDLER_OPER,  /**< Used for IRC operators. */
+  COMMAND_HANDLER_TYPE_COUNT,  /**< Number of handler types. */
+};
 
 struct CommandHandler
 {
   bool end_grace_period;  /**< Handler ends the flood grace period */
   bool empty_last_arg;  /**< Last argument is allowed to be empty / NUL */
-  unsigned int args_min;  /**< At least this many args must be passed or an error will
+  size_t args_min;  /**< At least this many args must be passed or an error will
                                be sent to the user before the m_func is even called */
-  unsigned int args_max;  /**< Maximum permitted parameters. If reached, the rest
+  size_t args_max;  /**< Maximum permitted parameters. If reached, the rest
                                of the message will be put into this last parameter */
-  void (*handler)(struct Client *, int, char *[]);  /**< Command handler function. */
+  command_handler_fn handler;  /**< Command handler function. */
 };
 
 /*
@@ -80,18 +71,18 @@ struct Command
   unsigned int count;  /**< Number of times command used */
   unsigned int rcount;  /**< Number of times command used by server */
   unsigned int ecount;  /**< Number of times command has been issued via ENCAP */
-  size_t bytes;  /**< Bytes received for this command */
-
-  /* handlers:
-   * UNREGISTERED, CLIENT, SERVER, ENCAP, OPER, LAST
-   */
-  struct CommandHandler handlers[LAST_HANDLER_TYPE];
+  size_t bytes;  /**< Bytes received from the command token through the end of the message. */
+  struct CommandHandler handlers[COMMAND_HANDLER_TYPE_COUNT];  /**< Command dispatch handlers. */
 };
 
 extern void command_add(struct Command *);
-extern void command_del(struct Command *);
 extern void command_add_array(struct Command *, size_t);
+extern void command_del(struct Command *);
 extern void command_del_array(struct Command *, size_t);
 extern void command_report(struct Client *);
 extern struct Command *command_find(const char *);
+extern void command_handler_ignore(struct Client *, size_t, char *[]);
+extern void command_handler_reject_not_oper(struct Client *, size_t, char *[]);
+extern void command_handler_reject_not_registered(struct Client *, size_t, char *[]);
+extern void command_handler_reject_already_registered(struct Client *, size_t, char *[]);
 #endif  /* INCLUDED_command_h */

@@ -1,39 +1,57 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_svinfo.c
  * \brief Includes required functions for processing the SVINFO command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "io_parse.h"
 #include "io_time.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "server.h"
-#include "conf.h"
 #include "log.h"
-#include "parse.h"
 #include "module.h"
 
+#include "client.h"
+#include "client_format.h"
+#include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "parse.h"
+#include "send.h"
+#include "server.h"
+
+static void _svinfo_report_link_status(struct Client *, bool, const char *, ...) IO_AFP(3, 4);
+static void
+_svinfo_report_link_status(struct Client *link, bool write_log, const char *status_format, ...)
+{
+  char status[IRCD_BUFSIZE];
+
+  va_list args;
+  va_start(args, status_format);
+  vsnprintf(status, sizeof(status), status_format, args);
+  va_end(args);
+
+  client_format_name_buffer_t admin_name_buffer;
+  client_format_name_buffer_t oper_name_buffer;
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Link %s %s",
+                 client_format_name(link, CLIENT_FORMAT_NAME_ADMIN, &admin_name_buffer), status);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Link %s %s",
+                 client_format_name(link, CLIENT_FORMAT_NAME_OPER, &oper_name_buffer), status);
+
+  if (write_log)
+  {
+    client_format_name_buffer_t log_name_buffer;
+    log_write(LOG_TYPE_IRCD, "Link %s %s",
+              client_format_name(link, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), status);
+  }
+}
 
 /*! \brief SVINFO command handler
  *
@@ -50,95 +68,99 @@
  *      - parv[4] = server's idea of UTC time
  */
 static void
-ms_svinfo(struct Client *source, int parc, char *parv[])
+ms_svinfo(struct Client *source, size_t parc, char *parv[])
 {
-  if (!IsServer(source) || !MyConnect(source))
+  if (!client_is_local_server(source))
     return;
 
-  server_ts_protocol_version_t current_version = atoi(parv[1]);
-  server_ts_protocol_version_t minimum_version = atoi(parv[2]);
-  if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
-      minimum_version > SERVER_TS_PROTOCOL_CURRENT)
+  uintmax_t current_version;
+  uintmax_t minimum_version;
+  if (io_parse_uintmax(parv[1], &current_version) != IO_PARSE_OK ||
+      io_parse_uintmax(parv[2], &minimum_version) != IO_PARSE_OK)
   {
-    /*
-     * A server with the wrong TS version connected; since we're
-     * TS_ONLY we can't fall back to the non-TS protocol so
-     * we drop the link  -orabidoo
-     */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, SHOW_IP), current_version, minimum_version);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, MASK_IP), current_version, minimum_version);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, wrong TS protocol version (current: %d, minimum: %d)",
-              client_get_name(source, SHOW_IP), current_version, minimum_version);
-
-    client_exit(source, "Incompatible TS version");
+    _svinfo_report_link_status(source, true, "dropped, malformed TS protocol version");
+    client_exit(source, "Malformed TS protocol version");
     return;
   }
 
-  /*
-   * Since we're here, might as well set event_base->time.sec_real while we're at it
-   */
-  io_time_set();
-
-  const uintmax_t remote_ts = strtoumax(parv[4], NULL, 10);
-  const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);
-  const intmax_t delta_ts = imaxabs(remote_ts - local_ts);
-
-  if (delta_ts > ConfigGeneral.ts_max_delta)
+  if (minimum_version > current_version)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
-    log_write(LOG_TYPE_IRCD,
-              "Link %s dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
+    _svinfo_report_link_status(source, true,
+                               "dropped, invalid TS protocol version range (current=%ju, minimum=%ju)",
+                               current_version, minimum_version);
+
+    client_exit(source, "Invalid TS protocol version range");
+    return;
+  }
+
+  if (current_version < SERVER_TS_PROTOCOL_MINIMUM ||
+      minimum_version > SERVER_TS_PROTOCOL_CURRENT)
+  {
+    _svinfo_report_link_status(source, true,
+                               "dropped, incompatible TS protocol version (current=%ju, minimum=%ju)",
+                               current_version, minimum_version);
+
+    client_exit(source, "Incompatible TS protocol version");
+    return;
+  }
+
+  uintmax_t remote_ts;
+  if (io_parse_uintmax(parv[4], &remote_ts) != IO_PARSE_OK)
+  {
+    _svinfo_report_link_status(source, true, "dropped, malformed timestamp");
+    client_exit(source, "Malformed timestamp");
+    return;
+  }
+
+  io_time_update_cache();
+
+  const uintmax_t local_ts = io_time_get(IO_TIME_REALTIME_SEC);
+  const uintmax_t abs_delta_ts = (remote_ts > local_ts) ? (remote_ts - local_ts) : (local_ts - remote_ts);
+
+  if (abs_delta_ts > ConfigGeneral.ts_max_delta)
+  {
+    _svinfo_report_link_status(source, true,
+                               "dropped, excessive TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+                               local_ts, remote_ts, abs_delta_ts);
 
     client_exit(source, "Excessive TS delta");
     return;
   }
 
-  if (delta_ts > ConfigGeneral.ts_warn_delta)
-  {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, SHOW_IP), local_ts, remote_ts, delta_ts);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
-              "Link %s notable TS delta (my TS=%ju, their TS=%ju, delta=%ji)",
-              client_get_name(source, MASK_IP), local_ts, remote_ts, delta_ts);
-  }
+  if (abs_delta_ts > ConfigGeneral.ts_warn_delta)
+    _svinfo_report_link_status(source, false,
+                               "notable TS delta (my TS=%ju, their TS=%ju, delta=%ju)",
+                               local_ts, remote_ts, abs_delta_ts);
 }
 
 static struct Command command_table =
 {
   .name = "SVINFO",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svinfo, .args_min = 5 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_svinfo, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_svinfo",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

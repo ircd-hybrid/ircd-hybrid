@@ -1,37 +1,26 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_userhost.c
  * \brief Includes required functions for processing the USERHOST command.
  */
 
-#include "stdinc.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "module.h"
-#include "io_string.h"
+
 #include "client.h"
+#include "client_find.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
+#include "parse.h"
 #include "send.h"
 #include "user_mode.h"
-#include "parse.h"
 
 /** See 5.7 Userhost message in RFC1459 */
 enum { RFC1459_MAX_USERHOST_LIST = 5 };
@@ -48,7 +37,7 @@ enum { RFC1459_MAX_USERHOST_LIST = 5 };
  *      - parv[1] = space-separated list of up to 5 nicknames
  */
 static void
-m_userhost(struct Client *source, int parc, char *parv[])
+m_userhost(struct Client *source, size_t parc, char *parv[])
 {
   char response[NICKLEN + USERLEN + HOSTLEN + 5]; /* +5 for "*=+@\0" */
   char buf[IRCD_BUFSIZE] = "";  /* Essential that buf[0] = '\0' */
@@ -57,13 +46,13 @@ m_userhost(struct Client *source, int parc, char *parv[])
 
   /* :me.name 302 source->name :n1*=+u1@h1 n2=-u2@h2 ...\r\n */
   /* 1       23456            78                        9 0  */
-  size_t len = strlen(me.name) + strlen(source->name) + 10;
+  const size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(parv[1], " ", &p); name && i++ < RFC1459_MAX_USERHOST_LIST;
-                   name = strtok_r(NULL,    " ", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(parv[1], " ", &saveptr); name && i++ < RFC1459_MAX_USERHOST_LIST;
+                   name = strtok_r(NULL,    " ", &saveptr))
   {
-    const struct Client *target = find_person(source, name);
+    const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
       continue;
 
@@ -76,16 +65,16 @@ m_userhost(struct Client *source, int parc, char *parv[])
     if (target == source)
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target->name,
-                         user_mode_has_flag(target, UMODE_OPER) ? "*" : "",
-                         target->away ? '-' : '+',
+                         client_is_oper(target) ? "*" : "",
+                         target->away_message ? '-' : '+',
                          target->username,
                          target->sockhost);
     else
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
-                         target->name, (user_mode_has_flag(target, UMODE_OPER) &&
-                                        (user_mode_has_flag(target, UMODE_HIDDEN) == false ||
-                                         user_mode_has_flag(source, UMODE_OPER))) ? "*" : "",
-                         target->away ? '-' : '+',
+                         target->name, (client_is_oper(target) &&
+                                        (!user_mode_has_flag(target, UMODE_HIDDEN) ||
+                                         client_is_oper(source))) ? "*" : "",
+                         target->away_message ? '-' : '+',
                          target->username,
                          target->host);
 
@@ -101,27 +90,31 @@ m_userhost(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "USERHOST",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_userhost, .args_min = 2, .args_max = 1 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_userhost",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

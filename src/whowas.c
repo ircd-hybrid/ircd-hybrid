@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -27,14 +11,17 @@
  * storing historical information about IRC users.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <string.h>
+#include <stddef.h>
+
 #include "io_string.h"
 #include "io_time.h"
-#include "list.h"
 #include "memory.h"
+
 #include "client.h"
-#include "hash.h"
 #include "conf.h"
+#include "hash.h"
 #include "whowas.h"
 
 static list_t whowas_list;  /*!< Linked list of struct Whowas pointers. */
@@ -46,15 +33,15 @@ static list_t whowas_hash[HASHSIZE];  /*!< Array of linked lists for Whowas entr
  * @param name The nickname string.
  * @return A pointer to the WhowasGroup struct if found, or NULL if not found.
  */
-struct WhowasGroup *
-whowas_group_find(const char *name)
+static struct WhowasGroup *
+_whowas_group_find(const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, whowas_hash[hash_string(name)].head)
   {
-    struct WhowasGroup *group = node->data;
-    if (irccmp(group->name, name) == 0)
+    struct WhowasGroup *const group = node->data;
+    if (io_strcasecmp(group->name, name) == 0)
       return group;
   }
 
@@ -68,12 +55,11 @@ whowas_group_find(const char *name)
  * @return A pointer to the newly created WhowasGroup struct.
  */
 static struct WhowasGroup *
-whowas_group_make(const char *name)
+_whowas_group_create(const char *name)
 {
-  struct WhowasGroup *group = io_calloc(sizeof(*group));
+  struct WhowasGroup *const group = io_calloc(sizeof(*group));
   group->name = io_strdup(name);
-  group->hash_value = hash_string(name);
-  list_add(group, &group->hash_node, &whowas_hash[group->hash_value]);
+  list_add(group, &group->hash_node, &whowas_hash[hash_string(group->name)]);
 
   return group;
 }
@@ -84,12 +70,12 @@ whowas_group_make(const char *name)
  * @param group Pointer to the WhowasGroup struct to be freed.
  */
 static void
-whowas_group_free(struct WhowasGroup *group)
+_whowas_group_destroy(struct WhowasGroup *group)
 {
-  if (list_is_empty(&group->whowas_records) == false)
+  if (!list_is_empty(&group->whowas_records))
     return;
 
-  list_remove(&group->hash_node, &whowas_hash[group->hash_value]);
+  list_remove(&group->hash_node, &whowas_hash[hash_string(group->name)]);
   io_free(group->name);
   io_free(group);
 }
@@ -99,7 +85,7 @@ whowas_group_free(struct WhowasGroup *group)
  * @param whowas Pointer to the Whowas struct to be unlinked and freed.
  */
 static void
-whowas_free(struct Whowas *whowas)
+_whowas_destroy(struct Whowas *whowas)
 {
   if (whowas->client)
     list_remove(&whowas->client_list_node, &whowas->client->whowas_list);
@@ -107,7 +93,7 @@ whowas_free(struct Whowas *whowas)
   list_remove(&whowas->whowas_list_node, &whowas_list);
   list_remove(&whowas->group_list_node, &whowas->group->whowas_records);
 
-  whowas_group_free(whowas->group);
+  _whowas_group_destroy(whowas->group);
 
   io_free(whowas->name);
   io_free(whowas->username);
@@ -129,13 +115,14 @@ whowas_free(struct Whowas *whowas)
  * @return A pointer to the allocated Whowas struct.
  */
 static struct Whowas *
-whowas_make(void)
+_whowas_create(void)
 {
-  if (list_length(&whowas_list) &&
-      list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(list_peek_tail(&whowas_list));  /* Free oldest item. */
+  assert(ConfigGeneral.whowas_history_length > 0);
 
-  struct Whowas *whowas = io_calloc(sizeof(*whowas));
+  while (list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
+    _whowas_destroy(list_peek_tail(&whowas_list));  /* Free oldest item. */
+
+  struct Whowas *const whowas = io_calloc(sizeof(*whowas));
   return whowas;
 }
 
@@ -150,9 +137,8 @@ whowas_make(void)
 void
 whowas_trim(void)
 {
-  while (list_length(&whowas_list) &&
-         list_length(&whowas_list) >= ConfigGeneral.whowas_history_length)
-    whowas_free(list_peek_tail(&whowas_list));
+  while (list_length(&whowas_list) > ConfigGeneral.whowas_history_length)
+    _whowas_destroy(list_peek_tail(&whowas_list));
 }
 
 /**
@@ -163,11 +149,11 @@ whowas_trim(void)
  * @param online Boolean indicating whether the client is online.
  */
 static void
-whowas_add(struct Whowas *whowas, struct Client *client, bool online)
+_whowas_add(struct Whowas *whowas, struct Client *client, bool online)
 {
-  whowas->group = whowas_group_find(whowas->name);
+  whowas->group = _whowas_group_find(whowas->name);
   if (whowas->group == NULL)
-    whowas->group = whowas_group_make(whowas->name);
+    whowas->group = _whowas_group_create(whowas->name);
 
   if (online)
   {
@@ -193,11 +179,14 @@ whowas_add(struct Whowas *whowas, struct Client *client, bool online)
 void
 whowas_add_history(struct Client *client, bool online)
 {
-  assert(IsClient(client));
+  assert(client_is_user(client));
 
-  struct Whowas *whowas = whowas_make();
-  whowas->logoff = io_time_get(IO_TIME_REALTIME_SEC);
-  whowas->server_hidden = IsHidden(client->servptr) != 0;
+  if (ConfigGeneral.whowas_history_length == 0)
+    return;
+
+  struct Whowas *const whowas = _whowas_create();
+  whowas->recorded_at = io_time_get(IO_TIME_REALTIME_SEC);
+  whowas->server_hidden = client_is_hidden(client->uplink);
   whowas->name = io_strdup(client->name);
   whowas->username = io_strdup(client->username);
   whowas->hostname = io_strdup(client->host);
@@ -205,9 +194,9 @@ whowas_add_history(struct Client *client, bool online)
   whowas->sockhost = io_strdup(client->sockhost);
   whowas->realname = io_strdup(client->info);
   whowas->account = io_strdup(client->account);
-  whowas->servername = io_strdup(client->servptr->name);
+  whowas->servername = io_strdup(client->uplink->name);
 
-  whowas_add(whowas, client, online);
+  _whowas_add(whowas, client, online);
 }
 
 /**
@@ -222,11 +211,18 @@ whowas_add_history(struct Client *client, bool online)
 void
 whowas_off_history(struct Client *client)
 {
-  while (client->whowas_list.head)
+  assert(client);
+
+  list_node_t *node;
+
+  while ((node = list_pop_head(&client->whowas_list)))
   {
-    struct Whowas *whowas = client->whowas_list.head->data;
+    struct Whowas *const whowas = node->data;
+    assert(whowas);
+    assert(node == &whowas->client_list_node);
+    assert(whowas->client == client);
+
     whowas->client = NULL;
-    list_remove(&whowas->client_list_node, &client->whowas_list);
   }
 }
 
@@ -241,66 +237,44 @@ whowas_off_history(struct Client *client)
  * @return A pointer to the Client struct representing the most recent user of the specified nickname within the time limit, or NULL if not found.
  */
 struct Client *
-whowas_get_history(const char *name, uintmax_t timelimit)
+whowas_find_recent_client(const char *name, uintmax_t max_age)
 {
-  struct WhowasGroup *group = whowas_group_find(name);
+  const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)
     return NULL;
 
-  timelimit = io_time_get(IO_TIME_REALTIME_SEC) - timelimit;
+  max_age = io_time_get(IO_TIME_REALTIME_SEC) - max_age;
 
   list_node_t *node;
   LIST_FOREACH(node, group->whowas_records.head)
   {
-    struct Whowas *whowas = node->data;
-    if (whowas->logoff >= timelimit)
+    struct Whowas *const whowas = node->data;
+    if (whowas->recorded_at >= max_age)
       return whowas->client;
   }
 
   return NULL;
 }
 
-/**
- * @brief Counts the allocated WhowasGroup and Whowas structures for debugging purposes.
- *
- * This function counts the number of allocated WhowasGroup and Whowas structures
- * and calculates the total memory occupied by these structures.
- *
- * @param group_count A pointer to an unsigned integer to store the count of WhowasGroup structures.
- * @param group_bytes A pointer to a size_t to store the total memory occupied by the WhowasGroup structures.
- * @param whowas_count A pointer to an unsigned integer to store the count of Whowas structures.
- * @param whowas_bytes A pointer to a size_t to store the total memory occupied by the Whowas structures.
- */
-void
-whowas_count_memory(unsigned int *const group_count, size_t *const group_bytes,
-                    unsigned int *const whowas_count, size_t *const whowas_bytes)
+unsigned int
+whowas_query(const char *name, unsigned int max_results, whowas_query_callback_t callback, void *user_data)
 {
-  *whowas_count = *whowas_bytes = *group_count = *group_bytes = 0;
+  const struct WhowasGroup *const group = _whowas_group_find(name);
+  if (group == NULL)
+    return 0;
+
+  unsigned int result_count = 0;
 
   list_node_t *node;
-  LIST_FOREACH(node, whowas_list.head)
+  LIST_FOREACH(node, group->whowas_records.head)
   {
+    if (max_results && result_count >= max_results)
+      break;
+
     const struct Whowas *const whowas = node->data;
-    ++*whowas_count;
-    *whowas_bytes += sizeof(*whowas);
-    *whowas_bytes += strlen(whowas->account) + 1;
-    *whowas_bytes += strlen(whowas->name) + 1;
-    *whowas_bytes += strlen(whowas->username) + 1;
-    *whowas_bytes += strlen(whowas->hostname) + 1;
-    *whowas_bytes += strlen(whowas->realhost) + 1;
-    *whowas_bytes += strlen(whowas->sockhost) + 1;
-    *whowas_bytes += strlen(whowas->realname) + 1;
-    *whowas_bytes += strlen(whowas->servername) + 1;
+    callback(whowas, user_data);
+    ++result_count;
   }
 
-  for (unsigned int i = 0; i < HASHSIZE; ++i)
-  {
-    LIST_FOREACH(node, whowas_hash[i].head)
-    {
-      const struct WhowasGroup *const group = node->data;
-      ++*group_count;
-      *group_bytes += sizeof(*group);
-      *group_bytes += strlen(group->name) + 1;
-    }
-  }
+  return result_count;
 }

@@ -1,58 +1,52 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_rehash.c
  * \brief Includes required functions for processing the REHASH command.
  */
 
-#include "stdinc.h"
-#include "client.h"
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
-#include "list.h"
-#include "numeric.h"
-#include "res.h"
+#include "log.h"
+#include "module.h"
+
+#include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_shared.h"
-#include "log.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "motd.h"
+#include "numeric.h"
+#include "parse.h"
+#include "resolver.h"
+#include "send.h"
 
+static void
+_rehash_report(struct Client *source, const char *option, const char *action)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  sendto_one_numeric(source, &me, RPL_REHASHING, option);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "%s is %s", source_name, action);
+  log_write(LOG_TYPE_IRCD, "REHASH %s from %s", option, source_name);
+}
 
 /*! \brief REHASH CONF handler
  *         Attempts to reload server's configuration file(s)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_conf(struct Client *source)
+_rehash_conf(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "CONF");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is rehashing configuration file(s)",
-                 get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH CONF from %s",
-            get_oper_name(source));
-  conf_rehash(false);
+  _rehash_report(source, "CONF", "rehashing configuration file(s)");
+  conf_rehash();
 }
 
 /*! \brief REHASH MOTD handler
@@ -60,14 +54,9 @@ rehash_conf(struct Client *source)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_motd(struct Client *source)
+_rehash_motd(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "MOTD");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is forcing re-reading of MOTD files",
-                 get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH MOTD from %s",
-            get_oper_name(source));
+  _rehash_report(source, "MOTD", "forcing re-reading of MOTD files");
   motd_recache();
 }
 
@@ -76,30 +65,37 @@ rehash_motd(struct Client *source)
  * \param source Pointer to client issuing the command
  */
 static void
-rehash_dns(struct Client *source)
+_rehash_dns(struct Client *source)
 {
-  sendto_one_numeric(source, &me, RPL_REHASHING, "DNS");
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                 "%s is rehashing DNS",
-                 get_oper_name(source));
-  log_write(LOG_TYPE_IRCD, "REHASH DNS from %s",
-            get_oper_name(source));
-  restart_resolver();
+  _rehash_report(source, "DNS", "rehashing DNS");
+  resolver_reload();
 }
 
-struct RehashStruct
+struct RehashOption
 {
-  const char *const option;
+  const char *const name;
   void (*const handler)(struct Client *);
 };
 
-static const struct RehashStruct rehash_cmd_table[] =
+static const struct RehashOption rehash_options[] =
 {
-  { .option = "CONF", .handler = rehash_conf },
-  { .option = "MOTD", .handler = rehash_motd },
-  { .option = "DNS", .handler = rehash_dns },
-  { .option = NULL }
+  { .name = "CONF", .handler = _rehash_conf },
+  { .name = "MOTD", .handler = _rehash_motd },
+  { .name = "DNS", .handler = _rehash_dns }
 };
+
+static const struct RehashOption *
+_rehash_option_find(const char *name)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(rehash_options); ++i)
+  {
+    const struct RehashOption *const option = &rehash_options[i];
+    if (io_strcasecmp(name, option->name) == 0)
+      return option;
+  }
+
+  return NULL;
+}
 
 /*! \brief REHASH command handler
  *
@@ -117,49 +113,46 @@ static const struct RehashStruct rehash_cmd_table[] =
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-mo_rehash(struct Client *source, int parc, char *parv[])
+mo_rehash(struct Client *source, size_t parc, char *parv[])
 {
-  const char *option = NULL;
-  const char *server = NULL;
+  const char *option_name = NULL;
+  const char *server_mask = NULL;
 
   if (!string_is_empty(parv[2]))
   {
-    if (!HasOFlag(source, OPER_FLAG_REHASH_REMOTE))
+    if (!client_has_oper_flag(source, OPER_FLAG_REHASH_REMOTE))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash:remote");
       return;
     }
 
-    server = parv[1];
-    option = parv[2];
+    server_mask = parv[1];
+    option_name = parv[2];
   }
   else
   {
-    if (!HasOFlag(source, OPER_FLAG_REHASH))
+    if (!client_has_oper_flag(source, OPER_FLAG_REHASH))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "rehash");
       return;
     }
 
-    option = parv[1];
+    option_name = parv[1];
   }
 
-  for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
+  const struct RehashOption *const option = _rehash_option_find(option_name);
+  if (option == NULL)
   {
-    if (irccmp(tab->option, option))
-      continue;
-
-    if (!string_is_empty(server))
-      sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
-
-    if (string_is_empty(server) || match(server, me.name) == 0)
-      tab->handler(source);
-
+    sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
+                      option_name);
     return;
   }
 
-  sendto_one_notice(source, &me, ":%s is not a valid option. Choose from CONF, DNS, MOTD",
-                    option);
+  if (!string_is_empty(server_mask))
+    sendto_match_servs(source, server_mask, 0, "REHASH %s %s", server_mask, option->name);
+
+  if (string_is_empty(server_mask) || match(server_mask, me.name) == 0)
+    option->handler(source);
 }
 
 /*! \brief REHASH command handler
@@ -175,53 +168,54 @@ mo_rehash(struct Client *source, int parc, char *parv[])
  *      - parv[2] = option [CONF, DNS, MOTD]
  */
 static void
-ms_rehash(struct Client *source, int parc, char *parv[])
+ms_rehash(struct Client *source, size_t parc, char *parv[])
 {
-  const char *const option = parv[2];
-  const char *const server = parv[1];
+  const char *const server_mask = parv[1];
+  const char *const option_name = parv[2];
 
-  sendto_match_servs(source, server, 0, "REHASH %s %s", server, option);
+  sendto_match_servs(source, server_mask, 0, "REHASH %s %s", server_mask, option_name);
 
-  if (match(server, me.name))
+  if (match(server_mask, me.name))
     return;
 
-  if (!shared_find(SHARED_REHASH, source->servptr->name, source->username, source->host))
+  if (!shared_find(SHARED_REHASH, source->uplink->name, source->username, source->host))
     return;
 
-  for (const struct RehashStruct *tab = rehash_cmd_table; tab->handler; ++tab)
-  {
-    if (irccmp(tab->option, option))
-      continue;
-
-    tab->handler(source);
+  const struct RehashOption *const option = _rehash_option_find(option_name);
+  if (option == NULL)
     return;
-  }
+
+  option->handler(source);
 }
 
 static struct Command command_table =
 {
   .name = "REHASH",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_rehash, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_rehash, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_rehash, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_rehash, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_rehash",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

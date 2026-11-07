@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -30,9 +14,11 @@
 
 #ifndef INCLUDED_fdlist_h
 #define INCLUDED_fdlist_h
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "io.h"
 #include "address.h"
+#include "io.h"
 #include "tls.h"
 
 /**
@@ -64,13 +50,8 @@ typedef struct _fde
   void (*write_handler)(struct _fde *, void *);  /**< Write event handler. */
   void *write_data;  /**< Data for the write event handler. */
 
-  void (*timeout_handler)(struct _fde *, void *);  /**< Timeout event handler. */
-  void *timeout_data;  /**< Data for the timeout event handler. */
-  uintmax_t timeout;  /**< Timeout duration. */
-
-  void (*flush_handler)(struct _fde *, void *);  /**< Flush event handler. */
-  void *flush_data;  /**< Data for the flush event handler. */
-  uintmax_t flush_timeout;  /**< Flush timeout duration. */
+  void (*cleanup_handler)(void *data);
+  void *cleanup_data;
   /**@}*/
 
   /** @name Flags */
@@ -80,17 +61,6 @@ typedef struct _fde
     bool open;  /**< Flag indicating if the file descriptor is open. */
     bool is_socket;  /**< Flag indicating if the file descriptor is a socket. */
   } flags;
-  /**@}*/
-
-  /** @name Connection Information */
-  /**@{*/
-  struct
-  {
-    struct io_addr addr;  /**< Host address information. */
-    void (*callback)(struct _fde *, int, void *);  /**< Callback function for connection events. */
-    void *data;  /**< Data for the connection callback. */
-    /* Retry count could be added here in the future -- adrian */
-  } connect;
   /**@}*/
 
   tls_data_t tls;  /**< TLS-related data. */

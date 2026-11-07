@@ -1,38 +1,23 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2014-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2014-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_svspart.c
  * \brief Includes required functions for processing the SVSPART command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "channel.h"
-#include "client.h"
+#include <stddef.h>
+
 #include "io_string.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
 #include "module.h"
 
+#include "ircd_module.h"
+#include "channel.h"
+#include "client.h"
+#include "client_find.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief SVSPART command handler
  *
@@ -48,61 +33,70 @@
  *      - parv[3] = part message
  */
 static void
-ms_svspart(struct Client *source, int parc, char *parv[])
+ms_svspart(struct Client *source, size_t parc, char *parv[])
 {
-  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
+  if (!client_is_service(source) && !client_is_server(source))
     return;
 
-  struct Client *target = find_person(source, parv[1]);
+  const char *const target_name = parv[1];
+  struct Client *const target = client_find_user(source, target_name);
   if (target == NULL)
     return;
 
-  if (MyConnect(target))
+  const char *const channel_name = parv[2];
+  const char *const reason = parv[3];
+
+  if (client_is_local(target))
   {
-    channel_part_list(target, parv[2], parv[3]);
+    channel_part(target, channel_name, reason);
     return;
   }
 
-  if (target->from == source->from)
+  if (target->nexthop == source->nexthop)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received wrong-direction SVSPART for %s (behind %s) from %s",
-                   target->name, source->from->name, client_get_name(source, HIDE_IP));
+                   target->name, source->nexthop->name, source->name);
     return;
   }
 
-  if (string_is_empty(parv[3]))
-    sendto_one(target, ":%s SVSPART %s %s",
-               source->id, target->id, parv[2]);
-  else
-    sendto_one(target, ":%s SVSPART %s %s :%s",
-               source->id, target->id, parv[2], parv[3]);
+  if (string_is_empty(reason))
+  {
+    sendto_one_command(target, source, "SVSPART", "%s", channel_name);
+    return;
+  }
+
+  sendto_one_command(target, source, "SVSPART", "%s :%s", channel_name, reason);
 }
 
 static struct Command command_table =
 {
   .name = "SVSPART",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svspart, .args_min = 3 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_svspart, .args_min = 3 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_svspart",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

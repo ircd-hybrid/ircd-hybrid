@@ -1,36 +1,26 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2005-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file s_bsd_epoll.c
  * \brief Linux epoll() compatible network routines.
  */
 
-#include "stdinc.h"
+#include "config.h"  /**< Autotools-generated USE_IOPOLL_MECHANISM & AX_IOPOLL_MECHANISM_POLL. */
 #if USE_IOPOLL_MECHANISM == AX_IOPOLL_MECHANISM_EPOLL
-#include "io_time.h"
-#include "fdlist.h"
+#include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/epoll.h>
+
 #include "comm.h"
+#include "fdlist.h"
+#include "io_time.h"
 #include "log.h"
 #include "memory.h"
-#include <sys/epoll.h>
 
 enum
 {
@@ -80,8 +70,7 @@ comm_select_init(void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
-               void *client_data, uintmax_t timeout)
+comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *), void *client_data)
 {
   int new_events, op;
   struct epoll_event ep_event;
@@ -101,16 +90,7 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
     F->write_data = client_data;
   }
 
-  new_events = (F->read_handler ? EPOLLIN : 0) |
-    (F->write_handler ? EPOLLOUT : 0);
-
-  if (timeout)
-  {
-    F->timeout = io_time_get(IO_TIME_MONOTONIC_SEC) + timeout;
-    F->timeout_handler = handler;
-    F->timeout_data = client_data;
-  }
-
+  new_events = (F->read_handler ? EPOLLIN : 0) | (F->write_handler ? EPOLLOUT : 0);
   if (new_events != F->evcache)
   {
     if (new_events == 0)
@@ -141,20 +121,25 @@ comm_setselect(fde_t *F, unsigned int type, void (*handler)(fde_t *, void *),
  * events.
  */
 void
-comm_select(void)
+comm_select(int timeout_ms)
 {
   int num;
   void (*hdl)(fde_t *, void *);
 
-  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, SELECT_DELAY);
+  num = epoll_wait(epollop->fd, epollop->events, epollop->nevents, timeout_ms);
+  const int wait_errno = errno;
   assert(num <= epollop->nevents);
 
-  io_time_set();
+  io_time_update_cache();
 
   if (num < 0)
   {
-    const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
-    nanosleep(&req, NULL);  /* Avoid 99% CPU in comm_select */
+    if (wait_errno != EINTR)
+    {
+      /* Avoid a busy loop after persistent wait errors. */
+      const struct timespec req = { .tv_sec = 0, .tv_nsec = 50000000 };
+      nanosleep(&req, NULL);
+    }
     return;
   }
 
@@ -189,7 +174,7 @@ comm_select(void)
       }
     }
 
-    comm_setselect(F, 0, NULL, NULL, 0);
+    comm_setselect(F, 0, NULL, NULL);
   }
 
   if (num == epollop->nevents && epollop->nevents < MAXIMUM_NEVENT)

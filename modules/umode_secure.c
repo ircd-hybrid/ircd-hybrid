@@ -1,31 +1,20 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "module.h"
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+
 #include "io_string.h"
+#include "module.h"
+
+#include "ircd_module.h"
 #include "client.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode secure_mode =
@@ -39,7 +28,6 @@ static hook_flow_t
 who_send_hook(void *ctx_)
 {
   ircd_hook_who_send_ctx *ctx = ctx_;
-
   if (user_mode_has_flag(ctx->target, UMODE_SECURE))
     if (ctx->modes_len < sizeof(ctx->modes) - 1)
       ctx->modes[ctx->modes_len++] = secure_mode.mode_char;
@@ -51,8 +39,7 @@ static hook_flow_t
 whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
-
-  if (user_mode_has_flag(ctx->target, UMODE_SECURE) == false)
+  if (!user_mode_has_flag(ctx->target, UMODE_SECURE))
     return HOOK_FLOW_CONTINUE;
 
   char buf[IRCD_BUFSIZE];
@@ -62,30 +49,38 @@ whois_send_hook(void *ctx_)
   sendto_one_numeric(ctx->source, &me, RPL_WHOISSECURE, ctx->target->name, buf);
 
   if (!string_is_empty(ctx->target->tls_certfp))
-    if (user_mode_has_flag(ctx->source, UMODE_OPER) || ctx->source == ctx->target)
+    if (client_is_oper(ctx->source) || ctx->source == ctx->target)
       sendto_one_numeric(ctx->source, &me, RPL_WHOISCERTFP, ctx->target->name, ctx->target->tls_certfp);
 
   return HOOK_FLOW_CONTINUE;
 }
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&secure_mode);
+  if (!ircd_module_register_user_mode(&secure_mode, error_message, error_message_size))
+    return false;
+
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&secure_mode);
   hook_uninstall(ircd_hook_who_send, who_send_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_secure",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

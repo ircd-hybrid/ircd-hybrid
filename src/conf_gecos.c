@@ -1,35 +1,22 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1998-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1998-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file conf_gecos.c
  * \brief Implements gecos {} block configuration management.
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "io_time.h"
 #include "list.h"
 #include "memory.h"
-#include "io_time.h"
-#include "send.h"
+
 #include "client.h"
 #include "conf_gecos.h"
+#include "send.h"
 
 static list_t gecos_list;
 
@@ -46,7 +33,7 @@ gecos_clear(void)
 
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
-    struct GecosItem *gecos = node->data;
+    struct GecosItem *const gecos = node->data;
     if (gecos->in_database == false)
       gecos_delete(gecos, false);
   }
@@ -68,8 +55,8 @@ gecos_delete(struct GecosItem *gecos, bool expired)
 struct GecosItem *
 gecos_make(void)
 {
-  struct GecosItem *gecos = io_calloc(sizeof(*gecos));
-  list_add(gecos, &gecos->node, &gecos_list);
+  struct GecosItem *const gecos = io_calloc(sizeof(*gecos));
+  list_add_tail(gecos, &gecos->node, &gecos_list);
 
   return gecos;
 }
@@ -81,7 +68,7 @@ gecos_find(const char *name, int (*compare)(const char *, const char *))
 
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
-    struct GecosItem *gecos = node->data;
+    struct GecosItem *const gecos = node->data;
     if (gecos->expires_at &&
         (gecos->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);
@@ -99,7 +86,7 @@ gecos_expire(void)
 
   LIST_FOREACH_SAFE(node, node_next, gecos_list.head)
   {
-    struct GecosItem *gecos = node->data;
+    struct GecosItem *const gecos = node->data;
     if (gecos->expires_at &&
         (gecos->expires_at <= io_time_get(IO_TIME_REALTIME_SEC)))
       gecos_delete(gecos, true);

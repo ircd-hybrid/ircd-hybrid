@@ -1,40 +1,117 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2002-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2002-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_tburst.c
  * \brief Includes required functions for processing the TBURST command.
  */
 
-#include "stdinc.h"
-#include "module.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "io_parse.h"
 #include "io_string.h"
+#include "module.h"
+
+#include "ircd_module.h"
+#include "channel.h"
 #include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "hash.h"
-#include "server_capab.h"
 #include "conf.h"
 #include "parse.h"
-#include "channel.h"
+#include "send.h"
+#include "server_capab.h"
 
+static size_t
+_tburst_topic_stored_length(const char *topic)
+{
+  assert(topic);
+  assert(TOPICLEN > 0);
+
+  size_t length = 0;
+  while (topic[length] && length < TOPICLEN)
+    ++length;
+
+  return length;
+}
+
+static bool
+_tburst_topic_matches_current(const struct Channel *channel, const char *topic)
+{
+  const char *const current_topic = string_or_empty(channel->topic);
+  const size_t stored_length = _tburst_topic_stored_length(topic);
+
+  if (strlen(current_topic) != stored_length)
+    return false;
+
+  return memcmp(current_topic, topic, stored_length) == 0;
+}
+
+static bool
+_tburst_topic_is_unchanged(const struct Channel *channel, const char *topic_setter, const char *topic)
+{
+  if (!_tburst_topic_matches_current(channel, topic))
+    return false;
+
+  return strcmp(string_or_empty(channel->topic_setter), topic_setter) == 0;
+}
+
+static bool
+_tburst_should_accept(const struct Client *source, const struct Channel *channel,
+                      uintmax_t channel_ts, uintmax_t topic_ts,
+                      const char *topic_setter, const char *topic)
+{
+  if (channel_ts > channel->creation_time)
+    return false;
+
+  if (client_is_service(source))
+    return true;
+
+  if (channel_ts < channel->creation_time)
+    return true;
+
+  if (topic_ts > channel->topic_time)
+    return true;
+
+  if (topic_ts < channel->topic_time)
+    return false;
+
+  /*
+   * Equal topic timestamps have no deterministic winner. Accept only an
+   * idempotent repeat of the exact effective topic state.
+   */
+  return _tburst_topic_is_unchanged(channel, topic_setter, topic);
+}
+
+static void
+_tburst_notify_channel_members(const struct Client *source, const struct Channel *channel)
+{
+  if (client_is_user(source))
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
+                         source->name, source->username, source->host,
+                         channel->name, string_or_empty(channel->topic));
+  else
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
+                         client_get_visible_server_name(source),
+                         channel->name, string_or_empty(channel->topic));
+}
+
+static void
+_tburst_commit(struct Client *source, struct Channel *channel, uintmax_t channel_ts, uintmax_t topic_ts,
+               const char *topic_setter, const char *topic)
+{
+  const bool topic_changed = !_tburst_topic_matches_current(channel, topic);
+
+  channel_set_topic(channel, topic, topic_setter, topic_ts, false);
+
+  sendto_servers(source, CAPAB_TBURST, 0, ":%s TBURST %ju %s %ju %s :%s",
+                 source->id, channel_ts, channel->name, topic_ts, topic_setter, string_or_empty(channel->topic));
+
+  if (topic_changed)
+    _tburst_notify_channel_members(source, channel);
+}
 
 /*! \brief TBURST command handler
  *
@@ -52,96 +129,65 @@
  *      - parv[5] = topic (can be an empty string)
  */
 static void
-ms_tburst(struct Client *source, int parc, char *parv[])
+ms_tburst(struct Client *source, size_t parc, char *parv[])
 {
-  uintmax_t remote_channel_ts = strtoumax(parv[1], NULL, 10);
-  uintmax_t remote_topic_ts = strtoumax(parv[3], NULL, 10);
-  const char *topic = parv[5];
-  const char *setby = parv[4];
+  if (!client_is_user(source) && !client_is_server(source))
+    return;
 
-  /*
-   * Do NOT test parv[5] for an empty string and return if true!
-   * parv[5] CAN be an empty string, i.e. if the other side wants
-   * to unset our topic.  Don't forget: an empty topic is also a
-   * valid topic.
-   */
-
-
-  struct Channel *channel = hash_find_channel(parv[2]);
+  struct Channel *const channel = channel_find(parv[2]);
   if (channel == NULL)
     return;
 
-  /*
-   * The logic for accepting and rejecting channel topics was
-   * always a bit hairy, so now we got exactly 3 cases where
-   * we would accept a topic
-   *
-   * Case 1:
-   *        A services client/server wants to set a topic
-   * Case 2:
-   *        The TS of the remote channel is older than ours
-   * Case 3:
-   *        The TS of the remote channel is equal to ours AND
-   *        the TS of the remote topic is newer than ours
-   */
-  bool accept_remote = false;
-  if (HasFlag(source, FLAGS_SERVICE))
-    accept_remote = true;
-  else if (remote_channel_ts < channel->creation_time)
-    accept_remote = true;
-  else if (remote_channel_ts == channel->creation_time)
-    if (remote_topic_ts > channel->topic_time)
-      accept_remote = true;
+  uintmax_t channel_ts;
+  if (io_parse_uintmax(parv[1], &channel_ts) != IO_PARSE_OK)
+    return;
 
-  if (accept_remote)
-  {
-    bool topic_differs = strncmp(string_or_empty(channel->topic), topic, TOPICLEN);
-    bool hidden_server = (ConfigServerHide.hide_servers || IsHidden(source));
+  uintmax_t topic_ts;
+  if (io_parse_uintmax(parv[3], &topic_ts) != IO_PARSE_OK)
+    return;
 
-    channel_set_topic(channel, topic, setby, remote_topic_ts, false);
+  const char *const topic_setter = parv[4];
+  const char *const topic = parv[5];  /* May be empty to clear the topic. */
+  if (!_tburst_should_accept(source, channel, channel_ts, topic_ts, topic_setter, topic))
+    return;
 
-    sendto_servers(source, CAPAB_TBURST, 0, ":%s TBURST %s %s %s %s :%s",
-                   source->id, parv[1], parv[2], parv[3], setby, topic);
-
-    /* If it's a new topic, send it to clients, otherwise drop it to save bandwith. */
-    if (topic_differs)
-    {
-      if (IsClient(source))
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s!%s@%s TOPIC %s :%s",
-                             source->name, source->username, source->host, channel->name, string_or_empty(channel->topic));
-      else
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s TOPIC %s :%s",
-                             hidden_server ? me.name : source->name, channel->name, string_or_empty(channel->topic));
-    }
-  }
+  _tburst_commit(source, channel, channel_ts, topic_ts, topic_setter, topic);
 }
 
 static struct Command command_table =
 {
   .name = "TBURST",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_tburst, .args_min = 6, .empty_last_arg = true },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_tburst, .args_min = 6, .empty_last_arg = true },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   capab_add("TBURST", CAPAB_TBURST, true);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   capab_del("TBURST");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_tburst",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

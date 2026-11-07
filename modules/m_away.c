@@ -1,97 +1,111 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_away.c
  * \brief Includes required functions for processing the AWAY command.
  */
 
-#include "stdinc.h"
-#include "memory.h"
-#include "module.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "io_string.h"
 #include "io_time.h"
+#include "memory.h"
+#include "module.h"
+
 #include "cap.h"
 #include "client.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "parse.h"
 #include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
-
-/*!
- *
- * \param source Pointer to client to set (un)away
- * \param message  Away message; can be NULL
- */
-static void
-do_away(struct Client *source, const char *message)
+static size_t
+_away_message_stored_length(const char *message)
 {
-  assert(IsClient(source));
+  assert(message);
+  assert(ConfigGeneral.max_away_length > 0);
+
+  size_t length = 0;
+  while (message[length] && length < ConfigGeneral.max_away_length)
+    ++length;
+
+  return length;
+}
+
+static bool
+_away_message_is_unchanged(const struct Client *source, const char *message)
+{
+  assert(!string_is_empty(message));
+
+  if (source->away_message == NULL)
+    return false;
+
+  const size_t stored_length = _away_message_stored_length(message);
+  if (strlen(source->away_message) != stored_length)
+    return false;
+
+  return memcmp(source->away_message, message, stored_length) == 0;
+}
+
+static void
+_away_send_unset(struct Client *source)
+{
+  sendto_servers(source, 0, 0, ":%s AWAY", source->id);
+  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
+                               source->name, source->username, source->host);
+}
+
+static void
+_away_send_set(struct Client *source)
+{
+  assert(source->away_message);
+
+  sendto_servers(source, 0, 0, ":%s AWAY :%s",
+                 source->id, source->away_message);
+  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                               source->name, source->username, source->host, source->away_message);
+}
+
+static void
+_away_commit_unset(struct Client *source)
+{
+  if (source->away_message == NULL)
+    return;
+
+  io_free(source->away_message);
+  source->away_message = NULL;
+
+  _away_send_unset(source);
+}
+
+static void
+_away_commit_set(struct Client *source, const char *message)
+{
+  assert(!string_is_empty(message));
+
+  io_free(source->away_message);
+  source->away_message = io_strndup(message, ConfigGeneral.max_away_length);
+
+  _away_send_set(source);
+}
+
+static void
+_away_commit(struct Client *source, const char *message)
+{
+  assert(client_is_user(source));
 
   if (string_is_empty(message))
-  {
-    /* Marking as not away */
-    if (source->away)
-    {
-      io_free(source->away);
-      source->away = NULL;
-
-      /* We now send this only if they were away before --is */
-      sendto_servers(source, 0, 0, ":%s AWAY", source->id);
-      sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY",
-                                   source->name, source->username, source->host);
-    }
-
-    if (MyConnect(source))
-      sendto_one_numeric(source, &me, RPL_UNAWAY);
-    return;
-  }
-
-  if (MyConnect(source))
-  {
-    if ((source->connection->away.last_attempt + ConfigGeneral.away_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
-      source->connection->away.count = 0;
-
-    if (source->connection->away.count > ConfigGeneral.away_count)
-    {
-      sendto_one_numeric(source, &me, ERR_TOOMANYAWAY);
-      return;
-    }
-
-    source->connection->away.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
-    source->connection->away.count++;
-    sendto_one_numeric(source, &me, RPL_NOWAWAY);
-
-    if (source->away && strncmp(source->away, message, ConfigGeneral.max_away_length) == 0)
-      return;
-  }
-
-  io_free(source->away);
-  source->away = io_strndup(message, ConfigGeneral.max_away_length);
-
-  sendto_common_channels_local(source, true, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                               source->name, source->username, source->host, source->away);
-  sendto_servers(source, 0, 0, ":%s AWAY :%s",
-                 source->id, source->away);
+    _away_commit_unset(source);
+  else
+    _away_commit_set(source, message);
 }
 
 /*! \brief AWAY command handler
@@ -106,37 +120,77 @@ do_away(struct Client *source, const char *message)
  *      - parv[1] = away message
  */
 static void
-m_away(struct Client *source, int parc, char *parv[])
+m_away(struct Client *source, size_t parc, char *parv[])
 {
-  const char *const message = parv[1];
+  assert(client_is_local_user(source));
 
-  do_away(source, message);
+  const char *const message = parv[1];
+  if (string_is_empty(message))
+  {
+    _away_commit_unset(source);
+
+    sendto_one_numeric(source, &me, RPL_UNAWAY);
+    return;
+  }
+
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - source->connection->away.last_attempt > ConfigGeneral.away_time)
+    source->connection->away.count = 0;
+
+  if (source->connection->away.count > ConfigGeneral.away_count)
+  {
+    sendto_one_numeric(source, &me, ERR_TOOMANYAWAY);
+    return;
+  }
+
+  source->connection->away.last_attempt = now;
+  source->connection->away.count++;
+
+  sendto_one_numeric(source, &me, RPL_NOWAWAY);
+
+  if (_away_message_is_unchanged(source, message))
+    return;
+
+  _away_commit_set(source, message);
+}
+
+static void
+ms_away(struct Client *source, size_t parc, char *parv[])
+{
+  assert(client_is_user(source));
+
+  const char *const message = parv[1];
+  _away_commit(source, message);
 }
 
 static struct Command command_table =
 {
   .name = "AWAY",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_away },
-  .handlers[SERVER_HANDLER] = { .handler = m_away },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_away }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_away },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_away },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_away }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_away",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

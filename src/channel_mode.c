@@ -1,48 +1,38 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file channel_mode.c
  * \brief Controls modes on channels.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdlib.h>
+
 #include "address.h"
-#include "list.h"
-#include "memory.h"
+#include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
+#include "list.h"
+#include "memory.h"
+
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
+#include "client_find.h"
 #include "conf.h"
+#include "extban.h"
 #include "ircd.h"
+#include "isupport.h"
 #include "nuh.h"
 #include "numeric.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "parse.h"
-#include "extban.h"
-#include "isupport.h"
+#include "send.h"
+#include "server.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 /** Buffer holding a list of channel modes to be used for RPL_MYINFO */
 char cmode_rpl04[2][256];
@@ -52,17 +42,8 @@ char cmode_class[4][256];
 static struct ChModeChange mode_changes[IRCD_BUFSIZE];
 static unsigned int mode_count;
 static unsigned int mode_limit;  /* number of modes set other than simple */
-static unsigned int simple_modes_mask;  /* bit mask of simple modes already set */
+static uint32_t simple_modes_mask;  /* bit mask of simple modes already set */
 
-/* check_string()
- *
- * inputs       - string to check
- * output       - pointer to modified string
- * side effects - Fixes a string so that the first white space found
- *                becomes an end of string marker (`\0`).
- *                returns the 'fixed' string or "*" if the string
- *                was NULL length or a NULL pointer.
- */
 static void
 check_string(char *s)
 {
@@ -72,7 +53,7 @@ check_string(char *s)
 
   for (; *s; ++s)
   {
-    if (IsSpace(*s))
+    if (io_ascii_is_space(*s))
     {
       *s = '\0';
       break;
@@ -100,29 +81,20 @@ get_mask(const struct Ban *ban)
   return buf;
 }
 
-/*
- * Ban functions to work with mode +b/e/I
- */
-/* add the specified ID to the channel.
- *   -is 8/9/00
- */
-
 const char *
-add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
+add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
   char mask[MODEBUFLEN];
   char *maskptr = mask;
-  unsigned int extbans, offset;
 
   strlcpy(mask, banid, sizeof(mask));
 
-  if (MyClient(client))
+  if (client_is_local_user(client))
   {
-    unsigned int num_mask = list_length(&channel->banlist) +
-                            list_length(&channel->exceptlist) +
-                            list_length(&channel->invexlist);
+    unsigned int num_mask = list_length(&channel->ban_list) +
+                            list_length(&channel->exception_list) +
+                            list_length(&channel->invite_exception_list);
 
-    /* Don't let local clients overflow the b/e/I lists */
     if (num_mask >= ((channel_has_mode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
     {
       sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
@@ -132,10 +104,12 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     collapse(mask);
   }
 
+  uint32_t extbans;
+  size_t offset;
   enum extban_type etype = extban_parse(mask, &extbans, &offset);
   maskptr += offset;
 
-  if (MyClient(client))
+  if (client_is_local_user(client))
   {
     if (etype == EXTBAN_INVALID)
     {
@@ -143,16 +117,10 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       return NULL;
     }
 
-    if (etype != EXTBAN_NONE && ConfigChannel.enable_extbans == 0)
-    {
-      sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
-      return NULL;
-    }
-
-    unsigned int extban_acting = extbans & extban_acting_mask();
+    const uint32_t extban_acting = extbans & extban_acting_mask();
     if (extban_acting)
     {
-      const struct Extban *extban = extban_find_flag(extban_acting);
+      const struct Extban *const extban = extban_find_flag(extban_acting);
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -160,10 +128,10 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       }
     }
 
-    unsigned extban_matching = extbans & extban_matching_mask();
+    const uint32_t extban_matching = extbans & extban_matching_mask();
     if (extban_matching)
     {
-      const struct Extban *extban = extban_find_flag(extban_matching);
+      const struct Extban *const extban = extban_find_flag(extban_matching);
       if (extban == NULL || !(extban->types & type))
       {
         sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
@@ -172,11 +140,10 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     }
   }
 
-  /* Don't allow empty bans */
   if (string_is_empty(maskptr))
     return NULL;
 
-  struct Ban *ban = io_calloc(sizeof(*ban));
+  struct Ban *const ban = io_calloc(sizeof(*ban));
   ban->extban = extbans;
   ban->when = io_time_get(IO_TIME_REALTIME_SEC);
 
@@ -200,10 +167,10 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
     nuh_split(&nuh);
 
-    ban->type = address_parse_netmask(ban->host, &ban->addr, &ban->bits);
+    address_parse_prefix(ban->host, &ban->addr, &ban->bits);
   }
 
-  if (MyClient(client))
+  if (client_is_local_user(client))
     ban->banstr_len = strlcpy(ban->banstr, get_mask(ban), sizeof(ban->banstr));
   else
     ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
@@ -211,39 +178,29 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    const struct Ban *tmp = node->data;
-
-    if (irccmp(tmp->banstr, ban->banstr) == 0)
+    const struct Ban *const tmp = node->data;
+    if (io_strcasecmp(tmp->banstr, ban->banstr) == 0)
     {
       io_free(ban);
       return NULL;
     }
   }
 
-  clear_ban_cache_list(&channel->members_local);
+  clear_ban_cache_list(&channel->local_member_list);
 
-  if (IsClient(client))
+  if (client_is_user(client))
     snprintf(ban->who, sizeof(ban->who), "%s!%s@%s",
              client->name, client->username, client->host);
-  else if (IsHidden(client) || ConfigServerHide.hide_servers)
-    strlcpy(ban->who, me.name, sizeof(ban->who));
   else
-    strlcpy(ban->who, client->name, sizeof(ban->who));
+    strlcpy(ban->who, client_get_visible_server_name(client), sizeof(ban->who));
 
-  list_add(ban, &ban->node, list);
+  list_add_tail(ban, &ban->node, list);
 
   return ban->banstr;
 }
 
-/*
- * inputs	- pointer to channel
- *		- pointer to ban id
- *		- type of ban, i.e. ban, exception, invex
- * output	- 0 for failure, 1 for success
- * side effects	-
- */
 static const char *
-del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, unsigned int type)
+del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
   static char mask[MODEBUFLEN];
   list_node_t *node;
@@ -254,12 +211,11 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
 
   LIST_FOREACH(node, list->head)
   {
-    struct Ban *ban = node->data;
-
-    if (irccmp(banid, ban->banstr) == 0)
+    struct Ban *const ban = node->data;
+    if (io_strcasecmp(banid, ban->banstr) == 0)
     {
       strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
-      clear_ban_cache_list(&channel->members_local);
+      clear_ban_cache_list(&channel->local_member_list);
       remove_ban(ban, list);
 
       return mask;
@@ -269,16 +225,6 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   return NULL;
 }
 
-/* channel_modes()
- *
- * inputs       - pointer to channel
- *              - pointer to client
- *              - pointer to mode buf
- *              - pointer to parameter buf
- * output       - NONE
- * side effects - write the "simple" list of channel modes for channel
- * channel onto buffer mbuf with the parameters in pbuf.
- */
 const char *
 channel_modes(const struct Channel *channel, const struct Client *client, bool params)
 {
@@ -289,32 +235,34 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   *bufptr++ = '+';
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
+  {
     if (tab->mode && channel_has_mode(channel, tab->mode))
       *bufptr++ = tab->letter;
+  }
 
-  if (channel->mode.limit)
+  if (channel_has_member_limit(channel))
   {
     *bufptr++ = 'l';
 
     if (params)
       server_or_member =
-        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
+        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
   }
 
-  if (channel->mode.key[0])
+  if (channel_has_key(channel))
   {
     *bufptr++ = 'k';
 
     if (params)
       server_or_member =
-        (server_or_member == true || IsServer(client) || member_find_link(client, channel));
+        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
   }
 
   if (server_or_member)
   {
-    if (channel->mode.limit)
-      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.limit);
-    if (channel->mode.key[0])
+    if (channel_has_member_limit(channel))
+      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.member_limit);
+    if (channel_has_key(channel))
       bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %s", channel->mode.key);
   }
 
@@ -322,14 +270,6 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   return buf;
 }
 
-/* fix_key()
- *
- * inputs       - pointer to key to clean up
- * output       - pointer to cleaned up key
- * side effects - input string is modified
- *
- * stolen from Undernet's ircd  -orabidoo
- */
 static char *
 fix_key(char *arg)
 {
@@ -348,11 +288,6 @@ fix_key(char *arg)
   return arg;
 }
 
-/*
- * inputs       - pointer to channel
- * output       - none
- * side effects - clear ban cache
- */
 void
 clear_ban_cache_list(list_t *list)
 {
@@ -360,7 +295,7 @@ clear_ban_cache_list(list_t *list)
 
   LIST_FOREACH(node, list->head)
   {
-    struct ChannelMember *member = node->data;
+    struct ChannelMember *const member = node->data;
     member->flags &= ~(CHFL_BAN_SILENCED | CHFL_BAN_CHECKED);
   }
 }
@@ -380,18 +315,19 @@ enum
   SM_ERR_NOTOPER      = 1 << 6,  /* Only irc-operators can change that mode */
   SM_ERR_ONLYSERVER   = 1 << 7,  /* Only servers or services can change that mode */
   SM_ERR_MLOCK        = 1 << 8,
+  SM_ERR_NOSUCHNICK   = 1 << 9,
 };
 
 static bool
 channel_mode_can_change(struct Client *client, struct Channel *channel, int *errors, int rank,
                         const char c, const struct chan_mode *mode)
 {
-  if (!MyClient(client))
+  if (!client_is_local_user(client))
     return true;
 
   if (mode->only_opers)
   {
-    if (user_mode_has_flag(client, UMODE_OPER) == false)
+    if (!client_is_oper(client))
     {
       if (!(*errors & SM_ERR_NOTOPER))
         sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
@@ -403,7 +339,7 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 
   if (mode->only_servers)
   {
-    if (!IsServer(client) && !HasFlag(client, FLAGS_SERVICE))
+    if (!client_is_server(client) && !client_is_service(client))
     {
       if (!(*errors & SM_ERR_ONLYSERVER))
         sendto_one_numeric(client, &me,
@@ -436,41 +372,41 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   return true;
 }
 
-/* Mode functions handle mode changes for a particular mode... */
 static void
-chm_nosuch(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_nosuch(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   if (*errors & SM_ERR_UNKNOWN)
     return;
 
   *errors |= SM_ERR_UNKNOWN;
-  sendto_one_numeric(client, &me, ERR_UNKNOWNMODE, c);
+
+  if (client_is_local_user(client))
+    sendto_one_numeric(client, &me, ERR_UNKNOWNMODE, c);
 }
 
 static void
-chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_simple(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
            int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
-  /* If have already dealt with this simple mode, ignore it */
   if (simple_modes_mask & mode->mode)
     return;
 
   simple_modes_mask |= mode->mode;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
-    if (MyClient(client) && channel_has_mode(channel, mode->mode))
+    if (client_is_local_user(client) && channel_has_mode(channel, mode->mode))
       return;
 
     channel_set_mode(channel, mode->mode);
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
-    if (MyClient(client) && !channel_has_mode(channel, mode->mode))
+    if (client_is_local_user(client) && !channel_has_mode(channel, mode->mode))
       return;
 
     channel_unset_mode(channel, mode->mode);
@@ -480,28 +416,10 @@ chm_simple(struct Client *client, struct Channel *channel, int parc, int *parn, 
   mode_changes[mode_count].arg = NULL;
   mode_changes[mode_count].id = NULL;
   mode_changes[mode_count++].dir = dir;
-
-  /*
-   * TBR: backwards-compatibility code for servers that don't have channel mode 'z'.
-   */
-  if (mode->letter == 'S')
-  {
-    mode_changes[mode_count].letter = 'z';
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
-  }
-  else if (mode->letter == 'z')
-  {
-    mode_changes[mode_count].letter = 'S';
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
-  }
 }
 
 static void
-chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_mask(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
   const char *ret = NULL;
@@ -513,19 +431,19 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
   {
     case CHFL_BAN:
       errtype = SM_ERR_RPL_B;
-      list = &channel->banlist;
+      list = &channel->ban_list;
       rpl_list = RPL_BANLIST;
       rpl_endlist = RPL_ENDOFBANLIST;
       break;
     case CHFL_EXCEPTION:
       errtype = SM_ERR_RPL_E;
-      list = &channel->exceptlist;
+      list = &channel->exception_list;
       rpl_list = RPL_EXCEPTLIST;
       rpl_endlist = RPL_ENDOFEXCEPTLIST;
       break;
     case CHFL_INVEX:
       errtype = SM_ERR_RPL_I;
-      list = &channel->invexlist;
+      list = &channel->invite_exception_list;
       rpl_list = RPL_INVEXLIST;
       rpl_endlist = RPL_ENDOFINVEXLIST;
       break;
@@ -543,7 +461,7 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     list_node_t *node;
     LIST_FOREACH(node, list->head)
     {
-      const struct Ban *ban = node->data;
+      const struct Ban *const ban = node->data;
       sendto_one_numeric(client, &me, rpl_list, channel->name, ban->banstr, ban->who, ban->when);
     }
 
@@ -551,32 +469,32 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
     return;
   }
 
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
-  if (MyClient(client) && (++mode_limit > MAXMODEPARAMS))
+  if (client_is_local_user(client) && (++mode_limit > MAXMODEPARAMS))
     return;
 
   char *mask = parv[*parn];
   ++(*parn);
 
-  if (*mask == ':' || (!MyConnect(client) && strchr(mask, ' ')))
+  if (*mask == ':' || (!client_is_local(client) && strchr(mask, ' ')))
     return;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
     ret = add_id(client, channel, mask, list, mode->flag);
     if (ret == NULL)
       return;
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
     ret = del_id(client, channel, mask, list, mode->flag);
     if (ret == NULL)
       return;
   }
 
-  static char buf[MAXPARA][MODEBUFLEN];
+  static char buf[PARSE_MAX_PARAMETERS][MODEBUFLEN];
   mask = buf[(*parn) - 1];
   strlcpy(mask, ret, sizeof(buf[(*parn) - 1]));
 
@@ -587,88 +505,106 @@ chm_mask(struct Client *client, struct Channel *channel, int parc, int *parn, ch
 }
 
 static void
-chm_flag(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_flag(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (parc <= *parn)
     return;
 
-  struct Client *client_target = find_chasing(client, parv[(*parn)++]);
-  if (client_target == NULL)
-    return;  /* find_chasing sends ERR_NOSUCHNICK */
+  const char *const target_name = parv[(*parn)++];
+  struct Client *const target = client_find_user_with_history(client, target_name, NULL);
+  if (target == NULL)
+  {
+    if (client_is_local_user(client) &&
+        !(*errors & SM_ERR_NOSUCHNICK))
+      sendto_one_numeric(client, &me, ERR_NOSUCHNICK, target_name);
 
-  struct ChannelMember *member = member_find_link(client_target, channel);
+    *errors |= SM_ERR_NOSUCHNICK;
+    return;
+  }
+
+  struct ChannelMember *const member = channel_member_find(channel, target);
   if (member == NULL)
   {
-    if (!(*errors & SM_ERR_NOTONCHANNEL))
-      sendto_one_numeric(client, &me, ERR_USERNOTINCHANNEL, client_target->name, channel->name);
+    if (client_is_local_user(client) &&
+        !(*errors & SM_ERR_NOTONCHANNEL))
+      sendto_one_numeric(client, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);
 
     *errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
 
-  if (MyClient(client) && (++mode_limit > MAXMODEPARAMS))
+  if (client_is_local_user(client) && (++mode_limit > MAXMODEPARAMS))
     return;
 
-  if (dir == MODE_ADD)  /* setting + */
+  if (dir == MODE_ADD)
   {
-    if (member_has_flags(member, mode->flag))
-      return;  /* No redundant mode changes */
+    if (channel_member_has_flags(member, mode->flag))
+      return;
 
-    member_set_flags(member, mode->flag);
+    channel_member_set_flags(member, mode->flag);
   }
-  else if (dir == MODE_DEL)  /* setting - */
+  else if (dir == MODE_DEL)
   {
-    if (member_has_flags(member, mode->flag) == false)
-      return;  /* No redundant mode changes */
+    if (!channel_member_has_flags(member, mode->flag))
+      return;
 
-    member_unset_flags(member, mode->flag);
+    channel_member_unset_flags(member, mode->flag);
   }
 
   mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = client_target->name;
-  mode_changes[mode_count].id = client_target->id;
+  mode_changes[mode_count].arg = target->name;
+  mode_changes[mode_count].id = target->id;
   mode_changes[mode_count++].dir = dir;
 }
 
 static void
-chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_limit(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (dir == MODE_ADD && parc > *parn)
   {
     char *const lstr = parv[(*parn)++];
-    int limit = 0;
 
-    if (string_is_empty(lstr) || (limit = atoi(lstr)) <= 0)
+    unsigned int parsed_limit;
+    const io_parse_status_t status = io_parse_uint(lstr, &parsed_limit);
+
+    if (status != IO_PARSE_OK && status != IO_PARSE_RANGE)
       return;
 
-    sprintf(lstr, "%d", limit);
+    if (status == IO_PARSE_OK && parsed_limit == 0)
+      return;
+
+    const unsigned int limit =
+      status == IO_PARSE_RANGE || parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
+    snprintf(lstr, strlen(lstr) + 1, "%u", limit);
 
     /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
+    {
       if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
+    }
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = lstr;
     mode_changes[mode_count].id = NULL;
     mode_changes[mode_count++].dir = dir;
 
-    channel->mode.limit = limit;
+    channel->mode.member_limit = limit;
   }
   else if (dir == MODE_DEL)
   {
-    if (channel->mode.limit == 0)
+    if (!channel_has_member_limit(channel))
       return;
 
-    channel->mode.limit = 0;
+    channel->mode.member_limit = 0;
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = NULL;
@@ -678,10 +614,10 @@ chm_limit(struct Client *client, struct Channel *channel, int parc, int *parn, c
 }
 
 static void
-chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, char *parv[],
+chm_key(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
 {
-  if (channel_mode_can_change(client, channel, errors, rank, c, mode) == false)
+  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
     return;
 
   if (dir == MODE_ADD && parc > *parn)
@@ -696,8 +632,10 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
 
     /* If somebody does MODE #channel +kk a b, accept latter --fl */
     for (unsigned int i = 0; i < mode_count; ++i)
+    {
       if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
         mode_changes[i].letter = 0;
+    }
 
     mode_changes[mode_count].letter = mode->letter;
     mode_changes[mode_count].arg = key;
@@ -709,7 +647,7 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
     if (parc > *parn)
       ++(*parn);
 
-    if (channel->mode.key[0] == '\0')
+    if (!channel_has_key(channel))
       return;
 
     channel->mode.key[0] = '\0';
@@ -721,13 +659,6 @@ chm_key(struct Client *client, struct Channel *channel, int parc, int *parn, cha
   }
 }
 
-/* send_mode_changes_server()
- * Input: the source client(client),
- *        the channel to send mode changes for(channel)
- * Output: None.
- * Side-effects: Sends the appropriate mode changes to servers.
- *
- */
 static void
 send_mode_changes_server(struct Client *client, struct Channel *channel)
 {
@@ -740,27 +671,17 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
   mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
                  client->id, channel->creation_time, channel->name);
 
-  /* Loop the list of modes we have */
   for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
       continue;
 
-    const char *arg;
-    if (mode_changes[i].id)
-      arg = mode_changes[i].id;
-    else
-      arg = mode_changes[i].arg;
-
+    const char *const arg = mode_changes[i].id ? mode_changes[i].id : mode_changes[i].arg;
     if (arg)
       arglen = strlen(arg);
     else
       arglen = 0;
 
-    /*
-     * If we're creeping past the buf size, we need to send it and make
-     * another line for the other modes
-     */
     if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
     {
       if (modecount)
@@ -801,16 +722,6 @@ send_mode_changes_server(struct Client *client, struct Channel *channel)
     sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
 }
 
-/* void send_mode_changes(struct Client *client,
- *                        struct Client *client,
- *                        struct Channel *channel)
- * Input: The client sending(client), the source client(client),
- *        the channel to send mode changes for(channel),
- *        mode change globals.
- * Output: None.
- * Side-effects: Sends the appropriate mode changes to other clients
- *               and propagates to servers.
- */
 static void
 send_mode_changes_client(struct Client *client, struct Channel *channel)
 {
@@ -820,19 +731,19 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
   unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
   unsigned int dir = MODE_NONE;
 
-  if (IsClient(client))
+  if (client_is_user(client))
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
                    client->name, client->username, client->host, channel->name);
   else
     mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                   (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
+                   client_get_visible_server_name(client), channel->name);
 
   for (unsigned int i = 0; i < mode_count; ++i)
   {
     if (mode_changes[i].letter == 0)
       continue;
 
-    const char *arg = mode_changes[i].arg;
+    const char *const arg = mode_changes[i].arg;
     if (arg)
       arglen = strlen(arg);
     else
@@ -846,12 +757,12 @@ send_mode_changes_client(struct Client *client, struct Channel *channel)
       modecount = 0;
       paracount = 0;
 
-      if (IsClient(client))
+      if (client_is_user(client))
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
                        client->name, client->username, client->host, channel->name);
       else
         mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                       (IsHidden(client) || ConfigServerHide.hide_servers) ? me.name : client->name, channel->name);
+                       client_get_visible_server_name(client), channel->name);
 
       pbl = 0;
       parabuf[0] = '\0';
@@ -907,7 +818,6 @@ const struct chan_mode cmode_tab[] =
   { .letter = 'O', .mode = MODE_OPERONLY, .required_rank = CHACCESS_OP, .only_opers = true, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'Q', .mode = MODE_NOKICK, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'R', .mode = MODE_REGONLY, .required_rank = CHACCESS_HALFOP, .func = chm_simple, .class = MODE_CLASS_D },
-  { .letter = 'S', .mode = MODE_SECUREONLY, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'T', .mode = MODE_NONOTICE, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'V', .mode = MODE_NOINVITE, .required_rank = CHACCESS_OP, .func = chm_simple, .class = MODE_CLASS_D },
   { .letter = 'Z', .mode = MODE_ISSECURE, .required_rank = CHACCESS_REMOTE, .only_servers = true, .func = chm_simple, .class = MODE_CLASS_D },
@@ -938,10 +848,6 @@ channel_mode_init(void)
 
   for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
   {
-    if ((tab->rank == CHACCESS_OWNER && ConfigChannel.enable_owner == 0) ||
-        (tab->rank == CHACCESS_ADMIN && ConfigChannel.enable_admin == 0))
-      continue;
-
     cmode_map[tab->letter] = tab;
 
     const char lstr[] = { tab->letter, '\0' };
@@ -982,30 +888,21 @@ channel_mode_init(void)
   isupport_add("EXCEPTS", NULL);
   isupport_add("INVEX", NULL);
 
-  capab_add("QOP", CAPAB_QOP, ConfigChannel.enable_owner != 0);
-  capab_add("AOP", CAPAB_AOP, ConfigChannel.enable_admin != 0);
+  capab_add("QOP", CAPAB_QOP, true);
+  capab_add("AOP", CAPAB_AOP, true);
   capab_add("HOP", CAPAB_HOP, true);
 }
 
-/*
- * Input: The the client this originated
- *        from, the channel, the parameter count starting at the modes,
- *        the parameters, the channel name.
- * Output: None.
- * Side-effects: Changes the channel membership and modes appropriately,
- *               sends the appropriate MODE messages to the appropriate
- *               clients.
- */
 void
-channel_mode_set(struct Client *client, struct Channel *channel, int parc, char *parv[])
+channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, char *parv[])
 {
   int dir = MODE_ADD;
-  int parn = 1;
+  size_t parn = 1;
   int errors = 0;
-  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now... */
+  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now. */
 
-  if (MyClient(client))
-    rank = member_highest_rank(member_find_link(client, channel));
+  if (client_is_local_user(client))
+    rank = channel_member_get_highest_rank(channel_member_find(channel, client));
 
   mode_count = 0;
   mode_limit = 0;
@@ -1023,8 +920,7 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
         break;
       default:
       {
-        const struct chan_mode *mode = cmode_map[(unsigned char)*ml];
-
+        const struct chan_mode *const mode = cmode_map[(unsigned char)*ml];
         if (mode)
           mode->func(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, mode);
         else
@@ -1034,10 +930,54 @@ channel_mode_set(struct Client *client, struct Channel *channel, int parc, char 
     }
   }
 
-  /* Bail out if we have nothing to do... */
   if (mode_count == 0)
     return;
 
   send_mode_changes_client(client, channel);
   send_mode_changes_server(client, channel);
+}
+
+void
+channel_mode_clear_member_statuses(struct Channel *channel, const char *source_name)
+{
+  char modebuf[MAXMODEPARAMS + 1];
+  char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
+  char *mbuf = modebuf;
+  char *pbuf = parabuf;
+  unsigned int pargs = 0;
+
+  list_node_t *node;
+  LIST_FOREACH(node, channel->member_list.head)
+  {
+    struct ChannelMember *const member = node->data;
+
+    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    {
+      if (channel_member_has_flags(member, tab->flag))
+      {
+        member->flags &= ~tab->flag;
+        *mbuf++ = tab->letter;
+        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s",
+                         member->client->name);
+
+        if (++pargs >= MAXMODEPARAMS)
+        {
+          *mbuf = '\0';
+          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                               source_name, channel->name, modebuf, parabuf);
+
+          mbuf = modebuf;
+          pbuf = parabuf;
+          pargs = 0;
+        }
+      }
+    }
+  }
+
+  if (pargs)
+  {
+    *mbuf = '\0';
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                         source_name, channel->name, modebuf, parabuf);
+  }
 }

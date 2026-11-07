@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -24,13 +8,17 @@
  * @brief Implements cluster block configuration management.
  */
 
-#include "stdinc.h"
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
+
 #include "list.h"
 #include "memory.h"
+
 #include "conf_cluster.h"
 #include "ircd_defs.h"
-#include "server_capab.h"
 #include "send.h"
+#include "server_capab.h"
 
 static list_t cluster_list;  /**< List to manage cluster items. */
 
@@ -55,10 +43,13 @@ cluster_get_list(void)
 void
 cluster_clear(void)
 {
-  while (cluster_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&cluster_list)))
   {
-    struct ClusterItem *cluster = cluster_list.head->data;
-    list_remove(&cluster->node, &cluster_list);
+    struct ClusterItem *const cluster = node->data;
+    assert(cluster);
+
     io_free(cluster->server);
     io_free(cluster);
   }
@@ -75,8 +66,8 @@ cluster_clear(void)
 struct ClusterItem *
 cluster_make(void)
 {
-  struct ClusterItem *cluster = io_calloc(sizeof(*cluster));
-  list_add(cluster, &cluster->node, &cluster_list);
+  struct ClusterItem *const cluster = io_calloc(sizeof(*cluster));
+  list_add_tail(cluster, &cluster->node, &cluster_list);
 
   return cluster;
 }
@@ -95,12 +86,12 @@ cluster_make(void)
  * @param ... Additional arguments for the command.
  */
 void
-cluster_distribute(const void *client, const char *command, unsigned int capab,
-                   unsigned int type, const char *pattern, ...)
+cluster_distribute(const void *client, const char *command, uint32_t capab, uint32_t type,
+                   const char *pattern, ...)
 {
   char buf[IRCD_BUFSIZE];
-
   va_list args;
+
   va_start(args, pattern);
   vsnprintf(buf, sizeof(buf), pattern, args);
   va_end(args);
@@ -108,7 +99,7 @@ cluster_distribute(const void *client, const char *command, unsigned int capab,
   list_node_t *node;
   LIST_FOREACH(node, cluster_list.head)
   {
-    const struct ClusterItem *cluster = node->data;
+    const struct ClusterItem *const cluster = node->data;
     if (cluster->type & type)
       sendto_match_servs(client, cluster->server, CAPAB_CLUSTER | capab, "%s %s %s",
                          command, cluster->server, buf);

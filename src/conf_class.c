@@ -1,39 +1,39 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file conf_class.c
  * \brief Configuration managment for class{} blocks
  */
 
-#include "stdinc.h"
-#include "defaults.h"
-#include "list.h"
+#include <assert.h>
+
 #include "io_string.h"
+#include "list.h"
 #include "memory.h"
 #include "patricia.h"
+
+#include "client.h"
 #include "conf.h"
+#include "conf_class.h"
+
+struct class_ip_limit_entry
+{
+  unsigned int count;
+};
 
 static list_t class_list;
 
 struct ClassItem *class_default;
+
+static void
+_class_ip_limit_entry_free(void *data)
+{
+  assert(data);
+
+  io_free(data);
+}
 
 const list_t *
 class_get_list(void)
@@ -42,87 +42,47 @@ class_get_list(void)
 }
 
 struct ClassItem *
-class_make(void)
+class_create(void)
 {
-  struct ClassItem *class = io_calloc(sizeof(*class));
-  class->active = true;
-  class->con_freq = DEFAULT_CONNECTFREQUENCY;
-  class->ping_freq = DEFAULT_PINGFREQUENCY;
-  class->max_sendq = DEFAULT_SENDQ;
-  class->max_recvq = DEFAULT_RECVQ;
-  class->ip_tree_v6 = patricia_new(128);
-  class->ip_tree_v4 = patricia_new( 32);
-  list_add(class, &class->node, &class_list);
+  struct ClassItem *const klass = io_calloc(sizeof(*klass));
+  klass->active = true;
+  klass->con_freq = CLASS_DEFAULT_CONNECT_FREQ;
+  klass->ping_freq = CLASS_DEFAULT_PING_FREQ;
+  klass->max_sendq = CLASS_DEFAULT_MAX_SENDQ;
+  klass->max_recvq = CLASS_DEFAULT_MAX_RECVQ;
+  klass->ip_tree_v6 = patricia_create(AF_INET6);
+  klass->ip_tree_v4 = patricia_create(AF_INET);
+  list_add_tail(klass, &klass->node, &class_list);
 
-  return class;
+  return klass;
 }
 
 void
-class_free(struct ClassItem *const class)
+class_destroy(struct ClassItem *klass)
 {
-  assert(class != class_default);
-  assert(class->active == false);
-  assert(class->ref_count == 0);
+  assert(klass);
+  assert(klass != class_default);
+  assert(klass->active == false);
+  assert(klass->ref_count == 0);
 
-  if (class->ip_tree_v6)
-    patricia_destroy(class->ip_tree_v6, NULL);
-  if (class->ip_tree_v4)
-    patricia_destroy(class->ip_tree_v4, NULL);
+  patricia_destroy(klass->ip_tree_v6, _class_ip_limit_entry_free);
+  patricia_destroy(klass->ip_tree_v4, _class_ip_limit_entry_free);
 
-  list_remove(&class->node, &class_list);
-  io_free(class->name);
-  io_free(class);
+  list_remove(&klass->node, &class_list);
+  io_free(klass->name);
+  io_free(klass);
 }
 
 void
 class_init(void)
 {
-  class_default = class_make();
-  class_default->name = io_strdup("default");
+  assert(class_default == NULL);
+  assert(list_is_empty(&class_list));
+
+  class_default = class_create();
+  class_default->name = io_strdup(CLASS_DEFAULT_NAME);
 }
 
-const struct ClassItem *
-class_get_ptr(const list_t *const list)
-{
-  const struct MaskItem *conf = list_peek_head(list);
-  if (conf == NULL)
-    return class_default;
-
-  assert(conf->class);
-  assert(conf->type & (CONF_OPER | CONF_CLIENT | CONF_SERVER));
-
-  return conf->class;
-}
-
-const char *
-class_get_name(const list_t *const list)
-{
-  return class_get_ptr(list)->name;
-}
-
-unsigned int
-class_get_ping_freq(const list_t *const list)
-{
-  return class_get_ptr(list)->ping_freq;
-}
-
-unsigned int
-class_get_sendq(const list_t *const list)
-{
-  return class_get_ptr(list)->max_sendq;
-}
-
-unsigned int
-class_get_recvq(const list_t *const list)
-{
-  return class_get_ptr(list)->max_recvq;
-}
-
-/*
- * inputs       - Integer (Number of class)
- * output       - Pointer to ClassItem struct. Non-NULL expected
- * side effects - NONE
- */
 struct ClassItem *
 class_find(const char *name, bool active)
 {
@@ -130,131 +90,160 @@ class_find(const char *name, bool active)
 
   LIST_FOREACH(node, class_list.head)
   {
-    struct ClassItem *class = node->data;
-    if (irccmp(class->name, name) == 0)
-    {
-      if (active && class->active == false)
-        return NULL;
+    struct ClassItem *const klass = node->data;
+    if (io_strcasecmp(klass->name, name))
+      continue;
 
-      return class;
-    }
+    if (active && klass->active == false)
+      continue;
+
+    return klass;
   }
 
   return NULL;
 }
 
-/*
- * We don't delete the class table, rather mark all entries for deletion.
- * The table is cleaned up by delete_marked_classes. - avalon
- */
 void
-class_mark_for_deletion(void)
+class_mark_all_inactive(void)
 {
   list_node_t *node;
 
-  LIST_FOREACH_PREV(node, class_list.tail->prev)
+  LIST_FOREACH(node, class_list.head)
   {
-    struct ClassItem *class = node->data;
-    class->active = false;
+    struct ClassItem *const klass = node->data;
+    if (klass == class_default)
+      continue;
+
+    klass->active = false;
   }
 }
 
 void
-class_delete_marked(void)
+class_sweep_inactive(void)
 {
   list_node_t *node, *node_next;
 
   LIST_FOREACH_SAFE(node, node_next, class_list.head)
   {
-    struct ClassItem *class = node->data;
-    if (class->active == false && class->ref_count == 0)
-      class_free(class);
+    struct ClassItem *const klass = node->data;
+    if (klass->active == false && klass->ref_count == 0)
+      class_destroy(klass);
   }
 }
 
-static patricia_tree_t *
-class_ip_limit_trie(struct ClassItem *class, void *addr)
+static bool
+_class_ip_limit_resolve(const struct ClassItem *klass, const struct io_addr *addr,
+                        patricia_tree_t **tree, unsigned int *bitlen)
 {
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
-    return class->ip_tree_v6;
-
-  return class->ip_tree_v4;
+  switch (address_get_family(addr))
+  {
+    case AF_INET:
+      *tree = klass->ip_tree_v4;
+      *bitlen = klass->cidr_bitlen_ipv4;
+      return true;
+    case AF_INET6:
+      *tree = klass->ip_tree_v6;
+      *bitlen = klass->cidr_bitlen_ipv6;
+      return true;
+    default:
+      return false;
+  }
 }
 
 bool
-class_ip_limit_add(struct ClassItem *class, void *addr, bool over_rule)
+class_ip_limit_add(struct ClassItem *klass, const struct io_addr *addr, enum class_ip_limit_mode mode)
 {
-  int bitlen;
+  assert(mode == CLASS_IP_LIMIT_ENFORCE || mode == CLASS_IP_LIMIT_ACCOUNT_ONLY);
 
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = class->cidr_bitlen_ipv6;
-  else
-    bitlen = class->cidr_bitlen_ipv4;
-
-  if (class->number_per_cidr == 0 || bitlen == 0)
+  const unsigned int limit = klass->number_per_cidr;
+  if (limit == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_make_and_lookup_addr(class_ip_limit_trie(class, addr), addr, bitlen);
-  if (((uintptr_t)pnode->data) >= class->number_per_cidr)
-  {
-    if (over_rule)
-      /*
-       * In case of overruling, we continue with the client registration process
-       * which means we expect a class_ip_limit_remove() call when detaching the
-       * configuration record upon client exit, therefore pnode->data has to be
-       * increased.
-       */
-      PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
+  patricia_tree_t *tree;
+  unsigned int bitlen;
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen))
+    return false;
 
-    return true;
+  patricia_node_t *const node = patricia_make_and_lookup_addr(tree, addr, bitlen);
+  if (node == NULL)
+    return false;
+
+  struct class_ip_limit_entry *entry = patricia_node_get_data(node);
+  if (entry == NULL)
+  {
+    entry = io_calloc(sizeof(*entry));
+    patricia_node_set_data(node, entry);
   }
 
-  PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) + 1));
+  if (mode == CLASS_IP_LIMIT_ENFORCE && entry->count >= limit)
+    return true;
+
+  ++entry->count;
   return false;
 }
 
 bool
-class_ip_limit_remove(struct ClassItem *class, void *addr)
+class_ip_limit_remove(struct ClassItem *klass, const struct io_addr *addr)
 {
-  int bitlen;
-
-  if (((struct sockaddr *)addr)->sa_family == AF_INET6)
-    bitlen = class->cidr_bitlen_ipv6;
-  else
-    bitlen = class->cidr_bitlen_ipv4;
-
-  if (class->number_per_cidr == 0 || bitlen == 0)
+  if (klass->number_per_cidr == 0)
     return false;
 
-  patricia_node_t *pnode = patricia_try_search_best_addr(class_ip_limit_trie(class, addr), addr, 0);
-  if (pnode == NULL)
+  patricia_tree_t *tree;
+  unsigned int bitlen;
+  if (!_class_ip_limit_resolve(klass, addr, &tree, &bitlen))
     return false;
 
-  PATRICIA_DATA_SET(pnode, (((uintptr_t)pnode->data) - 1));
+  patricia_node_t *const node = patricia_try_search_exact_addr(tree, addr, bitlen);
+  if (node == NULL)
+    return false;
 
-  if (((uintptr_t)pnode->data) == 0)
-  {
-    patricia_remove(class_ip_limit_trie(class, addr), pnode);
-    return true;
-  }
+  struct class_ip_limit_entry *const entry = patricia_node_get_data(node);
+  assert(entry);
+  assert(entry->count > 0);
 
-  return false;
+  if (--entry->count)
+    return false;
+
+  struct class_ip_limit_entry *const removed_entry = patricia_remove(tree, node);
+  assert(removed_entry == entry);
+
+  io_free(removed_entry);
+  return true;
 }
 
 void
-class_ip_limit_rebuild(struct ClassItem *class)
+class_ip_limit_rebuild(struct ClassItem *klass)
 {
-  patricia_clear(class->ip_tree_v6, NULL);
-  patricia_clear(class->ip_tree_v4, NULL);
+  patricia_clear(klass->ip_tree_v6, _class_ip_limit_entry_free);
+  patricia_clear(klass->ip_tree_v4, _class_ip_limit_entry_free);
 
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *client = node->data;
-    struct MaskItem *conf = list_peek_tail(&client->connection->confs);
-
-    if (conf->type == CONF_CLIENT)
-      if (conf->class == class)
-        class_ip_limit_add(class, &client->addr, true);
+    const struct Client *const client = node->data;
+    if (client->connection->base_class == klass)
+      class_ip_limit_add(klass, &client->addr, CLASS_IP_LIMIT_ACCOUNT_ONLY);
   }
+}
+
+void
+class_incref(struct ClassItem *klass)
+{
+  if (klass == NULL)
+    return;
+
+  klass->ref_count++;
+}
+
+void
+class_decref(struct ClassItem *klass)
+{
+  if (klass == NULL)
+    return;
+
+  assert(klass->ref_count > 0);
+  klass->ref_count--;
+
+  if (klass->ref_count == 0 && klass->active == false)
+    class_destroy(klass);
 }

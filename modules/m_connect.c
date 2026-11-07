@@ -1,96 +1,86 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_connect.c
  * \brief Includes required functions for processing the CONNECT command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
+#include "io_string.h"
 #include "log.h"
 #include "module.h"
-#include "io_string.h"
+
 #include "client.h"
+#include "client_format.h"
+#include "client_find.h"
+#include "conf_connect.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "conf.h"
-#include "server.h"
-#include "send.h"
-#include "user_mode.h"
 #include "parse.h"
-#include "hash.h"
+#include "send.h"
+#include "server.h"
 
 static void
-do_connect(struct Client *source, const char *name)
+_connect_report_request(const struct Client *source, const struct ConnectItem *connect)
 {
-  assert(IsClient(source));
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+  const char *const request_origin = client_is_local(source) ? "Local" : "Remote";
 
-  /*
-   * Try to find the name. If it fails, notify and bail.
-   */
-  struct MaskItem *conf = connect_find(name, match);
-  if (conf == NULL)
-  {
-    sendto_one_notice(source, &me, ":Connect: Server %s not listed in configuration file", name);
-    return;
-  }
-
-  const struct Client *target = hash_find_server(conf->name);
-  if (target)
-  {
-    sendto_one_notice(source, &me, ":Connect: Server %s already exists from %s",
-                      target->name, target->from->name);
-    return;
-  }
-
-  if (find_servconn_in_progress(conf->name))
-  {
-    sendto_one_notice(source, &me, ":Connect: a connection to %s is already in progress",
-                      conf->name);
-    return;
-  }
-
-  /* Notify all operators about connect requests. */
-  const char *const type_p = MyConnect(source) ? "Local" : "Remote";
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s CONNECT %s %u from %s",
-                 me.name, type_p, name, conf->port, get_oper_name(source));
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
+                 "from %s: %s CONNECT %s %u from %s",
+                 me.name, request_origin, connect->name, connect->port, source_name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",
-                 me.id, type_p, name, conf->port, get_oper_name(source));
+                 me.id, request_origin, connect->name, connect->port, source_name);
 
   log_write(LOG_TYPE_IRCD, "%s CONNECT %s %u from %s",
-            type_p, name, conf->port, get_oper_name(source));
+            request_origin, connect->name, connect->port, source_name);
+}
+
+static void
+_connect_process_request(struct Client *source, const char *name)
+{
+  assert(client_is_user(source));
+
+  struct ConnectItem *const connect = connect_find(name, true);
+  if (connect == NULL)
+  {
+    sendto_one_notice(source, &me, ":Connect: Server %s not found in configuration.", name);
+    return;
+  }
+
+  const struct Client *const target = client_find_entity_by_name(connect->name);
+  if (target)
+  {
+    if (client_is_server(target) || client_is_me(target))
+      sendto_one_notice(source, &me, ":Connect: Server %s is already connected (via %s).",
+                        target->name, target->nexthop->name);
+    else if (client_is_connecting(target) || client_is_handshake(target))
+      sendto_one_notice(source, &me, ":Connect: Connection to %s is already in progress.",
+                        connect->name);
+    return;
+  }
+
+  _connect_report_request(source, connect);
 
   /*
    * At this point we should be calling connect_server with a valid
    * connect{} block and a valid port in the connect{} block.
    */
-  if (server_connect(conf, source) == false)
+  if (!server_connect(connect, source))
     sendto_one_notice(source, &me, ":*** Couldn't connect to %s.%u",
-                      conf->name, conf->port);
-  else if (MyConnect(source) &&
-           (ConfigServerHide.hide_server_ips == 0 && user_mode_has_flag(source, UMODE_ADMIN)))
+                      connect->name, connect->port);
+  else if (client_is_local(source) && client_is_admin(source))
     sendto_one_notice(source, &me, ":*** Connecting to %s[%s].%u",
-                      conf->name, conf->host, conf->port);
+                      connect->name, connect->host, connect->port);
   else
     sendto_one_notice(source, &me, ":*** Connecting to %s.%u",
-                      conf->name, conf->port);
+                      connect->name, connect->port);
 
   /*
    * Client is either connecting with all the data it needs or has been
@@ -112,11 +102,11 @@ do_connect(struct Client *source, const char *name)
  *      - parv[3] = nickname/servername
  */
 static void
-mo_connect(struct Client *source, int parc, char *parv[])
+mo_connect(struct Client *source, size_t parc, char *parv[])
 {
   if (!string_is_empty(parv[3]))
   {
-    if (!HasOFlag(source, OPER_FLAG_CONNECT_REMOTE))
+    if (!client_has_oper_flag(source, OPER_FLAG_CONNECT_REMOTE))
     {
       sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect:remote");
       return;
@@ -126,14 +116,14 @@ mo_connect(struct Client *source, int parc, char *parv[])
       return;
   }
 
-  if (!HasOFlag(source, OPER_FLAG_CONNECT))
+  if (!client_has_oper_flag(source, OPER_FLAG_CONNECT))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "connect");
     return;
   }
 
   const char *const name = parv[1];
-  do_connect(source, name);
+  _connect_process_request(source, name);
 }
 
 /*! \brief CONNECT command handler
@@ -150,39 +140,43 @@ mo_connect(struct Client *source, int parc, char *parv[])
  *      - parv[3] = nickname/servername
  */
 static void
-ms_connect(struct Client *source, int parc, char *parv[])
+ms_connect(struct Client *source, size_t parc, char *parv[])
 {
   if (server_route_command(source, ":%s CONNECT %s %s :%s", 3, parv)->result != SERVER_ROUTE_ISME)
     return;
 
   const char *const name = parv[1];
-  do_connect(source, name);
+  _connect_process_request(source, name);
 }
 
 static struct Command command_table =
 {
   .name = "CONNECT",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_connect, .args_min = 4 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_connect, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_connect, .args_min = 4 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_connect, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_connect",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

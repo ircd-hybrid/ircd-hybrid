@@ -1,29 +1,14 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #include "module.h"
-#include "stdinc.h"
+
+#include "ircd_module.h"
 #include "client.h"
-#include "send.h"
 #include "ircd_hook.h"
+#include "send.h"
 #include "user_mode.h"
 
 static struct UserMode spy_mode =
@@ -33,34 +18,86 @@ static struct UserMode spy_mode =
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
-static hook_flow_t
-whois_send_hook(void *ctx_)
+static void
+_spy_send_request_notice(const struct Client *source, const char *command, char selector)
 {
-  ircd_hook_whois_send_ctx *ctx = ctx_;
+  if (selector == '\0')
+  {
+    sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "SPY: %s requested by %s (%s@%s) [%s]",
+                   command, source->name, source->username, source->host, source->uplink->name);
+    return;
+  }
 
-  if (user_mode_has_flag(ctx->target, UMODE_SPY) && ctx->source != ctx->target)
-    sendto_one_notice(ctx->target, &me, ":*** Notice -- %s (%s@%s) [%s] is doing a /whois on you",
-                      ctx->source->name, ctx->source->username, ctx->source->host, ctx->source->servptr->name);
+  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "SPY: %s %c requested by %s (%s@%s) [%s]",
+                 command, selector, source->name, source->username, source->host, source->uplink->name);
+}
 
+static void
+_spy_send_whois_notice(const struct Client *source, struct Client *target)
+{
+  sendto_one_notice(target, &me,
+                    ":*** Notice -- SPY: WHOIS requested for you by %s (%s@%s) [%s]",
+                    source->name, source->username, source->host, source->uplink->name);
+}
+
+static hook_flow_t
+_spy_request_hook(void *ctx_)
+{
+  const ircd_hook_spy_request_ctx *const ctx = ctx_;
+  assert(ctx);
+  assert(ctx->source);
+  assert(!string_is_empty(ctx->command));
+
+  _spy_send_request_notice(ctx->source, ctx->command, ctx->selector);
   return HOOK_FLOW_CONTINUE;
 }
 
-static void
-init_handler(void)
+static hook_flow_t
+_spy_whois_send_hook(void *ctx_)
 {
-  user_mode_register(&spy_mode);
-  hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_LOWEST);
+  ircd_hook_whois_send_ctx *const ctx = ctx_;
+  assert(ctx);
+  assert(ctx->source);
+  assert(ctx->target);
+
+  if (ctx->source == ctx->target)
+    return HOOK_FLOW_CONTINUE;
+
+  if (!user_mode_has_flag(ctx->target, UMODE_SPY))
+    return HOOK_FLOW_CONTINUE;
+
+  _spy_send_whois_notice(ctx->source, ctx->target);
+  return HOOK_FLOW_CONTINUE;
+}
+
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
+{
+  if (!ircd_module_register_user_mode(&spy_mode, error_message, error_message_size))
+    return false;
+
+  hook_install(ircd_hook_spy_request, _spy_request_hook, HOOK_PRIORITY_LOWEST);
+  hook_install(ircd_hook_whois_send, _spy_whois_send_hook, HOOK_PRIORITY_LOWEST);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&spy_mode);
-  hook_uninstall(ircd_hook_whois_send, whois_send_hook);
+  hook_uninstall(ircd_hook_spy_request, _spy_request_hook);
+  hook_uninstall(ircd_hook_whois_send, _spy_whois_send_hook);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_spy",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

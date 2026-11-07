@@ -24,9 +24,8 @@
 
 #ifndef INCLUDED_base32_h
 #define INCLUDED_base32_h
-
-#include <stddef.h>  /* size_t */
 #include <stdbool.h>
+#include <stddef.h>  /* size_t */
 
 /**
  * Returns the length of the output buffer required to encode len bytes of
@@ -97,7 +96,7 @@ typedef struct
 } base32_context_t;
 
 extern void base32_init(base32_context_t *);
-extern void base32_set_config(base32_context_t *, unsigned int);
+extern void base32_set_config(base32_context_t *, base32_flags_t);
 
 /**
  * Encode the data pointed to by plain into base32 and store the

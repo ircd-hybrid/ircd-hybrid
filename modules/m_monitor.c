@@ -1,41 +1,32 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2000-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2000-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_monitor.c
  * \brief Includes required functions for processing the MONITOR command.
  */
 
-#include "stdinc.h"
-#include "client.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
-#include "send.h"
-#include "parse.h"
-#include "module.h"
-#include "user.h"
-#include "monitor.h"
-#include "isupport.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
+#include "io_string.h"
+#include "list.h"
+#include "module.h"
+
+#include "client.h"
+#include "client_find.h"
+#include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "isupport.h"
+#include "monitor.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "user.h"
 
 static void
 monitor_add(struct Client *source, char *list)
@@ -49,14 +40,14 @@ monitor_add(struct Client *source, char *list)
   /* 1       23456            78                  9 0  */
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
   {
-    if (valid_nickname(name, true) == false)
+    if (!nickname_is_valid(name, true))
       continue;
 
-    if (list_length(&source->connection->monitors) >= ConfigGeneral.max_monitor)
+    if (list_length(&source->connection->monitor_list) >= ConfigGeneral.max_monitor)
     {
       char buf[IRCD_BUFSIZE];
 
@@ -65,24 +56,23 @@ monitor_add(struct Client *source, char *list)
       if (ofbufptr != ofbuf)
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
 
-      if (string_is_empty(p))
+      if (string_is_empty(saveptr))
         snprintf(buf, sizeof(buf), "%s", name);
       else
-        snprintf(buf, sizeof(buf), "%s,%s", name, p);
+        snprintf(buf, sizeof(buf), "%s,%s", name, saveptr);
 
       sendto_one_numeric(source, &me, ERR_MONLISTFULL,
                          ConfigGeneral.max_monitor, buf);
       return;
     }
 
-    if (monitor_add_to_hash_table(name, source) == false)
+    if (!monitor_subscribe(source, name))
       continue;  /* Name is already being monitored */
 
-    const struct Client *target = find_person(source, name);
+    const struct Client *const target = client_find_user_by_name(name);
     if (target == NULL)
     {
-      size_t masklen = strlen(name) + 1;  /* +1 for comma */
-
+      const size_t masklen = strlen(name) + 1;  /* +1 for comma */
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
@@ -93,9 +83,8 @@ monitor_add(struct Client *source, char *list)
     }
     else
     {
-      size_t masklen = strlen(target->name) + strlen(target->username) +
-                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
-
+      const size_t masklen = strlen(target->name) + strlen(target->username) +
+                             strlen(target->host) + 3;  /* +3 for ! + @ + comma */
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
@@ -116,14 +105,14 @@ monitor_add(struct Client *source, char *list)
 static void
 monitor_del(struct Client *source, char *list)
 {
-  if (list_is_empty(&source->connection->monitors))
+  if (list_is_empty(&source->connection->monitor_list))
     return;
 
-  char *p = NULL;
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  char *saveptr = NULL;
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
     if (!string_is_empty(name))
-      monitor_del_from_hash_table(name, source);
+      monitor_unsubscribe(source, name);
 }
 
 static void
@@ -137,10 +126,9 @@ monitor_list(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitor_list.head)
   {
-    const struct Monitor *monitor = node->data;
-
+    const struct Monitor *const monitor = node->data;
     if ((bufptr - buf) + strlen(monitor->name) + 1 /* +1 for comma */ + len > sizeof(buf))
     {
       sendto_one_numeric(source, &me, RPL_MONLIST, buf);
@@ -169,15 +157,14 @@ monitor_status(struct Client *source)
   size_t len = strlen(me.name) + strlen(source->name) + 10;
 
   list_node_t *node;
-  LIST_FOREACH(node, source->connection->monitors.head)
+  LIST_FOREACH(node, source->connection->monitor_list.head)
   {
-    const struct Monitor *monitor = node->data;
+    const struct Monitor *const monitor = node->data;
 
-    const struct Client *target = find_person(source, monitor->name);
+    const struct Client *const target = client_find_user_by_name(monitor->name);
     if (target == NULL)
     {
-      size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */
-
+      const size_t masklen = strlen(monitor->name) + 1;  /* +1 for comma */
       if ((ofbufptr - ofbuf) + masklen + len > sizeof(ofbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONOFFLINE, ofbuf);
@@ -188,9 +175,8 @@ monitor_status(struct Client *source)
     }
     else
     {
-      size_t masklen = strlen(target->name) + strlen(target->username) +
-                       strlen(target->host) + 3;  /* +3 for ! + @ + comma */
-
+      const size_t masklen = strlen(target->name) + strlen(target->username) +
+                             strlen(target->host) + 3;  /* +3 for ! + @ + comma */
       if ((onbufptr - onbuf) + masklen + len > sizeof(onbuf))
       {
         sendto_one_numeric(source, &me, RPL_MONONLINE, onbuf);
@@ -221,7 +207,7 @@ monitor_status(struct Client *source)
  *      - parv[2] = comma-separated list of nicknames 
  */
 static void
-m_monitor(struct Client *source, int parc, char *parv[])
+m_monitor(struct Client *source, size_t parc, char *parv[])
 {
   switch (*parv[1])
   {
@@ -261,29 +247,37 @@ m_monitor(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "MONITOR",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_monitor, .args_min = 2 },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_monitor, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_monitor, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_monitor, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
   isupport_add("MONITOR", "%d", ConfigGeneral.max_monitor);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
   isupport_delete("MONITOR");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_monitor",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

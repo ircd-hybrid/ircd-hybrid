@@ -1,36 +1,26 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_close.c
  * \brief Includes required functions for processing the CLOSE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stddef.h>
+
 #include "list.h"
 #include "module.h"
+
 #include "client.h"
+#include "client_format.h"
+#include "conf_oper.h"
 #include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "send.h"
 #include "parse.h"
+#include "send.h"
 
 /*! \brief CLOSE command handler
  *
@@ -43,56 +33,59 @@
  *      - parv[0] = command
  */
 static void
-mo_close(struct Client *source, int parc, char *parv[])
+mo_close(struct Client *source, size_t parc, char *parv[])
 {
-  if (!HasOFlag(source, OPER_FLAG_CLOSE))
+  if (!client_has_oper_flag(source, OPER_FLAG_CLOSE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "close");
     return;
   }
 
-  const unsigned int closed = list_length(&unknown_list);
-  while (unknown_list.head)
+  const unsigned int closed_count = list_length(&unknown_list);
+
+  struct Client *target;
+  while ((target = list_peek_head(&unknown_list)))
   {
-    struct Client *target = unknown_list.head->data;
+    /* An oper (source) can never be in the unknown_list. */
+    assert(source != target);
 
+    client_format_name_buffer_t target_name_buffer;
     sendto_one_numeric(source, &me, RPL_CLOSING,
-                       client_get_name(target, SHOW_IP), target->status);
-
-    /*
-     * Exit here is safe, because it is guaranteed not to be source
-     * because it is unregistered and source is an oper.
-     */
+                       client_format_name(target, CLIENT_FORMAT_NAME_ADMIN, &target_name_buffer), target->state);
     client_exit(target, "Oper Closing");
   }
 
-  sendto_one_numeric(source, &me, RPL_CLOSEEND, closed);
+  sendto_one_numeric(source, &me, RPL_CLOSEEND, closed_count);
 }
 
 static struct Command command_table =
 {
   .name = "CLOSE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_close }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_close }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_close",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

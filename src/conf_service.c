@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2012-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2012-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -24,9 +8,12 @@
  * @brief Implementation of service {} block configuration management.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
+
 #include "conf_service.h"
 
 /**
@@ -63,10 +50,13 @@ service_get_list(void)
 void
 service_clear(void)
 {
-  while (service_list.head)
+  list_node_t *node;
+
+  while ((node = list_pop_head(&service_list)))
   {
-    struct ServiceItem *service = service_list.head->data;
-    list_remove(&service->node, &service_list);
+    struct ServiceItem *const service = node->data;
+    assert(service);
+
     io_free(service->name);
     io_free(service);
   }
@@ -83,8 +73,8 @@ service_clear(void)
 struct ServiceItem *
 service_make(void)
 {
-  struct ServiceItem *service = io_calloc(sizeof(*service));
-  list_add(service, &service->node, &service_list);
+  struct ServiceItem *const service = io_calloc(sizeof(*service));
+  list_add_tail(service, &service->node, &service_list);
 
   return service;
 }
@@ -93,23 +83,21 @@ service_make(void)
  * @brief Find a service configuration by name.
  *
  * This function searches the service_list for a service configuration with
- * the specified name. It uses the provided compare function pointer to
- * perform the string comparison.
+ * the specified name.
  *
  * @param name The name of the service to find.
- * @param compare A function pointer for comparing two strings.
  *
  * @return A pointer to the found ServiceItem, or NULL if not found.
  */
 const struct ServiceItem *
-service_find(const char *name, int (*compare)(const char *, const char *))
+service_find(const char *name)
 {
   list_node_t *node;
 
   LIST_FOREACH(node, service_list.head)
   {
-    const struct ServiceItem *service = node->data;
-    if (compare(service->name, name) == 0)
+    const struct ServiceItem *const service = node->data;
+    if (io_strcasecmp(service->name, name) == 0)
       return service;
   }
 

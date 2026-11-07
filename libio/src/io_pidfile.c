@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -27,12 +11,15 @@
  * to ensure that only one instance of a process is running at a time.
  */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <string.h>
-#include <limits.h>
+#include <unistd.h>
+#include <sys/types.h>
+
 #include "io_pidfile.h"
 
 /**
@@ -53,7 +40,7 @@ static int pidfile_fd = -1;
 int
 io_pidfile_create(const char *path)
 {
-  pidfile_fd = open(path, O_RDWR | O_CREAT | O_CLOEXEC, 0644);
+  pidfile_fd = open(path, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
   if (pidfile_fd == -1)
   {
     fprintf(stderr, "Failed to open PID file %s: %s\n", path, strerror(errno));
@@ -89,10 +76,7 @@ io_pidfile_create(const char *path)
     return -1;
   }
 
-  char buf[16];
-  snprintf(buf, sizeof(buf), "%d\n", getpid());
-
-  if (write(pidfile_fd, buf, strlen(buf)) != (ssize_t)strlen(buf))
+  if (dprintf(pidfile_fd, "%d\n", getpid()) < 0)
   {
     fprintf(stderr, "Failed to write to PID file %s: %s\n", path, strerror(errno));
     io_pidfile_close();

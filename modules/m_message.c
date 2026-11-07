@@ -1,54 +1,73 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_message.c
  * \brief Includes required functions for processing the PRIVMSG/NOTICE command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "hook.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "hook.h"
-#include "client.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "conf.h"
-#include "server.h"
-#include "send.h"
-#include "parse.h"
-#include "user_mode.h"
 #include "module.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "io_string.h"
-#include "hash.h"
-#include "misc.h"
+
 #include "accept.h"
+#include "channel.h"
+#include "channel_member.h"
+#include "channel_mode.h"
+#include "client.h"
+#include "client_find.h"
+#include "client_format.h"
+#include "conf.h"
+#include "conf_oper.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "ircd_hook.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 static const char *const command[] =
 {
   [false] = "PRIVMSG",
   [true] = "NOTICE"
 };
+
+typedef struct
+{
+  const char *mask;
+} target_mask_ctx_t;
+
+static bool
+target_filter_host(const struct Client *client, void *context)
+{
+  const target_mask_ctx_t *const ctx = context;
+  const char *const mask = ctx->mask;
+
+  struct io_addr addr;
+  unsigned int prefix_length;
+
+  if (address_parse_prefix(mask, &addr, &prefix_length))
+    return address_match_prefix(&client->addr, &addr, prefix_length);
+
+  return match(mask, client->realhost) == 0;
+}
+
+static bool
+target_filter_server(const struct Client *client, void *context)
+{
+  const target_mask_ctx_t *const ctx = context;
+  return match(ctx->mask, client->uplink->name) == 0;
+}
 
 typedef enum
 {
@@ -67,16 +86,6 @@ struct Target
 static struct Target target_list[IRCD_BUFSIZE / 2];
 static unsigned int target_count;
 
-
-/* duplicate_ptr()
- *
- * inputs       - pointer to check
- *              - pointer to table of entities
- *              - number of valid entities so far
- * output       - YES if duplicate pointer in table, NO if not.
- *                note, this does the canonize using pointers
- * side effects - NONE
- */
 static bool
 target_is_duplicate(const void *const ptr)
 {
@@ -100,8 +109,12 @@ target_check_limit_exceeded(struct Client *source, const char *name)
 }
 
 static void
-target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
+target_add_to_list(void *target_ptr, target_entity_t target_type, unsigned int access_rank)
 {
+  assert(target_ptr);
+  assert(target_type == TARGET_ENTITY_CHANNEL ||
+         target_type == TARGET_ENTITY_CLIENT);
+
   if (target_count >= IO_ARRAY_LENGTH(target_list))
     return;
 
@@ -109,47 +122,41 @@ target_add_to_list(void *target_ptr, int target_type, unsigned int access_rank)
     (struct Target){ .ptr = target_ptr, .type = target_type, .rank = access_rank };
 }
 
-/* flood_attack_client()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                say NOTICE must not auto reply
- *              - pointer to source Client
- *              - pointer to target Client
- * output       - 1 if target is under flood attack
- * side effects - check for flood attack on target target
- */
 static bool
 flood_attack_client(bool notice, struct Client *source, struct Client *target)
 {
-  assert(MyClient(target));
-  assert(IsClient(source));
+  assert(client_is_local_user(target));
+  assert(client_is_user(source));
 
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     return false;
 
-  if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
+  if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (target->connection->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - target->connection->first_received_message_time > GlobalSetOptions.floodtime)
   {
-    if (target->connection->received_number_of_privmsgs)
-      target->connection->received_number_of_privmsgs = 0;
+    if (target->connection->received_privmsg_count)
+      target->connection->received_privmsg_count = 0;
     else
-      DelFlag(target, FLAGS_FLOOD_NOTICED);
+      client_unset_flag(target, FLAGS_FLOOD_NOTICED);
 
-    target->connection->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    target->connection->first_received_message_time = now;
   }
 
-  if (target->connection->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  if (target->connection->received_privmsg_count >= GlobalSetOptions.floodcount)
   {
-    if (!HasFlag(target, FLAGS_FLOOD_NOTICED))
+    if (!client_has_flag(target, FLAGS_FLOOD_NOTICED))
     {
+      client_format_name_buffer_t source_name_buffer;
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->servptr->name, target->name);
-      AddFlag(target, FLAGS_FLOOD_NOTICED);
+                     client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer),
+                     source->uplink->name, target->name);
+      client_set_flag(target, FLAGS_FLOOD_NOTICED);
     }
 
     if (notice == false)
@@ -157,51 +164,45 @@ flood_attack_client(bool notice, struct Client *source, struct Client *target)
     return true;
   }
 
-  ++target->connection->received_number_of_privmsgs;
+  ++target->connection->received_privmsg_count;
   return false;
 }
 
-/* flood_attack_channel()
- *
- * inputs       - flag 0 if PRIVMSG 1 if NOTICE. RFC
- *                says NOTICE must not auto reply
- *              - pointer to source Client
- *              - pointer to target channel
- * output       - 1 if target is under flood attack
- * side effects - check for flood attack on target channel
- */
 static bool
 flood_attack_channel(bool notice, struct Client *source, struct Channel *channel)
 {
   if (!(GlobalSetOptions.floodcount && GlobalSetOptions.floodtime))
     return false;
 
-  if (user_mode_has_flag(source, UMODE_OPER))
+  if (client_is_oper(source))
     return false;
 
-  if (HasFlag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
+  if (client_has_flag(source, FLAGS_SERVICE | FLAGS_CANFLOOD))
     return false;
 
-  if (channel->first_received_message_time + GlobalSetOptions.floodtime < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - channel->first_received_message_time > GlobalSetOptions.floodtime)
   {
-    if (channel->received_number_of_privmsgs)
-      channel->received_number_of_privmsgs = 0;
+    if (channel->received_privmsg_count)
+      channel->received_privmsg_count = 0;
     else
       channel->sent_message_flood_notice = false;
 
-    channel->first_received_message_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+    channel->first_received_message_time = now;
   }
 
-  if (channel->received_number_of_privmsgs >= GlobalSetOptions.floodcount)
+  if (channel->received_privmsg_count >= GlobalSetOptions.floodcount)
   {
     if (channel->sent_message_flood_notice == false)
     {
+      client_format_name_buffer_t source_name_buffer;
       sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Possible Flooder %s on %s target: %s",
-                     client_get_name(source, HIDE_IP), source->servptr->name, channel->name);
+                     client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer),
+                     source->uplink->name, channel->name);
       channel->sent_message_flood_notice = true;
     }
 
-    if (MyClient(source))
+    if (client_is_local_user(source))
     {
       if (notice == false)
         sendto_one_notice(source, &me, ":*** Message to %s throttled due to flooding", channel->name);
@@ -209,21 +210,10 @@ flood_attack_channel(bool notice, struct Client *source, struct Channel *channel
     }
   }
 
-  ++channel->received_number_of_privmsgs;
+  ++channel->received_privmsg_count;
   return false;
 }
 
-/* msg_channel_flags()
- *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
- *		  say NOTICE must not auto reply
- *		- pointer to source
- *		- pointer to channel
- *		- flags
- *		- pointer to text to send
- * output	- NONE
- * side effects	- message given channel either chanop or voice
- */
 static void
 msg_channel(bool notice, struct Client *source, struct Channel *channel,
             unsigned int rank, const char *text)
@@ -232,44 +222,36 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 
   /* Chanops and voiced can flood their own channel with impunity */
   channel_send_perm_t perm = channel_send_qualifies(channel, source, NULL, rank, text, notice, &error);
-  if (perm != CHANNEL_SEND_PERM_FORBIDDEN)
+  if (perm == CHANNEL_SEND_PERM_FORBIDDEN)
   {
-    if (perm == CHANNEL_SEND_PERM_ELEVATED || flood_attack_channel(notice, source, channel) == false)
-    {
-      const char *const prefix = channel_rank_to_prefix(rank);
-      sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
-                            command[notice], prefix, channel->name, text);
-    }
+    if (notice == false)
+      sendto_one_numeric(source, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
+    return;
   }
-  else if (notice == false)
-    sendto_one_numeric(source, &me, ERR_CANNOTSENDTOCHAN, channel->name, error);
+
+  if (perm == CHANNEL_SEND_PERM_ELEVATED || !flood_attack_channel(notice, source, channel))
+  {
+    const char *const prefix = channel_member_rank_to_prefix(rank);
+    sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
+                          command[notice], prefix, channel->name, text);
+  }
 }
 
-/* msg_client()
- *
- * inputs	- flag 0 if PRIVMSG 1 if NOTICE. RFC
- *		  say NOTICE must not auto reply
- * 		- pointer to source source (struct Client *)
- *		- pointer to target target (struct Client *)
- *		- pointer to text
- * output	- NONE
- * side effects	- message given channel either chanop or voice
- */
 static void
 msg_client(bool notice, struct Client *source, struct Client *target, const char *text)
 {
   ircd_hook_msg_client_ctx ctx = { .notice = notice, .source = source, .target = target, .text = text };
 
-  if (MyClient(source))
+  if (client_is_local_user(source))
   {
-    if (target->away && notice == false)
-      sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away);
+    if (target->away_message && notice == false)
+      sendto_one_numeric(source, &me, RPL_AWAY, target->name, target->away_message);
 
     if (hook_dispatch(ircd_hook_msg_client_source_local, &ctx) == HOOK_FLOW_STOP)
       return;
   }
 
-  if (MyClient(target) && IsClient(source))
+  if (client_is_local_user(target) && client_is_user(source))
   {
     if (flood_attack_client(notice, source, target))
       return;
@@ -278,7 +260,7 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
       return;
   }
 
-  sendto_one_anywhere(target, source, command[notice], ":%s", text);
+  sendto_one_command(target, source, command[notice], ":%s", text);
 }
 
 /* handle_special()
@@ -299,46 +281,61 @@ msg_client(bool notice, struct Client *source, struct Client *target, const char
 static void
 target_handle_masked(struct Client *source, const char *nick, const char *text, bool notice)
 {
-  if (user_mode_has_flag(source, UMODE_OPER) == false)
+  if (!client_is_oper(source))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
     return;
   }
 
-  if (MyClient(source) && !HasOFlag(source, OPER_FLAG_MESSAGE_MASS))
+  if (client_is_local_user(source) && !client_has_oper_flag(source, OPER_FLAG_MESSAGE_MASS))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "message:mass");
     return;
   }
 
-  if (*(nick + 1) == '$' || *(nick + 1) == '#')
-    ++nick;
-  else if (MyClient(source))
+  send_filter_fn filter_to_use = NULL;
+  const char *mask = NULL;
+
+  if (*(nick + 1) == '#')  /* $#host.mask */
   {
-    sendto_one_notice(source, &me, ":The command %s %s is no longer supported, please use $%s",
-                      command[notice], nick, nick);
+    filter_to_use = target_filter_host;
+    mask = nick + 2;
+  }
+  else if (*(nick + 1) == '$')  /* $$server.mask */
+  {
+    filter_to_use = target_filter_server;
+    mask = nick + 2;
+  }
+  else  /* Deprecated $server.mask */
+  {
+    if (client_is_local_user(source))
+      sendto_one_notice(source, &me, ":Invalid syntax for mass-message target '%s'. Use $$<servermask> for servers or $#<hostmask> for hosts.",
+                        nick);
+    /* Silently ignore for remote opers. */
     return;
   }
 
-  sendto_match_butone(IsServer(source->from) ? source->from : NULL, source, nick + 1,
-                      (*nick == '#') ? SEND_MATCH_HOST : SEND_MATCH_SERVER, "%s $%s :%s", command[notice], nick, text);
+  const struct Client *const exclude_uplink = client_is_server(source->nexthop) ? source->nexthop : NULL;
+  target_mask_ctx_t ctx = { .mask = mask };
+
+  sendto_filtered_butone(exclude_uplink, source, filter_to_use, &ctx, "%s %s :%s", command[notice], nick, text);
 }
 
 static void
 target_handle_directed(struct Client *source, const char *nick, const char *text, bool notice)
 {
-  const char *server = strchr(nick, '@');
+  const char *const server = strchr(nick, '@');
   if (server == NULL)
     return;
 
-  struct Client *target = hash_find_server(server + 1);
+  struct Client *const target = client_find_server(source, server + 1);
   if (target == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, server + 1);
     return;
   }
 
-  if (!IsMe(target))
+  if (!client_is_me(target))
   {
     sendto_one(target, ":%s %s %s :%s", source->id, command[notice], nick, text);
     return;
@@ -350,14 +347,14 @@ target_handle_directed(struct Client *source, const char *nick, const char *text
 static void
 target_handle_channel(struct Client *source, void *target, unsigned int access_rank)
 {
-  if (target_is_duplicate(target) == false)
+  if (!target_is_duplicate(target))
     target_add_to_list(target, TARGET_ENTITY_CHANNEL, access_rank);
 }
 
 static void
 target_handle_client(struct Client *source, void *target)
 {
-  if (target_is_duplicate(target) == false)
+  if (!target_is_duplicate(target))
     target_add_to_list(target, TARGET_ENTITY_CLIENT, 0);
 }
 
@@ -368,7 +365,7 @@ target_process(struct Client *source, const char *name, const char *text, bool n
 
   for (; *name; ++name)
   {
-    unsigned int prefix_rank = channel_prefix_to_rank(*name);
+    unsigned int prefix_rank = channel_member_prefix_to_rank(*name);
     if (prefix_rank == CHACCESS_PEON)
       break;
     if (access_rank == 0 || prefix_rank < access_rank)
@@ -382,16 +379,16 @@ target_process(struct Client *source, const char *name, const char *text, bool n
   }
 
   void *target;
-  if (IsChanPrefix(*name))
+  if (channel_is_valid_prefix_char(*name))
   {
-    target = hash_find_channel(name);
+    target = channel_find(name);
     if (target)
     {
       target_handle_channel(source, target, access_rank);
       return;
     }
   }
-  else if ((target = find_person(source, name)))
+  else if ((target = client_find_user(source, name)))
   {
     target_handle_client(source, target);
     return;
@@ -407,19 +404,19 @@ target_process(struct Client *source, const char *name, const char *text, bool n
     return;
   }
 
-  if (notice == false && (!IsDigit(*name) || MyClient(source)))
+  if (notice == false && client_is_local_user(source))
     sendto_one_numeric(source, &me, ERR_NOSUCHNICK, name);
 }
 
 static void
 target_process_list(struct Client *source, char *list, const char *text, bool notice)
 {
-  char *p = NULL;
+  char *saveptr = NULL;
 
   target_count = 0;
 
-  for (const char *name = strtok_r(list, ",", &p); name;
-                   name = strtok_r(NULL, ",", &p))
+  for (const char *name = strtok_r(list, ",", &saveptr); name;
+                   name = strtok_r(NULL, ",", &saveptr))
   {
     if (target_check_limit_exceeded(source, name))
       break;
@@ -427,13 +424,8 @@ target_process_list(struct Client *source, char *list, const char *text, bool no
   }
 }
 
-/*
- * inputs       - flag privmsg or notice
- *              - pointer to source
- *              - pointer to channel
- */
 static void
-m_message(struct Client *source, int parc, char *parv[], bool notice)
+m_message(struct Client *source, size_t parc, char *parv[], bool notice)
 {
   if (string_is_empty(parv[1]))
   {
@@ -453,7 +445,7 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
 
   for (unsigned int i = 0; i < target_count; ++i)
   {
-    struct Target *target = &target_list[i];
+    struct Target *const target = &target_list[i];
     switch (target->type)
     {
       case TARGET_ENTITY_CLIENT:
@@ -469,23 +461,23 @@ m_message(struct Client *source, int parc, char *parv[], bool notice)
 }
 
 static void
-m_privmsg(struct Client *source, int parc, char *parv[])
+m_privmsg(struct Client *source, size_t parc, char *parv[])
 {
   /*
    * Servers have no reason to send privmsgs, yet sometimes there is cause
    * for a notice.. (for example remote kline replies) --fl_
    */
-  if (!IsClient(source))
+  if (!client_is_user(source))
     return;
 
-  if (MyConnect(source))
-    source->connection->last_privmsg = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (client_is_local(source))
+    source->connection->last_privmsg_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
   m_message(source, parc, parv, false);
 }
 
 static void
-m_notice(struct Client *source, int parc, char *parv[])
+m_notice(struct Client *source, size_t parc, char *parv[])
 {
   m_message(source, parc, parv, true);
 }
@@ -494,37 +486,41 @@ static struct Command command_table[] =
 {
   [0] = {
     .name = "PRIVMSG",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = m_privmsg, .end_grace_period = true },
-    .handlers[SERVER_HANDLER] = { .handler = m_privmsg },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_privmsg, .end_grace_period = true }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_privmsg, .end_grace_period = true },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_privmsg },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_privmsg, .end_grace_period = true }
   },
   [1] = {
     .name = "NOTICE",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-    .handlers[CLIENT_HANDLER] = { .handler = m_notice },
-    .handlers[SERVER_HANDLER] = { .handler = m_notice },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_notice }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_notice },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = m_notice },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_notice }
   }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
+  return ircd_module_register_commands(command_table, IO_ARRAY_LENGTH(command_table), error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_message",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

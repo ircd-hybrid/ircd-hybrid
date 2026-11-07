@@ -1,41 +1,48 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015 Attila Molnar <attilamolnar@hush.com>
- *  Copyright (c) 2015 Adam <Adam@anope.org>
- *  Copyright (c) 2005-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015 Attila Molnar <attilamolnar@hush.com>
+ * SPDX-FileCopyrightText: 2015 Adam <Adam@anope.org>
+ * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file tls_openssl.c
  * \brief Includes all OpenSSL-specific TLS functions
  */
 
-#include "stdinc.h"
-#include "tls.h"
-#include "conf.h"
+#include <errno.h>
+#include <stdio.h>
+
+#include "io_hex.h"
 #include "log.h"
-#include "misc.h"
 #include "memory.h"
+#include "tls.h"
 
 #ifdef HAVE_TLS_OPENSSL
-static bool TLS_initialized;
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
+
+static void
+_tls_context_free(tls_context_t context)
+{
+  if (context->server_ctx)
+    SSL_CTX_free(context->server_ctx);
+  if (context->client_ctx)
+    SSL_CTX_free(context->client_ctx);
+
+  io_free(context);
+}
+
+static void
+_tls_context_ref(tls_context_t context)
+{
+  ++context->ref_count;
+}
+
+static void
+_tls_context_unref(tls_context_t context)
+{
+  if (--context->ref_count == 0)
+    _tls_context_free(context);
+}
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -50,283 +57,248 @@ report_crypto_errors(void)
 }
 
 static int
-always_accept_verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
+_tls_verify_accept_all_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
   return 1;
 }
 
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
-  return TLS_initialized;
+  return tls_ctx != NULL;
 }
 
-/* tls_init()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups SSL context.
- */
 void
-tls_init(void)
+tls_clear_config(void)
 {
-  if ((tls_ctx.server_ctx = SSL_CTX_new(TLS_server_method())) == NULL)
-  {
-    const char *s = ERR_lib_error_string(ERR_get_error());
+  tls_context_t context = tls_ctx;
 
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- %s", s);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
+  tls_ctx = NULL;
 
-  SSL_CTX_set_min_proto_version(tls_ctx.server_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx.server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE|SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-
-  if ((tls_ctx.client_ctx = SSL_CTX_new(TLS_client_method())) == NULL)
-  {
-    const char *s = ERR_lib_error_string(ERR_get_error());
-
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- %s", s);
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
-
-  SSL_CTX_set_min_proto_version(tls_ctx.client_ctx, TLS1_2_VERSION);
-  SSL_CTX_set_options(tls_ctx.client_ctx, SSL_OP_NO_TICKET);
-  SSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  SSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
+  if (context)
+    _tls_context_unref(context);
 }
 
-bool
-tls_new_credentials(void)
+static tls_context_t
+_tls_context_new(void)
 {
-  TLS_initialized = false;
+  tls_context_t context = io_calloc(sizeof(*context));
+  _tls_context_ref(context);
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
+  ERR_clear_error();
 
-  if (SSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != 1 ||
-      SSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != 1)
+  context->server_ctx = SSL_CTX_new(TLS_server_method());
+  if (context->server_ctx == NULL)
+    goto fail;
+
+  if (SSL_CTX_set_min_proto_version(context->server_ctx, TLS1_2_VERSION) != 1)
+    goto fail;
+
+  SSL_CTX_set_options(context->server_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(context->server_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
+  SSL_CTX_set_session_cache_mode(context->server_ctx, SSL_SESS_CACHE_OFF);
+
+  context->client_ctx = SSL_CTX_new(TLS_client_method());
+  if (context->client_ctx == NULL)
+    goto fail;
+
+  if (SSL_CTX_set_min_proto_version(context->client_ctx, TLS1_2_VERSION) != 1)
+    goto fail;
+
+  SSL_CTX_set_options(context->client_ctx, SSL_OP_NO_TICKET);
+  SSL_CTX_set_verify(context->client_ctx, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
+  SSL_CTX_set_session_cache_mode(context->client_ctx, SSL_SESS_CACHE_OFF);
+
+  return context;
+
+fail:
+  report_crypto_errors();
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  ERR_clear_error();
+
+  if (SSL_CTX_use_certificate_chain_file(context->server_ctx, config->certificate_file) != 1 ||
+      SSL_CTX_use_certificate_chain_file(context->client_ctx, config->certificate_file) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1 ||
-      SSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != 1)
+  if (SSL_CTX_use_PrivateKey_file(context->server_ctx, config->private_key_file, SSL_FILETYPE_PEM) != 1 ||
+      SSL_CTX_use_PrivateKey_file(context->client_ctx, config->private_key_file, SSL_FILETYPE_PEM) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (SSL_CTX_check_private_key(tls_ctx.server_ctx) != 1 ||
-      SSL_CTX_check_private_key(tls_ctx.client_ctx) != 1)
+  if (SSL_CTX_check_private_key(context->server_ctx) != 1 ||
+      SSL_CTX_check_private_key(context->client_ctx) != 1)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (ConfigServerInfo.tls_dh_param_file)
-  {
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-    BIO *file = BIO_new_file(ConfigServerInfo.tls_dh_param_file, "r");
-
-    if (file)
-    {
-      DH *dh = PEM_read_bio_DHparams(file, NULL, NULL, NULL);
-
-      BIO_free(file);
-
-      if (dh)
-      {
-        SSL_CTX_set_tmp_dh(tls_ctx.server_ctx, dh);
-        DH_free(dh);
-      }
-    }
-    else
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-#else
-    EVP_PKEY *dhpkey = NULL;
-    OSSL_STORE_CTX *ctx = OSSL_STORE_open(ConfigServerInfo.tls_dh_param_file, NULL, NULL, NULL, NULL);
-    if (ctx)
-    {
-      if (OSSL_STORE_expect(ctx, OSSL_STORE_INFO_PARAMS))
-      {
-        while (OSSL_STORE_eof(ctx) == 0)
-        {
-          OSSL_STORE_INFO *info = OSSL_STORE_load(ctx);
-          if (info)
-          {
-            dhpkey = OSSL_STORE_INFO_get1_PARAMS(info);
-            OSSL_STORE_INFO_free(info);
-
-            if (dhpkey)
-            {
-              if (EVP_PKEY_is_a(dhpkey, "DH"))
-                if (SSL_CTX_set0_tmp_dh_pkey(tls_ctx.server_ctx, dhpkey))
-                  break;
-
-              EVP_PKEY_free(dhpkey);
-              dhpkey = NULL;
-            }
-          }
-        }
-      }
-
-      OSSL_STORE_close(ctx);
-    }
-
-    if (dhpkey == NULL)
-      log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-#endif
-  }
-
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (SSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) == 0)
-  {
-    SSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
-
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = EVP_sha256();
-  else if ((message_digest_algorithm = EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
-  {
-    message_digest_algorithm = EVP_sha256();
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-  }
-
-  if (ConfigServerInfo.tls_cipher_list == NULL)
-    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (SSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) == 0)
-  {
-    SSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
-  }
-
-#ifndef LIBRESSL_VERSION_NUMBER
-  if (ConfigServerInfo.tls_cipher_suites == NULL)
-    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
-  else if (SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_suites) == 0)
-  {
-    SSL_CTX_set_ciphersuites(tls_ctx.server_ctx, "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_suites -- could not set supported cipher suite(s)");
-  }
-#endif
-
-  TLS_initialized = true;
   return true;
 }
 
+bool
+tls_configure(const tls_config_t *config)
+{
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
+
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
+
+  if (!_tls_context_load_credentials(context, config))
+  {
+    _tls_context_unref(context);
+    return false;
+  }
+
+  tls_context_t old_context = tls_ctx;
+  tls_ctx = context;
+
+  if (old_context)
+    _tls_context_unref(old_context);
+
+  return true;
+}
+
+void
+tls_library_init(void)
+{
+}
+
 const char *
-tls_get_cipher(const tls_data_t *tls_data)
+tls_session_get_cipher(const tls_data_t *tls_data)
 {
   static char buf[128];
-  SSL *ssl = *tls_data;
+  SSL *ssl = tls_data->session;
 
   snprintf(buf, sizeof(buf), "%s-%s", SSL_get_version(ssl), SSL_get_cipher(ssl));
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_library_get_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "OpenSSL version: library: %s, header: %s",
-           OpenSSL_version(OPENSSL_VERSION), OPENSSL_VERSION_TEXT);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "OpenSSL",
+    .runtime_version = OpenSSL_version(OPENSSL_VERSION),
+    .compile_version = OPENSSL_VERSION_TEXT
+  };
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_session_is_active(const tls_data_t *tls_data)
 {
-  SSL *ssl = *tls_data;
-  return ssl != NULL;
+  return tls_data->session != NULL;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_session_deinit(tls_data_t *tls_data)
 {
-  SSL_free(*tls_data);
-  *tls_data = NULL;
+  if (tls_data->session == NULL)
+    return;
+
+  SSL *session = tls_data->session;
+  tls_context_t context = tls_data->context;
+
+  tls_data->session = NULL;
+  tls_data->context = NULL;
+
+  SSL_free(session);
+  _tls_context_unref(context);
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
+  *want_write = false;
+
   ERR_clear_error();
+  errno = 0;
 
-  SSL *ssl = *tls_data;
-  ssize_t ret = SSL_read(ssl, buf, bufsize);
-  /* Translate openssl error codes, sigh */
-  if (ret < 0)
+  SSL *ssl = tls_data->session;
+  size_t nread = 0;
+  const int ret = SSL_read_ex(ssl, buf, bufsize, &nread);
+  if (ret == 1)
+    return (ssize_t)nread;
+
+  const int saved_errno = errno;
+
+  switch (SSL_get_error(ssl, ret))
   {
-    switch (SSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_WRITE:
-      {
-        /* OpenSSL wants to write, we signal this to the caller and do nothing about that here */
-        *want_write = true;
-        break;
-      }
-      case SSL_ERROR_WANT_READ:
-        errno = EWOULDBLOCK;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;
-    }
+    case SSL_ERROR_WANT_READ:
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_WANT_WRITE:
+      *want_write = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case SSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    case SSL_ERROR_SSL:
+    default:
+      errno = EPROTO;
+      return -1;
   }
-
-  return ret;
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
+  *want_read = false;
+
   ERR_clear_error();
+  errno = 0;
 
-  SSL *ssl = *tls_data;
-  ssize_t ret = SSL_write(ssl, buf, bufsize);
-  /* Translate openssl error codes, sigh */
-  if (ret < 0)
+  SSL *ssl = tls_data->session;
+  size_t nwritten = 0;
+  const int ret = SSL_write_ex(ssl, buf, bufsize, &nwritten);
+  if (ret == 1)
+    return (ssize_t)nwritten;
+
+  const int saved_errno = errno;
+
+  switch (SSL_get_error(ssl, ret))
   {
-    switch (SSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_READ:
-        *want_read = true;
-        break;  /* Retry later, don't register for write events */
-      case SSL_ERROR_WANT_WRITE:
-        errno = EWOULDBLOCK;
-        break;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;  /* Either an SSL-specific error or EOF */
-    }
+    case SSL_ERROR_WANT_WRITE:
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_WANT_READ:
+      *want_read = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case SSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case SSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    case SSL_ERROR_SSL:
+    default:
+      errno = EPROTO;
+      return -1;
   }
-
-  return ret;
 }
 
 void
-tls_shutdown(tls_data_t *tls_data)
+tls_session_close_notify(tls_data_t *tls_data)
 {
-  SSL *ssl = *tls_data;
-
+  SSL *ssl = tls_data->session;
   SSL_set_shutdown(ssl, SSL_RECEIVED_SHUTDOWN);
 
   if (SSL_shutdown(ssl) == 0)
@@ -334,103 +306,122 @@ tls_shutdown(tls_data_t *tls_data)
 }
 
 bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
 {
-  SSL *ssl;
-
-  if (TLS_initialized == false)
+  if (tls_ctx == NULL)
     return false;
 
-  if (role == TLS_ROLE_SERVER)
-    ssl = SSL_new(tls_ctx.server_ctx);
-  else
-    ssl = SSL_new(tls_ctx.client_ctx);
+  tls_context_t context = tls_ctx;
 
-  if (ssl == NULL)
+  SSL_CTX *ctx;
+  switch (role)
   {
-    log_write(LOG_TYPE_IRCD, "SSL_new() ERROR! -- %s",
-         ERR_error_string(ERR_get_error(), NULL));
-    return false;
+    case TLS_ROLE_SERVER:
+      ctx = context->server_ctx;
+      break;
+    case TLS_ROLE_CLIENT:
+      ctx = context->client_ctx;
+      break;
+    default:
+      return false;
   }
 
-  *tls_data = ssl;
-  SSL_set_fd(ssl, fd);
-  return true;
-}
+  _tls_context_ref(context);
 
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  SSL_set_cipher_list(*tls_data, cipher_list);
+  SSL *session = SSL_new(ctx);
+  if (session == NULL)
+    goto fail;
+
+  if (role == TLS_ROLE_SERVER)
+    SSL_set_accept_state(session);
+  else
+    SSL_set_connect_state(session);
+
+  if (SSL_set_fd(session, fd) != 1)
+    goto fail;
+
+  tls_data->session = session;
+  tls_data->context = context;
   return true;
+
+fail:
+  if (session)
+    SSL_free(session);
+
+  _tls_context_unref(context);
+  return false;
 }
 
 tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
 {
-  SSL *ssl = *tls_data;
-  int ret;
+  if (errstr)
+    *errstr = NULL;
 
   ERR_clear_error();
 
-  if (role == TLS_ROLE_SERVER)
-    ret = SSL_accept(ssl);
-  else
-    ret = SSL_connect(ssl);
-
-  if (ret > 0)
+  SSL *ssl = tls_data->session;
+  const int ret = SSL_do_handshake(ssl);
+  if (ret == 1)
     return TLS_HANDSHAKE_DONE;
 
   switch (SSL_get_error(ssl, ret))
   {
-    case SSL_ERROR_WANT_WRITE:
-      return TLS_HANDSHAKE_WANT_WRITE;
     case SSL_ERROR_WANT_READ:
       return TLS_HANDSHAKE_WANT_READ;
-    default:
-    {
-      const char *error = ERR_error_string(ERR_get_error(), NULL);
-
+    case SSL_ERROR_WANT_WRITE:
+      return TLS_HANDSHAKE_WANT_WRITE;
+    case SSL_ERROR_ZERO_RETURN:
       if (errstr)
-        *errstr = error;
-
-      return TLS_HANDSHAKE_ERROR;
-    }
-  }
-}
-
-bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
-{
-  SSL *ssl = *tls_data;
-  unsigned int n;
-  char buf[EVP_MAX_MD_SIZE * 2 + 1];
-  unsigned char md[EVP_MAX_MD_SIZE];
-  bool ret = false;
-
-  /* Accept NULL return from SSL_get_peer_certificate */
-  X509 *cert = SSL_get_peer_certificate(ssl);
-  if (cert == NULL)
-    return true;
-
-  switch (SSL_get_verify_result(ssl))
-  {
-    case X509_V_OK:
-    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-    case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-    case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-      ret = true;
-
-      if (X509_digest(cert, message_digest_algorithm, md, &n))
+        *errstr = "TLS connection closed during handshake";
+      break;
+    case SSL_ERROR_SYSCALL:
+      if (errstr)
+        *errstr = "System I/O error during TLS handshake";
+      break;
+    case SSL_ERROR_SSL:
+      if (errstr)
       {
-        binary_to_hex(md, buf, n);
-        *fingerprint = io_strdup(buf);
+        const unsigned long code = ERR_peek_last_error();
+        const char *const reason = code ? ERR_reason_error_string(code) : NULL;
+
+        *errstr = reason ? reason : "TLS protocol error during handshake";
       }
+      break;
     default:
+      if (errstr)
+        *errstr = "TLS handshake failed";
       break;
   }
 
-  X509_free(cert);
-  return ret;
+  return TLS_HANDSHAKE_ERROR;
+}
+
+bool
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
+{
+  SSL *ssl = tls_data->session;
+
+  io_free(*fingerprint);
+  *fingerprint = NULL;
+
+  const X509 *cert = SSL_get0_peer_certificate(ssl);
+  if (cert == NULL)
+    return false;
+
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
+  unsigned int digest_len;
+  if (X509_digest(cert, EVP_sha256(), digest, &digest_len) != 1)
+  {
+    ERR_clear_error();
+    return false;
+  }
+
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
+  if (!io_bytes_to_hex(digest, digest_len, hex_digest, sizeof(hex_digest)))
+    return false;
+
+  *fingerprint = io_strdup(hex_digest);
+  return true;
 }
 #endif  /* HAVE_TLS_OPENSSL */

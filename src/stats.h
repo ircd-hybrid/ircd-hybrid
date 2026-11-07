@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -29,6 +13,9 @@
 
 #ifndef INCLUDED_stats_h
 #define INCLUDED_stats_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "client.h"
 
@@ -44,7 +31,8 @@
  * @param h The function to handle the stats command.
  * @param r The required user modes to access this stats command.
  */
-#define STATS_HANDLER_INIT(l, h, r) { .letter = l, .handler = h, .required_modes = r, .enabled = true }
+#define STATS_HANDLER_INIT(l, h, r) \
+  { .letter = l, .handler = h, .required_modes = r, .enabled = true }
 
 /**
  * @enum stats_result_t
@@ -58,6 +46,7 @@ typedef enum
   STATS_SUCCESS = 0,  /**< Indicates a successful operation. */
   STATS_ALREADY_REGISTERED,  /**< Indicates that the stats handler for the given character is already registered. */
   STATS_NOT_FOUND,  /**< Indicates that the stats handler for the given character was not found. */
+  STATS_INVALID_ARGUMENT,  /**< Indicates that a required argument is invalid. */
 } stats_result_t;
 
 /**
@@ -66,7 +55,7 @@ typedef enum
  *
  * This typedef defines the function signature for stats handler functions.
  */
-typedef void (*stats_handler_func)(struct Client *, int, char *[]);
+typedef void (*stats_handler_func)(struct Client *, size_t, char *[]);
 
 /**
  * @struct StatsHandler

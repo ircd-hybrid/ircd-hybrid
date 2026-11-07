@@ -1,90 +1,68 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_nick.c
  * \brief Includes required functions for processing the NICK command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "io_parse.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
-#include "hash.h"
-#include "fdlist.h"
-#include "io_string.h"
-#include "ircd.h"
-#include "numeric.h"
+#include "misc.h"
+#include "module.h"
+
+#include "aline.h"
+#include "channel.h"
+#include "channel_member.h"
+#include "channel_mode.h"
+#include "client.h"
+#include "client_find.h"
+#include "client_format.h"
+#include "client_id.h"
 #include "conf.h"
 #include "conf_resv.h"
+#include "extban.h"
+#include "hash.h"
+#include "ipcache.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "ircd_hook.h"
+#include "monitor.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
 #include "whowas.h"
-#include "send.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "parse.h"
-#include "module.h"
-#include "monitor.h"
-#include "misc.h"
-#include "id.h"
-#include "ipcache.h"
-#include "extban.h"
-#include "ircd_hook.h"
 
-
-/* check_clean_nick()
- *
- * input        - pointer to source
- *              -
- *              - nickname
- *              - truncated nickname
- *              - origin of client
- *              - pointer to server nick is coming from
- * output       - none
- * side effects - if nickname is erroneous, or a different length to
- *                truncated nickname, return 1
- */
 static bool
 check_clean_nick(struct Client *source, const char *nick)
 {
-  assert(IsServer(source) || (IsClient(source) && !MyConnect(source)));
+  assert(client_is_server(source) || (client_is_user(source) && !client_is_local(source)));
 
-  /*
-   * The old code did some wacky stuff here, if the nick is invalid, kill it
-   * and don't bother messing at all
-   */
-  if (valid_nickname(nick, false))
+  if (nickname_is_valid(nick, false))
     return true;
 
-  ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
-                 nick, IsServer(source) ? source->name : source->servptr->name, source->from->name);
+                 nick, client_is_server(source) ? source->name : source->uplink->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
 
-  /* Bad nick change */
-  if (!IsServer(source))
+  if (!client_is_server(source))
   {
     sendto_servers(source, 0, 0, ":%s KILL %s :%s (Bad Nickname)",
                    me.id, source->id, me.name);
-    AddFlag(source, FLAGS_KILLED);
+
+    client_set_flag(source, FLAGS_KILLED);
     client_exit(source, "Bad Nickname");
   }
 
@@ -94,121 +72,79 @@ check_clean_nick(struct Client *source, const char *nick)
 static bool
 check_clean_uid(struct Client *source, const char *nick, const char *uid)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
-  if (valid_uid(uid) && strncmp(uid, source->id, IRC_MAXSID) == 0)
+  if (client_id_is_valid_uid(uid) && strncmp(uid, source->id, CLIENT_ID_SID_LENGTH) == 0)
     return true;
 
-  ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad UID: %s Nickname: %s From: %s(via %s)",
-                 uid, nick, source->name, source->from->name);
+                 uid, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad UID)",
              me.id, uid, me.name);
+
   return false;
 }
 
-/* check_clean_user()
- *
- * input        - pointer to client sending data
- *              - nickname
- *              - username to check
- *              - origin of NICK
- * output       - none
- * side effects - if username is erroneous, return 1
- */
 static bool
 check_clean_user(struct Client *source, const char *nick, const char *user)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
-  if (valid_username(user, false))
+  if (username_is_valid(user, false))
     return true;
 
-  ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
-                 user, nick, source->name, source->from->name);
+                 user, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Username)",
              me.id, nick, me.name);
+
   return false;
 }
 
-/* check_clean_host()
- *
- * input        - pointer to client sending us data
- *              - nickname
- *              - hostname to check
- *              - source name
- * output       - none
- * side effects - if hostname is erroneous, return 1
- */
 static bool
 check_clean_host(struct Client *source, const char *nick, const char *host)
 {
-  assert(IsServer(source));
+  assert(client_is_server(source));
 
-  if (valid_hostname(host))
+  if (hostname_is_valid(host))
     return true;
 
-  ++ServerStats.is_kill;
   sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
-                 host, nick, source->name, source->from->name);
+                 host, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Hostname)",
              me.id, nick, me.name);
+
   return false;
 }
 
-/* set_initial_nick()
- *
- * inputs
- * output
- * side effects -
- *
- * This function is only called to set up an initially registering
- * client.
- */
 static void
 set_initial_nick(struct Client *source, const char *nick)
 {
-  bool samenick = irccmp(source->name, nick) == 0;
+  bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
-    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
+    source->nick_timestamp = io_time_get(IO_TIME_REALTIME_SEC);
 
-  source->connection->registration &= ~REG_NEED_NICK;
+  client_update_name(source, nick);
 
-  if (source->name[0])
-    hash_del_client(source);
-
-  strlcpy(source->name, nick, sizeof(source->name));
-  hash_add_client(source);
-
-  /* fd_desc is long enough */
-  fd_note(source->connection->fd, "Nick: %s", source->name);
-
-  if (source->connection->registration == 0)
+  source->connection->registration_flags &= ~REG_NEED_NICK;
+  if (source->connection->registration_flags == 0)
     user_register_local(source);
 }
 
-/* change_local_nick()
- *
- * inputs       - pointer to server
- *              - pointer to client
- *              - nick
- * output       -
- * side effects - changes nick of a LOCAL user
- */
 static void
 nick_change_local(struct Client *source, const char *nick)
 {
   assert(source->name[0] && !string_is_empty(nick));
-  assert(MyClient(source));
+  assert(client_is_local_user(source));
 
-  if ((source->connection->nick.last_attempt + ConfigGeneral.max_nick_time) < io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - source->connection->nick.last_attempt > ConfigGeneral.max_nick_time)
     source->connection->nick.count = 0;
 
-  if (ConfigGeneral.anti_nick_flood && user_mode_has_flag(source, UMODE_OPER) == false &&
+  if (ConfigGeneral.anti_nick_flood && !client_is_oper(source) &&
       (source->connection->nick.count > ConfigGeneral.max_nick_changes))
   {
     sendto_one_numeric(source, &me, ERR_NICKTOOFAST,
@@ -216,49 +152,40 @@ nick_change_local(struct Client *source, const char *nick)
     return;
   }
 
-  source->connection->nick.last_attempt = io_time_get(IO_TIME_MONOTONIC_SEC);
+  source->connection->nick.last_attempt = now;
   source->connection->nick.count++;
 
-  bool samenick = irccmp(source->name, nick) == 0;
+  bool samenick = io_strcasecmp(source->name, nick) == 0;
   if (samenick == false)
   {
-    source->tsinfo = io_time_get(IO_TIME_REALTIME_SEC);
-    clear_ban_cache_list(&source->channel);
-    monitor_signoff(source);
+    source->nick_timestamp = io_time_get(IO_TIME_REALTIME_SEC);
+
+    clear_ban_cache_list(&source->channel_member_list);
+
+    monitor_notify_signoff(source);
 
     if (user_mode_has_flag(source, UMODE_REGISTERED))
     {
-      const uint64_t mode_flags_old = source->umodes;
+      const uint64_t mode_flags_old = source->user_mode_flags;
       user_mode_unset_flag(source, UMODE_REGISTERED);
-
-      user_mode_send(source, mode_flags_old, USER_MODE_SEND_CLIENT);
+      user_mode_send(source, mode_flags_old, USER_MODE_SEND_USER);
     }
   }
 
   ircd_hook_nick_change_ctx ctx = { .client = source, .nick = nick };
   hook_dispatch(ircd_hook_nick_change_local, &ctx);
 
-  /*
-   * Client just changing their nick. If they are on a channel, send
-   * note of change to all clients on that channel. Propagate notice
-   * to other servers.
-   */
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, nick);
   whowas_add_history(source, true);
 
   sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, nick, source->tsinfo);
+                 source->id, nick, source->nick_timestamp);
+  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               source->name, source->username, source->host, nick);
 
-  hash_del_client(source);
-  strlcpy(source->name, nick, sizeof(source->name));
-  hash_add_client(source);
+  client_update_name(source, nick);
 
   if (samenick == false)
-    monitor_signon(source);
-
-  /* fd_desc is long enough */
-  fd_note(source->connection->fd, "Nick: %s", source->name);
+    monitor_notify_signon(source);
 }
 
 /*!
@@ -274,40 +201,36 @@ nick_change_local(struct Client *source, const char *nick)
  *      - parv[2] = timestamp
  */
 static void
-nick_change_remote(struct Client *source, char *parv[])
+nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_timestamp)
 {
-  assert(!string_is_empty(parv[1]));
-  assert(IsClient(source));
+  assert(!string_is_empty(new_nick));
+  assert(client_is_user(source));
   assert(source->name[0]);
 
-  /* Client changing their nick */
-  bool samenick = irccmp(source->name, parv[1]) == 0;
+  const bool samenick = io_strcasecmp(source->name, new_nick) == 0;
   if (samenick == false)
   {
-    user_mode_unset_flag(source, UMODE_REGISTERED);
-    monitor_signoff(source);
+    assert(nick_timestamp);
+    source->nick_timestamp = nick_timestamp;
 
-    source->tsinfo = strtoumax(parv[2], NULL, 10);
-    assert(source->tsinfo);
+    user_mode_unset_flag(source, UMODE_REGISTERED);
+    monitor_notify_signoff(source);
   }
 
-  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = parv[1] };
+  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = new_nick };
   hook_dispatch(ircd_hook_nick_change_remote, &ctx);
 
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, parv[1]);
-
   whowas_add_history(source, true);
-  sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, parv[1], source->tsinfo);
 
-  /* Set the new nick name */
-  hash_del_client(source);
-  strlcpy(source->name, parv[1], sizeof(source->name));
-  hash_add_client(source);
+  sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
+                 source->id, new_nick, source->nick_timestamp);
+  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               source->name, source->username, source->host, new_nick);
+
+  client_update_name(source, new_nick);
 
   if (samenick == false)
-    monitor_signon(source);
+    monitor_notify_signon(source);
 }
 
 /*!
@@ -332,40 +255,39 @@ nick_change_remote(struct Client *source, char *parv[])
  *      - parv[11] = ircname (gecos)
  */
 static void
-uid_from_server(struct Client *source, int parc, char *parv[])
+uid_from_server(struct Client *source, size_t parc, char *parv[], uint32_t hopcount, uintmax_t nick_timestamp)
 {
-  struct Client *client_p = client_make(source->from);
-  client_p->servptr = source;
-  client_p->hopcount = atoi(parv[2]);
-  client_p->tsinfo = strtoumax(parv[3], NULL, 10);
+  struct Client *const client = client_create_remote(source);
+  client->hopcount = hopcount;
+  client->nick_timestamp = nick_timestamp;
 
-  strlcpy(client_p->name, parv[1], sizeof(client_p->name));
-  strlcpy(client_p->username, parv[5], sizeof(client_p->username));
-  strlcpy(client_p->host, parv[6], sizeof(client_p->host));
-  strlcpy(client_p->realhost, parv[7], sizeof(client_p->realhost));
-  strlcpy(client_p->sockhost, parv[8], sizeof(client_p->sockhost));
-  strlcpy(client_p->id, parv[9], sizeof(client_p->id));
-  strlcpy(client_p->account, parv[10], sizeof(client_p->account));
-  strlcpy(client_p->info, parv[11], sizeof(client_p->info));
+  strlcpy(client->name, parv[1], sizeof(client->name));
+  strlcpy(client->username, parv[5], sizeof(client->username));
+  strlcpy(client->host, parv[6], sizeof(client->host));
+  strlcpy(client->realhost, parv[7], sizeof(client->realhost));
+  strlcpy(client->sockhost, parv[8], sizeof(client->sockhost));
+  strlcpy(client->id, parv[9], sizeof(client->id));
+  strlcpy(client->account, parv[10], sizeof(client->account));
+  strlcpy(client->info, parv[11], sizeof(client->info));
 
-  if (address_from_string(client_p->sockhost, &client_p->addr))
+  if (address_from_string(client->sockhost, &client->addr))
   {
-    struct ip_entry *ipcache = ipcache_record_find_or_add(&client_p->addr);
+    struct ip_entry *const ipcache = ipcache_record_find_or_add(&client->addr);
     ++ipcache->count_remote;
-    AddFlag(client_p, FLAGS_IPHASH);
+    client_set_flag(client, FLAGS_IPHASH);
   }
 
-  hash_add_client(client_p);
-  hash_add_id(client_p);
+  hash_add_client(client);
+  hash_add_id(client);
 
   /* Parse user modes */
   for (const char *m = &parv[4][1]; *m; ++m)
   {
-    const struct UserMode *mode = user_mode_find(*m);
-    user_mode_set_mode_exec(client_p, mode, USER_MODE_SOURCE_REGULAR);
+    const struct UserMode *const mode = user_mode_find(*m);
+    user_mode_set_mode_exec(client, mode, USER_MODE_SOURCE_REGULAR);
   }
 
-  user_register_remote(client_p);
+  user_register_remote(client);
 }
 
 /*!
@@ -392,46 +314,41 @@ uid_from_server(struct Client *source, int parc, char *parv[])
  */
 static bool
 perform_uid_introduction_collides(struct Client *source, struct Client *target,
-                                  int parc, char *parv[])
+                                  size_t parc, char *parv[], uintmax_t nick_timestamp)
 {
   const char *uid = parv[9];
-  uintmax_t newts = strtoumax(parv[3], NULL, 10);
 
-  assert(IsServer(source));
-  assert(IsClient(target));
-
-  /* Server introducing new nick */
+  assert(client_is_server(source));
+  assert(client_is_user(target));
 
   /* If their TS's are the same, kill both */
-  if (newts == target->tsinfo)
+  if (nick_timestamp == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(both killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
                    me.id, target->id, me.name);
 
-    ++ServerStats.is_kill;
     sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
-    AddFlag(target, FLAGS_KILLED);
+    client_set_flag(target, FLAGS_KILLED);
     client_exit(target, "Nick collision (new)");
     return false;
   }
 
-  /* The timestamps are different */
-  bool sameuser = irccmp(target->username, parv[5]) == 0 &&
-                  irccmp(target->sockhost, parv[8]) == 0;
+  const bool sameuser = io_strcasecmp(target->username, parv[5]) == 0 &&
+                        io_strcasecmp(target->sockhost, parv[8]) == 0;
 
   /*
    * If the users are the same (loaded a client on a different server)
    * and the new users ts is older, or the users are different and the
    * new users ts is newer, ignore the new client and let it do the kill
    */
-  if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
+  if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
   {
     sendto_one(source, ":%s KILL %s :%s (Nick collision (new))",
                me.id, uid, me.name);
@@ -441,21 +358,19 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
-                   target->name, target->from->name, source->from->name);
-
-  ++ServerStats.is_kill;
-  sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision (new))",
                  me.id, target->id, me.name);
 
-  AddFlag(target, FLAGS_KILLED);
-  client_exit(target, "Nick collision");
+  sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
+  client_set_flag(target, FLAGS_KILLED);
+  client_exit(target, "Nick collision");
   return true;
 }
 
@@ -473,85 +388,153 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
  *      - parv[2] = timestamp
  */
 static bool
-perform_nick_change_collides(struct Client *source, struct Client *target,
-                             int parc, char *parv[])
+perform_nick_change_collides(struct Client *source, struct Client *target, uintmax_t nick_timestamp)
 {
-  uintmax_t newts = strtoumax(parv[2], NULL, 10);
+  assert(client_is_user(source));
+  assert(client_is_user(target));
+  assert(nick_timestamp);
 
-  assert(IsClient(source));
-  assert(IsClient(target));
-  assert(newts);
-
-  /* It's a client changing nick and causing a collide */
-  if (newts == target->tsinfo)
+  if (nick_timestamp == target->nick_timestamp)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick change collision from %s to %s(%s <- %s)(both killed)",
-                   source->name, target->name, target->from->name,
-                   source->from->name);
-
-    sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
-    ServerStats.is_kill += 2;
+                   source->name, target->name, target->nexthop->name,
+                   source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                    me.id, source->id, me.name);
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                    me.id, target->id, me.name);
 
-    AddFlag(source, FLAGS_KILLED);
-    AddFlag(target, FLAGS_KILLED);
+    sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
+
+    client_set_flag(source, FLAGS_KILLED);
+    client_set_flag(target, FLAGS_KILLED);
     client_exit(source, "Nick collision (old)");
     client_exit(target, "Nick collision (new)");
     return false;
   }
 
-  /* The timestamps are different */
-  bool sameuser = irccmp(target->username, source->username) == 0 &&
-                  irccmp(target->sockhost, source->sockhost) == 0;
-
-  if ((sameuser && newts < target->tsinfo) || (sameuser == false && newts > target->tsinfo))
+  const bool sameuser = io_strcasecmp(target->username, source->username) == 0 &&
+                        io_strcasecmp(target->sockhost, source->sockhost) == 0;
+  if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
   {
     if (sameuser)
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(older killed)",
-                     source->name, target->name, target->from->name,
-                     source->from->name);
+                     source->name, target->name, target->nexthop->name,
+                     source->nexthop->name);
     else
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(newer killed)",
-                     source->name, target->name, target->from->name,
-                     source->from->name);
-
-    ++ServerStats.is_kill;
+                     source->name, target->name, target->nexthop->name,
+                     source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick change collision)",
                    me.id, source->id, me.name);
-    AddFlag(source, FLAGS_KILLED);
 
+    client_set_flag(source, FLAGS_KILLED);
     if (sameuser)
       client_exit(source, "Nick collision (old)");
     else
       client_exit(source, "Nick collision (new)");
+
     return false;
   }
 
   if (sameuser)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
   else
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
-                   target->name, target->from->name, source->from->name);
+                   target->name, target->nexthop->name, source->nexthop->name);
 
   sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (Nick collision)",
                  me.id, target->id, me.name);
 
-  ++ServerStats.is_kill;
   sendto_one_numeric(target, &me, ERR_NICKCOLLISION, target->name);
 
-  AddFlag(target, FLAGS_KILLED);
+  client_set_flag(target, FLAGS_KILLED);
   client_exit(target, "Nick collision");
+  return true;
+}
+
+/*! \brief NICK command handler
+ *
+ * \param source Pointer to allocated Client struct from which the message
+ *                 originally comes from.  This can be a local or remote client.
+ * \param parc     Integer holding the number of supplied arguments.
+ * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
+ *                 pointers.
+ * \note Valid arguments for this command are:
+ *      - parv[0] = command
+ *      - parv[1] = nickname
+ */
+static void
+mr_nick(struct Client *source, size_t parc, char *parv[])
+{
+  assert(client_is_local(source));
+
+  const char *const new_nick = parv[1];
+  if (string_is_empty(new_nick))
+  {
+    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
+    return;
+  }
+
+  char nick[NICKLEN + 1];
+  strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+
+  if (!nickname_is_valid(nick, true))
+  {
+    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, new_nick, "Erroneous Nickname");
+    return;
+  }
+
+  const struct ResvItem *const resv = resv_find(nick, match);
+  if (resv)
+  {
+    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
+
+    client_format_name_buffer_t source_name_buffer;
+    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
+                   nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
+    return;
+  }
+
+  struct Client *const target = client_find_entity_by_name(nick);
+  if (target == NULL || target == source)
+    set_initial_nick(source, nick);
+  else
+    sendto_one_numeric(source, &me, ERR_NICKNAMEINUSE, target->name);
+}
+
+static bool
+_nick_change_check_channel_policy(struct Client *source)
+{
+  assert(client_is_local_user(source));
+
+  list_node_t *node;
+  LIST_FOREACH(node, source->channel_member_list.head)
+  {
+    const struct ChannelMember *const member = node->data;
+    if (channel_member_get_highest_rank(member) >= CHACCESS_VOICE)
+      continue;
+
+    if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
+    {
+      sendto_one_numeric(source, &me, ERR_NONICKCHANGE, member->channel->name);
+      return false;
+    }
+
+    if (is_banned(member->channel, source, &extban_nick))
+    {
+      sendto_one_numeric(source, &me, ERR_BANNICKCHANGE, member->channel->name);
+      return false;
+    }
+  }
 
   return true;
 }
@@ -568,129 +551,60 @@ perform_nick_change_collides(struct Client *source, struct Client *target,
  *      - parv[1] = nickname
  */
 static void
-mr_nick(struct Client *source, int parc, char *parv[])
+m_nick(struct Client *source, size_t parc, char *parv[])
 {
-  if (string_is_empty(parv[1]))
+  assert(client_is_local_user(source));
+
+  const char *const new_nick = parv[1];
+  if (string_is_empty(new_nick))
   {
     sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
     return;
   }
 
-  /* Copy the nick and terminate it */
   char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
+  strlcpy(nick, new_nick, IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
 
-  /* Check the nickname is ok */
-  if (valid_nickname(nick, true) == false)
-  {
-    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, parv[1], "Erroneous Nickname");
-    return;
-  }
-
-  /* Check if the nick is resv'd */
-  const struct ResvItem *resv = resv_find(nick, match);
-  if (resv)
-  {
-    sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
-                   nick, client_get_name(source, HIDE_IP));
-    return;
-  }
-
-  struct Client *target = hash_find_client(nick);
-  if (target == NULL || target == source)
-    set_initial_nick(source, nick);
-  else
-    sendto_one_numeric(source, &me, ERR_NICKNAMEINUSE, target->name);
-}
-
-/*! \brief NICK command handler
- *
- * \param source Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parc     Integer holding the number of supplied arguments.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *      - parv[0] = command
- *      - parv[1] = nickname
- */
-static void
-m_nick(struct Client *source, int parc, char *parv[])
-{
-  const struct ResvItem *resv = NULL;
-
-  assert(MyClient(source));
-
-  if (string_is_empty(parv[1]))
-  {
-    sendto_one_numeric(source, &me, ERR_NONICKNAMEGIVEN);
-    return;
-  }
-
-  /* Terminate nick to NICKLEN */
-  char nick[NICKLEN + 1];
-  strlcpy(nick, parv[1], IO_MIN(sizeof(nick), ConfigServerInfo.max_nick_length + 1));
-
-  /* Check the nickname is ok */
-  if (valid_nickname(nick, true) == false)
+  if (!nickname_is_valid(nick, true))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, "Erroneous Nickname");
     return;
   }
 
-  if (!HasFlag(source, FLAGS_EXEMPTRESV) &&
-      !(user_mode_has_flag(source, UMODE_OPER) && HasOFlag(source, OPER_FLAG_NICK_RESV)) &&
+  const struct ResvItem *resv;
+  if (!client_has_flag(source, FLAGS_EXEMPTRESV) &&
+      !(client_is_oper(source) && client_has_oper_flag(source, OPER_FLAG_NICK_RESV)) &&
       (resv = resv_find(nick, match)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
+
+    client_format_name_buffer_t source_name_buffer;
     sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
-                   nick, client_get_name(source, HIDE_IP));
+                   nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
     return;
   }
 
-  list_node_t *node;
-  LIST_FOREACH(node, source->channel.head)
-  {
-    struct ChannelMember *member = node->data;
+  if (!_nick_change_check_channel_policy(source))
+    return;
 
-    if (member_highest_rank(member) < CHACCESS_VOICE)
-    {
-      if (channel_has_mode(member->channel, MODE_NONICKCHANGE))
-      {
-        sendto_one_numeric(source, &me, ERR_NONICKCHANGE, member->channel->name);
-        return;
-      }
-
-      if (is_banned(member->channel, source, &extban_nick))
-      {
-        sendto_one_numeric(source, &me, ERR_BANNICKCHANGE, member->channel->name);
-        return;
-      }
-    }
-  }
-
-  struct Client *target = hash_find_client(nick);
+  struct Client *const target = client_find_entity_by_name(nick);
   if (target == NULL)
     nick_change_local(source, nick);
   else if (target == source)
   {
     /*
      * If (target == source) the client is changing nicks between
-     * equivalent nicknames ie: nick -> nIcK
+     * equivalent nicknames ie: nick -> nIcK.
      */
 
-    /* Check the nick isn't exactly the same */
+    /* Check the nick isn't exactly the same. */
     if (strcmp(target->name, nick))
       nick_change_local(source, nick);
   }
-  else if (IsUnknown(target))
+  else if (client_is_unknown(target))
   {
-    /*
-     * If the client that has the nick isn't registered yet (NICK but no
-     * USER) then drop the unregistered client
-     */
     client_exit(target, "Overridden by other sign on");
+
     nick_change_local(source, nick);
   }
   else
@@ -712,31 +626,38 @@ m_nick(struct Client *source, int parc, char *parv[])
  *      - parv[2] = timestamp
  */
 static void
-ms_nick(struct Client *source, int parc, char *parv[])
+ms_nick(struct Client *source, size_t parc, char *parv[])
 {
-  if (!IsClient(source))
-    return;  /* Servers and unknown clients can't change nicks.. */
+  if (!client_is_user(source))
+    return;  /* Servers and unknown clients can't change nicks. */
 
-  if (check_clean_nick(source, parv[1]) == false)
+  const char *const new_nick = parv[1];
+  if (!check_clean_nick(source, new_nick))
     return;
 
-  /* If the nick doesn't exist, allow it and process like normal */
-  struct Client *target = hash_find_client(parv[1]);
+  struct Client *const target = client_find_entity_by_name(new_nick);
+  if (target == source)
+  {
+    if (strcmp(target->name, new_nick))
+      nick_change_remote(source, new_nick, source->nick_timestamp);
+
+    return;
+  }
+
+  uintmax_t new_nick_timestamp;
+  if (io_parse_uintmax(parv[2], &new_nick_timestamp) != IO_PARSE_OK || new_nick_timestamp == 0)
+    return;
+
   if (target == NULL)
-    nick_change_remote(source, parv);
-  else if (IsUnknown(target))
+    nick_change_remote(source, new_nick, new_nick_timestamp);
+  else if (client_is_unknown(target))
   {
-    /* We're not living in the past anymore, an unknown client is local only. */
     client_exit(target, "Overridden by other sign on");
-    nick_change_remote(source, parv);
+
+    nick_change_remote(source, new_nick, new_nick_timestamp);
   }
-  else if (target == source)
-  {
-    if (strcmp(target->name, parv[1]))
-      nick_change_remote(source, parv);
-  }
-  else if (perform_nick_change_collides(source, target, parc, parv))
-    nick_change_remote(source, parv);
+  else if (perform_nick_change_collides(source, target, new_nick_timestamp))
+    nick_change_remote(source, new_nick, new_nick_timestamp);
 }
 
 /*! \brief UID command handler
@@ -762,7 +683,7 @@ ms_nick(struct Client *source, int parc, char *parv[])
  *      - parv[11] = ircname (gecos)
  */
 static void
-ms_uid(struct Client *source, int parc, char *parv[])
+ms_uid(struct Client *source, size_t parc, char *parv[])
 {
   if (check_clean_nick(source, parv[1]) == false ||
       check_clean_user(source, parv[1], parv[5]) == false ||
@@ -771,74 +692,95 @@ ms_uid(struct Client *source, int parc, char *parv[])
       check_clean_uid(source, parv[1], parv[9]) == false)
     return;
 
+  uint32_t hopcount;
+  const io_parse_status_t hopcount_status = io_parse_uint32(parv[2], &hopcount);
+  uintmax_t nick_timestamp;
+  const io_parse_status_t nick_timestamp_status = io_parse_uintmax(parv[3], &nick_timestamp);
+
+  if (hopcount_status != IO_PARSE_OK || nick_timestamp_status != IO_PARSE_OK)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Malformed UID introduction for %s (%s) from %s(via %s): hopcount='%s', timestamp='%s'",
+                   parv[1], parv[9], source->name, source->nexthop->name,
+                   parv[2], parv[3]);
+
+    sendto_one(source, ":%s KILL %s :%s (Malformed UID introduction)",
+               me.id, parv[9], me.name);
+    return;
+  }
+
   /*
    * If there is an ID collision, kill our client, and kill theirs.
    * This may generate 401's, but it ensures that both clients always
    * go, even if the other server refuses to do the right thing.
    */
-  struct Client *target = hash_find_id(parv[9]);
+  struct Client *target = client_find_entity_by_id(parv[9]);
   if (target)
   {
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "ID collision on %s(%s <- %s)(both killed)",
-                   target->name, target->from->name, source->from->name);
+                   "ID collision for UID %s on %s (%s <- %s) (both killed)",
+                   target->id, target->name, target->nexthop->name, source->nexthop->name);
 
     sendto_servers(NULL, 0, 0, ":%s KILL %s :%s (ID collision)",
                    me.id, target->id, me.name);
 
-    ++ServerStats.is_kill;
-    AddFlag(target, FLAGS_KILLED);
+    client_set_flag(target, FLAGS_KILLED);
     client_exit(target, "ID Collision");
     return;
   }
 
-  target = hash_find_client(parv[1]);
+  target = client_find_entity_by_name(parv[1]);
   if (target == NULL)
-    uid_from_server(source, parc, parv);
-  else if (IsUnknown(target))
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
+  else if (client_is_unknown(target))
   {
     client_exit(target, "Overridden by other sign on");
-    uid_from_server(source, parc, parv);
+
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
   }
-  else if (perform_uid_introduction_collides(source, target, parc, parv))
-    uid_from_server(source, parc, parv);
+  else if (perform_uid_introduction_collides(source, target, parc, parv, nick_timestamp))
+    uid_from_server(source, parc, parv, hopcount, nick_timestamp);
 }
 
 static struct Command command_table[] =
 {
   [0] = {
     .name = "NICK",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_nick },
-    .handlers[CLIENT_HANDLER] = { .handler = m_nick, .end_grace_period = true },
-    .handlers[SERVER_HANDLER] = { .handler = ms_nick, .args_min = 3 },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_nick }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_nick },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = m_nick, .end_grace_period = true },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_nick, .args_min = 3 },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = m_nick }
   },
   [1] = {
     .name = "UID",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = m_ignore },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = ms_uid, .args_min = 12 },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_uid, .args_min = 12 },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
+  return ircd_module_register_commands(command_table, IO_ARRAY_LENGTH(command_table), error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_nick",
+  .flags = MODULE_FLAG_NO_REMOVE,
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
-  .core = true
+  .exit_handler = exit_handler
 };

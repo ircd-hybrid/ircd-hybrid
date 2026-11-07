@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -30,12 +14,13 @@
  * namespace support.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+
 #include "list.h"
 #include "memory.h"
-#include "send.h"
-#include "client.h"
+
 #include "info.h"
+#include "send.h"
 
 /**
  * @brief List to hold dynamically registered info entries.
@@ -58,13 +43,12 @@ static list_t info_list;
  * @return A negative value if a < b, zero if a == b, and a positive value if a > b.
  */
 static int
-info_compare(const void *const a_, const void *const b_)
+_info_compare(const void *const a_, const void *const b_)
 {
   const struct InfoEntry *const a = a_;
   const struct InfoEntry *const b = b_;
-
   if (a->namespace == NULL && b->namespace == NULL)
-    return strcasecmp(a->name, b->name);
+    return io_strcasecmp(a->name, b->name);
 
   if (a->namespace == NULL)
     return -1;
@@ -72,11 +56,11 @@ info_compare(const void *const a_, const void *const b_)
   if (b->namespace == NULL)
     return 1;
 
-  const int ns_cmp = strcasecmp(a->namespace, b->namespace);
+  const int ns_cmp = io_strcasecmp(a->namespace, b->namespace);
   if (ns_cmp)
     return ns_cmp;
 
-  return strcasecmp(a->name, b->name);
+  return io_strcasecmp(a->name, b->name);
 }
 
 /**
@@ -98,15 +82,15 @@ info_register(const char *namespace, const char *name, info_output_type_t output
   if (info_find(namespace, name))
     return INFO_ALREADY_REGISTERED;
 
-  struct InfoEntry *info = io_calloc(sizeof(*info));
-  info->namespace = namespace ? strdup(namespace) : NULL;
-  info->name = strdup(name);
+  struct InfoEntry *const info = io_calloc(sizeof(*info));
+  info->namespace = namespace ? io_strdup(namespace) : NULL;
+  info->name = io_strdup(name);
   info->output_type = output_type;
   info->option = option;
-  info->description = strdup(description);
+  info->description = io_strdup(description);
 
   list_node_t *node = list_make_node();
-  list_add_sorted(info, node, &info_list, info_compare);
+  list_add_sorted(info, node, &info_list, _info_compare);
 
   return INFO_SUCCESS;
 }
@@ -124,11 +108,13 @@ info_register(const char *namespace, const char *name, info_output_type_t output
 info_result_t
 info_unregister(const char *namespace, const char *name)
 {
-  struct InfoEntry *info = info_find(namespace, name);
+  struct InfoEntry *const info = info_find(namespace, name);
   if (info == NULL)
     return INFO_NOT_FOUND;
 
   list_node_t *node = list_find_remove(&info_list, info);
+  assert(node);
+
   if (node)
     list_free_node(node);
 
@@ -202,10 +188,12 @@ info_find(const char *namespace, const char *name)
   LIST_FOREACH(node, info_list.head)
   {
     struct InfoEntry *const info = node->data;
-    if (strcasecmp(info->name, name) == 0)
+    if (io_strcasecmp(info->name, name) == 0)
+    {
       if ((namespace == NULL && info->namespace == NULL) ||
-          (namespace != NULL && info->namespace != NULL && strcasecmp(info->namespace, namespace) == 0))
+          (namespace != NULL && info->namespace != NULL && io_strcasecmp(info->namespace, namespace) == 0))
         return info;
+    }
   }
 
   return NULL;

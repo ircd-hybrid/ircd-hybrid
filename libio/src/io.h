@@ -1,44 +1,47 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #ifndef INCLUDED_io_h
 #define INCLUDED_io_h
-
 #include <limits.h>
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 
-#if defined PATH_MAX
+/**
+ * @def IO_MAX
+ * @brief Macro for maximum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The greater of the two values.
+ */
+#define IO_MAX(a, b)  ((a) > (b) ? (a) : (b))
+
+/**
+ * @def IO_MIN
+ * @brief Macro for minimum of two values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The smaller of the two values.
+ */
+#define IO_MIN(a, b)  ((a) < (b) ? (a) : (b))
+
+/**
+ * @def IO_ARRAY_LENGTH
+ * @brief Macro to determine the number of elements in an array.
+ * @param x Array whose number of elements is to be determined.
+ * @return The number of elements in the array.
+ */
+#define IO_ARRAY_LENGTH(x) ((sizeof(x)) / sizeof(x[0]))
+
+#ifdef PATH_MAX
 # define IO_PATH_MAX PATH_MAX
-#elif defined MAXPATHLEN
-# define IO_PATH_MAX MAXPATHLEN
 #else
 # define IO_PATH_MAX 4096
 #endif
 
-#if 0 && __GNUC__
-#define IO_AFP(a,b) __attribute__((format (printf, a, b)))
+#if defined(__GNUC__) || defined(__clang__)
+# define IO_AFP(a, b) __attribute__((format(printf, a, b)))
 #else
-#define IO_AFP(a,b)
+# define IO_AFP(a, b)
 #endif
-
 #endif  /* INCLUDED_io_h */

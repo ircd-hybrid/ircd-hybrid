@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -28,7 +12,6 @@
  * unregister them upon unloading.
  */
 
-#include "stdinc.h"
 #include "memory.h"
 #include "stats.h"
 
@@ -57,17 +40,21 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  * is already registered, it returns an error code.
  *
  * @param letter The character representing the stats command.
- * @param handler The function to handle the stats command.
- * @param required_modes The required user modes to access this stats command.
- * @return An error code indicating the result of the operation.
+ * @param handler Non-NULL function to handle the stats command.
+ * @param required_modes Borrowed required-mode flags, or NULL for no requirement.
+ * @return STATS_SUCCESS, STATS_INVALID_ARGUMENT, or STATS_ALREADY_REGISTERED.
+ *         Failure leaves existing registrations unchanged.
  */
 stats_result_t
 stats_register(unsigned char letter, stats_handler_func handler, uint64_t *required_modes)
 {
+  if (handler == NULL)
+    return STATS_INVALID_ARGUMENT;
+
   if (stats_handlers[letter])
     return STATS_ALREADY_REGISTERED;
 
-  struct StatsHandler *new = io_calloc(sizeof(*new));
+  struct StatsHandler *const new = io_calloc(sizeof(*new));
   new->letter = letter;
   new->handler = handler;
   new->required_modes = required_modes;
@@ -160,7 +147,7 @@ stats_find(unsigned char letter)
 stats_result_t
 stats_set_enabled(unsigned char letter)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 
@@ -179,7 +166,7 @@ stats_set_enabled(unsigned char letter)
 stats_result_t
 stats_set_disabled(unsigned char letter)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 
@@ -199,7 +186,7 @@ stats_set_disabled(unsigned char letter)
 stats_result_t
 stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
 {
-  struct StatsHandler *handler = stats_find(letter);
+  struct StatsHandler *const handler = stats_find(letter);
   if (handler == NULL)
     return STATS_NOT_FOUND;
 

@@ -1,0 +1,313 @@
+/*
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+
+#include "io_string.h"
+#include "log.h"
+#include "memory.h"
+#include "resolver.h"
+
+#include "client.h"
+#include "conf_connect.h"
+#include "conf_class.h"
+#include "send.h"
+
+static list_t connect_items;
+
+void
+connect_assign_class(struct ConnectItem *connect, const char *class_name)
+{
+  assert(connect->klass == NULL);
+
+  if (!string_is_empty(class_name))
+    connect->klass = class_find(class_name, true);
+
+  if (connect->klass == NULL)
+  {
+    connect->klass = class_default;
+
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+                   "Warning: Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
+                   string_or_default(class_name, "<not specified>"), connect->name, connect->klass->name);
+    log_write(LOG_TYPE_IRCD, "Class '%s' not found for connect block '%s'. Defaulting to class '%s'.",
+              string_or_default(class_name, "<not specified>"), connect->name, connect->klass->name);
+  }
+}
+
+void
+connect_mark_all_inactive(void)
+{
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    struct ConnectItem *const connect = node->data;
+    connect->active = false;
+  }
+}
+
+void
+connect_sweep_inactive(void)
+{
+  list_node_t *node, *node_next;
+  LIST_FOREACH_SAFE(node, node_next, connect_items.head)
+  {
+    struct ConnectItem *const connect = node->data;
+    if (connect->active == false && connect->ref_count == 0)
+      connect_destroy(connect);
+  }
+}
+
+struct ConnectItem *
+connect_create(void)
+{
+  struct ConnectItem *const connect = io_calloc(sizeof(*connect));
+  connect->active = true;
+  connect->address_family = AF_INET;
+
+  list_add_tail(connect, &connect->node, &connect_items);
+  return connect;
+}
+
+static void
+_connect_clear_mask_list(list_t *list)
+{
+  assert(list);
+
+  list_node_t *node;
+  while ((node = list_pop_head(list)))
+  {
+    assert(node->data);
+
+    io_free(node->data);
+    list_free_node(node);
+  }
+}
+
+void
+connect_destroy(struct ConnectItem *connect)
+{
+  assert(connect);
+  assert(connect->ref_count == 0);
+
+  list_remove(&connect->node, &connect_items);
+
+  if (connect->dns_pending)
+    resolver_cancel_by_context(connect);
+
+  if (connect->accept_password)
+    memset(connect->accept_password, 0, strlen(connect->accept_password));
+  if (connect->send_password)
+    memset(connect->send_password, 0, strlen(connect->send_password));
+
+  _connect_clear_mask_list(&connect->hub_masks);
+  _connect_clear_mask_list(&connect->leaf_masks);
+
+  connect->klass = NULL;
+
+  io_free(connect->name);
+  io_free(connect->host);
+  io_free(connect->accept_password);
+  io_free(connect->send_password);
+  io_free(connect->tls_cert_fingerprint);
+  io_free(connect);
+}
+
+static void
+_connect_dns_callback(void *callback_ctx, const struct io_addr *addresses, size_t address_count)
+{
+  struct ConnectItem *const connect = callback_ctx;
+  assert(connect);
+  assert(connect->dns_pending);
+
+  connect->dns_pending = false;
+
+  if (addresses == NULL || address_count == 0)
+  {
+    assert(addresses == NULL && address_count == 0);
+
+    address_clear(&connect->remote_addr);
+    connect->dns_failed = true;
+    return;
+  }
+
+  assert(address_get_family(&addresses[0]) == connect->address_family);
+
+  /* A connect block maintains a single resolved destination address. */
+  address_copy(&connect->remote_addr, &addresses[0]);
+  connect->dns_failed = false;
+}
+
+void
+connect_dns_lookup(struct ConnectItem *connect)
+{
+  assert(connect);
+  assert(connect->address_family == AF_INET || connect->address_family == AF_INET6);
+  assert(!string_is_empty(connect->host));
+
+  if (connect->dns_pending)
+    return;
+
+  if (address_from_string(connect->host, &connect->remote_addr))
+  {
+    connect->dns_failed = false;
+    return;
+  }
+
+  /*
+   * By this point connect->host is not a numerical network address. Resolve the configured
+   * address family asynchronously.
+   */
+  address_clear(&connect->remote_addr);
+  connect->dns_pending = true;
+  connect->dns_failed = false;
+
+  if (!resolver_lookup_name(_connect_dns_callback, connect, connect->host, connect->address_family))
+  {
+    connect->dns_pending = false;
+    connect->dns_failed = true;
+  }
+}
+
+struct ConnectItem *
+connect_find(const char *name, bool active)
+{
+  assert(!string_is_empty(name));
+
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    struct ConnectItem *const connect = node->data;
+    if (match(name, connect->name))
+      continue;
+
+    if (active && connect->active == false)
+      continue;
+
+    return connect;
+  }
+
+  return NULL;
+}
+
+static bool
+_connect_match_password(const struct ConnectItem *connect, const char *password)
+{
+  if (string_is_empty(password) || string_is_empty(connect->accept_password))
+    return false;
+
+  const char *encr;
+  if (connect->flags & CONNECT_FLAG_ENCRYPTED_PASSWORD)
+    encr = crypt(password, connect->accept_password);
+  else
+    encr = password;
+
+  return encr && strcmp(encr, connect->accept_password) == 0;
+}
+
+connect_auth_result_t
+connect_authenticate_server(const char *server_name, const struct Client *client, struct ConnectItem **connect_out)
+{
+  assert(!string_is_empty(server_name));
+  assert(client && client_is_local(client));
+  assert(connect_out);
+
+  *connect_out = NULL;
+  connect_auth_result_t result = CONNECT_AUTH_FAIL_NAME;
+
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    struct ConnectItem *const connect = node->data;
+    if (connect->active == false)
+      continue;
+
+    if (io_strcasecmp(server_name, connect->name))
+      continue;
+
+    if (io_strcasecmp(connect->host, client->host) && io_strcasecmp(connect->host, client->sockhost))
+    {
+      if (result < CONNECT_AUTH_FAIL_HOST)
+        result = CONNECT_AUTH_FAIL_HOST;
+      continue;
+    }
+
+    if ((connect->flags & CONNECT_FLAG_USE_TLS) && !client_has_flag(client, FLAGS_TLS_ACTIVE))
+    {
+      if (result < CONNECT_AUTH_FAIL_TLS)
+        result = CONNECT_AUTH_FAIL_TLS;
+      continue;
+    }
+
+    if (!string_is_empty(connect->tls_cert_fingerprint) &&
+        (string_is_empty(client->tls_certfp) || io_strcasecmp(client->tls_certfp, connect->tls_cert_fingerprint)))
+    {
+      if (result < CONNECT_AUTH_FAIL_CERTFP)
+        result = CONNECT_AUTH_FAIL_CERTFP;
+      continue;
+    }
+
+    if (!_connect_match_password(connect, client->connection->password))
+    {
+      if (result < CONNECT_AUTH_FAIL_PASSWORD)
+        result = CONNECT_AUTH_FAIL_PASSWORD;
+      continue;
+    }
+
+    *connect_out = connect;
+    return CONNECT_AUTH_SUCCESS;
+  }
+
+  return result;
+}
+
+list_t *
+connect_get_list(void)
+{
+  return &connect_items;
+}
+
+void
+connect_incref(struct ConnectItem *connect)
+{
+  if (connect == NULL)
+    return;
+
+  connect->ref_count++;
+}
+
+void
+connect_decref(struct ConnectItem *connect)
+{
+  if (connect == NULL)
+    return;
+
+  assert(connect->ref_count > 0);
+  connect->ref_count--;
+
+  if (connect->ref_count == 0 && connect->active == false)
+    connect_destroy(connect);
+}
+
+const char *
+connect_auth_result_to_string(connect_auth_result_t result)
+{
+  switch (result)
+  {
+    case CONNECT_AUTH_SUCCESS:        return "Success";
+    case CONNECT_AUTH_FAIL_NAME:      return "No configured connect block";
+    case CONNECT_AUTH_FAIL_HOST:      return "Connecting host does not match configured host";
+    case CONNECT_AUTH_FAIL_PASSWORD:  return "Invalid password";
+    case CONNECT_AUTH_FAIL_TLS:       return "TLS connection required";
+    case CONNECT_AUTH_FAIL_CERTFP:    return "Invalid TLS certificate fingerprint";
+  }
+
+  return "Unknown authentication result";
+}

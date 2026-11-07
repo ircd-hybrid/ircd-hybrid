@@ -7,7 +7,6 @@ User modes: (* designates that the umode is oper only)
        * o     - Designates this client is an IRC Operator.
                  Use the OPER command to attain this.
          i     - Designates this client 'invisible'.
-         w     - Can see server wallops.
          W     - User is connected using a webirc gateway.
        * l     - Can see oper locops (local wallops).
          B     - Marks the client as being a bot

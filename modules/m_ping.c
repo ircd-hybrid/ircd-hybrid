@@ -1,40 +1,25 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_ping.c
  * \brief Includes required functions for processing the PING command.
  */
 
-#include "stdinc.h"
-#include "client.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "send.h"
-#include "io_string.h"
-#include "parse.h"
-#include "user_mode.h"
-#include "module.h"
-#include "hash.h"
-#include "conf.h"
+#include <stddef.h>
 
+#include "io_string.h"
+#include "module.h"
+
+#include "client.h"
+#include "client_find.h"
+#include "conf.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief PING command handler
  *
@@ -49,10 +34,8 @@
  *      - parv[2] = destination
  */
 static void
-m_ping(struct Client *source, int parc, char *parv[])
+m_ping(struct Client *source, size_t parc, char *parv[])
 {
-  struct Client *target = NULL;
-
   if (string_is_empty(parv[1]))
   {
     sendto_one_numeric(source, &me, ERR_NOORIGIN);
@@ -60,18 +43,19 @@ m_ping(struct Client *source, int parc, char *parv[])
   }
 
   const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (ConfigServerHide.disable_remote_commands && user_mode_has_flag(source, UMODE_OPER) == false)
+  if (ConfigServerHide.disable_remote_commands && !client_is_oper(source))
   {
     sendto_one(source, ":%s PONG %s :%s",
                me.name, (destination) ? destination : me.name, parv[1]);
     return;
   }
 
-  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+  struct Client *target = NULL;
+  if (string_is_empty(destination) || ((target = client_find_server(source, destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s", me.name, me.name, parv[1]);
   else if (target)
     sendto_one(target, ":%s PING %s :%s",
-               ID_or_name(source, target), source->name, ID_or_name(target, target));
+               client_get_id_or_name(source, target), source->name, client_get_id_or_name(target, target));
   else
     sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
@@ -89,54 +73,50 @@ m_ping(struct Client *source, int parc, char *parv[])
  *      - parv[2] = destination
  */
 static void
-ms_ping(struct Client *source, int parc, char *parv[])
+ms_ping(struct Client *source, size_t parc, char *parv[])
 {
   struct Client *target = NULL;
 
-  if (string_is_empty(parv[1]))
-  {
-    sendto_one_numeric(source, &me, ERR_NOORIGIN);
-    return;
-  }
-
-  const char *const destination = parv[2];  /* Will get NULL or pointer (parc >= 2!!) */
-  if (string_is_empty(destination) || ((target = hash_find_server(destination)) && IsMe(target)))
+  const char *const destination = parv[2];
+  if (string_is_empty(destination) || ((target = client_find_server(source, destination)) && client_is_me(target)))
     sendto_one(source, ":%s PONG %s :%s",
-               ID_or_name(&me, source), me.name, ID_or_name(source, source));
+               client_get_id_or_name(&me, source), me.name, client_get_id_or_name(source, source));
   else if (target)
   {
-    if (target->from != source->from)
+    if (target->nexthop != source->nexthop)
       sendto_one(target, ":%s PING %s :%s",
-                 ID_or_name(source, target), source->name, ID_or_name(target, target));
+                 client_get_id_or_name(source, target), source->name, client_get_id_or_name(target, target));
   }
-  else if (!IsDigit(*destination))
-    sendto_one_numeric(source, &me, ERR_NOSUCHSERVER, destination);
 }
 
 static struct Command command_table =
 {
   .name = "PING",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ping },
-  .handlers[SERVER_HANDLER] = { .handler = ms_ping },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ping }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_ping },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_ping, .args_min = 2 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = m_ping }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_ping",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

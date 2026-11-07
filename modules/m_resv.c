@@ -1,74 +1,80 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2001-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2001-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_resv.c
  * \brief Includes required functions for processing the RESV command.
  */
 
-#include "stdinc.h"
-#include "io_time.h"
-#include "client.h"
-#include "ircd.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "io_parse.h"
 #include "io_string.h"
-#include "numeric.h"
-#include "server_capab.h"
-#include "send.h"
-#include "parse.h"
+#include "io_time.h"
+#include "log.h"
 #include "module.h"
+
+#include "aline.h"
+#include "channel.h"
+#include "client.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_resv.h"
 #include "conf_shared.h"
-#include "log.h"
-#include "aline.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
+#include "server_capab.h"
 
+static void
+_resv_report_added(struct Client *source, const struct ResvItem *resv, uintmax_t duration_minutes)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-/* parse_resv()
- *
- * inputs	- source
- *		- thing to resv
- *		- !0 if temporary
- *		- reason
- * outputs	- none
- * side effects	- parse resv, create if valid
- */
+  if (duration_minutes)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary RESV added by %s for [%s] (%ju min) [%s]",
+                   source_name, resv->mask, duration_minutes, resv->reason);
+    log_write(LOG_TYPE_RESV,
+              "Temporary RESV added by %s for [%s] (%ju min) [%s]",
+              source_name, resv->mask, duration_minutes, resv->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "RESV added by %s for [%s] [%s]",
+                 source_name, resv->mask, resv->reason);
+  log_write(LOG_TYPE_RESV, "RESV added by %s for [%s] [%s]",
+            source_name, resv->mask, resv->reason);
+}
+
 static void
 resv_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  if (!HasFlag(source, FLAGS_SERVICE))
+  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask + channel_is_valid_prefix_char(*aline->mask)))
   {
-    if (aline_valid_mask_simple(aline->mask + !!IsChanPrefix(*aline->mask)) == false)
-    {
-      if (IsClient(source))
-        sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the RESV",
-                          ConfigGeneral.min_nonwildcard_simple);
-      return;
-    }
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":Please include at least %u non-wildcard characters with the RESV",
+                        ConfigGeneral.min_nonwildcard_simple);
+    return;
   }
 
-  struct ResvItem *resv = resv_find(aline->mask, irccmp);
+  struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
   if (resv)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":A RESV has already been placed on: %s", resv->mask);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":A RESV has already been placed on [%s]",
+                        resv->mask);
     return;
   }
 
@@ -79,27 +85,21 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
   if (aline->duration)
   {
     resv->expires_at = resv->created_at + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. RESV [%s]",
-                        aline->duration / 60, resv->mask);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Added temporary RESV [%s] (%ju min)",
+                        resv->mask, duration_minutes);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. RESV for [%s] [%s]",
-                   get_oper_name(source), aline->duration / 60, resv->mask, resv->reason);
-    log_write(LOG_TYPE_RESV, "%s added temporary %ju min. RESV for [%s] [%s]",
-              get_oper_name(source), aline->duration / 60, resv->mask, resv->reason);
+    _resv_report_added(source, resv, duration_minutes);
   }
   else
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":Added RESV [%s] [%s]",
-                        resv->mask, resv->reason);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Added RESV [%s]",
+                        resv->mask);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added RESV for [%s] [%s]",
-                   get_oper_name(source), resv->mask, resv->reason);
-    log_write(LOG_TYPE_RESV, "%s added RESV for [%s] [%s]",
-              get_oper_name(source), resv->mask, resv->reason);
+    _resv_report_added(source, resv, 0);
   }
 }
 
@@ -108,17 +108,16 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
  *   parv[1] = channel/nick to forbid
  */
 static void
-mo_resv(struct Client *source, int parc, char *parv[])
+mo_resv(struct Client *source, size_t parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = true };
-
-  if (!HasOFlag(source, OPER_FLAG_RESV))
+  if (!client_has_oper_flag(source, OPER_FLAG_RESV))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "resv");
     return;
   }
 
-  if (aline_parse("RESV", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
+  if (!aline_parse("RESV", source, parc, parv, &aline))
     return;
 
   if (aline.server)
@@ -152,8 +151,12 @@ mo_resv(struct Client *source, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_resv(struct Client *source, int parc, char *parv[])
+ms_resv(struct Client *source, size_t parc, char *parv[])
 {
+  uintmax_t duration;
+  if (io_parse_uintmax(parv[2], &duration) != IO_PARSE_OK)
+    return;
+
   struct aline_ctx aline =
   {
     .add = true,
@@ -161,7 +164,7 @@ ms_resv(struct Client *source, int parc, char *parv[])
     .mask = parv[3],
     .reason = parv[4],
     .server = parv[1],
-    .duration = strtoumax(parv[2], NULL, 10)
+    .duration = duration
   };
 
   sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "RESV %s %ju %s :%s",
@@ -170,35 +173,39 @@ ms_resv(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_RESV, source->servptr->name, source->username, source->host))
+  if (client_is_service(source) ||
+      shared_find(SHARED_RESV, source->uplink->name, source->username, source->host))
     resv_handle(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "RESV",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_resv, .args_min = 5 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_resv, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_resv, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_resv, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_resv",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

@@ -1,58 +1,46 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file send.c
  * \brief Functions for sending messages.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <errno.h>
+
 #include "address.h"
 #include "comm.h"
 #include "dbuf.h"
-#include "list.h"
-#include "log.h"
 #include "io_string.h"
 #include "io_time.h"
-#include "send.h"
+#include "list.h"
+#include "log.h"
+
 #include "cap.h"
 #include "channel.h"
+#include "channel_member.h"
 #include "client.h"
+#include "client_format.h"
+#include "conf.h"
+#include "conf_class.h"
+#include "send.h"
 #include "server_capab.h"
 #include "user_mode.h"
-#include "conf_class.h"
-#include "conf.h"
 
-static uintmax_t send_marker;
-
-/* send_format()
+/**
+ * @var broadcast_id
+ * @brief A unique, incrementing ID for a single broadcast operation.
  *
- * inputs
- *		- buffer
- *		- format format to use
- *		- var args
- * output	- number of bytes formatted output
- * side effects	- modifies sendbuf
+ * This is used with the Connection::last_broadcast_id field to de-duplicate
+ * message delivery to a single nexthop during a broadcast that may traverse
+ * multiple paths (e.g., a message to a channel).
  */
+static uintmax_t broadcast_id;
+
 static void
-send_format(struct dbuf_block *buffer, const char *format, va_list args)
+_send_finalize_message(struct dbuf_block *block, const char *format, va_list args)
 {
   /*
    * from rfc1459
@@ -66,44 +54,49 @@ send_format(struct dbuf_block *buffer, const char *format, va_list args)
    * continuation message lines.  See section 7 for more details about
    * current implementations.
    */
-  dbuf_put_args(buffer, format, args);
-
-  if (buffer->size > IRCD_BUFSIZE - 2)
-    buffer->size = IRCD_BUFSIZE - 2;
-
-  buffer->data[buffer->size++] = '\r';
-  buffer->data[buffer->size++] = '\n';
+  dbuf_block_append_vfmt(block, format, args);
+  dbuf_block_truncate(block, IRCD_BUFSIZE - 2);
+  dbuf_block_append(block, "\r\n", 2);
 }
 
-/*
- ** send_message
- **      Internal utility which appends given buffer to the sockets
- **      sendq.
- */
 static void
-sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
+_send_block_to_client(struct Client *to, struct dbuf_block *block)
 {
-  assert(!IsMe(to));
-  assert(to != &me);
-  assert(MyConnect(to));
+  assert(to && client_is_local(to));
+  assert(!client_is_me(to));
 
-  if (dbuf_length(&to->connection->buf_sendq) + buffer->size > class_get_sendq(&to->connection->confs))
+  if (client_is_dead(to))
+    return;
+
+  struct dbuf_queue *const sendq = &to->connection->send_queue;
+
+  const size_t max_sendq = client_get_max_sendq(to);
+  const size_t new_sendq_size = dbuf_queue_length(sendq) + dbuf_block_length(block);
+  if (new_sendq_size > max_sendq)
   {
-    if (IsServer(to))
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                     "Max SendQ limit exceeded for %s: %zu > %u",
-                     client_get_name(to, HIDE_IP),
-                     (dbuf_length(&to->connection->buf_sendq) + buffer->size),
-                     class_get_sendq(&to->connection->confs));
+    if (!client_has_flag(to, FLAGS_SENDQEX))
+    {
+      client_set_flag(to, FLAGS_SENDQEX);
 
-    if (IsClient(to))
-      AddFlag(to, FLAGS_SENDQEX);
+      if (client_is_server(to))
+      {
+        client_format_name_buffer_t server_name_buffer;
+        const char *const server_name =
+          client_format_name(to, CLIENT_FORMAT_NAME_PUBLIC, &server_name_buffer);
 
-    dead_link_on_write(to, 0);
+        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                       "Max SendQ limit exceeded for %s: %zu > %zu",
+                       server_name, new_sendq_size, max_sendq);
+      }
+
+      client_schedule_exit_fmt(to, "Max SendQ exceeded (%zu > %zu)",
+                               new_sendq_size, max_sendq);
+    }
+
     return;
   }
 
-  dbuf_add(&to->connection->buf_sendq, buffer);
+  dbuf_queue_append_block(sendq, block);
 
   /*
    * Update statistics. The following is slightly incorrect because
@@ -116,98 +109,97 @@ sendto_one_buffer(struct Client *to, struct dbuf_block *buffer)
   send_queued_write(to);
 }
 
-/* send_message_remote()
- *
- * inputs	- pointer to client from message is being sent
- * 		- pointer to client to send to
- *		- pointer to buffer
- * output	- none
- * side effects	- Despite the function name, this only sends to directly
- *		  connected clients.
- *
- */
 static void
-sendto_one_buffer_remote(struct Client *to, const struct Client *from, struct dbuf_block *buffer)
+_send_block_to_server(struct Client *to, const struct Client *from, struct dbuf_block *block)
 {
-  assert(MyConnect(to));
-  assert(IsServer(to));
-  assert(!IsMe(to));
-  assert(to->from == to);
+  assert(to && client_is_local(to));
+  assert(!client_is_me(to));
+  assert(client_is_server(to));
+  assert(to->nexthop == to);
 
-  if (to == from->from)
+  if (client_is_dead(to))
+    return;
+
+  if (to == from->nexthop)
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                    to->name, from->name);
   else
-    sendto_one_buffer(to, buffer);
+    _send_block_to_client(to, block);
 }
 
-/*
- ** sendq_unblocked
- **      Called when a socket is ready for writing.
- */
 void
-sendq_unblocked(fde_t *F, void *data)
+send_write_ready(fde_t *fde, void *data)
 {
   struct Client *const client = data;
 
+  assert(fde);
   assert(client);
   assert(client->connection);
-  assert(client->connection->fd);
-  assert(client->connection->fd == F);
 
-  DelFlag(client, FLAGS_BLOCKED);
+  if (client_is_dead(client))
+    return;
+
+  assert(client->connection->fde);
+  assert(client->connection->fde == fde);
+  assert(client_has_flag(client, FLAGS_BLOCKED));
+
+  client_unset_flag(client, FLAGS_BLOCKED);
   send_queued_write(client);
 }
 
-/*
- ** send_queued_write
- **      This is called when there is a chance that some output would
- **      be possible. This attempts to empty the send queue as far as
- **      possible, and then if any data is left, a write is rescheduled.
- */
 void
 send_queued_write(struct Client *to)
 {
+  assert(to && client_is_local(to));
+
   /*
    * Once socket is marked dead, we cannot start writing to it,
    * even if the error is removed...
    */
-  if (IsDead(to) || HasFlag(to, FLAGS_BLOCKED))
+  if (client_is_dead(to) || client_has_flag(to, FLAGS_BLOCKED))
     return;  /* no use calling send() now */
 
-  /* Next, lets try to write some data */
-  while (dbuf_length(&to->connection->buf_sendq))
+  struct dbuf_view view;
+  while (dbuf_queue_peek_head(&to->connection->send_queue, &view))
   {
+    assert(view.data);
+    assert(view.length > 0);
+
     ssize_t retlen;
-    bool want_read = false;
-    const struct dbuf_block *first = to->connection->buf_sendq.blocks.head->data;
 
-    if (tls_isusing(&to->connection->fd->tls))
+    if (tls_session_is_active(&to->connection->fde->tls))
     {
-      retlen = tls_write(&to->connection->fd->tls, first->data + to->connection->buf_sendq.pos,
-                                                   first->size - to->connection->buf_sendq.pos, &want_read);
+      bool tls_want_read = false;
+      retlen = tls_session_write(&to->connection->fde->tls, view.data, view.length, &tls_want_read);
 
-      if (want_read)
-        return;  /* Retry later, don't register for write events */
+      if (tls_want_read)
+        return;  /* Retry later, don't register for write events. */
     }
     else
-      retlen = send(to->connection->fd->fd, first->data + to->connection->buf_sendq.pos,
-                                            first->size - to->connection->buf_sendq.pos, 0);
+      retlen = send(to->connection->fde->fd, view.data, view.length, 0);
 
     if (retlen <= 0)
     {
-      if (retlen < 0 && comm_ignore_errno(errno))
+      const int error_code = retlen < 0 ? errno : 0;
+      if (retlen < 0 && comm_errno_is_recoverable(error_code))
       {
-        AddFlag(to, FLAGS_BLOCKED);
+        client_set_flag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
-        comm_setselect(to->connection->fd, COMM_SELECT_WRITE, sendq_unblocked, to, 0);
+        comm_setselect(to->connection->fde, COMM_SELECT_WRITE, send_write_ready, to);
       }
       else
-        dead_link_on_write(to, errno);
+      {
+        client_schedule_exit_on_io_failure(to, CLIENT_IO_OPERATION_WRITE,
+                                           retlen == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED
+                                                       : CLIENT_IO_FAILURE_ERROR, error_code);
+      }
+
       return;
     }
 
-    dbuf_delete(&to->connection->buf_sendq, retlen);
+    assert((size_t)retlen <= view.length);
+
+    dbuf_queue_consume(&to->connection->send_queue, retlen);
 
     /* We have some data written .. update counters */
     to->connection->send.bytes += retlen;
@@ -215,134 +207,191 @@ send_queued_write(struct Client *to)
   }
 }
 
-/* sendto_one()
- *
- * inputs	- pointer to destination client
- *		- var args message
- * output	- NONE
- * side effects	- send message to single client
- */
+static void
+_sendto_one_stdreply(struct Client *to, const struct Client *from, const char *type,
+                     const char *command, const char *code,
+                     const char *context[], size_t context_len,
+                     const char *format, va_list args)
+{
+  assert(to);
+  assert(from);
+  assert(type);
+  assert(command);
+  assert(code);
+  assert(format);
+  assert((context_len > 0) == (context != NULL));
+
+  if (client_is_dead(to->nexthop))
+    return;
+
+  if (!client_has_cap(to, CAP_STANDARD_REPLIES))
+    return;
+
+  struct dbuf_block *const block = dbuf_block_create();
+  dbuf_block_append_fmt(block, ":%s %s %s %s",
+                        client_get_id_or_name(from, to), type, command, code);
+
+  for (size_t i = 0; i < context_len; ++i)
+  {
+    assert(context[i] != NULL && strchr(context[i], ' ') == NULL);
+    dbuf_block_append_fmt(block, " %s", context[i]);
+  }
+
+  dbuf_block_append_fmt(block, " :");
+  _send_finalize_message(block, format, args);
+
+  _send_block_to_client(to->nexthop, block);
+  dbuf_block_unref(block);
+}
+
+void
+sendto_one_fail(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "FAIL", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
+void
+sendto_one_warn(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "WARN", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
+void
+sendto_one_note(struct Client *to, const struct Client *from, const char *command, const char *code,
+                const char *context[], size_t context_len, const char *format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  _sendto_one_stdreply(to, from, "NOTE", command, code, context, context_len, format, args);
+  va_end(args);
+}
+
 void
 sendto_one(struct Client *to, const char *format, ...)
 {
-  if (IsDead(to->from))
-    return;  /* This socket has already been marked as dead */
+  if (client_is_dead(to->nexthop))
+    return;
 
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const block = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  _send_block_to_client(to->nexthop, block);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
 void
 sendto_one_numeric(struct Client *to, const struct Client *from, enum irc_numerics numeric, ...)
 {
-  if (IsDead(to->from))
-    return;  /* This socket has already been marked as dead */
+  if (client_is_dead(to->nexthop))
+    return;
 
-  const char *dest = ID_or_name(to, to);
+  const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s %03d %s ", ID_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
+  struct dbuf_block *const block = dbuf_block_create();
+  dbuf_block_append_fmt(block, ":%s %03d %s ",
+                        client_get_id_or_name(from, to), numeric & ~SND_EXPLICIT, dest);
 
   va_list args;
   va_start(args, numeric);
 
-  const char *numstr;
+  const char *numeric_format;
   if (numeric & SND_EXPLICIT)
-    numstr = va_arg(args, const char *);
+    numeric_format = va_arg(args, const char *);
   else
-    numstr = numeric_form(numeric);
+    numeric_format = numeric_form(numeric);
 
-  send_format(buffer, numstr, args);
+  _send_finalize_message(block, numeric_format, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  _send_block_to_client(to->nexthop, block);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
 void
 sendto_one_notice(struct Client *to, const struct Client *from, const char *format, ...)
 {
-  if (IsDead(to->from))
-    return;  /* This socket has already been marked as dead */
+  if (client_is_dead(to->nexthop))
+    return;
 
-  const char *dest = ID_or_name(to, to);
+  const char *dest = client_get_id_or_name(to, to);
   if (string_is_empty(dest))
     dest = "*";
 
-  struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE %s ", ID_or_name(from, to), dest);
+  struct dbuf_block *const block = dbuf_block_create();
+  dbuf_block_append_fmt(block, ":%s NOTICE %s ", client_get_id_or_name(from, to), dest);
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  sendto_one_buffer(to->from, buffer);
+  _send_block_to_client(to->nexthop, block);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/* sendto_anywhere()
- *
- * inputs	- pointer to dest client
- * 		- pointer to from client
- * 		- varags
- * output	- NONE
- * side effects	- less efficient than sendto_remote and sendto_one
- * 		  but useful when one does not know where target "lives"
- */
 void
-sendto_one_anywhere(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
+sendto_one_command(struct Client *to, const struct Client *from, const char *command, const char *format, ...)
 {
-  if (IsDead(to->from))
+  if (client_is_dead(to->nexthop))
     return;
 
-  struct dbuf_block *buffer = dbuf_alloc();
-  if (MyClient(to) && IsClient(from))
-    dbuf_put_fmt(buffer, ":%s!%s@%s %s %s ",
-                 from->name, from->username, from->host, command, to->name);
+  const char *dest = client_get_id_or_name(to, to);
+  if (string_is_empty(dest))
+    dest = "*";
+
+  struct dbuf_block *const block = dbuf_block_create();
+
+  if (client_is_local_user(to) && client_is_user(from))
+    dbuf_block_append_fmt(block, ":%s!%s@%s %s %s ",
+                          from->name, from->username, from->host, command, dest);
   else
-    dbuf_put_fmt(buffer, ":%s %s %s ",
-                 ID_or_name(from, to), command, ID_or_name(to, to));
+    dbuf_block_append_fmt(block, ":%s %s %s ",
+                          client_get_id_or_name(from, to), command, dest);
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  if (MyConnect(to))
-    sendto_one_buffer(to, buffer);
+  if (client_is_local(to))
+    _send_block_to_client(to, block);
   else
-    sendto_one_buffer_remote(to->from, from, buffer);
+    _send_block_to_server(to->nexthop, from, block);
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
 static bool
 sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recipient_t recipient)
 {
-  if (flags && user_mode_has_flag(client, flags) == false)
+  if (flags && !user_mode_has_flag(client, flags))
     return false;
 
   switch (recipient)
   {
     case SEND_RECIPIENT_ADMIN:
-      return user_mode_has_flag(client, UMODE_ADMIN);
+      return client_is_admin(client);
     case SEND_RECIPIENT_OPER:
-      return user_mode_has_flag(client, UMODE_OPER) && user_mode_has_flag(client, UMODE_ADMIN) == false;
+      return client_is_oper(client) && !client_is_admin(client);
     case SEND_RECIPIENT_OPER_ALL:
-      return user_mode_has_flag(client, UMODE_OPER);
+      return client_is_oper(client);
     case SEND_RECIPIENT_CLIENT:
       return true;
     default:
@@ -350,14 +399,6 @@ sendto_clients_qualifies(const struct Client *client, uint64_t flags, send_recip
   }
 }
 
-/* sendto_clients()
- *
- * inputs	- flag types of messages to show to real opers
- *		- flag indicating opers/admins
- *		- var args input message
- * output	- NONE
- * side effects	- Send to *local* ops only but NOT +s nonopers.
- */
 void
 sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, const char *format, ...)
 {
@@ -378,451 +419,326 @@ sendto_clients(uint64_t flags, send_recipient_t recipient, send_type_t type, con
       assert(0);
   }
 
-  struct dbuf_block *buffer = dbuf_alloc();
-  dbuf_put_fmt(buffer, ":%s NOTICE * :*** %s -- ", me.name, ntype);
+  struct dbuf_block *const block = dbuf_block_create();
+  dbuf_block_append_fmt(block, ":%s NOTICE * :*** %s -- ", me.name, ntype);
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  list_t *list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
+  list_t *const list = (recipient == SEND_RECIPIENT_CLIENT) ? &local_client_list : &oper_list;
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    struct Client *client = node->data;
-    if (IsDead(client))
+    struct Client *const client = node->data;
+    if (client_is_dead(client))
       continue;
 
-    if (sendto_clients_qualifies(client, flags, recipient) == false)
+    if (!sendto_clients_qualifies(client, flags, recipient))
       continue;
 
-    sendto_one_buffer(client, buffer);
+    _send_block_to_client(client, block);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/* ts_warn()
- *
- * inputs       - var args message
- * output       - NONE
- * side effects - Call sendto_clients, with some flood checking
- *                (at most 5 warnings every 5 seconds)
- */
 void
 sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
 {
-  if ((io_time_get(IO_TIME_MONOTONIC_SEC) - *rate) < 20)
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((now - *rate) < 20)
     return;
 
-  *rate = io_time_get(IO_TIME_MONOTONIC_SEC);
+  *rate = now;
 
-  char buffer[IRCD_BUFSIZE];
+  char message[IRCD_BUFSIZE];
   va_list args;
   va_start(args, format);
-  vsnprintf(buffer, sizeof(buffer), format, args);
+  vsnprintf(message, sizeof(message), format, args);
   va_end(args);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", buffer);
-  log_write(LOG_TYPE_IRCD, "%s", buffer);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", message);
+  log_write(LOG_TYPE_IRCD, "%s", message);
 }
 
-/*
- ** match_it() and sendto_match_butone() ARE only used
- ** to send a msg to all ppl on servers/hosts that match a specified mask
- ** (used for enhanced PRIVMSGs) for opers
- **
- ** addition -- Armin, 8jun90 (gruner@informatik.tu-muenchen.de)
- **
- */
-
-/* match_it()
- *
- * inputs	- client pointer to match on
- *		- actual mask to match
- *		- what to match on, HOST or SERVER
- * output	- 1 or 0 if match or not
- * side effects	- NONE
- */
-static bool
-sendto_match_butone_qualifies(const struct Client *one, const char *mask, send_match_type_t type)
-{
-  if (type == SEND_MATCH_HOST)
-  {
-    struct io_addr addr;
-    int bits = 0;
-    const int ret = address_parse_netmask(mask, &addr, &bits);
-
-    if (ret == HM_IPV4 || ret == HM_IPV6)
-      if (address_match(&one->addr, &addr, false, false, bits))
-        return true;
-    return match(mask, one->realhost) == 0;
-  }
-
-  return match(mask, one->servptr->name) == 0;
-}
-
-/* sendto_match_butone()
- *
- * Send to all clients which match the mask in a way defined on 'what';
- * either by user hostname or user servername.
- *
- * ugh. ONLY used by m_message.c to send an "oper magic" message. ugh.
- */
 void
-sendto_match_butone(const struct Client *one, const struct Client *from, const char *mask,
-                    send_match_type_t type, const char *format, ...)
+sendto_filtered_butone(const struct Client *exclude_client, const struct Client *source,
+                       send_filter_fn filter_fn, void *filter_ctx, const char *format, ...)
 {
-  struct dbuf_block *buffer_l = dbuf_alloc();
-  struct dbuf_block *buffer_r = dbuf_alloc();
+  assert(source);
+  assert(filter_fn);
 
-  dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
-  dbuf_put_fmt(buffer_r, ":%s ", from->id);
+  struct dbuf_block *const client_block = dbuf_block_create();
+  struct dbuf_block *const server_block = dbuf_block_create();
 
-  va_list args_l, args_r;
-  va_start(args_l, format);
-  va_start(args_r, format);
-  send_format(buffer_l, format, args_l);
-  send_format(buffer_r, format, args_r);
-  va_end(args_l);
-  va_end(args_r);
+  if (client_is_user(source))
+    dbuf_block_append_fmt(client_block, ":%s!%s@%s ", source->name, source->username, source->host);
+  else
+    dbuf_block_append_fmt(client_block, ":%s ", source->name);
 
-  /* Scan the local clients */
+  dbuf_block_append_fmt(server_block, ":%s ", source->id);
+
+  va_list client_args;
+  va_start(client_args, format);
+  va_list server_args;
+  va_copy(server_args, client_args);
+
+  _send_finalize_message(client_block, format, client_args);
+  _send_finalize_message(server_block, format, server_args);
+
+  va_end(server_args);
+  va_end(client_args);
+
   list_node_t *node;
   LIST_FOREACH(node, local_client_list.head)
   {
-    struct Client *client = node->data;
-
-    if (IsDead(client))
+    struct Client *const target = node->data;
+    if (client_is_dead(target))
       continue;
 
-    if (one && (client == one->from))
-      continue;
-
-    if (sendto_match_butone_qualifies(client, mask, type) == false)
-      continue;
-
-    sendto_one_buffer(client, buffer_l);
+    if (filter_fn(target, filter_ctx))
+      _send_block_to_client(target, client_block);
   }
 
-  /* Now scan servers */
   LIST_FOREACH(node, local_server_list.head)
   {
-    struct Client *client = node->data;
-
-    /*
-     * The old code looped through every client on the network for each
-     * server to check if the server (client) has at least 1 client
-     * matching the mask, using something like:
-     *
-     * for (target = GlobalClientList; target; target = target->next)
-     *        if (IsRegisteredUser(target) &&
-     *                        match_it(target, mask, what) &&
-     *                        (target->from == client))
-     *   vsendto_prefix_one(client, from, format, args);
-     *
-     * That way, we wouldn't send the message to a server who didn't have
-     * a matching client. However, on a network such as EFNet, that code
-     * would have looped through about 50 servers, and in each loop, loop
-     * through about 50k clients as well, calling match() in each nested
-     * loop. That is a very bad thing cpu wise - just send the message to
-     * every connected server and let that server deal with it.
-     * -wnder
-     */
-    if (IsDead(client))
+    struct Client *const target = node->data;
+    if (client_is_dead(target))
       continue;
 
-    if (one && (client == one->from))
+    if (target == exclude_client)
       continue;
 
-    sendto_one_buffer_remote(client, from, buffer_r);
+    _send_block_to_server(target, source, server_block);
   }
 
-  dbuf_ref_free(buffer_l);
-  dbuf_ref_free(buffer_r);
+  dbuf_block_unref(client_block);
+  dbuf_block_unref(server_block);
 }
 
-/* sendto_servers()
- *
- * inputs       - pointer to client to NOT send to
- *              - pointer to channel
- *              - capabs or'd together which must ALL be present
- *              - capabs or'd together which must ALL NOT be present
- *              - printf style format string
- *              - args to format string
- * output       - NONE
- * side effects - Send a message to all connected servers, except the
- *                client 'one' (if non-NULL), as long as the servers
- *                support ALL capabs in 'capab', and NO capabs in 'nocapab'.
- *
- * This function was written in an attempt to merge together the other
- * billion sendto_*serv*() functions, which sprung up with capabs,
- * lazylinks, uids, etc.
- * -davidt
- */
 void
-sendto_servers(const struct Client *one, const unsigned int capab,
-               const unsigned int nocapab, const char *format, ...)
+sendto_servers(const struct Client *exclude_client, uint32_t required_capab,
+               uint32_t excluded_capab, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const block = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
   list_node_t *node;
   LIST_FOREACH(node, local_server_list.head)
   {
-    struct Client *client = node->data;
-
-    /* If dead already skip */
-    if (IsDead(client))
+    struct Client *const client = node->data;
+    if (client_is_dead(client))
       continue;
 
-    /* check against 'one' */
-    if (one && (client == one->from))
+    if (exclude_client && (client == exclude_client->nexthop))
       continue;
 
-    /* check we have required capabs */
-    if (capab_has_flag(client, capab) != capab)
+    if ((client->connection->capab_flags & required_capab) != required_capab)
       continue;
 
-    /* check we don't have any forbidden capabs */
-    if (capab_has_flag(client, nocapab))
+    if (capab_has_flag(client, excluded_capab))
       continue;
 
-    sendto_one_buffer(client, buffer);
+    _send_block_to_client(client, block);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/* sendto_match_servs()
- *
- * inputs       - source client
- *              - mask to send to
- *              - capab needed
- *              - data
- * outputs	- none
- * side effects	- data sent to servers matching with capab
- */
 void
-sendto_match_servs(const struct Client *source, const char *mask, unsigned int capab, const char *format, ...)
+sendto_match_servs(const struct Client *source, const char *mask, uint32_t required_capab, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const block = dbuf_block_create();
 
-  dbuf_put_fmt(buffer, ":%s ", source->id);
+  dbuf_block_append_fmt(block, ":%s ", source->id);
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  ++send_marker;
+  ++broadcast_id;
 
   list_node_t *node;
   LIST_FOREACH(node, global_server_list.head)
   {
-    struct Client *target = node->data;
-
-    if (IsDead(target->from))
+    struct Client *const target = node->data;
+    if (client_is_dead(target->nexthop))
       continue;
 
-    /* Do not attempt to send to ourselves ... */
-    if (IsMe(target))
+    if (client_is_me(target))
       continue;
 
-    /* ... or the source */
-    if (target->from == source->from)
+    if (target->nexthop == source->nexthop)
       continue;
 
-    if (target->from->connection->send_marker == send_marker)
+    if (target->nexthop->connection->last_broadcast_id == broadcast_id)
       continue;
 
-    if (capab_has_flag(target->from, capab) != capab)
+    if ((target->nexthop->connection->capab_flags & required_capab) != required_capab)
       continue;
 
     if (match(mask, target->name))
       continue;
 
-    target->from->connection->send_marker = send_marker;
-    sendto_one_buffer_remote(target->from, source, buffer);
+    target->nexthop->connection->last_broadcast_id = broadcast_id;
+    _send_block_to_server(target->nexthop, source, block);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/* sendto_common_channels_local()
- *
- * inputs	- pointer to client
- *		- format to send
- * output	- NONE
- * side effects	- Sends a message to all people on local server who are
- * 		  in same channel with user.
- *		  used by m_nick.c and exit_one_client.
- */
 void
-sendto_common_channels_local(struct Client *user, bool touser, unsigned int poscap,
-                             unsigned int negcap, const char *format, ...)
+sendto_common_channels_local(struct Client *user, bool touser, uint32_t required_cap,
+                             uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const block = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
-  ++send_marker;
+  ++broadcast_id;
 
   list_node_t *node, *node2;
-  LIST_FOREACH(node, user->channel.head)
+  LIST_FOREACH(node, user->channel_member_list.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Channel *channel = member->channel;
+    const struct ChannelMember *const member = node->data;
 
-    LIST_FOREACH(node2, channel->members_local.head)
+    const struct Channel *const channel = member->channel;
+    LIST_FOREACH(node2, channel->local_member_list.head)
     {
-      struct ChannelMember *member2 = node2->data;
-      struct Client *target = member2->client;
+      const struct ChannelMember *const member2 = node2->data;
 
-      if (IsDead(target))
+      struct Client *const target = member2->client;
+      if (client_is_dead(target))
         continue;
 
       if (target == user)
         continue;
 
-      if (target->connection->send_marker == send_marker)
+      if (target->connection->last_broadcast_id == broadcast_id)
         continue;
 
-      if (poscap && HasCap(target, poscap) != poscap)
+      if (required_cap && (target->connection->cap_flags & required_cap) != required_cap)
         continue;
 
-      if (negcap && HasCap(target, negcap))
+      if (excluded_cap && (target->connection->cap_flags & excluded_cap))
         continue;
 
-      target->connection->send_marker = send_marker;
-      sendto_one_buffer(target, buffer);
+      target->connection->last_broadcast_id = broadcast_id;
+      _send_block_to_client(target, block);
     }
   }
 
-  if (touser && MyConnect(user) && !IsDead(user))
-    if (HasCap(user, poscap) == poscap)
-      sendto_one_buffer(user, buffer);
+  if (touser && client_is_local(user) && !client_is_dead(user))
+  {
+    if ((required_cap == 0 || (user->connection->cap_flags & required_cap) == required_cap) &&
+        (excluded_cap == 0 || (user->connection->cap_flags & excluded_cap) == 0))
+      _send_block_to_client(user, block);
+  }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/*! \brief Send a message to members of a channel that are locally connected to this server.
- * \param one      Client to skip; can be NULL
- * \param channel    Destination channel
- * \param rank     Minimum channel member rank clients must have
- * \param poscap   Positive client capabilities flags (CAP)
- * \param negcap   Negative client capabilities flags (CAP)
- * \param format  Format string for command arguments
- */
 void
-sendto_channel_local(const struct Client *one, struct Channel *channel, int rank, unsigned int poscap,
-                     unsigned int negcap, const char *format, ...)
+sendto_channel_local(const struct Client *exclude_client, const struct Channel *channel, int required_rank,
+                     uint32_t required_cap, uint32_t excluded_cap, const char *format, ...)
 {
-  struct dbuf_block *buffer = dbuf_alloc();
+  struct dbuf_block *const block = dbuf_block_create();
 
   va_list args;
   va_start(args, format);
-  send_format(buffer, format, args);
+  _send_finalize_message(block, format, args);
   va_end(args);
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members_local.head)
+  LIST_FOREACH(node, channel->local_member_list.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    const struct ChannelMember *const member = node->data;
 
-    if (IsDead(target))
+    struct Client *const target = member->client;
+    if (client_is_dead(target))
       continue;
 
-    if (one && (target == one->from))
+    if (exclude_client && (target == exclude_client->nexthop))
       continue;
 
-    if (rank && member_highest_rank(member) < rank)
+    if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
-    if (poscap && HasCap(target, poscap) != poscap)
+    if (required_cap && (target->connection->cap_flags & required_cap) != required_cap)
       continue;
 
-    if (negcap && HasCap(target, negcap))
+    if (excluded_cap && (target->connection->cap_flags & excluded_cap))
       continue;
 
-    sendto_one_buffer(target, buffer);
+    _send_block_to_client(target, block);
   }
 
-  dbuf_ref_free(buffer);
+  dbuf_block_unref(block);
 }
 
-/* sendto_channel_butone()
- *
- * inputs	- pointer to client(server) to NOT send message to
- *		- pointer to client that is sending this message
- *		- pointer to channel being sent to
- *		- vargs message
- * output	- NONE
- * side effects	- message as given is sent to given channel members.
- *
- * WARNING - +D clients are ignored
- */
 void
-sendto_channel_butone(struct Client *one, const struct Client *from, struct Channel *channel,
-                      int rank, const char *format, ...)
+sendto_channel_butone(const struct Client *exclude_client, const struct Client *from, const struct Channel *channel,
+                      int required_rank, const char *format, ...)
 {
-  struct dbuf_block *buffer_l = dbuf_alloc();
-  struct dbuf_block *buffer_r = dbuf_alloc();
+  struct dbuf_block *const client_block = dbuf_block_create();
+  struct dbuf_block *const server_block = dbuf_block_create();
 
-  if (IsClient(from))
-    dbuf_put_fmt(buffer_l, ":%s!%s@%s ", from->name, from->username, from->host);
+  if (client_is_user(from))
+    dbuf_block_append_fmt(client_block, ":%s!%s@%s ", from->name, from->username, from->host);
   else
-    dbuf_put_fmt(buffer_l, ":%s ", from->name);
+    dbuf_block_append_fmt(client_block, ":%s ", from->name);
 
-  dbuf_put_fmt(buffer_r, ":%s ", from->id);
+  dbuf_block_append_fmt(server_block, ":%s ", from->id);
 
-  va_list args_l, args_r;
-  va_start(args_l, format);
-  va_start(args_r, format);
-  send_format(buffer_l, format, args_l);
-  send_format(buffer_r, format, args_r);
-  va_end(args_l);
-  va_end(args_r);
+  va_list client_args;
+  va_start(client_args, format);
+  va_list server_args;
+  va_copy(server_args, client_args);
 
-  ++send_marker;
+  _send_finalize_message(client_block, format, client_args);
+  _send_finalize_message(server_block, format, server_args);
+
+  va_end(server_args);
+  va_end(client_args);
+
+  ++broadcast_id;
 
   list_node_t *node;
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
-    struct ChannelMember *member = node->data;
-    struct Client *target = member->client;
+    const struct ChannelMember *const member = node->data;
 
-    assert(IsClient(target));
-
-    if (IsDead(target->from))
+    struct Client *const target = member->client;
+    if (client_is_dead(target->nexthop))
       continue;
 
-    if (one && (target->from == one->from))
+    if (exclude_client && (target->nexthop == exclude_client->nexthop))
       continue;
 
-    if (rank && member_highest_rank(member) < rank)
+    if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
     if (user_mode_has_flag(target, UMODE_DEAF))
       continue;
 
-    if (MyConnect(target))
-      sendto_one_buffer(target, buffer_l);
-    else if (target->from->connection->send_marker != send_marker)
-      sendto_one_buffer_remote(target->from, from, buffer_r);
+    if (client_is_local(target))
+      _send_block_to_client(target, client_block);
+    else if (target->nexthop->connection->last_broadcast_id != broadcast_id)
+      _send_block_to_server(target->nexthop, from, server_block);
 
-    target->from->connection->send_marker = send_marker;
+    target->nexthop->connection->last_broadcast_id = broadcast_id;
   }
 
-  dbuf_ref_free(buffer_l);
-  dbuf_ref_free(buffer_r);
+  dbuf_block_unref(client_block);
+  dbuf_block_unref(server_block);
 }

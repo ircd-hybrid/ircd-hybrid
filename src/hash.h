@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -30,6 +14,7 @@
 
 #ifndef INCLUDED_hash_h
 #define INCLUDED_hash_h
+#include <stdint.h>
 
 /**
  * @def FNV1_32_INIT
@@ -58,15 +43,15 @@
 struct Client;
 struct Channel;
 
-enum
+enum hash_type
 {
   HASH_TYPE_ID,
   HASH_TYPE_CLIENT,
   HASH_TYPE_CHANNEL
 };
 
-extern unsigned int hash_string(const char *);
-extern void *hash_get_bucket(int, unsigned int);
+extern uint32_t hash_string(const char *);
+extern void *hash_get_bucket(enum hash_type, size_t);
 extern void hash_add_client(struct Client *);
 extern void hash_del_client(struct Client *);
 extern void hash_add_channel(struct Channel *);
@@ -75,9 +60,5 @@ extern void hash_add_id(struct Client *);
 extern void hash_del_id(struct Client *);
 extern struct Client *hash_find_id(const char *);
 extern struct Client *hash_find_client(const char *);
-extern struct Client *hash_find_server(const char *);
 extern struct Channel *hash_find_channel(const char *);
-
-extern void free_list_task(struct Client *);
-extern void safe_list_channels(struct Client *, bool);
 #endif  /* INCLUDED_hash_h */

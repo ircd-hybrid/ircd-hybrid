@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file ipcache.h
@@ -25,7 +9,10 @@
 
 #ifndef INCLUDED_ipcache_h
 #define INCLUDED_ipcache_h
+#include <stdbool.h>
+#include <stdint.h>
 
+#include "address.h"
 #include "list.h"
 #include "patricia.h"
 
@@ -35,12 +22,12 @@ struct ip_entry
   patricia_tree_t *trie_pointer;  /**< Pointer to 'patricia_tree_t' item */
   unsigned int count_local;  /**< Number of local users using this IP */
   unsigned int count_remote;  /**< Number of remote users using this IP */
-  unsigned int connection_count;  /**< Number of connections from this IP in the last throttle_time duration */
-  uintmax_t last_attempt;  /**< The last time someone connected from this IP; monotonic time */
+  unsigned int throttle_allowed_count;  /**< Attempts admitted in the current throttle burst. */
+  uintmax_t throttle_last_allowed_at;  /**< Last admitted attempt, in monotonic seconds. */
 };
 
-extern void ipcache_record_remove(void *, bool);
-extern void ipcache_get_stats(unsigned int *const, size_t *const);
+extern void ipcache_record_remove(const struct io_addr *, bool);
 extern void ipcache_init(void);
-extern struct ip_entry *ipcache_record_find_or_add(void *);
+extern bool ipcache_throttle_allow(const struct io_addr *);
+extern struct ip_entry *ipcache_record_find_or_add(const struct io_addr *);
 #endif  /* INCLUDED_ipcache_h */

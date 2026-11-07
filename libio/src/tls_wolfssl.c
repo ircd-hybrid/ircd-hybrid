@@ -1,41 +1,50 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015 Attila Molnar <attilamolnar@hush.com>
- *  Copyright (c) 2015 Adam <Adam@anope.org>
- *  Copyright (c) 2005-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015 Attila Molnar <attilamolnar@hush.com>
+ * SPDX-FileCopyrightText: 2015 Adam <Adam@anope.org>
+ * SPDX-FileCopyrightText: 2005-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file tls_wolfssl.c
  * \brief Includes all wolfSSL-specific TLS functions
  */
 
-#include "stdinc.h"
-#include "tls.h"
-#include "conf.h"
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "io_hex.h"
 #include "log.h"
-#include "misc.h"
 #include "memory.h"
+#include "tls.h"
 
 #ifdef HAVE_TLS_WOLFSSL
-static bool TLS_initialized;
 static tls_context_t tls_ctx;
-static tls_md_t message_digest_algorithm;
+
+static void
+_tls_context_free(tls_context_t context)
+{
+  if (context->server_ctx)
+    wolfSSL_CTX_free(context->server_ctx);
+  if (context->client_ctx)
+    wolfSSL_CTX_free(context->client_ctx);
+
+  io_free(context);
+}
+
+static void
+_tls_context_ref(tls_context_t context)
+{
+  ++context->ref_count;
+}
+
+static void
+_tls_context_unref(tls_context_t context)
+{
+  if (--context->ref_count == 0)
+    _tls_context_free(context);
+}
 
 /*
  * report_crypto_errors - Dump crypto error list to log
@@ -50,327 +59,377 @@ report_crypto_errors(void)
 }
 
 static int
-always_accept_verify_cb(int preverify_ok, WOLFSSL_X509_STORE_CTX *x509_ctx)
+_tls_verify_accept_all_cb(int preverify_ok, WOLFSSL_X509_STORE_CTX *x509_ctx)
 {
   return 1;
 }
 
 bool
-tls_is_initialized(void)
+tls_is_configured(void)
 {
-  return TLS_initialized;
+  return tls_ctx != NULL;
 }
 
-/* tls_init()
- *
- * inputs       - nothing
- * output       - nothing
- * side effects - setups SSL context.
- */
 void
-tls_init(void)
+tls_clear_config(void)
 {
-  wolfSSL_Init();
+  tls_context_t context = tls_ctx;
 
-  if ((tls_ctx.server_ctx = wolfSSL_CTX_new(wolfTLS_server_method())) == NULL)
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS server context -- wolfSSL_CTX_new failed");
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
+  tls_ctx = NULL;
 
-  wolfSSL_CTX_SetMinVersion(tls_ctx.server_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx.server_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx.server_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
-  wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-
-  if ((tls_ctx.client_ctx = wolfSSL_CTX_new(wolfTLS_client_method())) == NULL)
-  {
-    log_write(LOG_TYPE_IRCD, "ERROR: Could not initialize the TLS client context -- wolfSSL_CTX_new failed");
-    exit(EXIT_FAILURE);
-    return;  /* Not reached */
-  }
-
-  wolfSSL_CTX_SetMinVersion(tls_ctx.client_ctx, WOLFSSL_TLSV1_2);
-  wolfSSL_CTX_set_session_cache_mode(tls_ctx.client_ctx, SSL_SESS_CACHE_OFF);
-  wolfSSL_CTX_set_verify(tls_ctx.client_ctx, SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE, always_accept_verify_cb);
+  if (context)
+    _tls_context_unref(context);
 }
 
-bool
-tls_new_credentials(void)
+static tls_context_t
+_tls_context_new(void)
 {
-  TLS_initialized = false;
+  tls_context_t context = io_calloc(sizeof(*context));
+  _tls_context_ref(context);
 
-  if (ConfigServerInfo.tls_certificate_file == NULL || ConfigServerInfo.rsa_private_key_file == NULL)
-    return true;
+  wolfSSL_ERR_clear_error();
 
-  if (wolfSSL_CTX_use_certificate_chain_file(tls_ctx.server_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_certificate_chain_file(tls_ctx.client_ctx, ConfigServerInfo.tls_certificate_file) != SSL_SUCCESS)
+  context->server_ctx = wolfSSL_CTX_new(wolfTLS_server_method());
+  if (context->server_ctx == NULL)
+    goto fail;
+
+  if (wolfSSL_CTX_SetMinVersion(context->server_ctx, WOLFSSL_TLSV1_2) != WOLFSSL_SUCCESS)
+    goto fail;
+
+  wolfSSL_CTX_set_session_cache_mode(context->server_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(context->server_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
+
+  context->client_ctx = wolfSSL_CTX_new(wolfTLS_client_method());
+  if (context->client_ctx == NULL)
+    goto fail;
+
+  if (wolfSSL_CTX_SetMinVersion(context->client_ctx, WOLFSSL_TLSV1_2) != WOLFSSL_SUCCESS)
+    goto fail;
+
+  wolfSSL_CTX_set_session_cache_mode(context->client_ctx, WOLFSSL_SESS_CACHE_OFF);
+  wolfSSL_CTX_set_verify(context->client_ctx, WOLFSSL_VERIFY_PEER | WOLFSSL_VERIFY_CLIENT_ONCE, _tls_verify_accept_all_cb);
+
+  return context;
+
+fail:
+  report_crypto_errors();
+  _tls_context_unref(context);
+  return NULL;
+}
+
+static bool
+_tls_context_load_credentials(tls_context_t context, const tls_config_t *config)
+{
+  wolfSSL_ERR_clear_error();
+
+  if (wolfSSL_CTX_use_certificate_chain_file(context->server_ctx, config->certificate_file) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_certificate_chain_file(context->client_ctx, config->certificate_file) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_use_PrivateKey_file(tls_ctx.server_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS ||
-      wolfSSL_CTX_use_PrivateKey_file(tls_ctx.client_ctx, ConfigServerInfo.rsa_private_key_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+  if (wolfSSL_CTX_use_PrivateKey_file(context->server_ctx, config->private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_use_PrivateKey_file(context->client_ctx, config->private_key_file, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (wolfSSL_CTX_check_private_key(tls_ctx.server_ctx) != SSL_SUCCESS ||
-      wolfSSL_CTX_check_private_key(tls_ctx.client_ctx) != SSL_SUCCESS)
+  if (wolfSSL_CTX_check_private_key(context->server_ctx) != WOLFSSL_SUCCESS ||
+      wolfSSL_CTX_check_private_key(context->client_ctx) != WOLFSSL_SUCCESS)
   {
     report_crypto_errors();
     return false;
   }
 
-  if (ConfigServerInfo.tls_dh_param_file)
-    if (wolfSSL_CTX_SetTmpDH_file(tls_ctx.server_ctx, ConfigServerInfo.tls_dh_param_file, SSL_FILETYPE_PEM) != SSL_SUCCESS)
-       log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_dh_param_file -- could not open/read Diffie-Hellman parameter file");
-
-#ifdef SSL_CTX_set1_groups_list
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set1_groups_list(tls_ctx.server_ctx, "X25519:P-256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
-#else
-  if (ConfigServerInfo.tls_supported_groups == NULL)
-    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
-  else if (wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, ConfigServerInfo.tls_supported_groups) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set1_curves_list(tls_ctx.server_ctx, "X25519:P-256");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_supported_groups -- could not set supported group(s)");
-  }
-#endif
-
-  if (ConfigServerInfo.tls_message_digest_algorithm == NULL)
-    message_digest_algorithm = wolfSSL_EVP_sha256();
-  else if ((message_digest_algorithm = wolfSSL_EVP_get_digestbyname(ConfigServerInfo.tls_message_digest_algorithm)) == NULL)
-  {
-    message_digest_algorithm = wolfSSL_EVP_sha256();
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_message_digest_algorithm -- unknown message digest algorithm");
-  }
-
-  if (ConfigServerInfo.tls_cipher_list == NULL)
-    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-  else if (wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, ConfigServerInfo.tls_cipher_list) != SSL_SUCCESS)
-  {
-    wolfSSL_CTX_set_cipher_list(tls_ctx.server_ctx, "EECDH+HIGH:EDH+HIGH:HIGH:!aNULL");
-    log_write(LOG_TYPE_IRCD, "Ignoring serverinfo::tls_cipher_list -- could not set supported cipher(s)");
-  }
-
-  TLS_initialized = true;
   return true;
 }
 
+bool
+tls_configure(const tls_config_t *config)
+{
+  if (config == NULL || config->certificate_file == NULL || config->private_key_file == NULL)
+    return false;
+
+  tls_context_t context = _tls_context_new();
+  if (context == NULL)
+    return false;
+
+  if (!_tls_context_load_credentials(context, config))
+  {
+    _tls_context_unref(context);
+    return false;
+  }
+
+  tls_context_t old_context = tls_ctx;
+  tls_ctx = context;
+
+  if (old_context)
+    _tls_context_unref(old_context);
+
+  return true;
+}
+
+void
+tls_library_init(void)
+{
+  if (wolfSSL_Init() != WOLFSSL_SUCCESS)
+    exit(EXIT_FAILURE);
+}
+
 const char *
-tls_get_cipher(const tls_data_t *tls_data)
+tls_session_get_cipher(const tls_data_t *tls_data)
 {
   static char buf[128];
-  WOLFSSL *ssl = *tls_data;
+  WOLFSSL *ssl = tls_data->session;
 
   snprintf(buf, sizeof(buf), "%s-%s", wolfSSL_get_version(ssl), wolfSSL_get_cipher(ssl));
   return buf;
 }
 
-const char *
-tls_get_version(void)
+tls_library_info_t
+tls_library_get_info(void)
 {
-  static char buf[256];
-
-  snprintf(buf, sizeof(buf), "wolfSSL version: library: %s, header: %s",
-           wolfSSL_lib_version(), LIBWOLFSSL_VERSION_STRING);
-  return buf;
+  return (tls_library_info_t)
+  {
+    .name = "wolfSSL",
+    .runtime_version = wolfSSL_lib_version(),
+    .compile_version = LIBWOLFSSL_VERSION_STRING
+  };
 }
 
 bool
-tls_isusing(tls_data_t *tls_data)
+tls_session_is_active(const tls_data_t *tls_data)
 {
-  WOLFSSL *ssl = *tls_data;
-  return ssl != NULL;
+  return tls_data->session != NULL;
 }
 
 void
-tls_free(tls_data_t *tls_data)
+tls_session_deinit(tls_data_t *tls_data)
 {
-  wolfSSL_free(*tls_data);
-  *tls_data = NULL;
+  if (tls_data->session == NULL)
+    return;
+
+  WOLFSSL *session = tls_data->session;
+  tls_context_t context = tls_data->context;
+
+  tls_data->session = NULL;
+  tls_data->context = NULL;
+
+  wolfSSL_free(session);
+  _tls_context_unref(context);
 }
 
 ssize_t
-tls_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
+tls_session_read(tls_data_t *tls_data, char *buf, size_t bufsize, bool *want_write)
 {
-  WOLFSSL *ssl = *tls_data;
-  ssize_t ret = wolfSSL_read(ssl, buf, bufsize);
+  *want_write = false;
 
-  /* Translate wolfSSL error codes, sigh */
-  if (ret < 0)
+  WOLFSSL *ssl = tls_data->session;
+  const int size = bufsize > INT_MAX ? INT_MAX : (int)bufsize;
+
+  errno = 0;
+
+  /* TODO: Use wolfSSL_read_ex() once wolfSSL >= 5.8.0 is required. */
+  const int ret = wolfSSL_read(ssl, buf, size);
+  if (ret > 0)
+    return ret;
+
+  const int saved_errno = errno;
+
+  switch (wolfSSL_get_error(ssl, ret))
   {
-    switch (wolfSSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_WRITE:
-      {
-        /* wolfSSL wants to write, we signal this to the caller and do nothing about that here */
-        *want_write = true;
-        break;
-      }
-      case SSL_ERROR_WANT_READ:
-        errno = EWOULDBLOCK;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;
-    }
+    case WOLFSSL_ERROR_WANT_READ:
+      errno = EWOULDBLOCK;
+      return -1;
+    case WOLFSSL_ERROR_WANT_WRITE:
+      *want_write = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case WOLFSSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case WOLFSSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
+    default:
+      errno = EPROTO;
+      return -1;
   }
-
-  return ret;
 }
 
 ssize_t
-tls_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
+tls_session_write(tls_data_t *tls_data, const char *buf, size_t bufsize, bool *want_read)
 {
-  WOLFSSL *ssl = *tls_data;
-  ssize_t ret = wolfSSL_write(ssl, buf, bufsize);
+  *want_read = false;
 
-  /* Translate WolfSSL error codes, sigh */
-  if (ret < 0)
-  {
-    switch (wolfSSL_get_error(ssl, ret))
-    {
-      case SSL_ERROR_WANT_READ:
-        *want_read = true;
-        break;  /* Retry later, don't register for write events */
-      case SSL_ERROR_WANT_WRITE:
-        errno = EWOULDBLOCK;
-        break;
-      case SSL_ERROR_SYSCALL:
-        break;
-      case SSL_ERROR_SSL:
-        if (errno == EAGAIN)
-          break;
-      /* Fall through */
-      default:
-        ret = errno = 0;  /* Either an SSL-specific error or EOF */
-    }
-  }
+  WOLFSSL *ssl = tls_data->session;
+  const int size = bufsize > INT_MAX ? INT_MAX : (int)bufsize;
 
-  return ret;
-}
+  errno = 0;
 
-void
-tls_shutdown(tls_data_t *tls_data)
-{
-  WOLFSSL *ssl = *tls_data;
-  int ret = wolfSSL_shutdown(ssl);
+  /* TODO: Use wolfSSL_write_ex() once wolfSSL >= 5.8.0 is required. */
+  const int ret = wolfSSL_write(ssl, buf, size);
+  if (ret > 0)
+    return ret;
 
-  if (ret == WOLFSSL_SHUTDOWN_NOT_DONE)
-     wolfSSL_shutdown(ssl);
-}
-
-bool
-tls_new(tls_data_t *tls_data, int fd, tls_role_t role)
-{
-  WOLFSSL *ssl;
-
-  if (TLS_initialized == false)
-    return false;
-
-  if (role == TLS_ROLE_SERVER)
-    ssl = wolfSSL_new(tls_ctx.server_ctx);
-  else
-    ssl = wolfSSL_new(tls_ctx.client_ctx);
-
-  if (ssl == NULL)
-  {
-    log_write(LOG_TYPE_IRCD, "wolfSSL_new() ERROR! -- %s",
-         wolfSSL_ERR_error_string(wolfSSL_ERR_get_error(), NULL));
-    return false;
-  }
-
-  *tls_data = ssl;
-  wolfSSL_set_fd(ssl, fd);
-  return true;
-}
-
-bool
-tls_set_ciphers(tls_data_t *tls_data, const char *cipher_list)
-{
-  wolfSSL_set_cipher_list(*tls_data, cipher_list);
-  return true;
-}
-
-tls_handshake_status_t
-tls_handshake(tls_data_t *tls_data, tls_role_t role, const char **errstr)
-{
-  WOLFSSL *ssl = *tls_data;
-  int ret;
-
-  if (role == TLS_ROLE_SERVER)
-    ret = wolfSSL_accept(ssl);
-  else
-    ret = wolfSSL_connect(ssl);
-
-  if (ret == WOLFSSL_SUCCESS)
-    return TLS_HANDSHAKE_DONE;
+  const int saved_errno = errno;
 
   switch (wolfSSL_get_error(ssl, ret))
   {
     case WOLFSSL_ERROR_WANT_WRITE:
-      return TLS_HANDSHAKE_WANT_WRITE;
+      errno = EWOULDBLOCK;
+      return -1;
     case WOLFSSL_ERROR_WANT_READ:
-      return TLS_HANDSHAKE_WANT_READ;
+      *want_read = true;
+      errno = EWOULDBLOCK;
+      return -1;
+    case WOLFSSL_ERROR_ZERO_RETURN:
+      errno = 0;
+      return 0;
+    case WOLFSSL_ERROR_SYSCALL:
+      errno = saved_errno ? saved_errno : EIO;
+      return -1;
     default:
-    {
-      const char *error = wolfSSL_ERR_error_string(wolfSSL_ERR_get_error(), NULL);
-
-      if (errstr)
-        *errstr = error;
-
-      return TLS_HANDSHAKE_ERROR;
-    }
+      errno = EPROTO;
+      return -1;
   }
 }
 
-bool
-tls_verify_certificate(tls_data_t *tls_data, char **fingerprint)
+void
+tls_session_close_notify(tls_data_t *tls_data)
 {
-  WOLFSSL *ssl = *tls_data;
-  unsigned int n;
-  char buf[EVP_MAX_MD_SIZE * 2 + 1];
-  unsigned char md[EVP_MAX_MD_SIZE];
-  bool ret = false;
+  WOLFSSL *ssl = tls_data->session;
 
-  /* Accept NULL return from SSL_get_peer_certificate */
-  WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ssl);
-  if (cert == NULL)
-    return true;
+  int ret = wolfSSL_shutdown(ssl);
+  if (ret == WOLFSSL_SHUTDOWN_NOT_DONE)
+    wolfSSL_shutdown(ssl);
+}
 
-  switch (wolfSSL_get_verify_result(ssl))
+bool
+tls_session_init(tls_data_t *tls_data, int fd, tls_role_t role)
+{
+  if (tls_ctx == NULL)
+    return false;
+
+  tls_context_t context = tls_ctx;
+
+  WOLFSSL_CTX *ctx;
+  switch (role)
   {
-    case X509_V_OK:
-    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
-    case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
-    case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-      ret = true;
-
-      if (wolfSSL_X509_digest(cert, message_digest_algorithm, md, &n))
-      {
-        binary_to_hex(md, buf, n);
-        *fingerprint = io_strdup(buf);
-      }
+    case TLS_ROLE_SERVER:
+      ctx = context->server_ctx;
+      break;
+    case TLS_ROLE_CLIENT:
+      ctx = context->client_ctx;
+      break;
     default:
+      return false;
+  }
+
+  _tls_context_ref(context);
+
+  WOLFSSL *session = wolfSSL_new(ctx);
+  if (session == NULL)
+    goto fail;
+
+  if (role == TLS_ROLE_SERVER)
+    wolfSSL_set_accept_state(session);
+  else
+    wolfSSL_set_connect_state(session);
+
+  if (wolfSSL_set_fd(session, fd) != WOLFSSL_SUCCESS)
+    goto fail;
+
+  tls_data->session = session;
+  tls_data->context = context;
+  return true;
+
+fail:
+  if (session)
+    wolfSSL_free(session);
+
+  _tls_context_unref(context);
+  return false;
+}
+
+tls_handshake_status_t
+tls_session_handshake(tls_data_t *tls_data, const char **errstr)
+{
+  if (errstr)
+    *errstr = NULL;
+
+  WOLFSSL *ssl = tls_data->session;
+  const int ret = wolfSSL_negotiate(ssl);
+  if (ret == WOLFSSL_SUCCESS)
+    return TLS_HANDSHAKE_DONE;
+
+  const int error = wolfSSL_get_error(ssl, ret);
+  switch (error)
+  {
+    case WOLFSSL_ERROR_WANT_READ:
+      return TLS_HANDSHAKE_WANT_READ;
+    case WOLFSSL_ERROR_WANT_WRITE:
+      return TLS_HANDSHAKE_WANT_WRITE;
+    case WOLFSSL_ERROR_ZERO_RETURN:
+      if (errstr)
+        *errstr = "TLS connection closed during handshake";
+      break;
+    case WOLFSSL_ERROR_SYSCALL:
+      if (errstr)
+        *errstr = "System I/O error during TLS handshake";
+      break;
+    default:
+      if (errstr)
+      {
+        const char *const reason = wolfSSL_ERR_reason_error_string((unsigned long)error);
+        *errstr = reason ? reason : "TLS handshake failed";
+      }
+
       break;
   }
 
+  return TLS_HANDSHAKE_ERROR;
+}
+
+bool
+tls_session_get_peer_certificate_fingerprint(tls_data_t *tls_data, char **fingerprint)
+{
+  WOLFSSL *ssl = tls_data->session;
+
+  io_free(*fingerprint);
+  *fingerprint = NULL;
+
+  WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ssl);
+  if (cert == NULL)
+    return false;
+
+  int der_len;
+  const unsigned char *const der = wolfSSL_X509_get_der(cert, &der_len);
+  if (der == NULL || der_len <= 0)
+  {
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  unsigned char digest[TLS_CERTFP_DIGEST_SIZE];
+  if (wc_Sha256Hash(der, (word32)der_len, digest))
+  {
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  char hex_digest[TLS_CERTFP_STRING_SIZE];
+  if (!io_bytes_to_hex(digest, sizeof(digest), hex_digest, sizeof(hex_digest)))
+  {
+    wolfSSL_X509_free(cert);
+    return false;
+  }
+
+  *fingerprint = io_strdup(hex_digest);
+
   wolfSSL_X509_free(cert);
-  return ret;
+  return true;
 }
 #endif  /* HAVE_TLS_WOLFSSL */

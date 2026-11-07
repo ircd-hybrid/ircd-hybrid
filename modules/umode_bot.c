@@ -1,31 +1,18 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+#include <stddef.h>
+
 #include "module.h"
-#include "stdinc.h"
+
+#include "ircd_module.h"
 #include "client.h"
+#include "ircd_hook.h"
 #include "isupport.h"
 #include "numeric.h"
 #include "send.h"
-#include "ircd_hook.h"
 #include "user_mode.h"
 
 static struct UserMode bot_mode =
@@ -57,17 +44,21 @@ whois_send_hook(void *ctx_)
   return HOOK_FLOW_CONTINUE;
 }
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  user_mode_register(&bot_mode);
+  if (!ircd_module_register_user_mode(&bot_mode, error_message, error_message_size))
+    return false;
+
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
   isupport_add("BOT", "%c", bot_mode.mode_char);
+
+  return true;
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   user_mode_unregister(&bot_mode);
   hook_uninstall(ircd_hook_who_send, who_send_hook);
@@ -75,8 +66,12 @@ exit_handler(void)
   isupport_delete("BOT");
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "umode_bot",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

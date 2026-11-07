@@ -1,27 +1,16 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "stdinc.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "list.h"
 #include "memory.h"
+
 #include "cap.h"
 
 static list_t cap_list;
@@ -36,7 +25,7 @@ cap_get_list(void)
 }
 
 static int
-cap_compare_direct(const void *const a_, const void *const b_)
+_cap_compare_direct(const void *const a_, const void *const b_)
 {
   const char *const a = ((const struct Cap *)a_)->name;
   const char *const b = ((const struct Cap *)b_)->name;
@@ -44,7 +33,7 @@ cap_compare_direct(const void *const a_, const void *const b_)
 }
 
 static int
-cap_compare_indirect(const void *const a_, const void *const b_)
+_cap_compare_indirect(const void *const a_, const void *const b_)
 {
   const char *const a = (*(const struct Cap *const *)a_)->name;
   const char *const b = (*(const struct Cap *const *)b_)->name;
@@ -59,16 +48,16 @@ cap_register(unsigned int flag, const char *name, const char *value)
 
   struct Cap *cap = io_calloc(sizeof(*cap));
   cap->flag = flag;
-  cap->name = strdup(name);
+  cap->name = io_strdup(name);
   cap->name_len = strlen(name);
 
   if (value)
   {
-    cap->value = strdup(value);
+    cap->value = io_strdup(value);
     cap->value_len = strlen(value);
   }
 
-  list_add_sorted(cap, &cap->node, &cap_list, cap_compare_direct);
+  list_add_sorted(cap, &cap->node, &cap_list, _cap_compare_direct);
   cap_array_stale = true;
 }
 
@@ -95,12 +84,13 @@ cap_unregister(const char *name)
 }
 
 static void
-cap_array_update(void)
+_cap_array_update(void)
 {
   cap_array_stale = false;
 
   io_free(cap_array);
   cap_array = NULL;
+  cap_array_size = 0;
 
   if (list_is_empty(&cap_list))
     return;
@@ -113,14 +103,14 @@ struct Cap *
 cap_find(const char *name)
 {
   if (cap_array_stale)
-    cap_array_update();
+    _cap_array_update();
 
   if (cap_array_size == 0)
     return NULL;
 
   const struct Cap key = { .name = name };
   const struct Cap *key_ptr = &key;
-  struct Cap **cap = bsearch(&key_ptr, cap_array, cap_array_size, sizeof(key_ptr), cap_compare_indirect);
+  struct Cap **cap = bsearch(&key_ptr, cap_array, cap_array_size, sizeof(key_ptr), _cap_compare_indirect);
 
   return cap ? *cap : NULL;
 }

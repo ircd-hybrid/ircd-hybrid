@@ -1,32 +1,18 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "stdinc.h"
-#include "memory.h"
-#include "misc.h"
+#include <assert.h>
+#include <stddef.h>
+
 #include "io_string.h"
+#include "memory.h"
+
 #include "client.h"
+#include "command.h"
 #include "numeric.h"
 #include "send.h"
-#include "command.h"
 
 /*
  * (based on orabidoo's parser code)
@@ -39,20 +25,20 @@
  *
  * so roughly you have this for matching 'trie' or 'tie'
  *
- * 't' points -> [CommandTree *] 'r' -> [CommandTree *] -> 'i'
- *   -> [CommandTree *] -> [CommandTree *] -> 'e' and matches
+ * 't' points -> [CommandTrieNode *] 'r' -> [CommandTrieNode *] -> 'i'
+ *   -> [CommandTrieNode *] -> [CommandTrieNode *] -> 'e' and matches
  *
- *                               'i' -> [CommandTree *] -> 'e' and matches
+ *                               'i' -> [CommandTrieNode *] -> 'e' and matches
  *
  * BUGS (Limitations!)
  *
  * I designed this trie to parse ircd commands. Hence it currently
- * casefolds. This is trivial to fix by increasing MAXPTRLEN.
+ * casefolds. This is trivial to fix by increasing COMMAND_TRIE_CHILD_COUNT.
  * This trie also "folds" '{' etc. down. This means, the input to this
  * trie must be alpha tokens only. This again, is a limitation that
- * can be overcome by increasing MAXPTRLEN to include upper/lower case
+ * can be overcome by increasing COMMAND_TRIE_CHILD_COUNT to include upper/lower case
  * at the expense of more memory. At the extreme end, you could make
- * MAXPTRLEN 128.
+ * COMMAND_TRIE_CHILD_COUNT 128.
  *
  * This is also not a patricia trie. On short ircd tokens, this is
  * not likely going to matter.
@@ -63,180 +49,191 @@
 /*
  * Must be a power of 2, and larger than 26 [a-z]|[A-Z]. It's used to allocate
  * the set of pointers at each node of the tree.
- * There are MAXPTRLEN pointers at each node. Obviously, there have to be more
+ * There are COMMAND_TRIE_CHILD_COUNT pointers at each node. Obviously, there have to be more
  * pointers than ASCII letters. 32 is a nice number since there is then no need
  * to shift 'A'/'a' to base 0 index, at the expense of a few never used
  * pointers.
  * For a small parser like this, this is a good compromise and does
  * make it somewhat faster. - Dianora
  */
-enum { MAXPTRLEN = 32 };
+enum { COMMAND_TRIE_CHILD_COUNT = 32 };
 
-struct CommandTree
+struct CommandTrieNode
 {
-  int links; /* Count of all pointers (including command) at this node
+  unsigned int link_count; /* Count of all pointers (including command) at this node
               * used as reference count for deletion of _this_ node.
               */
   struct Command *command;
-  struct CommandTree *pointers[MAXPTRLEN];
+  struct CommandTrieNode *children[COMMAND_TRIE_CHILD_COUNT];
 };
 
-static struct CommandTree command_tree;
+static struct CommandTrieNode command_trie_root;
 
-/* add_msg_element()
- *
- * inputs	- pointer to CommandTree
- *		- pointer to Message to add for given command
- *		- pointer to current portion of command being added
- * output	- NONE
- * side effects	- recursively build the Message Tree ;-)
- */
+static unsigned int
+_command_trie_index(const char ch)
+{
+  return (unsigned char)ch & (COMMAND_TRIE_CHILD_COUNT - 1);
+}
+
 /*
  * How this works.
  *
  * The code first checks to see if its reached the end of the command
- * If so, that struct CommandTree has a msg pointer updated and the links
+ * If so, that struct CommandTrieNode has a msg pointer updated and the links
  * count incremented, since a msg pointer is a reference.
  * Then the code descends recursively, building the trie.
- * If a pointer index inside the struct CommandTree is NULL a new
- * child struct CommandTree has to be allocated.
+ * If a pointer index inside the struct CommandTrieNode is NULL a new
+ * child struct CommandTrieNode has to be allocated.
  * The links (reference count) is incremented as they are created
  * in the parent.
  */
 static void
-command_tree_add_element(struct CommandTree *tree, struct Command *command, const char *const name)
+_command_trie_add_element(struct CommandTrieNode *node, struct Command *command, const char *const name)
 {
   if (*name == '\0')
   {
-    tree->command = command;
-    tree->links++;  /* Have msg pointer, so up ref count */
+    node->command = command;
+    node->link_count++;  /* Have msg pointer, so up ref count */
   }
   else
   {
     /*
-     * *name & (MAXPTRLEN-1)
+     * *name & (COMMAND_TRIE_CHILD_COUNT - 1)
      * convert the char pointed to at *name from ASCII to an integer
-     * between 0 and MAXPTRLEN.
+     * between 0 and COMMAND_TRIE_CHILD_COUNT.
      * Thus 'A' -> 0x1 'B' -> 0x2 'c' -> 0x3 etc.
      */
-    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    const unsigned int index = _command_trie_index(*name);
+    struct CommandTrieNode *current = node->children[index];
     if (current == NULL)
     {
       current = io_calloc(sizeof(*current));
-      tree->pointers[*name & (MAXPTRLEN - 1)] = current;
-
-      tree->links++;  /* Have new pointer, so up ref count */
+      node->children[index] = current;
+      node->link_count++;  /* Have new pointer, so up ref count */
     }
 
-    command_tree_add_element(current, command, name + 1);
+    _command_trie_add_element(current, command, name + 1);
   }
 }
 
-/* del_msg_element()
- *
- * inputs	- Pointer to CommandTree to delete from
- *		- pointer to command name to delete
- * output	- NONE
- * side effects	- recursively deletes a token from the Message Tree ;-)
- */
 /*
  * How this works.
  *
  * Well, first off, the code recursively descends into the trie
  * until it finds the terminating letter of the command being removed.
  * Once it has done that, it marks the msg pointer as NULL then
- * reduces the reference count on that allocated struct CommandTree
+ * reduces the reference count on that allocated struct CommandTrieNode
  * since a command counts as a reference.
  *
  * Then it pops up the recurse stack. As it comes back up the recurse
  * The code checks to see if the child now has no pointers or msg
  * i.e. the links count has gone to zero. If it's no longer used, the
- * child struct CommandTree can be deleted. The parent reference
+ * child struct CommandTrieNode can be deleted. The parent reference
  * to this child is then removed and the parents link count goes down.
- * Thus, we continue to go back up removing all unused CommandTree(s)
+ * Thus, we continue to go back up removing all unused CommandTrieNode(s)
  */
 static void
-command_tree_del_element(struct CommandTree *tree, const char *const name)
+_command_trie_del_element(struct CommandTrieNode *node, const char *const name)
 {
   /*
    * In case this is called for a nonexistent command
    * check that there is a command pointer here, else links-- goes -ve
    * -db
    */
-  if (*name== '\0' && tree->command)
+  if (*name == '\0' && node->command)
   {
-    tree->command = NULL;
-    tree->links--;
+    node->command = NULL;
+    node->link_count--;
   }
   else
   {
-    struct CommandTree *current = tree->pointers[*name & (MAXPTRLEN - 1)];
+    const unsigned int index = _command_trie_index(*name);
+    struct CommandTrieNode *const current = node->children[index];
     if (current)
     {
-      command_tree_del_element(current, name + 1);
+      _command_trie_del_element(current, name + 1);
 
-      if (current->links == 0)
+      if (current->link_count == 0)
       {
-        tree->pointers[*name & (MAXPTRLEN - 1)] = NULL;
-        tree->links--;
+        node->children[index] = NULL;
+        node->link_count--;
         io_free(current);
       }
     }
   }
 }
 
-/* command_tree_find()
- *
- * inputs	- Pointer to command to find
- *		- Pointer to CommandTree root
- * output	- Find given command returning Message * if found NULL if not
- * side effects	- none
- */
-static struct Command *
-command_tree_find(const char *name)
+static bool
+_command_name_is_valid_char(unsigned char ch)
 {
-  struct CommandTree *tree = &command_tree;
-
-  assert(!string_is_empty(name));
-
-  while (IsAlpha(*name) && (tree = tree->pointers[*name & (MAXPTRLEN - 1)]))
-    if (*++name == '\0')
-      return tree->command;
-
-  return NULL;
+  return (ch >= 'A' && ch <= 'Z') ||
+         (ch >= 'a' && ch <= 'z');
 }
 
-/* command_add()
- *
- * inputs	- pointer to struct Command
- * output	- none
- * side effects - load this one command name
- */
+static bool
+_command_name_is_valid(const char *name)
+{
+  if (string_is_empty(name))
+    return false;
+
+  if (strlen(name) > COMMAND_NAME_LENGTH_MAX)
+    return false;
+
+  for (const unsigned char *p = (const unsigned char *)name; *p; ++p)
+    if (!_command_name_is_valid_char(*p))
+      return false;
+
+  return true;
+}
+
+static struct Command *
+_command_trie_find(const char *name)
+{
+  if (string_is_empty(name))
+    return NULL;
+
+  struct CommandTrieNode *node = &command_trie_root;
+
+  while (*name)
+  {
+    if (!_command_name_is_valid_char(*name))
+      return NULL;
+
+    node = node->children[_command_trie_index(*name)];
+    if (node == NULL)
+      return NULL;
+
+    ++name;
+  }
+
+  return node->command;
+}
+
 void
 command_add(struct Command *command)
 {
   assert(command);
   assert(command->name);
 
+  if (!_command_name_is_valid(command->name))
+    return;
+
   /* Command already added? */
-  if (command_tree_find(command->name) == NULL)
-    command_tree_add_element(&command_tree, command, command->name);
+  if (_command_trie_find(command->name) == NULL)
+    _command_trie_add_element(&command_trie_root, command, command->name);
 }
 
-/* command_del()
- *
- * inputs	- pointer to struct Command
- * output	- none
- * side effects - unload this one command name
- */
 void
 command_del(struct Command *command)
 {
   assert(command);
   assert(command->name);
 
-  if (command_tree_find(command->name))
-    command_tree_del_element(&command_tree, command->name);
+  if (!_command_name_is_valid(command->name))
+    return;
+
+  if (_command_trie_find(command->name))
+    _command_trie_del_element(&command_trie_root, command->name);
 }
 
 void
@@ -244,8 +241,8 @@ command_add_array(struct Command *commands, size_t elements)
 {
   for (size_t i = 0; i < elements; ++i)
   {
-    struct Command *const tmp = &commands[i];
-    command_add(tmp);
+    struct Command *const command = &commands[i];
+    command_add(command);
   }
 }
 
@@ -254,44 +251,31 @@ command_del_array(struct Command *commands, size_t elements)
 {
   for (size_t i = 0; i < elements; ++i)
   {
-    struct Command *const tmp = &commands[i];
-    command_del(tmp);
+    struct Command *const command = &commands[i];
+    command_del(command);
   }
 }
 
-/* find_command()
- *
- * inputs	- command name
- * output	- pointer to struct Command
- * side effects - none
- */
 struct Command *
 command_find(const char *name)
 {
-  return command_tree_find(name);
+  return _command_trie_find(name);
 }
 
-/* report_messages()
- *
- * inputs	- pointer to client to report to
- * output	- NONE
- * side effects	- client is shown list of commands
- */
 void
 command_report(struct Client *client)
 {
-  const struct CommandTree *const tree = &command_tree;
-  const struct CommandTree *stack[128];
+  const struct CommandTrieNode *const node = &command_trie_root;
+  const struct CommandTrieNode *stack[128];
   unsigned int top = 0;
 
   /* Initialize stack with the root node. */
-  stack[top++] = tree;
+  stack[top++] = node;
 
   while (top > 0)
   {
     /* Pop the top of the stack. */
-    const struct CommandTree *current = stack[--top];
-
+    const struct CommandTrieNode *const current = stack[--top];
     if (current->command)
       sendto_one_numeric(client, &me, RPL_STATSCOMMANDS,
                          current->command->name,
@@ -301,15 +285,40 @@ command_report(struct Client *client)
                          current->command->ecount);
 
     /* Push non-null pointers onto the stack in descending order. */
-    for (int i = MAXPTRLEN - 1; i >= 0; --i)
+    for (int i = COMMAND_TRIE_CHILD_COUNT - 1; i >= 0; --i)
     {
-      const struct CommandTree *ptr = current->pointers[i];
+      const struct CommandTrieNode *const ptr = current->children[i];
       if (ptr)
       {
         if (top >= IO_ARRAY_LENGTH(stack))
           return;
+
         stack[top++] = ptr;
       }
     }
   }
+}
+
+void
+command_handler_reject_not_oper(struct Client *source, size_t parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_NOPRIVILEGES);
+}
+
+void
+command_handler_reject_not_registered(struct Client *source, size_t parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_NOTREGISTERED);
+}
+
+void
+command_handler_reject_already_registered(struct Client *source, size_t parc, char *parv[])
+{
+  sendto_one_numeric(source, &me, ERR_ALREADYREGISTRED);
+}
+
+void
+command_handler_ignore(struct Client *source, size_t parc, char *parv[])
+{
+  return;
 }

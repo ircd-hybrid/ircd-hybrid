@@ -1,24 +1,8 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2015 Attila Molnar <attilamolnar@hush.com>
- *  Copyright (c) 2015 Adam <Adam@anope.org>
- *  Copyright (c) 2015-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2015 Attila Molnar <attilamolnar@hush.com>
+ * SPDX-FileCopyrightText: 2015 Adam <Adam@anope.org>
+ * SPDX-FileCopyrightText: 2015-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file tls.h
@@ -27,7 +11,11 @@
 
 #ifndef INCLUDED_tls_h
 #define INCLUDED_tls_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <sys/types.h>
 
+#include "config.h"  /**< Autotools-generated HAVE_LIBCRYPTO & HAVE_LIBGNUTLS & HAVE_LIBWOLFSSL. */
 #ifdef HAVE_LIBCRYPTO
 #include "tls_openssl.h"
 #elif defined(HAVE_LIBGNUTLS)
@@ -38,16 +26,19 @@
 #include "tls_none.h"
 #endif
 
-/**< Time in seconds for the TLS handshake to time out. */
-enum { TLS_HANDSHAKE_TIMEOUT = 5 };
+enum
+{
+  TLS_CERTFP_DIGEST_SIZE = 32,
+  TLS_CERTFP_STRING_SIZE = (TLS_CERTFP_DIGEST_SIZE * 2) + 1
+};
 
-typedef enum _tls_role
+typedef enum tls_role
 {
   TLS_ROLE_SERVER,
   TLS_ROLE_CLIENT
 } tls_role_t;
 
-typedef enum _tls_handshake_status
+typedef enum tls_session_handshake_status
 {
   TLS_HANDSHAKE_DONE,
   TLS_HANDSHAKE_WANT_READ,
@@ -55,18 +46,31 @@ typedef enum _tls_handshake_status
   TLS_HANDSHAKE_ERROR
 } tls_handshake_status_t;
 
-extern void tls_free(tls_data_t *);
-extern void tls_init(void);
-extern void tls_shutdown(tls_data_t *);
-extern bool tls_is_initialized(void);
-extern bool tls_isusing(tls_data_t *);
-extern bool tls_new(tls_data_t *, int, tls_role_t);
-extern bool tls_new_credentials(void);
-extern bool tls_set_ciphers(tls_data_t *, const char *);
-extern bool tls_verify_certificate(tls_data_t *, char **);
-extern ssize_t tls_read(tls_data_t *, char *, size_t, bool *);
-extern ssize_t tls_write(tls_data_t *, const char *, size_t, bool *);
-extern tls_handshake_status_t tls_handshake(tls_data_t *, tls_role_t, const char **);
-extern const char *tls_get_cipher(const tls_data_t *);
-extern const char *tls_get_version(void);
+typedef struct
+{
+  const char *certificate_file;
+  const char *private_key_file;
+} tls_config_t;
+
+typedef struct
+{
+  const char *name;
+  const char *runtime_version;
+  const char *compile_version;
+} tls_library_info_t;
+
+extern void tls_clear_config(void);
+extern void tls_library_init(void);
+extern void tls_session_close_notify(tls_data_t *);
+extern void tls_session_deinit(tls_data_t *);
+extern bool tls_configure(const tls_config_t *);
+extern bool tls_is_configured(void);
+extern bool tls_session_get_peer_certificate_fingerprint(tls_data_t *, char **);
+extern bool tls_session_init(tls_data_t *, int, tls_role_t);
+extern bool tls_session_is_active(const tls_data_t *);
+extern ssize_t tls_session_read(tls_data_t *, char *, size_t, bool *);
+extern ssize_t tls_session_write(tls_data_t *, const char *, size_t, bool *);
+extern tls_handshake_status_t tls_session_handshake(tls_data_t *, const char **);
+extern tls_library_info_t tls_library_get_info(void);
+extern const char *tls_session_get_cipher(const tls_data_t *);
 #endif  /* INCLUDED_tls_h */

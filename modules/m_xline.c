@@ -1,48 +1,40 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2003-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2003-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_xline.c
  * \brief Includes required functions for processing the XLINE command.
  */
 
-#include "stdinc.h"
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+#include "io_parse.h"
+#include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "log.h"
+#include "memory.h"
+#include "misc.h"
+#include "module.h"
+
+#include "aline.h"
 #include "client.h"
-#include "io_string.h"
-#include "ircd.h"
+#include "client_format.h"
 #include "conf.h"
 #include "conf_cluster.h"
 #include "conf_gecos.h"
 #include "conf_shared.h"
+#include "ircd.h"
+#include "ircd_module.h"
 #include "numeric.h"
-#include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "send.h"
 #include "server_capab.h"
-#include "parse.h"
-#include "module.h"
-#include "memory.h"
-#include "aline.h"
-
 
 static void
 xline_check(const struct GecosItem *gecos)
@@ -51,110 +43,108 @@ xline_check(const struct GecosItem *gecos)
 
   LIST_FOREACH_SAFE(node, node_next, local_client_list.head)
   {
-    struct Client *client = node->data;
-
-    if (IsDead(client))
+    struct Client *const client = node->data;
+    if (client_is_dead(client))
       continue;
 
     if (match(gecos->mask, client->info) == 0)
-      conf_try_ban(client, CLIENT_BAN_XLINE, gecos->reason);
+      conf_ban_apply(client, CONF_BAN_TYPE_XLINE, gecos->reason);
   }
 }
 
-/* xline_handle()
- *
- * inputs       - client taking credit for xline, gecos, reason, xline type
- * outputs      - none
- * side effects - when successful, adds an xline to the conf
- */
+static void
+_xline_report_added(struct Client *source, const struct GecosItem *gecos, uintmax_t duration_minutes)
+{
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
+
+  if (duration_minutes)
+  {
+    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                   "Temporary X-line added by %s for [%s] (%ju min) [%s]",
+                   source_name, gecos->mask, duration_minutes, gecos->reason);
+    log_write(LOG_TYPE_XLINE,
+              "Temporary X-line added by %s for [%s] (%ju min) [%s]",
+              source_name, gecos->mask, duration_minutes, gecos->reason);
+    return;
+  }
+
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "X-line added by %s for [%s] [%s]",
+                 source_name, gecos->mask, gecos->reason);
+  log_write(LOG_TYPE_XLINE, "X-line added by %s for [%s] [%s]",
+            source_name, gecos->mask, gecos->reason);
+}
+
 static void
 xline_handle(struct Client *source, const struct aline_ctx *aline)
 {
-  char buf[IRCD_BUFSIZE];
-
-  if (!HasFlag(source, FLAGS_SERVICE))
+  if (!client_is_service(source) && !aline_valid_mask_simple(aline->mask))
   {
-    if (aline_valid_mask_simple(aline->mask) == false)
-    {
-      if (IsClient(source))
-        sendto_one_notice(source, &me, ":Please include at least %u non-wildcard characters with the xline",
-                          ConfigGeneral.min_nonwildcard_simple);
-      return;
-    }
+    if (client_is_user(source))
+      sendto_one_notice(source, &me,
+                        ":Please include at least %u non-wildcard characters with the X-line",
+                        ConfigGeneral.min_nonwildcard_simple);
+    return;
   }
 
   struct GecosItem *gecos = gecos_find(aline->mask, match);
   if (gecos)
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":[%s] already X-Lined by [%s] - %s",
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":[%s] already X-lined by [%s] - %s",
                         aline->mask, gecos->mask, gecos->reason);
     return;
   }
 
+  char reason[IRCD_BUFSIZE];
   if (aline->duration)
-    snprintf(buf, sizeof(buf), "Temporary X-line %ju min. - %.*s (%s)",
+    snprintf(reason, sizeof(reason), "Temporary X-line %ju min. - %.*s (%s)",
              aline->duration / 60, REASONLEN, aline->reason, date_iso8601(0));
   else
-    snprintf(buf, sizeof(buf), "%.*s (%s)", REASONLEN, aline->reason, date_iso8601(0));
+    snprintf(reason, sizeof(reason), "%.*s (%s)",
+             REASONLEN, aline->reason, date_iso8601(0));
 
   gecos = gecos_make();
   gecos->mask = io_strdup(aline->mask);
-  gecos->reason = io_strdup(buf);
+  gecos->reason = io_strdup(reason);
   gecos->created_at = io_time_get(IO_TIME_REALTIME_SEC);
   gecos->in_database = true;
 
   if (aline->duration)
   {
     gecos->expires_at = gecos->created_at + aline->duration;
+    const uintmax_t duration_minutes = aline->duration / 60;
 
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":Added temporary %ju min. X-Line [%s]",
-                        aline->duration / 60, gecos->mask);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Added temporary X-line [%s] (%ju min)",
+                        gecos->mask, duration_minutes);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
-                   "%s added temporary %ju min. X-Line for [%s] [%s]",
-                   get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
-    log_write(LOG_TYPE_XLINE, "%s added temporary %ju min. X-Line for [%s] [%s]",
-              get_oper_name(source), aline->duration / 60, gecos->mask, gecos->reason);
+    _xline_report_added(source, gecos, duration_minutes);
   }
   else
   {
-    if (IsClient(source))
-      sendto_one_notice(source, &me, ":Added X-Line [%s] [%s]",
-                        gecos->mask, gecos->reason);
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Added X-line [%s]",
+                        gecos->mask);
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s added X-Line for [%s] [%s]",
-                   get_oper_name(source), gecos->mask, gecos->reason);
-    log_write(LOG_TYPE_XLINE, "%s added X-Line for [%s] [%s]",
-              get_oper_name(source), gecos->mask, gecos->reason);
+    _xline_report_added(source, gecos, 0);
   }
 
   xline_check(gecos);
 }
 
-/* mo_xline()
- *
- * inputs	- pointer to server
- *		- pointer to client
- *		- parameter count
- *		- parameter list
- * output	-
- * side effects - x line is added
- *
- */
 static void
-mo_xline(struct Client *source, int parc, char *parv[])
+mo_xline(struct Client *source, size_t parc, char *parv[])
 {
-  struct aline_ctx aline = { .add = true, .simple_mask = true };
-
-  if (!HasOFlag(source, OPER_FLAG_XLINE))
+  if (!client_has_oper_flag(source, OPER_FLAG_XLINE))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "xline");
     return;
   }
 
-  if (aline_parse("XLINE", source, parc, parv, &aline) == false)
+  struct aline_ctx aline = { .add = true, .simple_mask = true };
+  if (!aline_parse("XLINE", source, parc, parv, &aline))
     return;
 
   if (aline.server)
@@ -188,8 +178,12 @@ mo_xline(struct Client *source, int parc, char *parv[])
  *      - parv[4] = reason
  */
 static void
-ms_xline(struct Client *source, int parc, char *parv[])
+ms_xline(struct Client *source, size_t parc, char *parv[])
 {
+  uintmax_t duration;
+  if (io_parse_uintmax(parv[3], &duration) != IO_PARSE_OK)
+    return;
+
   struct aline_ctx aline =
   {
     .add = true,
@@ -197,7 +191,7 @@ ms_xline(struct Client *source, int parc, char *parv[])
     .mask = parv[2],
     .reason = parv[4],
     .server = parv[1],
-    .duration = strtoumax(parv[3], NULL, 10)
+    .duration = duration
   };
 
   sendto_match_servs(source, aline.server, CAPAB_CLUSTER, "XLINE %s %s %ju :%s",
@@ -206,35 +200,39 @@ ms_xline(struct Client *source, int parc, char *parv[])
   if (match(aline.server, me.name))
     return;
 
-  if (HasFlag(source, FLAGS_SERVICE) ||
-      shared_find(SHARED_XLINE, source->servptr->name, source->username, source->host))
+  if (client_is_service(source) ||
+      shared_find(SHARED_XLINE, source->uplink->name, source->username, source->host))
     xline_handle(source, &aline);
 }
 
 static struct Command command_table =
 {
   .name = "XLINE",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = ms_xline, .args_min = 5 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_xline, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_xline, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_xline, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_xline",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

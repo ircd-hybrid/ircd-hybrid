@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -26,8 +10,10 @@
 
 #ifndef INCLUDED_conf_cluster_h
 #define INCLUDED_conf_cluster_h
+#include <stdint.h>
 
 #include "io.h"
+#include "list.h"
 
 /**
  * @brief Configuration options for clustering.
@@ -48,7 +34,7 @@ enum
   CLUSTER_DLINE   = 1 << 7,  /**< Share DLINE commands. */
   CLUSTER_UNDLINE = 1 << 8,  /**< Share UNDLINE commands. */
   CLUSTER_REHASH  = 1 << 9,  /**< Share REHASH commands. */
-  CLUSTER_ALL     = UINT_MAX  /**< Share all supported commands (default). */
+  CLUSTER_ALL     = UINT32_MAX  /**< Share all supported commands (default). */
 };
 
 /**
@@ -62,11 +48,11 @@ struct ClusterItem
 {
   list_node_t node;  /**< Linked list node for management. */
   char *server;  /**< Name of the server to share with; may include wildcards. */
-  unsigned int type;  /**< Type of IRC command to share (using CLUSTER_* constants). */
+  uint32_t type;  /**< Type of IRC command to share (using CLUSTER_* constants). */
 };
 
 extern void cluster_clear(void);
-extern void cluster_distribute(const void *, const char *, unsigned int, unsigned int, const char *, ...) IO_AFP(5,6);
+extern void cluster_distribute(const void *, const char *, uint32_t, uint32_t, const char *, ...) IO_AFP(5,6);
 extern struct ClusterItem *cluster_make(void);
 extern const list_t *cluster_get_list(void);
 #endif  /* INCLUDED_conf_cluster_h */

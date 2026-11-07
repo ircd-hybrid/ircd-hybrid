@@ -1,203 +1,193 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2001-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2001-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_map.c
  * \brief Includes required functions for processing the MAP command.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "io_time.h"
-#include "client.h"
 #include "module.h"
-#include "numeric.h"
-#include "send.h"
-#include "user_mode.h"
+
+#include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_module.h"
+#include "ircd_hook.h"
+#include "links_cache.h"
+#include "numeric.h"
 #include "parse.h"
+#include "send.h"
 
+enum { MAP_LINE_PREFIX_WIDTH = 50 };
+enum { MAP_PROMPT_BUFFER_SIZE = 64 };
+
+static void _map_format_line(char *buffer, size_t buffer_size, const char *server_name, const char *server_id, size_t indent_len, unsigned int user_count, unsigned int total_users);
+static void _map_send_flat(struct Client *client);
+static void _map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, size_t prompt_length);
+static bool _map_should_hide_server(const struct Client *server, const struct Client *client);
+static double _map_get_user_percentage(unsigned int count, unsigned int total);
+
+static double
+_map_get_user_percentage(unsigned int count, unsigned int total)
+{
+  if (total == 0)
+    return 0.0;
+
+  return 100.0 * (double)count / (double)total;
+}
 
 static void
-dump_map_flat(struct Client *client)
+_map_format_line(char *buffer, size_t buffer_size, const char *server_name, const char *server_id,
+                 size_t indent_len, unsigned int user_count, unsigned int total_users)
 {
-  unsigned int count = 0;
+  size_t bufpos = snprintf(buffer, buffer_size, "%s", server_name);
+  if (server_id)
+    bufpos += snprintf(buffer + bufpos, buffer_size - bufpos, "[%s]", server_id);
 
-  list_node_t *node;
-  LIST_FOREACH(node, global_server_list.head)
+  int required_dashes = MAP_LINE_PREFIX_WIDTH - bufpos - indent_len;
+  if (required_dashes > 0)
   {
-    const struct Client *const server = node->data;
+    if (bufpos < buffer_size - 1)
+      buffer[bufpos++] = ' ';
 
-    if (IsHidden(server))
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    ++count;
+    const size_t drawable_dashes = IO_MIN((size_t)required_dashes, buffer_size - bufpos - 1);
+    memset(buffer + bufpos, '-', drawable_dashes);
+    bufpos += drawable_dashes;
   }
 
-  unsigned int current_server = 0;
-  LIST_FOREACH_PREV(node, global_server_list.tail)
+  snprintf(buffer + bufpos, buffer_size - bufpos, " | Users: %5u (%1.2f%%)",
+           user_count, _map_get_user_percentage(user_count, total_users));
+}
+
+static bool
+_map_should_hide_server(const struct Client *server, const struct Client *client)
+{
+  if (client_is_oper(client))
+    return false;
+
+  if (client_is_hidden(server))
+    return true;
+
+  if (client_is_service(server) && ConfigServerHide.hide_services)
+    return true;
+
+  return false;
+}
+
+static void
+_map_send_flat(struct Client *client)
+{
+  const list_t *const cache = links_cache_get();
+  const links_cache_metadata_t *metadata = links_cache_get_metadata();
+  const unsigned int remote_server_count = list_length(cache);
+  unsigned int processed_server_count = 0;
+  unsigned int snapshot_global_users;
+
+  if (metadata->generated_at_unix > 0)
+    snapshot_global_users = metadata->network_users_total;
+  else
+    snapshot_global_users = list_length(&global_client_list);
+
+  char line_buffer[IRCD_BUFSIZE];
+  _map_format_line(line_buffer, sizeof(line_buffer),
+                   me.name, NULL, 0, list_length(&local_client_list), snapshot_global_users);
+  sendto_one_numeric(client, &me, RPL_MAP, "", line_buffer);
+
+  list_node_t *node;
+  LIST_FOREACH(node, cache->head)
   {
-    const struct Client *const server = node->data;
+    const links_cache_entry_t *const entry = node->data;
+    ++processed_server_count;
 
-    if (IsHidden(server))
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
+    _map_format_line(line_buffer, sizeof(line_buffer),
+                     entry->name, NULL, 2, entry->user_count, snapshot_global_users);
 
-    if (HasFlag(server, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    char buf[IRCD_BUFSIZE];
-    unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
-
-    buf[bufpos++] = ' ';
-    unsigned int dashes = 50 - bufpos;
-
-    if (current_server)
-      dashes -= 2;
-
-    for (; dashes > 0; --dashes)
-      buf[bufpos++] = '-';
-
-    buf[bufpos++] = ' ';
-    buf[bufpos++] = '|';
-
-    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
-                       list_length(&server->serv->client_list), 100 *
-                       (float)list_length(&server->serv->client_list) /
-                       (float)list_length(&global_client_list));
-
-    if (current_server == 0)
-      sendto_one_numeric(client, &me, RPL_MAP, "", buf);
-    else if (current_server == count - 1)
-      sendto_one_numeric(client, &me, RPL_MAP, "`-", buf);
-    else
-      sendto_one_numeric(client, &me, RPL_MAP, "|-", buf);
-
-    ++current_server;
+    const char *const prefix = (processed_server_count == remote_server_count) ? "`-": "|-";
+    sendto_one_numeric(client, &me, RPL_MAP, prefix, line_buffer);
   }
 }
 
 static void
-dump_map(struct Client *client, const struct Client *server, unsigned int prompt_length)
+_map_send_live(struct Client *client, const struct Client *current_server, char *prompt_buffer, size_t prompt_length)
 {
-  static char prompt[64];
-  char *p = prompt + prompt_length;
-
+  assert(prompt_length < MAP_PROMPT_BUFFER_SIZE);
+  char *const p = prompt_buffer + prompt_length;
   *p = '\0';
 
   if (prompt_length > 60)
-    sendto_one_numeric(client, &me, RPL_MAPMORE, prompt, server->name);
+    sendto_one_numeric(client, &me, RPL_MAPMORE, prompt_buffer, current_server->name);
   else
   {
-    char buf[IRCD_BUFSIZE];
-    unsigned int bufpos = snprintf(buf, sizeof(buf), "%s", server->name);
+    char line_buffer[IRCD_BUFSIZE];
+    const char *const server_id = client_is_oper(client) ? current_server->id : NULL;
+    const unsigned int server_users = list_length(&current_server->server->child_user_list);
+    const unsigned int global_users = list_length(&global_client_list);
 
-    if (user_mode_has_flag(client, UMODE_OPER))
-      bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, "[%s]", server->id);
-
-    buf[bufpos++] = ' ';
-
-    for (int dashes = 50 - bufpos - prompt_length; dashes > 0; --dashes)
-      buf[bufpos++] = '-';
-
-    buf[bufpos++] = ' ';
-    buf[bufpos++] = '|';
-
-    bufpos += snprintf(buf + bufpos, sizeof(buf) - bufpos, " Users: %5d (%1.2f%%)",
-                       list_length(&server->serv->client_list), 100 *
-                       (float)list_length(&server->serv->client_list) /
-                       (float)list_length(&global_client_list));
-    sendto_one_numeric(client, &me, RPL_MAP, prompt, buf);
+    _map_format_line(line_buffer, sizeof(line_buffer),
+                     current_server->name, server_id, prompt_length, server_users, global_users);
+    sendto_one_numeric(client, &me, RPL_MAP, prompt_buffer, line_buffer);
   }
 
   if (prompt_length)
   {
     *(p - 1) = ' ';
-
     if (*(p - 2) == '`')
       *(p - 2) = ' ';
   }
 
   if (prompt_length > 60)
     return;
+
   strcpy(p, "|-");
 
-  unsigned int count = 0;
+  unsigned int visible_server_count = 0;
   list_node_t *node;
-  LIST_FOREACH(node, server->serv->server_list.head)
+  LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
-    const struct Client *target = node->data;
-
-    if (IsHidden(target))
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    ++count;
+    const struct Client *const server = node->data;
+    if (!_map_should_hide_server(server, client))
+      ++visible_server_count;
   }
 
-  LIST_FOREACH(node, server->serv->server_list.head)
+  LIST_FOREACH(node, current_server->server->child_server_list.head)
   {
-    const struct Client *target = node->data;
+    const struct Client *const server = node->data;
+    if (_map_should_hide_server(server, client))
+      continue;
 
-    if (IsHidden(target))
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    if (HasFlag(target, FLAGS_SERVICE) && ConfigServerHide.hide_services)
-      if (user_mode_has_flag(client, UMODE_OPER) == false)
-        continue;
-
-    if (--count == 0)
+    if (--visible_server_count == 0)
       *p = '`';
-    dump_map(client, target, prompt_length + 2);
+
+    _map_send_live(client, server, prompt_buffer, prompt_length + 2);
   }
 
   if (prompt_length)
     *(p - 1) = '-';
 }
 
-/*! \brief Sends a network topology map and notifies irc-operators
- *         about the MAP request
- *
- * \param source Pointer to client to report to
- */
 static void
-do_map(struct Client *source)
+_map_process_request(struct Client *source)
 {
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "MAP requested by %s (%s@%s) [%s]",
-                 source->name, source->username, source->host, source->servptr->name);
+  hook_dispatch(ircd_hook_spy_request, &(ircd_hook_spy_request_ctx){
+    .source = source,
+    .command = "MAP"
+  });
 
-  if (ConfigServerHide.flatten_links && user_mode_has_flag(source, UMODE_OPER) == false)
-    dump_map_flat(source);
+  if (ConfigServerHide.flatten_links && !client_is_oper(source))
+    _map_send_flat(source);
   else
-    dump_map(source, &me, 0);
+    _map_send_live(source, &me, (char[MAP_PROMPT_BUFFER_SIZE]){ 0 }, 0);
+
+  sendto_one_numeric(source, &me, RPL_MAPEND);
 }
 
 /*! \brief MAP command handler
@@ -211,20 +201,20 @@ do_map(struct Client *source)
  *      - parv[0] = command
  */
 static void
-m_map(struct Client *source, int parc, char *parv[])
+m_map(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if ((last_used + ConfigGeneral.pace_wait) > now)
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "MAP");
     return;
   }
 
-  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
+  last_used = now;
 
-  do_map(source);
-  sendto_one_numeric(source, &me, RPL_MAPEND);
+  _map_process_request(source);
 }
 
 /*! \brief MAP command handler
@@ -238,36 +228,39 @@ m_map(struct Client *source, int parc, char *parv[])
  *      - parv[0] = command
  */
 static void
-mo_map(struct Client *source, int parc, char *parv[])
+mo_map(struct Client *source, size_t parc, char *parv[])
 {
-  do_map(source);
-  sendto_one_numeric(source, &me, RPL_MAPEND);
+  _map_process_request(source);
 }
 
 static struct Command command_table =
 {
   .name = "MAP",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_map },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_map }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = m_map },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_map }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_map",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

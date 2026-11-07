@@ -1,12 +1,9 @@
-AUTOMAKE_OPTIONS = foreign
-
 bin_PROGRAMS = ircd
 
 AM_YFLAGS = -d
 AM_CPPFLAGS = -I$(top_srcdir)/libio/src -I$(top_srcdir)/src
 ircd_LDFLAGS = -export-dynamic
-ircd_LDADD = ../libio/src/.libs/libio.la
-ircd_DEPENDENCIES = ../libio/src/.libs/libio.la
+ircd_LDADD = $(top_builddir)/libio/src/libio.la
 
 ircd_SOURCES = accept.c          \
                accept.h          \
@@ -18,10 +15,20 @@ ircd_SOURCES = accept.c          \
                channel.h         \
                channel_invite.c  \
                channel_invite.h  \
+               channel_member.c  \
+               channel_member.h  \
                channel_mode.c    \
                channel_mode.h    \
                client.c          \
                client.h          \
+               client_find.c     \
+               client_find.h     \
+               client_format.c   \
+               client_format.h   \
+               client_id.c       \
+               client_id.h       \
+               client_input.c    \
+               client_input.h    \
                client_svstag.c   \
                client_svstag.h   \
                cloak.c           \
@@ -30,14 +37,26 @@ ircd_SOURCES = accept.c          \
                command.h         \
                conf.c            \
                conf.h            \
+               conf_auth.c       \
+               conf_auth.h       \
                conf_class.c      \
                conf_class.h      \
                conf_cluster.c    \
                conf_cluster.h    \
+               conf_connect.c    \
+               conf_connect.h    \
                conf_db.c         \
                conf_db.h         \
+               conf_deny.c       \
+               conf_deny.h       \
+               conf_exempt.c     \
+               conf_exempt.h     \
                conf_gecos.c      \
                conf_gecos.h      \
+               conf_kill.c       \
+               conf_kill.h       \
+               conf_oper.c       \
+               conf_oper.h       \
                conf_pseudo.c     \
                conf_pseudo.h     \
                conf_resv.c       \
@@ -63,12 +82,8 @@ ircd_SOURCES = accept.c          \
                extban_server.c   \
                extban_tlsinfo.c  \
                extban_usermode.c \
-               flatten_links.c   \
-               flatten_links.h   \
                hash.c            \
                hash.h            \
-               id.c              \
-               id.h              \
                info.c            \
                info.h            \
                ipcache.c         \
@@ -80,10 +95,16 @@ ircd_SOURCES = accept.c          \
                ircd_exit.h       \
                ircd_hook.c       \
                ircd_hook.h       \
+               ircd_module.c     \
+               ircd_module.h     \
                ircd_signal.c     \
                ircd_signal.h     \
                isupport.c        \
                isupport.h        \
+               links_cache.c     \
+               links_cache.h     \
+               list_task.c       \
+               list_task.h       \
                listener.c        \
                listener.h        \
                lookup.c          \
@@ -102,7 +123,6 @@ ircd_SOURCES = accept.c          \
                parse.h           \
                stats.c           \
                stats.h           \
-               stdinc.h          \
                send.c            \
                send.h            \
                server.c          \

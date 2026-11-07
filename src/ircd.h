@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -31,8 +15,10 @@
 
 #ifndef INCLUDED_ircd_h
 #define INCLUDED_ircd_h
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "config.h"
+#include "config.h"  /**< Autotools-generated PACKAGE_NAME & PACKAGE_VERSION. */
 #include "event.h"
 
 /**
@@ -54,45 +40,14 @@
  */
 struct SetOptions
 {
-  unsigned int autoconnect;  /**< Flag indicating if autoconnect is enabled for all servers. */
-  unsigned int maxclients;  /**< Maximum allowed client connections. */
-  unsigned int floodcount;  /**< Number of messages allowed in 'floodtime' seconds. */
-  unsigned int floodtime;  /**< Time threshold for flood control. */
-  unsigned int joinfloodtime;  /**< Time threshold for join flood control. */
-  unsigned int joinfloodcount;  /**< Number of join messages allowed in 'joinfloodtime' seconds. */
-  unsigned int spam_num;  /**< Number of spam messages allowed. */
-  unsigned int spam_time;  /**< Time threshold for spam control. */
-};
-
-/**
- * @struct ServerStatistics
- * @brief Structure for server communication and connection statistics.
- *
- * This structure holds statistics related to server communication and connections.
- * These metrics provide insights into data transmission, connection durations,
- * and various activities between clients and servers.
- */
-struct ServerStatistics
-{
-  size_t is_cbs;  /**< Bytes sent to clients. */
-  size_t is_cbr;  /**< Bytes received from clients. */
-  size_t is_sbs;  /**< Bytes sent to servers. */
-  size_t is_sbr;  /**< Bytes received from servers. */
-  uintmax_t is_cti;  /**< Time spent connected by clients. */
-  uintmax_t is_sti;  /**< Time spent connected by servers. */
-  unsigned int is_cl;  /**< Number of client connections. */
-  unsigned int is_sv;  /**< Number of server connections. */
-  unsigned int is_ni;  /**< Connections with unidentified sources. */
-  unsigned int is_ac;  /**< Number of accepted connections. */
-  unsigned int is_ref;  /**< Number of refused connections. */
-  unsigned int is_unco;  /**< Number of unknown commands received. */
-  unsigned int is_wrdi;  /**< Number of commands going in the wrong direction. */
-  unsigned int is_unpf;  /**< Number of messages with unknown prefixes. */
-  unsigned int is_empt;  /**< Number of empty messages received. */
-  unsigned int is_num;  /**< Number of numeric messages received. */
-  unsigned int is_kill;  /**< Number of kills generated on collisions. */
-  unsigned int is_asuc;  /**< Number of successful authentication requests. */
-  unsigned int is_abad;  /**< Number of unsuccessful authentication requests. */
+  uint32_t autoconnect;  /**< Flag indicating if autoconnect is enabled for all servers. */ /* XXX bool -> m_set.c */
+  uint32_t maxclients;  /**< Maximum allowed client connections. */
+  uint32_t floodcount;  /**< Number of messages allowed in 'floodtime' seconds. */
+  uint32_t floodtime;  /**< Time threshold for flood control. */
+  uint32_t joinfloodtime;  /**< Time threshold for join flood control. */
+  uint32_t joinfloodcount;  /**< Number of join messages allowed in 'joinfloodtime' seconds. */
+  uint32_t spam_num;  /**< Number of spam messages allowed. */
+  uint32_t spam_time;  /**< Time threshold for spam control. */
 };
 
 /**
@@ -104,12 +59,12 @@ struct ServerStatistics
  */
 struct Counter
 {
-  uintmax_t totalrestartcount;  /**< Total clients connected since server startup. */
-  unsigned int oper;  /**< Current IRC operators. */
-  unsigned int invisi;  /**< Current invisible clients (users with user mode +i). */
-  unsigned int max_loc;  /**< Peak local client count. */
-  unsigned int max_tot;  /**< Peak global client count. */
-  unsigned int max_loc_con;  /**< Peak local connections (clients + server). */
+  uint64_t totalrestartcount;  /**< Total clients connected since server startup. */
+  uint32_t oper;  /**< Current IRC operators. */
+  uint32_t invisi;  /**< Current invisible clients (users with user mode +i). */
+  uint32_t max_loc;  /**< Peak local client count. */
+  uint32_t max_tot;  /**< Peak global client count. */
+  uint32_t max_loc_con;  /**< Peak local connections (clients + server). */
 };
 
 /**
@@ -149,7 +104,7 @@ extern const char *logFileName;
 extern const char *pidFileName;
 
 extern struct Counter Count;
-extern struct ServerStatistics ServerStats;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
+extern event_manager_t ircd_event_manager;
 #endif  /* INCLUDED_ircd_h */

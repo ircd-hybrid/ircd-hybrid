@@ -1,35 +1,33 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file s_bsd.c
  * \brief Network functions.
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include "io_time.h"
+#include <sys/socket.h>
+#include <sys/types.h>
+
 #include "address.h"
-#include "fdlist.h"
 #include "comm.h"
+#include "event.h"
+#include "fdlist.h"
+#include "io_time.h"
+#include "log.h"
+#include "memory.h"
+
+event_manager_t comm_event_manager;
 
 static const char *const comm_err_str[] =
 {
@@ -40,37 +38,46 @@ static const char *const comm_err_str[] =
   [COMM_ERROR] = "Comm Error"
 };
 
-static void comm_connect_callback(fde_t *, int);
-static void comm_connect_timeout(fde_t *, void *);
-static void comm_connect_tryconnect(fde_t *, void *);
-
-
-/* comm_get_sockerr - get the error value from the socket or the current errno
- *
- * Get the *real* error from the socket (well try to anyway..).
- * This may only work when SO_DEBUG is enabled but its worth the
- * gamble anyway.
- */
-int
-comm_get_sockerr(fde_t *F)
+struct comm_op_st
 {
-  int errtmp = errno;
-#ifdef SO_ERROR
-  int err = 0;
-  socklen_t len = sizeof(err);
+  fde_t *fde;
+  struct io_addr remote_addr;
+  void (*completion_handler)(fde_t *, int, void *);
+  void *completion_handler_data;
+  event_handle_t timeout_event;
+};
 
-  assert(F);
-  assert(F->flags.open == true);
+void
+comm_init(event_manager_t mgr)
+{
+  assert(comm_event_manager == NULL);
+  comm_event_manager = mgr;
 
-  if (getsockopt(F->fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0)
+  comm_select_init();
+}
+
+bool
+comm_socket_get_error(const fde_t *fde, int *const sock_err_out)
+{
+  assert(fde);
+  assert(fde->flags.open);
+  assert(sock_err_out);
+
+  *sock_err_out = 0;
+
+  int sock_err = 0;
+  socklen_t len = sizeof(sock_err);
+  if (getsockopt(fde->fd, SOL_SOCKET, SO_ERROR, &sock_err, &len) == 0)
   {
-    if (err)
-      errtmp = err;
+    *sock_err_out = sock_err;
+    return true;
   }
-
-  errno = errtmp;
-#endif
-  return errtmp;
+  else
+  {
+    log_write(LOG_TYPE_DEBUG, "comm_socket_get_error: getsockopt(SO_ERROR) failed for FD %d: %s",
+              fde->fd, strerror(errno));
+    return false;
+  }
 }
 
 /*
@@ -78,24 +85,52 @@ comm_get_sockerr(fde_t *F)
  *
  * Set the socket non-blocking, and other wonderful bits.
  */
-static void
-setup_socket(int fd)
+static bool
+setup_socket(int fd, int family, int sock_type)
 {
-  int opt = 1;
+  if (sock_type == SOCK_STREAM)
+  {
+    int opt = 1;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
+      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_NODELAY) failed for FD %d: %s",
+                fd, strerror(errno));
 
-  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+#if defined(IPTOS_LOWDELAY)
+    opt = IPTOS_LOWDELAY;
 
-#ifdef IPTOS_LOWDELAY
-  opt = IPTOS_LOWDELAY;
-  setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt));
+    if (family == AF_INET)
+    {
+      if (setsockopt(fd, IPPROTO_IP, IP_TOS, &opt, sizeof(opt)) == -1)
+        log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IP_TOS) failed for FD %d: %s",
+                  fd, strerror(errno));
+    }
+#ifdef IPV6_TCLASS
+    else if (family == AF_INET6)
+    {
+      if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, &opt, sizeof(opt)) == -1)
+        log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(IPV6_TCLASS) failed for FD %d: %s",
+                  fd, strerror(errno));
+    }
+#endif
 #endif
 
 #ifdef TCP_QUICKACK
-  opt = 1;
-  setsockopt(fd, SOL_SOCKET, TCP_QUICKACK, &opt, sizeof(opt));
+    opt = 1;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, &opt, sizeof(opt)) == -1)
+      log_write(LOG_TYPE_DEBUG, "setup_socket: setsockopt(TCP_QUICKACK) failed for FD %d: %s",
+                fd, strerror(errno));
 #endif
+  }
 
-  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (flags == -1 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "setup_socket: fcntl(O_NONBLOCK) failed for FD %d: %s",
+              fd, strerror(errno));
+    return false;
+  }
+
+  return true;
 }
 
 /*
@@ -105,16 +140,16 @@ setup_socket(int fd)
  *     -- adrian
  */
 bool
-comm_ignore_errno(int ierrno)
+comm_errno_is_recoverable(int error_code)
 {
-  switch (ierrno)
+  switch (error_code)
   {
     case EINPROGRESS:
+    case EALREADY:
     case EWOULDBLOCK:
 #if EAGAIN != EWOULDBLOCK
     case EAGAIN:
 #endif
-    case EALREADY:
     case EINTR:
 #ifdef ERESTART
     case ERESTART:
@@ -125,83 +160,106 @@ comm_ignore_errno(int ierrno)
   }
 }
 
-/*
- * comm_settimeout() - set the socket timeout
- *
- * Set the timeout for the fd
- */
-void
-comm_settimeout(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
-{
-  assert(F);
-  assert(F->flags.open == true);
+#define COMM_DEFAULT_SELECT_TIMEOUT_MS 100
 
-  F->timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
-  F->timeout_handler = callback;
-  F->timeout_data = cbdata;
+int
+comm_get_select_timeout(event_manager_t mgr)
+{
+  const uintmax_t next_fire_time_ms = event_manager_get_next_fire_time(mgr);
+  if (next_fire_time_ms == EVENT_TIME_NEVER)
+    return COMM_DEFAULT_SELECT_TIMEOUT_MS;
+
+  const uintmax_t current_time_ms = io_time_get_monotonic_ms_total();
+  if (next_fire_time_ms <= current_time_ms)
+    return 0;
+
+  const uintmax_t delta_ms = next_fire_time_ms - current_time_ms;
+  if (delta_ms > COMM_DEFAULT_SELECT_TIMEOUT_MS)
+    return COMM_DEFAULT_SELECT_TIMEOUT_MS;
+
+  return (int)delta_ms;
 }
 
-/*
- * comm_setflush() - set a flush function
- *
- * A flush function is simply a function called if found during
- * comm_timeouts(). Its basically a second timeout, except in this case
- * I'm too lazy to implement multiple timeout functions! :-)
- * its kinda nice to have it separate, since this is designed for
- * flush functions, and when comm_close() is implemented correctly
- * with close functions, we _actually_ don't call comm_close() here ..
- * -- originally Adrian's notes
- * comm_close() is replaced with fd_close() in fdlist.c
- */
-void
-comm_setflush(fde_t *F, uintmax_t timeout, void (*callback)(fde_t *, void *), void *cbdata)
+static void
+comm_connect_complete(comm_op_t *op, int status)
 {
-  assert(F);
-  assert(F->flags.open == true);
+  assert(op);
 
-  F->flush_timeout = timeout ? io_time_get(IO_TIME_MONOTONIC_SEC) + timeout : 0;
-  F->flush_handler = callback;
-  F->flush_data = cbdata;
-}
+  fde_t *fde = op->fde;
+  void (*hdl)(fde_t *, int, void *) = op->completion_handler;
+  void *hdl_data = op->completion_handler_data;
 
-/*
- * comm_checktimeouts() - check the socket timeouts
- *
- * All this routine does is call the given callback/cbdata, without closing
- * down the file descriptor. When close handlers have been implemented,
- * this will happen.
- */
-void
-comm_checktimeouts(void *unused)
-{
-  for (int fd = 0; fd <= highest_fd; ++fd)
+  if (op->timeout_event)
   {
-    fde_t *F = &fd_table[fd];
-
-    if (F->flags.open == false)
-      continue;
-
-    /* check flush functions */
-    if (F->flush_timeout && F->flush_timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      void (*hdl)(fde_t *, void *) = F->flush_handler;
-      void *data = F->flush_data;
-
-      comm_setflush(F, 0, NULL, NULL);
-      hdl(F, data);
-    }
-
-    /* check timeouts */
-    if (F->timeout && F->timeout < io_time_get(IO_TIME_MONOTONIC_SEC))
-    {
-      /* Call timeout handler */
-      void (*hdl)(fde_t *, void *) = F->timeout_handler;
-      void *data = F->timeout_data;
-
-      comm_settimeout(F, 0, NULL, NULL);
-      hdl(F, data);
-    }
+    event_destroy(op->timeout_event);
+    op->timeout_event = NULL;
   }
+
+  if (fde == NULL || fde->flags.open == false)
+  {
+    hdl(fde, COMM_ERROR, hdl_data);
+
+    io_free(op);
+    return;
+  }
+
+  if (fde->cleanup_data == op)
+  {
+    fde->cleanup_handler = NULL;
+    fde->cleanup_data = NULL;
+  }
+
+  comm_setselect(fde, COMM_SELECT_WRITE, NULL, NULL);
+
+  hdl(fde, status, hdl_data);
+  io_free(op);
+}
+
+static void
+comm_connect_cleanup(void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  comm_connect_complete(op, COMM_ERROR);
+}
+
+static void
+comm_connect_timeout(void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  event_handle_t timeout_event = op->timeout_event;
+  op->timeout_event = NULL;
+  event_destroy(timeout_event);
+
+  comm_connect_complete(op, COMM_ERR_TIMEOUT);
+}
+
+/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
+ * Input: The fd, the handler data(unused).
+ * Output: None.
+ * Side-effects: Try and connect with pending connect data for the FD. If
+ *               we succeed or get a fatal error, call the callback.
+ *               Otherwise, it is still blocking or something, so register
+ *               to select for a write event on this FD.
+ */
+static void
+comm_connect_handler(fde_t *fde, void *cbdata)
+{
+  comm_op_t *op = cbdata;
+  assert(op);
+
+  /* This check is needed or re-entrant s_bsd_* like sigio break it. */
+  if (fde->cleanup_handler != comm_connect_cleanup || fde->cleanup_data != op)
+    return;
+
+  int sock_err = 0;
+  if (comm_socket_get_error(fde, &sock_err) && sock_err == 0)
+    comm_connect_complete(op, COMM_OK);
+  else
+    comm_connect_complete(op, COMM_ERR_CONNECT);
 }
 
 /*
@@ -218,109 +276,62 @@ comm_checktimeouts(void *unused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(fde_t *F, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
-                 void (*callback)(fde_t *, int, void *), void *data, uintmax_t timeout)
+comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
+                 void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout_ms)
 {
-  assert(callback);
+  assert(fde);
+  assert(fde->flags.open);
+  assert(caddr);
+  assert(address_is_ipv4(caddr) || address_is_ipv6(caddr));
+  assert(handler);
+  assert(fde->cleanup_handler == NULL);
+  assert(fde->cleanup_data == NULL);
 
-  address_copy(&F->connect.addr, caddr);
-  address_set_port(&F->connect.addr, port);
+  comm_op_t *const op = io_calloc(sizeof(*op));
+  op->fde = fde;
+  op->completion_handler = handler;
+  op->completion_handler_data = data;
+  address_copy(&op->remote_addr, caddr);
 
-  F->connect.callback = callback;
-  F->connect.data = data;
+  fde->cleanup_handler = comm_connect_cleanup;
+  fde->cleanup_data = op;
 
-  /* Note that we're using a passed sockaddr here. This is because
-   * generally you'll be bind()ing to a sockaddr grabbed from
-   * getsockname(), so this makes things easier.
-   * XXX If NULL is passed as local, we should later on bind() to the
-   * virtual host IP, for completeness.
-   *   -- adrian
-   */
-  if (baddr && bind(F->fd, (const struct sockaddr *)baddr, address_length(baddr)) < 0)
+  if (!address_set_port(&op->remote_addr, port))
   {
-    /* Failure, call the callback with COMM_ERR_BIND */
-    comm_connect_callback(F, COMM_ERR_BIND);
-    return;  /* ... and quit */
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+    return;
   }
 
-  comm_settimeout(F, timeout, comm_connect_timeout, NULL);
-  comm_connect_tryconnect(F, NULL);
-}
-
-/*
- * comm_connect_callback() - call the callback, and continue with life
- */
-static void
-comm_connect_callback(fde_t *F, int status)
-{
-  void (*hdl)(fde_t *, int, void *);
-
-  /* This check is gross..but probably necessary */
-  if (F->connect.callback == NULL)
-    return;
-
-  /* Clear the connect flag + handler */
-  hdl = F->connect.callback;
-  F->connect.callback = NULL;
-
-  /* Clear the timeout handler */
-  comm_settimeout(F, 0, NULL, NULL);
-
-  /* Call the handler */
-  hdl(F, status, F->connect.data);
-}
-
-/*
- * comm_connect_timeout() - this gets called when the socket connection
- * times out. This *only* can be called once connect() is initially
- * called ..
- */
-static void
-comm_connect_timeout(fde_t *F, void *unused)
-{
-  /* error! */
-  comm_connect_callback(F, COMM_ERR_TIMEOUT);
-}
-
-/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
- * Input: The fd, the handler data(unused).
- * Output: None.
- * Side-effects: Try and connect with pending connect data for the FD. If
- *               we succeed or get a fatal error, call the callback.
- *               Otherwise, it is still blocking or something, so register
- *               to select for a write event on this FD.
- */
-static void
-comm_connect_tryconnect(fde_t *F, void *unused)
-{
-  /* This check is needed or re-entrant s_bsd_* like sigio break it. */
-  if (F->connect.callback == NULL)
-    return;
+  if (baddr && address_is_specified(baddr))
+  {
+    if (bind(fde->fd, address_get_sockaddr(baddr), address_get_sockaddr_length(baddr)) == -1)
+    {
+      /* Failure, call the callback with COMM_ERR_BIND */
+      comm_connect_complete(op, COMM_ERR_BIND);
+      return;  /* ... and quit */
+    }
+  }
 
   /* Try the connect() */
-  int retval = connect(F->fd, (struct sockaddr *)&F->connect.addr, address_length(&F->connect.addr));
-
-  /* Error? */
-  if (retval < 0)
+  if (connect(fde->fd, address_get_sockaddr(&op->remote_addr), address_get_sockaddr_length(&op->remote_addr)) == 0)
   {
-    /*
-     * If we get EISCONN, then we've already connect()ed the socket,
-     * which is a good thing.
-     *   -- adrian
-     */
-    if (errno == EISCONN)
-      comm_connect_callback(F, COMM_OK);
-    else if (comm_ignore_errno(errno))
-      /* Ignore error? Reschedule */
-      comm_setselect(F, COMM_SELECT_WRITE, comm_connect_tryconnect, NULL, 0);
-    else
-      /* Error? Fail with COMM_ERR_CONNECT */
-      comm_connect_callback(F, COMM_ERR_CONNECT);
+    comm_connect_complete(op, COMM_OK);
     return;
   }
 
-  /* If we get here, we've suceeded, so call with COMM_OK */
-  comm_connect_callback(F, COMM_OK);
+  if (!comm_errno_is_recoverable(errno))
+  {
+    comm_connect_complete(op, COMM_ERR_CONNECT);
+    return;
+  }
+
+  if (timeout_ms > 0)
+  {
+    op->timeout_event = event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout_ms, true, op, NULL);
+    event_schedule(op->timeout_event);
+  }
+
+  comm_setselect(fde, COMM_SELECT_WRITE, comm_connect_handler, op);
 }
 
 /*
@@ -334,70 +345,149 @@ comm_errstr(int error)
   return comm_err_str[error];
 }
 
-/*
- * comm_open() - open a socket
- *
- * This is a highly highly cut down version of squid's comm_open() which
- * for the most part emulates socket(), *EXCEPT* it fails if we're about
- * to run out of file descriptors.
- */
-int
-comm_socket(int family, int sock_type, int proto)
+fde_t *
+comm_socket_create(int family, int sock_type, int proto, const char *desc)
 {
-  /* First, make sure we aren't going to run out of file descriptors */
   if (number_fd >= hard_fdlimit)
   {
+    log_write(LOG_TYPE_DEBUG, "comm_socket_create: Cannot create new socket: %s", strerror(ENFILE));
     errno = ENFILE;
-    return -1;
+    return NULL;
   }
 
-  /*
-   * Next, we try to open the socket. We *should* drop the reserved FD
-   * limit if/when we get an error, but we can deal with that later.
-   * XXX !!! -- adrian
-   */
   int fd = socket(family, sock_type, proto);
   if (fd < 0)
-    return -1; /* errno will be passed through, yay.. */
+  {
+    log_write(LOG_TYPE_DEBUG, "comm_socket_create: socket() failed: %s", strerror(errno));
+    return NULL;
+  }
 
-  setup_socket(fd);
+  if (!setup_socket(fd, family, sock_type))
+  {
+    close(fd);
+    return NULL;
+  }
 
-  return fd;
+  return fd_open(fd, true, desc);
 }
 
-/*
- * comm_accept() - accept an incoming connection
- *
- * This is a simple wrapper for accept() which enforces FD limits like
- * comm_open() does. Returned fd must be either closed or tagged with
- * fd_open (this function no longer does it).
- */
-int
-comm_accept(fde_t *F, struct io_addr *addr)
+fde_t *
+comm_socket_listen(const struct io_addr *addr, int backlog, const char *desc)
 {
-  socklen_t addrlen = sizeof(*addr);
+  assert(backlog > 0);
+
+  fde_t *fde = comm_socket_create(address_get_family(addr), SOCK_STREAM, 0, desc);
+  if (fde == NULL)
+    return NULL;
+
+  const int opt = 1;
+  if (setsockopt(fde->fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "comm_socket_listen: setsockopt(SO_REUSEADDR) failed for FD %d: %s",
+              fde->fd, strerror(errno));
+    fd_close(fde);
+    return NULL;
+  }
+
+#ifdef IPV6_V6ONLY
+  if (address_is_ipv6(addr) && address_is_unspecified(addr))
+  {
+    const int v6only_opt = 0;
+    if (setsockopt(fde->fd, IPPROTO_IPV6, IPV6_V6ONLY, &v6only_opt, sizeof(v6only_opt)) == -1)
+    {
+      log_write(LOG_TYPE_DEBUG, "comm_socket_listen: setsockopt(IPV6_V6ONLY=0) failed for FD %d: %s",
+                fde->fd, strerror(errno));
+      fd_close(fde);
+      return NULL;
+    }
+  }
+#endif
+
+  if (bind(fde->fd, address_get_sockaddr(addr), address_get_sockaddr_length(addr)) == -1)
+  {
+    char addr_str[ADDRESS_STRING_BUFSIZE];
+    address_to_string(addr, addr_str, sizeof(addr_str));
+
+    log_write(LOG_TYPE_IRCD, "comm_socket_listen: bind() failed for %s: %s",
+              addr_str, strerror(errno));
+    fd_close(fde);
+    return NULL;
+  }
+
+  if (listen(fde->fd, backlog) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "comm_socket_listen: listen() failed for FD %d: %s",
+              fde->fd, strerror(errno));
+    fd_close(fde);
+    return NULL;
+  }
+
+  return fde;
+}
+
+void
+comm_socket_close(fde_t *fde)
+{
+  assert(fde && fde->flags.open == true);
+
+  if (tls_session_is_active(&fde->tls))
+    tls_session_close_notify(&fde->tls);
+
+  fd_close(fde);
+}
+
+fde_t *
+comm_accept(fde_t *listener_fde, struct io_addr *addr, const char *desc)
+{
+  assert(listener_fde);
+  assert(listener_fde->flags.open);
 
   if (number_fd >= hard_fdlimit)
   {
+    log_write(LOG_TYPE_IRCD, "comm_accept: Cannot accept new connection: %s", strerror(ENFILE));
     errno = ENFILE;
-    return -1;
+    return NULL;
   }
 
   address_clear(addr);
 
-  /*
-   * Next, do the accept(). if we get an error, we should drop the
-   * reserved fd limit, but we can deal with that when comm_open()
-   * also does it. XXX -- adrian
-   */
-  int fd = accept(F->fd, (struct sockaddr *)addr, &addrlen);
+  socklen_t addrlen = sizeof(addr->ss);
+  int fd = accept(listener_fde->fd, (struct sockaddr *)&addr->ss, &addrlen);
   if (fd < 0)
-    return -1;
+  {
+    if (comm_errno_is_recoverable(errno))
+      return NULL;
 
-  address_strip_ipv4(addr);
+    log_write(LOG_TYPE_IRCD, "comm_accept: accept() failed on FD %d: %s",
+              listener_fde->fd, strerror(errno));
+    return NULL;
+  }
 
-  setup_socket(fd);
+  address_unmap_ipv4(addr);
 
-  /* .. and return */
-  return fd;
+  if (!setup_socket(fd, address_get_family(addr), SOCK_STREAM))
+  {
+    close(fd);
+    return NULL;
+  }
+
+  return fd_open(fd, true, desc);
+}
+
+void
+comm_socket_note(fde_t *fde, const char *format, ...)
+{
+  if (format)
+  {
+    char buf[FD_DESC_SIZE + 1];
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(buf, sizeof(buf), format, args);
+    va_end(args);
+
+    fd_note(fde, "%s", buf);
+  }
+  else
+    fd_note(fde, NULL);
 }

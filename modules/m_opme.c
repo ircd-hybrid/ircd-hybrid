@@ -1,43 +1,30 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2014-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2014-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_opme.c
  * \brief Includes required functions for processing the OPME command.
  */
 
-#include "stdinc.h"
-#include "list.h"
-#include "client.h"
-#include "hash.h"
-#include "ircd.h"
-#include "numeric.h"
-#include "log.h"
-#include "send.h"
-#include "io_string.h"
-#include "parse.h"
-#include "module.h"
-#include "channel.h"
-#include "channel_mode.h"
-#include "conf.h"
+#include <stddef.h>
+#include <stdint.h>
 
+#include "list.h"
+#include "log.h"
+#include "module.h"
+
+#include "channel.h"
+#include "channel_member.h"
+#include "channel_mode.h"
+#include "client.h"
+#include "client_format.h"
+#include "conf_oper.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "numeric.h"
+#include "parse.h"
+#include "send.h"
 
 /*! \brief OPME command handler
  *
@@ -51,36 +38,36 @@
  *      - parv[1] = channel name
  */
 static void
-mo_opme(struct Client *source, int parc, char *parv[])
+mo_opme(struct Client *source, size_t parc, char *parv[])
 {
   const char *const name = parv[1];
   list_node_t *node;
 
-  if (!HasOFlag(source, OPER_FLAG_OPME))
+  if (!client_has_oper_flag(source, OPER_FLAG_OPME))
   {
     sendto_one_numeric(source, &me, ERR_NOPRIVS, "opme");
     return;
   }
 
-  struct Channel *channel = hash_find_channel(name);
+  struct Channel *channel = channel_find(name);
   if (channel == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOSUCHCHANNEL, name);
     return;
   }
 
-  struct ChannelMember *member = member_find_link(source, channel);
+  struct ChannelMember *member = channel_member_find(channel, source);
   if (member == NULL)
   {
     sendto_one_numeric(source, &me, ERR_NOTONCHANNEL, channel->name);
     return;
   }
 
-  LIST_FOREACH(node, channel->members.head)
+  LIST_FOREACH(node, channel->member_list.head)
   {
     const struct ChannelMember *tmp = node->data;
 
-    if (member_highest_rank(tmp) > CHACCESS_HALFOP)
+    if (channel_member_get_highest_rank(tmp) > CHACCESS_HALFOP)
     {
       sendto_one_notice(source, &me, ":Cannot use OPME on %s: channel is not opless",
                         channel->name);
@@ -88,14 +75,17 @@ mo_opme(struct Client *source, int parc, char *parv[])
     }
   }
 
-  log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
-            get_oper_name(source), channel->name);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
-                 me.name, get_oper_name(source), channel->name);
-  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
-                 me.id, get_oper_name(source), channel->name);
+  client_format_oper_name_buffer_t source_name_buffer;
+  const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  member_set_flags(member, CHFL_CHANOP);
+  log_write(LOG_TYPE_IRCD, "%s used OPME on channel %s",
+            source_name, channel->name);
+  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s used OPME on channel %s",
+                 me.name, source_name, channel->name);
+  sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s used OPME on channel %s",
+                 me.id, source_name, channel->name);
+
+  channel_member_set_flags(member, CHFL_CHANOP);
   sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +o %s",
                        me.name, channel->name, source->name);
   sendto_servers(NULL, 0, 0, ":%s TMODE %ju %s +o %s", me.id, channel->creation_time,
@@ -105,27 +95,31 @@ mo_opme(struct Client *source, int parc, char *parv[])
 static struct Command command_table =
 {
   .name = "OPME",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_not_oper },
-  .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = mo_opme, .args_min = 2 }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_reject_not_oper },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = mo_opme, .args_min = 2 }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_opme",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

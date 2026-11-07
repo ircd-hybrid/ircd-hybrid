@@ -1,45 +1,35 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1999 Bahamut development team.
- *  Copyright (c) 2011-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1999 Bahamut development team
+ * SPDX-FileCopyrightText: 2011-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_svsnick.c
  * \brief Includes required functions for processing the SVSNICK command.
  */
 
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
-#include "stdinc.h"
-#include "client.h"
-#include "ircd.h"
+#include "io_parse.h"
+#include "io_string.h"
+#include "module.h"
+
 #include "channel.h"
 #include "channel_mode.h"
-#include "send.h"
+#include "client.h"
+#include "client_find.h"
+#include "ircd.h"
+#include "ircd_module.h"
+#include "monitor.h"
 #include "parse.h"
-#include "module.h"
-#include "io_string.h"
+#include "send.h"
 #include "user.h"
 #include "user_mode.h"
-#include "hash.h"
-#include "monitor.h"
 #include "whowas.h"
-
 
 /*! \brief SVSNICK command handler
  *
@@ -51,46 +41,43 @@
  * \note Valid arguments for this command are:
  *      - parv[0] = command
  *      - parv[1] = old nickname
- *      - parv[2] = old timestamp
+ *      - parv[2] = ignored/unused
  *      - parv[3] = new nickname
  *      - parv[4] = new timestamp
  */
 static void
-ms_svsnick(struct Client *source, int parc, char *parv[])
+ms_svsnick(struct Client *source, size_t parc, char *parv[])
 {
-  if (!HasFlag(source, FLAGS_SERVICE) && !IsServer(source))
+  if (!client_is_service(source) && !client_is_server(source))
     return;
 
-  const char *new_nick = parv[3];
-  if (valid_nickname(new_nick, true) == false)
-    return;
-
-  struct Client *target = find_person(source, parv[1]);
+  struct Client *const target = client_find_user(source, parv[1]);
   if (target == NULL)
     return;
 
-  uintmax_t ts = strtoumax(parv[2], NULL, 10);
-  if (ts && (ts != target->tsinfo))
+  const char *const new_nick = parv[3];
+  if (!nickname_is_valid(new_nick, true))
     return;
 
-  uintmax_t new_ts = strtoumax(parv[4], NULL, 10);
+  uintmax_t new_nick_timestamp;
+  if (io_parse_uintmax(parv[4], &new_nick_timestamp) != IO_PARSE_OK)
+    return;
 
-  if (!MyConnect(target))
+  if (!client_is_local(target))
   {
-    if (target->from == source->from)
+    if (target->nexthop == source->nexthop)
     {
       sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Received wrong-direction SVSNICK for %s (behind %s) from %s",
-                     target->name, source->from->name, client_get_name(source, HIDE_IP));
+                     target->name, source->nexthop->name, source->name);
       return;
     }
 
-    sendto_one(target, ":%s SVSNICK %s %ju %s %ju",
-               source->id, target->id, ts, new_nick, new_ts);
+    sendto_one_command(target, source, "SVSNICK", "0 %s %ju", new_nick, new_nick_timestamp);
     return;
   }
 
-  struct Client *exists_p = hash_find_client(new_nick);
+  struct Client *const exists_p = client_find_entity_by_name(new_nick);
   if (exists_p)
   {
     if (target == exists_p)
@@ -98,7 +85,7 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
       if (strcmp(target->name, new_nick) == 0)
         return;
     }
-    else if (IsUnknown(exists_p))
+    else if (client_is_unknown(exists_p))
       client_exit(exists_p, "SVSNICK Override");
     else
     {
@@ -107,58 +94,58 @@ ms_svsnick(struct Client *source, int parc, char *parv[])
     }
   }
 
-  target->tsinfo = new_ts;
-  clear_ban_cache_list(&target->channel);
-  monitor_signoff(target);
+  whowas_add_history(target, true);
+
+  monitor_notify_signoff(target);
+
+  clear_ban_cache_list(&target->channel_member_list);
 
   if (user_mode_has_flag(target, UMODE_REGISTERED))
   {
-    const uint64_t mode_flags_old = target->umodes;
+    const uint64_t mode_flags_old = target->user_mode_flags;
     user_mode_unset_flag(target, UMODE_REGISTERED);
-    user_mode_send(source, mode_flags_old, USER_MODE_SEND_CLIENT);
+    user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
   }
 
+  sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
+                 target->id, new_nick, new_nick_timestamp);
   sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
                                target->name, target->username, target->host, new_nick);
 
-  whowas_add_history(target, true);
+  client_update_name(target, new_nick);
+  target->nick_timestamp = new_nick_timestamp;
 
-  sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
-                 target->id, new_nick, target->tsinfo);
-
-  hash_del_client(target);
-  strlcpy(target->name, new_nick, sizeof(target->name));
-  hash_add_client(target);
-
-  monitor_signon(target);
-
-  fd_note(target->connection->fd, "Nick: %s", target->name);
+  monitor_notify_signon(target);
 }
 
 static struct Command command_table =
 {
   .name = "SVSNICK",
-  .handlers[UNREGISTERED_HANDLER] = { .handler = m_unregistered },
-  .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-  .handlers[SERVER_HANDLER] = { .handler = ms_svsnick, .args_min = 5 },
-  .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-  .handlers[OPER_HANDLER] = { .handler = m_ignore }
+  .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = command_handler_reject_not_registered },
+  .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_SERVER] = { .handler = ms_svsnick, .args_min = 5 },
+  .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+  .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add(&command_table);
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del(&command_table);
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_svsnick",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

@@ -1,186 +1,285 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#include "stdinc.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "address.h"
 #include "comm.h"
 #include "ident.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "memory.h"
-#include "res.h"
+#include "resolver.h"
+
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
 #include "lookup.h"
 #include "packet.h"
 #include "send.h"
+#include "user.h"
 
-typedef enum
+enum lookup_report_type
 {
-  LOOKUP_DNS_START,
-  LOOKUP_DNS_SUCCESS,
-  LOOKUP_DNS_FAIL,
-  LOOKUP_DNS_IP_MISMATCH,
-  LOOKUP_DNS_TOO_LONG,
-  LOOKUP_DNS_INVALID,
-  LOOKUP_IDENT_START,
-  LOOKUP_IDENT_SUCCESS,
-  LOOKUP_IDENT_FAIL
-} lookup_report_type_t;
+  LOOKUP_REPORT_DNS_START,
+  LOOKUP_REPORT_DNS_SUCCESS,
+  LOOKUP_REPORT_DNS_FAIL,
+  LOOKUP_REPORT_DNS_IP_MISMATCH,
+  LOOKUP_REPORT_DNS_TOO_LONG,
+  LOOKUP_REPORT_DNS_INVALID,
+  LOOKUP_REPORT_IDENT_START,
+  LOOKUP_REPORT_IDENT_SUCCESS,
+  LOOKUP_REPORT_IDENT_FAIL,
+  LOOKUP_REPORT_COUNT
+};
 
-static const char *const lookup_report_headers[] =
+enum lookup_dns_state
 {
-  [LOOKUP_DNS_START] = ":*** Looking up your hostname",
-  [LOOKUP_DNS_SUCCESS] = ":*** Found your hostname",
-  [LOOKUP_DNS_FAIL] = ":*** Couldn't look up your hostname",
-  [LOOKUP_DNS_IP_MISMATCH] = ":*** Your forward and reverse DNS do not match, ignoring hostname",
-  [LOOKUP_DNS_TOO_LONG] = ":*** Your hostname is too long, ignoring hostname",
-  [LOOKUP_DNS_INVALID] = ":*** Your hostname contains illegal characters, ignoring hostname",
-  [LOOKUP_IDENT_START] = ":*** Checking Ident",
-  [LOOKUP_IDENT_SUCCESS] = ":*** Got Ident response",
-  [LOOKUP_IDENT_FAIL] = ":*** No Ident response"
+  LOOKUP_DNS_STATE_IDLE = 0,
+  LOOKUP_DNS_STATE_REVERSE,
+  LOOKUP_DNS_STATE_FORWARD
+};
+
+struct LookupDNS
+{
+  enum lookup_dns_state state;
+  char hostname[HOSTLEN + 1];
+};
+
+struct LookupRequest
+{
+  struct Client *client;
+  struct LookupDNS dns;
+  bool ident_pending;
+};
+
+static const char *const lookup_report_messages[LOOKUP_REPORT_COUNT] =
+{
+  [LOOKUP_REPORT_DNS_START] = ":*** Looking up your hostname",
+  [LOOKUP_REPORT_DNS_SUCCESS] = ":*** Found your hostname",
+  [LOOKUP_REPORT_DNS_FAIL] = ":*** Couldn't look up your hostname",
+  [LOOKUP_REPORT_DNS_IP_MISMATCH] = ":*** Your forward and reverse DNS do not match, ignoring hostname",
+  [LOOKUP_REPORT_DNS_TOO_LONG] = ":*** Your hostname is too long, ignoring hostname",
+  [LOOKUP_REPORT_DNS_INVALID] = ":*** Your hostname contains illegal characters, ignoring hostname",
+  [LOOKUP_REPORT_IDENT_START] = ":*** Checking Ident",
+  [LOOKUP_REPORT_IDENT_SUCCESS] = ":*** Got Ident response",
+  [LOOKUP_REPORT_IDENT_FAIL] = ":*** No Ident response"
 };
 
 static void
-lookup_check_complete(struct LookupRequest *lookup)
+_lookup_assert_attached(const struct LookupRequest *lookup)
 {
-  /* Check if DNS or ident queries are still pending; if yes, do not release the client yet. */
-  if (lookup->dns_pending || lookup->ident_pending)
+  assert(lookup);
+  assert(lookup->client);
+  assert(lookup->client->connection);
+  assert(lookup->client->connection->lookup_request == lookup);
+}
+
+static void
+_lookup_report(const struct LookupRequest *lookup, enum lookup_report_type type)
+{
+  _lookup_assert_attached(lookup);
+  assert((unsigned int)type < (unsigned int)LOOKUP_REPORT_COUNT);
+  assert(lookup_report_messages[type]);
+
+  sendto_one_notice(lookup->client, &me, "%s", lookup_report_messages[type]);
+}
+
+static void
+_lookup_complete_if_ready(struct LookupRequest *lookup)
+{
+  _lookup_assert_attached(lookup);
+
+  if (lookup->dns.state != LOOKUP_DNS_STATE_IDLE || lookup->ident_pending)
     return;
 
-  struct Client *client = lookup->client;
-  client->connection->lookup = NULL;
+  struct Client *const client = lookup->client;
+  client->connection->lookup_request = NULL;
   io_free(lookup);
 
-  client->connection->last_ping = \
-  client->connection->last_data = \
-  client->connection->created_monotonic = io_time_get(IO_TIME_MONOTONIC_SEC);
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->last_receive_time = now;
+  client->connection->created_monotonic = now;
   client->connection->created_real = io_time_get(IO_TIME_REALTIME_SEC);
-  AddFlag(client, FLAGS_LOOKUP_DONE);
 
-  /*
-   * When a client has auth'ed, we want to start reading what it sends
-   * us. This is what read_packet() does.
-   *     -- adrian
-   */
-  comm_setflush(client->connection->fd, 1, flood_recalc, client);
-  read_packet(client->connection->fd, client);
-}
+  /* Start the registration timer; the client must now send NICK/USER. */
+  client_update_activity_timeout(client);
 
-static bool
-lookup_verify_hostname(const char *hostname)
-{
-  const char *p = hostname;
-  assert(p);
-
-  if (string_is_empty(p) || *p == '.' || *p == ':')
-    return false;
-
-  for (; *p; ++p)
-    if (!IsHostChar(*p))
-      return false;
-
-  return true;
+  /* Hand the connection over to the main packet reader to begin processing IRC protocol commands. */
+  read_packet(client->connection->fde, client);
 }
 
 static void
-lookup_dns_callback(void *vptr, const struct io_addr *addr, const char *name, size_t name_length)
+_lookup_dns_finish(struct LookupRequest *lookup, enum lookup_report_type report)
 {
-  struct LookupRequest *lookup = vptr;
-  lookup->dns_pending = false;
+  _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_IDLE);
 
-  if (name_length == 0)
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_FAIL]);
-  else if (name_length > HOSTLEN)
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_TOO_LONG]);
-  else if (address_match(addr, &lookup->client->addr, true, false, 0) == false)
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_IP_MISMATCH]);
-  else if (lookup_verify_hostname(name) == false)
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_INVALID]);
-  else
+  lookup->dns.hostname[0] = '\0';
+  _lookup_report(lookup, report);
+  _lookup_complete_if_ready(lookup);
+}
+
+static void
+_lookup_dns_forward_callback(void *callback_ctx, const struct io_addr *addresses, size_t address_count)
+{
+  struct LookupRequest *const lookup = callback_ctx;
+  _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_FORWARD);
+  assert(lookup->dns.hostname[0] != '\0');
+
+  lookup->dns.state = LOOKUP_DNS_STATE_IDLE;
+
+  if (addresses == NULL || address_count == 0)
   {
-    strlcpy(lookup->client->host, name, sizeof(lookup->client->host));
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_DNS_SUCCESS]);
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
+    return;
   }
 
-  lookup_check_complete(lookup);
+  for (size_t i = 0; i < address_count; ++i)
+  {
+    if (!address_equal(&addresses[i], &lookup->client->addr))
+      continue;
+
+    strlcpy(lookup->client->host, lookup->dns.hostname, sizeof(lookup->client->host));
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_SUCCESS);
+    return;
+  }
+
+  _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_IP_MISMATCH);
 }
 
 static void
-lookup_ident_callback(void *user_data, const char *username)
+_lookup_dns_reverse_callback(void *callback_ctx, const char *name, size_t name_length)
 {
-  struct LookupRequest *lookup = user_data;
+  struct LookupRequest *const lookup = callback_ctx;
+  _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_REVERSE);
+  assert(lookup->dns.hostname[0] == '\0');
+
+  lookup->dns.state = LOOKUP_DNS_STATE_IDLE;
+
+  if (name == NULL || name_length == 0)
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
+    return;
+  }
+
+  if (name_length > HOSTLEN)
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_TOO_LONG);
+    return;
+  }
+
+  if (!hostname_is_valid(name))
+  {
+    _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_INVALID);
+    return;
+  }
+
+  strlcpy(lookup->dns.hostname, name, sizeof(lookup->dns.hostname));
+
+  const int family = address_get_family(&lookup->client->addr);
+  assert(family == AF_INET || family == AF_INET6);
+
+  if (resolver_lookup_name(_lookup_dns_forward_callback, lookup, lookup->dns.hostname, family))
+  {
+    lookup->dns.state = LOOKUP_DNS_STATE_FORWARD;
+    return;
+  }
+
+  _lookup_dns_finish(lookup, LOOKUP_REPORT_DNS_FAIL);
+}
+
+static void
+_lookup_ident_callback(void *callback_ctx, const char *username)
+{
+  struct LookupRequest *const lookup = callback_ctx;
+  _lookup_assert_attached(lookup);
+  assert(lookup->ident_pending);
+
   lookup->ident_pending = false;
-  lookup->ident_request = NULL;
 
-  if (string_is_empty(username))
-  {
-    ++ServerStats.is_abad;
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_FAIL]);
-  }
-  else
+  enum lookup_report_type report = LOOKUP_REPORT_IDENT_FAIL;
+  if (!string_is_empty(username))
   {
     strlcpy(lookup->client->username, username, sizeof(lookup->client->username));
-    AddFlag(lookup->client, FLAGS_GOTID);
-
-    ++ServerStats.is_asuc;
-    sendto_one_notice(lookup->client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_SUCCESS]);
+    client_set_flag(lookup->client, FLAGS_GOTID);
+    report = LOOKUP_REPORT_IDENT_SUCCESS;
   }
 
-  lookup_check_complete(lookup);
+  _lookup_report(lookup, report);
+  _lookup_complete_if_ready(lookup);
+}
+
+static void
+_lookup_dns_start(struct LookupRequest *lookup)
+{
+  _lookup_assert_attached(lookup);
+  assert(lookup->dns.state == LOOKUP_DNS_STATE_IDLE);
+  assert(lookup->dns.hostname[0] == '\0');
+
+  _lookup_report(lookup, LOOKUP_REPORT_DNS_START);
+
+  if (resolver_lookup_addr(_lookup_dns_reverse_callback, lookup, &lookup->client->addr))
+  {
+    lookup->dns.state = LOOKUP_DNS_STATE_REVERSE;
+    return;
+  }
+
+  _lookup_report(lookup, LOOKUP_REPORT_DNS_FAIL);
+}
+
+static void
+_lookup_ident_start(struct LookupRequest *lookup)
+{
+  _lookup_assert_attached(lookup);
+  assert(!lookup->ident_pending);
+
+  _lookup_report(lookup, LOOKUP_REPORT_IDENT_START);
+
+  const uintmax_t timeout_ms = ConfigGeneral.ident_timeout * 1000ULL;
+  if (ident_start(_lookup_ident_callback, lookup, lookup->client->connection->fde->fd, timeout_ms))
+  {
+    lookup->ident_pending = true;
+    return;
+  }
+
+  _lookup_report(lookup, LOOKUP_REPORT_IDENT_FAIL);
 }
 
 void
 lookup_delete(struct LookupRequest *lookup)
 {
-  if (lookup->ident_request)
-    ident_delete(lookup->ident_request);
+  _lookup_assert_attached(lookup);
 
-  delete_resolver_queries(lookup);
+  ident_cancel_by_context(lookup);
+  resolver_cancel_by_context(lookup);
+
   io_free(lookup);
 }
 
 void
 lookup_start(struct Client *client)
 {
-  struct LookupRequest *lookup = io_calloc(sizeof(*lookup));
+  assert(client);
+  assert(client->connection);
+  assert(client->connection->lookup_request == NULL);
+
+  struct LookupRequest *const lookup = io_calloc(sizeof(*lookup));
   lookup->client = client;
-  client->connection->lookup = lookup;
+  client->connection->lookup_request = lookup;
 
   if (ConfigGeneral.disable_dns == 0)
-  {
-    sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_DNS_START]);
-    lookup->dns_pending = true;
-    gethost_byaddr(lookup_dns_callback, lookup, &client->addr);
-  }
+    _lookup_dns_start(lookup);
 
-  if (ConfigGeneral.disable_auth == 0)
-  {
-    sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_START]);
-    lookup->ident_request =
-      ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, ConfigGeneral.ident_timeout);
-    if (lookup->ident_request)
-      lookup->ident_pending = true;
-  }
+  if (ConfigGeneral.disable_ident == 0)
+    _lookup_ident_start(lookup);
 
-  lookup_check_complete(lookup);
+  _lookup_complete_if_ready(lookup);
 }

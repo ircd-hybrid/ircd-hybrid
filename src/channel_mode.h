@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file channel_mode.h
@@ -25,6 +9,9 @@
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
+#include <stdint.h>
+
+#include "channel.h"
 
 
 enum { CMEMBER_STATUS_FLAGS_LEN = 5 };
@@ -132,15 +119,15 @@ struct chan_mode
 {
   unsigned char letter;
   unsigned char prefix;
-  unsigned int mode;
-  unsigned int flag;
+  uint32_t mode;
+  uint32_t flag;
   enum mode_class class;
   bool only_opers;
   bool only_servers;
   int required_rank;
   int rank;
   void (*func)(struct Client *,
-               struct Channel *, int, int *, char *[], int *,
+               struct Channel *, size_t, size_t *, char *[], int *,
                int, int, const char, const struct chan_mode *);
 };
 
@@ -150,32 +137,45 @@ extern const struct chan_mode  cflag_tab[];
 extern char cmode_rpl04[][256];
 extern char cmode_class[][256];
 
+extern void channel_mode_clear_member_statuses(struct Channel *, const char *);
 extern void channel_mode_init(void);
-extern void channel_mode_set(struct Client *, struct Channel *, int, char *[]);
+extern void channel_mode_set(struct Client *, struct Channel *, size_t, char *[]);
 extern void clear_ban_cache_list(list_t *);
-extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, unsigned int);
+extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, uint32_t);
 
 static inline bool
-channel_has_mode(const struct Channel *channel, unsigned int mode)
+channel_has_mode(const struct Channel *channel, uint32_t mode)
 {
-  return (channel->mode.mode & mode) != 0;
+  return (channel->mode.flags & mode) != 0;
 }
 
 static inline void
-channel_set_mode(struct Channel *channel, unsigned int mode)
+channel_set_mode(struct Channel *channel, uint32_t mode)
 {
-  channel->mode.mode |= mode;
+  channel->mode.flags |= mode;
 }
 
 static inline void
-channel_unset_mode(struct Channel *channel, unsigned int mode)
+channel_unset_mode(struct Channel *channel, uint32_t mode)
 {
-  channel->mode.mode &= ~mode;
+  channel->mode.flags &= ~mode;
 }
 
 static inline bool
 channel_is_public(const struct Channel *channel)
 {
-  return channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET) == false;
+  return !channel_has_mode(channel, MODE_PRIVATE | MODE_SECRET);
+}
+
+static inline bool
+channel_is_secret(const struct Channel *channel)
+{
+  return channel_has_mode(channel, MODE_SECRET);
+}
+
+static inline bool
+channel_is_private(const struct Channel *channel)
+{
+  return channel_has_mode(channel, MODE_PRIVATE);
 }
 #endif  /* INCLUDED_channel_mode_h */

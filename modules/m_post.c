@@ -1,36 +1,20 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2001-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2001-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /*! \file m_post.c
  * \brief Includes required functions for processing the POST/GET/PUT command.
  */
 
-#include "stdinc.h"
-#include "misc.h"
-#include "client.h"
-#include "ircd.h"
-#include "send.h"
-#include "parse.h"
+#include "io.h"
 #include "module.h"
 
+#include "ircd_module.h"
+#include "client.h"
+#include "client_format.h"
+#include "send.h"
+#include "parse.h"
 
 /*! \brief GET/POST/PUT command handler
  *
@@ -43,55 +27,63 @@
  *      - parv[0] = command
  */
 static void
-mr_dumb_proxy(struct Client *source, int parc, char *parv[])
+mr_dumb_proxy(struct Client *source, size_t parc, char *parv[])
 {
-  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "HTTP Proxy disconnected: [%s@%s]",
-                 source->username, source->host);
-  client_exit(source, "Client Exit");
+  client_format_name_buffer_t source_name_buffer;
+  const char *const source_name =
+    client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer);
+
+  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+                 "HTTP request rejected from %s", source_name);
+  client_exit(source, "HTTP request on IRC port");
 }
 
 static struct Command command_table[] =
 {
   [0] = {
     .name = "GET",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   },
   [1] = {
     .name = "POST",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   },
   [2] = {
     .name = "PUT",
-    .handlers[UNREGISTERED_HANDLER] = { .handler = mr_dumb_proxy },
-    .handlers[CLIENT_HANDLER] = { .handler = m_ignore },
-    .handlers[SERVER_HANDLER] = { .handler = m_ignore },
-    .handlers[ENCAP_HANDLER] = { .handler = m_ignore },
-    .handlers[OPER_HANDLER] = { .handler = m_ignore }
+    .handlers[COMMAND_HANDLER_UNREGISTERED] = { .handler = mr_dumb_proxy },
+    .handlers[COMMAND_HANDLER_USER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_SERVER] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_ENCAP] = { .handler = command_handler_ignore },
+    .handlers[COMMAND_HANDLER_OPER] = { .handler = command_handler_ignore }
   }
 };
 
-static void
-init_handler(void)
+static bool
+init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  command_add_array(command_table, IO_ARRAY_LENGTH(command_table));
+  return ircd_module_register_commands(command_table, IO_ARRAY_LENGTH(command_table), error_message, error_message_size);
 }
 
 static void
-exit_handler(void)
+exit_handler(void *context)
 {
   command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
 }
 
-struct Module module_entry =
+const struct module_descriptor module_entry_v1 =
 {
+  .abi_version = MODULE_DESCRIPTOR_ABI_VERSION,
+  .descriptor_size = sizeof(struct module_descriptor),
+  .application_abi_version = IRCD_MODULE_ABI_VERSION,
+  .name = "m_post",
   .init_handler = init_handler,
-  .exit_handler = exit_handler,
+  .exit_handler = exit_handler
 };

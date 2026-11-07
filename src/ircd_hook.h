@@ -1,35 +1,21 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 2024-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 2024-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 #ifndef INCLUDED_ircd_hook_h
 #define INCLUDED_ircd_hook_h
+#include <stdbool.h>
+#include <stddef.h>
 
-#include "stdinc.h"
 #include "hook.h"
+
 #include "client.h"
 
 typedef struct
 {
   struct Client *client;
-  const char *comment;
+  const char *reason;
 } ircd_hook_client_exit_ctx;
 
 typedef struct
@@ -45,6 +31,13 @@ typedef struct
   struct Client *client;
   const char *nick;
 } ircd_hook_nick_change_ctx;
+
+typedef struct
+{
+  const struct Client *source;
+  const char *command;
+  char selector;
+} ircd_hook_spy_request_ctx;
 
 typedef struct
 {
@@ -71,6 +64,7 @@ extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
 extern struct HookContainer *ircd_hook_nick_change_local;
 extern struct HookContainer *ircd_hook_nick_change_remote;
+extern struct HookContainer *ircd_hook_spy_request;
 extern struct HookContainer *ircd_hook_user_register_local;
 extern struct HookContainer *ircd_hook_user_register_remote;
 extern struct HookContainer *ircd_hook_who_send;

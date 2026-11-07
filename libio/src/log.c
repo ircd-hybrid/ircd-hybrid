@@ -1,22 +1,6 @@
 /*
- *  ircd-hybrid: an advanced, lightweight Internet Relay Chat Daemon (ircd)
- *
- *  Copyright (c) 1997-2025 ircd-hybrid development team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- *  USA
+ * SPDX-FileCopyrightText: 1997-2026 ircd-hybrid development team
+ * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
 /**
@@ -27,11 +11,16 @@
  * It provides flexibility through various log types, file rotation mechanisms, and configurable logging behaviors.
  */
 
-#include "stdinc.h"
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
 #include "list.h"
 #include "log.h"
 #include "io_string.h"
-#include "conf.h"
 #include "misc.h"
 #include "memory.h"
 
@@ -73,6 +62,8 @@ enum { LOG_ROTATION_ATTEMPTS = 1000 };
  * type of log (e.g., ircd log, kill log, etc.).
  */
 static list_t log_list;
+
+static bool log_enabled = true;
 
 /**
  * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
@@ -206,10 +197,8 @@ log_rotate_due(struct Log *log)
 void
 log_write(enum log_type type, const char *format, ...)
 {
-  if (ConfigLog.use_logging == 0)
-    return;
-
   list_node_t *node;
+
   LIST_FOREACH(node, log_list.head)
   {
     struct Log *log = node->data;
@@ -280,4 +269,10 @@ log_clear(void)
     if (log->main == false)
       log_destroy(log);
   }
+}
+
+void
+log_set_enabled(bool enabled)
+{
+  log_enabled = enabled;
 }

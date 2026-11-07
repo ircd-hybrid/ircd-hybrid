@@ -241,7 +241,6 @@ _user_register_report_rejection(struct Client *client, const char *reason_format
                  client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer), reason);
 }
 
-
 static void
 _user_register_reject_authorization(struct Client *client, enum conf_auth_result result,
                                     const char *failure_reason)

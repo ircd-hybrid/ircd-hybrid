@@ -17,7 +17,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "client.h"
+struct Client;
 
 /**
  * @def STATS_HANDLER_INIT
@@ -50,12 +50,12 @@ typedef enum
 } stats_result_t;
 
 /**
- * @typedef stats_handler_func
+ * @typedef stats_handler_fn
  * @brief Type definition for stats handler functions.
  *
  * This typedef defines the function signature for stats handler functions.
  */
-typedef void (*stats_handler_func)(struct Client *, size_t, char *[]);
+typedef void (*stats_handler_fn)(struct Client *, size_t, char *[]);
 
 /**
  * @struct StatsHandler
@@ -67,14 +67,14 @@ typedef void (*stats_handler_func)(struct Client *, size_t, char *[]);
 struct StatsHandler
 {
   unsigned char letter;  /**< The character representing the stats command. */
-  stats_handler_func handler;  /**< The function to handle the stats command. */
+  stats_handler_fn handler;  /**< The function to handle the stats command. */
   uint64_t *required_modes;  /**< The required user modes to access this stats command. */
   bool enabled;  /**< Indicates if the handler is enabled. */
 };
 
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
 extern bool stats_allowed(const struct StatsHandler *, uint64_t);
-extern stats_result_t stats_register(unsigned char, stats_handler_func, uint64_t *);
+extern stats_result_t stats_register(unsigned char, stats_handler_fn, uint64_t *);
 extern stats_result_t stats_register_array(const struct StatsHandler *, size_t, size_t *);
 extern stats_result_t stats_unregister(unsigned char);
 extern stats_result_t stats_set_enabled(unsigned char);

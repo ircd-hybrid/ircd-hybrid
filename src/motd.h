@@ -12,6 +12,8 @@
 #define INCLUDED_motd_h
 #include <stddef.h>
 
+struct Client;
+
 extern void motd_add(const char *, const char *);
 extern void motd_clear(void);
 extern void motd_init(void);

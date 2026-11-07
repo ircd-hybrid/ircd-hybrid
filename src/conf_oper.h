@@ -11,8 +11,8 @@
 #include "address.h"
 #include "list.h"
 
-#include "client.h"
-#include "conf_class.h"
+struct ClassItem;
+struct Client;
 
 typedef enum
 {

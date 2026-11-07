@@ -18,7 +18,7 @@
 #define INCLUDED_info_h
 #include <stddef.h>
 
-#include "client.h"
+struct Client;
 
 /**
  * @def INFO_ENTRY_INIT

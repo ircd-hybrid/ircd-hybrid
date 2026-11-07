@@ -48,7 +48,7 @@ static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
  *         Failure leaves existing registrations unchanged.
  */
 stats_result_t
-stats_register(unsigned char letter, stats_handler_func handler, uint64_t *required_modes)
+stats_register(unsigned char letter, stats_handler_fn handler, uint64_t *required_modes)
 {
   if (handler == NULL)
     return STATS_INVALID_ARGUMENT;

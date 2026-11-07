@@ -15,10 +15,10 @@
 
 #include "list.h"
 
-struct Channel;
-struct Client;
 struct Ban;
+struct Channel;
 struct ChannelMember;
+struct Client;
 
 #define EXTBAN_MASK UINT32_MAX  /* All possible mask values */
 

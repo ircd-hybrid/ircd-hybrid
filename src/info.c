@@ -17,9 +17,11 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "io_string.h"
 #include "list.h"
 #include "memory.h"
 
+#include "client.h"
 #include "info.h"
 #include "send.h"
 

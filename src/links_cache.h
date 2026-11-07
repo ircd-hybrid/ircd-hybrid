@@ -5,8 +5,8 @@
 
 #ifndef INCLUDED_links_cache_h
 #define INCLUDED_links_cache_h
-
 #include <stdint.h>
+
 #include "list.h"
 
 typedef struct

@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 #include "list.h"
-#include "client.h"
 
+struct Client;
 
 struct AcceptItem
 {

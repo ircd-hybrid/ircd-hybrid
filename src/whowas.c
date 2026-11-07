@@ -257,7 +257,7 @@ whowas_find_recent_client(const char *name, uintmax_t max_age)
 }
 
 unsigned int
-whowas_query(const char *name, unsigned int max_results, whowas_query_callback_t callback, void *user_data)
+whowas_query(const char *name, unsigned int max_results, whowas_query_callback_fn callback, void *user_data)
 {
   const struct WhowasGroup *const group = _whowas_group_find(name);
   if (group == NULL)

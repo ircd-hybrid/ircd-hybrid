@@ -11,7 +11,7 @@
 
 #include "hook.h"
 
-#include "client.h"
+struct Client;
 
 typedef struct
 {

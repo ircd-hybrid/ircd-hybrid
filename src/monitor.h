@@ -16,6 +16,8 @@
 #include "io.h"
 #include "list.h"
 
+struct Client;
+
 /** Monitor structure */
 struct Monitor
 {

@@ -290,18 +290,23 @@ _cap_notify_publish(const struct CapNotifyPlan *plan)
   io_free(local_clients);
 }
 
-/* Only the outermost scope publishes notifications; hooks may queue a later round. */
-void
-cap_notify_batch_begin(void)
+static void
+_cap_notify_capture_baseline(void)
 {
-  assert(cap_notify_batch.depth < UINT_MAX);
+  assert(cap_notify_batch.depth > 0);
 
   if (!cap_notify_batch.has_baseline)
   {
     _cap_snapshot_capture(&cap_notify_batch.baseline);
     cap_notify_batch.has_baseline = true;
   }
+}
 
+/* Only the outermost scope publishes notifications; hooks may queue a later round. */
+void
+cap_notify_batch_begin(void)
+{
+  assert(cap_notify_batch.depth < UINT_MAX);
   ++cap_notify_batch.depth;
 }
 
@@ -340,6 +345,9 @@ _cap_update(struct Cap *cap, const char *value, bool available)
     return;
 
   cap_notify_batch_begin();
+
+  if (was_available || available)
+    _cap_notify_capture_baseline();
 
   if (was_available && !available)
     cap_notify_batch.withdrawn_flags |= cap->flag;

@@ -23,6 +23,7 @@
 #include "info.h"
 #include "ircd_exit.h"
 #include "ircd_module.h"
+#include "isupport.h"
 #include "stats.h"
 #include "user_mode.h"
 
@@ -113,6 +114,7 @@ _ircd_module_operation_begin(struct module_error_info *error)
 
   module_operation_active = true;
   cap_notify_batch_begin();
+  isupport_notify_batch_begin();
   return true;
 }
 
@@ -121,8 +123,9 @@ _ircd_module_operation_end(void)
 {
   assert(module_operation_active);
 
-  /* Keep module mutations protected while CAP hooks observe the result. */
+  /* Keep module mutations protected until all feature notifications finish. */
   cap_notify_batch_end();
+  isupport_notify_batch_end();
   module_operation_active = false;
 }
 

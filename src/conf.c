@@ -303,12 +303,14 @@ _conf_read(FILE *file)
 void
 conf_rehash(void)
 {
+  isupport_notify_batch_begin();
   resolver_reload();
 
   if (conf_read_files(false))
     ircd_module_apply_config();
 
   conf_ban_check_clients();
+  isupport_notify_batch_end();
 }
 
 void
@@ -451,6 +453,8 @@ conf_read_files(bool cold)
     return false;
   }
 
+  isupport_notify_batch_begin();
+
   if (!cold)
     _conf_clear();
 
@@ -496,6 +500,7 @@ conf_read_files(bool cold)
   motd_init();
   _conf_update_isupport();
   hook_dispatch(ircd_hook_conf_read, NULL);
+  isupport_notify_batch_end();
 
   return success;
 }

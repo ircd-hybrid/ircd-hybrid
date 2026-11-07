@@ -8,12 +8,13 @@
  * @brief Implementation of IRC ISUPPORT messages (RPL_ISUPPORT) in ircd-hybrid.
  *
  * The ISUPPORT mechanism provides a means for IRC servers to communicate their
- * capabilities and configuration settings to clients during the connection
- * establishment phase. This file contains functions and structures necessary for
+ * capabilities and configuration settings to clients at registration and when
+ * these features change. This file contains functions and structures necessary for
  * handling and managing ISUPPORT messages within the ircd-hybrid server.
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -52,6 +53,15 @@ struct Isupport
   char *value;  /**< Encoded value, or NULL for a valueless token. */
 };
 
+struct IsupportLineBuilder
+{
+  list_t *lines;
+  size_t limit;
+  size_t length;
+  unsigned int token_count;
+  char buffer[IRCD_BUFSIZE];
+};
+
 /**
  * @var isupport_list
  * @brief List containing Isupport structures representing active ISUPPORT options.
@@ -66,15 +76,25 @@ static list_t isupport_list;
 
 /**
  * @var isupport_list_lines
- * @brief List containing formatted ISUPPORT strings for transmission.
+ * @brief Published ISUPPORT response lines.
  *
- * The isupport_list_lines is a linked list that stores formatted ISUPPORT strings, each
- * representing a line of ISUPPORT information suitable for sending to clients. These
- * strings are constructed based on the options stored in the isupport_list. The list is
- * updated and rebuilt as needed to reflect the current set of supported features and
- * configurations.
+ * The cache remains unchanged while an update batch is open. It is rebuilt once
+ * when the outermost batch commits an actual change to the advertised tokens.
  */
 static list_t isupport_list_lines;
+
+static struct
+{
+  list_t baseline;
+  unsigned int depth;
+  bool has_baseline;
+} isupport_notify_batch;
+
+static bool
+_isupport_values_equal(const char *lhs, const char *rhs)
+{
+  return lhs == rhs || (lhs && rhs && strcmp(lhs, rhs) == 0);
+}
 
 static bool
 _isupport_name_is_valid(const char *name)
@@ -144,11 +164,11 @@ _isupport_line_limit(void)
  * deallocates memory, and frees the associated data.
  */
 static void
-_isupport_clear_lines(void)
+_isupport_clear_lines(list_t *lines)
 {
   list_node_t *node;
 
-  while ((node = list_pop_head(&isupport_list_lines)))
+  while ((node = list_pop_head(lines)))
   {
     assert(node->data);
 
@@ -157,62 +177,145 @@ _isupport_clear_lines(void)
   }
 }
 
-/**
- * @brief Constructs formatted lines for ISUPPORT messages.
- *
- * This function constructs formatted lines for ISUPPORT messages based on the ISUPPORT
- * options stored in the isupport_list. Each line represents a set of ISUPPORT options,
- * and the resulting lines are stored in isupport_list_lines.
- */
+static void
+_isupport_line_flush(struct IsupportLineBuilder *builder)
+{
+  if (builder->token_count == 0)
+    return;
+
+  list_add_tail(io_strdup(builder->buffer), list_make_node(), builder->lines);
+  builder->length = 0;
+  builder->token_count = 0;
+}
+
+static void
+_isupport_line_append(struct IsupportLineBuilder *builder, const char *name, const char *value)
+{
+  const size_t name_length = strlen(name);
+  const size_t value_length = value ? strlen(value) : 0;
+  const size_t token_length = name_length + (value ? value_length + 1 : 0);
+
+  assert(builder->limit > 0 && builder->limit < sizeof(builder->buffer));
+  assert(name_length > 0 && token_length <= builder->limit);
+
+  if (builder->token_count && (builder->token_count == ISUPPORT_TOKENS_PER_LINE ||
+                               token_length >= builder->limit - builder->length))
+    _isupport_line_flush(builder);
+
+  if (builder->token_count)
+    builder->buffer[builder->length++] = ' ';
+
+  memcpy(builder->buffer + builder->length, name, name_length);
+  builder->length += name_length;
+
+  if (value)
+  {
+    builder->buffer[builder->length++] = '=';
+    memcpy(builder->buffer + builder->length, value, value_length);
+    builder->length += value_length;
+  }
+
+  builder->buffer[builder->length] = '\0';
+  ++builder->token_count;
+}
+
 static void
 _isupport_build_lines(size_t line_limit)
 {
-  char line[IRCD_BUFSIZE];
-  size_t line_length = 0;
-  unsigned int token_count = 0;
-
-  assert(line_limit > 0 && line_limit < sizeof(line));
-
-  _isupport_clear_lines();
+  struct IsupportLineBuilder builder = { .lines = &isupport_list_lines, .limit = line_limit };
+  _isupport_clear_lines(&isupport_list_lines);
 
   list_node_t *node;
   LIST_FOREACH(node, isupport_list.head)
   {
     const struct Isupport *const support = node->data;
-
-    const size_t name_length = strlen(support->name);
-    const size_t value_length = support->value ? strlen(support->value) : 0;
-    const size_t token_length = name_length + (support->value ? value_length + 1 : 0);
-
-    assert(name_length > 0 && token_length <= line_limit);
-
-    if (token_count && (token_count == ISUPPORT_TOKENS_PER_LINE ||
-                        token_length >= line_limit - line_length))
-    {
-      list_add_tail(io_strdup(line), list_make_node(), &isupport_list_lines);
-      line_length = 0;
-      token_count = 0;
-    }
-
-    if (token_count)
-      line[line_length++] = ' ';
-
-    memcpy(line + line_length, support->name, name_length);
-    line_length += name_length;
-
-    if (support->value)
-    {
-      line[line_length++] = '=';
-      memcpy(line + line_length, support->value, value_length);
-      line_length += value_length;
-    }
-
-    line[line_length] = '\0';
-    ++token_count;
+    _isupport_line_append(&builder, support->name, support->value);
   }
 
-  if (token_count)
-    list_add_tail(io_strdup(line), list_make_node(), &isupport_list_lines);
+  _isupport_line_flush(&builder);
+}
+
+static void
+_isupport_line_append_negation(struct IsupportLineBuilder *builder, const char *name)
+{
+  char token[ISUPPORT_NAME_LENGTH_MAX + sizeof("-")];
+
+  token[0] = '-';
+  memcpy(token + 1, name, strlen(name) + 1);
+  _isupport_line_append(builder, token, NULL);
+}
+
+static void
+_isupport_notify_build_lines(const list_t *before, list_t *lines, size_t line_limit)
+{
+  struct IsupportLineBuilder builder = { .lines = lines, .limit = line_limit };
+  const list_node_t *old_node = before->head;
+  const list_node_t *new_node = isupport_list.head;
+
+  /* Both lists are sorted by name, so each entry is visited once. */
+  while (old_node && new_node)
+  {
+    const struct Isupport *const old = old_node->data;
+    const struct Isupport *const current = new_node->data;
+
+    const int comparison = io_strcasecmp(old->name, current->name);
+    if (comparison < 0)
+    {
+      _isupport_line_append_negation(&builder, old->name);
+      old_node = old_node->next;
+    }
+    else if (comparison > 0)
+    {
+      _isupport_line_append(&builder, current->name, current->value);
+      new_node = new_node->next;
+    }
+    else
+    {
+      if (!_isupport_values_equal(old->value, current->value))
+        _isupport_line_append(&builder, current->name, current->value);
+
+      old_node = old_node->next;
+      new_node = new_node->next;
+    }
+  }
+
+  for (; old_node; old_node = old_node->next)
+  {
+    const struct Isupport *const old = old_node->data;
+    _isupport_line_append_negation(&builder, old->name);
+  }
+
+  for (; new_node; new_node = new_node->next)
+  {
+    const struct Isupport *const current = new_node->data;
+    _isupport_line_append(&builder, current->name, current->value);
+  }
+
+  _isupport_line_flush(&builder);
+}
+
+static void
+_isupport_send_lines(struct Client *client, const list_t *lines)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, lines->head)
+  {
+    const char *const string = node->data;
+    sendto_one_numeric(client, &me, RPL_ISUPPORT, string);
+  }
+}
+
+static void
+_isupport_notify_publish(const list_t *lines)
+{
+  list_node_t *node;
+
+  LIST_FOREACH(node, local_client_list.head)
+  {
+    struct Client *const client = node->data;
+    _isupport_send_lines(client, lines);
+  }
 }
 
 /**
@@ -262,24 +365,93 @@ _isupport_create(const char *name, const char *value)
   support->name = io_strdup(name);
   support->value = value ? io_strdup(value) : NULL;
 
-  list_add_sorted(support, &support->node, &isupport_list, _isupport_cmp);
   return support;
 }
 
 /**
  * @brief Destroys an ISUPPORT option.
  *
- * Removes an ISUPPORT option from the list and deallocates its memory.
+ * Deallocates an ISUPPORT option which has already been unlinked.
  *
  * @param support A pointer to the Isupport structure to destroy.
  */
 static void
 _isupport_destroy(struct Isupport *support)
 {
-  list_remove(&support->node, &isupport_list);
   io_free(support->name);
   io_free(support->value);
   io_free(support);
+}
+
+static void
+_isupport_snapshot_capture(list_t *snapshot)
+{
+  assert(list_is_empty(snapshot));
+
+  list_node_t *node;
+  LIST_FOREACH(node, isupport_list.head)
+  {
+    const struct Isupport *const support = node->data;
+
+    struct Isupport *const copy = _isupport_create(support->name, support->value);
+    list_add_tail(copy, &copy->node, snapshot);
+  }
+}
+
+static void
+_isupport_snapshot_clear(list_t *snapshot)
+{
+  list_node_t *node;
+
+  while ((node = list_pop_head(snapshot)))
+    _isupport_destroy(node->data);
+}
+
+static void
+_isupport_notify_capture_baseline(void)
+{
+  assert(isupport_notify_batch.depth > 0);
+
+  /* Before the first mutation, the registry still matches the published state. */
+  if (!isupport_notify_batch.has_baseline)
+  {
+    _isupport_snapshot_capture(&isupport_notify_batch.baseline);
+    isupport_notify_batch.has_baseline = true;
+  }
+}
+
+void
+isupport_notify_batch_begin(void)
+{
+  assert(isupport_notify_batch.depth < UINT_MAX);
+  ++isupport_notify_batch.depth;
+}
+
+void
+isupport_notify_batch_end(void)
+{
+  assert(isupport_notify_batch.depth > 0);
+
+  if (--isupport_notify_batch.depth || !isupport_notify_batch.has_baseline)
+    return;
+
+  list_t lines = { 0 };
+  const size_t line_limit = _isupport_line_limit();
+  assert(line_limit > 0);
+
+  if (line_limit)
+    _isupport_notify_build_lines(&isupport_notify_batch.baseline, &lines, line_limit);
+
+  _isupport_snapshot_clear(&isupport_notify_batch.baseline);
+  isupport_notify_batch.has_baseline = false;
+
+  if (!list_is_empty(&lines))
+  {
+    _isupport_build_lines(line_limit);
+    _isupport_notify_publish(&lines);
+  }
+
+  _isupport_clear_lines(&lines);
 }
 
 /**
@@ -287,6 +459,7 @@ _isupport_destroy(struct Isupport *support)
  *
  * Validates the name, formatted value and complete token length before changing
  * the registry. Failed updates preserve both the previous entry and output.
+ * Accepted changes are published when the outermost update batch ends.
  *
  * @param name The name of the ISUPPORT option.
  * @param format Format for the optional value, or NULL for a valueless token.
@@ -330,16 +503,27 @@ isupport_add(const char *name, const char *format, ...)
     return ISUPPORT_TOO_LONG;
 
   struct Isupport *const support = _isupport_find(name);
+  const char *const value = value_length ? encoded_value : NULL;
+  if (support && _isupport_values_equal(support->value, value))
+    return ISUPPORT_SUCCESS;
+
+  isupport_notify_batch_begin();
+  _isupport_notify_capture_baseline();
+
   if (support)
   {
-    char *const value = value_length ? io_strdup(encoded_value) : NULL;
+    char *const copy = value ? io_strdup(value) : NULL;
+
     io_free(support->value);
-    support->value = value;
+    support->value = copy;
   }
   else
-    _isupport_create(name, value_length ? encoded_value : NULL);
+  {
+    struct Isupport *const entry = _isupport_create(name, value);
+    list_add_sorted(entry, &entry->node, &isupport_list, _isupport_cmp);
+  }
 
-  _isupport_build_lines(line_limit);
+  isupport_notify_batch_end();
   return ISUPPORT_SUCCESS;
 }
 
@@ -361,8 +545,8 @@ isupport_result_to_string(isupport_result_t result)
 /**
  * @brief Deletes an ISUPPORT option.
  *
- * Deletes an ISUPPORT option with the specified name. After deletion,
- * the ISUPPORT lines are rebuilt.
+ * Deletes an ISUPPORT option with the specified name. The published response
+ * and connected clients are updated when the outermost batch ends.
  *
  * @param name The name of the ISUPPORT option to delete.
  */
@@ -376,14 +560,12 @@ isupport_delete(const char *name)
   if (support == NULL)
     return;
 
-  const size_t line_limit = _isupport_line_limit();
-  assert(line_limit > 0);
-  if (line_limit == 0)
-    return;
-
+  isupport_notify_batch_begin();
+  _isupport_notify_capture_baseline();
+  list_remove(&support->node, &isupport_list);
   _isupport_destroy(support);
 
-  _isupport_build_lines(line_limit);
+  isupport_notify_batch_end();
 }
 
 /**
@@ -397,11 +579,5 @@ isupport_delete(const char *name)
 void
 isupport_show(struct Client *client)
 {
-  list_node_t *node;
-
-  LIST_FOREACH(node, isupport_list_lines.head)
-  {
-    const char *const string = node->data;
-    sendto_one_numeric(client, &me, RPL_ISUPPORT, string);
-  }
+  _isupport_send_lines(client, &isupport_list_lines);
 }

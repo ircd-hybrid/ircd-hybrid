@@ -62,13 +62,14 @@ m_version(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - last_used < ConfigGeneral.pace_wait_simple)
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "VERSION");
     return;
   }
 
-  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
+  last_used = now;
 
   if (ConfigServerHide.disable_remote_commands == 0)
     if (server_route_command(source, ":%s VERSION :%s", 1, parv)->result != SERVER_ROUTE_ISME)

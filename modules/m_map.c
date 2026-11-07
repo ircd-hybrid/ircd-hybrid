@@ -206,7 +206,7 @@ m_map(struct Client *source, size_t parc, char *parv[])
   static uintmax_t last_used = 0;
 
   const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
-  if ((last_used + ConfigGeneral.pace_wait) > now)
+  if (now - last_used < ConfigGeneral.pace_wait)
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "MAP");
     return;

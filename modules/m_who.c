@@ -340,13 +340,15 @@ _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
   if (!client_is_oper(source))
   {
     static uintmax_t last_used = 0;
-    if ((last_used + ConfigGeneral.pace_wait) > io_time_get(IO_TIME_MONOTONIC_SEC))
+
+    const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+    if (now - last_used < ConfigGeneral.pace_wait)
     {
       sendto_one_numeric(source, &me, RPL_LOAD2HI, "WHO");
       return;
     }
 
-    last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
+    last_used = now;
   }
 
   /* First, list all matching invisible clients on common channels */

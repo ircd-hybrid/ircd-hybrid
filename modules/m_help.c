@@ -117,13 +117,14 @@ m_help(struct Client *source, size_t parc, char *parv[])
 {
   static uintmax_t last_used = 0;
 
-  if ((last_used + ConfigGeneral.pace_wait_simple) > io_time_get(IO_TIME_MONOTONIC_SEC))
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  if (now - last_used < ConfigGeneral.pace_wait_simple)
   {
     sendto_one_numeric(source, &me, RPL_LOAD2HI, "HELP");
     return;
   }
 
-  last_used = io_time_get(IO_TIME_MONOTONIC_SEC);
+  last_used = now;
 
   do_help(source, parv[1]);
 }

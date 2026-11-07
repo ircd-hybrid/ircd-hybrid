@@ -765,43 +765,43 @@ stats_ltrace(struct Client *client, size_t parc, char *parv[])
 
 static const struct StatsHandler stats_tab[] =
 {
-  STATS_HANDLER_INIT('a', stats_dns_servers, &UMODE_ADMIN),
-  STATS_HANDLER_INIT('A', stats_dns_servers, &UMODE_ADMIN),
-  STATS_HANDLER_INIT('c', stats_connect, &UMODE_OPER),
-  STATS_HANDLER_INIT('C', stats_connect, &UMODE_OPER),
-  STATS_HANDLER_INIT('d', stats_tdeny, &UMODE_OPER),
-  STATS_HANDLER_INIT('D', stats_deny, &UMODE_OPER),
-  STATS_HANDLER_INIT('e', stats_exempt, &UMODE_OPER),
-  STATS_HANDLER_INIT('E', stats_events, &UMODE_ADMIN),
-  STATS_HANDLER_INIT('f', stats_fdlist, &UMODE_ADMIN),
-  STATS_HANDLER_INIT('F', stats_fdlist, &UMODE_ADMIN),
-  STATS_HANDLER_INIT('h', stats_hubleaf, &UMODE_OPER),
-  STATS_HANDLER_INIT('H', stats_hubleaf, &UMODE_OPER),
-  STATS_HANDLER_INIT('i', stats_auth, &UMODE_OPER),
-  STATS_HANDLER_INIT('I', stats_auth, &UMODE_OPER),
-  STATS_HANDLER_INIT('k', stats_tkill, &UMODE_OPER),
-  STATS_HANDLER_INIT('K', stats_kill, &UMODE_OPER),
-  STATS_HANDLER_INIT('l', stats_ltrace, &UMODE_OPER),
-  STATS_HANDLER_INIT('L', stats_ltrace, &UMODE_OPER),
-  STATS_HANDLER_INIT('m', stats_messages, &UMODE_OPER),
-  STATS_HANDLER_INIT('M', stats_messages, &UMODE_OPER),
-  STATS_HANDLER_INIT('o', stats_operator, &UMODE_OPER),
-  STATS_HANDLER_INIT('O', stats_operator, &UMODE_OPER),
-  STATS_HANDLER_INIT('p', stats_operedup, 0),
-  STATS_HANDLER_INIT('P', stats_ports, &UMODE_OPER),
-  STATS_HANDLER_INIT('q', stats_resv, &UMODE_OPER),
-  STATS_HANDLER_INIT('Q', stats_resv, &UMODE_OPER),
-  STATS_HANDLER_INIT('s', stats_pseudo, &UMODE_OPER),
-  STATS_HANDLER_INIT('S', stats_service, &UMODE_OPER),
-  STATS_HANDLER_INIT('T', motd_report, &UMODE_OPER),
-  STATS_HANDLER_INIT('u', stats_uptime, 0),
-  STATS_HANDLER_INIT('U', stats_shared, &UMODE_OPER),
-  STATS_HANDLER_INIT('v', stats_servers, &UMODE_OPER),
-  STATS_HANDLER_INIT('x', stats_gecos, &UMODE_OPER),
-  STATS_HANDLER_INIT('X', stats_gecos, &UMODE_OPER),
-  STATS_HANDLER_INIT('y', stats_class, &UMODE_OPER),
-  STATS_HANDLER_INIT('Y', stats_class, &UMODE_OPER),
-  STATS_HANDLER_INIT('?', stats_servlinks, &UMODE_OPER)
+  STATS_HANDLER_INIT('a', stats_dns_servers, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('A', stats_dns_servers, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('c', stats_connect, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('C', stats_connect, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('d', stats_tdeny, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('D', stats_deny, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('e', stats_exempt, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('E', stats_events, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('f', stats_fdlist, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('F', stats_fdlist, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('h', stats_hubleaf, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('H', stats_hubleaf, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('i', stats_auth, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('I', stats_auth, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('k', stats_tkill, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('K', stats_kill, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('l', stats_ltrace, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('L', stats_ltrace, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('m', stats_messages, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('M', stats_messages, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('o', stats_operator, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('O', stats_operator, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('p', stats_operedup, STATS_ACCESS_PUBLIC),
+  STATS_HANDLER_INIT('P', stats_ports, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('q', stats_resv, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('Q', stats_resv, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('s', stats_pseudo, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('S', stats_service, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('T', motd_report, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('u', stats_uptime, STATS_ACCESS_PUBLIC),
+  STATS_HANDLER_INIT('U', stats_shared, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('v', stats_servers, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('x', stats_gecos, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('X', stats_gecos, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('y', stats_class, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('Y', stats_class, STATS_ACCESS_OPER),
+  STATS_HANDLER_INIT('?', stats_servlinks, STATS_ACCESS_OPER)
 };
 
 static void
@@ -812,7 +812,7 @@ do_stats(struct Client *client, size_t parc, char *parv[])
   const struct StatsHandler *const handler = stats_find(letter);
   if (handler)
   {
-    if (stats_allowed(handler, client->user_mode_flags))
+    if (stats_allowed(handler, client))
       handler->handler(client, parc, parv);
     else
       sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);

@@ -5,77 +5,70 @@
 
 /**
  * @file stats.c
- * @brief Implements dynamic registration and unregistration of stats handlers.
- *
- * This file contains the implementation of an API for dynamically registering and unregistering
- * stats handlers. The API allows modules to register their own stats handlers upon loading and
- * unregister them upon unloading.
+ * @brief Registration, activation, and access control for STATS handlers.
  */
 
 #include <assert.h>
+#include <limits.h>
 
-#include "memory.h"
+#include "client.h"
 #include "stats.h"
 
-/**
- * @def STATS_ARRAY_SIZE
- * @brief The size of the array used to store stats handlers.
- *
- * This constant defines the maximum number of stats handlers, allowing each possible ASCII character
- * to be used as a handler key.
- */
-#define STATS_ARRAY_SIZE 256
+/** One slot for each possible unsigned-character selector. */
+#define STATS_HANDLER_CAPACITY (UCHAR_MAX + 1U)
+
+struct stats_registration
+{
+  const struct StatsHandler *handler;
+  bool enabled;
+};
+
+static struct stats_registration stats_registrations[STATS_HANDLER_CAPACITY];
 
 /**
- * @var stats_handlers
- * @brief Array of stats handlers.
+ * @brief Registers a borrowed handler definition.
  *
- * This static array holds pointers to stats handlers for each possible ASCII character.
- * Each entry corresponds to a stats handler that can be dynamically registered and unregistered.
- */
-static struct StatsHandler *stats_handlers[STATS_ARRAY_SIZE];
-
-/**
- * @brief Registers a new stats handler.
+ * The definition must remain valid and unchanged until unregistered. New
+ * registrations are enabled. Failure leaves existing registrations unchanged.
  *
- * This function registers a new stats handler for the specified character. If a handler for the character
- * is already registered, it returns an error code.
- *
- * @param letter The character representing the stats command.
- * @param handler Non-NULL function to handle the stats command.
- * @param required_modes Borrowed required-mode flags, or NULL for no requirement.
+ * @param handler Non-NULL definition with a callback and a valid access class.
  * @return STATS_SUCCESS, STATS_INVALID_ARGUMENT, or STATS_ALREADY_REGISTERED.
- *         Failure leaves existing registrations unchanged.
  */
 stats_result_t
-stats_register(unsigned char letter, stats_handler_fn handler, uint64_t *required_modes)
+stats_register(const struct StatsHandler *handler)
 {
-  if (handler == NULL)
+  if (handler == NULL || handler->handler == NULL)
     return STATS_INVALID_ARGUMENT;
 
-  if (stats_handlers[letter])
+  switch (handler->access)
+  {
+    case STATS_ACCESS_PUBLIC:
+    case STATS_ACCESS_OPER:
+    case STATS_ACCESS_ADMIN:
+      break;
+    default:
+      return STATS_INVALID_ARGUMENT;
+  }
+
+  struct stats_registration *const registration = &stats_registrations[handler->letter];
+  if (registration->handler)
     return STATS_ALREADY_REGISTERED;
 
-  struct StatsHandler *const new = io_calloc(sizeof(*new));
-  new->letter = letter;
-  new->handler = handler;
-  new->required_modes = required_modes;
-  new->enabled = true;
-  stats_handlers[letter] = new;
-
+  *registration = (struct stats_registration){ .handler = handler, .enabled = true };
   return STATS_SUCCESS;
 }
 
 /**
- * @brief Registers an array of stats handlers.
+ * @brief Registers an array of borrowed handler definitions.
  *
- * If registration fails, all handlers added by this call are unregistered
- * in reverse order. Previously registered handlers remain unchanged.
+ * The array must remain valid and unchanged until unregistered. If registration
+ * fails, definitions added by this call are unregistered in reverse order.
+ * Previously registered definitions and their activation states remain unchanged.
  *
- * @param handlers The array of StatsHandler structures, or NULL when elements is zero.
- * @param elements The number of elements in the handlers array.
+ * @param handlers The array of definitions, or NULL when elements is zero.
+ * @param elements The number of elements in the array.
  * @param failed_index Optional output for the first failing index, or elements on success.
- * @return STATS_SUCCESS if all handlers were registered, otherwise the first registration error.
+ * @return STATS_SUCCESS, otherwise the first registration error.
  */
 stats_result_t
 stats_register_array(const struct StatsHandler *handlers, size_t elements, size_t *failed_index)
@@ -87,15 +80,14 @@ stats_register_array(const struct StatsHandler *handlers, size_t elements, size_
 
   for (size_t i = 0; i < elements; ++i)
   {
-    const struct StatsHandler *const handler = &handlers[i];
-    const stats_result_t result = stats_register(handler->letter, handler->handler, handler->required_modes);
+    const stats_result_t result = stats_register(&handlers[i]);
     if (result != STATS_SUCCESS)
     {
       if (failed_index)
         *failed_index = i;
 
       while (i)
-        stats_unregister(handlers[--i].letter);
+        stats_unregister(&handlers[--i]);
 
       return result;
     }
@@ -105,132 +97,110 @@ stats_register_array(const struct StatsHandler *handlers, size_t elements, size_
 }
 
 /**
- * @brief Unregisters an existing stats handler.
+ * @brief Unregisters the exact definition originally registered.
  *
- * This function unregisters the stats handler for the specified character. If no handler is
- * found for the character, it returns an error code.
+ * A different definition with the same selector leaves the registration and its
+ * activation state unchanged. The registry never frees the borrowed definition.
  *
- * @param letter The character representing the stats command.
- * @return An error code indicating the result of the operation.
+ * @param handler The definition originally passed to stats_register().
+ * @return STATS_SUCCESS, STATS_NOT_FOUND, or STATS_INVALID_ARGUMENT for NULL.
  */
 stats_result_t
-stats_unregister(unsigned char letter)
+stats_unregister(const struct StatsHandler *handler)
 {
-  if (stats_handlers[letter] == NULL)
+  if (handler == NULL)
+    return STATS_INVALID_ARGUMENT;
+
+  struct stats_registration *const registration = &stats_registrations[handler->letter];
+  if (registration->handler != handler)
     return STATS_NOT_FOUND;
 
-  io_free(stats_handlers[letter]);
-  stats_handlers[letter] = NULL;
-
+  *registration = (struct stats_registration){ 0 };
   return STATS_SUCCESS;
 }
 
 /**
- * @brief Unregisters an array of stats handlers.
+ * @brief Unregisters definitions belonging to the supplied array.
  *
- * This function unregisters an entire array of stats handlers from the stats API.
+ * Registrations belonging to other definitions remain unchanged.
  *
- * @param handlers The array of StatsHandler structures to be unregistered.
- * @param elements The number of elements in the handlers array.
+ * @param handlers The original array, or NULL when elements is zero.
+ * @param elements The number of elements in the array.
  */
 void
 stats_unregister_array(const struct StatsHandler *handlers, size_t elements)
 {
+  assert(handlers || elements == 0);
+
   for (size_t i = 0; i < elements; ++i)
-  {
-    const struct StatsHandler *const tmp = &handlers[i];
-    stats_unregister(tmp->letter);
-  }
+    stats_unregister(&handlers[i]);
 }
 
 /**
- * @brief Finds a stats handler.
- *
- * This function looks up a stats handler for the specified character. If found, it returns a pointer
- * to the handler structure.
- *
- * @param letter The character representing the stats command.
- * @return A pointer to the StatsHandler structure or NULL if not found.
+ * @brief Finds a registered definition, including disabled registrations.
+ * @return The borrowed definition, valid until unregistered, or NULL.
  */
-struct StatsHandler *
+const struct StatsHandler *
 stats_find(unsigned char letter)
 {
-  return stats_handlers[letter];
+  return stats_registrations[letter].handler;
 }
 
 /**
- * @brief Enables a stats handler.
- *
- * This function sets the enabled field of the specified stats handler to true.
- *
- * @param letter The character representing the stats command.
- * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
+ * @brief Enables the current registration for a selector.
+ * @return STATS_SUCCESS or STATS_NOT_FOUND.
  */
 stats_result_t
 stats_set_enabled(unsigned char letter)
 {
-  struct StatsHandler *const handler = stats_find(letter);
-  if (handler == NULL)
+  struct stats_registration *const registration = &stats_registrations[letter];
+  if (registration->handler == NULL)
     return STATS_NOT_FOUND;
 
-  handler->enabled = true;
+  registration->enabled = true;
   return STATS_SUCCESS;
 }
 
 /**
- * @brief Disables a stats handler.
- *
- * This function sets the enabled field of the specified stats handler to false.
- *
- * @param letter The character representing the stats command.
- * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
+ * @brief Disables the current registration without removing its definition.
+ * @return STATS_SUCCESS or STATS_NOT_FOUND.
  */
 stats_result_t
 stats_set_disabled(unsigned char letter)
 {
-  struct StatsHandler *const handler = stats_find(letter);
-  if (handler == NULL)
+  struct stats_registration *const registration = &stats_registrations[letter];
+  if (registration->handler == NULL)
     return STATS_NOT_FOUND;
 
-  handler->enabled = false;
+  registration->enabled = false;
   return STATS_SUCCESS;
 }
 
 /**
- * @brief Sets the required user modes for a stats handler.
+ * @brief Checks registration, activation, and the client's access class.
  *
- * This function updates the required user modes for the specified stats handler.
- *
- * @param letter The character representing the stats command.
- * @param required_modes The user modes required to access this stats command.
- * @return STATS_SUCCESS on success, or STATS_NOT_FOUND if the handler was not found.
- */
-stats_result_t
-stats_set_required_modes(unsigned char letter, uint64_t *required_modes)
-{
-  struct StatsHandler *const handler = stats_find(letter);
-  if (handler == NULL)
-    return STATS_NOT_FOUND;
-
-  handler->required_modes = required_modes;
-  return STATS_SUCCESS;
-}
-
-/**
- * @brief Checks if the user has the required user modes and if the handler is enabled.
- *
- * This function checks if the user has the necessary user modes to execute a
- * stats handler and if the handler is enabled. It returns true if the user has
- * the required user modes and the handler is enabled, or if no specific user modes are required.
- *
- * @param handler The stats handler containing the required user modes and enabled state.
- * @param modes The user modes the user currently has
- * @return True if the user has the required user modes and the handler is enabled, false otherwise.
+ * A NULL argument, an unregistered or disabled definition, or an unknown access
+ * class denies access. Oper and admin status are evaluated through the Client API.
  */
 bool
-stats_allowed(const struct StatsHandler *handler, uint64_t modes)
+stats_allowed(const struct StatsHandler *handler, const struct Client *client)
 {
-  if (handler->enabled == false)
+  if (handler == NULL || client == NULL)
     return false;
-  return handler->required_modes == NULL || (modes & *handler->required_modes);
+
+  const struct stats_registration *const registration = &stats_registrations[handler->letter];
+  if (registration->handler != handler || !registration->enabled)
+    return false;
+
+  switch (handler->access)
+  {
+    case STATS_ACCESS_PUBLIC:
+      return true;
+    case STATS_ACCESS_OPER:
+      return client_is_oper(client);
+    case STATS_ACCESS_ADMIN:
+      return client_is_admin(client);
+  }
+
+  return false;
 }

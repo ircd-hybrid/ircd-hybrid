@@ -15,7 +15,6 @@
 #define INCLUDED_stats_h
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 
 struct Client;
 
@@ -24,15 +23,23 @@ struct Client;
  * @brief Macro to simplify the initialization of StatsHandler entries.
  *
  * This macro is used to create entries for arrays of StatsHandler structures,
- * providing a more readable and consistent initialization process. By default,
- * the handler is enabled.
+ * providing a more readable and consistent initialization process. New
+ * registrations are enabled independently of the immutable definition.
  *
  * @param l The character representing the stats command.
  * @param h The function to handle the stats command.
- * @param r The required user modes to access this stats command.
+ * @param a The access class required to use this stats command.
  */
-#define STATS_HANDLER_INIT(l, h, r) \
-  { .letter = l, .handler = h, .required_modes = r, .enabled = true }
+#define STATS_HANDLER_INIT(l, h, a) \
+  { .letter = l, .handler = h, .access = a }
+
+/** Access classes for stats handlers. Zero is not a valid access class. */
+typedef enum
+{
+  STATS_ACCESS_PUBLIC = 1,
+  STATS_ACCESS_OPER,
+  STATS_ACCESS_ADMIN
+} stats_access_t;
 
 /**
  * @enum stats_result_t
@@ -61,24 +68,22 @@ typedef void (*stats_handler_fn)(struct Client *, size_t, char *[]);
  * @struct StatsHandler
  * @brief Structure for holding stats handler information.
  *
- * This structure contains the letter representing the stats command, the function pointer to the stats handler,
- * and the required user modes for accessing the stats command.
+ * Definitions are borrowed by the registry and must remain valid and unchanged
+ * until unregistered. Activation state is maintained separately by the registry.
  */
 struct StatsHandler
 {
   unsigned char letter;  /**< The character representing the stats command. */
   stats_handler_fn handler;  /**< The function to handle the stats command. */
-  uint64_t *required_modes;  /**< The required user modes to access this stats command. */
-  bool enabled;  /**< Indicates if the handler is enabled. */
+  stats_access_t access;  /**< The access class required to use this stats command. */
 };
 
 extern void stats_unregister_array(const struct StatsHandler *, size_t);
-extern bool stats_allowed(const struct StatsHandler *, uint64_t);
-extern stats_result_t stats_register(unsigned char, stats_handler_fn, uint64_t *);
+extern bool stats_allowed(const struct StatsHandler *, const struct Client *);
+extern stats_result_t stats_register(const struct StatsHandler *);
 extern stats_result_t stats_register_array(const struct StatsHandler *, size_t, size_t *);
-extern stats_result_t stats_unregister(unsigned char);
+extern stats_result_t stats_unregister(const struct StatsHandler *);
 extern stats_result_t stats_set_enabled(unsigned char);
 extern stats_result_t stats_set_disabled(unsigned char);
-extern stats_result_t stats_set_required_modes(unsigned char, uint64_t *);
-extern struct StatsHandler *stats_find(unsigned char);
+extern const struct StatsHandler *stats_find(unsigned char);
 #endif  /* INCLUDED_stats_h */

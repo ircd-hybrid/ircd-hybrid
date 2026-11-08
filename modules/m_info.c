@@ -16,7 +16,6 @@
 
 #include "client.h"
 #include "conf.h"
-#include "info.h"
 #include "ircd.h"
 #include "ircd_module.h"
 #include "ircd_hook.h"
@@ -25,100 +24,6 @@
 #include "send.h"
 #include "server.h"
 #include "tls.h"
-
-static const struct InfoEntry info_table[] =
-{
-  INFO_ENTRY_INIT("#define", "CPATH", INFO_OUTPUT_STRING, &ConfigGeneral.configfile, "Path to main configuration file"),
-  INFO_ENTRY_INIT("#define", "DPATH", INFO_OUTPUT_STRING, &ConfigGeneral.dpath, "Root directory of installation"),
-  INFO_ENTRY_INIT("#define", "SPATH", INFO_OUTPUT_STRING, &ConfigGeneral.spath, "Path to server executable"),
-  INFO_ENTRY_INIT("#define, command-line", "DLPATH", INFO_OUTPUT_STRING, &ConfigGeneral.dlinefile, "Path to D-line database file"),
-  INFO_ENTRY_INIT("#define, command-line", "KPATH", INFO_OUTPUT_STRING, &ConfigGeneral.klinefile, "Path to K-line database file"),
-  INFO_ENTRY_INIT("#define, command-line", "RESVPATH", INFO_OUTPUT_STRING, &ConfigGeneral.resvfile, "Path to resv database file"),
-  INFO_ENTRY_INIT("#define, command-line", "XPATH", INFO_OUTPUT_STRING, &ConfigGeneral.xlinefile, "Path to X-line database file"),
-  INFO_ENTRY_INIT("admin", "description", INFO_OUTPUT_STRING, &ConfigAdminInfo.description, "Details of the institution, usually used for the admin's role"),
-  INFO_ENTRY_INIT("admin", "email", INFO_OUTPUT_STRING, &ConfigAdminInfo.email, "Administrative contact email address"),
-  INFO_ENTRY_INIT("admin", "name", INFO_OUTPUT_STRING, &ConfigAdminInfo.name, "Description of the server location (city, state, country), usually used for the admin's name"),
-  INFO_ENTRY_INIT("channel", "default_join_flood_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.default_join_flood_count, "Startup value of JFLOODCOUNT"),
-  INFO_ENTRY_INIT("channel", "default_join_flood_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.default_join_flood_time, "Startup value of JFLOODTIME"),
-  INFO_ENTRY_INIT("channel", "disable_fake_channels", INFO_OUTPUT_BOOLEAN, &ConfigChannel.disable_fake_channels, "Forbids channels with special ASCII characters in their name"),
-  INFO_ENTRY_INIT("channel", "invite_client_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.invite_client_count, "How many INVITE attempts are permitted in invite_client_time"),
-  INFO_ENTRY_INIT("channel", "invite_client_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.invite_client_time, "How many invite_client_count invites are allowed in this time"),
-  INFO_ENTRY_INIT("channel", "invite_delay_channel", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.invite_delay_channel, "Delay between INVITE attempts to a channel"),
-  INFO_ENTRY_INIT("channel", "invite_expire_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.invite_expire_time, "Amount of time an INVITE will be active until it expires"),
-  INFO_ENTRY_INIT("channel", "knock_client_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.knock_client_count, "How many KNOCK attempts are permitted in knock_client_time"),
-  INFO_ENTRY_INIT("channel", "knock_client_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.knock_client_time, "How many knock_client_count knocks are allowed in this time"),
-  INFO_ENTRY_INIT("channel", "knock_delay_channel", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.knock_delay_channel, "Delay between KNOCK attempts to a channel"),
-  INFO_ENTRY_INIT("channel", "max_bans", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_bans, "Total +b/e/I modes allowed in a channel"),
-  INFO_ENTRY_INIT("channel", "max_bans_large", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_bans_large, "Total +b/e/I modes allowed in a +L channel"),
-  INFO_ENTRY_INIT("channel", "max_channels", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_channels, "Maximum number of channels a user can join"),
-  INFO_ENTRY_INIT("channel", "max_invites", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_invites, "Maximum number of channels a user can be invited to"),
-  INFO_ENTRY_INIT("channel", "max_kick_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_kick_length, "Maximum length of a KICK message that the server will accept from a client"),
-  INFO_ENTRY_INIT("channel", "max_topic_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigChannel.max_topic_length, "Maximum topic length"),
-  INFO_ENTRY_INIT("cloak", "cidr_len_ipv4", INFO_OUTPUT_UNSIGNED_INT, &ConfigCloak.cidr_len_ipv4, "CIDR length for IPv4 addresses used in hostname cloaking"),
-  INFO_ENTRY_INIT("cloak", "cidr_len_ipv6", INFO_OUTPUT_UNSIGNED_INT, &ConfigCloak.cidr_len_ipv6, "CIDR length for IPv6 addresses used in hostname cloaking"),
-  INFO_ENTRY_INIT("cloak", "enabled", INFO_OUTPUT_BOOLEAN, &ConfigCloak.enabled, "Enable or disable hostname cloaking"),
-  INFO_ENTRY_INIT("cloak", "num_bits", INFO_OUTPUT_UNSIGNED_INT, &ConfigCloak.num_bits, "Number of bits for the MAC computation used in hostname cloaking"),
-  INFO_ENTRY_INIT("cloak", "secret", INFO_OUTPUT_STRING_LITERAL, "<REDACTED>", "Secret key used in the MAC computation for hostname cloaking"),
-  INFO_ENTRY_INIT("cloak", "suffix", INFO_OUTPUT_STRING, &ConfigCloak.suffix, "Suffix appended to the cloaked hostname"),
-  INFO_ENTRY_INIT("general", "anti_spam_exit_message_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.anti_spam_exit_message_time, "Duration a client must be connected for to have an exit message"),
-  INFO_ENTRY_INIT("general", "away_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.away_count, "How many AWAY attempts are permitted in away_time"),
-  INFO_ENTRY_INIT("general", "away_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.away_time, "How many away_count aways are allowed in this time"),
-  INFO_ENTRY_INIT("general", "caller_id_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.caller_id_wait, "Minimum delay between notifying UMODE +g users of messages"),
-  INFO_ENTRY_INIT("general", "default_floodcount", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.default_floodcount, "Startup value of FLOODCOUNT"),
-  INFO_ENTRY_INIT("general", "default_floodtime", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.default_floodtime, "Startup value of FLOODTIME"),
-  INFO_ENTRY_INIT("general", "disable_dns", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.disable_dns, "Disable DNS lookups for client hostname resolution"),
-  INFO_ENTRY_INIT("general", "disable_ident", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.disable_ident, "Completely disable ident lookups"),
-  INFO_ENTRY_INIT("general", "dline_min_cidr", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.dline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 D-Lines"),
-  INFO_ENTRY_INIT("general", "dline_min_cidr6", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.dline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 D-Lines"),
-  INFO_ENTRY_INIT("general", "ident_timeout", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.ident_timeout, "How long to wait for Ident replies"),
-  INFO_ENTRY_INIT("general", "invisible_on_connect", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.invisible_on_connect, "Automatically set mode +i on connecting users"),
-  INFO_ENTRY_INIT("general", "kill_chase_time_limit", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kill_chase_time_limit, "Nick Change Tracker for KILL"),
-  INFO_ENTRY_INIT("general", "kline_min_cidr", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kline_min_cidr, "Minimum required length of a CIDR bitmask for IPv4 K-Lines"),
-  INFO_ENTRY_INIT("general", "kline_min_cidr6", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.kline_min_cidr6, "Minimum required length of a CIDR bitmask for IPv6 K-Lines"),
-  INFO_ENTRY_INIT("general", "max_accept", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_accept, "Maximum nicknames on accept list"),
-  INFO_ENTRY_INIT("general", "max_away_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_away_length, "Maximum length of a AWAY message that the server will accept from a client"),
-  INFO_ENTRY_INIT("general", "max_monitor", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_monitor, "Maximum nicknames on monitor list"),
-  INFO_ENTRY_INIT("general", "max_nick_changes", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_changes, "NICK change threshold (0 = disabled)"),
-  INFO_ENTRY_INIT("general", "max_nick_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_nick_time, "NICK flood protection time interval"),
-  INFO_ENTRY_INIT("general", "max_targets", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.max_targets, "Maximum PRIVMSG/NOTICE targets per message (0 = unlimited)"),
-  INFO_ENTRY_INIT("general", "min_nonwildcard", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard, "Minimum non-wildcard chars in K/D lines"),
-  INFO_ENTRY_INIT("general", "min_nonwildcard_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.min_nonwildcard_simple, "Minimum non-wildcards in gecos bans"),
-  INFO_ENTRY_INIT("general", "oper_umodes", INFO_OUTPUT_STRING, &ConfigGeneral.oper_umodes, "Default user modes assigned to operators upon successful OPER"),
-  INFO_ENTRY_INIT("general", "opers_bypass_callerid", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.opers_bypass_callerid, "Allows IRC operators to message users who are +g (callerid)"),
-  INFO_ENTRY_INIT("general", "pace_wait", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait, "Minimum delay between uses of certain commands"),
-  INFO_ENTRY_INIT("general", "pace_wait_simple", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.pace_wait_simple, "Minimum delay between less intensive commands"),
-  INFO_ENTRY_INIT("general", "ping_cookie", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.ping_cookie, "Require ping cookies to connect"),
-  INFO_ENTRY_INIT("general", "registration_timeout", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.registration_timeout, "Maximum time an unauthenticated client has to register before being disconnected"),
-  INFO_ENTRY_INIT("general", "sasl_service", INFO_OUTPUT_STRING, &ConfigGeneral.sasl_service, "Server providing SASL authentication (unset = disabled)"),
-  INFO_ENTRY_INIT("general", "short_motd", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.short_motd, "Do not show MOTD; only tell clients they should read it"),
-  INFO_ENTRY_INIT("general", "specials_in_ident", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.specials_in_ident, "Number of permissible '-', '_', or '.' characters in an ident"),
-  INFO_ENTRY_INIT("general", "stats_e_disabled", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.stats_e_disabled, "Whether or not STATS e is disabled"),
-  INFO_ENTRY_INIT("general", "stats_u_oper_only", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.stats_u_oper_only, "STATS u output is only shown to operators"),
-  INFO_ENTRY_INIT("general", "throttle_count", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.throttle_count, "Number of connects in throttle_time before connections are blocked"),
-  INFO_ENTRY_INIT("general", "throttle_time", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.throttle_time, "Minimum time between client reconnects"),
-  INFO_ENTRY_INIT("general", "ts_max_delta", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.ts_max_delta, "Maximum permitted TS delta from another server"),
-  INFO_ENTRY_INIT("general", "ts_warn_delta", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.ts_warn_delta, "Maximum permitted TS delta before displaying a warning"),
-  INFO_ENTRY_INIT("general", "warn_no_connect_block", INFO_OUTPUT_BOOLEAN, &ConfigGeneral.warn_no_connect_block, "Display warning if connecting server lacks a connect{} block"),
-  INFO_ENTRY_INIT("general", "whowas_history_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigGeneral.whowas_history_length, "Length of the WHOWAS nick name history list"),
-  INFO_ENTRY_INIT("log", "use_logging", INFO_OUTPUT_BOOLEAN, &ConfigLog.use_logging, "Enable logging"),
-  INFO_ENTRY_INIT("serverhide", "disable_remote_commands", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.disable_remote_commands, "Prevent users issuing commands on remote servers"),
-  INFO_ENTRY_INIT("serverhide", "flatten_links", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.flatten_links, "Flatten /links list"),
-  INFO_ENTRY_INIT("serverhide", "flatten_links_delay", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerHide.flatten_links_delay, "Links rehash delay"),
-  INFO_ENTRY_INIT("serverhide", "flatten_links_file", INFO_OUTPUT_STRING, &ConfigServerHide.flatten_links_file, "Path to the flatten links cache file"),
-  INFO_ENTRY_INIT("serverhide", "hidden", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hidden, "Hide this server from a flattened /links on remote servers"),
-  INFO_ENTRY_INIT("serverhide", "hidden_name", INFO_OUTPUT_STRING, &ConfigServerHide.hidden_name, "Server name users see if hide_servers = yes"),
-  INFO_ENTRY_INIT("serverhide", "hide_servers", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hide_servers, "Hide servernames from users"),
-  INFO_ENTRY_INIT("serverhide", "hide_services", INFO_OUTPUT_BOOLEAN, &ConfigServerHide.hide_services, "Hides the location of services server"),
-  INFO_ENTRY_INIT("serverinfo", "default_max_clients", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.default_max_clients, "The default maximum number of clients permitted simultaneously on this server"),
-  INFO_ENTRY_INIT("serverinfo", "description", INFO_OUTPUT_STRING, &ConfigServerInfo.description, "Server description"),
-  INFO_ENTRY_INIT("serverinfo", "hub", INFO_OUTPUT_BOOLEAN, &ConfigServerInfo.hub, "Server is a hub"),
-  INFO_ENTRY_INIT("serverinfo", "max_nick_length", INFO_OUTPUT_UNSIGNED_INT, &ConfigServerInfo.max_nick_length, "Maximum nickname length"),
-  INFO_ENTRY_INIT("serverinfo", "motd_file", INFO_OUTPUT_STRING, &ConfigServerInfo.motd_file, "Path to main motd (Message of the Day) file"),
-  INFO_ENTRY_INIT("serverinfo", "name", INFO_OUTPUT_STRING, &ConfigServerInfo.name, "Server name"),
-  INFO_ENTRY_INIT("serverinfo", "network_description", INFO_OUTPUT_STRING, &ConfigServerInfo.network_description, "Network description"),
-  INFO_ENTRY_INIT("serverinfo", "network_name", INFO_OUTPUT_STRING, &ConfigServerInfo.network_name, "Network name"),
-  INFO_ENTRY_INIT("serverinfo", "sid", INFO_OUTPUT_STRING, &ConfigServerInfo.sid, "Server ID")
-};
 
 static const char *const info_text_lines[] =
 {
@@ -214,13 +119,8 @@ _info_process_request(struct Client *client)
     sendto_one_numeric(client, &me, RPL_INFO, line);
   }
 
-  if (client_is_oper(client))
-  {
-    info_send(client);
-
-    if (tls_is_configured())
-      _info_send_tls_library(client);
-  }
+  if (client_is_oper(client) && tls_is_configured())
+    _info_send_tls_library(client);
 
   _info_send_online_since(client);
 
@@ -292,23 +192,13 @@ static struct Command command_table =
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
-    return false;
-
-  if (!ircd_module_register_info_entries(info_table, IO_ARRAY_LENGTH(info_table), error_message, error_message_size))
-  {
-    command_del(&command_table);
-    return false;
-  }
-
-  return true;
+  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
 }
 
 static void
 exit_handler(void *context)
 {
   command_del(&command_table);
-  info_unregister_array(info_table, IO_ARRAY_LENGTH(info_table));
 }
 
 const struct module_descriptor module_entry_v1 =

@@ -21,7 +21,6 @@
 struct Cap;
 struct CapConfig;
 struct Command;
-struct InfoEntry;
 struct StatsHandler;
 struct UserMode;
 
@@ -34,7 +33,6 @@ extern void ircd_module_shutdown(void);
 extern bool ircd_module_init(void);
 extern bool ircd_module_register_cap(const struct CapConfig *, struct Cap **, char *, size_t);
 extern bool ircd_module_register_commands(struct Command *, size_t, char *, size_t);
-extern bool ircd_module_register_info_entries(const struct InfoEntry *, size_t, char *, size_t);
 extern bool ircd_module_register_stats_handlers(const struct StatsHandler *, size_t, char *, size_t);
 extern bool ircd_module_register_user_mode(struct UserMode *, char *, size_t);
 extern enum module_error_code ircd_module_load(const char *, struct module_error_info *);

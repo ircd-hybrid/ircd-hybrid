@@ -83,8 +83,6 @@ ircd_SOURCES = accept.c          \
                extban_usermode.c \
                hash.c            \
                hash.h            \
-               info.c            \
-               info.h            \
                ipcache.c         \
                ipcache.h         \
                ircd.c            \

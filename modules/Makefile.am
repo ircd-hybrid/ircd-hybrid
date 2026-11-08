@@ -50,6 +50,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_capab.la      \
                       m_certfp.la     \
                       m_close.la      \
+                      m_config.la     \
                       m_connect.la    \
                       m_die.la        \
                       m_dline.la      \

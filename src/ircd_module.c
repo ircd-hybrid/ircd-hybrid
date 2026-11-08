@@ -20,7 +20,6 @@
 #include "cap.h"
 #include "client.h"
 #include "command.h"
-#include "info.h"
 #include "ircd_exit.h"
 #include "ircd_module.h"
 #include "isupport.h"
@@ -334,25 +333,6 @@ ircd_module_register_commands(struct Command *commands, size_t count,
       return false;
   }
 
-  return false;
-}
-
-bool
-ircd_module_register_info_entries(const struct InfoEntry *entries, size_t count,
-                                  char *error_message, size_t error_message_size)
-{
-  assert(entries || count == 0);
-  assert(error_message);
-  assert(error_message_size > 0);
-
-  size_t failed_index;
-  const info_result_t result = info_register_array(entries, count, &failed_index);
-  if (result == INFO_SUCCESS)
-    return true;
-
-  const struct InfoEntry *const entry = &entries[failed_index];
-  snprintf(error_message, error_message_size, "Cannot register info %s/%s (result %u)",
-           entry->namespace ? entry->namespace : "(global)", entry->name, (unsigned int)result);
   return false;
 }
 

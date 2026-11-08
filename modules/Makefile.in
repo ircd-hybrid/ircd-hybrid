@@ -209,6 +209,9 @@ m_certfp_la_OBJECTS = m_certfp.lo
 m_close_la_LIBADD =
 m_close_la_SOURCES = m_close.c
 m_close_la_OBJECTS = m_close.lo
+m_config_la_LIBADD =
+m_config_la_SOURCES = m_config.c
+m_config_la_OBJECTS = m_config.lo
 m_connect_la_LIBADD =
 m_connect_la_SOURCES = m_connect.c
 m_connect_la_OBJECTS = m_connect.lo
@@ -543,48 +546,48 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/m_admin.Plo ./$(DEPDIR)/m_away.Plo \
 	./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_cap.Plo \
 	./$(DEPDIR)/m_capab.Plo ./$(DEPDIR)/m_certfp.Plo \
-	./$(DEPDIR)/m_close.Plo ./$(DEPDIR)/m_connect.Plo \
-	./$(DEPDIR)/m_die.Plo ./$(DEPDIR)/m_dline.Plo \
-	./$(DEPDIR)/m_encap.Plo ./$(DEPDIR)/m_eob.Plo \
-	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_etrace.Plo \
-	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_help.Plo \
-	./$(DEPDIR)/m_info.Plo ./$(DEPDIR)/m_invite.Plo \
-	./$(DEPDIR)/m_ison.Plo ./$(DEPDIR)/m_join.Plo \
-	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
-	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
-	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
-	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
-	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_message.Plo \
-	./$(DEPDIR)/m_metadata.Plo ./$(DEPDIR)/m_mlock.Plo \
-	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_module.Plo \
-	./$(DEPDIR)/m_monitor.Plo ./$(DEPDIR)/m_motd.Plo \
-	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_nick.Plo \
-	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_opme.Plo \
-	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_pass.Plo \
-	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
-	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_quit.Plo \
-	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
-	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_resync.Plo \
-	./$(DEPDIR)/m_sasl.Plo ./$(DEPDIR)/m_server.Plo \
-	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_sjoin.Plo \
-	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_stats.Plo \
-	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
-	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
-	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
-	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
-	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
-	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_tmode.Plo \
-	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
-	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
-	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
-	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
-	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_webirc.Plo \
-	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
-	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo \
-	./$(DEPDIR)/umode_admin.Plo ./$(DEPDIR)/umode_bot.Plo \
-	./$(DEPDIR)/umode_callerid.Plo ./$(DEPDIR)/umode_cloak.Plo \
-	./$(DEPDIR)/umode_connect.Plo ./$(DEPDIR)/umode_deaf.Plo \
-	./$(DEPDIR)/umode_expiration.Plo \
+	./$(DEPDIR)/m_close.Plo ./$(DEPDIR)/m_config.Plo \
+	./$(DEPDIR)/m_connect.Plo ./$(DEPDIR)/m_die.Plo \
+	./$(DEPDIR)/m_dline.Plo ./$(DEPDIR)/m_encap.Plo \
+	./$(DEPDIR)/m_eob.Plo ./$(DEPDIR)/m_error.Plo \
+	./$(DEPDIR)/m_etrace.Plo ./$(DEPDIR)/m_globops.Plo \
+	./$(DEPDIR)/m_help.Plo ./$(DEPDIR)/m_info.Plo \
+	./$(DEPDIR)/m_invite.Plo ./$(DEPDIR)/m_ison.Plo \
+	./$(DEPDIR)/m_join.Plo ./$(DEPDIR)/m_kick.Plo \
+	./$(DEPDIR)/m_kill.Plo ./$(DEPDIR)/m_kline.Plo \
+	./$(DEPDIR)/m_knock.Plo ./$(DEPDIR)/m_links.Plo \
+	./$(DEPDIR)/m_list.Plo ./$(DEPDIR)/m_locops.Plo \
+	./$(DEPDIR)/m_lusers.Plo ./$(DEPDIR)/m_map.Plo \
+	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_metadata.Plo \
+	./$(DEPDIR)/m_mlock.Plo ./$(DEPDIR)/m_mode.Plo \
+	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
+	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
+	./$(DEPDIR)/m_nick.Plo ./$(DEPDIR)/m_oper.Plo \
+	./$(DEPDIR)/m_opme.Plo ./$(DEPDIR)/m_part.Plo \
+	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
+	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
+	./$(DEPDIR)/m_quit.Plo ./$(DEPDIR)/m_rehash.Plo \
+	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
+	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_sasl.Plo \
+	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_set.Plo \
+	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
+	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
+	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
+	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
+	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
+	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
+	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
+	./$(DEPDIR)/m_tmode.Plo ./$(DEPDIR)/m_topic.Plo \
+	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
+	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
+	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
+	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
+	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
+	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
+	./$(DEPDIR)/m_xline.Plo ./$(DEPDIR)/umode_admin.Plo \
+	./$(DEPDIR)/umode_bot.Plo ./$(DEPDIR)/umode_callerid.Plo \
+	./$(DEPDIR)/umode_cloak.Plo ./$(DEPDIR)/umode_connect.Plo \
+	./$(DEPDIR)/umode_deaf.Plo ./$(DEPDIR)/umode_expiration.Plo \
 	./$(DEPDIR)/umode_external.Plo \
 	./$(DEPDIR)/umode_farconnect.Plo ./$(DEPDIR)/umode_flood.Plo \
 	./$(DEPDIR)/umode_hidden.Plo ./$(DEPDIR)/umode_hidechans.Plo \
@@ -620,55 +623,57 @@ SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
 	cap_extended_monitor.c cap_invite_notify.c cap_multi_prefix.c \
 	cap_no_implicit_names.c cap_standard_replies.c \
 	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
-	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
-	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
-	m_globops.c m_help.c m_info.c m_invite.c m_ison.c m_join.c \
-	m_kick.c m_kill.c m_kline.c m_knock.c m_links.c m_list.c \
-	m_locops.c m_lusers.c m_map.c m_message.c m_metadata.c \
-	m_mlock.c m_mode.c m_module.c m_monitor.c m_motd.c m_names.c \
-	m_nick.c m_oper.c m_opme.c m_part.c m_pass.c m_ping.c m_pong.c \
-	m_post.c m_quit.c m_rehash.c m_restart.c m_resv.c m_resync.c \
-	m_sasl.c m_server.c m_set.c m_sjoin.c m_squit.c m_stats.c \
-	m_svinfo.c m_svsaccount.c m_svshost.c m_svsjoin.c m_svskill.c \
-	m_svsmode.c m_svsnick.c m_svspart.c m_svstag.c m_tburst.c \
-	m_time.c m_tmode.c m_topic.c m_trace.c m_undline.c m_unkline.c \
-	m_unresv.c m_unxline.c m_user.c m_userhost.c m_version.c \
-	m_webirc.c m_who.c m_whois.c m_whowas.c m_xline.c \
-	umode_admin.c umode_bot.c umode_callerid.c umode_cloak.c \
-	umode_connect.c umode_deaf.c umode_expiration.c \
-	umode_external.c umode_farconnect.c umode_flood.c \
-	umode_hidden.c umode_hidechans.c umode_hideidle.c \
-	umode_invisible.c umode_locops.c umode_nickchange.c \
-	umode_oper.c umode_registered.c umode_regonly.c umode_reject.c \
-	umode_secure.c umode_secureonly.c umode_servnotice.c \
-	umode_skill.c umode_softcallerid.c umode_spy.c umode_webirc.c
+	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_config.c \
+	m_connect.c m_die.c m_dline.c m_encap.c m_eob.c m_error.c \
+	m_etrace.c m_globops.c m_help.c m_info.c m_invite.c m_ison.c \
+	m_join.c m_kick.c m_kill.c m_kline.c m_knock.c m_links.c \
+	m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
+	m_metadata.c m_mlock.c m_mode.c m_module.c m_monitor.c \
+	m_motd.c m_names.c m_nick.c m_oper.c m_opme.c m_part.c \
+	m_pass.c m_ping.c m_pong.c m_post.c m_quit.c m_rehash.c \
+	m_restart.c m_resv.c m_resync.c m_sasl.c m_server.c m_set.c \
+	m_sjoin.c m_squit.c m_stats.c m_svinfo.c m_svsaccount.c \
+	m_svshost.c m_svsjoin.c m_svskill.c m_svsmode.c m_svsnick.c \
+	m_svspart.c m_svstag.c m_tburst.c m_time.c m_tmode.c m_topic.c \
+	m_trace.c m_undline.c m_unkline.c m_unresv.c m_unxline.c \
+	m_user.c m_userhost.c m_version.c m_webirc.c m_who.c m_whois.c \
+	m_whowas.c m_xline.c umode_admin.c umode_bot.c \
+	umode_callerid.c umode_cloak.c umode_connect.c umode_deaf.c \
+	umode_expiration.c umode_external.c umode_farconnect.c \
+	umode_flood.c umode_hidden.c umode_hidechans.c \
+	umode_hideidle.c umode_invisible.c umode_locops.c \
+	umode_nickchange.c umode_oper.c umode_registered.c \
+	umode_regonly.c umode_reject.c umode_secure.c \
+	umode_secureonly.c umode_servnotice.c umode_skill.c \
+	umode_softcallerid.c umode_spy.c umode_webirc.c
 DIST_SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
 	cap_chghost.c cap_echo_message.c cap_extended_join.c \
 	cap_extended_monitor.c cap_invite_notify.c cap_multi_prefix.c \
 	cap_no_implicit_names.c cap_standard_replies.c \
 	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
-	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_connect.c \
-	m_die.c m_dline.c m_encap.c m_eob.c m_error.c m_etrace.c \
-	m_globops.c m_help.c m_info.c m_invite.c m_ison.c m_join.c \
-	m_kick.c m_kill.c m_kline.c m_knock.c m_links.c m_list.c \
-	m_locops.c m_lusers.c m_map.c m_message.c m_metadata.c \
-	m_mlock.c m_mode.c m_module.c m_monitor.c m_motd.c m_names.c \
-	m_nick.c m_oper.c m_opme.c m_part.c m_pass.c m_ping.c m_pong.c \
-	m_post.c m_quit.c m_rehash.c m_restart.c m_resv.c m_resync.c \
-	m_sasl.c m_server.c m_set.c m_sjoin.c m_squit.c m_stats.c \
-	m_svinfo.c m_svsaccount.c m_svshost.c m_svsjoin.c m_svskill.c \
-	m_svsmode.c m_svsnick.c m_svspart.c m_svstag.c m_tburst.c \
-	m_time.c m_tmode.c m_topic.c m_trace.c m_undline.c m_unkline.c \
-	m_unresv.c m_unxline.c m_user.c m_userhost.c m_version.c \
-	m_webirc.c m_who.c m_whois.c m_whowas.c m_xline.c \
-	umode_admin.c umode_bot.c umode_callerid.c umode_cloak.c \
-	umode_connect.c umode_deaf.c umode_expiration.c \
-	umode_external.c umode_farconnect.c umode_flood.c \
-	umode_hidden.c umode_hidechans.c umode_hideidle.c \
-	umode_invisible.c umode_locops.c umode_nickchange.c \
-	umode_oper.c umode_registered.c umode_regonly.c umode_reject.c \
-	umode_secure.c umode_secureonly.c umode_servnotice.c \
-	umode_skill.c umode_softcallerid.c umode_spy.c umode_webirc.c
+	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_config.c \
+	m_connect.c m_die.c m_dline.c m_encap.c m_eob.c m_error.c \
+	m_etrace.c m_globops.c m_help.c m_info.c m_invite.c m_ison.c \
+	m_join.c m_kick.c m_kill.c m_kline.c m_knock.c m_links.c \
+	m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
+	m_metadata.c m_mlock.c m_mode.c m_module.c m_monitor.c \
+	m_motd.c m_names.c m_nick.c m_oper.c m_opme.c m_part.c \
+	m_pass.c m_ping.c m_pong.c m_post.c m_quit.c m_rehash.c \
+	m_restart.c m_resv.c m_resync.c m_sasl.c m_server.c m_set.c \
+	m_sjoin.c m_squit.c m_stats.c m_svinfo.c m_svsaccount.c \
+	m_svshost.c m_svsjoin.c m_svskill.c m_svsmode.c m_svsnick.c \
+	m_svspart.c m_svstag.c m_tburst.c m_time.c m_tmode.c m_topic.c \
+	m_trace.c m_undline.c m_unkline.c m_unresv.c m_unxline.c \
+	m_user.c m_userhost.c m_version.c m_webirc.c m_who.c m_whois.c \
+	m_whowas.c m_xline.c umode_admin.c umode_bot.c \
+	umode_callerid.c umode_cloak.c umode_connect.c umode_deaf.c \
+	umode_expiration.c umode_external.c umode_farconnect.c \
+	umode_flood.c umode_hidden.c umode_hidechans.c \
+	umode_hideidle.c umode_invisible.c umode_locops.c \
+	umode_nickchange.c umode_oper.c umode_registered.c \
+	umode_regonly.c umode_reject.c umode_secure.c \
+	umode_secureonly.c umode_servnotice.c umode_skill.c \
+	umode_softcallerid.c umode_spy.c umode_webirc.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -876,6 +881,7 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_capab.la      \
                       m_certfp.la     \
                       m_close.la      \
+                      m_config.la     \
                       m_connect.la    \
                       m_die.la        \
                       m_dline.la      \
@@ -1078,6 +1084,9 @@ m_certfp.la: $(m_certfp_la_OBJECTS) $(m_certfp_la_DEPENDENCIES) $(EXTRA_m_certfp
 
 m_close.la: $(m_close_la_OBJECTS) $(m_close_la_DEPENDENCIES) $(EXTRA_m_close_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_close_la_OBJECTS) $(m_close_la_LIBADD) $(LIBS)
+
+m_config.la: $(m_config_la_OBJECTS) $(m_config_la_DEPENDENCIES) $(EXTRA_m_config_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_config_la_OBJECTS) $(m_config_la_LIBADD) $(LIBS)
 
 m_connect.la: $(m_connect_la_OBJECTS) $(m_connect_la_DEPENDENCIES) $(EXTRA_m_connect_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_connect_la_OBJECTS) $(m_connect_la_LIBADD) $(LIBS)
@@ -1411,6 +1420,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_capab.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_certfp.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_close.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_config.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_connect.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_die.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_dline.Plo@am__quote@ # am--include-marker
@@ -1696,6 +1706,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/m_capab.Plo
 	-rm -f ./$(DEPDIR)/m_certfp.Plo
 	-rm -f ./$(DEPDIR)/m_close.Plo
+	-rm -f ./$(DEPDIR)/m_config.Plo
 	-rm -f ./$(DEPDIR)/m_connect.Plo
 	-rm -f ./$(DEPDIR)/m_die.Plo
 	-rm -f ./$(DEPDIR)/m_dline.Plo
@@ -1863,6 +1874,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/m_capab.Plo
 	-rm -f ./$(DEPDIR)/m_certfp.Plo
 	-rm -f ./$(DEPDIR)/m_close.Plo
+	-rm -f ./$(DEPDIR)/m_config.Plo
 	-rm -f ./$(DEPDIR)/m_connect.Plo
 	-rm -f ./$(DEPDIR)/m_die.Plo
 	-rm -f ./$(DEPDIR)/m_dline.Plo

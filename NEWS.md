@@ -48,6 +48,8 @@
   directive selects the services server used for SASL authentication.
 * Added the `MODULE INFO` and `MODULE CONFIG` subcommands to inspect module configuration,
   state, protection flags, and failure details.
+* Added the `CONFIG` command to inspect current configuration values. `CONFIG LIST [selector]`
+  supports wildcard filtering. Configuration values are no longer included in `INFO` output.
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

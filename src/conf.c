@@ -420,9 +420,6 @@ static void
 _conf_update_isupport(void)
 {
   isupport_add("CASEMAPPING", "%s", "ascii");
-  isupport_add("AWAYLEN", "%u", ConfigGeneral.max_away_length);
-  isupport_add("KICKLEN", "%u", ConfigChannel.max_kick_length);
-  isupport_add("NICKLEN", "%u", ConfigServerInfo.max_nick_length);
   isupport_add("NETWORK", "%s", ConfigServerInfo.network_name);
   isupport_add("MAXLIST", "beI:%u", ConfigChannel.max_bans);
 
@@ -434,7 +431,6 @@ _conf_update_isupport(void)
   isupport_add("CHANTYPES", "%s", "#");
   isupport_add("CHANLIMIT", "#:%u", ConfigChannel.max_channels);
   isupport_add("CHANNELLEN", "%u", (unsigned int)CHANNELLEN);
-  isupport_add("TOPICLEN", "%u", ConfigChannel.max_topic_length);
 }
 
 bool

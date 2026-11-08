@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "io_string.h"
@@ -22,7 +23,9 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
+#include "isupport.h"
 #include "monitor.h"
 #include "numeric.h"
 #include "parse.h"
@@ -174,16 +177,47 @@ static struct Command command_table =
   .handlers[COMMAND_HANDLER_OPER] = { .handler = m_away }
 };
 
+static isupport_result_t
+_away_update_isupport(void)
+{
+  return isupport_add("AWAYLEN", "%u", ConfigGeneral.max_away_length);
+}
+
+static hook_flow_t
+_away_conf_read_hook(void *unused)
+{
+  const isupport_result_t result = _away_update_isupport();
+  assert(result == ISUPPORT_SUCCESS);
+  (void)result;
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  return ircd_module_register_commands(&command_table, 1, error_message, error_message_size);
+  if (!ircd_module_register_commands(&command_table, 1, error_message, error_message_size))
+    return false;
+
+  const isupport_result_t result = _away_update_isupport();
+  if (result != ISUPPORT_SUCCESS)
+  {
+    command_del(&command_table);
+    snprintf(error_message, error_message_size, "Unable to register ISUPPORT AWAYLEN: %s",
+             isupport_result_to_string(result));
+    return false;
+  }
+
+  hook_install(ircd_hook_conf_read, _away_conf_read_hook, HOOK_PRIORITY_DEFAULT);
+  return true;
 }
 
 static void
 exit_handler(void *context)
 {
+  hook_uninstall(ircd_hook_conf_read, _away_conf_read_hook);
   command_del(&command_table);
+  isupport_delete("AWAYLEN");
 }
 
 const struct module_descriptor module_entry_v1 =

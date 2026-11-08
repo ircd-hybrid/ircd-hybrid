@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "io.h"
+#include "io_hex.h"
 #include "io_string.h"
 #include "module.h"
 
@@ -138,7 +139,9 @@ static const struct config_entry config_entries[] =
   CONFIG_ENTRY_STRING("serverinfo::name", &ConfigServerInfo.name),
   CONFIG_ENTRY_STRING("serverinfo::network_description", &ConfigServerInfo.network_description),
   CONFIG_ENTRY_STRING("serverinfo::network_name", &ConfigServerInfo.network_name),
-  CONFIG_ENTRY_STRING("serverinfo::sid", &ConfigServerInfo.sid)
+  CONFIG_ENTRY_STRING("serverinfo::sid", &ConfigServerInfo.sid),
+  CONFIG_ENTRY_STRING("serverinfo::tls_certificate_file", &ConfigServerInfo.tls_certificate_file),
+  CONFIG_ENTRY_STRING("serverinfo::tls_private_key_file", &ConfigServerInfo.tls_private_key_file)
 };
 
 static bool
@@ -236,18 +239,19 @@ _config_send_value(struct Client *source, const char *name, const char *value,
   {
     const char *text = (const char *)cursor;
     size_t length = 1;
-    char escaped[4];
+    char escaped[sizeof("\\xFF")];
 
     if (*cursor < 0x20 || *cursor == 0x7f)
     {
-      static const char hex[] = "0123456789ABCDEF";
-
       escaped[0] = '\\';
       escaped[1] = 'x';
-      escaped[2] = hex[*cursor >> 4];
-      escaped[3] = hex[*cursor & 0xf];
+
+      const bool converted = io_bytes_to_hex(cursor, 1, escaped + 2, sizeof(escaped) - 2);
+      assert(converted);
+      (void)converted;
+
       text = escaped;
-      length = sizeof(escaped);
+      length = sizeof(escaped) - 1;
     }
     else if (*cursor == '\\' || *cursor == '"')
     {
@@ -269,10 +273,11 @@ _config_send_value(struct Client *source, const char *name, const char *value,
 static void
 _config_cmd_list(struct Client *source, const char *pattern)
 {
+  const size_t count = IO_ARRAY_LENGTH(config_entries);
   size_t matched = 0;
   int name_width = sizeof("Pattern:") - 1;
 
-  for (size_t i = 0; i < IO_ARRAY_LENGTH(config_entries); ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     const struct config_entry *const entry = &config_entries[i];
     if (!_config_entry_matches(entry, pattern))
@@ -291,13 +296,7 @@ _config_cmd_list(struct Client *source, const char *pattern)
   if (pattern)
     _config_send_value(source, "Pattern:", pattern, true, name_width, limit);
 
-  if (matched == 0)
-  {
-    sendto_one_notice(source, &me, ":No matching configuration entries.");
-    return;
-  }
-
-  for (size_t i = 0; i < IO_ARRAY_LENGTH(config_entries); ++i)
+  for (size_t i = 0; i < count; ++i)
   {
     const struct config_entry *const entry = &config_entries[i];
     if (!_config_entry_matches(entry, pattern))
@@ -310,8 +309,12 @@ _config_cmd_list(struct Client *source, const char *pattern)
     _config_send_value(source, entry->name, value ? value : "<unset>", quoted, name_width, limit);
   }
 
-  sendto_one_notice(source, &me, ":End of configuration list: %zu %s.",
-                    matched, matched == 1 ? "entry" : "entries");
+  const char *const entry_label = count == 1 ? "entry" : "entries";
+  if (pattern)
+    sendto_one_notice(source, &me, ":End of configuration list: %zu of %zu %s shown.",
+                      matched, count, entry_label);
+  else
+    sendto_one_notice(source, &me, ":End of configuration list: %zu %s.", count, entry_label);
 }
 
 static void

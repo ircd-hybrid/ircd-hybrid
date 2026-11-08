@@ -37,12 +37,11 @@ enum
   CAPAB_TBURST  = 1 <<  6,  /**< Indicates support for TBURST. */
   CAPAB_DLN     = 1 <<  7,  /**< Indicates support for the DLINE message. */
   CAPAB_UNDLN   = 1 <<  8,  /**< Indicates support for the UNDLINE message. */
-  CAPAB_RHOST   = 1 <<  9,  /**< Indicates support for extended realhost UID messages. */
-  CAPAB_QOP     = 1 << 10,  /**< Indicates support for the owner (~) channel prefix mode (QOP). */
-  CAPAB_AOP     = 1 << 11,  /**< Indicates support for the admin (&) channel prefix mode (AOP). */
-  CAPAB_HOP     = 1 << 12,  /**< Indicates support for the half-op (%) channel prefix mode (HOP). */
-  CAPAB_RESYNC  = 1 << 13,  /**< Indicates support for the RESYNC message. */
-  CAPAB_MLOCK   = 1 << 14,  /**< Indicates support for mode locking (MLOCK). */
+  CAPAB_QOP     = 1 <<  9,  /**< Indicates support for the owner (~) channel prefix mode (QOP). */
+  CAPAB_AOP     = 1 << 10,  /**< Indicates support for the admin (&) channel prefix mode (AOP). */
+  CAPAB_HOP     = 1 << 11,  /**< Indicates support for the half-op (%) channel prefix mode (HOP). */
+  CAPAB_RESYNC  = 1 << 12,  /**< Indicates support for the RESYNC message. */
+  CAPAB_MLOCK   = 1 << 13,  /**< Indicates support for mode locking (MLOCK). */
 };
 
 /**

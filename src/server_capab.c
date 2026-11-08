@@ -35,7 +35,6 @@ capab_init(void)
 {
   capab_add("EOB", CAPAB_EOB, true);
   capab_add("CLUSTER", CAPAB_CLUSTER, true);
-  capab_add("RHOST", CAPAB_RHOST, true);
 }
 
 /**

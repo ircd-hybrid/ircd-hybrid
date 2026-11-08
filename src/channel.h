@@ -9,10 +9,13 @@
 
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
-#include "extban.h"
 #include "address.h"
+#include "ircd_defs.h"        /* KEYLEN, CHANNELLEN */
+#include "list.h"
 
 /**
  * @enum channel_send_perm_t
@@ -28,6 +31,7 @@ typedef enum
   CHANNEL_SEND_PERM_ELEVATED,  /**< Client can send messages to the channel as an operator, half-operator, or voiced. */
 } channel_send_perm_t;
 
+struct ChannelMember;
 struct Client;
 
 /** Mode structure for channels */
@@ -74,7 +78,7 @@ enum { BANSTRLEN = 200 }; /* XXX */
 struct Ban
 {
   list_node_t node;
-  uint32_t extban;
+  uint64_t extban;
   char banstr[BANSTRLEN];
   char name[NICKLEN + 1];
   char user[USERLEN + 1];
@@ -99,8 +103,9 @@ extern void channel_set_mode_lock(struct Client *, struct Channel *, const char 
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 extern void remove_ban(struct Ban *, list_t *);
 extern bool channel_is_valid_name(const char *, bool);
-extern bool find_bmask(struct Client *, struct Channel*, const list_t *, struct Extban *);
-extern bool is_banned(struct Channel *, struct Client *, struct Extban *);
+extern bool find_bmask(struct Client *, struct Channel *, const list_t *, uint64_t);
+extern bool is_banned(struct Channel *, struct Client *);
+extern bool is_extbanned(struct Channel *, struct Client *, uint64_t);
 extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_create(const char *);
 extern struct Channel *channel_find(const char *);

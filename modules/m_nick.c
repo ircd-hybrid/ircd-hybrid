@@ -533,7 +533,7 @@ _nick_change_check_channel_policy(struct Client *source)
       return false;
     }
 
-    if (is_banned(member->channel, source, &extban_nick))
+    if (is_extbanned(member->channel, source, EXTBAN_NICK))
     {
       sendto_one_numeric(source, &me, ERR_BANNICKCHANGE, member->channel->name);
       return false;

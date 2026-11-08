@@ -20,6 +20,7 @@
 #include "channel_mode.h"
 #include "client.h"
 #include "conf.h"
+#include "extban.h"
 #include "ircd.h"
 #include "ircd_module.h"
 #include "isupport.h"
@@ -91,7 +92,7 @@ m_knock(struct Client *source, size_t parc, char *parv[])
   }
 
   /* Don't allow a knock if the user is banned. */
-  if (is_banned(channel, source, NULL) || is_banned(channel, source, &extban_knock))
+  if (is_banned(channel, source) || is_extbanned(channel, source, EXTBAN_KNOCK))
   {
     sendto_one_numeric(source, &me, ERR_CANNOTKNOCK, channel->name, "you are banned (+b)");
     return;

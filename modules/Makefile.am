@@ -15,6 +15,17 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_no_implicit_names.la \
                       cap_standard_replies.la  \
                       cap_userhost_in_names.la \
+                      extban_account.la        \
+                      extban_channel.la        \
+                      extban_fingerprint.la    \
+                      extban_gecos.la          \
+                      extban_join.la           \
+                      extban_knock.la          \
+                      extban_mute.la           \
+                      extban_nick.la           \
+                      extban_operclass.la      \
+                      extban_server.la         \
+                      extban_usermode.la       \
                       umode_admin.la           \
                       umode_bot.la             \
                       umode_callerid.la        \

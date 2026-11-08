@@ -20,6 +20,7 @@
 #include "cap.h"
 #include "client.h"
 #include "command.h"
+#include "extban.h"
 #include "ircd_exit.h"
 #include "ircd_module.h"
 #include "isupport.h"
@@ -333,6 +334,28 @@ ircd_module_register_commands(struct Command *commands, size_t count,
       return false;
   }
 
+  return false;
+}
+
+bool
+ircd_module_register_extban(const struct Extban *extban, char *error_message, size_t error_message_size)
+{
+  assert(extban);
+  assert(error_message);
+  assert(error_message_size > 0);
+
+  const extban_result_t result = extban_register(extban);
+  if (result == EXTBAN_SUCCESS)
+    return true;
+
+  char character[sizeof("0xFF")];
+  if (io_ascii_is_alpha(extban->character))
+    snprintf(character, sizeof(character), "%c", extban->character);
+  else
+    snprintf(character, sizeof(character), "0x%02X", (unsigned int)extban->character);
+
+  snprintf(error_message, error_message_size, "Cannot register extended ban %s: %s",
+           character, extban_result_to_string(result));
   return false;
 }
 

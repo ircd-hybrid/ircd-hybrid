@@ -13,14 +13,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "list.h"
-
 struct Ban;
 struct Channel;
-struct ChannelMember;
 struct Client;
-
-#define EXTBAN_MASK UINT32_MAX  /* All possible mask values */
 
 enum extban_type
 {
@@ -36,37 +31,37 @@ enum extban_match
   EXTBAN_MATCH
 };
 
+typedef enum
+{
+  EXTBAN_SUCCESS = 0,
+  EXTBAN_ALREADY_REGISTERED,
+  EXTBAN_NOT_FOUND,
+  EXTBAN_INVALID_ARGUMENT,
+  EXTBAN_TYPE_CONFLICT
+} extban_result_t;
+
 struct Extban
 {
-  list_node_t node;
   unsigned char character;
   enum extban_type type;
   int (*is_valid)(const char *);
   enum extban_match (*matches)(struct Client *, struct Channel *, struct Ban *);
   uint32_t types;  /* CHFL_BAN/EXCEPTION/INVEX */
-  uint32_t flag;
+  uint64_t *flag_out;
 };
 
-extern struct Extban extban_account;
-extern struct Extban extban_channel;
-extern struct Extban extban_fingerprint;
-extern struct Extban extban_gecos;
-extern struct Extban extban_join;
-extern struct Extban extban_knock;
-extern struct Extban extban_mute;
-extern struct Extban extban_nick;
-extern struct Extban extban_operclass;
-extern struct Extban extban_server;
-extern struct Extban extban_usermode;
+extern uint64_t EXTBAN_JOIN;
+extern uint64_t EXTBAN_KNOCK;
+extern uint64_t EXTBAN_MUTE;
+extern uint64_t EXTBAN_NICK;
 
-extern void extban_init(void);
-extern void extban_add(struct Extban *);
-extern void extban_del(struct Extban *);
-extern enum extban_type extban_parse(const char *, uint32_t *, size_t *);
-extern size_t extban_format(uint32_t, char *);
-extern uint32_t extban_matching_mask(void);
-extern uint32_t extban_acting_mask(void);
-extern struct Extban *extban_find(unsigned char);
-extern struct Extban *extban_find_flag(uint32_t);
-extern const char *extban_get_isupport(void);
+extern extban_result_t extban_register(const struct Extban *);
+extern extban_result_t extban_unregister(const struct Extban *);
+extern enum extban_type extban_parse(const char *, uint64_t *, size_t *);
+extern size_t extban_format(uint64_t, char *);
+extern uint64_t extban_matching_mask(void);
+extern uint64_t extban_acting_mask(void);
+extern const struct Extban *extban_find(unsigned char);
+extern const struct Extban *extban_find_flag(uint64_t);
+extern const char *extban_result_to_string(extban_result_t);
 #endif  /* INCLUDED_extban_h */

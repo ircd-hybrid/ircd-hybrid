@@ -185,6 +185,39 @@ cap_standard_replies_la_OBJECTS = cap_standard_replies.lo
 cap_userhost_in_names_la_LIBADD =
 cap_userhost_in_names_la_SOURCES = cap_userhost_in_names.c
 cap_userhost_in_names_la_OBJECTS = cap_userhost_in_names.lo
+extban_account_la_LIBADD =
+extban_account_la_SOURCES = extban_account.c
+extban_account_la_OBJECTS = extban_account.lo
+extban_channel_la_LIBADD =
+extban_channel_la_SOURCES = extban_channel.c
+extban_channel_la_OBJECTS = extban_channel.lo
+extban_fingerprint_la_LIBADD =
+extban_fingerprint_la_SOURCES = extban_fingerprint.c
+extban_fingerprint_la_OBJECTS = extban_fingerprint.lo
+extban_gecos_la_LIBADD =
+extban_gecos_la_SOURCES = extban_gecos.c
+extban_gecos_la_OBJECTS = extban_gecos.lo
+extban_join_la_LIBADD =
+extban_join_la_SOURCES = extban_join.c
+extban_join_la_OBJECTS = extban_join.lo
+extban_knock_la_LIBADD =
+extban_knock_la_SOURCES = extban_knock.c
+extban_knock_la_OBJECTS = extban_knock.lo
+extban_mute_la_LIBADD =
+extban_mute_la_SOURCES = extban_mute.c
+extban_mute_la_OBJECTS = extban_mute.lo
+extban_nick_la_LIBADD =
+extban_nick_la_SOURCES = extban_nick.c
+extban_nick_la_OBJECTS = extban_nick.lo
+extban_operclass_la_LIBADD =
+extban_operclass_la_SOURCES = extban_operclass.c
+extban_operclass_la_OBJECTS = extban_operclass.lo
+extban_server_la_LIBADD =
+extban_server_la_SOURCES = extban_server.c
+extban_server_la_OBJECTS = extban_server.lo
+extban_usermode_la_LIBADD =
+extban_usermode_la_SOURCES = extban_usermode.c
+extban_usermode_la_OBJECTS = extban_usermode.lo
 m_accept_la_LIBADD =
 m_accept_la_SOURCES = m_accept.c
 m_accept_la_OBJECTS = m_accept.lo
@@ -542,52 +575,59 @@ am__depfiles_remade = ./$(DEPDIR)/cap_account_notify.Plo \
 	./$(DEPDIR)/cap_multi_prefix.Plo \
 	./$(DEPDIR)/cap_no_implicit_names.Plo \
 	./$(DEPDIR)/cap_standard_replies.Plo \
-	./$(DEPDIR)/cap_userhost_in_names.Plo ./$(DEPDIR)/m_accept.Plo \
-	./$(DEPDIR)/m_admin.Plo ./$(DEPDIR)/m_away.Plo \
-	./$(DEPDIR)/m_bmask.Plo ./$(DEPDIR)/m_cap.Plo \
-	./$(DEPDIR)/m_capab.Plo ./$(DEPDIR)/m_certfp.Plo \
-	./$(DEPDIR)/m_close.Plo ./$(DEPDIR)/m_config.Plo \
-	./$(DEPDIR)/m_connect.Plo ./$(DEPDIR)/m_die.Plo \
-	./$(DEPDIR)/m_dline.Plo ./$(DEPDIR)/m_encap.Plo \
-	./$(DEPDIR)/m_eob.Plo ./$(DEPDIR)/m_error.Plo \
-	./$(DEPDIR)/m_etrace.Plo ./$(DEPDIR)/m_globops.Plo \
-	./$(DEPDIR)/m_help.Plo ./$(DEPDIR)/m_info.Plo \
-	./$(DEPDIR)/m_invite.Plo ./$(DEPDIR)/m_ison.Plo \
-	./$(DEPDIR)/m_join.Plo ./$(DEPDIR)/m_kick.Plo \
-	./$(DEPDIR)/m_kill.Plo ./$(DEPDIR)/m_kline.Plo \
-	./$(DEPDIR)/m_knock.Plo ./$(DEPDIR)/m_links.Plo \
-	./$(DEPDIR)/m_list.Plo ./$(DEPDIR)/m_locops.Plo \
-	./$(DEPDIR)/m_lusers.Plo ./$(DEPDIR)/m_map.Plo \
-	./$(DEPDIR)/m_message.Plo ./$(DEPDIR)/m_metadata.Plo \
-	./$(DEPDIR)/m_mlock.Plo ./$(DEPDIR)/m_mode.Plo \
-	./$(DEPDIR)/m_module.Plo ./$(DEPDIR)/m_monitor.Plo \
-	./$(DEPDIR)/m_motd.Plo ./$(DEPDIR)/m_names.Plo \
-	./$(DEPDIR)/m_nick.Plo ./$(DEPDIR)/m_oper.Plo \
-	./$(DEPDIR)/m_opme.Plo ./$(DEPDIR)/m_part.Plo \
-	./$(DEPDIR)/m_pass.Plo ./$(DEPDIR)/m_ping.Plo \
-	./$(DEPDIR)/m_pong.Plo ./$(DEPDIR)/m_post.Plo \
-	./$(DEPDIR)/m_quit.Plo ./$(DEPDIR)/m_rehash.Plo \
-	./$(DEPDIR)/m_restart.Plo ./$(DEPDIR)/m_resv.Plo \
-	./$(DEPDIR)/m_resync.Plo ./$(DEPDIR)/m_sasl.Plo \
-	./$(DEPDIR)/m_server.Plo ./$(DEPDIR)/m_set.Plo \
-	./$(DEPDIR)/m_sjoin.Plo ./$(DEPDIR)/m_squit.Plo \
-	./$(DEPDIR)/m_stats.Plo ./$(DEPDIR)/m_svinfo.Plo \
-	./$(DEPDIR)/m_svsaccount.Plo ./$(DEPDIR)/m_svshost.Plo \
-	./$(DEPDIR)/m_svsjoin.Plo ./$(DEPDIR)/m_svskill.Plo \
-	./$(DEPDIR)/m_svsmode.Plo ./$(DEPDIR)/m_svsnick.Plo \
-	./$(DEPDIR)/m_svspart.Plo ./$(DEPDIR)/m_svstag.Plo \
-	./$(DEPDIR)/m_tburst.Plo ./$(DEPDIR)/m_time.Plo \
-	./$(DEPDIR)/m_tmode.Plo ./$(DEPDIR)/m_topic.Plo \
-	./$(DEPDIR)/m_trace.Plo ./$(DEPDIR)/m_undline.Plo \
-	./$(DEPDIR)/m_unkline.Plo ./$(DEPDIR)/m_unresv.Plo \
-	./$(DEPDIR)/m_unxline.Plo ./$(DEPDIR)/m_user.Plo \
-	./$(DEPDIR)/m_userhost.Plo ./$(DEPDIR)/m_version.Plo \
-	./$(DEPDIR)/m_webirc.Plo ./$(DEPDIR)/m_who.Plo \
-	./$(DEPDIR)/m_whois.Plo ./$(DEPDIR)/m_whowas.Plo \
-	./$(DEPDIR)/m_xline.Plo ./$(DEPDIR)/umode_admin.Plo \
-	./$(DEPDIR)/umode_bot.Plo ./$(DEPDIR)/umode_callerid.Plo \
-	./$(DEPDIR)/umode_cloak.Plo ./$(DEPDIR)/umode_connect.Plo \
-	./$(DEPDIR)/umode_deaf.Plo ./$(DEPDIR)/umode_expiration.Plo \
+	./$(DEPDIR)/cap_userhost_in_names.Plo \
+	./$(DEPDIR)/extban_account.Plo ./$(DEPDIR)/extban_channel.Plo \
+	./$(DEPDIR)/extban_fingerprint.Plo \
+	./$(DEPDIR)/extban_gecos.Plo ./$(DEPDIR)/extban_join.Plo \
+	./$(DEPDIR)/extban_knock.Plo ./$(DEPDIR)/extban_mute.Plo \
+	./$(DEPDIR)/extban_nick.Plo ./$(DEPDIR)/extban_operclass.Plo \
+	./$(DEPDIR)/extban_server.Plo ./$(DEPDIR)/extban_usermode.Plo \
+	./$(DEPDIR)/m_accept.Plo ./$(DEPDIR)/m_admin.Plo \
+	./$(DEPDIR)/m_away.Plo ./$(DEPDIR)/m_bmask.Plo \
+	./$(DEPDIR)/m_cap.Plo ./$(DEPDIR)/m_capab.Plo \
+	./$(DEPDIR)/m_certfp.Plo ./$(DEPDIR)/m_close.Plo \
+	./$(DEPDIR)/m_config.Plo ./$(DEPDIR)/m_connect.Plo \
+	./$(DEPDIR)/m_die.Plo ./$(DEPDIR)/m_dline.Plo \
+	./$(DEPDIR)/m_encap.Plo ./$(DEPDIR)/m_eob.Plo \
+	./$(DEPDIR)/m_error.Plo ./$(DEPDIR)/m_etrace.Plo \
+	./$(DEPDIR)/m_globops.Plo ./$(DEPDIR)/m_help.Plo \
+	./$(DEPDIR)/m_info.Plo ./$(DEPDIR)/m_invite.Plo \
+	./$(DEPDIR)/m_ison.Plo ./$(DEPDIR)/m_join.Plo \
+	./$(DEPDIR)/m_kick.Plo ./$(DEPDIR)/m_kill.Plo \
+	./$(DEPDIR)/m_kline.Plo ./$(DEPDIR)/m_knock.Plo \
+	./$(DEPDIR)/m_links.Plo ./$(DEPDIR)/m_list.Plo \
+	./$(DEPDIR)/m_locops.Plo ./$(DEPDIR)/m_lusers.Plo \
+	./$(DEPDIR)/m_map.Plo ./$(DEPDIR)/m_message.Plo \
+	./$(DEPDIR)/m_metadata.Plo ./$(DEPDIR)/m_mlock.Plo \
+	./$(DEPDIR)/m_mode.Plo ./$(DEPDIR)/m_module.Plo \
+	./$(DEPDIR)/m_monitor.Plo ./$(DEPDIR)/m_motd.Plo \
+	./$(DEPDIR)/m_names.Plo ./$(DEPDIR)/m_nick.Plo \
+	./$(DEPDIR)/m_oper.Plo ./$(DEPDIR)/m_opme.Plo \
+	./$(DEPDIR)/m_part.Plo ./$(DEPDIR)/m_pass.Plo \
+	./$(DEPDIR)/m_ping.Plo ./$(DEPDIR)/m_pong.Plo \
+	./$(DEPDIR)/m_post.Plo ./$(DEPDIR)/m_quit.Plo \
+	./$(DEPDIR)/m_rehash.Plo ./$(DEPDIR)/m_restart.Plo \
+	./$(DEPDIR)/m_resv.Plo ./$(DEPDIR)/m_resync.Plo \
+	./$(DEPDIR)/m_sasl.Plo ./$(DEPDIR)/m_server.Plo \
+	./$(DEPDIR)/m_set.Plo ./$(DEPDIR)/m_sjoin.Plo \
+	./$(DEPDIR)/m_squit.Plo ./$(DEPDIR)/m_stats.Plo \
+	./$(DEPDIR)/m_svinfo.Plo ./$(DEPDIR)/m_svsaccount.Plo \
+	./$(DEPDIR)/m_svshost.Plo ./$(DEPDIR)/m_svsjoin.Plo \
+	./$(DEPDIR)/m_svskill.Plo ./$(DEPDIR)/m_svsmode.Plo \
+	./$(DEPDIR)/m_svsnick.Plo ./$(DEPDIR)/m_svspart.Plo \
+	./$(DEPDIR)/m_svstag.Plo ./$(DEPDIR)/m_tburst.Plo \
+	./$(DEPDIR)/m_time.Plo ./$(DEPDIR)/m_tmode.Plo \
+	./$(DEPDIR)/m_topic.Plo ./$(DEPDIR)/m_trace.Plo \
+	./$(DEPDIR)/m_undline.Plo ./$(DEPDIR)/m_unkline.Plo \
+	./$(DEPDIR)/m_unresv.Plo ./$(DEPDIR)/m_unxline.Plo \
+	./$(DEPDIR)/m_user.Plo ./$(DEPDIR)/m_userhost.Plo \
+	./$(DEPDIR)/m_version.Plo ./$(DEPDIR)/m_webirc.Plo \
+	./$(DEPDIR)/m_who.Plo ./$(DEPDIR)/m_whois.Plo \
+	./$(DEPDIR)/m_whowas.Plo ./$(DEPDIR)/m_xline.Plo \
+	./$(DEPDIR)/umode_admin.Plo ./$(DEPDIR)/umode_bot.Plo \
+	./$(DEPDIR)/umode_callerid.Plo ./$(DEPDIR)/umode_cloak.Plo \
+	./$(DEPDIR)/umode_connect.Plo ./$(DEPDIR)/umode_deaf.Plo \
+	./$(DEPDIR)/umode_expiration.Plo \
 	./$(DEPDIR)/umode_external.Plo \
 	./$(DEPDIR)/umode_farconnect.Plo ./$(DEPDIR)/umode_flood.Plo \
 	./$(DEPDIR)/umode_hidden.Plo ./$(DEPDIR)/umode_hidechans.Plo \
@@ -622,12 +662,15 @@ SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
 	cap_chghost.c cap_echo_message.c cap_extended_join.c \
 	cap_extended_monitor.c cap_invite_notify.c cap_multi_prefix.c \
 	cap_no_implicit_names.c cap_standard_replies.c \
-	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
-	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_config.c \
-	m_connect.c m_die.c m_dline.c m_encap.c m_eob.c m_error.c \
-	m_etrace.c m_globops.c m_help.c m_info.c m_invite.c m_ison.c \
-	m_join.c m_kick.c m_kill.c m_kline.c m_knock.c m_links.c \
-	m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
+	cap_userhost_in_names.c extban_account.c extban_channel.c \
+	extban_fingerprint.c extban_gecos.c extban_join.c \
+	extban_knock.c extban_mute.c extban_nick.c extban_operclass.c \
+	extban_server.c extban_usermode.c m_accept.c m_admin.c \
+	m_away.c m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c \
+	m_config.c m_connect.c m_die.c m_dline.c m_encap.c m_eob.c \
+	m_error.c m_etrace.c m_globops.c m_help.c m_info.c m_invite.c \
+	m_ison.c m_join.c m_kick.c m_kill.c m_kline.c m_knock.c \
+	m_links.c m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
 	m_metadata.c m_mlock.c m_mode.c m_module.c m_monitor.c \
 	m_motd.c m_names.c m_nick.c m_oper.c m_opme.c m_part.c \
 	m_pass.c m_ping.c m_pong.c m_post.c m_quit.c m_rehash.c \
@@ -650,12 +693,15 @@ DIST_SOURCES = cap_account_notify.c cap_away_notify.c cap_cap_notify.c \
 	cap_chghost.c cap_echo_message.c cap_extended_join.c \
 	cap_extended_monitor.c cap_invite_notify.c cap_multi_prefix.c \
 	cap_no_implicit_names.c cap_standard_replies.c \
-	cap_userhost_in_names.c m_accept.c m_admin.c m_away.c \
-	m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c m_config.c \
-	m_connect.c m_die.c m_dline.c m_encap.c m_eob.c m_error.c \
-	m_etrace.c m_globops.c m_help.c m_info.c m_invite.c m_ison.c \
-	m_join.c m_kick.c m_kill.c m_kline.c m_knock.c m_links.c \
-	m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
+	cap_userhost_in_names.c extban_account.c extban_channel.c \
+	extban_fingerprint.c extban_gecos.c extban_join.c \
+	extban_knock.c extban_mute.c extban_nick.c extban_operclass.c \
+	extban_server.c extban_usermode.c m_accept.c m_admin.c \
+	m_away.c m_bmask.c m_cap.c m_capab.c m_certfp.c m_close.c \
+	m_config.c m_connect.c m_die.c m_dline.c m_encap.c m_eob.c \
+	m_error.c m_etrace.c m_globops.c m_help.c m_info.c m_invite.c \
+	m_ison.c m_join.c m_kick.c m_kill.c m_kline.c m_knock.c \
+	m_links.c m_list.c m_locops.c m_lusers.c m_map.c m_message.c \
 	m_metadata.c m_mlock.c m_mode.c m_module.c m_monitor.c \
 	m_motd.c m_names.c m_nick.c m_oper.c m_opme.c m_part.c \
 	m_pass.c m_ping.c m_pong.c m_post.c m_quit.c m_rehash.c \
@@ -846,6 +892,17 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       cap_no_implicit_names.la \
                       cap_standard_replies.la  \
                       cap_userhost_in_names.la \
+                      extban_account.la        \
+                      extban_channel.la        \
+                      extban_fingerprint.la    \
+                      extban_gecos.la          \
+                      extban_join.la           \
+                      extban_knock.la          \
+                      extban_mute.la           \
+                      extban_nick.la           \
+                      extban_operclass.la      \
+                      extban_server.la         \
+                      extban_usermode.la       \
                       umode_admin.la           \
                       umode_bot.la             \
                       umode_callerid.la        \
@@ -1060,6 +1117,39 @@ cap_standard_replies.la: $(cap_standard_replies_la_OBJECTS) $(cap_standard_repli
 
 cap_userhost_in_names.la: $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_DEPENDENCIES) $(EXTRA_cap_userhost_in_names_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(cap_userhost_in_names_la_OBJECTS) $(cap_userhost_in_names_la_LIBADD) $(LIBS)
+
+extban_account.la: $(extban_account_la_OBJECTS) $(extban_account_la_DEPENDENCIES) $(EXTRA_extban_account_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_account_la_OBJECTS) $(extban_account_la_LIBADD) $(LIBS)
+
+extban_channel.la: $(extban_channel_la_OBJECTS) $(extban_channel_la_DEPENDENCIES) $(EXTRA_extban_channel_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_channel_la_OBJECTS) $(extban_channel_la_LIBADD) $(LIBS)
+
+extban_fingerprint.la: $(extban_fingerprint_la_OBJECTS) $(extban_fingerprint_la_DEPENDENCIES) $(EXTRA_extban_fingerprint_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_fingerprint_la_OBJECTS) $(extban_fingerprint_la_LIBADD) $(LIBS)
+
+extban_gecos.la: $(extban_gecos_la_OBJECTS) $(extban_gecos_la_DEPENDENCIES) $(EXTRA_extban_gecos_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_gecos_la_OBJECTS) $(extban_gecos_la_LIBADD) $(LIBS)
+
+extban_join.la: $(extban_join_la_OBJECTS) $(extban_join_la_DEPENDENCIES) $(EXTRA_extban_join_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_join_la_OBJECTS) $(extban_join_la_LIBADD) $(LIBS)
+
+extban_knock.la: $(extban_knock_la_OBJECTS) $(extban_knock_la_DEPENDENCIES) $(EXTRA_extban_knock_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_knock_la_OBJECTS) $(extban_knock_la_LIBADD) $(LIBS)
+
+extban_mute.la: $(extban_mute_la_OBJECTS) $(extban_mute_la_DEPENDENCIES) $(EXTRA_extban_mute_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_mute_la_OBJECTS) $(extban_mute_la_LIBADD) $(LIBS)
+
+extban_nick.la: $(extban_nick_la_OBJECTS) $(extban_nick_la_DEPENDENCIES) $(EXTRA_extban_nick_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_nick_la_OBJECTS) $(extban_nick_la_LIBADD) $(LIBS)
+
+extban_operclass.la: $(extban_operclass_la_OBJECTS) $(extban_operclass_la_DEPENDENCIES) $(EXTRA_extban_operclass_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_operclass_la_OBJECTS) $(extban_operclass_la_LIBADD) $(LIBS)
+
+extban_server.la: $(extban_server_la_OBJECTS) $(extban_server_la_DEPENDENCIES) $(EXTRA_extban_server_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_server_la_OBJECTS) $(extban_server_la_LIBADD) $(LIBS)
+
+extban_usermode.la: $(extban_usermode_la_OBJECTS) $(extban_usermode_la_DEPENDENCIES) $(EXTRA_extban_usermode_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(extban_usermode_la_OBJECTS) $(extban_usermode_la_LIBADD) $(LIBS)
 
 m_accept.la: $(m_accept_la_OBJECTS) $(m_accept_la_DEPENDENCIES) $(EXTRA_m_accept_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(modulesdir) $(m_accept_la_OBJECTS) $(m_accept_la_LIBADD) $(LIBS)
@@ -1412,6 +1502,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_no_implicit_names.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_standard_replies.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cap_userhost_in_names.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_account.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_channel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_fingerprint.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_gecos.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_join.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_knock.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_mute.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_nick.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_operclass.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_server.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extban_usermode.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_accept.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_admin.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/m_away.Plo@am__quote@ # am--include-marker
@@ -1698,6 +1799,17 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/cap_no_implicit_names.Plo
 	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo
 	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
+	-rm -f ./$(DEPDIR)/extban_account.Plo
+	-rm -f ./$(DEPDIR)/extban_channel.Plo
+	-rm -f ./$(DEPDIR)/extban_fingerprint.Plo
+	-rm -f ./$(DEPDIR)/extban_gecos.Plo
+	-rm -f ./$(DEPDIR)/extban_join.Plo
+	-rm -f ./$(DEPDIR)/extban_knock.Plo
+	-rm -f ./$(DEPDIR)/extban_mute.Plo
+	-rm -f ./$(DEPDIR)/extban_nick.Plo
+	-rm -f ./$(DEPDIR)/extban_operclass.Plo
+	-rm -f ./$(DEPDIR)/extban_server.Plo
+	-rm -f ./$(DEPDIR)/extban_usermode.Plo
 	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo
@@ -1866,6 +1978,17 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/cap_no_implicit_names.Plo
 	-rm -f ./$(DEPDIR)/cap_standard_replies.Plo
 	-rm -f ./$(DEPDIR)/cap_userhost_in_names.Plo
+	-rm -f ./$(DEPDIR)/extban_account.Plo
+	-rm -f ./$(DEPDIR)/extban_channel.Plo
+	-rm -f ./$(DEPDIR)/extban_fingerprint.Plo
+	-rm -f ./$(DEPDIR)/extban_gecos.Plo
+	-rm -f ./$(DEPDIR)/extban_join.Plo
+	-rm -f ./$(DEPDIR)/extban_knock.Plo
+	-rm -f ./$(DEPDIR)/extban_mute.Plo
+	-rm -f ./$(DEPDIR)/extban_nick.Plo
+	-rm -f ./$(DEPDIR)/extban_operclass.Plo
+	-rm -f ./$(DEPDIR)/extban_server.Plo
+	-rm -f ./$(DEPDIR)/extban_usermode.Plo
 	-rm -f ./$(DEPDIR)/m_accept.Plo
 	-rm -f ./$(DEPDIR)/m_admin.Plo
 	-rm -f ./$(DEPDIR)/m_away.Plo

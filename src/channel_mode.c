@@ -104,7 +104,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
     collapse(mask);
   }
 
-  uint32_t extbans;
+  uint64_t extbans;
   size_t offset;
   enum extban_type etype = extban_parse(mask, &extbans, &offset);
   maskptr += offset;
@@ -117,7 +117,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       return NULL;
     }
 
-    const uint32_t extban_acting = extbans & extban_acting_mask();
+    const uint64_t extban_acting = extbans & extban_acting_mask();
     if (extban_acting)
     {
       const struct Extban *const extban = extban_find_flag(extban_acting);
@@ -128,7 +128,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
       }
     }
 
-    const uint32_t extban_matching = extbans & extban_matching_mask();
+    const uint64_t extban_matching = extbans & extban_matching_mask();
     if (extban_matching)
     {
       const struct Extban *const extban = extban_find_flag(extban_matching);

@@ -70,17 +70,6 @@ ircd_SOURCES = accept.c          \
                defaults.h        \
                extban.c          \
                extban.h          \
-               extban_account.c  \
-               extban_channel.c  \
-               extban_fingerprint.c \
-               extban_gecos.c    \
-               extban_join.c     \
-               extban_knock.c    \
-               extban_mute.c     \
-               extban_nick.c     \
-               extban_operclass.c \
-               extban_server.c   \
-               extban_usermode.c \
                hash.c            \
                hash.h            \
                ipcache.c         \

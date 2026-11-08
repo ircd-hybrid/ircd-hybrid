@@ -52,7 +52,6 @@
 #include "conf_exempt.h"
 #include "conf_kill.h"
 #include "defaults.h"
-#include "extban.h"
 #include "hash.h"
 #include "ipcache.h"
 #include "ircd.h"
@@ -452,7 +451,6 @@ main(int argc, char *argv[])
 
   ipcache_init();
   channel_mode_init();
-  extban_init();
   capab_init();
   _initialize_global_set_options();  /* Has to be called after conf_read_files() */
   links_cache_init();

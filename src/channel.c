@@ -435,7 +435,7 @@ _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 }
 
 bool
-find_bmask(struct Client *client, struct Channel *channel, const list_t *list, struct Extban *extban)
+find_bmask(struct Client *client, struct Channel *channel, const list_t *list, uint64_t extban_flag)
 {
   list_node_t *node;
 
@@ -444,9 +444,9 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
     struct Ban *const ban = node->data;
 
     /* Looking for a specific type of extban? */
-    if (extban)
+    if (extban_flag)
     {
-      if (!(ban->extban & extban->flag))
+      if (!(ban->extban & extban_flag))
         continue;
     }
     else
@@ -469,12 +469,23 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, s
   return false;
 }
 
-bool
-is_banned(struct Channel *channel, struct Client *client, struct Extban *extban)
+static bool
+_channel_is_banned(struct Channel *channel, struct Client *client, uint64_t extban_flag)
 {
-  if (find_bmask(client, channel, &channel->ban_list, extban))
-    return !find_bmask(client, channel, &channel->exception_list, extban);
-  return false;
+  return find_bmask(client, channel, &channel->ban_list, extban_flag) &&
+         !find_bmask(client, channel, &channel->exception_list, extban_flag);
+}
+
+bool
+is_banned(struct Channel *channel, struct Client *client)
+{
+  return _channel_is_banned(channel, client, 0);
+}
+
+bool
+is_extbanned(struct Channel *channel, struct Client *client, uint64_t extban_flag)
+{
+  return extban_flag && _channel_is_banned(channel, client, extban_flag);
 }
 
 static int
@@ -491,7 +502,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
 
   if (channel_has_mode(channel, MODE_INVITEONLY))
     if (channel_invite_find(channel, client) == NULL)
-      if (!find_bmask(client, channel, &channel->invite_exception_list, NULL))
+      if (!find_bmask(client, channel, &channel->invite_exception_list, 0))
         return ERR_INVITEONLYCHAN;
 
   if (channel_has_key(channel) && (string_is_empty(key) || strcmp(channel->mode.key, key)))
@@ -500,7 +511,7 @@ _can_join(struct Client *client, struct Channel *channel, const char *key)
   if (channel_has_member_limit(channel) && list_length(&channel->member_list) >= channel->mode.member_limit)
     return ERR_CHANNELISFULL;
 
-  if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_join))
+  if (is_banned(channel, client) || is_extbanned(channel, client, EXTBAN_JOIN))
     return ERR_BANNEDFROMCHAN;
 
   return 0;
@@ -613,7 +624,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
 
       if (!(member->flags & CHFL_BAN_CHECKED))
       {
-        if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
+        if (is_banned(channel, client) || is_extbanned(channel, client, EXTBAN_MUTE))
         {
           member->flags |= (CHFL_BAN_CHECKED | CHFL_BAN_SILENCED);
           return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -622,7 +633,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
         member->flags |= CHFL_BAN_CHECKED;
       }
     }
-    else if (is_banned(channel, client, NULL) || is_banned(channel, client, &extban_mute))
+    else if (is_banned(channel, client) || is_extbanned(channel, client, EXTBAN_MUTE))
       return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 

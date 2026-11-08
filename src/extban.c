@@ -8,120 +8,190 @@
  * \brief Implements extended channel bans.
  */
 
-#include <string.h>
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "io.h"
 #include "io_string.h"
-#include "client.h"
+
+#include "channel.h"
+#include "channel_mode.h"
 #include "extban.h"
 #include "isupport.h"
 
+enum { EXTBAN_CAPACITY = 52 };
+
 static const char extban_prefix_char = '$';
 
-static list_t extban_list;
-static uint32_t matching_mask, acting_mask;
-
-static uint32_t
-_extban_find_mask(void)
+struct extban_slot
 {
-  uint32_t used = 0;
+  const struct Extban *definition;
+  enum extban_type type;
+};
 
+static struct extban_slot extban_table[EXTBAN_CAPACITY];
+static uint64_t matching_mask, acting_mask;
+
+uint64_t EXTBAN_JOIN;
+uint64_t EXTBAN_KNOCK;
+uint64_t EXTBAN_MUTE;
+uint64_t EXTBAN_NICK;
+
+static int
+_extban_char_to_index(unsigned char character)
+{
+  if (character >= 'A' && character <= 'Z')
+    return character - 'A';
+  if (character >= 'a' && character <= 'z')
+    return character - 'a' + 26;
+
+  return -1;
+}
+
+static unsigned char
+_extban_index_to_char(size_t index)
+{
+  assert(index < EXTBAN_CAPACITY);
+  return index < 26 ? 'A' + index : 'a' + index - 26;
+}
+
+static uint64_t
+_extban_char_to_flag(unsigned char character)
+{
+  const int index = _extban_char_to_index(character);
+  return index < 0 ? 0 : UINT64_C(1) << index;
+}
+
+static void
+_extban_invalidate_ban_caches(void)
+{
   list_node_t *node;
-  LIST_FOREACH(node, extban_list.head)
+
+  LIST_FOREACH(node, channel_get_list()->head)
   {
-    const struct Extban *const extban = node->data;
-    used |= extban->flag;
-  }
-
-  uint32_t i;
-  for (i = 1; (i < EXTBAN_MASK) && (used & i); i <<= 1)
-    ;
-
-  return i;
-}
-
-void
-extban_init(void)
-{
-  extban_add(&extban_account);
-  extban_add(&extban_channel);
-  extban_add(&extban_fingerprint);
-  extban_add(&extban_gecos);
-  extban_add(&extban_join);
-  extban_add(&extban_knock);
-  extban_add(&extban_mute);
-  extban_add(&extban_nick);
-  extban_add(&extban_operclass);
-  extban_add(&extban_server);
-  extban_add(&extban_usermode);
-
-  const char *ptr = extban_get_isupport();
-  if (ptr)
-  {
-    isupport_add("EXTBAN", "%s", ptr);
-    isupport_add("ACCOUNTEXTBAN", "%c", extban_account.character); /* XXX - extban modules still static */
+    struct Channel *const channel = node->data;
+    clear_ban_cache_list(&channel->member_list);
   }
 }
 
-void
-extban_add(struct Extban *extban)
+static void
+_extban_update_isupport(void)
 {
-  const uint32_t mask = _extban_find_mask();
-  if (mask == 0)
+  char value[EXTBAN_CAPACITY + sizeof("$,")];
+  size_t length = 0;
+
+  value[length++] = extban_prefix_char;
+  value[length++] = ',';
+
+  for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
+    if (extban_table[i].definition)
+      value[length++] = extban_table[i].definition->character;
+
+  if (length == 2)
+  {
+    isupport_delete("EXTBAN");
     return;
-
-  extban->flag = mask;
-  list_add(extban, &extban->node, &extban_list);
-
-  if (extban->type & EXTBAN_MATCHING)
-    matching_mask |= mask;
-  if (extban->type & EXTBAN_ACTING)
-    acting_mask |= mask;
-}
-
-void
-extban_del(struct Extban *extban)
-{
-  if (extban->flag == 0)
-    return;
-
-  list_remove(&extban->node, &extban_list);
-
-  matching_mask &= ~extban->flag;
-  acting_mask &= ~extban->flag;
-}
-
-struct Extban *
-extban_find(unsigned char c)
-{
-  list_node_t *node;
-
-  LIST_FOREACH(node, extban_list.head)
-  {
-    struct Extban *const extban = node->data;
-    if (extban->character == c)
-      return extban;
   }
 
-  return NULL;
+  value[length] = '\0';
+  const isupport_result_t result = isupport_add("EXTBAN", "%s", value);
+  assert(result == ISUPPORT_SUCCESS);
+  (void)result;
 }
 
-struct Extban *
-extban_find_flag(uint32_t flag)
+extban_result_t
+extban_register(const struct Extban *extban)
 {
-  list_node_t *node;
+  if (extban == NULL)
+    return EXTBAN_INVALID_ARGUMENT;
 
-  LIST_FOREACH(node, extban_list.head)
+  const int index = _extban_char_to_index(extban->character);
+  const uint32_t allowed_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX;
+  if (index < 0 ||
+      (extban->type != EXTBAN_MATCHING && extban->type != EXTBAN_ACTING) ||
+      extban->types == 0 || (extban->types & ~allowed_types) ||
+      (extban->type == EXTBAN_MATCHING && extban->matches == NULL) ||
+      (extban->type == EXTBAN_ACTING && extban->matches != NULL))
+    return EXTBAN_INVALID_ARGUMENT;
+
+  struct extban_slot *const slot = &extban_table[index];
+  if (slot->definition)
+    return EXTBAN_ALREADY_REGISTERED;
+  if (slot->type != EXTBAN_NONE && slot->type != extban->type)
+    return EXTBAN_TYPE_CONFLICT;
+
+  if (extban->flag_out)
+    for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
+      if (extban_table[i].definition && extban_table[i].definition->flag_out == extban->flag_out)
+        return EXTBAN_INVALID_ARGUMENT;
+
+  const uint64_t flag = UINT64_C(1) << index;
+  slot->definition = extban;
+  slot->type = extban->type;
+
+  if (extban->type == EXTBAN_MATCHING)
+    matching_mask |= flag;
+  else
+    acting_mask |= flag;
+
+  if (extban->flag_out)
+    *extban->flag_out = flag;
+
+  _extban_invalidate_ban_caches();
+  _extban_update_isupport();
+  return EXTBAN_SUCCESS;
+}
+
+extban_result_t
+extban_unregister(const struct Extban *extban)
+{
+  if (extban == NULL)
+    return EXTBAN_INVALID_ARGUMENT;
+
+  const int index = _extban_char_to_index(extban->character);
+  if (index < 0)
+    return EXTBAN_INVALID_ARGUMENT;
+
+  struct extban_slot *const slot = &extban_table[index];
+  if (slot->definition != extban)
+    return EXTBAN_NOT_FOUND;
+
+  slot->definition = NULL;
+  if (extban->flag_out)
+    *extban->flag_out = 0;
+
+  _extban_invalidate_ban_caches();
+  _extban_update_isupport();
+  return EXTBAN_SUCCESS;
+}
+
+const struct Extban *
+extban_find(unsigned char character)
+{
+  const int index = _extban_char_to_index(character);
+  return index < 0 ? NULL : extban_table[index].definition;
+}
+
+const struct Extban *
+extban_find_flag(uint64_t flag)
+{
+  if (flag == 0 || (flag & (flag - 1)))
+    return NULL;
+
+  size_t index = 0;
+
+  while (flag > 1)
   {
-    struct Extban *const extban = node->data;
-    if (extban->flag == flag)
-      return extban;
+    flag >>= 1;
+    ++index;
   }
 
-  return NULL;
+  return index < EXTBAN_CAPACITY ? extban_table[index].definition : NULL;
 }
 
 enum extban_type
-extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
+extban_parse(const char *mask, uint64_t *input_extbans, size_t *offset)
 {
   *input_extbans = *offset = 0;
 
@@ -132,7 +202,7 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
   if (extban == NULL)
     return EXTBAN_INVALID;
 
-  *input_extbans |= extban->flag;
+  *input_extbans |= _extban_char_to_flag(extban->character);
   *offset += 3;
   mask += 3;
 
@@ -155,95 +225,64 @@ extban_parse(const char *mask, uint32_t *input_extbans, size_t *offset)
   if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
     return EXTBAN_INVALID;
 
-  *input_extbans |= extban->flag;
+  *input_extbans |= _extban_char_to_flag(extban->character);
   *offset += 2;
   return EXTBAN_MATCHING;
 }
 
 size_t
-extban_format(uint32_t e, char *buf)
+extban_format(uint64_t flags, char *buffer)
 {
+  static const enum extban_type types[] = { EXTBAN_ACTING, EXTBAN_MATCHING };
   size_t written = 0;
 
-  list_node_t *node;
-  LIST_FOREACH(node, extban_list.head)
+  for (size_t type = 0; type < IO_ARRAY_LENGTH(types); ++type)
   {
-    const struct Extban *const extban = node->data;
-    if (extban->type != EXTBAN_ACTING || !(extban->flag & e))
-      continue;
-
-    if (written == 0)
+    for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
     {
-      ++written;
-      *buf++ = extban_prefix_char;
+      if (extban_table[i].type != types[type] || !(flags & (UINT64_C(1) << i)))
+        continue;
+
+      if (written == 0)
+        buffer[written++] = extban_prefix_char;
+
+      buffer[written++] = _extban_index_to_char(i);
+      buffer[written++] = ':';
+      break;
     }
-
-    *buf++ = extban->character;
-    *buf++ = ':';
-    written += 2;
-
-    break;
-  }
-
-  LIST_FOREACH(node, extban_list.head)
-  {
-    const struct Extban *const extban = node->data;
-    if (extban->type != EXTBAN_MATCHING || !(extban->flag & e))
-      continue;
-
-    if (written == 0)
-    {
-      ++written;
-      *buf++ = extban_prefix_char;
-    }
-
-    *buf++ = extban->character;
-    *buf++ = ':';
-    written += 2;
-
-    break;
   }
 
   return written;
 }
 
-uint32_t
+uint64_t
 extban_matching_mask(void)
 {
   return matching_mask;
 }
 
-uint32_t
+uint64_t
 extban_acting_mask(void)
 {
   return acting_mask;
 }
 
 const char *
-extban_get_isupport(void)
+extban_result_to_string(extban_result_t result)
 {
-  if (list_is_empty(&extban_list))
-    return NULL;
-
-  char extban_chars[256] = { 0 };
-
-  list_node_t *node;
-  LIST_FOREACH(node, extban_list.head)
+  switch (result)
   {
-    const struct Extban *const extban = node->data;
-    extban_chars[extban->character] = extban->character;
+    case EXTBAN_SUCCESS:
+      return "Success";
+    case EXTBAN_ALREADY_REGISTERED:
+      return "Character already registered";
+    case EXTBAN_NOT_FOUND:
+      return "Definition not registered";
+    case EXTBAN_INVALID_ARGUMENT:
+      return "Invalid definition";
+    case EXTBAN_TYPE_CONFLICT:
+      return "Character already assigned to another extban type";
   }
 
-  static char buf[sizeof(extban_chars) + 3 /* +3 = $,\0 */ ];
-  char *p = buf;
-  *p++ = extban_prefix_char;
-  *p++ = ',';
-
-  for (size_t i = 0; i < sizeof(extban_chars); ++i)
-    if (extban_chars[i])
-      *p++ = extban_chars[i];
-
-  *p = '\0';
-
-  return buf;
+  return "Unknown error";
 }

@@ -18,10 +18,10 @@
 
 static const struct Extban extban_knock =
 {
-  .character = 'K',
-  .type = EXTBAN_ACTING,
-  .types = CHFL_BAN | CHFL_EXCEPTION,
-  .flag_out = &EXTBAN_KNOCK
+  .letter = 'K',
+  .kind = EXTBAN_KIND_ACTING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION,
+  .flag_binding = &EXTBAN_KNOCK
 };
 
 static bool

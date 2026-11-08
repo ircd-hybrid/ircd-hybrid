@@ -19,24 +19,23 @@
 #include "extban.h"
 #include "ircd_module.h"
 
-static enum extban_match
-_extban_operclass_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+static bool
+_extban_operclass_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
   if (client_is_local(client) && client_is_oper(client))
   {
-    const char *class_name = client_get_class_name(client);
-    if (match(ban->host, class_name) == 0)
-      return EXTBAN_MATCH;
+    const char *const class_name = client_get_class_name(client);
+    return match(ban->extban_parameter, class_name) == 0;
   }
 
-  return EXTBAN_NO_MATCH;
+  return false;
 }
 
 static const struct Extban extban_operclass =
 {
-  .character = 'o',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .letter = 'o',
+  .kind = EXTBAN_KIND_MATCHING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
   .matches = _extban_operclass_matches
 };
 

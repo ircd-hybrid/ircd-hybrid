@@ -18,10 +18,10 @@
 
 static const struct Extban extban_nick =
 {
-  .character = 'n',
-  .type = EXTBAN_ACTING,
-  .types = CHFL_BAN | CHFL_EXCEPTION,
-  .flag_out = &EXTBAN_NICK
+  .letter = 'n',
+  .kind = EXTBAN_KIND_ACTING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION,
+  .flag_binding = &EXTBAN_NICK
 };
 
 static bool

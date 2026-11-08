@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "io_string.h"
 #include "module.h"
 
 #include "channel.h"
@@ -20,49 +21,77 @@
 #include "ircd_module.h"
 #include "user_mode.h"
 
-static enum extban_match
-_extban_usermode_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+struct extban_usermode_constraints
 {
-  user_mode_action_t action = USER_MODE_ACTION_ADD;
-  uint64_t modes_del = 0, modes_add = 0;
+  uint64_t required_modes;
+  uint64_t forbidden_modes;
+};
 
-  for (const char *m = ban->host; *m; ++m)
+static bool
+_extban_usermode_parse_parameter(const char *parameter, struct extban_usermode_constraints *constraints_out)
+{
+  if (string_is_empty(parameter))
+    return false;
+
+  struct extban_usermode_constraints constraints = { 0 };
+  const char *cursor = parameter;
+  bool require_modes = true;
+
+  while (*cursor)
   {
-    switch (*m)
-    {
-      case '+':
-        action = USER_MODE_ACTION_ADD;
-        continue;
-      case '-':
-        action = USER_MODE_ACTION_DEL;
-        continue;
-      default:
-      {
-        const struct UserMode *const mode = user_mode_find(*m);
-        if (mode == NULL)
-          continue;
+    if (*cursor == '+' || *cursor == '-')
+      require_modes = *cursor++ == '+';
 
-        if (action == USER_MODE_ACTION_ADD)
-          modes_add |= mode->mode_bit;
-        else
-          modes_del |= mode->mode_bit;
-      }
+    const char *const group_start = cursor;
+    for (; *cursor && *cursor != '+' && *cursor != '-'; ++cursor)
+    {
+      const struct UserMode *const mode = user_mode_find(*cursor);
+      if (mode == NULL)
+        return false;
+
+      if (require_modes)
+        constraints.required_modes |= mode->mode_bit;
+      else
+        constraints.forbidden_modes |= mode->mode_bit;
     }
+
+    if (cursor == group_start)
+      return false;
   }
 
+  if (constraints.required_modes & constraints.forbidden_modes)
+    return false;
 
-  if ((client->user_mode_flags & modes_add) == modes_add &&
-      (client->user_mode_flags & modes_del) == 0)
-    return EXTBAN_MATCH;
+  if (constraints_out)
+    *constraints_out = constraints;
 
-  return EXTBAN_NO_MATCH;
+  return true;
+}
+
+static bool
+_extban_usermode_validate_parameter(const char *parameter)
+{
+  return _extban_usermode_parse_parameter(parameter, NULL);
+}
+
+static bool
+_extban_usermode_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
+{
+  struct extban_usermode_constraints constraints;
+  if (!_extban_usermode_parse_parameter(ban->extban_parameter, &constraints))
+    return false;
+
+  return (client->user_mode_flags & constraints.required_modes) == constraints.required_modes &&
+         (client->user_mode_flags & constraints.forbidden_modes) == 0;
 }
 
 static const struct Extban extban_usermode =
 {
-  .character = 'u',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .letter = 'u',
+  .kind = EXTBAN_KIND_MATCHING,
+  .parameter_case_sensitive = true,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .validate_parameter = _extban_usermode_validate_parameter,
   .matches = _extban_usermode_matches
 };
 

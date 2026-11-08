@@ -19,10 +19,10 @@
 
 static const struct Extban extban_mute =
 {
-  .character = 'm',
-  .type = EXTBAN_ACTING,
-  .types = CHFL_BAN | CHFL_EXCEPTION,
-  .flag_out = &EXTBAN_MUTE
+  .letter = 'm',
+  .kind = EXTBAN_KIND_ACTING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION,
+  .flag_binding = &EXTBAN_MUTE
 };
 
 static bool

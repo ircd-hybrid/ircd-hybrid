@@ -411,16 +411,19 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 }
 
 static bool
-_ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+_ban_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
+  if (ban->extban_opaque)
+    return false;
+
   /* Is a matching extban, call custom match handler */
-  if (ban->extban & extban_matching_mask())
+  if (ban->extban_flags & extban_known_matching_mask())
   {
-    const struct Extban *const extban = extban_find_flag(ban->extban & extban_matching_mask());
+    const struct Extban *const extban = extban_find_by_flag(ban->extban_flags & extban_known_matching_mask());
     if (extban == NULL || extban->matches == NULL)
       return false;
 
-    return extban->matches(client, channel, ban) == EXTBAN_MATCH;
+    return extban->matches(client, channel, ban);
   }
 
   if (match(ban->name, client->name) || match(ban->user, client->username))
@@ -435,18 +438,18 @@ _ban_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
 }
 
 bool
-find_bmask(struct Client *client, struct Channel *channel, const list_t *list, uint64_t extban_flag)
+find_bmask(const struct Client *client, const struct Channel *channel, const list_t *list, uint64_t extban_flag)
 {
-  list_node_t *node;
+  const list_node_t *node;
 
   LIST_FOREACH(node, list->head)
   {
-    struct Ban *const ban = node->data;
+    const struct Ban *const ban = node->data;
 
     /* Looking for a specific type of extban? */
     if (extban_flag)
     {
-      if (!(ban->extban & extban_flag))
+      if (!(ban->extban_flags & extban_flag))
         continue;
     }
     else
@@ -455,35 +458,32 @@ find_bmask(struct Client *client, struct Channel *channel, const list_t *list, u
        * Acting extbans have their own time they act and are not general purpose bans,
        * so skip them unless we are hunting them.
        */
-      if (ban->extban & extban_acting_mask())
+      if (ban->extban_flags & extban_known_acting_mask())
         continue;
     }
 
-    bool matches = _ban_matches(client, channel, ban);
-    if (matches == false)
-      continue;
-
-    return true;
+    if (_ban_matches(client, channel, ban))
+      return true;
   }
 
   return false;
 }
 
 static bool
-_channel_is_banned(struct Channel *channel, struct Client *client, uint64_t extban_flag)
+_channel_is_banned(const struct Channel *channel, const struct Client *client, uint64_t extban_flag)
 {
   return find_bmask(client, channel, &channel->ban_list, extban_flag) &&
          !find_bmask(client, channel, &channel->exception_list, extban_flag);
 }
 
 bool
-is_banned(struct Channel *channel, struct Client *client)
+is_banned(const struct Channel *channel, const struct Client *client)
 {
   return _channel_is_banned(channel, client, 0);
 }
 
 bool
-is_extbanned(struct Channel *channel, struct Client *client, uint64_t extban_flag)
+is_extbanned(const struct Channel *channel, const struct Client *client, uint64_t extban_flag)
 {
   return extban_flag && _channel_is_banned(channel, client, extban_flag);
 }

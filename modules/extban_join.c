@@ -18,10 +18,10 @@
 
 static const struct Extban extban_join =
 {
-  .character = 'j',
-  .type = EXTBAN_ACTING,
-  .types = CHFL_BAN | CHFL_EXCEPTION,
-  .flag_out = &EXTBAN_JOIN
+  .letter = 'j',
+  .kind = EXTBAN_KIND_ACTING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION,
+  .flag_binding = &EXTBAN_JOIN
 };
 
 static bool

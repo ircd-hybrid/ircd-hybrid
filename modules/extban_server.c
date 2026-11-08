@@ -19,20 +19,17 @@
 #include "extban.h"
 #include "ircd_module.h"
 
-static enum extban_match
-_extban_server_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+static bool
+_extban_server_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
-  if (match(ban->host, me.name) == 0)
-    return EXTBAN_MATCH;
-
-  return EXTBAN_NO_MATCH;
+  return match(ban->extban_parameter, me.name) == 0;
 }
 
 static const struct Extban extban_server =
 {
-  .character = 's',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_INVEX,
+  .letter = 's',
+  .kind = EXTBAN_KIND_MATCHING,
+  .list_types = CHFL_BAN | CHFL_INVEX,
   .matches = _extban_server_matches
 };
 

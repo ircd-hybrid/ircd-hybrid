@@ -19,42 +19,35 @@
 #include "extban.h"
 #include "ircd_module.h"
 
-static enum extban_match
-_extban_channel_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+static bool
+_extban_channel_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
-  const char *name = ban->host;
+  const char *channel_name = ban->extban_parameter;
 
-  const int rank = channel_member_prefix_to_rank(*name);
-  if (rank != CHACCESS_PEON)
-    ++name;
+  const int required_rank = channel_member_prefix_to_rank(*channel_name);
+  if (required_rank != CHACCESS_PEON)
+    ++channel_name;
 
-  const struct Channel *const referenced_channel = channel_find(name);
+  const struct Channel *const referenced_channel = channel_find(channel_name);
   if (referenced_channel == NULL)
-    return EXTBAN_NO_MATCH;
+    return false;
 
   /*
    * If the channel in question is either +s, or +p, only allow a match against
    * the source channel to prevent channel probing.
    */
   if (!channel_is_public(referenced_channel) && referenced_channel != channel)
-    return EXTBAN_NO_MATCH;
+    return false;
 
   const struct ChannelMember *const member = channel_member_find(referenced_channel, client);
-  if (member)
-  {
-    if (rank > channel_member_get_highest_rank(member))
-      return EXTBAN_NO_MATCH;
-    return EXTBAN_MATCH;
-  }
-
-  return EXTBAN_NO_MATCH;
+  return member && required_rank <= channel_member_get_highest_rank(member);
 }
 
 static const struct Extban extban_channel =
 {
-  .character = 'c',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .letter = 'c',
+  .kind = EXTBAN_KIND_MATCHING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
   .matches = _extban_channel_matches
 };
 

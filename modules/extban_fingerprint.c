@@ -20,21 +20,17 @@
 #include "extban.h"
 #include "ircd_module.h"
 
-static enum extban_match
-_extban_fingerprint_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+static bool
+_extban_fingerprint_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
-  if (!string_is_empty(client->tls_certfp))
-    if (match(ban->host, client->tls_certfp) == 0)
-      return EXTBAN_MATCH;
-
-  return EXTBAN_NO_MATCH;
+  return !string_is_empty(client->tls_certfp) && match(ban->extban_parameter, client->tls_certfp) == 0;
 }
 
 static const struct Extban extban_fingerprint =
 {
-  .character = 'z',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .letter = 'z',
+  .kind = EXTBAN_KIND_MATCHING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
   .matches = _extban_fingerprint_matches
 };
 

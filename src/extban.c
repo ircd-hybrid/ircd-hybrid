@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "io.h"
 #include "io_string.h"
@@ -24,14 +25,9 @@ enum { EXTBAN_CAPACITY = 52 };
 
 static const char extban_prefix_char = '$';
 
-struct extban_slot
-{
-  const struct Extban *definition;
-  enum extban_type type;
-};
-
-static struct extban_slot extban_table[EXTBAN_CAPACITY];
-static uint64_t matching_mask, acting_mask;
+static const struct Extban *extban_table[EXTBAN_CAPACITY];
+static uint64_t known_matching_mask, known_acting_mask;
+static uint64_t case_sensitive_parameter_mask;
 
 uint64_t EXTBAN_JOIN;
 uint64_t EXTBAN_KNOCK;
@@ -39,28 +35,55 @@ uint64_t EXTBAN_MUTE;
 uint64_t EXTBAN_NICK;
 
 static int
-_extban_char_to_index(unsigned char character)
+_extban_letter_to_index(unsigned char letter)
 {
-  if (character >= 'A' && character <= 'Z')
-    return character - 'A';
-  if (character >= 'a' && character <= 'z')
-    return character - 'a' + 26;
+  if (letter >= 'A' && letter <= 'Z')
+    return letter - 'A';
+  if (letter >= 'a' && letter <= 'z')
+    return letter - 'a' + 26;
 
   return -1;
 }
 
 static unsigned char
-_extban_index_to_char(size_t index)
+_extban_index_to_letter(int index)
 {
-  assert(index < EXTBAN_CAPACITY);
+  assert(index >= 0 && index < EXTBAN_CAPACITY);
   return index < 26 ? 'A' + index : 'a' + index - 26;
 }
 
 static uint64_t
-_extban_char_to_flag(unsigned char character)
+_extban_letter_to_flag(unsigned char letter)
 {
-  const int index = _extban_char_to_index(character);
+  const int index = _extban_letter_to_index(letter);
   return index < 0 ? 0 : UINT64_C(1) << index;
+}
+
+static int
+_extban_flag_to_index(uint64_t flag)
+{
+  if (flag == 0 || (flag & (flag - 1)))
+    return -1;
+
+  int index = 0;
+
+  while (flag > 1)
+  {
+    flag >>= 1;
+    ++index;
+  }
+
+  return index < EXTBAN_CAPACITY ? index : -1;
+}
+
+static bool
+_extban_flags_are_valid(uint64_t flags)
+{
+  const uint64_t matching_flags = flags & known_matching_mask;
+  const uint64_t acting_flags = flags & known_acting_mask;
+
+  return (flags & ~(known_matching_mask | known_acting_mask)) == 0 &&
+         (matching_flags & (matching_flags - 1)) == 0 && (acting_flags & (acting_flags - 1)) == 0;
 }
 
 static void
@@ -71,7 +94,7 @@ _extban_invalidate_ban_caches(void)
   LIST_FOREACH(node, channel_get_list()->head)
   {
     struct Channel *const channel = node->data;
-    clear_ban_cache_list(&channel->member_list);
+    clear_ban_cache_list(&channel->local_member_list);
   }
 }
 
@@ -84,9 +107,9 @@ _extban_update_isupport(void)
   value[length++] = extban_prefix_char;
   value[length++] = ',';
 
-  for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
-    if (extban_table[i].definition)
-      value[length++] = extban_table[i].definition->character;
+  for (size_t entry_index = 0; entry_index < EXTBAN_CAPACITY; ++entry_index)
+    if (extban_table[entry_index])
+      value[length++] = extban_table[entry_index]->letter;
 
   if (length == 2)
   {
@@ -106,37 +129,43 @@ extban_register(const struct Extban *extban)
   if (extban == NULL)
     return EXTBAN_INVALID_ARGUMENT;
 
-  const int index = _extban_char_to_index(extban->character);
-  const uint32_t allowed_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX;
+  const int index = _extban_letter_to_index(extban->letter);
+  const uint32_t allowed_list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX;
   if (index < 0 ||
-      (extban->type != EXTBAN_MATCHING && extban->type != EXTBAN_ACTING) ||
-      extban->types == 0 || (extban->types & ~allowed_types) ||
-      (extban->type == EXTBAN_MATCHING && extban->matches == NULL) ||
-      (extban->type == EXTBAN_ACTING && extban->matches != NULL))
+      (extban->kind != EXTBAN_KIND_MATCHING && extban->kind != EXTBAN_KIND_ACTING) ||
+      extban->list_types == 0 || (extban->list_types & ~allowed_list_types) ||
+      (extban->kind == EXTBAN_KIND_MATCHING && extban->matches == NULL) ||
+      (extban->kind == EXTBAN_KIND_ACTING && (extban->matches != NULL || extban->parameter_case_sensitive)))
     return EXTBAN_INVALID_ARGUMENT;
 
-  struct extban_slot *const slot = &extban_table[index];
-  if (slot->definition)
+  if (extban_table[index])
     return EXTBAN_ALREADY_REGISTERED;
-  if (slot->type != EXTBAN_NONE && slot->type != extban->type)
-    return EXTBAN_TYPE_CONFLICT;
-
-  if (extban->flag_out)
-    for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
-      if (extban_table[i].definition && extban_table[i].definition->flag_out == extban->flag_out)
-        return EXTBAN_INVALID_ARGUMENT;
 
   const uint64_t flag = UINT64_C(1) << index;
-  slot->definition = extban;
-  slot->type = extban->type;
+  const uint64_t incompatible_mask = extban->kind == EXTBAN_KIND_MATCHING ? known_acting_mask : known_matching_mask;
+  if (flag & incompatible_mask)
+    return EXTBAN_KIND_CONFLICT;
 
-  if (extban->type == EXTBAN_MATCHING)
-    matching_mask |= flag;
+  if (extban->flag_binding)
+    for (size_t entry_index = 0; entry_index < EXTBAN_CAPACITY; ++entry_index)
+      if (extban_table[entry_index] &&
+          extban_table[entry_index]->flag_binding == extban->flag_binding)
+        return EXTBAN_INVALID_ARGUMENT;
+
+  extban_table[index] = extban;
+
+  if (extban->kind == EXTBAN_KIND_MATCHING)
+    known_matching_mask |= flag;
   else
-    acting_mask |= flag;
+    known_acting_mask |= flag;
 
-  if (extban->flag_out)
-    *extban->flag_out = flag;
+  if (extban->parameter_case_sensitive)
+    case_sensitive_parameter_mask |= flag;
+  else
+    case_sensitive_parameter_mask &= ~flag;
+
+  if (extban->flag_binding)
+    *extban->flag_binding = flag;
 
   _extban_invalidate_ban_caches();
   _extban_update_isupport();
@@ -149,17 +178,16 @@ extban_unregister(const struct Extban *extban)
   if (extban == NULL)
     return EXTBAN_INVALID_ARGUMENT;
 
-  const int index = _extban_char_to_index(extban->character);
+  const int index = _extban_letter_to_index(extban->letter);
   if (index < 0)
     return EXTBAN_INVALID_ARGUMENT;
 
-  struct extban_slot *const slot = &extban_table[index];
-  if (slot->definition != extban)
+  if (extban_table[index] != extban)
     return EXTBAN_NOT_FOUND;
 
-  slot->definition = NULL;
-  if (extban->flag_out)
-    *extban->flag_out = 0;
+  extban_table[index] = NULL;
+  if (extban->flag_binding)
+    *extban->flag_binding = 0;
 
   _extban_invalidate_ban_caches();
   _extban_update_isupport();
@@ -167,104 +195,153 @@ extban_unregister(const struct Extban *extban)
 }
 
 const struct Extban *
-extban_find(unsigned char character)
+extban_find_by_letter(unsigned char letter)
 {
-  const int index = _extban_char_to_index(character);
-  return index < 0 ? NULL : extban_table[index].definition;
+  const int index = _extban_letter_to_index(letter);
+  return index < 0 ? NULL : extban_table[index];
 }
 
 const struct Extban *
-extban_find_flag(uint64_t flag)
+extban_find_by_flag(uint64_t flag)
 {
-  if (flag == 0 || (flag & (flag - 1)))
-    return NULL;
+  const int index = _extban_flag_to_index(flag);
+  return index < 0 ? NULL : extban_table[index];
+}
 
-  size_t index = 0;
+bool
+extban_validate_local(uint64_t flags, uint32_t list_type, const char *parameter)
+{
+  if (flags == 0 || !_extban_flags_are_valid(flags) || string_is_empty(parameter) ||
+      (list_type != CHFL_BAN && list_type != CHFL_EXCEPTION && list_type != CHFL_INVEX))
+    return false;
 
-  while (flag > 1)
+  const uint64_t component_flags[] = { flags & known_acting_mask, flags & known_matching_mask };
+
+  for (size_t entry_index = 0; entry_index < IO_ARRAY_LENGTH(component_flags); ++entry_index)
   {
-    flag >>= 1;
-    ++index;
+    if (component_flags[entry_index] == 0)
+      continue;
+
+    const struct Extban *const extban = extban_find_by_flag(component_flags[entry_index]);
+    if (extban == NULL || !(extban->list_types & list_type) ||
+        (extban->validate_parameter && !extban->validate_parameter(parameter)))
+      return false;
   }
 
-  return index < EXTBAN_CAPACITY ? extban_table[index].definition : NULL;
+  return true;
 }
 
-enum extban_type
-extban_parse(const char *mask, uint64_t *input_extbans, size_t *offset)
+extban_parse_result_t
+extban_parse(const char *mask)
 {
-  *input_extbans = *offset = 0;
+  if (mask == NULL)
+    return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
+  if (mask[0] != extban_prefix_char)
+    return (extban_parse_result_t){ .status = EXTBAN_PARSE_NOT_EXTBAN };
+  if (!io_ascii_is_alpha(mask[1]) || mask[2] != ':' || mask[3] == '\0')
+    return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
 
-  if (!(mask[0] == extban_prefix_char && io_ascii_is_alpha(mask[1]) && mask[2] == ':'))
-    return EXTBAN_NONE;
+  const char *const parameter = mask + 3;
+  for (const char *cursor = parameter; *cursor; ++cursor)
+    if (io_ascii_is_space(*cursor))
+      return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
 
-  const struct Extban *extban = extban_find(*(mask + 1));
+  const struct Extban *extban = extban_find_by_letter(mask[1]);
   if (extban == NULL)
-    return EXTBAN_INVALID;
+    return (extban_parse_result_t){ .status = EXTBAN_PARSE_UNSUPPORTED };
 
-  *input_extbans |= _extban_char_to_flag(extban->character);
-  *offset += 3;
-  mask += 3;
+  uint64_t flags = _extban_letter_to_flag(extban->letter);
+  size_t parameter_offset = 3;
 
-  /* Matching extbans take a special parameter, so stop reading */
-  if (extban->type == EXTBAN_MATCHING)
-    return EXTBAN_MATCHING;
-
-  if (!(io_ascii_is_alpha(mask[0]) && mask[1] == ':'))
-    return EXTBAN_ACTING;
-
-  extban = extban_find(mask[0]);
-  if (extban == NULL)
-    return EXTBAN_INVALID;
-
-  /* Two acting extbans make no sense */
-  if (extban->type == EXTBAN_ACTING)
-    return EXTBAN_INVALID;
-
-  /* Check parameter */
-  if (extban->is_valid && extban->is_valid(mask) == EXTBAN_INVALID)
-    return EXTBAN_INVALID;
-
-  *input_extbans |= _extban_char_to_flag(extban->character);
-  *offset += 2;
-  return EXTBAN_MATCHING;
-}
-
-size_t
-extban_format(uint64_t flags, char *buffer)
-{
-  static const enum extban_type types[] = { EXTBAN_ACTING, EXTBAN_MATCHING };
-  size_t written = 0;
-
-  for (size_t type = 0; type < IO_ARRAY_LENGTH(types); ++type)
+  if (extban->kind == EXTBAN_KIND_ACTING)
   {
-    for (size_t i = 0; i < EXTBAN_CAPACITY; ++i)
+    if (parameter[0] == extban_prefix_char)
+      return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
+
+    if (io_ascii_is_alpha(parameter[0]) && parameter[1] == ':')
     {
-      if (extban_table[i].type != types[type] || !(flags & (UINT64_C(1) << i)))
-        continue;
+      if (parameter[2] == '\0')
+        return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
 
-      if (written == 0)
-        buffer[written++] = extban_prefix_char;
+      extban = extban_find_by_letter(parameter[0]);
+      if (extban == NULL)
+        return (extban_parse_result_t){ .status = EXTBAN_PARSE_UNSUPPORTED };
+      if (extban->kind != EXTBAN_KIND_MATCHING)
+        return (extban_parse_result_t){ .status = EXTBAN_PARSE_INVALID_SYNTAX };
 
-      buffer[written++] = _extban_index_to_char(i);
-      buffer[written++] = ':';
-      break;
+      flags |= _extban_letter_to_flag(extban->letter);
+      parameter_offset += 2;
     }
   }
 
-  return written;
+  return (extban_parse_result_t)
+  {
+    .status = EXTBAN_PARSE_SUCCESS,
+    .flags = flags,
+    .parameter_offset = parameter_offset
+  };
+}
+
+extban_result_t
+extban_format_prefix(uint64_t flags, char *buffer, size_t capacity, size_t *length_out)
+{
+  if (length_out)
+    *length_out = 0;
+  if (buffer == NULL)
+    return EXTBAN_INVALID_ARGUMENT;
+  if (capacity)
+    buffer[0] = '\0';
+  if (!_extban_flags_are_valid(flags))
+    return EXTBAN_INVALID_FLAGS;
+
+  const uint64_t component_flags[] = { flags & known_acting_mask, flags & known_matching_mask };
+  const size_t required_length = (flags != 0) + 2 * ((component_flags[0] != 0) + (component_flags[1] != 0));
+
+  if (capacity <= required_length)
+    return EXTBAN_BUFFER_TOO_SMALL;
+
+  size_t length = 0;
+  for (size_t entry_index = 0; entry_index < IO_ARRAY_LENGTH(component_flags); ++entry_index)
+  {
+    if (component_flags[entry_index] == 0)
+      continue;
+
+    if (length == 0)
+      buffer[length++] = extban_prefix_char;
+
+    buffer[length++] = _extban_index_to_letter(_extban_flag_to_index(component_flags[entry_index]));
+    buffer[length++] = ':';
+  }
+
+  buffer[length] = '\0';
+  if (length_out)
+    *length_out = length;
+
+  return EXTBAN_SUCCESS;
+}
+
+bool
+extban_parameters_equal(uint64_t flags, const char *lhs, const char *rhs)
+{
+  if (flags == 0 || !_extban_flags_are_valid(flags) || lhs == NULL || rhs == NULL)
+    return false;
+
+  if (flags & case_sensitive_parameter_mask)
+    return strcmp(lhs, rhs) == 0;
+
+  return io_strcasecmp(lhs, rhs) == 0;
 }
 
 uint64_t
-extban_matching_mask(void)
+extban_known_matching_mask(void)
 {
-  return matching_mask;
+  return known_matching_mask;
 }
 
 uint64_t
-extban_acting_mask(void)
+extban_known_acting_mask(void)
 {
-  return acting_mask;
+  return known_acting_mask;
 }
 
 const char *
@@ -275,13 +352,17 @@ extban_result_to_string(extban_result_t result)
     case EXTBAN_SUCCESS:
       return "Success";
     case EXTBAN_ALREADY_REGISTERED:
-      return "Character already registered";
+      return "Letter already registered";
     case EXTBAN_NOT_FOUND:
       return "Definition not registered";
     case EXTBAN_INVALID_ARGUMENT:
-      return "Invalid definition";
-    case EXTBAN_TYPE_CONFLICT:
-      return "Character already assigned to another extban type";
+      return "Invalid argument";
+    case EXTBAN_KIND_CONFLICT:
+      return "Letter already assigned to another extban kind";
+    case EXTBAN_INVALID_FLAGS:
+      return "Invalid flag combination";
+    case EXTBAN_BUFFER_TOO_SMALL:
+      return "Buffer too small";
   }
 
   return "Unknown error";

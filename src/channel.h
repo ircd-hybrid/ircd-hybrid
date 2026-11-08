@@ -78,11 +78,16 @@ enum { BANSTRLEN = 200 }; /* XXX */
 struct Ban
 {
   list_node_t node;
-  uint64_t extban;
+  uint64_t extban_flags;
+  bool extban_opaque;  /**< Unsupported remote extban retained without interpreting its parameter. */
   char banstr[BANSTRLEN];
   char name[NICKLEN + 1];
   char user[USERLEN + 1];
-  char host[HOSTLEN + 1];
+  union
+  {
+    char host[HOSTLEN + 1];
+    char extban_parameter[BANSTRLEN];
+  };
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
   size_t banstr_len;  /**< Cached string length of Ban::banstr */
   uintmax_t when;  /**< Time this ban has been set; real time */
@@ -103,9 +108,9 @@ extern void channel_set_mode_lock(struct Client *, struct Channel *, const char 
 extern void channel_set_topic(struct Channel *, const char *, const char *, uintmax_t, bool);
 extern void remove_ban(struct Ban *, list_t *);
 extern bool channel_is_valid_name(const char *, bool);
-extern bool find_bmask(struct Client *, struct Channel *, const list_t *, uint64_t);
-extern bool is_banned(struct Channel *, struct Client *);
-extern bool is_extbanned(struct Channel *, struct Client *, uint64_t);
+extern bool find_bmask(const struct Client *, const struct Channel *, const list_t *, uint64_t);
+extern bool is_banned(const struct Channel *, const struct Client *);
+extern bool is_extbanned(const struct Channel *, const struct Client *, uint64_t);
 extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Client *, struct ChannelMember *, unsigned int, const char *, bool, const char **);
 extern struct Channel *channel_create(const char *);
 extern struct Channel *channel_find(const char *);

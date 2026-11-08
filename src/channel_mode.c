@@ -64,145 +64,179 @@ check_string(char *s)
     strcpy(str, "*");
 }
 
-static const char *
-get_mask(const struct Ban *ban)
+static bool
+_ban_format_mask(struct Ban *ban)
 {
-  static char buf[MODEBUFLEN];
-  const size_t len = extban_format(ban->extban, buf);
+  size_t prefix_length;
+  if (extban_format_prefix(ban->extban_flags, ban->banstr, sizeof(ban->banstr), &prefix_length) != EXTBAN_SUCCESS)
+    return false;
 
-  assert(len <= sizeof(buf));
+  const size_t parameter_capacity = sizeof(ban->banstr) - prefix_length;
+  int formatted_length;
 
-  /* Matching extbans only use ban->host */
-  if (ban->extban & extban_matching_mask())
-    strlcpy(buf + len, ban->host, sizeof(buf) - len);
+  if (ban->extban_flags & extban_known_matching_mask())
+    formatted_length = snprintf(ban->banstr + prefix_length, parameter_capacity, "%s", ban->extban_parameter);
   else
-    snprintf(buf + len, sizeof(buf) - len, "%s!%s@%s", ban->name, ban->user, ban->host);
+    formatted_length = snprintf(ban->banstr + prefix_length, parameter_capacity, "%s!%s@%s",
+                                ban->name, ban->user, ban->host);
 
-  return buf;
+  if (formatted_length < 0 || (size_t)formatted_length >= parameter_capacity)
+    return false;
+
+  ban->banstr_len = prefix_length + (size_t)formatted_length;
+  return true;
+}
+
+static bool
+_ban_mask_equals(const struct Ban *ban, const char *mask)
+{
+  if (ban->extban_opaque)
+    return strcmp(ban->banstr, mask) == 0;
+
+  if (ban->extban_flags)
+  {
+    char prefix[EXTBAN_PREFIX_BUFFER_SIZE];
+    size_t prefix_length;
+    if (extban_format_prefix(ban->extban_flags, prefix, sizeof(prefix), &prefix_length) != EXTBAN_SUCCESS ||
+        strncmp(mask, prefix, prefix_length) != 0)
+      return false;
+
+    return extban_parameters_equal(ban->extban_flags, ban->banstr + prefix_length, mask + prefix_length);
+  }
+
+  return io_strcasecmp(ban->banstr, mask) == 0;
 }
 
 const char *
-add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
+add_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t list_type)
 {
+  const bool local = client_is_local_user(client);
+  struct Ban *ban = NULL;
   char mask[MODEBUFLEN];
-  char *maskptr = mask;
 
-  strlcpy(mask, banid, sizeof(mask));
+  if (strlcpy(mask, banid, sizeof(mask)) >= sizeof(mask))
+    goto invalid;
 
-  if (client_is_local_user(client))
-  {
-    unsigned int num_mask = list_length(&channel->ban_list) +
-                            list_length(&channel->exception_list) +
-                            list_length(&channel->invite_exception_list);
-
-    if (num_mask >= ((channel_has_mode(channel, MODE_EXTLIMIT)) ? ConfigChannel.max_bans_large : ConfigChannel.max_bans))
-    {
-      sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
-      return NULL;
-    }
-
+  if (local)
     collapse(mask);
-  }
 
-  uint64_t extbans;
-  size_t offset;
-  enum extban_type etype = extban_parse(mask, &extbans, &offset);
-  maskptr += offset;
+  const extban_parse_result_t parsed = extban_parse(mask);
+  if (parsed.status == EXTBAN_PARSE_INVALID_SYNTAX ||
+      (local && parsed.status == EXTBAN_PARSE_UNSUPPORTED))
+    goto invalid;
 
-  if (client_is_local_user(client))
-  {
-    if (etype == EXTBAN_INVALID)
-    {
-      sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
-      return NULL;
-    }
-
-    const uint64_t extban_acting = extbans & extban_acting_mask();
-    if (extban_acting)
-    {
-      const struct Extban *const extban = extban_find_flag(extban_acting);
-      if (extban == NULL || !(extban->types & type))
-      {
-        sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
-        return NULL;
-      }
-    }
-
-    const uint64_t extban_matching = extbans & extban_matching_mask();
-    if (extban_matching)
-    {
-      const struct Extban *const extban = extban_find_flag(extban_matching);
-      if (extban == NULL || !(extban->types & type))
-      {
-        sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, mask);
-        return NULL;
-      }
-    }
-  }
-
-  if (string_is_empty(maskptr))
+  char *const parameter = mask + parsed.parameter_offset;
+  if (local && parsed.status == EXTBAN_PARSE_SUCCESS &&
+      !extban_validate_local(parsed.flags, list_type, parameter))
+    goto invalid;
+  if (string_is_empty(parameter))
     return NULL;
 
-  struct Ban *const ban = io_calloc(sizeof(*ban));
-  ban->extban = extbans;
-  ban->when = io_time_get(IO_TIME_REALTIME_SEC);
+  ban = io_calloc(sizeof(*ban));
+  ban->extban_flags = parsed.flags;
+  ban->extban_opaque = parsed.status == EXTBAN_PARSE_UNSUPPORTED;
 
-  check_string(maskptr);
-
-  if (etype == EXTBAN_MATCHING)
-    /* Matching extbans have their own format, don't try to parse it */
-    strlcpy(ban->host, maskptr, sizeof(ban->host));
-  else
+  if (!ban->extban_opaque)
   {
-    struct nuh_split nuh =
+    if (ban->extban_flags & extban_known_matching_mask())
+      strlcpy(ban->extban_parameter, parameter, sizeof(ban->extban_parameter));
+    else
     {
-      .nuhmask = maskptr,
-      .nickptr = ban->name,
-      .userptr = ban->user,
-      .hostptr = ban->host,
-      .nicksize = sizeof(ban->name),
-      .usersize = sizeof(ban->user),
-      .hostsize = sizeof(ban->host)
-    };
+      check_string(parameter);
 
-    nuh_split(&nuh);
+      struct nuh_split nuh =
+      {
+        .nuhmask = parameter,
+        .nickptr = ban->name,
+        .userptr = ban->user,
+        .hostptr = ban->host,
+        .nicksize = sizeof(ban->name),
+        .usersize = sizeof(ban->user),
+        .hostsize = sizeof(ban->host)
+      };
 
-    address_parse_prefix(ban->host, &ban->addr, &ban->bits);
+      nuh_split(&nuh);
+      address_parse_prefix(ban->host, &ban->addr, &ban->bits);
+    }
   }
 
-  if (client_is_local_user(client))
-    ban->banstr_len = strlcpy(ban->banstr, get_mask(ban), sizeof(ban->banstr));
+  if (local)
+  {
+    if (!_ban_format_mask(ban))
+      goto invalid;
+  }
   else
+  {
     ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
+    if (ban->banstr_len >= sizeof(ban->banstr))
+      goto invalid;
+  }
 
+  struct Ban *replaced = NULL;
   list_node_t *node;
   LIST_FOREACH(node, list->head)
   {
-    const struct Ban *const tmp = node->data;
-    if (io_strcasecmp(tmp->banstr, ban->banstr) == 0)
+    struct Ban *const existing = node->data;
+    const bool equal = (existing->extban_opaque || ban->extban_opaque) ?
+      strcmp(existing->banstr, ban->banstr) == 0 : _ban_mask_equals(existing, ban->banstr);
+
+    if (!equal)
+      continue;
+
+    if (existing->extban_opaque && !ban->extban_opaque)
+    {
+      replaced = existing;
+      break;
+    }
+
+    io_free(ban);
+    return NULL;
+  }
+
+  if (local && replaced == NULL)
+  {
+    const size_t mask_count =
+      (size_t)list_length(&channel->ban_list) + list_length(&channel->exception_list) +
+      list_length(&channel->invite_exception_list);
+    const unsigned int limit = channel_has_mode(channel, MODE_EXTLIMIT) ?
+      ConfigChannel.max_bans_large : ConfigChannel.max_bans;
+
+    if (mask_count >= limit)
     {
       io_free(ban);
+      sendto_one_numeric(client, &me, ERR_BANLISTFULL, channel->name, banid);
       return NULL;
     }
   }
 
   clear_ban_cache_list(&channel->local_member_list);
 
+  ban->when = io_time_get(IO_TIME_REALTIME_SEC);
   if (client_is_user(client))
     snprintf(ban->who, sizeof(ban->who), "%s!%s@%s",
              client->name, client->username, client->host);
   else
     strlcpy(ban->who, client_get_visible_server_name(client), sizeof(ban->who));
 
-  list_add_tail(ban, &ban->node, list);
+  if (replaced)
+    remove_ban(replaced, list);
 
+  list_add_tail(ban, &ban->node, list);
   return ban->banstr;
+
+invalid:
+  io_free(ban);
+  if (local)
+    sendto_one_numeric(client, &me, ERR_INVALIDBAN, channel->name, banid);
+
+  return NULL;
 }
 
 static const char *
 del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
 {
   static char mask[MODEBUFLEN];
+  struct Ban *found = NULL;
   list_node_t *node;
 
   assert(banid);
@@ -212,17 +246,23 @@ del_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   LIST_FOREACH(node, list->head)
   {
     struct Ban *const ban = node->data;
-    if (io_strcasecmp(banid, ban->banstr) == 0)
+    if (strcmp(ban->banstr, banid) == 0)
     {
-      strlcpy(mask, ban->banstr, sizeof(mask));  /* caSe might be different in 'banid' */
-      clear_ban_cache_list(&channel->local_member_list);
-      remove_ban(ban, list);
-
-      return mask;
+      found = ban;
+      break;
     }
+
+    if (found == NULL && _ban_mask_equals(ban, banid))
+      found = ban;
   }
 
-  return NULL;
+  if (found == NULL)
+    return NULL;
+
+  strlcpy(mask, found->banstr, sizeof(mask));
+  clear_ban_cache_list(&channel->local_member_list);
+  remove_ban(found, list);
+  return mask;
 }
 
 const char *

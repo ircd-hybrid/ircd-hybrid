@@ -348,14 +348,14 @@ ircd_module_register_extban(const struct Extban *extban, char *error_message, si
   if (result == EXTBAN_SUCCESS)
     return true;
 
-  char character[sizeof("0xFF")];
-  if (io_ascii_is_alpha(extban->character))
-    snprintf(character, sizeof(character), "%c", extban->character);
+  char letter_text[sizeof("0xFF")];
+  if (io_ascii_is_alpha(extban->letter))
+    snprintf(letter_text, sizeof(letter_text), "%c", extban->letter);
   else
-    snprintf(character, sizeof(character), "0x%02X", (unsigned int)extban->character);
+    snprintf(letter_text, sizeof(letter_text), "0x%02X", (unsigned int)extban->letter);
 
   snprintf(error_message, error_message_size, "Cannot register extended ban %s: %s",
-           character, extban_result_to_string(result));
+           letter_text, extban_result_to_string(result));
   return false;
 }
 

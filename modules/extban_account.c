@@ -22,22 +22,17 @@
 #include "ircd_module.h"
 #include "isupport.h"
 
-static enum extban_match
-_extban_account_matches(struct Client *client, struct Channel *channel, struct Ban *ban)
+static bool
+_extban_account_matches(const struct Client *client, const struct Channel *channel, const struct Ban *ban)
 {
-  assert(client->account[0]);
-
-  if (client_has_account(client) && match(ban->host, client->account) == 0)
-    return EXTBAN_MATCH;
-
-  return EXTBAN_NO_MATCH;
+  return client_has_account(client) && match(ban->extban_parameter, client->account) == 0;
 }
 
 static const struct Extban extban_account =
 {
-  .character = 'a',
-  .type = EXTBAN_MATCHING,
-  .types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
+  .letter = 'a',
+  .kind = EXTBAN_KIND_MATCHING,
+  .list_types = CHFL_BAN | CHFL_EXCEPTION | CHFL_INVEX,
   .matches = _extban_account_matches
 };
 
@@ -47,7 +42,7 @@ init_handler(void *context, char *error_message, size_t error_message_size)
   if (!ircd_module_register_extban(&extban_account, error_message, error_message_size))
     return false;
 
-  const isupport_result_t result = isupport_add("ACCOUNTEXTBAN", "%c", extban_account.character);
+  const isupport_result_t result = isupport_add("ACCOUNTEXTBAN", "%c", extban_account.letter);
   assert(result == ISUPPORT_SUCCESS);
   (void)result;
   return true;

@@ -323,6 +323,21 @@ _channel_mode_remove_mask(struct ChannelModeContext *ctx, const struct chan_mode
   remove_ban(found, list);
 }
 
+struct ChannelMode
+channel_mode_merge(const struct ChannelMode *left_mode, const struct ChannelMode *right_mode)
+{
+  struct ChannelMode merged_mode = *left_mode;
+  merged_mode.flags |= right_mode->flags;
+
+  if (right_mode->member_limit > merged_mode.member_limit)
+    merged_mode.member_limit = right_mode->member_limit;
+
+  if (strcmp(merged_mode.key, right_mode->key) < 0)
+    strlcpy(merged_mode.key, right_mode->key, sizeof(merged_mode.key));
+
+  return merged_mode;
+}
+
 struct ChannelModeDiffFormatter
 {
   char *modes;

@@ -108,14 +108,14 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
+  struct ChannelMode incoming_mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
   size_t args = 0;
   for (const char *modes = parv[3]; *modes; ++modes)
   {
     switch (*modes)
     {
       case 'k':
-        strlcpy(mode.key, parv[4 + args], sizeof(mode.key));
+        strlcpy(incoming_mode.key, parv[4 + args], sizeof(incoming_mode.key));
         ++args;
 
         if (parc < 5 + args)
@@ -132,18 +132,18 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
         unsigned int parsed_limit;
         const io_parse_status_t status = io_parse_uint(limit_text, &parsed_limit);
         if (status == IO_PARSE_RANGE)
-          mode.member_limit = INT_MAX;
+          incoming_mode.member_limit = INT_MAX;
         else if (status != IO_PARSE_OK)
           return;
         else
-          mode.member_limit = parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
+          incoming_mode.member_limit = parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
         break;
 
       default:
       {
         const struct chan_mode *const cmode = cmode_map[(unsigned char)*modes];
         if (cmode)
-          mode.flags |= cmode->mode;
+          incoming_mode.flags |= cmode->mode;
         break;
       }
     }
@@ -154,8 +154,8 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     return;
 
   uintmax_t oldts = 0;
-  bool keep_our_modes = true;
-  bool keep_new_modes = true;
+  bool keep_existing_modes = true;
+  bool keep_incoming_modes = true;
 
   bool isnew = false;
   struct Channel *channel = channel_find(channel_name);
@@ -167,40 +167,36 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
   }
   else if (newts < channel->creation_time)
   {
-    keep_our_modes = false;
+    keep_existing_modes = false;
     oldts = channel->creation_time;
     channel->creation_time = newts;
   }
   else if (newts > channel->creation_time)
-    keep_new_modes = false;
+    keep_incoming_modes = false;
 
-  const struct ChannelMode *const oldmode = &channel->mode;
+  const struct ChannelMode *const old_mode = &channel->mode;
+  struct ChannelMode new_mode;
 
-  if (keep_new_modes == false)
-    mode = *oldmode;
-  else if (keep_our_modes)
-  {
-    mode.flags |= oldmode->flags;
-
-    if (oldmode->member_limit > mode.member_limit)
-      mode.member_limit = oldmode->member_limit;
-    if (strcmp(mode.key, oldmode->key) < 0)
-      strlcpy(mode.key, oldmode->key, sizeof(mode.key));
-  }
+  if (keep_incoming_modes == false)
+    new_mode = *old_mode;
+  else if (keep_existing_modes)
+    new_mode = channel_mode_merge(&incoming_mode, old_mode);
+  else
+    new_mode = incoming_mode;
 
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
-  const bool formatted = channel_mode_format_diff(oldmode, &mode, modebuf, sizeof(modebuf),
+  const bool formatted = channel_mode_format_diff(old_mode, &new_mode, modebuf, sizeof(modebuf),
                                                   parabuf, sizeof(parabuf));
   assert(formatted);
   (void)formatted;
 
-  channel->mode = mode;
+  channel->mode = new_mode;
 
   const char *const origin_name = client_get_visible_server_name(source);
 
   /* Lost the TS, other side wins, so remove modes on this side */
-  if (keep_our_modes == false)
+  if (keep_existing_modes == false)
   {
     /* Update channel name to be the correct case */
     strlcpy(channel->name, channel_name, sizeof(channel->name));
@@ -266,7 +262,7 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     size_t len_uid = strlen(target->id);
     char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
 
-    if (status_flags && keep_new_modes)
+    if (status_flags && keep_incoming_modes)
     {
       const struct ChannelMember member = { .flags = status_flags };
       len_uid += strlcpy(uid_prefix, channel_member_get_prefix(&member, true), sizeof(uid_prefix));

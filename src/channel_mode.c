@@ -8,6 +8,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -320,6 +321,116 @@ _channel_mode_remove_mask(struct ChannelModeContext *ctx, const struct chan_mode
   _channel_mode_record_change(ctx, mode, MODE_DEL, found->banstr, NULL);
   clear_ban_cache_list(&ctx->channel->local_member_list);
   remove_ban(found, list);
+}
+
+struct ChannelModeDiffFormatter
+{
+  char *modes;
+  size_t modes_capacity;
+  size_t modes_length;
+  char *parameters;
+  size_t parameters_capacity;
+  size_t parameters_length;
+  enum channel_mode_action last_action;
+};
+
+static bool
+_channel_mode_diff_append_change(struct ChannelModeDiffFormatter *formatter, enum channel_mode_action action,
+                                 unsigned char letter, const char *parameter)
+{
+  const size_t modes_needed = 1 + (formatter->last_action != action);
+  const size_t parameter_length = parameter ? strlen(parameter) : 0;
+  const size_t parameters_needed = parameter ? parameter_length + (formatter->parameters_length != 0) : 0;
+
+  if (modes_needed >= formatter->modes_capacity - formatter->modes_length ||
+      parameters_needed >= formatter->parameters_capacity - formatter->parameters_length)
+    return false;
+
+  if (formatter->last_action != action)
+  {
+    formatter->modes[formatter->modes_length++] = action == MODE_ADD ? '+' : '-';
+    formatter->last_action = action;
+  }
+
+  formatter->modes[formatter->modes_length++] = letter;
+  formatter->modes[formatter->modes_length] = '\0';
+
+  if (parameter)
+  {
+    if (formatter->parameters_length)
+      formatter->parameters[formatter->parameters_length++] = ' ';
+
+    memcpy(formatter->parameters + formatter->parameters_length, parameter, parameter_length + 1);
+    formatter->parameters_length += parameter_length;
+  }
+
+  return true;
+}
+
+bool
+channel_mode_format_diff(const struct ChannelMode *old_mode, const struct ChannelMode *new_mode,
+                         char *modes, size_t modes_capacity,
+                         char *parameters, size_t parameters_capacity)
+{
+  assert(old_mode);
+  assert(new_mode);
+  assert(modes || modes_capacity == 0);
+  assert(parameters || parameters_capacity == 0);
+
+  if (modes_capacity)
+    modes[0] = '\0';
+  if (parameters_capacity)
+    parameters[0] = '\0';
+
+  if (modes_capacity == 0 || parameters_capacity == 0)
+    return false;
+
+  struct ChannelModeDiffFormatter formatter =
+  {
+    .modes = modes,
+    .modes_capacity = modes_capacity,
+    .parameters = parameters,
+    .parameters_capacity = parameters_capacity,
+    .last_action = MODE_NONE
+  };
+
+  for (const struct chan_mode *mode = cmode_tab; mode->letter; ++mode)
+    if ((mode->mode & new_mode->flags) && !(mode->mode & old_mode->flags))
+      if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, mode->letter, NULL))
+        goto buffer_too_small;
+
+  for (const struct chan_mode *mode = cmode_tab; mode->letter; ++mode)
+    if ((mode->mode & old_mode->flags) && !(mode->mode & new_mode->flags))
+      if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, mode->letter, NULL))
+        goto buffer_too_small;
+
+  if (old_mode->member_limit && new_mode->member_limit == 0)
+    if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, 'l', NULL))
+      goto buffer_too_small;
+
+  if (old_mode->key[0] && new_mode->key[0] == '\0')
+    if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, 'k', old_mode->key))
+      goto buffer_too_small;
+
+  if (new_mode->member_limit && old_mode->member_limit != new_mode->member_limit)
+  {
+    char limit_buffer[sizeof(new_mode->member_limit) * CHAR_BIT + 1];
+    snprintf(limit_buffer, sizeof(limit_buffer), "%" PRIu32, new_mode->member_limit);
+
+    if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, 'l', limit_buffer))
+      goto buffer_too_small;
+  }
+
+  if (new_mode->key[0] && strcmp(old_mode->key, new_mode->key))
+    if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, 'k', new_mode->key))
+      goto buffer_too_small;
+
+  return true;
+
+buffer_too_small:
+  modes[0] = '\0';
+  parameters[0] = '\0';
+  return false;
 }
 
 const char *

@@ -9,6 +9,8 @@
 
 #ifndef INCLUDED_channel_mode_h
 #define INCLUDED_channel_mode_h
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "channel.h"
@@ -133,6 +135,8 @@ extern char cmode_class[][256];
 extern void channel_mode_clear_member_statuses(struct Channel *, const char *);
 extern void channel_mode_init(void);
 extern void channel_mode_set(struct Client *, struct Channel *, size_t, char *[]);
+extern bool channel_mode_format_diff(const struct ChannelMode *, const struct ChannelMode *, char *, size_t, char *, size_t);
+
 extern void clear_ban_cache_list(list_t *);
 extern const char *add_id(struct Client *, struct Channel *, const char *, list_t *, uint32_t);
 

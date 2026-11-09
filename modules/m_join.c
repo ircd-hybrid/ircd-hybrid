@@ -7,11 +7,11 @@
  * \brief Includes required functions for processing the JOIN command.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "io_parse.h"
@@ -31,90 +31,6 @@
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
-
-static void
-set_final_mode(const struct ChannelMode *mode, const struct ChannelMode *oldmode, char *mbuf, char *pbuf)
-{
-  int what = MODE_NONE;
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & mode->flags) && !(tab->mode & oldmode->flags))
-    {
-      if (what != MODE_ADD)
-      {
-        *mbuf++ = '+';
-        what = MODE_ADD;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && (tab->mode & oldmode->flags) && !(tab->mode & mode->flags))
-    {
-      if (what != MODE_DEL)
-      {
-        *mbuf++ = '-';
-        what = MODE_DEL;
-      }
-
-      *mbuf++ = tab->letter;
-    }
-  }
-
-  if (oldmode->member_limit && mode->member_limit == 0)
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'l';
-  }
-
-  if (oldmode->key[0] && mode->key[0] == '\0')
-  {
-    if (what != MODE_DEL)
-    {
-      *mbuf++ = '-';
-      what = MODE_DEL;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", oldmode->key);
-  }
-
-  if (mode->member_limit && oldmode->member_limit != mode->member_limit)
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'l';
-    pbuf += sprintf(pbuf, "%u ", mode->member_limit);
-  }
-
-  if (mode->key[0] && strcmp(oldmode->key, mode->key))
-  {
-    if (what != MODE_ADD)
-    {
-      *mbuf++ = '+';
-      what = MODE_ADD;
-    }
-
-    *mbuf++ = 'k';
-    pbuf += sprintf(pbuf, "%s ", mode->key);
-  }
-
-  *mbuf = '\0';
-  *pbuf = '\0';
-}
 
 /*! \brief JOIN command handler
  *
@@ -191,11 +107,15 @@ ms_join(struct Client *source, size_t parc, char *parv[])
   /* Lost the TS, other side wins, so remove modes on this side */
   if (keep_our_modes == false)
   {
-    struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
+    const struct ChannelMode mode = { .flags = 0, .member_limit = 0, .key[0] = '\0' };
     char modebuf[MODEBUFLEN];
     char parabuf[MODEBUFLEN];
 
-    set_final_mode(&mode, &channel->mode, modebuf, parabuf);
+    const bool formatted = channel_mode_format_diff(&channel->mode, &mode, modebuf, sizeof(modebuf),
+                                                    parabuf, sizeof(parabuf));
+    assert(formatted);
+    (void)formatted;
+
     channel->mode = mode;
 
     /* Update channel name to be the correct case */
@@ -213,7 +133,8 @@ ms_join(struct Client *source, size_t parc, char *parv[])
     channel_set_mode_lock(source->nexthop, channel, NULL);
 
     if (modebuf[0])
-      sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s %s %s",
+      sendto_channel_local(NULL, channel, 0, 0, 0,
+                           parabuf[0] ? ":%s MODE %s %s %s" : ":%s MODE %s %s",
                            origin_name, channel->name, modebuf, parabuf);
 
     if (!string_is_empty(channel->topic))

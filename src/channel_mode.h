@@ -21,7 +21,7 @@ enum { MODEBUFLEN = 200 };
 /** Maximum mode changes allowed per client, per server is different */
 enum { MAXMODEPARAMS = 6 };
 
-enum
+enum channel_mode_action
 {
   MODE_NONE,
   MODE_DEL,
@@ -107,13 +107,7 @@ enum
   MODE_NOINVITE     = 1 << 19,  /**< Clients may not use INVITE on this channel */
 };
 
-struct ChModeChange
-{
-  char letter;
-  const char *arg;
-  const char *id;
-  unsigned int dir;
-};
+struct ChannelModeContext;
 
 struct chan_mode
 {
@@ -126,9 +120,8 @@ struct chan_mode
   bool only_servers;
   int required_rank;
   int rank;
-  void (*func)(struct Client *,
-               struct Channel *, size_t, size_t *, char *[], int *,
-               int, int, const char, const struct chan_mode *);
+  void (*func)(struct ChannelModeContext *, const struct chan_mode *,
+               enum channel_mode_action, const char *);
 };
 
 extern const struct chan_mode *cmode_map[];

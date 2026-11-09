@@ -8,9 +8,12 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "address.h"
+#include "io.h"
 #include "io_parse.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -39,10 +42,69 @@ char cmode_rpl04[2][256];
 /** Buffer holding a list of channel modes to be used for RPL_ISUPPORT */
 char cmode_class[4][256];
 
-static struct ChModeChange mode_changes[IRCD_BUFSIZE];
-static unsigned int mode_count;
-static unsigned int mode_limit;  /* number of modes set other than simple */
-static uint32_t simple_modes_mask;  /* bit mask of simple modes already set */
+struct ChannelModeChange
+{
+  unsigned char letter;
+  enum channel_mode_action action;
+  const char *argument;
+  const char *target_id;
+};
+
+struct ChannelModeContext
+{
+  struct Client *source;
+  struct Channel *channel;
+  int rank;
+  unsigned int errors;
+  uint32_t seen_simple_modes;
+  size_t limited_mode_count;
+  size_t change_count;
+  struct ChannelModeChange changes[IRCD_BUFSIZE];
+  size_t arguments_used;
+  char arguments[PARSE_MAX_PARAMETERS * MODEBUFLEN];
+};
+
+static const char *
+_channel_mode_copy_argument(struct ChannelModeContext *ctx, const char *argument)
+{
+  if (argument == NULL)
+    return NULL;
+
+  const size_t length = strlen(argument) + 1;
+  assert(length <= MODEBUFLEN);
+  assert(length <= sizeof(ctx->arguments) - ctx->arguments_used);
+
+  char *const copy = ctx->arguments + ctx->arguments_used;
+  memcpy(copy, argument, length);
+  ctx->arguments_used += length;
+  return copy;
+}
+
+static void
+_channel_mode_record_change(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+                            enum channel_mode_action action, const char *argument, const char *target_id)
+{
+  assert(ctx->change_count < IO_ARRAY_LENGTH(ctx->changes));
+
+  const char *const argument_copy = _channel_mode_copy_argument(ctx, argument);
+  const char *const target_id_copy = _channel_mode_copy_argument(ctx, target_id);
+
+  ctx->changes[ctx->change_count++] = (struct ChannelModeChange)
+  {
+    .letter = mode->letter,
+    .action = action,
+    .argument = argument_copy,
+    .target_id = target_id_copy
+  };
+}
+
+static void
+_channel_mode_discard_additions(struct ChannelModeContext *ctx, const struct chan_mode *mode)
+{
+  for (size_t i = 0; i < ctx->change_count; ++i)
+    if (ctx->changes[i].letter == mode->letter && ctx->changes[i].action == MODE_ADD)
+      ctx->changes[i].letter = '\0';
+}
 
 static void
 check_string(char *s)
@@ -232,37 +294,32 @@ invalid:
   return NULL;
 }
 
-static const char *
-del_id(struct Client *client, struct Channel *channel, const char *banid, list_t *list, uint32_t type)
+static void
+_channel_mode_remove_mask(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+                          const char *mask, list_t *list)
 {
-  static char mask[MODEBUFLEN];
   struct Ban *found = NULL;
   list_node_t *node;
-
-  assert(banid);
-
-  /* TBD: n!u@h formatting fo local clients */
 
   LIST_FOREACH(node, list->head)
   {
     struct Ban *const ban = node->data;
-    if (strcmp(ban->banstr, banid) == 0)
+    if (strcmp(ban->banstr, mask) == 0)
     {
       found = ban;
       break;
     }
 
-    if (found == NULL && _ban_mask_equals(ban, banid))
+    if (found == NULL && _ban_mask_equals(ban, mask))
       found = ban;
   }
 
   if (found == NULL)
-    return NULL;
+    return;
 
-  strlcpy(mask, found->banstr, sizeof(mask));
-  clear_ban_cache_list(&channel->local_member_list);
+  _channel_mode_record_change(ctx, mode, MODE_DEL, found->banstr, NULL);
+  clear_ban_cache_list(&ctx->channel->local_member_list);
   remove_ban(found, list);
-  return mask;
 }
 
 const char *
@@ -310,7 +367,7 @@ channel_modes(const struct Channel *channel, const struct Client *client, bool p
   return buf;
 }
 
-static char *
+static void
 fix_key(char *arg)
 {
   unsigned char *s = (unsigned char *)arg;
@@ -325,7 +382,6 @@ fix_key(char *arg)
   }
 
   *t = '\0';
-  return arg;
 }
 
 void
@@ -359,9 +415,11 @@ enum
 };
 
 static bool
-channel_mode_can_change(struct Client *client, struct Channel *channel, int *errors, int rank,
-                        const char c, const struct chan_mode *mode)
+channel_mode_can_change(struct ChannelModeContext *ctx, const struct chan_mode *mode)
 {
+  struct Client *const client = ctx->source;
+  struct Channel *const channel = ctx->channel;
+
   if (!client_is_local_user(client))
     return true;
 
@@ -369,10 +427,10 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   {
     if (!client_is_oper(client))
     {
-      if (!(*errors & SM_ERR_NOTOPER))
+      if (!(ctx->errors & SM_ERR_NOTOPER))
         sendto_one_numeric(client, &me, ERR_NOPRIVILEGES);
 
-      *errors |= SM_ERR_NOTOPER;
+      ctx->errors |= SM_ERR_NOTOPER;
       return false;
     }
   }
@@ -381,31 +439,31 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
   {
     if (!client_is_server(client) && !client_is_service(client))
     {
-      if (!(*errors & SM_ERR_ONLYSERVER))
+      if (!(ctx->errors & SM_ERR_ONLYSERVER))
         sendto_one_numeric(client, &me,
-                           rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_ONLYSERVERSCANCHANGE, channel->name);
+                           ctx->rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_ONLYSERVERSCANCHANGE, channel->name);
 
-      *errors |= SM_ERR_ONLYSERVER;
+      ctx->errors |= SM_ERR_ONLYSERVER;
       return false;
     }
   }
 
-  if (rank < mode->required_rank)
+  if (ctx->rank < mode->required_rank)
   {
-    if (!(*errors & SM_ERR_NOOPS))
+    if (!(ctx->errors & SM_ERR_NOOPS))
       sendto_one_numeric(client, &me,
-                         rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED, channel->name);
+                         ctx->rank == CHACCESS_NOTONCHAN ? ERR_NOTONCHANNEL : ERR_CHANOPRIVSNEEDED, channel->name);
 
-    *errors |= SM_ERR_NOOPS;
+    ctx->errors |= SM_ERR_NOOPS;
     return false;
   }
 
-  if (channel->mode_lock && strchr(channel->mode_lock, c))
+  if (channel->mode_lock && strchr(channel->mode_lock, mode->letter))
   {
-    if (!(*errors & SM_ERR_MLOCK))
-      sendto_one_numeric(client, &me, ERR_MLOCKRESTRICTED, channel->name, c, channel->mode_lock);
+    if (!(ctx->errors & SM_ERR_MLOCK))
+      sendto_one_numeric(client, &me, ERR_MLOCKRESTRICTED, channel->name, mode->letter, channel->mode_lock);
 
-    *errors |= SM_ERR_MLOCK;
+    ctx->errors |= SM_ERR_MLOCK;
     return false;
   }
 
@@ -413,59 +471,56 @@ channel_mode_can_change(struct Client *client, struct Channel *channel, int *err
 }
 
 static void
-chm_nosuch(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_nosuch(struct ChannelModeContext *ctx, unsigned char letter)
 {
-  if (*errors & SM_ERR_UNKNOWN)
+  if (ctx->errors & SM_ERR_UNKNOWN)
     return;
 
-  *errors |= SM_ERR_UNKNOWN;
+  ctx->errors |= SM_ERR_UNKNOWN;
 
-  if (client_is_local_user(client))
-    sendto_one_numeric(client, &me, ERR_UNKNOWNMODE, c);
+  if (client_is_local_user(ctx->source))
+    sendto_one_numeric(ctx->source, &me, ERR_UNKNOWNMODE, letter);
 }
 
 static void
-chm_simple(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-           int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_simple(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+           enum channel_mode_action action, const char *parameter)
 {
-  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
+  if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (simple_modes_mask & mode->mode)
+  if (ctx->seen_simple_modes & mode->mode)
     return;
 
-  simple_modes_mask |= mode->mode;
+  ctx->seen_simple_modes |= mode->mode;
 
-  if (dir == MODE_ADD)
+  if (action == MODE_ADD)
   {
-    if (client_is_local_user(client) && channel_has_mode(channel, mode->mode))
+    if (client_is_local_user(ctx->source) && channel_has_mode(ctx->channel, mode->mode))
       return;
 
-    channel_set_mode(channel, mode->mode);
+    channel_set_mode(ctx->channel, mode->mode);
   }
-  else if (dir == MODE_DEL)
+  else if (action == MODE_DEL)
   {
-    if (client_is_local_user(client) && !channel_has_mode(channel, mode->mode))
+    if (client_is_local_user(ctx->source) && !channel_has_mode(ctx->channel, mode->mode))
       return;
 
-    channel_unset_mode(channel, mode->mode);
+    channel_unset_mode(ctx->channel, mode->mode);
   }
 
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = NULL;
-  mode_changes[mode_count].id = NULL;
-  mode_changes[mode_count++].dir = dir;
+  _channel_mode_record_change(ctx, mode, action, NULL, NULL);
 }
 
 static void
-chm_mask(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_mask(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+         enum channel_mode_action action, const char *parameter)
 {
-  const char *ret = NULL;
+  struct Client *const client = ctx->source;
+  struct Channel *const channel = ctx->channel;
   list_t *list;
-  enum irc_numerics rpl_list = 0, rpl_endlist = 0;
-  int errtype = 0;
+  enum irc_numerics rpl_list, rpl_endlist;
+  unsigned int errtype;
 
   switch (mode->flag)
   {
@@ -488,15 +543,16 @@ chm_mask(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
       rpl_endlist = RPL_ENDOFINVEXLIST;
       break;
     default:
-      list = NULL;  /* Let it crash */
+      assert(false);
+      return;
   }
 
-  if (parc <= *parn)
+  if (parameter == NULL)
   {
-    if (*errors & errtype)
+    if (ctx->errors & errtype)
       return;
 
-    *errors |= errtype;
+    ctx->errors |= errtype;
 
     list_node_t *node;
     LIST_FOREACH(node, list->head)
@@ -509,60 +565,47 @@ chm_mask(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
     return;
   }
 
-  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
+  if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (client_is_local_user(client) && (++mode_limit > MAXMODEPARAMS))
+  if (client_is_local_user(client) && (++ctx->limited_mode_count > MAXMODEPARAMS))
     return;
 
-  char *mask = parv[*parn];
-  ++(*parn);
-
-  if (*mask == ':' || (!client_is_local(client) && strchr(mask, ' ')))
+  if (*parameter == ':' || (!client_is_local(client) && strchr(parameter, ' ')))
     return;
 
-  if (dir == MODE_ADD)
+  if (action == MODE_DEL)
   {
-    ret = add_id(client, channel, mask, list, mode->flag);
-    if (ret == NULL)
-      return;
-  }
-  else if (dir == MODE_DEL)
-  {
-    ret = del_id(client, channel, mask, list, mode->flag);
-    if (ret == NULL)
-      return;
+    _channel_mode_remove_mask(ctx, mode, parameter, list);
+    return;
   }
 
-  static char buf[PARSE_MAX_PARAMETERS][MODEBUFLEN];
-  mask = buf[(*parn) - 1];
-  strlcpy(mask, ret, sizeof(buf[(*parn) - 1]));
-
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = mask;  /* At this point 'mask' is no longer than MODEBUFLEN */
-  mode_changes[mode_count].id = NULL;
-  mode_changes[mode_count++].dir = dir;
+  const char *const mask = add_id(client, channel, parameter, list, mode->flag);
+  if (mask)
+    _channel_mode_record_change(ctx, mode, action, mask, NULL);
 }
 
 static void
-chm_flag(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-         int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_flag(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+         enum channel_mode_action action, const char *parameter)
 {
-  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
+  struct Client *const client = ctx->source;
+  struct Channel *const channel = ctx->channel;
+
+  if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (parc <= *parn)
+  if (parameter == NULL)
     return;
 
-  const char *const target_name = parv[(*parn)++];
-  struct Client *const target = client_find_user_with_history(client, target_name, NULL);
+  struct Client *const target = client_find_user_with_history(client, parameter, NULL);
   if (target == NULL)
   {
     if (client_is_local_user(client) &&
-        !(*errors & SM_ERR_NOSUCHNICK))
-      sendto_one_numeric(client, &me, ERR_NOSUCHNICK, target_name);
+        !(ctx->errors & SM_ERR_NOSUCHNICK))
+      sendto_one_numeric(client, &me, ERR_NOSUCHNICK, parameter);
 
-    *errors |= SM_ERR_NOSUCHNICK;
+    ctx->errors |= SM_ERR_NOSUCHNICK;
     return;
   }
 
@@ -570,24 +613,24 @@ chm_flag(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
   if (member == NULL)
   {
     if (client_is_local_user(client) &&
-        !(*errors & SM_ERR_NOTONCHANNEL))
+        !(ctx->errors & SM_ERR_NOTONCHANNEL))
       sendto_one_numeric(client, &me, ERR_USERNOTINCHANNEL, target->name, channel->name);
 
-    *errors |= SM_ERR_NOTONCHANNEL;
+    ctx->errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
 
-  if (client_is_local_user(client) && (++mode_limit > MAXMODEPARAMS))
+  if (client_is_local_user(client) && (++ctx->limited_mode_count > MAXMODEPARAMS))
     return;
 
-  if (dir == MODE_ADD)
+  if (action == MODE_ADD)
   {
     if (channel_member_has_flags(member, mode->flag))
       return;
 
     channel_member_set_flags(member, mode->flag);
   }
-  else if (dir == MODE_DEL)
+  else if (action == MODE_DEL)
   {
     if (!channel_member_has_flags(member, mode->flag))
       return;
@@ -595,25 +638,20 @@ chm_flag(struct Client *client, struct Channel *channel, size_t parc, size_t *pa
     channel_member_unset_flags(member, mode->flag);
   }
 
-  mode_changes[mode_count].letter = mode->letter;
-  mode_changes[mode_count].arg = target->name;
-  mode_changes[mode_count].id = target->id;
-  mode_changes[mode_count++].dir = dir;
+  _channel_mode_record_change(ctx, mode, action, target->name, target->id);
 }
 
 static void
-chm_limit(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-          int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_limit(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+          enum channel_mode_action action, const char *parameter)
 {
-  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
+  if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (dir == MODE_ADD && parc > *parn)
+  if (action == MODE_ADD && parameter)
   {
-    char *const lstr = parv[(*parn)++];
-
     unsigned int parsed_limit;
-    const io_parse_status_t status = io_parse_uint(lstr, &parsed_limit);
+    const io_parse_status_t status = io_parse_uint(parameter, &parsed_limit);
 
     if (status != IO_PARSE_OK && status != IO_PARSE_RANGE)
       return;
@@ -623,214 +661,188 @@ chm_limit(struct Client *client, struct Channel *channel, size_t parc, size_t *p
 
     const unsigned int limit =
       status == IO_PARSE_RANGE || parsed_limit > INT_MAX ? INT_MAX : parsed_limit;
-    snprintf(lstr, strlen(lstr) + 1, "%u", limit);
+    char limit_buffer[sizeof(limit) * CHAR_BIT + 1];
+    snprintf(limit_buffer, sizeof(limit_buffer), "%u", limit);
 
-    /* If somebody sets MODE #channel +ll 1 2, accept latter --fl */
-    for (unsigned int i = 0; i < mode_count; ++i)
-    {
-      if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
-        mode_changes[i].letter = 0;
-    }
-
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = lstr;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
-
-    channel->mode.member_limit = limit;
+    _channel_mode_discard_additions(ctx, mode);
+    _channel_mode_record_change(ctx, mode, action, limit_buffer, NULL);
+    ctx->channel->mode.member_limit = limit;
   }
-  else if (dir == MODE_DEL)
+  else if (action == MODE_DEL)
   {
-    if (!channel_has_member_limit(channel))
+    if (!channel_has_member_limit(ctx->channel))
       return;
 
-    channel->mode.member_limit = 0;
-
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = NULL;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
+    ctx->channel->mode.member_limit = 0;
+    _channel_mode_record_change(ctx, mode, action, NULL, NULL);
   }
 }
 
 static void
-chm_key(struct Client *client, struct Channel *channel, size_t parc, size_t *parn, char *parv[],
-        int *errors, int rank, int dir, const char c, const struct chan_mode *mode)
+chm_key(struct ChannelModeContext *ctx, const struct chan_mode *mode,
+        enum channel_mode_action action, const char *parameter)
 {
-  if (!channel_mode_can_change(client, channel, errors, rank, c, mode))
+  if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (dir == MODE_ADD && parc > *parn)
+  if (action == MODE_ADD && parameter)
   {
-    char *const key = fix_key(parv[(*parn)++]);
+    char key[KEYLEN + 1];
+    strlcpy(key, parameter, sizeof(key));
+    fix_key(key);
 
     if (string_is_empty(key))
       return;
 
     assert(*key != ' ');
-    strlcpy(channel->mode.key, key, sizeof(channel->mode.key));
+    strlcpy(ctx->channel->mode.key, key, sizeof(ctx->channel->mode.key));
 
-    /* If somebody does MODE #channel +kk a b, accept latter --fl */
-    for (unsigned int i = 0; i < mode_count; ++i)
-    {
-      if (mode_changes[i].letter == mode->letter && mode_changes[i].dir == MODE_ADD)
-        mode_changes[i].letter = 0;
-    }
-
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = key;
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
+    _channel_mode_discard_additions(ctx, mode);
+    _channel_mode_record_change(ctx, mode, action, key, NULL);
   }
-  else if (dir == MODE_DEL)
+  else if (action == MODE_DEL)
   {
-    if (parc > *parn)
-      ++(*parn);
-
-    if (!channel_has_key(channel))
+    if (!channel_has_key(ctx->channel))
       return;
 
-    channel->mode.key[0] = '\0';
-
-    mode_changes[mode_count].letter = mode->letter;
-    mode_changes[mode_count].arg = "*";
-    mode_changes[mode_count].id = NULL;
-    mode_changes[mode_count++].dir = dir;
+    ctx->channel->mode.key[0] = '\0';
+    _channel_mode_record_change(ctx, mode, action, "*", NULL);
   }
 }
 
 static void
-send_mode_changes_server(struct Client *client, struct Channel *channel)
+send_mode_changes_server(const struct ChannelModeContext *ctx)
 {
-  char modebuf[IRCD_BUFSIZE] = "";
-  char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
-  char *parptr = parabuf;
-  unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  unsigned int dir = MODE_NONE;
+  struct Client *const client = ctx->source;
+  struct Channel *const channel = ctx->channel;
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE] = "";
+  const size_t prefix_length = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
+                                        client->id, channel->creation_time, channel->name);
+  size_t modes_length = prefix_length;
+  size_t parameters_length = 0;
+  size_t parameter_count = 0;
+  enum channel_mode_action action = MODE_NONE;
 
-  mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
-                 client->id, channel->creation_time, channel->name);
-
-  for (unsigned int i = 0; i < mode_count; ++i)
+  for (size_t i = 0; i < ctx->change_count; ++i)
   {
-    if (mode_changes[i].letter == 0)
+    const struct ChannelModeChange *const change = &ctx->changes[i];
+    if (change->letter == '\0')
       continue;
 
-    const char *const arg = mode_changes[i].id ? mode_changes[i].id : mode_changes[i].arg;
-    if (arg)
-      arglen = strlen(arg);
-    else
-      arglen = 0;
+    const char *const argument = change->target_id ? change->target_id : change->argument;
+    const size_t argument_length = argument ? strlen(argument) : 0;
+    assert(prefix_length + 2 + (argument ? argument_length + 1 : 0) <= sizeof(modebuf) - 2);
 
-    if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
+    /* Every argument adds one separator, including the first argument. */
+    const size_t change_length = 1 + (action != change->action) + (argument ? argument_length + 1 : 0);
+    const size_t line_length = modes_length + parameters_length + (parameter_count != 0);
+
+    if ((argument && parameter_count == MAXMODEPARAMS) ||
+        line_length + change_length > sizeof(modebuf) - 2)
     {
-      if (modecount)
-        sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+      if (action != MODE_NONE)
+        sendto_servers(client, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
 
-      modecount = 0;
-      paracount = 0;
-
-      mbl = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
-                     client->id, channel->creation_time, channel->name);
-
-      pbl = 0;
+      modes_length = prefix_length;
+      modebuf[modes_length] = '\0';
+      parameters_length = 0;
       parabuf[0] = '\0';
-      parptr = parabuf;
-      dir = MODE_NONE;
+      parameter_count = 0;
+      action = MODE_NONE;
     }
 
-    if (dir != mode_changes[i].dir)
+    if (action != change->action)
     {
-      modebuf[mbl++] = mode_changes[i].dir == MODE_ADD ? '+' : '-';
-      dir = mode_changes[i].dir;
+      modebuf[modes_length++] = change->action == MODE_ADD ? '+' : '-';
+      action = change->action;
     }
 
-    modebuf[mbl++] = mode_changes[i].letter;
-    modebuf[mbl] = '\0';
-    ++modecount;
+    modebuf[modes_length++] = change->letter;
+    modebuf[modes_length] = '\0';
 
-    if (arg)
+    if (argument)
     {
-      int len = sprintf(parptr, pbl == 0 ? "%s" : " %s", arg);
-      pbl += len;
-      parptr += len;
-      ++paracount;
+      if (parameter_count)
+        parabuf[parameters_length++] = ' ';
+
+      memcpy(parabuf + parameters_length, argument, argument_length + 1);
+      parameters_length += argument_length;
+      ++parameter_count;
     }
   }
 
-  if (modecount)
-    sendto_servers(client, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+  if (action != MODE_NONE)
+    sendto_servers(client, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
 }
 
 static void
-send_mode_changes_client(struct Client *client, struct Channel *channel)
+send_mode_changes_client(const struct ChannelModeContext *ctx)
 {
-  char modebuf[IRCD_BUFSIZE] = "";
-  char parabuf[IRCD_BUFSIZE] = "";  /* Essential that parabuf[0] = '\0' */
-  char *parptr = parabuf;
-  unsigned int mbl = 0, pbl = 0, arglen = 0, modecount = 0, paracount = 0;
-  unsigned int dir = MODE_NONE;
+  struct Client *const client = ctx->source;
+  struct Channel *const channel = ctx->channel;
+  char modebuf[IRCD_BUFSIZE];
+  char parabuf[IRCD_BUFSIZE] = "";
+  const size_t prefix_length = client_is_user(client) ?
+    snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
+             client->name, client->username, client->host, channel->name) :
+    snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
+             client_get_visible_server_name(client), channel->name);
+  size_t modes_length = prefix_length;
+  size_t parameters_length = 0;
+  size_t parameter_count = 0;
+  enum channel_mode_action action = MODE_NONE;
 
-  if (client_is_user(client))
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
-                   client->name, client->username, client->host, channel->name);
-  else
-    mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                   client_get_visible_server_name(client), channel->name);
-
-  for (unsigned int i = 0; i < mode_count; ++i)
+  for (size_t i = 0; i < ctx->change_count; ++i)
   {
-    if (mode_changes[i].letter == 0)
+    const struct ChannelModeChange *const change = &ctx->changes[i];
+    if (change->letter == '\0')
       continue;
 
-    const char *const arg = mode_changes[i].arg;
-    if (arg)
-      arglen = strlen(arg);
-    else
-      arglen = 0;
+    const char *const argument = change->argument;
+    const size_t argument_length = argument ? strlen(argument) : 0;
+    assert(prefix_length + 2 + (argument ? argument_length + 1 : 0) <= sizeof(modebuf) - 2);
 
-    if ((paracount == MAXMODEPARAMS) || ((arglen + mbl + pbl + 2 /* +2 for /r/n */ ) > sizeof(modebuf)))
+    /* Every argument adds one separator, including the first argument. */
+    const size_t change_length = 1 + (action != change->action) + (argument ? argument_length + 1 : 0);
+    const size_t line_length = modes_length + parameters_length + (parameter_count != 0);
+
+    if ((argument && parameter_count == MAXMODEPARAMS) ||
+        line_length + change_length > sizeof(modebuf) - 2)
     {
-      if (modecount)
-        sendto_channel_local(NULL, channel, 0, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+      if (action != MODE_NONE)
+        sendto_channel_local(NULL, channel, 0, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
 
-      modecount = 0;
-      paracount = 0;
-
-      if (client_is_user(client))
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
-                       client->name, client->username, client->host, channel->name);
-      else
-        mbl = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-                       client_get_visible_server_name(client), channel->name);
-
-      pbl = 0;
+      modes_length = prefix_length;
+      modebuf[modes_length] = '\0';
+      parameters_length = 0;
       parabuf[0] = '\0';
-      parptr = parabuf;
-      dir = MODE_NONE;
+      parameter_count = 0;
+      action = MODE_NONE;
     }
 
-    if (dir != mode_changes[i].dir)
+    if (action != change->action)
     {
-      modebuf[mbl++] = mode_changes[i].dir == MODE_ADD ? '+' : '-';
-      dir = mode_changes[i].dir;
+      modebuf[modes_length++] = change->action == MODE_ADD ? '+' : '-';
+      action = change->action;
     }
 
-    modebuf[mbl++] = mode_changes[i].letter;
-    modebuf[mbl] = '\0';
-    ++modecount;
+    modebuf[modes_length++] = change->letter;
+    modebuf[modes_length] = '\0';
 
-    if (arg)
+    if (argument)
     {
-      int len = sprintf(parptr, pbl == 0 ? "%s" : " %s", arg);
-      pbl += len;
-      parptr += len;
-      ++paracount;
+      if (parameter_count)
+        parabuf[parameters_length++] = ' ';
+
+      memcpy(parabuf + parameters_length, argument, argument_length + 1);
+      parameters_length += argument_length;
+      ++parameter_count;
     }
   }
 
-  if (modecount)
-    sendto_channel_local(NULL, channel, 0, 0, 0, paracount == 0 ? "%s" : "%s %s", modebuf, parabuf);
+  if (action != MODE_NONE)
+    sendto_channel_local(NULL, channel, 0, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
 }
 
 const struct chan_mode *cmode_map[256];
@@ -933,48 +945,65 @@ channel_mode_init(void)
   capab_add("HOP", CAPAB_HOP, true);
 }
 
+static const char *
+_channel_mode_next_parameter(const struct chan_mode *mode, enum channel_mode_action action,
+                             size_t parc, char *parv[], size_t *index)
+{
+  if (mode->class == MODE_CLASS_D || (mode->class == MODE_CLASS_C && action == MODE_DEL))
+    return NULL;
+
+  if (*index >= parc)
+    return NULL;
+
+  return parv[(*index)++];
+}
+
 void
 channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, char *parv[])
 {
-  int dir = MODE_ADD;
-  size_t parn = 1;
-  int errors = 0;
-  int rank = CHACCESS_REMOTE;  /* Let hacked servers in for now. */
+  assert(parc > 0 && parc <= PARSE_MAX_PARAMETERS);
+  assert(strlen(parv[0]) < IRCD_BUFSIZE);
 
-  if (client_is_local_user(client))
-    rank = channel_member_get_highest_rank(channel_member_find(channel, client));
-
-  mode_count = 0;
-  mode_limit = 0;
-  simple_modes_mask = 0;
+  struct ChannelModeContext ctx =
+  {
+    .source = client,
+    .channel = channel,
+    .rank = client_is_local_user(client) ?
+      channel_member_get_highest_rank(channel_member_find(channel, client)) : CHACCESS_REMOTE
+  };
+  enum channel_mode_action action = MODE_ADD;
+  size_t parameter_index = 1;
 
   for (const char *ml = parv[0]; *ml; ++ml)
   {
     switch (*ml)
     {
       case '+':
-        dir = MODE_ADD;
+        action = MODE_ADD;
         break;
       case '-':
-        dir = MODE_DEL;
+        action = MODE_DEL;
         break;
       default:
       {
         const struct chan_mode *const mode = cmode_map[(unsigned char)*ml];
         if (mode)
-          mode->func(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, mode);
+        {
+          const char *const parameter = _channel_mode_next_parameter(mode, action, parc, parv, &parameter_index);
+          mode->func(&ctx, mode, action, parameter);
+        }
         else
-          chm_nosuch(client, channel, parc, &parn, parv, &errors, rank, dir, *ml, NULL);
+          chm_nosuch(&ctx, (unsigned char)*ml);
         break;
       }
     }
   }
 
-  if (mode_count == 0)
+  if (ctx.change_count == 0)
     return;
 
-  send_mode_changes_client(client, channel);
-  send_mode_changes_server(client, channel);
+  send_mode_changes_client(&ctx);
+  send_mode_changes_server(&ctx);
 }
 
 void

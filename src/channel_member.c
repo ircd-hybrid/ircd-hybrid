@@ -139,22 +139,13 @@ channel_member_get_highest_rank(const struct ChannelMember *member)
   if (member == NULL)
     return CHACCESS_NOTONCHAN;
 
-  if (channel_member_has_flags(member, CHFL_CHANOWNER))
-    return CHACCESS_OWNER;
+  int highest_rank = CHACCESS_PEON;
 
-  if (channel_member_has_flags(member, CHFL_CHANADMIN))
-    return CHACCESS_ADMIN;
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    if (status_mode->rank > highest_rank && channel_member_has_flags(member, status_mode->flag))
+      highest_rank = status_mode->rank;
 
-  if (channel_member_has_flags(member, CHFL_CHANOP))
-    return CHACCESS_OP;
-
-  if (channel_member_has_flags(member, CHFL_HALFOP))
-    return CHACCESS_HALFOP;
-
-  if (channel_member_has_flags(member, CHFL_VOICE))
-    return CHACCESS_VOICE;
-
-  return CHACCESS_PEON;
+  return highest_rank;
 }
 
 struct ChannelMember *

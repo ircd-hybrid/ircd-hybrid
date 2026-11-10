@@ -338,7 +338,7 @@ channel_mode_merge(const struct ChannelMode *left_mode, const struct ChannelMode
   return merged_mode;
 }
 
-struct ChannelModeDiffFormatter
+struct ChannelModeFormatter
 {
   char *modes;
   size_t modes_capacity;
@@ -350,8 +350,8 @@ struct ChannelModeDiffFormatter
 };
 
 static bool
-_channel_mode_diff_append_change(struct ChannelModeDiffFormatter *formatter, enum channel_mode_action action,
-                                 unsigned char letter, const char *parameter)
+_channel_mode_formatter_append(struct ChannelModeFormatter *formatter, enum channel_mode_action action,
+                                unsigned char letter, const char *parameter)
 {
   const size_t modes_needed = 1 + (formatter->last_action != action);
   const size_t parameter_length = parameter ? strlen(parameter) : 0;
@@ -383,6 +383,61 @@ _channel_mode_diff_append_change(struct ChannelModeDiffFormatter *formatter, enu
 }
 
 bool
+channel_mode_format(const struct ChannelMode *mode, char *modes, size_t modes_capacity,
+                    char *parameters, size_t parameters_capacity)
+{
+  assert(mode);
+  assert(modes || modes_capacity == 0);
+  assert(parameters || parameters_capacity == 0);
+
+  if (modes_capacity)
+    modes[0] = '\0';
+  if (parameters_capacity)
+    parameters[0] = '\0';
+
+  if (modes_capacity < 2 || parameters_capacity == 0)
+    return false;
+
+  modes[0] = '+';
+  modes[1] = '\0';
+
+  struct ChannelModeFormatter formatter =
+  {
+    .modes = modes,
+    .modes_capacity = modes_capacity,
+    .modes_length = 1,
+    .parameters = parameters,
+    .parameters_capacity = parameters_capacity,
+    .last_action = MODE_ADD
+  };
+
+  for (const struct chan_mode *mode_entry = cmode_tab; mode_entry->letter; ++mode_entry)
+    if (mode_entry->mode & mode->flags)
+      if (!_channel_mode_formatter_append(&formatter, MODE_ADD, mode_entry->letter, NULL))
+        goto buffer_too_small;
+
+  if (mode->member_limit)
+  {
+    char limit_buffer[sizeof(mode->member_limit) * CHAR_BIT + 1];
+    snprintf(limit_buffer, sizeof(limit_buffer), "%" PRIu32, mode->member_limit);
+
+    if (!_channel_mode_formatter_append(&formatter, MODE_ADD, 'l', limit_buffer))
+      goto buffer_too_small;
+  }
+
+  if (mode->key[0])
+    if (!_channel_mode_formatter_append(&formatter, MODE_ADD, 'k', mode->key))
+      goto buffer_too_small;
+
+  return true;
+
+buffer_too_small:
+  modes[0] = '\0';
+  parameters[0] = '\0';
+  return false;
+}
+
+bool
 channel_mode_format_diff(const struct ChannelMode *old_mode, const struct ChannelMode *new_mode,
                          char *modes, size_t modes_capacity,
                          char *parameters, size_t parameters_capacity)
@@ -400,7 +455,7 @@ channel_mode_format_diff(const struct ChannelMode *old_mode, const struct Channe
   if (modes_capacity == 0 || parameters_capacity == 0)
     return false;
 
-  struct ChannelModeDiffFormatter formatter =
+  struct ChannelModeFormatter formatter =
   {
     .modes = modes,
     .modes_capacity = modes_capacity,
@@ -411,20 +466,20 @@ channel_mode_format_diff(const struct ChannelMode *old_mode, const struct Channe
 
   for (const struct chan_mode *mode = cmode_tab; mode->letter; ++mode)
     if ((mode->mode & new_mode->flags) && !(mode->mode & old_mode->flags))
-      if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, mode->letter, NULL))
+      if (!_channel_mode_formatter_append(&formatter, MODE_ADD, mode->letter, NULL))
         goto buffer_too_small;
 
   for (const struct chan_mode *mode = cmode_tab; mode->letter; ++mode)
     if ((mode->mode & old_mode->flags) && !(mode->mode & new_mode->flags))
-      if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, mode->letter, NULL))
+      if (!_channel_mode_formatter_append(&formatter, MODE_DEL, mode->letter, NULL))
         goto buffer_too_small;
 
   if (old_mode->member_limit && new_mode->member_limit == 0)
-    if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, 'l', NULL))
+    if (!_channel_mode_formatter_append(&formatter, MODE_DEL, 'l', NULL))
       goto buffer_too_small;
 
   if (old_mode->key[0] && new_mode->key[0] == '\0')
-    if (!_channel_mode_diff_append_change(&formatter, MODE_DEL, 'k', old_mode->key))
+    if (!_channel_mode_formatter_append(&formatter, MODE_DEL, 'k', old_mode->key))
       goto buffer_too_small;
 
   if (new_mode->member_limit && old_mode->member_limit != new_mode->member_limit)
@@ -432,12 +487,12 @@ channel_mode_format_diff(const struct ChannelMode *old_mode, const struct Channe
     char limit_buffer[sizeof(new_mode->member_limit) * CHAR_BIT + 1];
     snprintf(limit_buffer, sizeof(limit_buffer), "%" PRIu32, new_mode->member_limit);
 
-    if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, 'l', limit_buffer))
+    if (!_channel_mode_formatter_append(&formatter, MODE_ADD, 'l', limit_buffer))
       goto buffer_too_small;
   }
 
   if (new_mode->key[0] && strcmp(old_mode->key, new_mode->key))
-    if (!_channel_mode_diff_append_change(&formatter, MODE_ADD, 'k', new_mode->key))
+    if (!_channel_mode_formatter_append(&formatter, MODE_ADD, 'k', new_mode->key))
       goto buffer_too_small;
 
   return true;
@@ -446,51 +501,6 @@ buffer_too_small:
   modes[0] = '\0';
   parameters[0] = '\0';
   return false;
-}
-
-const char *
-channel_modes(const struct Channel *channel, const struct Client *client, bool params)
-{
-  static char buf[MODEBUFLEN];
-  char *bufptr = buf;
-  bool server_or_member = false;
-
-  *bufptr++ = '+';
-
-  for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
-  {
-    if (tab->mode && channel_has_mode(channel, tab->mode))
-      *bufptr++ = tab->letter;
-  }
-
-  if (channel_has_member_limit(channel))
-  {
-    *bufptr++ = 'l';
-
-    if (params)
-      server_or_member =
-        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
-  }
-
-  if (channel_has_key(channel))
-  {
-    *bufptr++ = 'k';
-
-    if (params)
-      server_or_member =
-        (server_or_member == true || client_is_server(client) || channel_member_find(channel, client));
-  }
-
-  if (server_or_member)
-  {
-    if (channel_has_member_limit(channel))
-      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %u", channel->mode.member_limit);
-    if (channel_has_key(channel))
-      bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), " %s", channel->mode.key);
-  }
-
-  *bufptr = '\0';
-  return buf;
 }
 
 static void

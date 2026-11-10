@@ -133,6 +133,7 @@ extern char cmode_class[][256];
 extern void channel_mode_clear_member_statuses(struct Channel *, const char *);
 extern void channel_mode_init(void);
 extern void channel_mode_set(struct Client *, struct Channel *, size_t, char *[]);
+extern bool channel_mode_format(const struct ChannelMode *, char *, size_t, char *, size_t);
 extern bool channel_mode_format_diff(const struct ChannelMode *, const struct ChannelMode *, char *, size_t, char *, size_t);
 extern struct ChannelMode channel_mode_merge(const struct ChannelMode *, const struct ChannelMode *);
 

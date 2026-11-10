@@ -164,12 +164,17 @@ _list_task_eval_channel(const struct ListTask *task, const struct Channel *chann
 static void
 _list_task_send_channel(const struct ListTask *task, const struct Channel *channel)
 {
-  char mode_buf[MODEBUFLEN];
-  snprintf(mode_buf, sizeof(mode_buf), string_is_empty(channel->topic) ? "[%s]" : "[%s] ",
-           channel_modes(channel, task->client, false));
+  char modes[MODEBUFLEN];
+  char parameters[MODEBUFLEN];
+  const bool formatted = channel_mode_format(&channel->mode, modes, sizeof(modes), parameters, sizeof(parameters));
+  assert(formatted);
+  (void)formatted;
+
+  char mode_display[sizeof(modes) + sizeof("[] ") - 1];
+  snprintf(mode_display, sizeof(mode_display), string_is_empty(channel->topic) ? "[%s]" : "[%s] ", modes);
 
   sendto_one_numeric(task->client, &me, RPL_LIST, channel->name,
-                     list_length(&channel->member_list), mode_buf, string_or_empty(channel->topic));
+                     list_length(&channel->member_list), mode_display, string_or_empty(channel->topic));
 }
 
 static void

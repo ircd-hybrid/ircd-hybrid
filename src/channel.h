@@ -115,7 +115,6 @@ extern channel_send_perm_t channel_send_qualifies(struct Channel *, struct Clien
 extern struct Channel *channel_create(const char *);
 extern struct Channel *channel_find(const char *);
 extern const list_t *channel_get_list(void);
-extern const char *channel_modes(const struct Channel *, const struct Client *, bool);
 
 static inline bool
 channel_is_valid_prefix_char(unsigned char ch)

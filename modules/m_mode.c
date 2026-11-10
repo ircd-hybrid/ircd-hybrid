@@ -14,6 +14,7 @@
 #include "module.h"
 
 #include "channel.h"
+#include "channel_member.h"
 #include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
@@ -121,8 +122,17 @@ m_mode(struct Client *source, size_t parc, char *parv[])
 
   if (parc < 3)
   {
+    char modes[MODEBUFLEN];
+    char parameters[MODEBUFLEN];
+    const bool formatted = channel_mode_format(&channel->mode, modes, sizeof(modes), parameters, sizeof(parameters));
+    assert(formatted);
+    (void)formatted;
+
+    if (channel_member_find(channel, source) == NULL)
+      parameters[0] = '\0';
+
     sendto_one_numeric(source, &me, RPL_CHANNELMODEIS,
-                       channel->name, channel_modes(channel, source, true));
+                       channel->name, modes, parameters[0] ? " " : "", parameters);
     sendto_one_numeric(source, &me, RPL_CREATIONTIME,
                        channel->name, channel->creation_time);
     return;

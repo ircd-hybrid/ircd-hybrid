@@ -186,10 +186,10 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
 
   char modebuf[MODEBUFLEN];
   char parabuf[MODEBUFLEN];
-  const bool formatted = channel_mode_format_diff(old_mode, &new_mode, modebuf, sizeof(modebuf),
-                                                  parabuf, sizeof(parabuf));
-  assert(formatted);
-  (void)formatted;
+  const bool diff_formatted = channel_mode_format_diff(old_mode, &new_mode, modebuf, sizeof(modebuf),
+                                                       parabuf, sizeof(parabuf));
+  assert(diff_formatted);
+  (void)diff_formatted;
 
   channel->mode = new_mode;
 
@@ -230,16 +230,22 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
                          origin_name, channel->name, modebuf, parabuf);
 
   const bool record_join_flood = client_has_flag(source, FLAGS_EOB);
+  const bool formatted = channel_mode_format(&channel->mode, modebuf, sizeof(modebuf), parabuf, sizeof(parabuf));
+  assert(formatted);
+  (void)formatted;
+
+  char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
+  const size_t buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s%s%s :",
+                                 source->id, channel->creation_time, channel->name,
+                                 modebuf, parabuf[0] ? " " : "", parabuf);
+  char *uid_ptr = uid_buf + buflen;
+  char *const uid_buf_start = uid_ptr;
+
+  modebuf[0] = '\0';
+  parabuf[0] = '\0';
   char *mbuf = modebuf;
   char *pbuf = parabuf;
   unsigned int pargs = 0;
-
-  char uid_buf[IRCD_BUFSIZE];  /* Buffer for modes/prefixes */
-  const size_t buflen = snprintf(uid_buf, sizeof(uid_buf), ":%s SJOIN %ju %s %s :",
-                                 source->id, channel->creation_time, channel->name,
-                                 channel_modes(channel, source, true));
-  char *uid_ptr = uid_buf + buflen;
-  char *const uid_buf_start = uid_ptr;
 
   char *list = parv[args + 4], *saveptr = NULL;
   for (const char *s = strtok_r(list, " ", &saveptr); s;
@@ -266,9 +272,9 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     if (status_flags && keep_incoming_modes)
     {
       const struct ChannelMember member = { .flags = status_flags };
-      const bool formatted = channel_member_format_prefix(&member, true, uid_prefix, sizeof(uid_prefix));
-      assert(formatted);
-      (void)formatted;
+      const bool prefix_formatted = channel_member_format_prefix(&member, true, uid_prefix, sizeof(uid_prefix));
+      assert(prefix_formatted);
+      (void)prefix_formatted;
 
       len_uid += strlen(uid_prefix);
     }

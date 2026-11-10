@@ -94,11 +94,16 @@ channel_flood_record_join(struct Channel *channel, const struct Client *client)
 static void
 _channel_send_sjoin(struct Client *client, const struct Channel *channel)
 {
-  size_t len;
+  char modes[MODEBUFLEN];
+  char parameters[MODEBUFLEN];
+  const bool formatted = channel_mode_format(&channel->mode, modes, sizeof(modes), parameters, sizeof(parameters));
+  assert(formatted);
+  (void)formatted;
+
   char buf[IRCD_BUFSIZE];
-  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s :",
+  char *bufptr = buf + snprintf(buf, sizeof(buf), ":%s SJOIN %ju %s %s%s%s :",
                                 me.id, channel->creation_time,
-                                channel->name, channel_modes(channel, client, true));
+                                channel->name, modes, parameters[0] ? " " : "", parameters);
   char *const bufptr_start = bufptr;
 
   list_node_t *node;
@@ -107,14 +112,13 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
     const struct ChannelMember *const member = node->data;
 
     char prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE];
-    const bool formatted = channel_member_format_prefix(member, true, prefix, sizeof(prefix));
-    assert(formatted);
-    (void)formatted;
+    const bool prefix_formatted = channel_member_format_prefix(member, true, prefix, sizeof(prefix));
+    assert(prefix_formatted);
+    (void)prefix_formatted;
 
-    len = strlen(member->client->id) + 1;  /* +1 for space */
-    len += strlen(prefix);
+    const size_t member_length = strlen(prefix) + strlen(member->client->id);
 
-    if ((bufptr - buf) + len > sizeof(buf) - 2)
+    if ((bufptr - buf) + (bufptr != bufptr_start) + member_length > sizeof(buf) - 2)
     {
       sendto_one(client, "%s", buf);
       bufptr = bufptr_start;

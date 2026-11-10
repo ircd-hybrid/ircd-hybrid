@@ -106,8 +106,13 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
   {
     const struct ChannelMember *const member = node->data;
 
+    char prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE];
+    const bool formatted = channel_member_format_prefix(member, true, prefix, sizeof(prefix));
+    assert(formatted);
+    (void)formatted;
+
     len = strlen(member->client->id) + 1;  /* +1 for space */
-    len += channel_member_get_prefix_length(member, true);
+    len += strlen(prefix);
 
     if ((bufptr - buf) + len > sizeof(buf) - 2)
     {
@@ -116,7 +121,7 @@ _channel_send_sjoin(struct Client *client, const struct Channel *channel)
     }
 
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != bufptr_start ? " %s%s" : "%s%s",
-                       channel_member_get_prefix(member, true), member->client->id);
+                       prefix, member->client->id);
   }
 
   sendto_one(client, "%s", buf);
@@ -384,7 +389,12 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
       else
         masklen = strlen(member->client->name) + 1;  /* +1 for space */
 
-      masklen += channel_member_get_prefix_length(member, multi_prefix);
+      char prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE];
+      const bool formatted = channel_member_format_prefix(member, multi_prefix, prefix, sizeof(prefix));
+      assert(formatted);
+      (void)formatted;
+
+      masklen += strlen(prefix);
 
       if ((bufptr - buf) + masklen + len > sizeof(buf))
       {
@@ -395,11 +405,11 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
 
       if (userhost_in_names)
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s!%s@%s" : "%s%s!%s@%s",
-                           channel_member_get_prefix(member, multi_prefix),
+                           prefix,
                            member->client->name, member->client->username, member->client->host);
       else
         bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s" : "%s%s",
-                           channel_member_get_prefix(member, multi_prefix), member->client->name);
+                           prefix, member->client->name);
     }
 
     if (bufptr != buf)

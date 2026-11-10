@@ -16,8 +16,6 @@
 #include "channel.h"
 
 
-enum { CMEMBER_STATUS_FLAGS_LEN = 5 };
-
 enum { MODEBUFLEN = 200 };
 
 /** Maximum mode changes allowed per client, per server is different */

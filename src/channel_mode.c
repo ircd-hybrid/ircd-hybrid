@@ -1018,21 +1018,24 @@ const struct chan_mode cflag_tab[] =
 void
 channel_mode_init(void)
 {
-  char letter[8] = "";
-  char prefix[8] = "";
+  char status_letters[IO_ARRAY_LENGTH(cflag_tab)];
+  char status_prefixes[IO_ARRAY_LENGTH(cflag_tab)];
+  size_t status_count = 0;
 
   for (const struct chan_mode *tab = cmode_tab; tab->letter; ++tab)
     cmode_map[tab->letter] = tab;
 
-  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
   {
-    cmode_map[tab->letter] = tab;
+    cmode_map[status_mode->letter] = status_mode;
 
-    const char lstr[] = { tab->letter, '\0' };
-    const char pstr[] = { tab->prefix, '\0' };
-    strlcat(letter, lstr, sizeof(letter));
-    strlcat(prefix, pstr, sizeof(prefix));
+    status_letters[status_count] = status_mode->letter;
+    status_prefixes[status_count] = status_mode->prefix;
+    ++status_count;
   }
+
+  status_letters[status_count] = '\0';
+  status_prefixes[status_count] = '\0';
 
   for (unsigned int i = 0; i < 256; ++i)
   {
@@ -1060,8 +1063,8 @@ channel_mode_init(void)
                cmode_class[MODE_CLASS_A], cmode_class[MODE_CLASS_B],
                cmode_class[MODE_CLASS_C], cmode_class[MODE_CLASS_D]);
 
-  isupport_add("PREFIX", "(%s)%s", letter, prefix);
-  isupport_add("STATUSMSG", "%s", prefix);
+  isupport_add("PREFIX", "(%s)%s", status_letters, status_prefixes);
+  isupport_add("STATUSMSG", "%s", status_prefixes);
   isupport_add("MODES", "%u", (unsigned int)MAXMODEPARAMS);
   isupport_add("EXCEPTS", NULL);
   isupport_add("INVEX", NULL);

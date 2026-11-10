@@ -5,6 +5,7 @@
 
 #ifndef INCLUDED_channel_member_h
 #define INCLUDED_channel_member_h
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -24,16 +25,17 @@ struct ChannelMember
   uint32_t flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
+enum { CHANNEL_MEMBER_PREFIX_BUFFER_SIZE = sizeof(((struct ChannelMember *)0)->flags) * CHAR_BIT + 1 };
+
 extern void channel_member_remove(struct ChannelMember *);
 extern void channel_member_remove_list(list_t *);
+extern bool channel_member_format_prefix(const struct ChannelMember *, bool, char *, size_t);
+extern char channel_member_rank_to_prefix(int);
 extern int channel_member_get_highest_rank(const struct ChannelMember *);
 extern int channel_member_prefix_to_rank(char);
 extern uint32_t channel_member_prefix_to_flag(char);
-extern size_t channel_member_get_prefix_length(const struct ChannelMember *, bool);
 extern struct ChannelMember *channel_member_add(struct Channel *, struct Client *, uint32_t);
 extern struct ChannelMember *channel_member_find(const struct Channel *, const struct Client *);
-extern const char *channel_member_get_prefix(const struct ChannelMember *, bool);
-extern const char *channel_member_rank_to_prefix(int);
 
 static inline bool
 channel_member_has_flags(const struct ChannelMember *member, uint32_t flags)

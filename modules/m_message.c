@@ -241,7 +241,7 @@ msg_channel(bool notice, struct Client *source, struct Channel *channel,
 
   if (perm == CHANNEL_SEND_PERM_ELEVATED || !flood_attack_channel(notice, source, channel))
   {
-    const char prefix[] = { channel_member_rank_to_prefix(rank)[0], '\0' };
+    const char prefix[] = { channel_member_rank_to_prefix(rank), '\0' };
     sendto_channel_butone(source, source, channel, rank, "%s %s%s :%s",
                           command[notice], prefix, channel->name, text);
     msg_dispatch_sent_hook(notice, source, prefix[0], channel->name, text);

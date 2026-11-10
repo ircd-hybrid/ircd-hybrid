@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the WHOIS command.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -143,7 +144,12 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
     if (vis == WHOIS_CHANNEL_VISIBILITY_NONE)
       continue;
 
-    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + channel_member_get_prefix_length(member, true) + len > sizeof(buf))
+    char prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE];
+    const bool formatted = channel_member_format_prefix(member, true, prefix, sizeof(prefix));
+    assert(formatted);
+    (void)formatted;
+
+    if ((bufptr - buf) + member->channel->name_len + 1 + (vis != WHOIS_CHANNEL_VISIBILITY_FULL) + strlen(prefix) + len > sizeof(buf))
     {
       sendto_one_numeric(source, &me, RPL_WHOISCHANNELS, target->name, buf);
       bufptr = buf;
@@ -151,7 +157,7 @@ _whois_send_channels_numeric(struct Client *source, const struct Client *target)
 
     const char *const channel_prefix = _whois_get_channel_visibility_prefix(vis);
     bufptr += snprintf(bufptr, sizeof(buf) - (bufptr - buf), bufptr != buf ? " %s%s%s" : "%s%s%s",
-                       channel_prefix, channel_member_get_prefix(member, true), member->channel->name);
+                       channel_prefix, prefix, member->channel->name);
   }
 
   if (bufptr != buf)

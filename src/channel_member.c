@@ -60,77 +60,62 @@ channel_member_remove_list(list_t *list)
 int
 channel_member_prefix_to_rank(char prefix)
 {
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-    if (tab->prefix == prefix)
-      return tab->rank;
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    if (status_mode->prefix == prefix)
+      return status_mode->rank;
   return CHACCESS_PEON;
 }
 
-const char *
+char
 channel_member_rank_to_prefix(int rank)
 {
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-  {
-    if (tab->rank == rank)
-    {
-      static char prefix[2];
-      prefix[0] = tab->prefix;
-      prefix[1] = '\0';
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    if (status_mode->rank == rank)
+      return status_mode->prefix;
 
-      return prefix;
-    }
-  }
-
-  return "";
+  return '\0';
 }
 
 uint32_t
 channel_member_prefix_to_flag(char prefix)
 {
-  for (const struct chan_mode *tab = cflag_tab; tab->prefix; ++tab)
-    if (tab->prefix == prefix)
-      return tab->flag;
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    if (status_mode->prefix == prefix)
+      return status_mode->flag;
   return 0;
 }
 
-const char *
-channel_member_get_prefix(const struct ChannelMember *member, bool combine)
+bool
+channel_member_format_prefix(const struct ChannelMember *member, bool multi_prefix, char *buffer, size_t capacity)
 {
-  static char buf[CMEMBER_STATUS_FLAGS_LEN + 1];  /* +1 for \0 */
-  char *bufptr = buf;
+  assert(member);
+  assert(buffer || capacity == 0);
 
-  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+  if (capacity == 0)
+    return false;
+
+  size_t length = 0;
+  buffer[0] = '\0';
+
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
   {
-    if (channel_member_has_flags(member, tab->flag))
+    if (channel_member_has_flags(member, status_mode->flag))
     {
-      *bufptr++ = tab->prefix;
+      if (length == capacity - 1)
+      {
+        buffer[0] = '\0';
+        return false;
+      }
 
-      if (!combine)
+      buffer[length++] = status_mode->prefix;
+
+      if (!multi_prefix)
         break;
     }
   }
 
-  *bufptr = '\0';
-  return buf;
-}
-
-size_t
-channel_member_get_prefix_length(const struct ChannelMember *member, bool combine)
-{
-  size_t len = 0;
-
-  for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-  {
-    if (channel_member_has_flags(member, tab->flag))
-    {
-      ++len;
-
-      if (!combine)
-        break;
-    }
-  }
-
-  return len;
+  buffer[length] = '\0';
+  return true;
 }
 
 int

@@ -109,10 +109,6 @@ _who_send(struct Client *source, const struct Client *target,
   char buf[IRCD_BUFSIZE];
   char *p = buf;
 
-  /*
-   * NOTE: with current fields list and sizes this _cannot_ overrun,
-   * and also the message finally sent shouldn't ever be truncated.
-   */
   buf[1] = '\0';
 
   /* If we don't have a channel and we need one... try to find it. */
@@ -166,10 +162,12 @@ _who_send(struct Client *source, const struct Client *target,
 
   if (_who_reply_includes(who, WHO_FIELD_FLA))
   {
-    char status[32] = { [0] = target->away_message ? 'G' : 'H' };
-
     ircd_hook_who_send_ctx ctx = { .source = source, .target = target };
     hook_dispatch(ircd_hook_who_send, &ctx);
+    assert(ctx.modes_len < sizeof(ctx.modes));
+
+    char status[sizeof(ctx.modes) + CHANNEL_MEMBER_PREFIX_BUFFER_SIZE] =
+      { [0] = target->away_message ? 'G' : 'H' };
 
     if (ctx.modes_len)
     {
@@ -179,10 +177,13 @@ _who_send(struct Client *source, const struct Client *target,
 
     if (member)
     {
-      const char *const prefix =
-        channel_member_get_prefix(member, who->whox || client_has_cap(source, CAP_MULTI_PREFIX));
-      if (!string_is_empty(prefix))
-        strlcat(status, prefix, sizeof(status));
+      char prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE];
+      const bool formatted =
+        channel_member_format_prefix(member, who->whox || client_has_cap(source, CAP_MULTI_PREFIX), prefix, sizeof(prefix));
+      assert(formatted);
+      (void)formatted;
+
+      strlcat(status, prefix, sizeof(status));
     }
 
     p += snprintf(p, sizeof(buf) - (p - buf), " %s", status);

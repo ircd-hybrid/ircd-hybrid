@@ -245,10 +245,11 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
   for (const char *s = strtok_r(list, " ", &saveptr); s;
                    s = strtok_r(NULL, " ", &saveptr))
   {
-    unsigned int ret, status_flags = 0;
-    while ((ret = channel_member_prefix_to_flag(*s)))
+    uint32_t status_flags = 0;
+    uint32_t status_flag;
+    while ((status_flag = channel_member_prefix_to_flag(*s)))
     {
-      status_flags |= ret;
+      status_flags |= status_flag;
       ++s;
     }
 
@@ -260,17 +261,21 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
       continue;
 
     size_t len_uid = strlen(target->id);
-    char uid_prefix[CMEMBER_STATUS_FLAGS_LEN + 1] = "";
+    char uid_prefix[CHANNEL_MEMBER_PREFIX_BUFFER_SIZE] = "";
 
     if (status_flags && keep_incoming_modes)
     {
       const struct ChannelMember member = { .flags = status_flags };
-      len_uid += strlcpy(uid_prefix, channel_member_get_prefix(&member, true), sizeof(uid_prefix));
+      const bool formatted = channel_member_format_prefix(&member, true, uid_prefix, sizeof(uid_prefix));
+      assert(formatted);
+      (void)formatted;
+
+      len_uid += strlen(uid_prefix);
     }
     else
       status_flags = 0;
 
-    if ((uid_ptr - uid_buf + len_uid) > (sizeof(uid_buf) - 2))
+    if ((uid_ptr - uid_buf) + (uid_ptr != uid_buf_start) + len_uid > sizeof(uid_buf) - 2)
     {
       sendto_servers(source, 0, 0, "%s", uid_buf);
       uid_ptr = uid_buf_start;

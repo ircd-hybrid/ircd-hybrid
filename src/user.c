@@ -552,25 +552,11 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     clear_ban_cache_list(&client->channel_member_list);
   }
 
+  const size_t nickname_length = strlen(client->name);
   list_node_t *node;
   LIST_FOREACH(node, client->channel_member_list.head)
   {
-    char nickbuf[CMEMBER_STATUS_FLAGS_LEN * NICKLEN + CMEMBER_STATUS_FLAGS_LEN] = "";
-    char modebuf[CMEMBER_STATUS_FLAGS_LEN + 1];
-    char *p = modebuf;
-    int len = 0;
     const struct ChannelMember *const member = node->data;
-
-    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
-    {
-      if (channel_member_has_flags(member, tab->flag))
-      {
-        *p++ = tab->letter;
-        len += snprintf(nickbuf + len, sizeof(nickbuf) - len, len ? " %s" : "%s", client->name);
-      }
-    }
-
-    *p = '\0';
 
     sendto_channel_local(client, member->channel, 0, CAP_EXTENDED_JOIN, CAP_CHGHOST, ":%s!%s@%s JOIN %s %s :%s",
                          client->name, client->username, client->host, member->channel->name,
@@ -578,9 +564,42 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     sendto_channel_local(client, member->channel, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
                          client->name, client->username, client->host, member->channel->name);
 
-    if (nickbuf[0])
+    char modes[MAXMODEPARAMS + 1];
+    char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
+    size_t mode_count = 0;
+    size_t parameters_length = 0;
+
+    for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    {
+      if (!channel_member_has_flags(member, status_mode->flag))
+        continue;
+
+      modes[mode_count++] = status_mode->letter;
+
+      if (parameters_length)
+        parameters[parameters_length++] = ' ';
+      memcpy(parameters + parameters_length, client->name, nickname_length);
+      parameters_length += nickname_length;
+
+      if (mode_count == MAXMODEPARAMS)
+      {
+        modes[mode_count] = '\0';
+        parameters[parameters_length] = '\0';
+        sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
+                             client->uplink->name, member->channel->name, modes, parameters);
+
+        mode_count = 0;
+        parameters_length = 0;
+      }
+    }
+
+    if (mode_count)
+    {
+      modes[mode_count] = '\0';
+      parameters[parameters_length] = '\0';
       sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                           client->uplink->name, member->channel->name, modebuf, nickbuf);
+                           client->uplink->name, member->channel->name, modes, parameters);
+    }
   }
 
   if (client->away_message)

@@ -94,6 +94,29 @@ static void _client_exit_unwind_tree(struct Client *client, const char *reason);
 static void _client_exit_notify_network(struct Client *client, const char *reason);
 static void _client_exit_detach(struct Client *client);
 
+bool
+client_shares_channel(const struct Client *client, const struct Client *other)
+{
+  const list_t *member_list = &client->channel_member_list;
+  const struct Client *lookup_client = other;
+
+  if (list_length(member_list) > list_length(&other->channel_member_list))
+  {
+    member_list = &other->channel_member_list;
+    lookup_client = client;
+  }
+
+  const list_node_t *node;
+  LIST_FOREACH(node, member_list->head)
+  {
+    const struct ChannelMember *const member = node->data;
+    if (channel_member_find(member->channel, lookup_client))
+      return true;
+  }
+
+  return false;
+}
+
 void
 client_update_activity_timeout(struct Client *client)
 {

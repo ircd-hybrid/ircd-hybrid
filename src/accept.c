@@ -10,8 +10,6 @@
 #include "memory.h"
 
 #include "accept.h"
-#include "channel.h"
-#include "channel_member.h"
 #include "client.h"
 #include "conf.h"
 #include "user_mode.h"
@@ -84,8 +82,6 @@ accept_find(const char *nick, const char *user, const char *host, list_t *list,
 bool
 accept_message(struct Client *source, struct Client *target)
 {
-  list_node_t *node;
-
   if (client_is_service(source) || (client_is_oper(source) && ConfigGeneral.opers_bypass_callerid))
     return true;
 
@@ -93,10 +89,6 @@ accept_message(struct Client *source, struct Client *target)
                                       &target->connection->accept_list, match))
     return true;
 
-  if (!user_mode_has_flag(target, UMODE_CALLERID) && user_mode_has_flag(target, UMODE_SOFTCALLERID))
-    LIST_FOREACH(node, target->channel_member_list.head)
-      if (channel_member_find(((struct ChannelMember *)node->data)->channel, source))
-        return true;
-
-  return false;
+  return !user_mode_has_flag(target, UMODE_CALLERID) &&
+         user_mode_has_flag(target, UMODE_SOFTCALLERID) && client_shares_channel(source, target);
 }

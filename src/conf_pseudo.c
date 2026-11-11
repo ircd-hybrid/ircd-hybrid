@@ -137,12 +137,13 @@ _pseudo_free(struct PseudoItem *pseudo)
  * @param server Target server for the pseudo command.
  * @param prepend Optional text to be prepended to the user's message.
  * @param command Actual command or alias being registered.
+ * @return COMMAND_SUCCESS on registration, or the command registration error.
  */
-void
+command_result_t
 pseudo_register(const char *name, const char *nick, const char *server, const char *prepend, const char *command)
 {
   if (string_is_empty(command))
-    return;
+    return COMMAND_INVALID_NAME;
 
   struct PseudoItem *const pseudo = io_calloc(sizeof(*pseudo));
   pseudo->name = io_strdup(name);
@@ -160,13 +161,15 @@ pseudo_register(const char *name, const char *nick, const char *server, const ch
     .handlers[COMMAND_HANDLER_OPER] = { .handler = _pseudo_message_handler, .args_max = 2 }
   };
 
-  if (command_add(&pseudo->command_struct) != COMMAND_SUCCESS)
+  const command_result_t result = command_add(&pseudo->command_struct);
+  if (result != COMMAND_SUCCESS)
   {
     _pseudo_free(pseudo);
-    return;
+    return result;
   }
 
   list_add_tail(pseudo, &pseudo->node, &pseudo_list);
+  return COMMAND_SUCCESS;
 }
 
 /**

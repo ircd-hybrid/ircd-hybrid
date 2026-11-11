@@ -854,8 +854,24 @@ pseudo_entry: T_PSEUDO
       !block_state.host.buf[0])
     break;
 
-  pseudo_register(block_state.name.buf, block_state.nick.buf, block_state.host.buf,
-                  block_state.prepend.buf, block_state.command.buf);
+  const command_result_t result =
+    pseudo_register(block_state.name.buf, block_state.nick.buf, block_state.host.buf,
+                    block_state.prepend.buf, block_state.command.buf);
+
+  char message[IRCD_BUFSIZE];
+  switch (result)
+  {
+    case COMMAND_SUCCESS:
+      break;
+    case COMMAND_INVALID_NAME:
+      snprintf(message, sizeof(message), "Invalid pseudo::command: %s", block_state.command.buf);
+      conf_report_error(message);
+      break;
+    case COMMAND_ALREADY_REGISTERED:
+      snprintf(message, sizeof(message), "Pseudo command %s is already registered", block_state.command.buf);
+      conf_report_error(message);
+      break;
+  }
 };
 
 pseudo_items: pseudo_items pseudo_item | pseudo_item;

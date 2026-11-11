@@ -13,6 +13,13 @@
 #include "channel_mode.h"
 #include "client.h"
 
+enum channel_member_status_format
+{
+  MEMBER_STATUS_FORMAT_HIGHEST_PREFIX,
+  MEMBER_STATUS_FORMAT_ALL_PREFIXES,
+  MEMBER_STATUS_FORMAT_MODE_LETTERS
+};
+
 struct ChannelMember *
 channel_member_add(struct Channel *channel, struct Client *client, uint32_t flags)
 {
@@ -85,8 +92,9 @@ channel_member_prefix_to_flag(char prefix)
   return 0;
 }
 
-bool
-channel_member_format_prefix(const struct ChannelMember *member, bool multi_prefix, char *buffer, size_t capacity)
+static bool
+_channel_member_format_statuses(const struct ChannelMember *member, enum channel_member_status_format format,
+                                char *buffer, size_t capacity)
 {
   assert(member);
   assert(buffer || capacity == 0);
@@ -107,15 +115,29 @@ channel_member_format_prefix(const struct ChannelMember *member, bool multi_pref
         return false;
       }
 
-      buffer[length++] = status_mode->prefix;
+      buffer[length++] = format == MEMBER_STATUS_FORMAT_MODE_LETTERS ? status_mode->letter : status_mode->prefix;
 
-      if (!multi_prefix)
+      if (format == MEMBER_STATUS_FORMAT_HIGHEST_PREFIX)
         break;
     }
   }
 
   buffer[length] = '\0';
   return true;
+}
+
+bool
+channel_member_format_prefix(const struct ChannelMember *member, bool multi_prefix, char *buffer, size_t capacity)
+{
+  const enum channel_member_status_format format =
+    multi_prefix ? MEMBER_STATUS_FORMAT_ALL_PREFIXES : MEMBER_STATUS_FORMAT_HIGHEST_PREFIX;
+  return _channel_member_format_statuses(member, format, buffer, capacity);
+}
+
+bool
+channel_member_format_status_modes(const struct ChannelMember *member, char *buffer, size_t capacity)
+{
+  return _channel_member_format_statuses(member, MEMBER_STATUS_FORMAT_MODE_LETTERS, buffer, capacity);
 }
 
 int

@@ -25,11 +25,16 @@ struct ChannelMember
   uint32_t flags;  /**< user/channel flags, e.g. CHFL_CHANOP */
 };
 
-enum { CHANNEL_MEMBER_PREFIX_BUFFER_SIZE = sizeof(((struct ChannelMember *)0)->flags) * CHAR_BIT + 1 };
+enum
+{
+  CHANNEL_MEMBER_PREFIX_BUFFER_SIZE = sizeof(((struct ChannelMember *)0)->flags) * CHAR_BIT + 1,
+  CHANNEL_MEMBER_STATUS_MODES_BUFFER_SIZE = CHANNEL_MEMBER_PREFIX_BUFFER_SIZE
+};
 
 extern void channel_member_remove(struct ChannelMember *);
 extern void channel_member_remove_list(list_t *);
 extern bool channel_member_format_prefix(const struct ChannelMember *, bool, char *, size_t);
+extern bool channel_member_format_status_modes(const struct ChannelMember *, char *, size_t);
 extern char channel_member_rank_to_prefix(int);
 extern int channel_member_get_highest_rank(const struct ChannelMember *);
 extern int channel_member_prefix_to_rank(char);

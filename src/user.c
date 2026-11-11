@@ -564,17 +564,19 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     sendto_channel_local(client, member->channel, 0, 0, CAP_EXTENDED_JOIN | CAP_CHGHOST, ":%s!%s@%s JOIN :%s",
                          client->name, client->username, client->host, member->channel->name);
 
+    char status_modes[CHANNEL_MEMBER_STATUS_MODES_BUFFER_SIZE];
+    const bool formatted = channel_member_format_status_modes(member, status_modes, sizeof(status_modes));
+    assert(formatted);
+    (void)formatted;
+
     char modes[MAXMODEPARAMS + 1];
     char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
     size_t mode_count = 0;
     size_t parameters_length = 0;
 
-    for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      if (!channel_member_has_flags(member, status_mode->flag))
-        continue;
-
-      modes[mode_count++] = status_mode->letter;
+      modes[mode_count++] = *mode_letter;
 
       if (parameters_length)
         parameters[parameters_length++] = ' ';

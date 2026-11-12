@@ -132,6 +132,7 @@ _listener_finalize(struct Listener *listener)
     buf[0] = '0';
   }
 
+  io_free(listener->name);
   listener->name = io_strdup(buf);
 
   fde_t *const new_fde = comm_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
@@ -245,26 +246,38 @@ listener_retain(struct Listener *listener)
   ++listener->ref_count;
 }
 
-void
+listener_result_t
 listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
 {
   if (port == 0)
-    return;
+    return LISTENER_INVALID_PORT;
+
+#ifndef HAVE_TLS
+  if (flags & LISTENER_TLS)
+    return LISTENER_TLS_UNAVAILABLE;
+#endif
 
   /* If ipv6 and no address specified we need to have two listeners; one for each protocol. */
   if (string_is_empty(addr_string))
   {
-    listener_add(port, "0.0.0.0", flags);
-    listener_add(port, "::", flags);
-    return;
+    const listener_result_t ipv4_result = listener_add(port, "0.0.0.0", flags);
+    const listener_result_t ipv6_result = listener_add(port, "::", flags);
+
+    if (ipv4_result == LISTENER_SUCCESS && ipv6_result == LISTENER_SUCCESS)
+      return LISTENER_SUCCESS;
+
+    if (ipv4_result == LISTENER_SUCCESS || ipv6_result == LISTENER_SUCCESS)
+      return LISTENER_PARTIAL_SUCCESS;
+
+    return LISTENER_INITIALIZATION_FAILED;
   }
 
   struct io_addr addr;
   if (!address_from_string(addr_string, &addr))
-    return;
+    return LISTENER_INVALID_ADDRESS;
 
   if (!address_set_port(&addr, port))
-    return;
+    return LISTENER_INVALID_ADDRESS;
 
   struct Listener *listener = _listener_find(&addr);
   if (listener == NULL)
@@ -273,8 +286,35 @@ listener_add(uint16_t port, const char *addr_string, listener_flag_t flags)
   listener->flags = flags;
 
   if (listener_is_active(listener))
-    return;
+    return LISTENER_SUCCESS;
 
   if (!_listener_finalize(listener))
+  {
     _listener_close(listener);
+    return LISTENER_INITIALIZATION_FAILED;
+  }
+
+  return LISTENER_SUCCESS;
+}
+
+const char *
+listener_result_to_string(listener_result_t result)
+{
+  switch (result)
+  {
+    case LISTENER_SUCCESS:
+      return "Success";
+    case LISTENER_PARTIAL_SUCCESS:
+      return "Only one wildcard listener could be initialized";
+    case LISTENER_INVALID_PORT:
+      return "Invalid port";
+    case LISTENER_INVALID_ADDRESS:
+      return "Invalid IP address";
+    case LISTENER_TLS_UNAVAILABLE:
+      return "TLS support is not available";
+    case LISTENER_INITIALIZATION_FAILED:
+      return "Listener initialization failed";
+  }
+
+  return "Unknown listener result";
 }

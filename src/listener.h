@@ -27,6 +27,16 @@ typedef enum
   LISTENER_DEFER  = 1 << 4,  /**< Listener has the TCP_DEFER_ACCEPT/SO_ACCEPTFILTER socket option enabled */
 } listener_flag_t;
 
+typedef enum
+{
+  LISTENER_SUCCESS = 0,
+  LISTENER_PARTIAL_SUCCESS,
+  LISTENER_INVALID_PORT,
+  LISTENER_INVALID_ADDRESS,
+  LISTENER_TLS_UNAVAILABLE,
+  LISTENER_INITIALIZATION_FAILED
+} listener_result_t;
+
 /** Entry for a single listener/port */
 struct Listener
 {
@@ -38,10 +48,11 @@ struct Listener
   uint32_t ref_count;  /**< Number of connection references */
 };
 
-extern void listener_add(uint16_t, const char *, listener_flag_t);
 extern void listener_release(struct Listener *);
 extern void listener_retain(struct Listener *);
 extern void listener_close_marked(void);
+extern listener_result_t listener_add(uint16_t, const char *, listener_flag_t);
+extern const char *listener_result_to_string(listener_result_t);
 extern const list_t *listener_get_list(void);
 
 static inline const char *

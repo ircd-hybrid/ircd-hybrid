@@ -134,6 +134,35 @@ reset_block_state(void)
   memset(&block_state, 0, sizeof(block_state));
 }
 
+static void
+_conf_parser_add_listeners(uint16_t first_port, uint16_t last_port, const char *address, listener_flag_t flags)
+{
+  if (first_port > last_port)
+  {
+    conf_report_error("Invalid listener port range");
+    return;
+  }
+
+  for (unsigned int port = first_port; port <= last_port; ++port)
+  {
+    const listener_result_t result = listener_add((uint16_t)port, address, flags);
+    if (result == LISTENER_SUCCESS)
+      continue;
+
+    char message[IRCD_BUFSIZE];
+    snprintf(message, sizeof(message), "Listener on port %u: %s (address: %s)", port,
+             listener_result_to_string(result), string_is_empty(address) ? "all addresses" : address);
+
+    if (result == LISTENER_PARTIAL_SUCCESS)
+      conf_report_warning(message);
+    else
+      conf_report_error(message);
+
+    if (result == LISTENER_INVALID_ADDRESS || result == LISTENER_TLS_UNAVAILABLE)
+      break;
+  }
+}
+
 static bool
 _conf_parser_quantity_add(unsigned int total, unsigned int amount, unsigned int unit, unsigned int *result)
 {
@@ -1456,31 +1485,11 @@ port_items: port_items ',' port_item | port_item;
 port_item: port_number
 {
   if (conf_parser_ctx.pass == 2)
-  {
-#ifndef HAVE_TLS
-    if (block_state.flags.value & LISTENER_TLS)
-    {
-      conf_report_error("TLS not available - port closed");
-      break;
-    }
-#endif
-    listener_add((uint16_t)$1, block_state.addr.buf, block_state.flags.value);
-  }
+    _conf_parser_add_listeners((uint16_t)$1, (uint16_t)$1, block_state.addr.buf, block_state.flags.value);
 } | port_number TWODOTS port_number
 {
   if (conf_parser_ctx.pass == 2)
-  {
-#ifndef HAVE_TLS
-    if (block_state.flags.value & LISTENER_TLS)
-    {
-      conf_report_error("TLS not available - port closed");
-      break;
-    }
-#endif
-
-    for (unsigned int port = $1; port <= $3; ++port)
-      listener_add((uint16_t)port, block_state.addr.buf, block_state.flags.value);
-  }
+    _conf_parser_add_listeners((uint16_t)$1, (uint16_t)$3, block_state.addr.buf, block_state.flags.value);
 };
 
 listen_address: IP '=' QSTRING ';'

@@ -31,6 +31,7 @@ enum
   CHANNEL_MEMBER_STATUS_MODES_BUFFER_SIZE = CHANNEL_MEMBER_PREFIX_BUFFER_SIZE
 };
 
+extern void channel_member_clear_statuses(struct ChannelMember *);
 extern void channel_member_remove(struct ChannelMember *);
 extern void channel_member_remove_list(list_t *);
 extern bool channel_member_format_prefix(const struct ChannelMember *, bool, char *, size_t);

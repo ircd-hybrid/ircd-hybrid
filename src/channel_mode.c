@@ -1148,44 +1148,53 @@ channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, ch
 void
 channel_mode_clear_member_statuses(struct Channel *channel, const char *source_name)
 {
-  char modebuf[MAXMODEPARAMS + 1];
-  char parabuf[MAXMODEPARAMS * (NICKLEN + 1) + 1];
-  char *mbuf = modebuf;
-  char *pbuf = parabuf;
-  unsigned int pargs = 0;
+  char modes[MAXMODEPARAMS + 1];
+  char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
+  size_t mode_count = 0;
+  size_t parameters_length = 0;
 
   list_node_t *node;
   LIST_FOREACH(node, channel->member_list.head)
   {
     struct ChannelMember *const member = node->data;
 
-    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    char status_modes[CHANNEL_MEMBER_STATUS_MODES_BUFFER_SIZE];
+    const bool formatted = channel_member_format_status_modes(member, status_modes, sizeof(status_modes));
+    assert(formatted);
+
+    if (!formatted || string_is_empty(status_modes))
+      continue;
+
+    channel_member_clear_statuses(member);
+
+    const size_t nickname_length = strlen(member->client->name);
+    for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      if (channel_member_has_flags(member, tab->flag))
+      modes[mode_count++] = *mode_letter;
+
+      if (parameters_length)
+        parameters[parameters_length++] = ' ';
+      memcpy(parameters + parameters_length, member->client->name, nickname_length);
+      parameters_length += nickname_length;
+
+      if (mode_count == MAXMODEPARAMS)
       {
-        member->flags &= ~tab->flag;
-        *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s",
-                         member->client->name);
+        modes[mode_count] = '\0';
+        parameters[parameters_length] = '\0';
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
+                             source_name, channel->name, modes, parameters);
 
-        if (++pargs >= MAXMODEPARAMS)
-        {
-          *mbuf = '\0';
-          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                               source_name, channel->name, modebuf, parabuf);
-
-          mbuf = modebuf;
-          pbuf = parabuf;
-          pargs = 0;
-        }
+        mode_count = 0;
+        parameters_length = 0;
       }
     }
   }
 
-  if (pargs)
+  if (mode_count)
   {
-    *mbuf = '\0';
+    modes[mode_count] = '\0';
+    parameters[parameters_length] = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                         source_name, channel->name, modebuf, parabuf);
+                         source_name, channel->name, modes, parameters);
   }
 }

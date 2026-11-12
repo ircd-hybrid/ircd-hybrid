@@ -64,6 +64,15 @@ channel_member_remove_list(list_t *list)
     channel_member_remove(member);
 }
 
+void
+channel_member_clear_statuses(struct ChannelMember *member)
+{
+  assert(member);
+
+  for (const struct chan_mode *status_mode = cflag_tab; status_mode->letter; ++status_mode)
+    channel_member_unset_flags(member, status_mode->flag);
+}
+
 int
 channel_member_prefix_to_rank(char prefix)
 {

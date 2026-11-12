@@ -241,11 +241,10 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
   char *uid_ptr = uid_buf + buflen;
   char *const uid_buf_start = uid_ptr;
 
-  modebuf[0] = '\0';
-  parabuf[0] = '\0';
-  char *mbuf = modebuf;
-  char *pbuf = parabuf;
-  unsigned int pargs = 0;
+  char modes[MAXMODEPARAMS + 1];
+  char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
+  size_t mode_count = 0;
+  size_t parameters_length = 0;
 
   char *list = parv[args + 4], *saveptr = NULL;
   for (const char *s = strtok_r(list, " ", &saveptr); s;
@@ -307,32 +306,42 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
                              target->name, target->username, target->host, target->away_message);
     }
 
-    for (const struct chan_mode *tab = cflag_tab; tab->letter; ++tab)
+    const struct ChannelMember incoming_status = { .flags = status_flags };
+    char status_modes[CHANNEL_MEMBER_STATUS_MODES_BUFFER_SIZE];
+    const bool status_formatted =
+      channel_member_format_status_modes(&incoming_status, status_modes, sizeof(status_modes));
+    assert(status_formatted);
+    (void)status_formatted;
+
+    const size_t nickname_length = strlen(target->name);
+    for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      if (status_flags & tab->flag)
+      modes[mode_count++] = *mode_letter;
+
+      if (parameters_length)
+        parameters[parameters_length++] = ' ';
+      memcpy(parameters + parameters_length, target->name, nickname_length);
+      parameters_length += nickname_length;
+
+      if (mode_count == MAXMODEPARAMS)
       {
-        *mbuf++ = tab->letter;
-        pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", target->name);
+        modes[mode_count] = '\0';
+        parameters[parameters_length] = '\0';
+        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
+                             origin_name, channel->name, modes, parameters);
 
-        if (++pargs >= MAXMODEPARAMS)
-        {
-          *mbuf = '\0';
-          sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                               origin_name, channel->name, modebuf, parabuf);
-
-          mbuf = modebuf;
-          pbuf = parabuf;
-          pargs = 0;
-        }
+        mode_count = 0;
+        parameters_length = 0;
       }
     }
   }
 
-  if (pargs)
+  if (mode_count)
   {
-    *mbuf = '\0';
+    modes[mode_count] = '\0';
+    parameters[parameters_length] = '\0';
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                         origin_name, channel->name, modebuf, parabuf);
+                         origin_name, channel->name, modes, parameters);
   }
 
   sendto_servers(source, 0, 0, "%s", uid_buf);

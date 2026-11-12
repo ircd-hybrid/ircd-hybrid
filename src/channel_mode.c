@@ -24,6 +24,7 @@
 #include "channel.h"
 #include "channel_member.h"
 #include "channel_mode.h"
+#include "channel_mode_batch.h"
 #include "client.h"
 #include "client_find.h"
 #include "conf.h"
@@ -847,18 +848,35 @@ chm_key(struct ChannelModeContext *ctx, const struct chan_mode *mode,
 }
 
 static void
+_channel_mode_flush_local_batch(const struct Channel *channel, const char *header, struct ChannelModeBatch *batch)
+{
+  if (batch->modes_length)
+    sendto_channel_local(NULL, channel, 0, 0, 0, "%s%s%s%s",
+                         header, batch->modes, batch->parameter_count ? " " : "", batch->parameters);
+
+  channel_mode_batch_reset(batch);
+}
+
+static void
+_channel_mode_flush_server_batch(const struct Client *source, const char *header, struct ChannelModeBatch *batch)
+{
+  if (batch->modes_length)
+    sendto_servers(source, 0, 0, "%s%s%s%s",
+                   header, batch->modes, batch->parameter_count ? " " : "", batch->parameters);
+
+  channel_mode_batch_reset(batch);
+}
+
+static void
 send_mode_changes_server(const struct ChannelModeContext *ctx)
 {
-  struct Client *const client = ctx->source;
-  struct Channel *const channel = ctx->channel;
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE] = "";
-  const size_t prefix_length = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %ju %s ",
-                                        client->id, channel->creation_time, channel->name);
-  size_t modes_length = prefix_length;
-  size_t parameters_length = 0;
-  size_t parameter_count = 0;
-  enum channel_mode_action action = MODE_NONE;
+  char header[IRCD_BUFSIZE];
+  const int header_length = snprintf(header, sizeof(header), ":%s TMODE %ju %s ",
+                                     ctx->source->id, ctx->channel->creation_time, ctx->channel->name);
+  assert(header_length >= 0 && (size_t)header_length < sizeof(header));
+
+  struct ChannelModeBatch batch;
+  channel_mode_batch_init(&batch, (size_t)header_length);
 
   for (size_t i = 0; i < ctx->change_count; ++i)
   {
@@ -867,67 +885,34 @@ send_mode_changes_server(const struct ChannelModeContext *ctx)
       continue;
 
     const char *const argument = change->target_id ? change->target_id : change->argument;
-    const size_t argument_length = argument ? strlen(argument) : 0;
-    assert(prefix_length + 2 + (argument ? argument_length + 1 : 0) <= sizeof(modebuf) - 2);
-
-    /* Every argument adds one separator, including the first argument. */
-    const size_t change_length = 1 + (action != change->action) + (argument ? argument_length + 1 : 0);
-    const size_t line_length = modes_length + parameters_length + (parameter_count != 0);
-
-    if ((argument && parameter_count == MAXMODEPARAMS) ||
-        line_length + change_length > sizeof(modebuf) - 2)
+    channel_mode_batch_result_t result = channel_mode_batch_append(&batch, change->action, change->letter, argument);
+    if (result == CHANNEL_MODE_BATCH_FULL)
     {
-      if (action != MODE_NONE)
-        sendto_servers(client, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
-
-      modes_length = prefix_length;
-      modebuf[modes_length] = '\0';
-      parameters_length = 0;
-      parabuf[0] = '\0';
-      parameter_count = 0;
-      action = MODE_NONE;
+      _channel_mode_flush_server_batch(ctx->source, header, &batch);
+      result = channel_mode_batch_append(&batch, change->action, change->letter, argument);
     }
 
-    if (action != change->action)
-    {
-      modebuf[modes_length++] = change->action == MODE_ADD ? '+' : '-';
-      action = change->action;
-    }
-
-    modebuf[modes_length++] = change->letter;
-    modebuf[modes_length] = '\0';
-
-    if (argument)
-    {
-      if (parameter_count)
-        parabuf[parameters_length++] = ' ';
-
-      memcpy(parabuf + parameters_length, argument, argument_length + 1);
-      parameters_length += argument_length;
-      ++parameter_count;
-    }
+    assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+    (void)result;
   }
 
-  if (action != MODE_NONE)
-    sendto_servers(client, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
+  _channel_mode_flush_server_batch(ctx->source, header, &batch);
 }
 
 static void
 send_mode_changes_client(const struct ChannelModeContext *ctx)
 {
-  struct Client *const client = ctx->source;
-  struct Channel *const channel = ctx->channel;
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE] = "";
-  const size_t prefix_length = client_is_user(client) ?
-    snprintf(modebuf, sizeof(modebuf), ":%s!%s@%s MODE %s ",
-             client->name, client->username, client->host, channel->name) :
-    snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-             client_get_visible_server_name(client), channel->name);
-  size_t modes_length = prefix_length;
-  size_t parameters_length = 0;
-  size_t parameter_count = 0;
-  enum channel_mode_action action = MODE_NONE;
+  const struct Client *const client = ctx->source;
+  char header[IRCD_BUFSIZE];
+  const int header_length = client_is_user(client) ?
+    snprintf(header, sizeof(header), ":%s!%s@%s MODE %s ",
+             client->name, client->username, client->host, ctx->channel->name) :
+    snprintf(header, sizeof(header), ":%s MODE %s ",
+             client_get_visible_server_name(client), ctx->channel->name);
+  assert(header_length >= 0 && (size_t)header_length < sizeof(header));
+
+  struct ChannelModeBatch batch;
+  channel_mode_batch_init(&batch, (size_t)header_length);
 
   for (size_t i = 0; i < ctx->change_count; ++i)
   {
@@ -935,50 +920,19 @@ send_mode_changes_client(const struct ChannelModeContext *ctx)
     if (change->letter == '\0')
       continue;
 
-    const char *const argument = change->argument;
-    const size_t argument_length = argument ? strlen(argument) : 0;
-    assert(prefix_length + 2 + (argument ? argument_length + 1 : 0) <= sizeof(modebuf) - 2);
-
-    /* Every argument adds one separator, including the first argument. */
-    const size_t change_length = 1 + (action != change->action) + (argument ? argument_length + 1 : 0);
-    const size_t line_length = modes_length + parameters_length + (parameter_count != 0);
-
-    if ((argument && parameter_count == MAXMODEPARAMS) ||
-        line_length + change_length > sizeof(modebuf) - 2)
+    channel_mode_batch_result_t result =
+      channel_mode_batch_append(&batch, change->action, change->letter, change->argument);
+    if (result == CHANNEL_MODE_BATCH_FULL)
     {
-      if (action != MODE_NONE)
-        sendto_channel_local(NULL, channel, 0, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
-
-      modes_length = prefix_length;
-      modebuf[modes_length] = '\0';
-      parameters_length = 0;
-      parabuf[0] = '\0';
-      parameter_count = 0;
-      action = MODE_NONE;
+      _channel_mode_flush_local_batch(ctx->channel, header, &batch);
+      result = channel_mode_batch_append(&batch, change->action, change->letter, change->argument);
     }
 
-    if (action != change->action)
-    {
-      modebuf[modes_length++] = change->action == MODE_ADD ? '+' : '-';
-      action = change->action;
-    }
-
-    modebuf[modes_length++] = change->letter;
-    modebuf[modes_length] = '\0';
-
-    if (argument)
-    {
-      if (parameter_count)
-        parabuf[parameters_length++] = ' ';
-
-      memcpy(parabuf + parameters_length, argument, argument_length + 1);
-      parameters_length += argument_length;
-      ++parameter_count;
-    }
+    assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+    (void)result;
   }
 
-  if (action != MODE_NONE)
-    sendto_channel_local(NULL, channel, 0, 0, 0, parameter_count ? "%s %s" : "%s", modebuf, parabuf);
+  _channel_mode_flush_local_batch(ctx->channel, header, &batch);
 }
 
 const struct chan_mode *cmode_map[256];
@@ -1148,10 +1102,12 @@ channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, ch
 void
 channel_mode_clear_member_statuses(struct Channel *channel, const char *source_name)
 {
-  char modes[MAXMODEPARAMS + 1];
-  char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
-  size_t mode_count = 0;
-  size_t parameters_length = 0;
+  char header[IRCD_BUFSIZE];
+  const int header_length = snprintf(header, sizeof(header), ":%s MODE %s ", source_name, channel->name);
+  assert(header_length >= 0 && (size_t)header_length < sizeof(header));
+
+  struct ChannelModeBatch batch;
+  channel_mode_batch_init(&batch, (size_t)header_length);
 
   list_node_t *node;
   LIST_FOREACH(node, channel->member_list.head)
@@ -1167,34 +1123,23 @@ channel_mode_clear_member_statuses(struct Channel *channel, const char *source_n
 
     channel_member_clear_statuses(member);
 
-    const size_t nickname_length = strlen(member->client->name);
     for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      modes[mode_count++] = *mode_letter;
-
-      if (parameters_length)
-        parameters[parameters_length++] = ' ';
-      memcpy(parameters + parameters_length, member->client->name, nickname_length);
-      parameters_length += nickname_length;
-
-      if (mode_count == MAXMODEPARAMS)
+      channel_mode_batch_result_t result =
+        channel_mode_batch_append(&batch, MODE_DEL, (unsigned char)*mode_letter, member->client->name);
+      if (result == CHANNEL_MODE_BATCH_FULL)
       {
-        modes[mode_count] = '\0';
-        parameters[parameters_length] = '\0';
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                             source_name, channel->name, modes, parameters);
-
-        mode_count = 0;
-        parameters_length = 0;
+        _channel_mode_flush_local_batch(channel, header, &batch);
+        result = channel_mode_batch_append(&batch, MODE_DEL, (unsigned char)*mode_letter, member->client->name);
       }
+
+      assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+      (void)result;
+
+      if (batch.parameter_count == MAXMODEPARAMS)
+        _channel_mode_flush_local_batch(channel, header, &batch);
     }
   }
 
-  if (mode_count)
-  {
-    modes[mode_count] = '\0';
-    parameters[parameters_length] = '\0';
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s -%s %s",
-                         source_name, channel->name, modes, parameters);
-  }
+  _channel_mode_flush_local_batch(channel, header, &batch);
 }

@@ -27,6 +27,7 @@
 #include "channel.h"
 #include "channel_member.h"
 #include "channel_mode.h"
+#include "channel_mode_batch.h"
 #include "client.h"
 #include "client_format.h"
 #include "client_id.h"
@@ -528,6 +529,17 @@ nickname_is_valid(const char *nickname, bool is_local_source)
   return true;
 }
 
+static void
+_user_flush_hostmask_modes(const struct Client *client, const struct Channel *channel,
+                           const char *header, struct ChannelModeBatch *batch)
+{
+  if (batch->modes_length)
+    sendto_channel_local(client, channel, 0, 0, CAP_CHGHOST, "%s%s%s%s",
+                         header, batch->modes, batch->parameter_count ? " " : "", batch->parameters);
+
+  channel_mode_batch_reset(batch);
+}
+
 void
 user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
 {
@@ -552,7 +564,6 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     clear_ban_cache_list(&client->channel_member_list);
   }
 
-  const size_t nickname_length = strlen(client->name);
   list_node_t *node;
   LIST_FOREACH(node, client->channel_member_list.head)
   {
@@ -569,39 +580,29 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
     assert(formatted);
     (void)formatted;
 
-    char modes[MAXMODEPARAMS + 1];
-    char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
-    size_t mode_count = 0;
-    size_t parameters_length = 0;
+    char header[IRCD_BUFSIZE];
+    const int header_length = snprintf(header, sizeof(header), ":%s MODE %s ",
+                                       client->uplink->name, member->channel->name);
+    assert(header_length >= 0 && (size_t)header_length < sizeof(header));
+
+    struct ChannelModeBatch batch;
+    channel_mode_batch_init(&batch, (size_t)header_length);
 
     for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      modes[mode_count++] = *mode_letter;
-
-      if (parameters_length)
-        parameters[parameters_length++] = ' ';
-      memcpy(parameters + parameters_length, client->name, nickname_length);
-      parameters_length += nickname_length;
-
-      if (mode_count == MAXMODEPARAMS)
+      channel_mode_batch_result_t result =
+        channel_mode_batch_append(&batch, MODE_ADD, (unsigned char)*mode_letter, client->name);
+      if (result == CHANNEL_MODE_BATCH_FULL)
       {
-        modes[mode_count] = '\0';
-        parameters[parameters_length] = '\0';
-        sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                             client->uplink->name, member->channel->name, modes, parameters);
-
-        mode_count = 0;
-        parameters_length = 0;
+        _user_flush_hostmask_modes(client, member->channel, header, &batch);
+        result = channel_mode_batch_append(&batch, MODE_ADD, (unsigned char)*mode_letter, client->name);
       }
+
+      assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+      (void)result;
     }
 
-    if (mode_count)
-    {
-      modes[mode_count] = '\0';
-      parameters[parameters_length] = '\0';
-      sendto_channel_local(client, member->channel, 0, 0, CAP_CHGHOST, ":%s MODE %s +%s %s",
-                           client->uplink->name, member->channel->name, modes, parameters);
-    }
+    _user_flush_hostmask_modes(client, member->channel, header, &batch);
   }
 
   if (client->away_message)

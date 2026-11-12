@@ -7,9 +7,11 @@
  * \brief Includes required functions for processing the BMASK command.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -20,11 +22,22 @@
 
 #include "channel.h"
 #include "channel_mode.h"
+#include "channel_mode_batch.h"
 #include "client.h"
 #include "ircd.h"
 #include "ircd_module.h"
 #include "parse.h"
 #include "send.h"
+
+static void
+_bmask_flush_modes(const struct Channel *channel, const char *header, struct ChannelModeBatch *batch)
+{
+  if (batch->modes_length)
+    sendto_channel_local(NULL, channel, 0, 0, 0, "%s%s%s%s",
+                         header, batch->modes, batch->parameter_count ? " " : "", batch->parameters);
+
+  channel_mode_batch_reset(batch);
+}
 
 /*! \brief BMASK command handler
  *
@@ -43,15 +56,12 @@
 static void
 ms_bmask(struct Client *source, size_t parc, char *parv[])
 {
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
   char banbuf[IRCD_BUFSIZE];
   const char *mask;
-  char *s, *t, *mbuf, *pbuf;
+  char *s, *t;
   list_t *list = NULL;
-  size_t mlen = 0, tlen = 0;
-  int modecount = 0;
-  unsigned int type = 0;
+  size_t tlen = 0;
+  uint32_t type = 0;
 
   struct Channel *channel = channel_find(parv[2]);
   if (channel == NULL)
@@ -86,10 +96,13 @@ ms_bmask(struct Client *source, size_t parc, char *parv[])
   strlcpy(banbuf, parv[4], sizeof(banbuf));
   s = banbuf;
 
-  mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s +",
-                  client_get_visible_server_name(source), channel->name);
-  mbuf = modebuf + mlen;
-  pbuf = parabuf;
+  char header[IRCD_BUFSIZE];
+  const int header_length = snprintf(header, sizeof(header), ":%s MODE %s ",
+                                     client_get_visible_server_name(source), channel->name);
+  assert(header_length >= 0 && (size_t)header_length < sizeof(header));
+
+  struct ChannelModeBatch batch;
+  channel_mode_batch_init(&batch, (size_t)header_length);
 
   do
   {
@@ -103,34 +116,21 @@ ms_bmask(struct Client *source, size_t parc, char *parv[])
 
     if (tlen && *s != ':' && (mask = add_id(source, channel, s, list, type)))
     {
-      /* add_id can modify the actual ban mask */
-      tlen = strlen(mask);
-
-      /* this new one wont fit.. */
-      if (mbuf - modebuf + 2 + pbuf - parabuf + tlen > sizeof(modebuf) - 2 ||
-          modecount >= MAXMODEPARAMS)
+      channel_mode_batch_result_t result = channel_mode_batch_append(&batch, MODE_ADD, (unsigned char)*parv[3], mask);
+      if (result == CHANNEL_MODE_BATCH_FULL)
       {
-        *mbuf = '\0';
-
-        sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
-        mbuf = modebuf + mlen;
-        pbuf = parabuf;
-        modecount = 0;
+        _bmask_flush_modes(channel, header, &batch);
+        result = channel_mode_batch_append(&batch, MODE_ADD, (unsigned char)*parv[3], mask);
       }
 
-      *mbuf++ = *parv[3];
-      pbuf += snprintf(pbuf, sizeof(parabuf) - (pbuf - parabuf), pbuf != parabuf ? " %s" : "%s", mask);
-      ++modecount;
+      assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+      (void)result;
     }
 
     s = t;
   } while (s);
 
-  if (modecount)
-  {
-    *mbuf = '\0';
-    sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
-  }
+  _bmask_flush_modes(channel, header, &batch);
 
   sendto_servers(source, 0, 0, ":%s BMASK %ju %s %s :%s",
                  source->id, channel->creation_time, channel->name, parv[3], parv[4]);

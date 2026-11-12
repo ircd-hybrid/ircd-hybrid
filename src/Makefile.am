@@ -19,6 +19,8 @@ ircd_SOURCES = accept.c          \
                channel_member.h  \
                channel_mode.c    \
                channel_mode.h    \
+               channel_mode_batch.c \
+               channel_mode_batch.h \
                client.c          \
                client.h          \
                client_find.c     \

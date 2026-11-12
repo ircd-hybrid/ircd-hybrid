@@ -25,6 +25,7 @@
 #include "channel_invite.h"
 #include "channel_member.h"
 #include "channel_mode.h"
+#include "channel_mode_batch.h"
 #include "client.h"
 #include "client_find.h"
 #include "conf.h"
@@ -34,51 +35,45 @@
 #include "send.h"
 
 static void
+_sjoin_flush_modes(const struct Channel *channel, const char *header, struct ChannelModeBatch *batch)
+{
+  if (batch->modes_length)
+    sendto_channel_local(NULL, channel, 0, 0, 0, "%s%s%s%s",
+                         header, batch->modes, batch->parameter_count ? " " : "", batch->parameters);
+
+  channel_mode_batch_reset(batch);
+}
+
+static void
 remove_ban_list(struct Channel *channel, const char *origin_name, list_t *list, char c)
 {
-  char modebuf[IRCD_BUFSIZE];
-  char parabuf[IRCD_BUFSIZE];
-  char *mbuf;
-  char *pbuf;
-  int count = 0;
-  size_t cur_len, mlen;
-
   if (list_is_empty(list))
     return;
 
-  cur_len = mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s -",
-                            origin_name, channel->name);
-  mbuf = modebuf + mlen;
-  pbuf = parabuf;
+  char mode_header[IRCD_BUFSIZE];
+  const int mode_header_length = snprintf(mode_header, sizeof(mode_header), ":%s MODE %s ", origin_name, channel->name);
+  assert(mode_header_length >= 0 && (size_t)mode_header_length < sizeof(mode_header));
+
+  struct ChannelModeBatch mode_batch;
+  channel_mode_batch_init(&mode_batch, (size_t)mode_header_length);
 
   while (list->head)
   {
     struct Ban *const ban = list->head->data;
-    const int plen = ban->banstr_len + 2;  /* +2 = b and space */
-
-    if (count >= MAXMODEPARAMS ||
-        (cur_len + 1 /* space between */ + (plen - 1)) > sizeof(modebuf) - 2)
+    channel_mode_batch_result_t result = channel_mode_batch_append(&mode_batch, MODE_DEL, (unsigned char)c, ban->banstr);
+    if (result == CHANNEL_MODE_BATCH_FULL)
     {
-      /* NUL-terminate and remove trailing space */
-      *mbuf = *(pbuf - 1) = '\0';
-      sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
-
-      cur_len = mlen;
-      mbuf = modebuf + mlen;
-      pbuf = parabuf;
-      count = 0;
+      _sjoin_flush_modes(channel, mode_header, &mode_batch);
+      result = channel_mode_batch_append(&mode_batch, MODE_DEL, (unsigned char)c, ban->banstr);
     }
 
-    *mbuf++ = c;
-    cur_len += plen;
-    pbuf += sprintf(pbuf, "%s ", ban->banstr);
-    ++count;
+    assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+    (void)result;
 
     remove_ban(ban, list);
   }
 
-  *mbuf = *(pbuf - 1) = '\0';
-  sendto_channel_local(NULL, channel, 0, 0, 0, "%s %s", modebuf, parabuf);
+  _sjoin_flush_modes(channel, mode_header, &mode_batch);
 }
 
 /* ms_sjoin()
@@ -241,10 +236,12 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
   char *uid_ptr = uid_buf + buflen;
   char *const uid_buf_start = uid_ptr;
 
-  char modes[MAXMODEPARAMS + 1];
-  char parameters[MAXMODEPARAMS * (NICKLEN + 1)];
-  size_t mode_count = 0;
-  size_t parameters_length = 0;
+  char mode_header[IRCD_BUFSIZE];
+  const int mode_header_length = snprintf(mode_header, sizeof(mode_header), ":%s MODE %s ", origin_name, channel->name);
+  assert(mode_header_length >= 0 && (size_t)mode_header_length < sizeof(mode_header));
+
+  struct ChannelModeBatch mode_batch;
+  channel_mode_batch_init(&mode_batch, (size_t)mode_header_length);
 
   char *list = parv[args + 4], *saveptr = NULL;
   for (const char *s = strtok_r(list, " ", &saveptr); s;
@@ -313,36 +310,25 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     assert(status_formatted);
     (void)status_formatted;
 
-    const size_t nickname_length = strlen(target->name);
     for (const char *mode_letter = status_modes; *mode_letter; ++mode_letter)
     {
-      modes[mode_count++] = *mode_letter;
-
-      if (parameters_length)
-        parameters[parameters_length++] = ' ';
-      memcpy(parameters + parameters_length, target->name, nickname_length);
-      parameters_length += nickname_length;
-
-      if (mode_count == MAXMODEPARAMS)
+      channel_mode_batch_result_t result =
+        channel_mode_batch_append(&mode_batch, MODE_ADD, (unsigned char)*mode_letter, target->name);
+      if (result == CHANNEL_MODE_BATCH_FULL)
       {
-        modes[mode_count] = '\0';
-        parameters[parameters_length] = '\0';
-        sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                             origin_name, channel->name, modes, parameters);
-
-        mode_count = 0;
-        parameters_length = 0;
+        _sjoin_flush_modes(channel, mode_header, &mode_batch);
+        result = channel_mode_batch_append(&mode_batch, MODE_ADD, (unsigned char)*mode_letter, target->name);
       }
+
+      assert(result == CHANNEL_MODE_BATCH_SUCCESS);
+      (void)result;
+
+      if (mode_batch.parameter_count == MAXMODEPARAMS)
+        _sjoin_flush_modes(channel, mode_header, &mode_batch);
     }
   }
 
-  if (mode_count)
-  {
-    modes[mode_count] = '\0';
-    parameters[parameters_length] = '\0';
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +%s %s",
-                         origin_name, channel->name, modes, parameters);
-  }
+  _sjoin_flush_modes(channel, mode_header, &mode_batch);
 
   sendto_servers(source, 0, 0, "%s", uid_buf);
 

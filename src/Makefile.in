@@ -123,7 +123,8 @@ PROGRAMS = $(bin_PROGRAMS)
 am_ircd_OBJECTS = accept.$(OBJEXT) aline.$(OBJEXT) cap.$(OBJEXT) \
 	channel.$(OBJEXT) channel_invite.$(OBJEXT) \
 	channel_member.$(OBJEXT) channel_mode.$(OBJEXT) \
-	client.$(OBJEXT) client_find.$(OBJEXT) client_format.$(OBJEXT) \
+	channel_mode_batch.$(OBJEXT) client.$(OBJEXT) \
+	client_find.$(OBJEXT) client_format.$(OBJEXT) \
 	client_id.$(OBJEXT) client_input.$(OBJEXT) \
 	client_svstag.$(OBJEXT) cloak.$(OBJEXT) command.$(OBJEXT) \
 	conf.$(OBJEXT) conf_auth.$(OBJEXT) conf_class.$(OBJEXT) \
@@ -169,21 +170,21 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/accept.Po ./$(DEPDIR)/aline.Po \
 	./$(DEPDIR)/cap.Po ./$(DEPDIR)/channel.Po \
 	./$(DEPDIR)/channel_invite.Po ./$(DEPDIR)/channel_member.Po \
-	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/client.Po \
-	./$(DEPDIR)/client_find.Po ./$(DEPDIR)/client_format.Po \
-	./$(DEPDIR)/client_id.Po ./$(DEPDIR)/client_input.Po \
-	./$(DEPDIR)/client_svstag.Po ./$(DEPDIR)/cloak.Po \
-	./$(DEPDIR)/command.Po ./$(DEPDIR)/conf.Po \
-	./$(DEPDIR)/conf_auth.Po ./$(DEPDIR)/conf_class.Po \
-	./$(DEPDIR)/conf_cluster.Po ./$(DEPDIR)/conf_connect.Po \
-	./$(DEPDIR)/conf_db.Po ./$(DEPDIR)/conf_deny.Po \
-	./$(DEPDIR)/conf_exempt.Po ./$(DEPDIR)/conf_gecos.Po \
-	./$(DEPDIR)/conf_kill.Po ./$(DEPDIR)/conf_lexer.Po \
-	./$(DEPDIR)/conf_oper.Po ./$(DEPDIR)/conf_parser.Po \
-	./$(DEPDIR)/conf_pseudo.Po ./$(DEPDIR)/conf_resv.Po \
-	./$(DEPDIR)/conf_service.Po ./$(DEPDIR)/conf_shared.Po \
-	./$(DEPDIR)/extban.Po ./$(DEPDIR)/hash.Po \
-	./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
+	./$(DEPDIR)/channel_mode.Po ./$(DEPDIR)/channel_mode_batch.Po \
+	./$(DEPDIR)/client.Po ./$(DEPDIR)/client_find.Po \
+	./$(DEPDIR)/client_format.Po ./$(DEPDIR)/client_id.Po \
+	./$(DEPDIR)/client_input.Po ./$(DEPDIR)/client_svstag.Po \
+	./$(DEPDIR)/cloak.Po ./$(DEPDIR)/command.Po \
+	./$(DEPDIR)/conf.Po ./$(DEPDIR)/conf_auth.Po \
+	./$(DEPDIR)/conf_class.Po ./$(DEPDIR)/conf_cluster.Po \
+	./$(DEPDIR)/conf_connect.Po ./$(DEPDIR)/conf_db.Po \
+	./$(DEPDIR)/conf_deny.Po ./$(DEPDIR)/conf_exempt.Po \
+	./$(DEPDIR)/conf_gecos.Po ./$(DEPDIR)/conf_kill.Po \
+	./$(DEPDIR)/conf_lexer.Po ./$(DEPDIR)/conf_oper.Po \
+	./$(DEPDIR)/conf_parser.Po ./$(DEPDIR)/conf_pseudo.Po \
+	./$(DEPDIR)/conf_resv.Po ./$(DEPDIR)/conf_service.Po \
+	./$(DEPDIR)/conf_shared.Po ./$(DEPDIR)/extban.Po \
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/ipcache.Po ./$(DEPDIR)/ircd.Po \
 	./$(DEPDIR)/ircd_exit.Po ./$(DEPDIR)/ircd_hook.Po \
 	./$(DEPDIR)/ircd_module.Po ./$(DEPDIR)/ircd_signal.Po \
 	./$(DEPDIR)/isupport.Po ./$(DEPDIR)/links_cache.Po \
@@ -410,6 +411,8 @@ ircd_SOURCES = accept.c          \
                channel_member.h  \
                channel_mode.c    \
                channel_mode.h    \
+               channel_mode_batch.c \
+               channel_mode_batch.h \
                client.c          \
                client.h          \
                client_find.c     \
@@ -611,6 +614,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_invite.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_member.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel_mode_batch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_find.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client_format.Po@am__quote@ # am--include-marker
@@ -840,6 +844,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_member.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
+	-rm -f ./$(DEPDIR)/channel_mode_batch.Po
 	-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/client_find.Po
 	-rm -f ./$(DEPDIR)/client_format.Po
@@ -944,6 +949,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/channel_invite.Po
 	-rm -f ./$(DEPDIR)/channel_member.Po
 	-rm -f ./$(DEPDIR)/channel_mode.Po
+	-rm -f ./$(DEPDIR)/channel_mode_batch.Po
 	-rm -f ./$(DEPDIR)/client.Po
 	-rm -f ./$(DEPDIR)/client_find.Po
 	-rm -f ./$(DEPDIR)/client_format.Po

@@ -6,12 +6,14 @@
 #ifndef INCLUDED_conf_connect_h
 #define INCLUDED_conf_connect_h
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "address.h"
 #include "list.h"
 
 struct ClassItem;
+struct Client;
 
 enum
 {
@@ -35,6 +37,13 @@ typedef enum
   CONNECT_AUTH_FAIL_PASSWORD,
   CONNECT_AUTH_SUCCESS,
 } connect_auth_result_t;
+
+typedef enum
+{
+  CONNECT_SELECT_CONFIGURED,  /**< Entries in the current configuration. */
+  CONNECT_SELECT_RETAINED,  /**< Removed entries awaiting reference release or cleanup. */
+  CONNECT_SELECT_ALL
+} connect_selection_t;
 
 struct ConnectItem
 {
@@ -61,16 +70,21 @@ struct ConnectItem
   bool dns_failed;
 };
 
+typedef void (*connect_foreach_fn)(const struct ConnectItem *, void *);
+
 extern void connect_assign_class(struct ConnectItem *, const char *);
 extern void connect_decref(struct ConnectItem *);
 extern void connect_destroy(struct ConnectItem *);
 extern void connect_dns_lookup(struct ConnectItem *);
+extern void connect_foreach(connect_selection_t, connect_foreach_fn, void *);
 extern void connect_incref(struct ConnectItem *);
 extern void connect_mark_all_inactive(void);
 extern void connect_sweep_inactive(void);
+extern size_t connect_count(connect_selection_t);
 extern connect_auth_result_t connect_authenticate_server(const char *, const struct Client *, struct ConnectItem **);
-extern list_t *connect_get_list(void);
+extern struct ConnectItem *connect_autoconnect_next(void);
 extern struct ConnectItem *connect_create(void);
-extern struct ConnectItem *connect_find(const char *, bool);
+extern struct ConnectItem *connect_find_exact(const char *, connect_selection_t);
+extern struct ConnectItem *connect_find_matching(const char *, connect_selection_t);
 extern const char *connect_auth_result_to_string(connect_auth_result_t);
 #endif  /* INCLUDED_conf_connect_h */

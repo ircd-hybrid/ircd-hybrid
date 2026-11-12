@@ -431,13 +431,12 @@ server_connect_auto(void *unused)
   if (GlobalSetOptions.autoconnect == false)
     return;
 
-  list_t *const list = connect_get_list();
-  list_node_t *node;
-  LIST_FOREACH(node, list->head)
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  for (size_t remaining = connect_count(CONNECT_SELECT_CONFIGURED); remaining > 0; --remaining)
   {
-    struct ConnectItem *const connect = node->data;
-    if (connect->active == false)
-      continue;
+    struct ConnectItem *const connect = connect_autoconnect_next();
+    if (connect == NULL)
+      break;
 
     assert(connect->klass);
     assert(!string_is_empty(connect->name));
@@ -446,7 +445,6 @@ server_connect_auto(void *unused)
     if (connect->port == 0 || !(connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN))
       continue;
 
-    const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
     if (connect->autoconnect_hold_until > now)
       continue;
     connect->autoconnect_hold_until = now + connect->retry_delay_sec;
@@ -456,16 +454,6 @@ server_connect_auto(void *unused)
 
     if (client_find_entity_by_name(connect->name))
       continue;
-
-    /*
-     * Move this connect block to the end of the list so the next attempt
-     * starts with a different server.
-     */
-    if (list->tail != node)
-    {
-      list_remove(node, list);
-      list_add_tail(connect, node, list);
-    }
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Connection to %s[%s] activated.",
                    connect->name, connect->host);

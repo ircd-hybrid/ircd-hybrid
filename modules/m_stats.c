@@ -185,31 +185,32 @@ stats_operator(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
+_stats_connect_entry(const struct ConnectItem *connect, void *context)
+{
+  struct Client *const client = context;
+  char buf[8];
+  char *bufptr = buf;
+
+  if (connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
+    *bufptr++ = 'A';
+  if (connect->flags & CONNECT_FLAG_USE_TLS)
+    *bufptr++ = 'T';
+  if (bufptr == buf)
+    *bufptr++ = '*';
+
+  *bufptr = '\0';
+
+  const char *const visible_host =
+    client_is_admin(client) ? connect->host : "*@127.0.0.1";
+  sendto_one_numeric(client, &me, RPL_STATSCLINE,
+                     'C', visible_host, buf, connect->name, connect->port, connect->klass->name,
+                     connect->active ? "active" : "disabled");
+}
+
+static void
 stats_connect(struct Client *client, size_t parc, char *parv[])
 {
-  list_node_t *node;
-
-  LIST_FOREACH(node, connect_get_list()->head)
-  {
-    char buf[8];
-    char *bufptr = buf;
-
-    const struct ConnectItem *const connect = node->data;
-    if (connect->flags & CONNECT_FLAG_ALLOW_AUTO_CONN)
-      *bufptr++ = 'A';
-    if (connect->flags & CONNECT_FLAG_USE_TLS)
-      *bufptr++ = 'T';
-    if (bufptr == buf)
-      *bufptr++ = '*';
-
-    *bufptr = '\0';
-
-    const char *const visible_host =
-      client_is_admin(client) ? connect->host : "*@127.0.0.1";
-    sendto_one_numeric(client, &me, RPL_STATSCLINE,
-                       'C', visible_host, buf, connect->name, connect->port, connect->klass->name,
-                       connect->active ? "active" : "disabled");
-  }
+  connect_foreach(CONNECT_SELECT_ALL, _stats_connect_entry, client);
 }
 
 static void
@@ -373,22 +374,30 @@ stats_fdlist(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
+_stats_hub_entry(const struct ConnectItem *connect, void *context)
+{
+  struct Client *const client = context;
+  list_node_t *node;
+
+  LIST_FOREACH(node, connect->hub_masks.head)
+    sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', node->data, connect->name, 0, "*");
+}
+
+static void
+_stats_leaf_entry(const struct ConnectItem *connect, void *context)
+{
+  struct Client *const client = context;
+  list_node_t *node;
+
+  LIST_FOREACH(node, connect->leaf_masks.head)
+    sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', node->data, connect->name, 0, "*");
+}
+
+static void
 stats_hubleaf(struct Client *client, size_t parc, char *parv[])
 {
-  list_node_t *node, *mask_node;
-  LIST_FOREACH(node, connect_get_list()->head)
-  {
-    const struct ConnectItem *const connect = node->data;
-    LIST_FOREACH(mask_node, connect->hub_masks.head)
-      sendto_one_numeric(client, &me, RPL_STATSHLINE, 'H', mask_node->data, connect->name, 0, "*");
-  }
-
-  LIST_FOREACH(node, connect_get_list()->head)
-  {
-    const struct ConnectItem *const connect = node->data;
-    LIST_FOREACH(mask_node, connect->leaf_masks.head)
-      sendto_one_numeric(client, &me, RPL_STATSLLINE, 'L', mask_node->data, connect->name, 0, "*");
-  }
+  connect_foreach(CONNECT_SELECT_ALL, _stats_hub_entry, client);
+  connect_foreach(CONNECT_SELECT_ALL, _stats_leaf_entry, client);
 }
 
 static void

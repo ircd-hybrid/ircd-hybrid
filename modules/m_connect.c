@@ -47,7 +47,7 @@ _connect_process_request(struct Client *source, const char *name)
 {
   assert(client_is_user(source));
 
-  struct ConnectItem *const connect = connect_find(name, true);
+  struct ConnectItem *const connect = connect_find_matching(name, CONNECT_SELECT_CONFIGURED);
   if (connect == NULL)
   {
     sendto_one_notice(source, &me, ":Connect: Server %s not found in configuration.", name);

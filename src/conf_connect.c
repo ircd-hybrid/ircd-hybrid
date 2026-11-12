@@ -21,6 +21,24 @@
 #include "send.h"
 
 static list_t connect_items;
+static list_node_t *autoconnect_cursor;
+
+static bool
+_connect_matches_selection(const struct ConnectItem *connect, connect_selection_t selection)
+{
+  switch (selection)
+  {
+    case CONNECT_SELECT_CONFIGURED:
+      return connect->active;
+    case CONNECT_SELECT_RETAINED:
+      return !connect->active;
+    case CONNECT_SELECT_ALL:
+      return true;
+  }
+
+  assert(false);
+  return false;
+}
 
 void
 connect_assign_class(struct ConnectItem *connect, const char *class_name)
@@ -45,6 +63,8 @@ connect_assign_class(struct ConnectItem *connect, const char *class_name)
 void
 connect_mark_all_inactive(void)
 {
+  autoconnect_cursor = NULL;
+
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
@@ -99,7 +119,13 @@ connect_destroy(struct ConnectItem *connect)
   assert(connect);
   assert(connect->ref_count == 0);
 
+  if (autoconnect_cursor == &connect->node)
+    autoconnect_cursor = connect->node.next;
+
   list_remove(&connect->node, &connect_items);
+
+  if (autoconnect_cursor == NULL)
+    autoconnect_cursor = connect_items.head;
 
   if (connect->dns_pending)
     resolver_cancel_by_context(connect);
@@ -178,25 +204,35 @@ connect_dns_lookup(struct ConnectItem *connect)
   }
 }
 
-struct ConnectItem *
-connect_find(const char *name, bool active)
+static struct ConnectItem *
+_connect_find(const char *query, connect_selection_t selection, int (*compare)(const char *, const char *))
 {
-  assert(!string_is_empty(name));
+  assert(!string_is_empty(query));
+
+  if (string_is_empty(query))
+    return NULL;
 
   list_node_t *node;
   LIST_FOREACH(node, connect_items.head)
   {
     struct ConnectItem *const connect = node->data;
-    if (match(name, connect->name))
-      continue;
-
-    if (active && connect->active == false)
-      continue;
-
-    return connect;
+    if (_connect_matches_selection(connect, selection) && compare(query, connect->name) == 0)
+      return connect;
   }
 
   return NULL;
+}
+
+struct ConnectItem *
+connect_find_exact(const char *name, connect_selection_t selection)
+{
+  return _connect_find(name, selection, io_strcasecmp);
+}
+
+struct ConnectItem *
+connect_find_matching(const char *pattern, connect_selection_t selection)
+{
+  return _connect_find(pattern, selection, match);
 }
 
 static bool
@@ -270,10 +306,54 @@ connect_authenticate_server(const char *server_name, const struct Client *client
   return result;
 }
 
-list_t *
-connect_get_list(void)
+void
+connect_foreach(connect_selection_t selection, connect_foreach_fn callback, void *context)
 {
-  return &connect_items;
+  assert(callback);
+
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    const struct ConnectItem *const connect = node->data;
+    if (_connect_matches_selection(connect, selection))
+      callback(connect, context);
+  }
+}
+
+size_t
+connect_count(connect_selection_t selection)
+{
+  if (selection == CONNECT_SELECT_ALL)
+    return list_length(&connect_items);
+
+  size_t count = 0;
+  list_node_t *node;
+  LIST_FOREACH(node, connect_items.head)
+  {
+    const struct ConnectItem *const connect = node->data;
+    if (_connect_matches_selection(connect, selection))
+      ++count;
+  }
+
+  return count;
+}
+
+struct ConnectItem *
+connect_autoconnect_next(void)
+{
+  if (autoconnect_cursor == NULL)
+    autoconnect_cursor = connect_items.head;
+
+  for (size_t remaining = list_length(&connect_items); remaining > 0; --remaining)
+  {
+    struct ConnectItem *const connect = autoconnect_cursor->data;
+    autoconnect_cursor = autoconnect_cursor->next ? autoconnect_cursor->next : connect_items.head;
+
+    if (connect->active)
+      return connect;
+  }
+
+  return NULL;
 }
 
 void

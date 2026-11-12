@@ -173,7 +173,7 @@ oper_auth_result_to_string(oper_auth_result_t result)
   return "Unknown authentication result";
 }
 
-list_t *
+const list_t *
 oper_get_list(void)
 {
   return &operator_items;

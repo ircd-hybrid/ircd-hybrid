@@ -490,20 +490,30 @@ server_connect_auto(void *unused)
     if (conf->until > io_time_get(IO_TIME_MONOTONIC_SEC))
       continue;
 
-    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
-
-    if (conf->class->ref_count >= conf->class->max_total)
-      continue;
-
     /*
      * Found a CONNECT config with port specified, scan clients
      * and see if this server is already connected?
      */
     if (hash_find_server(conf->name))
+    {
+      /* Linked: refresh the hold time, as before (delay after a split) */
+      conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
       continue;
+    }
 
+    /*
+     * A connection to this server is already in progress, possibly via
+     * another connect{} block with the same name (e.g. ipv4 + ipv6), or
+     * the class is full. Do NOT touch the hold time here, otherwise this
+     * block loses its turn without ever being tried.
+     */
     if (find_servconn_in_progress(conf->name))
       continue;
+
+    if (conf->class->ref_count >= conf->class->max_total)
+      continue;
+
+    conf->until = io_time_get(IO_TIME_MONOTONIC_SEC) + conf->class->con_freq;
 
     /* Move this entry to the end of the list, if not already last */
     if (node->next)

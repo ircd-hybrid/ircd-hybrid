@@ -147,7 +147,6 @@ _ban_format_mask(struct Ban *ban)
   if (formatted_length < 0 || (size_t)formatted_length >= parameter_capacity)
     return false;
 
-  ban->banstr_len = prefix_length + (size_t)formatted_length;
   return true;
 }
 
@@ -231,8 +230,7 @@ add_id(struct Client *client, struct Channel *channel, const char *banid, list_t
   }
   else
   {
-    ban->banstr_len = strlcpy(ban->banstr, banid, sizeof(ban->banstr));
-    if (ban->banstr_len >= sizeof(ban->banstr))
+    if (strlcpy(ban->banstr, banid, sizeof(ban->banstr)) >= sizeof(ban->banstr))
       goto invalid;
   }
 

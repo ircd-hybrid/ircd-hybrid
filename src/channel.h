@@ -89,7 +89,6 @@ struct Ban
     char extban_parameter[BANSTRLEN];
   };
   char who[NICKLEN + USERLEN + HOSTLEN + 3];
-  size_t banstr_len;  /**< Cached string length of Ban::banstr */
   uintmax_t when;  /**< Time this ban has been set; real time */
   struct io_addr addr;
   unsigned int bits;

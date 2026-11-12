@@ -146,7 +146,7 @@ _channel_send_mask_list(struct Client *client, const struct Channel *channel, co
   LIST_FOREACH(node, list->head)
   {
     const struct Ban *const ban = node->data;
-    const size_t len = ban->banstr_len + 1;  /* +1 for space */
+    const size_t len = strlen(ban->banstr) + 1;  /* +1 for space */
 
     if ((bufptr - buf) + len > sizeof(buf) - 2)
     {

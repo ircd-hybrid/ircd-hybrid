@@ -226,6 +226,7 @@ enum irc_numerics
   ERR_LISTSYNTAX           = 521,
   ERR_WHOLIMEXCEED         = 523,
   ERR_HELPNOTFOUND         = 524,
+  ERR_INVALIDKEY           = 525,
   ERR_CANNOTSENDTOUSER     = 531,
   RPL_WHOISSECURE          = 671,
   RPL_HELPSTART            = 704,

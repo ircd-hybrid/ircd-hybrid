@@ -194,6 +194,7 @@ static const char *const replies[] =
   /* 521 */  [ERR_LISTSYNTAX] = ":Bad list syntax, type /QUOTE HELP LIST",
   /* 523 */  [ERR_WHOLIMEXCEED] = "%u :%s search limit exceeded.",
   /* 524 */  [ERR_HELPNOTFOUND] = "%s :Help not found",
+  /* 525 */  [ERR_INVALIDKEY] = "%s :Key is not well-formed",
   /* 531 */  [ERR_CANNOTSENDTOUSER] = "%s :%s",
   /* 671 */  [RPL_WHOISSECURE] = "%s :%s",
   /* 704 */  [RPL_HELPSTART] = "%s :%s",

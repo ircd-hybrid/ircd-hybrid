@@ -502,6 +502,22 @@ buffer_too_small:
   return false;
 }
 
+static bool
+_channel_mode_key_is_valid(const char *key)
+{
+  if (string_is_empty(key))
+    return false;
+
+  for (size_t i = 0; key[i]; ++i)
+  {
+    const unsigned char ch = (unsigned char)key[i];
+    if (i == KEYLEN || ch < 0x21 || ch > 0x7e || ch == ',' || ch == ':')
+      return false;
+  }
+
+  return true;
+}
+
 static void
 fix_key(char *arg)
 {
@@ -822,9 +838,18 @@ chm_key(struct ChannelModeContext *ctx, const struct chan_mode *mode,
 
   if (action == MODE_ADD && parameter)
   {
+    const bool local = client_is_local_user(ctx->source);
+    if (local && !_channel_mode_key_is_valid(parameter))
+    {
+      sendto_one_numeric(ctx->source, &me, ERR_INVALIDKEY, ctx->channel->name);
+      return;
+    }
+
     char key[KEYLEN + 1];
     strlcpy(key, parameter, sizeof(key));
-    fix_key(key);
+
+    if (!local)
+      fix_key(key);
 
     if (string_is_empty(key))
       return;

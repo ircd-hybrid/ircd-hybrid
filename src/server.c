@@ -447,13 +447,19 @@ server_connect_auto(void *unused)
 
     if (connect->autoconnect_hold_until > now)
       continue;
-    connect->autoconnect_hold_until = now + connect->retry_delay_sec;
+
+    const struct Client *const existing = client_find_entity_by_name(connect->name);
+    if (existing)
+    {
+      if (client_is_server(existing))
+        connect->autoconnect_hold_until = now + connect->retry_delay_sec;
+      continue;
+    }
 
     if (connect->klass->ref_count >= connect->klass->max_total)
       continue;
 
-    if (client_find_entity_by_name(connect->name))
-      continue;
+    connect->autoconnect_hold_until = now + connect->retry_delay_sec;
 
     sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Connection to %s[%s] activated.",
                    connect->name, connect->host);

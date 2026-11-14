@@ -59,7 +59,7 @@ struct ChannelModeContext
   int rank;
   unsigned int errors;
   uint32_t seen_simple_modes;
-  size_t limited_mode_count;
+  size_t variable_mode_count;
   size_t change_count;
   struct ChannelModeChange changes[IRCD_BUFSIZE];
   size_t arguments_used;
@@ -719,9 +719,6 @@ chm_mask(struct ChannelModeContext *ctx, const struct chan_mode *mode,
   if (!channel_mode_can_change(ctx, mode))
     return;
 
-  if (client_is_local_user(client) && (++ctx->limited_mode_count > MAXMODEPARAMS))
-    return;
-
   if (*parameter == ':' || (!client_is_local(client) && strchr(parameter, ' ')))
     return;
 
@@ -770,9 +767,6 @@ chm_flag(struct ChannelModeContext *ctx, const struct chan_mode *mode,
     ctx->errors |= SM_ERR_NOTONCHANNEL;
     return;
   }
-
-  if (client_is_local_user(client) && (++ctx->limited_mode_count > MAXMODEPARAMS))
-    return;
 
   if (action == MODE_ADD)
   {
@@ -1074,6 +1068,20 @@ _channel_mode_next_parameter(const struct chan_mode *mode, enum channel_mode_act
   return parv[(*index)++];
 }
 
+static bool
+_channel_mode_check_input_limit(struct ChannelModeContext *ctx, const struct chan_mode *mode, const char *parameter)
+{
+  if (!client_is_local_user(ctx->source) || mode->class == MODE_CLASS_D ||
+      (mode->class == MODE_CLASS_A && parameter == NULL))
+    return true;
+
+  if (ctx->variable_mode_count >= MAXMODEPARAMS)
+    return false;
+
+  ++ctx->variable_mode_count;
+  return true;
+}
+
 void
 channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, char *parv[])
 {
@@ -1106,7 +1114,8 @@ channel_mode_set(struct Client *client, struct Channel *channel, size_t parc, ch
         if (mode)
         {
           const char *const parameter = _channel_mode_next_parameter(mode, action, parc, parv, &parameter_index);
-          mode->func(&ctx, mode, action, parameter);
+          if (_channel_mode_check_input_limit(&ctx, mode, parameter))
+            mode->func(&ctx, mode, action, parameter);
         }
         else
           chm_nosuch(&ctx, (unsigned char)*ml);

@@ -795,13 +795,10 @@ channel_join(struct Client *client, const char *name, const char *key)
     return;
   }
 
-  uint32_t status_flags = 0;
   struct Channel *channel = channel_find(name);
-  if (channel == NULL)
-  {
-    status_flags = CHFL_CHANOP;
+  const bool is_new_channel = channel == NULL;
+  if (is_new_channel)
     channel = channel_create(name);
-  }
   else
   {
     if (channel_member_find(channel, client))
@@ -818,36 +815,31 @@ channel_join(struct Client *client, const char *name, const char *key)
   if (!client_is_oper(client))
     _channel_check_spambot_warning(client, channel->name);
 
-  channel_member_add(channel, client, status_flags);
+  channel_member_add(channel, client, is_new_channel ? CHFL_CHANOP : 0);
   channel_flood_record_join(channel, client);
   channel_invite_consume(channel, client);
 
   client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
 
-  if (status_flags == CHFL_CHANOP)
+  if (is_new_channel)
   {
     channel_set_mode(channel, MODE_TOPICLIMIT | MODE_NOPRIVMSGS);
 
     sendto_servers(NULL, 0, 0, ":%s SJOIN %ju %s +nt :@%s",
                    me.id, channel->creation_time, channel->name, client->id);
-
-    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                         client->name, client->username, client->host, channel->name, client->account, client->info);
-    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                         client->name, client->username, client->host, channel->name);
-    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
-                         me.name, channel->name);
   }
   else
-  {
     sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
                    client->id, channel->creation_time, channel->name);
 
-    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                         client->name, client->username, client->host, channel->name, client->account, client->info);
-    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                         client->name, client->username, client->host, channel->name);
-  }
+  sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                       client->name, client->username, client->host, channel->name, client->account, client->info);
+  sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                       client->name, client->username, client->host, channel->name);
+
+  if (is_new_channel)
+    sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
+                         me.name, channel->name);
 
   if (client->away_message)
     sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",

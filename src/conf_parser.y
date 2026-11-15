@@ -1276,10 +1276,6 @@ oper_flags_item: KILL ':' REMOTE
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MODULE;
-} | T_OPME
-{
-  if (conf_parser_ctx.pass == 2)
-    block_state.port.value |= OPER_FLAG_OPME;
 } | NICK ':' RESV
 {
   if (conf_parser_ctx.pass == 2)

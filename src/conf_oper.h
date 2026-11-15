@@ -48,22 +48,21 @@ typedef enum
   OPER_FLAG_LOCOPS         = 1 << 11,  /**< Oper can use LOCOPS command */
   OPER_FLAG_MODULE         = 1 << 12,  /**< Oper can use MODULE command */
   OPER_FLAG_NICK_RESV      = 1 << 13,  /**< Oper can use NICK on resv {} nicks */
-  OPER_FLAG_OPME           = 1 << 14,  /**< Oper can use OPME command */
-  OPER_FLAG_REHASH         = 1 << 15,  /**< Oper can use REHASH command */
-  OPER_FLAG_REHASH_REMOTE  = 1 << 16,  /**< Oper can do remote REHASH command */
-  OPER_FLAG_REMOTEBAN      = 1 << 17,  /**< Oper can set remote bans */
-  OPER_FLAG_RESTART        = 1 << 18,  /**< Oper can use RESTART command */
-  OPER_FLAG_RESV           = 1 << 19,  /**< Oper can use RESV command */
-  OPER_FLAG_SET            = 1 << 20,  /**< Oper can use SET command */
-  OPER_FLAG_SQUIT          = 1 << 21,  /**< Oper can do local SQUIT */
-  OPER_FLAG_SQUIT_REMOTE   = 1 << 22,  /**< Oper can do remote SQUIT */
-  OPER_FLAG_UNDLINE        = 1 << 23,  /**< Oper can use UNDLINE command */
-  OPER_FLAG_UNKLINE        = 1 << 24,  /**< Oper can use UNKLINE command */
-  OPER_FLAG_UNRESV         = 1 << 25,  /**< Oper can use UNRESV command */
-  OPER_FLAG_UNXLINE        = 1 << 26,  /**< Oper can use UNXLINE command */
-  OPER_FLAG_XLINE          = 1 << 27,  /**< Oper can use XLINE command */
-  OPER_FLAG_MESSAGE_MASS   = 1 << 28,  /**< Oper can send mass messages */
-  OPER_FLAG_BYPASS_INPUT_FLOOD = 1 << 29,  /**< Oper can bypass local input throttling */
+  OPER_FLAG_REHASH         = 1 << 14,  /**< Oper can use REHASH command */
+  OPER_FLAG_REHASH_REMOTE  = 1 << 15,  /**< Oper can do remote REHASH command */
+  OPER_FLAG_REMOTEBAN      = 1 << 16,  /**< Oper can set remote bans */
+  OPER_FLAG_RESTART        = 1 << 17,  /**< Oper can use RESTART command */
+  OPER_FLAG_RESV           = 1 << 18,  /**< Oper can use RESV command */
+  OPER_FLAG_SET            = 1 << 19,  /**< Oper can use SET command */
+  OPER_FLAG_SQUIT          = 1 << 20,  /**< Oper can do local SQUIT */
+  OPER_FLAG_SQUIT_REMOTE   = 1 << 21,  /**< Oper can do remote SQUIT */
+  OPER_FLAG_UNDLINE        = 1 << 22,  /**< Oper can use UNDLINE command */
+  OPER_FLAG_UNKLINE        = 1 << 23,  /**< Oper can use UNKLINE command */
+  OPER_FLAG_UNRESV         = 1 << 24,  /**< Oper can use UNRESV command */
+  OPER_FLAG_UNXLINE        = 1 << 25,  /**< Oper can use UNXLINE command */
+  OPER_FLAG_XLINE          = 1 << 26,  /**< Oper can use XLINE command */
+  OPER_FLAG_MESSAGE_MASS   = 1 << 27,  /**< Oper can send mass messages */
+  OPER_FLAG_BYPASS_INPUT_FLOOD = 1 << 28,  /**< Oper can bypass local input throttling */
 } oper_priv_flags_t;
 
 struct OperItem

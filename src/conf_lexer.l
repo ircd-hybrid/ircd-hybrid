@@ -312,7 +312,6 @@ oper                        { return OPERATOR; }
 oper_umodes                 { return OPER_UMODES; }
 operator                    { return OPERATOR; }
 opers_bypass_callerid       { return OPERS_BYPASS_CALLERID; }
-opme                        { return T_OPME; }
 pace_wait                   { return PACE_WAIT; }
 pace_wait_simple            { return PACE_WAIT_SIMPLE; }
 password                    { return PASSWORD; }

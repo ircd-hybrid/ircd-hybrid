@@ -94,7 +94,6 @@ modules_LTLIBRARIES = cap_account_notify.la    \
                       m_names.la      \
                       m_nick.la       \
                       m_oper.la       \
-                      m_opme.la       \
                       m_part.la       \
                       m_pass.la       \
                       m_ping.la       \

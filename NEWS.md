@@ -50,6 +50,7 @@
   state, protection flags, and failure details.
 * Added the `CONFIG` command to inspect current configuration values. `CONFIG LIST [selector]`
   supports wildcard filtering. Configuration values are no longer included in `INFO` output.
+- Removed the `OPME` command and the corresponding `opme` operator flag
 
 
 #### Noteworthy changes in version 8.2.47 (2025-04-04)

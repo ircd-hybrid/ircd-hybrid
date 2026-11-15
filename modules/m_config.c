@@ -4,20 +4,28 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
+#include "address.h"
 #include "io.h"
 #include "io_hex.h"
+#include "io_parse.h"
 #include "io_string.h"
+#include "io_time.h"
 #include "module.h"
 
 #include "client.h"
 #include "command.h"
 #include "conf.h"
+#include "conf_deny.h"
+#include "conf_exempt.h"
+#include "conf_kill.h"
 #include "ircd_module.h"
 #include "numeric.h"
 #include "send.h"
@@ -225,6 +233,33 @@ _config_output_append(struct config_output *output, const char *text, size_t len
   output->length += length;
 }
 
+static size_t
+_config_escape_byte(unsigned char ch, char *buffer)
+{
+  if (ch < 0x20 || ch == 0x7f)
+  {
+    buffer[0] = '\\';
+    buffer[1] = 'x';
+
+    const bool converted = io_bytes_to_hex(&ch, 1, buffer + 2, sizeof("FF"));
+    assert(converted);
+    (void)converted;
+    return sizeof("\\xFF") - 1;
+  }
+
+  if (ch == '\\' || ch == '"')
+  {
+    buffer[0] = '\\';
+    buffer[1] = (char)ch;
+    buffer[2] = '\0';
+    return 2;
+  }
+
+  buffer[0] = (char)ch;
+  buffer[1] = '\0';
+  return 1;
+}
+
 static void
 _config_send_value(struct Client *source, const char *name, const char *value,
                    bool quoted, int name_width, size_t limit)
@@ -237,31 +272,9 @@ _config_send_value(struct Client *source, const char *name, const char *value,
 
   for (const unsigned char *cursor = (const unsigned char *)value; *cursor; ++cursor)
   {
-    const char *text = (const char *)cursor;
-    size_t length = 1;
     char escaped[sizeof("\\xFF")];
-
-    if (*cursor < 0x20 || *cursor == 0x7f)
-    {
-      escaped[0] = '\\';
-      escaped[1] = 'x';
-
-      const bool converted = io_bytes_to_hex(cursor, 1, escaped + 2, sizeof(escaped) - 2);
-      assert(converted);
-      (void)converted;
-
-      text = escaped;
-      length = sizeof(escaped) - 1;
-    }
-    else if (*cursor == '\\' || *cursor == '"')
-    {
-      escaped[0] = '\\';
-      escaped[1] = (char)*cursor;
-      text = escaped;
-      length = 2;
-    }
-
-    _config_output_append(&output, text, length);
+    const size_t length = _config_escape_byte(*cursor, escaped);
+    _config_output_append(&output, escaped, length);
   }
 
   if (quoted)
@@ -317,6 +330,448 @@ _config_cmd_list(struct Client *source, const char *pattern)
     sendto_one_notice(source, &me, ":End of configuration list: %zu %s.", count, entry_label);
 }
 
+enum
+{
+  CONFIG_BLOCK_PAGE_SIZE = 50,
+  CONFIG_ORIGIN_COLUMN_WIDTH = sizeof("database") - 1,
+  CONFIG_EXPIRY_COLUMN_WIDTH = 12,
+  CONFIG_SELECTOR_COLUMN_WIDTH = 24,
+  CONFIG_TIME_BUFSIZE = sizeof(uintmax_t) * CHAR_BIT + 1
+};
+
+struct config_record
+{
+  char selector[IRCD_BUFSIZE];
+  const char *origin;
+  const char *reason;
+  uintmax_t created_at;
+  uintmax_t expires_at;
+};
+
+struct config_block
+{
+  const char *name;
+  const char *selector_label;
+  bool has_metadata;
+  const list_t *(*get_list)(void);
+  bool (*read_record)(const void *, struct config_record *);
+  bool (*normalize_selector)(const char *, char *, size_t);
+};
+
+struct config_block_query
+{
+  const struct config_block *block;
+  const char *selector;
+  uintmax_t page;
+  bool detailed;
+};
+
+static bool
+_config_normalize_prefix(const char *text, char *buffer, size_t buffer_size)
+{
+  struct io_addr address;
+  unsigned int prefix_length;
+
+  return address_parse_prefix(text, &address, &prefix_length) &&
+         address_prefix_to_string(&address, prefix_length, buffer, buffer_size);
+}
+
+static bool
+_config_normalize_kill_selector(const char *text, char *buffer, size_t buffer_size)
+{
+  const char *const separator = strrchr(text, '@');
+  if (separator == NULL || separator == text || separator[1] == '\0')
+    return false;
+
+  const size_t user_length = (size_t)(separator - text) + 1;
+  if (user_length >= buffer_size)
+    return false;
+
+  char prefix[ADDRESS_PREFIX_BUFSIZE];
+  const char *host = separator + 1;
+  if (_config_normalize_prefix(host, prefix, sizeof(prefix)))
+    host = prefix;
+
+  const size_t host_length = strlen(host);
+  if (host_length >= buffer_size - user_length)
+    return false;
+
+  memcpy(buffer, text, user_length);
+  memcpy(buffer + user_length, host, host_length + 1);
+  return true;
+}
+
+static bool
+_config_read_kill(const void *data, struct config_record *record)
+{
+  const struct conf_kill *const kill = data;
+  char host[IRCD_BUFSIZE];
+
+  const bool formatted = conf_kill_format_host(kill, host, sizeof(host));
+  assert(formatted);
+  if (!formatted)
+    return false;
+
+  const int length = snprintf(record->selector, sizeof(record->selector), "%s@%s", kill->user, host);
+  assert(length >= 0 && (size_t)length < sizeof(record->selector));
+  if (length < 0 || (size_t)length >= sizeof(record->selector))
+    return false;
+
+  switch (kill->origin)
+  {
+    case CONF_KILL_ORIGIN_CONFIG:   record->origin = "config"; break;
+    case CONF_KILL_ORIGIN_DATABASE: record->origin = "database"; break;
+    default: return false;
+  }
+
+  record->reason = kill->reason;
+  record->created_at = kill->created_at;
+  record->expires_at = kill->expires_at;
+  return true;
+}
+
+static bool
+_config_read_deny(const void *data, struct config_record *record)
+{
+  const struct conf_deny *const deny = data;
+  if (!conf_deny_format_prefix(deny, record->selector, sizeof(record->selector)))
+    return false;
+
+  switch (deny->origin)
+  {
+    case CONF_DENY_ORIGIN_CONFIG:   record->origin = "config"; break;
+    case CONF_DENY_ORIGIN_DATABASE: record->origin = "database"; break;
+    default: return false;
+  }
+
+  record->reason = deny->reason;
+  record->created_at = deny->created_at;
+  record->expires_at = deny->expires_at;
+  return true;
+}
+
+static bool
+_config_read_exempt(const void *data, struct config_record *record)
+{
+  return conf_exempt_format_prefix(data, record->selector, sizeof(record->selector));
+}
+
+static const struct config_block config_blocks[] =
+{
+  {
+    .name = "KILL",
+    .selector_label = "user",
+    .has_metadata = true,
+    .get_list = conf_kill_get_list,
+    .read_record = _config_read_kill,
+    .normalize_selector = _config_normalize_kill_selector
+  },
+  {
+    .name = "DENY",
+    .selector_label = "ip",
+    .has_metadata = true,
+    .get_list = conf_deny_get_list,
+    .read_record = _config_read_deny,
+    .normalize_selector = _config_normalize_prefix
+  },
+  {
+    .name = "EXEMPT",
+    .selector_label = "ip",
+    .get_list = conf_exempt_get_list,
+    .read_record = _config_read_exempt,
+    .normalize_selector = _config_normalize_prefix
+  }
+};
+
+static const struct config_block *
+_config_block_find(const char *name)
+{
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(config_blocks); ++i)
+    if (io_strcasecmp(name, config_blocks[i].name) == 0)
+      return &config_blocks[i];
+
+  return NULL;
+}
+
+static bool
+_config_record_matches(const struct config_block_query *query, const struct config_record *record)
+{
+  if (query->selector == NULL)
+    return true;
+
+  if (query->detailed)
+    return io_strcasecmp(query->selector, record->selector) == 0;
+
+  return match(query->selector, record->selector) == 0;
+}
+
+static size_t
+_config_escaped_length(const char *value, size_t limit)
+{
+  size_t length = 0;
+
+  for (const unsigned char *p = (const unsigned char *)value; *p; ++p)
+  {
+    char escaped[sizeof("\\xFF")];
+    const size_t encoded_length = _config_escape_byte(*p, escaped);
+    if (encoded_length > limit - length)
+      return limit;
+
+    length += encoded_length;
+  }
+
+  return length;
+}
+
+static size_t
+_config_format_preview(const char *value, bool quoted, char *buffer, size_t buffer_size)
+{
+  assert(buffer_size >= sizeof("\"...\""));
+
+  size_t capacity = buffer_size - 1 - (quoted ? 2 : 0);
+  const bool truncated = _config_escaped_length(value, capacity + 1) > capacity;
+
+  if (truncated)
+    capacity -= sizeof("...") - 1;
+
+  size_t written = 0;
+  if (quoted)
+    buffer[written++] = '"';
+
+  size_t content_length = 0;
+  for (const unsigned char *p = (const unsigned char *)value; *p; ++p)
+  {
+    char escaped[sizeof("\\xFF")];
+    const size_t length = _config_escape_byte(*p, escaped);
+    if (length > capacity - content_length)
+      break;
+
+    memcpy(buffer + written, escaped, length);
+    written += length;
+    content_length += length;
+  }
+
+  if (truncated)
+  {
+    memcpy(buffer + written, "...", sizeof("...") - 1);
+    written += sizeof("...") - 1;
+  }
+
+  if (quoted)
+    buffer[written++] = '"';
+
+  buffer[written] = '\0';
+  return written;
+}
+
+static void
+_config_send_record_row(struct Client *source, const struct config_record *record, size_t limit, uintmax_t now)
+{
+  char line[IRCD_BUFSIZE];
+  size_t length;
+
+  if (record->origin)
+  {
+    char expires[CONFIG_TIME_BUFSIZE + sizeof("s")];
+
+    if (record->expires_at == 0)
+      strcpy(expires, "never");
+    else if (record->expires_at <= now)
+      strcpy(expires, "expired");
+    else
+      snprintf(expires, sizeof(expires), "%jus", record->expires_at - now);
+
+    const int prefix_length = snprintf(line, sizeof(line), "  %-*s %-*s ",
+                                       CONFIG_ORIGIN_COLUMN_WIDTH, record->origin, CONFIG_EXPIRY_COLUMN_WIDTH, expires);
+    assert(prefix_length > 0 && (size_t)prefix_length < sizeof(line));
+    length = (size_t)prefix_length;
+  }
+  else
+  {
+    memcpy(line, "  ", 2);
+    length = 2;
+  }
+
+  const size_t minimum_preview_length = sizeof("\"...\"") - 1;
+  assert(length + 2 + 2 * minimum_preview_length <= limit);
+  size_t reserved = 0;
+
+  if (record->reason)
+  {
+    size_t reason_length = 2 + _config_escaped_length(record->reason, (limit - length) / 2 - 2);
+    if (reason_length < minimum_preview_length)
+      reason_length = minimum_preview_length;
+
+    reserved = 2 + reason_length;
+  }
+
+  const size_t selector_length =
+    _config_format_preview(record->selector, false, line + length, limit - length - reserved + 1);
+  length += selector_length;
+
+  if (record->reason)
+  {
+    size_t padding = selector_length < CONFIG_SELECTOR_COLUMN_WIDTH ?
+      CONFIG_SELECTOR_COLUMN_WIDTH - selector_length + 2 : 2;
+    const size_t padding_limit = limit - length - minimum_preview_length;
+    if (padding > padding_limit)
+      padding = padding_limit;
+
+    memset(line + length, ' ', padding);
+    length += padding;
+    length += _config_format_preview(record->reason, true, line + length, limit - length + 1);
+  }
+
+  line[length] = '\0';
+  sendto_one_notice(source, &me, ":%s", line);
+}
+
+static const char *
+_config_format_timestamp(uintmax_t timestamp, char *buffer, size_t buffer_size)
+{
+  if (timestamp == 0)
+    return "<unknown>";
+
+  if (timestamp <= INTMAX_MAX)
+  {
+    const time_t time = (time_t)timestamp;
+    struct tm utc;
+    if ((uintmax_t)time == timestamp && gmtime_r(&time, &utc) && utc.tm_year <= 9999 - 1900 &&
+        strftime(buffer, buffer_size, "%Y-%m-%dT%H:%M:%SZ", &utc))
+      return buffer;
+  }
+
+  snprintf(buffer, buffer_size, "%ju", timestamp);
+  return buffer;
+}
+
+static void
+_config_send_record_details(struct Client *source, const struct config_block *block,
+                            const struct config_record *record, size_t limit, uintmax_t now)
+{
+  const int width = sizeof("expires_at") - 1;
+  _config_send_value(source, block->selector_label, record->selector, true, width, limit);
+
+  if (record->origin == NULL)
+    return;
+
+  char buffer[CONFIG_TIME_BUFSIZE + sizeof(" seconds")];
+  _config_send_value(source, "origin", record->origin, false, width, limit);
+  _config_send_value(source, "created_at",
+                      _config_format_timestamp(record->created_at, buffer, sizeof(buffer)), false, width, limit);
+  _config_send_value(source, "expires_at", record->expires_at ?
+                      _config_format_timestamp(record->expires_at, buffer, sizeof(buffer)) : "never", false, width, limit);
+
+  if (record->expires_at)
+  {
+    const char *remaining = "expired";
+
+    if (record->expires_at > now)
+    {
+      snprintf(buffer, sizeof(buffer), "%ju seconds", record->expires_at - now);
+      remaining = buffer;
+    }
+
+    _config_send_value(source, "remaining", remaining, false, width, limit);
+  }
+
+  _config_send_value(source, "reason", record->reason, true, width, limit);
+}
+
+static void
+_config_cmd_block(struct Client *source, const struct config_block_query *query)
+{
+  assert(query->page > 0);
+
+  const list_t *const items = query->block->get_list();
+  const size_t total = list_length(items);
+  const size_t page_size = query->detailed ? 1 : CONFIG_BLOCK_PAGE_SIZE;
+  const uintmax_t page_index = query->page - 1;
+  const void *page_items[CONFIG_BLOCK_PAGE_SIZE];
+  struct config_record record = { 0 };
+  size_t matched = 0;
+  size_t selected = 0;
+
+  const list_node_t *node;
+  LIST_FOREACH(node, items->head)
+  {
+    if (query->selector)
+    {
+      if (!query->block->read_record(node->data, &record))
+        goto format_error;
+      if (!_config_record_matches(query, &record))
+        continue;
+    }
+
+    if (matched / page_size == page_index)
+    {
+      assert(selected < IO_ARRAY_LENGTH(page_items));
+      page_items[selected++] = node->data;
+    }
+    ++matched;
+
+    if (query->selector == NULL && selected == page_size)
+    {
+      matched = total;
+      break;
+    }
+  }
+
+  const size_t pages = matched ? (matched - 1) / page_size + 1 : 1;
+  if (query->page > pages)
+  {
+    sendto_one_notice(source, &me, ":Page %ju is out of range for %s (1-%zu).",
+                      query->page, query->block->name, pages);
+    return;
+  }
+
+  const size_t limit = _config_notice_limit(source);
+  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
+  sendto_one_notice(source, &me, ":%s configuration:", query->block->name);
+
+  if (query->selector && (!query->detailed || matched == 0))
+    _config_send_value(source, query->detailed ? "Selector:" : "Pattern:", query->selector, true, 10, limit);
+
+  if (pages > 1)
+    sendto_one_notice(source, &me, ":  Page: %ju of %zu", query->page, pages);
+
+  if (!query->detailed && query->block->has_metadata)
+    sendto_one_notice(source, &me, ":  %-*s %-*s %-*s  Reason",
+                      CONFIG_ORIGIN_COLUMN_WIDTH, "Origin", CONFIG_EXPIRY_COLUMN_WIDTH, "Expires",
+                      CONFIG_SELECTOR_COLUMN_WIDTH, query->block->selector_label);
+
+  for (size_t i = 0; i < selected; ++i)
+  {
+    if (!query->block->read_record(page_items[i], &record))
+      goto format_error;
+
+    if (query->detailed)
+      _config_send_record_details(source, query->block, &record, limit, now);
+    else
+      _config_send_record_row(source, &record, limit, now);
+  }
+
+  sendto_one_notice(source, &me, ":End of %s configuration%s: %zu of %zu %s shown.",
+                    query->block->name, query->detailed ? "" : " list", selected, total, total == 1 ? "entry" : "entries");
+
+  if (query->selector && matched > selected)
+    sendto_one_notice(source, &me, ":%zu entries match the selector.", matched);
+  if (query->page < pages)
+    sendto_one_notice(source, &me, ":Next page: PAGE %ju.", query->page + 1);
+  return;
+
+format_error:
+  sendto_one_notice(source, &me, ":Unable to format %s configuration entry.", query->block->name);
+}
+
+static void
+_config_send_syntax(struct Client *source)
+{
+  sendto_one_notice(source, &me, ":Syntax: CONFIG [LIST [selector]]");
+  sendto_one_notice(source, &me, ":Syntax: CONFIG LIST <KILL|DENY|EXEMPT> [pattern] [PAGE <number>]");
+  sendto_one_notice(source, &me, ":Syntax: CONFIG SHOW <KILL|DENY|EXEMPT> <selector> [PAGE <number>]");
+}
+
 static void
 mo_config(struct Client *source, size_t parc, char *parv[])
 {
@@ -326,14 +781,68 @@ mo_config(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  if (parc > 3 || (parc > 1 && io_strcasecmp(parv[1], "LIST")) ||
-      (parc == 3 && string_is_empty(parv[2])))
+  if (parc == 1 || (parc == 2 && io_strcasecmp(parv[1], "LIST") == 0))
   {
-    sendto_one_notice(source, &me, ":Syntax: CONFIG [LIST [selector]]");
+    _config_cmd_list(source, NULL);
     return;
   }
 
-  _config_cmd_list(source, parc == 3 ? parv[2] : NULL);
+  const bool detailed = io_strcasecmp(parv[1], "SHOW") == 0;
+  if (parc < 3 || (!detailed && io_strcasecmp(parv[1], "LIST")))
+  {
+    _config_send_syntax(source);
+    return;
+  }
+
+  const struct config_block *const block = _config_block_find(parv[2]);
+  if (block == NULL)
+  {
+    if (!detailed && parc == 3 && !string_is_empty(parv[2]))
+      _config_cmd_list(source, parv[2]);
+    else
+      _config_send_syntax(source);
+    return;
+  }
+
+  struct config_block_query query = { .block = block, .page = 1, .detailed = detailed };
+  size_t argument_count = parc - 3;
+  char *const *const arguments = parv + 3;
+  if (argument_count >= 2 && io_strcasecmp(arguments[argument_count - 2], "PAGE") == 0)
+  {
+    if (io_parse_uintmax(arguments[argument_count - 1], &query.page) != IO_PARSE_OK || query.page == 0)
+    {
+      _config_send_syntax(source);
+      return;
+    }
+
+    argument_count -= 2;
+  }
+
+  if (argument_count > 1 || (detailed && argument_count != 1) ||
+      (argument_count == 1 && string_is_empty(arguments[0])))
+  {
+    _config_send_syntax(source);
+    return;
+  }
+
+  char selector[IRCD_BUFSIZE];
+  if (argument_count)
+  {
+    if (detailed)
+    {
+      if (!block->normalize_selector(arguments[0], selector, sizeof(selector)))
+      {
+        sendto_one_notice(source, &me, ":Invalid %s selector.", block->name);
+        return;
+      }
+
+      query.selector = selector;
+    }
+    else
+      query.selector = arguments[0];
+  }
+
+  _config_cmd_block(source, &query);
 }
 
 static struct Command command_table =

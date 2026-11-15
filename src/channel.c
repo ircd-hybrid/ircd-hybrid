@@ -60,17 +60,25 @@ channel_flood_record_join(struct Channel *channel, const struct Client *client)
   if (!(GlobalSetOptions.joinfloodtime && GlobalSetOptions.joinfloodcount))
     return;
 
-  channel->number_joined += 1.0f;
-  channel->number_joined -=
-    (float)(io_time_get(IO_TIME_MONOTONIC_SEC) - channel->last_join_time) *
-    ((float)GlobalSetOptions.joinfloodcount / (float)GlobalSetOptions.joinfloodtime);
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  const uintmax_t elapsed = now - channel->last_join_time;
+
+  /* A full interval drains even a saturated bucket without a rounding residue. */
+  if (elapsed >= GlobalSetOptions.joinfloodtime)
+    channel->number_joined = 0.0f;
+  else
+    channel->number_joined -=
+      (float)((double)elapsed * GlobalSetOptions.joinfloodcount / GlobalSetOptions.joinfloodtime);
 
   if (channel->number_joined <= 0.0f)
   {
     channel->number_joined = 0.0f;
     channel->sent_join_flood_notice = false;
   }
-  else if (channel->number_joined >= GlobalSetOptions.joinfloodcount)
+
+  channel->number_joined += 1.0f;
+
+  if (channel->number_joined >= GlobalSetOptions.joinfloodcount)
   {
     channel->number_joined = GlobalSetOptions.joinfloodcount;
 
@@ -88,7 +96,7 @@ channel_flood_record_join(struct Channel *channel, const struct Client *client)
     }
   }
 
-  channel->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+  channel->last_join_time = now;
 }
 
 static void

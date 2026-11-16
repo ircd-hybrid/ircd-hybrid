@@ -577,8 +577,8 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
   {
     if (!(client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV)))
     {
-      const struct ResvItem *const resv = resv_find(channel->name, match);
-      if (resv && !resv_exempt_find(client, resv))
+      const struct conf_resv *const resv = conf_resv_find(channel->name);
+      if (resv && !conf_resv_exempts_client(resv, client))
       {
         *error = "channel is reserved";
         return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -776,9 +776,9 @@ channel_join(struct Client *client, const char *name, const char *key)
   const bool can_join_reserved_channel =
     client_has_flag(client, FLAGS_EXEMPTRESV) ||
     (client_is_oper(client) && client_has_oper_flag(client, OPER_FLAG_JOIN_RESV));
-  const struct ResvItem *const resv = can_join_reserved_channel ? NULL : resv_find(name, match);
+  const struct conf_resv *const resv = can_join_reserved_channel ? NULL : conf_resv_find(name);
 
-  if (resv && !resv_exempt_find(client, resv))
+  if (resv && !conf_resv_exempts_client(resv, client))
   {
     sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
 

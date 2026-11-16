@@ -248,18 +248,18 @@ save_resv_database(const char *filename)
   json_object_set_new(root, "resv", resv_array);
 
   list_node_t *node;
-  LIST_FOREACH(node, resv_chan_get_list()->head)
+  LIST_FOREACH(node, conf_resv_channel_get_list()->head)
   {
-    const struct ResvItem *resv = node->data;
-    if (resv->in_database == false)
+    const struct conf_resv *const resv = node->data;
+    if (resv->origin != CONF_RESV_ORIGIN_DATABASE)
       continue;
 
     json_error_t error;
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", resv->mask,
                                  "reason", resv->reason,
-                                 "created_at", resv->created_at,
-                                 "expires_at", resv->expires_at);
+                                 "created_at", (json_int_t)resv->created_at,
+                                 "expires_at", (json_int_t)resv->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
@@ -270,18 +270,18 @@ save_resv_database(const char *filename)
     json_array_append_new(resv_array, entry);
   }
 
-  LIST_FOREACH(node, resv_nick_get_list()->head)
+  LIST_FOREACH(node, conf_resv_nick_get_list()->head)
   {
-    const struct ResvItem *resv = node->data;
-    if (resv->in_database == false)
+    const struct conf_resv *const resv = node->data;
+    if (resv->origin != CONF_RESV_ORIGIN_DATABASE)
       continue;
 
     json_error_t error;
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", resv->mask,
                                  "reason", resv->reason,
-                                 "created_at", resv->created_at,
-                                 "expires_at", resv->expires_at);
+                                 "created_at", (json_int_t)resv->created_at,
+                                 "expires_at", (json_int_t)resv->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing resv: line %d, column %d, position %d: %s",
@@ -324,7 +324,7 @@ load_resv_database(const char *filename)
   json_array_foreach(resv_array, index, entry)
   {
     const char *mask, *reason;
-    uint64_t created_at, expires_at;
+    json_int_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
                              "mask", &mask,
                              "reason", &reason,
@@ -337,10 +337,17 @@ load_resv_database(const char *filename)
       continue;
     }
 
-    struct ResvItem *resv = resv_make(mask, reason, NULL);
-    resv->created_at = created_at;
-    resv->expires_at = expires_at;
-    resv->in_database = true;
+    const struct conf_resv_spec spec =
+    {
+      .mask = mask,
+      .reason = reason,
+      .created_at = (uintmax_t)created_at,
+      .expires_at = (uintmax_t)expires_at,
+      .origin = CONF_RESV_ORIGIN_DATABASE
+    };
+
+    if (conf_resv_add(&spec) == NULL)
+      log_write(LOG_TYPE_IRCD, "Unable to load reservation at index %zu", index);
   }
 
   json_decref(root);
@@ -354,18 +361,18 @@ save_xline_database(const char *filename)
   json_object_set_new(root, "x_lines", xline_array);
 
   list_node_t *node;
-  LIST_FOREACH(node, gecos_get_list()->head)
+  LIST_FOREACH(node, conf_gecos_get_list()->head)
   {
-    const struct GecosItem *gecos = node->data;
-    if (gecos->in_database == false)
+    const struct conf_gecos *const gecos = node->data;
+    if (gecos->origin != CONF_GECOS_ORIGIN_DATABASE)
       continue;
 
     json_error_t error;
     json_t *entry = json_pack_ex(&error, 0, "{s:s, s:s, s:I, s:I}",
                                  "mask", gecos->mask,
                                  "reason", gecos->reason,
-                                 "created_at", gecos->created_at,
-                                 "expires_at", gecos->expires_at);
+                                 "created_at", (json_int_t)gecos->created_at,
+                                 "expires_at", (json_int_t)gecos->expires_at);
     if (entry == NULL)
     {
       log_write(LOG_TYPE_IRCD, "Error packing xline: line %d, column %d, position %d: %s",
@@ -408,7 +415,7 @@ load_xline_database(const char *filename)
   json_array_foreach(x_lines, index, entry)
   {
     const char *mask, *reason;
-    uint64_t created_at, expires_at;
+    json_int_t created_at, expires_at;
     int res = json_unpack_ex(entry, &error, 0, "{s:s, s:s, s:I, s:I}",
                              "mask", &mask,
                              "reason", &reason,
@@ -421,12 +428,17 @@ load_xline_database(const char *filename)
       continue;
     }
 
-    struct GecosItem *gecos = gecos_make();
-    gecos->mask = io_strdup(mask);
-    gecos->reason = io_strdup(reason);
-    gecos->created_at = created_at;
-    gecos->expires_at = expires_at;
-    gecos->in_database = true;
+    const struct conf_gecos_spec spec =
+    {
+      .mask = mask,
+      .reason = reason,
+      .created_at = (uintmax_t)created_at,
+      .expires_at = (uintmax_t)expires_at,
+      .origin = CONF_GECOS_ORIGIN_DATABASE
+    };
+
+    if (conf_gecos_add(&spec) == NULL)
+      log_write(LOG_TYPE_IRCD, "Unable to load X-line at index %zu", index);
   }
 
   json_decref(root);

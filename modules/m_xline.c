@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the XLINE command.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -18,7 +19,6 @@
 #include "io_time.h"
 #include "list.h"
 #include "log.h"
-#include "memory.h"
 #include "misc.h"
 #include "module.h"
 
@@ -36,8 +36,15 @@
 #include "send.h"
 #include "server_capab.h"
 
+static uintmax_t
+_xline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
+{
+  assert(duration_seconds > 0);
+  return duration_seconds > UINTMAX_MAX - created_at ? UINTMAX_MAX : created_at + duration_seconds;
+}
+
 static void
-xline_check(const struct GecosItem *gecos)
+xline_check(const struct conf_gecos *gecos)
 {
   list_node_t *node, *node_next;
 
@@ -53,7 +60,7 @@ xline_check(const struct GecosItem *gecos)
 }
 
 static void
-_xline_report_added(struct Client *source, const struct GecosItem *gecos, uintmax_t duration_minutes)
+_xline_report_added(struct Client *source, const struct conf_gecos *gecos, uintmax_t duration_minutes)
 {
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
@@ -88,12 +95,12 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  struct GecosItem *gecos = gecos_find(aline->mask, match);
-  if (gecos)
+  const struct conf_gecos *const existing = conf_gecos_find(aline->mask);
+  if (existing)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":[%s] already X-lined by [%s] - %s",
-                        aline->mask, gecos->mask, gecos->reason);
+                        aline->mask, existing->mask, existing->reason);
     return;
   }
 
@@ -105,15 +112,28 @@ xline_handle(struct Client *source, const struct aline_ctx *aline)
     snprintf(reason, sizeof(reason), "%.*s (%s)",
              REASONLEN, aline->reason, date_iso8601(0));
 
-  gecos = gecos_make();
-  gecos->mask = io_strdup(aline->mask);
-  gecos->reason = io_strdup(reason);
-  gecos->created_at = io_time_get(IO_TIME_REALTIME_SEC);
-  gecos->in_database = true;
+  const uintmax_t created_at = io_time_get(IO_TIME_REALTIME_SEC);
+  const struct conf_gecos_spec spec =
+  {
+    .mask = aline->mask,
+    .reason = reason,
+    .created_at = created_at,
+    .expires_at = aline->duration ? _xline_expiration_time(created_at, aline->duration) : 0,
+    .origin = CONF_GECOS_ORIGIN_DATABASE
+  };
+
+  const struct conf_gecos *const gecos = conf_gecos_add(&spec);
+  if (gecos == NULL)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add X-line [%s]", aline->mask);
+
+    log_write(LOG_TYPE_IRCD, "Unable to add X-line for [%s]", aline->mask);
+    return;
+  }
 
   if (aline->duration)
   {
-    gecos->expires_at = gecos->created_at + aline->duration;
     const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))

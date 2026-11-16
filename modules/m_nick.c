@@ -497,7 +497,7 @@ mr_nick(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  const struct ResvItem *const resv = resv_find(nick, match);
+  const struct conf_resv *const resv = conf_resv_find(nick);
   if (resv)
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
@@ -575,10 +575,10 @@ m_nick(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  const struct ResvItem *resv;
+  const struct conf_resv *resv;
   if (!client_has_flag(source, FLAGS_EXEMPTRESV) &&
       !(client_is_oper(source) && client_has_oper_flag(source, OPER_FLAG_NICK_RESV)) &&
-      (resv = resv_find(nick, match)))
+      (resv = conf_resv_find(nick)))
   {
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
 

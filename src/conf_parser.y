@@ -1670,7 +1670,15 @@ resv_entry: RESV
   if (conf_parser_ctx.pass != 2)
     break;
 
-  resv_make(block_state.name.buf, block_state.rpass.buf, &block_state.mask.list);
+  const struct conf_resv_spec spec =
+  {
+    .mask = block_state.name.buf,
+    .reason = block_state.rpass.buf,
+    .exemptions = &block_state.mask.list,
+    .origin = CONF_RESV_ORIGIN_CONFIG
+  };
+  if (conf_resv_add(&spec) == NULL)
+    conf_report_error("Unable to add reservation");
 };
 
 resv_items:     resv_items resv_item | resv_item;
@@ -2236,16 +2244,14 @@ gecos_entry: GECOS
   if (conf_parser_ctx.pass != 2)
     break;
 
-  if (!block_state.name.buf[0])
-    break;
-
-  struct GecosItem *gecos = gecos_make();
-  gecos->mask = io_strdup(block_state.name.buf);
-
-  if (block_state.rpass.buf[0])
-    gecos->reason = io_strdup(block_state.rpass.buf);
-  else
-    gecos->reason = io_strdup(CONF_NOREASON);
+  const struct conf_gecos_spec spec =
+  {
+    .mask = block_state.name.buf,
+    .reason = block_state.rpass.buf[0] ? block_state.rpass.buf : CONF_NOREASON,
+    .origin = CONF_GECOS_ORIGIN_CONFIG
+  };
+  if (conf_gecos_add(&spec) == NULL)
+    conf_report_error("Unable to add X-line");
 };
 
 gecos_items: gecos_items gecos_item | gecos_item;

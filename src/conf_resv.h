@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file conf_resv.h
- * \brief A header for the RESV functions.
- */
-
 #ifndef INCLUDED_conf_resv_h
 #define INCLUDED_conf_resv_h
 #include <stdbool.h>
@@ -17,36 +13,54 @@
 
 struct Client;
 
-struct ResvItem
+enum conf_resv_origin
+{
+  CONF_RESV_ORIGIN_INVALID,
+  CONF_RESV_ORIGIN_CONFIG,
+  CONF_RESV_ORIGIN_DATABASE
+};
+
+struct conf_resv
 {
   list_node_t node;
-  list_t *list;
-  list_t exempt_list;
+  list_t exemptions;
   char *mask;
   char *reason;
   uintmax_t created_at;
   uintmax_t expires_at;
-  bool in_database;
+  enum conf_resv_origin origin;
 };
 
-struct ResvExemptItem
+struct conf_resv_exempt
 {
   list_node_t node;
-  char *name;
+  char *nick;
   char *user;
   char *host;
-  struct io_addr addr;
-  unsigned int bits;
+  struct io_addr address;
+  unsigned int prefix_length;
 };
 
-typedef void (*resv_expire_callback_fn)(const struct ResvItem *, void *);
+struct conf_resv_spec
+{
+  const char *mask;
+  const char *reason;
+  const list_t *exemptions;
+  uintmax_t created_at;
+  uintmax_t expires_at;
+  enum conf_resv_origin origin;
+};
 
-extern void resv_clear(void);
-extern void resv_delete(struct ResvItem *);
-extern void resv_expire(uintmax_t, resv_expire_callback_fn, void *);
-extern bool resv_exempt_find(const struct Client *, const struct ResvItem *);
-extern struct ResvItem *resv_make(const char *, const char *, const list_t *);
-extern struct ResvItem *resv_find(const char *, int (*)(const char *, const char *));
-extern const list_t *resv_chan_get_list(void);
-extern const list_t *resv_nick_get_list(void);
+typedef void (*conf_resv_expire_callback_fn)(const struct conf_resv *, void *);
+
+extern void conf_resv_clear_configuration(void);
+extern void conf_resv_expire(uintmax_t, conf_resv_expire_callback_fn, void *);
+extern bool conf_resv_exempts_client(const struct conf_resv *, const struct Client *);
+extern bool conf_resv_remove_active_exact(const char *);
+extern const list_t *conf_resv_channel_get_list(void);
+extern const list_t *conf_resv_nick_get_list(void);
+extern const struct conf_resv *conf_resv_add(const struct conf_resv_spec *);
+extern const struct conf_resv *conf_resv_find(const char *);
+extern const struct conf_resv *conf_resv_find_exact(const char *);
+extern const struct conf_resv *conf_resv_find_active_exact(const char *);
 #endif  /* INCLUDED_conf_resv_h */

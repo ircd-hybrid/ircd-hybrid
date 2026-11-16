@@ -3,15 +3,12 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file conf_resv.c
- * \brief Functions to reserve(jupe) a nick/channel.
- */
-
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
 #include "address.h"
+#include "io.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -23,143 +20,219 @@
 #include "ircd_defs.h"
 #include "nuh.h"
 
-static list_t resv_chan_list;
-static list_t resv_nick_list;
+enum conf_resv_lookup_mode
+{
+  CONF_RESV_LOOKUP_MATCH,
+  CONF_RESV_LOOKUP_EXACT,
+  CONF_RESV_LOOKUP_ACTIVE_EXACT
+};
+
+static list_t conf_resv_channels;
+static list_t conf_resv_nicks;
 
 #ifndef NDEBUG
-static bool resv_expire_callback_active;
+static bool conf_resv_expire_callback_active;
 #endif
 
 static void
-_resv_assert_mutation_allowed(void)
+_conf_resv_assert_mutation_allowed(void)
 {
 #ifndef NDEBUG
-  assert(!resv_expire_callback_active);
+  assert(!conf_resv_expire_callback_active);
 #endif
 }
 
-static bool
-_resv_is_expired(const struct ResvItem *resv, uintmax_t now)
+static list_t *
+_conf_resv_list(const char *name)
 {
-  assert(resv);
+  assert(!string_is_empty(name));
+  return channel_is_valid_prefix_char(*name) ? &conf_resv_channels : &conf_resv_nicks;
+}
+
+static bool
+_conf_resv_is_expired(const struct conf_resv *resv, uintmax_t now)
+{
   return resv->expires_at != 0 && resv->expires_at <= now;
 }
 
-const list_t *
-resv_chan_get_list(void)
+static bool
+_conf_resv_spec_is_valid(const struct conf_resv_spec *spec)
 {
-  return &resv_chan_list;
-}
+  if (spec == NULL || string_is_empty(spec->mask) || spec->reason == NULL ||
+      (spec->origin != CONF_RESV_ORIGIN_CONFIG && spec->origin != CONF_RESV_ORIGIN_DATABASE) ||
+      (spec->expires_at != 0 && spec->expires_at <= spec->created_at))
+    return false;
 
-const list_t *
-resv_nick_get_list(void)
-{
-  return &resv_nick_list;
-}
-
-void
-resv_delete(struct ResvItem *resv)
-{
-  assert(resv);
-  _resv_assert_mutation_allowed();
-
-  list_node_t *node;
-  while ((node = list_pop_head(&resv->exempt_list)))
+  if (spec->exemptions)
   {
-    struct ResvExemptItem *const exempt = node->data;
-    assert(exempt);
-
-    io_free(exempt->name);
-    io_free(exempt->user);
-    io_free(exempt->host);
-    io_free(exempt);
+    const list_node_t *node;
+    LIST_FOREACH(node, spec->exemptions->head)
+      if (node->data == NULL)
+        return false;
   }
 
-  list_remove(&resv->node, resv->list);
-  io_free(resv->mask);
-  io_free(resv->reason);
-  io_free(resv);
+  return true;
 }
 
-struct ResvItem *
-resv_make(const char *mask, const char *reason, const list_t *elist)
+static void
+_conf_resv_add_exemptions(struct conf_resv *resv, const list_t *exemptions)
 {
-  _resv_assert_mutation_allowed();
+  if (exemptions == NULL)
+    return;
 
-  list_t *const list = channel_is_valid_prefix_char(*mask) ? &resv_chan_list : &resv_nick_list;
-  struct ResvItem *const resv = io_calloc(sizeof(*resv));
-  resv->list = list;
-  resv->mask = io_strdup(mask);
-  resv->reason = io_strndup(reason, REASONLEN);
-  list_add_tail(resv, &resv->node, resv->list);
-
-  if (elist)
+  const list_node_t *node;
+  LIST_FOREACH(node, exemptions->head)
   {
-    list_node_t *node;
-    LIST_FOREACH(node, elist->head)
+    char *const mask = io_strdup(node->data);
+    char nick[NICKLEN + 1];
+    char user[USERLEN + 1];
+    char host[HOSTLEN + 1];
+    struct nuh_split nuh =
     {
-      char *const s = node->data;
-      char nick[NICKLEN + 1];
-      char user[USERLEN + 1];
-      char host[HOSTLEN + 1];
-      struct nuh_split nuh =
-      {
-        .nuhmask = s,
-        .nickptr = nick,
-        .userptr = user,
-        .hostptr = host,
-        .nicksize = sizeof(nick),
-        .usersize = sizeof(user),
-        .hostsize = sizeof(host)
-      };
+      .nuhmask = mask,
+      .nickptr = nick,
+      .userptr = user,
+      .hostptr = host,
+      .nicksize = sizeof(nick),
+      .usersize = sizeof(user),
+      .hostsize = sizeof(host)
+    };
 
-      nuh_split(&nuh);
+    nuh_split(&nuh);
+    io_free(mask);
 
-      struct ResvExemptItem *const exempt = io_calloc(sizeof(*exempt));
-      exempt->name = io_strdup(nick);
-      exempt->user = io_strdup(user);
-      exempt->host = io_strdup(host);
-      address_parse_prefix(exempt->host, &exempt->addr, &exempt->bits);
-
-      list_add_tail(exempt, &exempt->node, &resv->exempt_list);
-    }
+    struct conf_resv_exempt *const exempt = io_calloc(sizeof(*exempt));
+    exempt->nick = io_strdup(nick);
+    exempt->user = io_strdup(user);
+    exempt->host = io_strdup(host);
+    address_parse_prefix(exempt->host, &exempt->address, &exempt->prefix_length);
+    list_add_tail(exempt, &exempt->node, &resv->exemptions);
   }
-
-  return resv;
 }
 
-struct ResvItem *
-resv_find(const char *name, int (*compare)(const char *, const char *))
+static struct conf_resv *
+_conf_resv_lookup(const char *name, enum conf_resv_lookup_mode mode)
 {
-  const uintmax_t now = io_time_get(IO_TIME_REALTIME_SEC);
-  list_t *const list = channel_is_valid_prefix_char(*name) ? &resv_chan_list : &resv_nick_list;
+  if (string_is_empty(name))
+    return NULL;
 
-  list_node_t *node;
-  LIST_FOREACH(node, list->head)
+  const bool exact = mode != CONF_RESV_LOOKUP_MATCH;
+  const bool active = mode != CONF_RESV_LOOKUP_EXACT;
+  const uintmax_t now = active ? io_time_get(IO_TIME_REALTIME_SEC) : 0;
+
+  const list_node_t *node;
+  LIST_FOREACH(node, _conf_resv_list(name)->head)
   {
-    struct ResvItem *const resv = node->data;
-    if (!_resv_is_expired(resv, now) && compare(resv->mask, name) == 0)
+    struct conf_resv *const resv = node->data;
+    if (active && _conf_resv_is_expired(resv, now))
+      continue;
+
+    if ((exact ? io_strcasecmp(resv->mask, name) : match(resv->mask, name)) == 0)
       return resv;
   }
 
   return NULL;
 }
 
-bool
-resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
+static void
+_conf_resv_destroy(struct conf_resv *resv)
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, resv->exempt_list.head)
+  while ((node = list_pop_head(&resv->exemptions)))
   {
-    const struct ResvExemptItem *const exempt = node->data;
-    if (match(exempt->name, client->name) || match(exempt->user, client->username))
+    struct conf_resv_exempt *const exempt = node->data;
+    io_free(exempt->nick);
+    io_free(exempt->user);
+    io_free(exempt->host);
+    io_free(exempt);
+  }
+
+  list_remove(&resv->node, _conf_resv_list(resv->mask));
+  io_free(resv->mask);
+  io_free(resv->reason);
+  io_free(resv);
+}
+
+const list_t *
+conf_resv_channel_get_list(void)
+{
+  return &conf_resv_channels;
+}
+
+const list_t *
+conf_resv_nick_get_list(void)
+{
+  return &conf_resv_nicks;
+}
+
+const struct conf_resv *
+conf_resv_add(const struct conf_resv_spec *spec)
+{
+  _conf_resv_assert_mutation_allowed();
+
+  if (!_conf_resv_spec_is_valid(spec))
+    return NULL;
+
+  struct conf_resv *const resv = io_calloc(sizeof(*resv));
+  resv->mask = io_strdup(spec->mask);
+  resv->reason = io_strndup(spec->reason, REASONLEN);
+  resv->created_at = spec->created_at;
+  resv->expires_at = spec->expires_at;
+  resv->origin = spec->origin;
+  _conf_resv_add_exemptions(resv, spec->exemptions);
+  list_add_tail(resv, &resv->node, _conf_resv_list(resv->mask));
+
+  return resv;
+}
+
+const struct conf_resv *
+conf_resv_find(const char *name)
+{
+  return _conf_resv_lookup(name, CONF_RESV_LOOKUP_MATCH);
+}
+
+const struct conf_resv *
+conf_resv_find_exact(const char *mask)
+{
+  return _conf_resv_lookup(mask, CONF_RESV_LOOKUP_EXACT);
+}
+
+const struct conf_resv *
+conf_resv_find_active_exact(const char *mask)
+{
+  return _conf_resv_lookup(mask, CONF_RESV_LOOKUP_ACTIVE_EXACT);
+}
+
+bool
+conf_resv_remove_active_exact(const char *mask)
+{
+  _conf_resv_assert_mutation_allowed();
+
+  struct conf_resv *const resv = _conf_resv_lookup(mask, CONF_RESV_LOOKUP_ACTIVE_EXACT);
+  if (resv == NULL)
+    return false;
+
+  _conf_resv_destroy(resv);
+  return true;
+}
+
+bool
+conf_resv_exempts_client(const struct conf_resv *resv, const struct Client *client)
+{
+  assert(resv);
+  assert(client);
+
+  const list_node_t *node;
+  LIST_FOREACH(node, resv->exemptions.head)
+  {
+    const struct conf_resv_exempt *const exempt = node->data;
+    if (match(exempt->nick, client->name) || match(exempt->user, client->username))
       continue;
 
-    if (address_is_ipv4(&exempt->addr) ||
-        address_is_ipv6(&exempt->addr))
+    if (address_is_ipv4(&exempt->address) || address_is_ipv6(&exempt->address))
     {
-      if (address_match_prefix(&client->addr, &exempt->addr, exempt->bits))
+      if (address_match_prefix(&client->addr, &exempt->address, exempt->prefix_length))
         return true;
     }
     else if (match(exempt->host, client->realhost) == 0 ||
@@ -171,58 +244,52 @@ resv_exempt_find(const struct Client *client, const struct ResvItem *resv)
 }
 
 void
-resv_clear(void)
+conf_resv_clear_configuration(void)
 {
-  _resv_assert_mutation_allowed();
+  _conf_resv_assert_mutation_allowed();
 
-  list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
-
-  for (list_t **list = tab; *list; ++list)
+  list_t *const lists[] = { &conf_resv_channels, &conf_resv_nicks };
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(lists); ++i)
   {
     list_node_t *node, *node_next;
-
-    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, lists[i]->head)
     {
-      struct ResvItem *const resv = node->data;
-      if (resv->in_database == false)
-        resv_delete(resv);
+      struct conf_resv *const resv = node->data;
+      if (resv->origin == CONF_RESV_ORIGIN_CONFIG)
+        _conf_resv_destroy(resv);
     }
   }
 }
 
 void
-resv_expire(uintmax_t now, resv_expire_callback_fn callback, void *callback_ctx)
+conf_resv_expire(uintmax_t now, conf_resv_expire_callback_fn callback, void *callback_ctx)
 {
-  _resv_assert_mutation_allowed();
+  _conf_resv_assert_mutation_allowed();
 
-  list_t *tab[] = { &resv_chan_list, &resv_nick_list, NULL };
-
-  for (list_t **list = tab; *list; ++list)
+  list_t *const lists[] = { &conf_resv_channels, &conf_resv_nicks };
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(lists); ++i)
   {
     list_node_t *node, *node_next;
-
-    LIST_FOREACH_SAFE(node, node_next, (*list)->head)
+    LIST_FOREACH_SAFE(node, node_next, lists[i]->head)
     {
-      struct ResvItem *const resv = node->data;
-      if (!_resv_is_expired(resv, now))
+      struct conf_resv *const resv = node->data;
+      if (!_conf_resv_is_expired(resv, now))
         continue;
 
       if (callback)
       {
 #ifndef NDEBUG
-        assert(!resv_expire_callback_active);
-        resv_expire_callback_active = true;
+        assert(!conf_resv_expire_callback_active);
+        conf_resv_expire_callback_active = true;
 #endif
-
         callback(resv, callback_ctx);
-
 #ifndef NDEBUG
-        assert(resv_expire_callback_active);
-        resv_expire_callback_active = false;
+        assert(conf_resv_expire_callback_active);
+        conf_resv_expire_callback_active = false;
 #endif
       }
 
-      resv_delete(resv);
+      _conf_resv_destroy(resv);
     }
   }
 }

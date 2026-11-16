@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the RESV command.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -33,8 +34,15 @@
 #include "send.h"
 #include "server_capab.h"
 
+static uintmax_t
+_resv_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
+{
+  assert(duration_seconds > 0);
+  return duration_seconds > UINTMAX_MAX - created_at ? UINTMAX_MAX : created_at + duration_seconds;
+}
+
 static void
-_resv_report_added(struct Client *source, const struct ResvItem *resv, uintmax_t duration_minutes)
+_resv_report_added(struct Client *source, const struct conf_resv *resv, uintmax_t duration_minutes)
 {
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
@@ -69,22 +77,37 @@ resv_handle(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  struct ResvItem *resv = resv_find(aline->mask, io_strcasecmp);
-  if (resv)
+  const struct conf_resv *const existing = conf_resv_find_active_exact(aline->mask);
+  if (existing)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me, ":A RESV has already been placed on [%s]",
-                        resv->mask);
+                        existing->mask);
     return;
   }
 
-  resv = resv_make(aline->mask, aline->reason, NULL);
-  resv->created_at = io_time_get(IO_TIME_REALTIME_SEC);
-  resv->in_database = true;
+  const uintmax_t created_at = io_time_get(IO_TIME_REALTIME_SEC);
+  const struct conf_resv_spec spec =
+  {
+    .mask = aline->mask,
+    .reason = aline->reason,
+    .created_at = created_at,
+    .expires_at = aline->duration ? _resv_expiration_time(created_at, aline->duration) : 0,
+    .origin = CONF_RESV_ORIGIN_DATABASE
+  };
+
+  const struct conf_resv *const resv = conf_resv_add(&spec);
+  if (resv == NULL)
+  {
+    if (client_is_user(source))
+      sendto_one_notice(source, &me, ":Unable to add RESV [%s]", aline->mask);
+
+    log_write(LOG_TYPE_IRCD, "Unable to add RESV for [%s]", aline->mask);
+    return;
+  }
 
   if (aline->duration)
   {
-    resv->expires_at = resv->created_at + aline->duration;
     const uintmax_t duration_minutes = aline->duration / 60;
 
     if (client_is_user(source))

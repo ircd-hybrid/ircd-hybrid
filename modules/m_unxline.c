@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the UNXLINE command.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -29,7 +30,7 @@
 #include "server_capab.h"
 
 static void
-_unxline_report_removed(struct Client *source, const struct GecosItem *gecos)
+_unxline_report_removed(struct Client *source, const struct conf_gecos *gecos)
 {
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
@@ -44,7 +45,7 @@ _unxline_report_removed(struct Client *source, const struct GecosItem *gecos)
 static void
 _unxline_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct GecosItem *const gecos = gecos_find(aline->mask, io_strcasecmp);
+  const struct conf_gecos *const gecos = conf_gecos_find_active_exact(aline->mask);
   if (gecos == NULL)
   {
     if (client_is_user(source))
@@ -53,7 +54,7 @@ _unxline_remove(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  if (gecos->in_database == false)
+  if (gecos->origin != CONF_GECOS_ORIGIN_DATABASE)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me,
@@ -68,7 +69,9 @@ _unxline_remove(struct Client *source, const struct aline_ctx *aline)
 
   _unxline_report_removed(source, gecos);
 
-  gecos_delete(gecos);
+  const bool removed = conf_gecos_remove_active_exact(aline->mask);
+  assert(removed);
+  (void)removed;
 }
 
 /*! \brief UNXLINE command handler

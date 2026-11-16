@@ -163,9 +163,9 @@ stats_gecos(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, gecos_get_list()->head)
+  LIST_FOREACH(node, conf_gecos_get_list()->head)
   {
-    const struct GecosItem *const gecos = node->data;
+    const struct conf_gecos *const gecos = node->data;
     sendto_one_numeric(client, &me, RPL_STATSXLINE,
                        gecos->expires_at ? 'x' : 'X', gecos->mask, gecos->reason);
   }
@@ -218,16 +218,16 @@ stats_resv(struct Client *client, size_t parc, char *parv[])
 {
   list_node_t *node;
 
-  LIST_FOREACH(node, resv_chan_get_list()->head)
+  LIST_FOREACH(node, conf_resv_channel_get_list()->head)
   {
-    const struct ResvItem *const resv = node->data;
+    const struct conf_resv *const resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expires_at ? 'q' : 'Q', resv->mask, resv->reason);
   }
 
-  LIST_FOREACH(node, resv_nick_get_list()->head)
+  LIST_FOREACH(node, conf_resv_nick_get_list()->head)
   {
-    const struct ResvItem *const resv = node->data;
+    const struct conf_resv *const resv = node->data;
     sendto_one_numeric(client, &me, RPL_STATSQLINE,
                        resv->expires_at ? 'q' : 'Q', resv->mask, resv->reason);
   }

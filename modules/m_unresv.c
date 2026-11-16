@@ -7,6 +7,7 @@
  * \brief Includes required functions for processing the UNRESV command.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -29,7 +30,7 @@
 #include "server_capab.h"
 
 static void
-_unresv_report_removed(struct Client *source, const struct ResvItem *resv)
+_unresv_report_removed(struct Client *source, const struct conf_resv *resv)
 {
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
@@ -44,7 +45,7 @@ _unresv_report_removed(struct Client *source, const struct ResvItem *resv)
 static void
 _unresv_remove(struct Client *source, const struct aline_ctx *aline)
 {
-  struct ResvItem *const resv = resv_find(aline->mask, io_strcasecmp);
+  const struct conf_resv *const resv = conf_resv_find_active_exact(aline->mask);
   if (resv == NULL)
   {
     if (client_is_user(source))
@@ -53,7 +54,7 @@ _unresv_remove(struct Client *source, const struct aline_ctx *aline)
     return;
   }
 
-  if (resv->in_database == false)
+  if (resv->origin != CONF_RESV_ORIGIN_DATABASE)
   {
     if (client_is_user(source))
       sendto_one_notice(source, &me,
@@ -68,7 +69,9 @@ _unresv_remove(struct Client *source, const struct aline_ctx *aline)
 
   _unresv_report_removed(source, resv);
 
-  resv_delete(resv);
+  const bool removed = conf_resv_remove_active_exact(aline->mask);
+  assert(removed);
+  (void)removed;
 }
 
 /*! \brief UNRESV command handler

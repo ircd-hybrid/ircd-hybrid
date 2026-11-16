@@ -322,7 +322,7 @@ user_register_local(struct Client *client)
 
   if ((auth->flags & CONF_AUTH_FLAG_EXEMPT_XLINE) == 0)
   {
-    const struct GecosItem *const gecos = gecos_find(client->info, match);
+    const struct conf_gecos *const gecos = conf_gecos_find(client->info);
     if (gecos)
     {
       _user_register_report_rejection(client,

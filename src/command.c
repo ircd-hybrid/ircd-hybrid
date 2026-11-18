@@ -330,3 +330,19 @@ command_handler_ignore(struct Client *source, size_t parc, char *parv[])
 {
   return;
 }
+
+const char *
+command_result_to_string(command_result_t result)
+{
+  switch (result)
+  {
+    case COMMAND_SUCCESS:
+      return "Success";
+    case COMMAND_INVALID_NAME:
+      return "Invalid command name";
+    case COMMAND_ALREADY_REGISTERED:
+      return "Command name already registered";
+  }
+
+  return "Unknown command result";
+}

@@ -92,4 +92,5 @@ extern void command_handler_reject_not_registered(struct Client *, size_t, char 
 extern void command_handler_reject_already_registered(struct Client *, size_t, char *[]);
 extern command_result_t command_add(struct Command *);
 extern command_result_t command_add_array(struct Command *, size_t, size_t *);
+extern const char *command_result_to_string(command_result_t);
 #endif  /* INCLUDED_command_h */

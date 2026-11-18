@@ -318,22 +318,14 @@ ircd_module_register_commands(struct Command *commands, size_t count,
 
   size_t failed_index;
   const command_result_t result = command_add_array(commands, count, &failed_index);
-  switch (result)
-  {
-    case COMMAND_SUCCESS:
-      return true;
+  if (result == COMMAND_SUCCESS)
+    return true;
 
-    case COMMAND_INVALID_NAME:
-      snprintf(error_message, error_message_size, "Command %zu has an invalid name: %s",
-               failed_index, string_or_default(commands[failed_index].name, "(empty)"));
-      return false;
+  assert(failed_index < count);
 
-    case COMMAND_ALREADY_REGISTERED:
-      snprintf(error_message, error_message_size, "Command %s is already registered",
-               commands[failed_index].name);
-      return false;
-  }
-
+  snprintf(error_message, error_message_size, "Cannot register command at index %zu: %s (name: %s)",
+           failed_index, command_result_to_string(result),
+           string_or_default(commands[failed_index].name, "<unnamed>"));
   return false;
 }
 

@@ -406,7 +406,7 @@ ircd_module_register_cap(const struct CapConfig *config, struct Cap **cap_out,
   if (result == CAP_SUCCESS)
     return true;
 
-  snprintf(error_message, error_message_size, "Cannot register capability %s (result %u)",
-           string_is_empty(config->name) ? "<unnamed>" : config->name, (unsigned int)result);
+  snprintf(error_message, error_message_size, "Cannot register capability %s: %s",
+           string_or_default(config->name, "<unnamed>"), cap_result_to_string(result));
   return false;
 }

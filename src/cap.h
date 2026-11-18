@@ -65,6 +65,7 @@ extern cap_result_t cap_register(const struct CapConfig *, struct Cap **);
 extern cap_result_t cap_update(struct Cap *, const char *, bool);
 extern void cap_unregister(struct Cap **);
 extern void cap_client_set_flags(struct Client *, uint32_t);
+extern const char *cap_result_to_string(cap_result_t);
 extern const struct Cap *cap_find(const char *);
 extern const list_t *cap_get_list(void);
 #endif  /* INCLUDED_cap_h */

@@ -516,3 +516,25 @@ cap_find(const char *name)
 
   return match ? *match : NULL;
 }
+
+const char *
+cap_result_to_string(cap_result_t result)
+{
+  switch (result)
+  {
+    case CAP_SUCCESS:
+      return "Success";
+    case CAP_INVALID_NAME:
+      return "Invalid capability name";
+    case CAP_INVALID_FLAG:
+      return "Flag must contain exactly one bit";
+    case CAP_INVALID_VALUE:
+      return "Invalid capability value";
+    case CAP_ALREADY_REGISTERED:
+      return "Capability name already registered";
+    case CAP_FLAG_CONFLICT:
+      return "Flag already used or reserved by another capability";
+  }
+
+  return "Unknown capability result";
+}

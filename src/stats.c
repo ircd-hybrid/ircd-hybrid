@@ -204,3 +204,21 @@ stats_allowed(const struct StatsHandler *handler, const struct Client *client)
 
   return false;
 }
+
+const char *
+stats_result_to_string(stats_result_t result)
+{
+  switch (result)
+  {
+    case STATS_SUCCESS:
+      return "Success";
+    case STATS_ALREADY_REGISTERED:
+      return "Stats selector already registered";
+    case STATS_NOT_FOUND:
+      return "Stats handler not registered";
+    case STATS_INVALID_ARGUMENT:
+      return "Invalid argument";
+  }
+
+  return "Unknown stats result";
+}

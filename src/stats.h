@@ -85,5 +85,6 @@ extern stats_result_t stats_register_array(const struct StatsHandler *, size_t, 
 extern stats_result_t stats_unregister(const struct StatsHandler *);
 extern stats_result_t stats_set_enabled(unsigned char);
 extern stats_result_t stats_set_disabled(unsigned char);
+extern const char *stats_result_to_string(stats_result_t);
 extern const struct StatsHandler *stats_find(unsigned char);
 #endif  /* INCLUDED_stats_h */

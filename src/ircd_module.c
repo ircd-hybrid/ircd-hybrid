@@ -372,8 +372,17 @@ ircd_module_register_stats_handlers(const struct StatsHandler *handlers, size_t 
   if (result == STATS_SUCCESS)
     return true;
 
-  snprintf(error_message, error_message_size, "Cannot register stats %c (result %u)",
-           handlers[failed_index].letter, (unsigned int)result);
+  assert(failed_index < count);
+
+  const unsigned char letter = handlers[failed_index].letter;
+  char letter_text[sizeof("0xFF")];
+  if (letter >= '!' && letter <= '~')
+    snprintf(letter_text, sizeof(letter_text), "%c", letter);
+  else
+    snprintf(letter_text, sizeof(letter_text), "0x%02X", (unsigned int)letter);
+
+  snprintf(error_message, error_message_size, "Cannot register stats %s: %s",
+           letter_text, stats_result_to_string(result));
   return false;
 }
 

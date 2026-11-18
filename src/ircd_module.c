@@ -397,8 +397,15 @@ ircd_module_register_user_mode(struct UserMode *mode, char *error_message, size_
   if (result == USER_MODE_SUCCESS)
     return true;
 
-  snprintf(error_message, error_message_size, "Cannot register user mode %c (result %u)",
-           mode->mode_char, (unsigned int)result);
+  const unsigned char mode_char = (unsigned char)mode->mode_char;
+  char mode_text[sizeof("0xFF")];
+  if (io_ascii_is_alpha(mode_char))
+    snprintf(mode_text, sizeof(mode_text), "%c", mode_char);
+  else
+    snprintf(mode_text, sizeof(mode_text), "0x%02X", (unsigned int)mode_char);
+
+  snprintf(error_message, error_message_size, "Cannot register user mode %s: %s",
+           mode_text, user_mode_result_to_string(result));
   return false;
 }
 

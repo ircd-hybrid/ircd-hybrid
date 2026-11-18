@@ -491,3 +491,27 @@ user_mode_to_str(uint64_t mode_flags)
   *bufptr = '\0';
   return buf;
 }
+
+const char *
+user_mode_result_to_string(user_mode_result_t result)
+{
+  switch (result)
+  {
+    case USER_MODE_SUCCESS:
+      return "Success";
+    case USER_MODE_RESULT_INVALID_CHAR:
+      return "Invalid user mode character";
+    case USER_MODE_RESULT_MODE_NOT_FOUND:
+      return "User mode not registered";
+    case USER_MODE_RESULT_MODE_ALREADY_EXISTS:
+      return "User mode already registered";
+    case USER_MODE_RESULT_POLICY_VIOLATION:
+      return "User mode change denied by policy";
+    case USER_MODE_RESULT_CALLBACK_FAILED:
+      return "User mode callback failed";
+    case USER_MODE_RESULT_COUNT:
+      break;
+  }
+
+  return "Unknown user mode result";
+}

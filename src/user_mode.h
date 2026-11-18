@@ -81,5 +81,6 @@ extern user_mode_result_t user_mode_unregister(struct UserMode *);
 extern user_mode_result_t user_mode_unset(struct Client *, char, user_mode_source_t);
 extern struct UserMode *user_mode_find(char);
 extern const char *user_mode_get_string(void);
+extern const char *user_mode_result_to_string(user_mode_result_t);
 extern const char *user_mode_to_str(uint64_t);
 #endif  /* INCLUDED_user_mode_h */

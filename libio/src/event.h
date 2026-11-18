@@ -76,4 +76,5 @@ extern event_status_t event_set_priority(event_handle_t, uint8_t);
 extern event_status_t event_unschedule(event_handle_t);
 extern void *event_get_data(event_handle_t);
 extern const char *event_get_name(event_handle_t);
+extern const char *event_status_to_string(event_status_t);
 #endif  /* INCLUDED_event_h */

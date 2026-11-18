@@ -752,3 +752,21 @@ event_manager_dispatch_due(event_manager_t manager)
   assert(manager->heap_size <= manager->heap_capacity);
   return status;
 }
+
+const char *
+event_status_to_string(event_status_t status)
+{
+  switch (status)
+  {
+    case EVENT_SUCCESS:
+      return "Success";
+    case EVENT_ERR_INVALID_ARG:
+      return "Invalid argument";
+    case EVENT_ERR_BUSY:
+      return "Event manager is busy";
+    case EVENT_ERR_RANGE:
+      return "Event time is out of range";
+  }
+
+  return "Unknown event status";
+}

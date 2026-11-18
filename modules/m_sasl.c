@@ -828,14 +828,16 @@ init_handler(void *context, char *error_message, size_t error_message_size)
 
   session_expiry_event =
     event_create(ircd_event_manager, "sasl_expire_sessions", sasl_expire_sessions, 1000, false, NULL, NULL);
-  if (event_schedule(session_expiry_event) != EVENT_SUCCESS)
+  const event_status_t status = event_schedule(session_expiry_event);
+  if (status != EVENT_SUCCESS)
   {
     event_destroy(session_expiry_event);
     session_expiry_event = NULL;
     command_del_array(command_table, IO_ARRAY_LENGTH(command_table));
     cap_unregister(&sasl_capability);
 
-    snprintf(error_message, error_message_size, "could not schedule SASL session expiry");
+    snprintf(error_message, error_message_size, "could not schedule SASL session expiry: %s",
+             event_status_to_string(status));
     return false;
   }
 

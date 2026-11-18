@@ -357,8 +357,7 @@ stats_events(struct Client *client, size_t parc, char *parv[])
 
   if (status != EVENT_SUCCESS)
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT,
-                       "E :event snapshot unavailable: status=%u",
-                       (unsigned int)status);
+                       "E :event snapshot unavailable: %s", event_status_to_string(status));
 }
 
 static void

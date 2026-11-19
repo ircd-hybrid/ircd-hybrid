@@ -29,6 +29,7 @@
 #include "client_find.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
 #include "numeric.h"
 #include "parse.h"
@@ -58,19 +59,6 @@ _invite_send_to_target(const struct Client *source, struct Client *target, const
 }
 
 static void
-_invite_notify_channel_members(const struct Client *source, const struct Client *target,
-                               const struct Channel *channel, bool invite_only)
-{
-  sendto_channel_local(NULL, channel, CHACCESS_HALFOP, CAP_INVITE_NOTIFY, 0, ":%s!%s@%s INVITE %s %s",
-                       source->name, source->username, source->host, target->name, channel->name);
-
-  if (invite_only)
-    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
-                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
-                         me.name, channel->name, source->name, target->name, channel->name);
-}
-
-static void
 _invite_commit(const struct Client *source, struct Client *target, struct Channel *channel, uintmax_t now)
 {
   assert(client_is_user(source));
@@ -86,7 +74,18 @@ _invite_commit(const struct Client *source, struct Client *target, struct Channe
                  source->id, target->id, channel->name, channel->creation_time);
 
   _invite_send_to_target(source, target, channel);
-  _invite_notify_channel_members(source, target, channel, invite_only);
+
+  hook_dispatch(ircd_hook_channel_invite, &(ircd_hook_channel_invite_ctx)
+  {
+    .source = source,
+    .target = target,
+    .channel = channel
+  });
+
+  if (invite_only)
+    sendto_channel_local(NULL, channel, CHACCESS_HALFOP, 0, CAP_INVITE_NOTIFY,
+                         ":%s NOTICE %%%s :%s is inviting %s to %s.",
+                         me.name, channel->name, source->name, target->name, channel->name);
 }
 
 /*! \brief INVITE command handler

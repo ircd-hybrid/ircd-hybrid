@@ -30,6 +30,7 @@
 #include "extban.h"
 #include "hash.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "numeric.h"
 #include "send.h"
 #include "server.h"
@@ -368,6 +369,15 @@ _channel_get_privacy_prefix(const struct Channel *channel)
   if (channel_is_private(channel))
     return "*";
   return "=";
+}
+
+void
+channel_send_join_local(const struct Client *client, const struct Channel *channel)
+{
+  sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
+                       client->name, client->username, client->host, channel->name, client->account, client->info);
+  sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
+                       client->name, client->username, client->host, channel->name);
 }
 
 void
@@ -832,18 +842,17 @@ channel_join(struct Client *client, const char *name, const char *key)
     sendto_servers(NULL, 0, 0, ":%s JOIN %ju %s +",
                    client->id, channel->creation_time, channel->name);
 
-  sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                       client->name, client->username, client->host, channel->name, client->account, client->info);
-  sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                       client->name, client->username, client->host, channel->name);
+  channel_send_join_local(client, channel);
 
   if (is_new_channel)
     sendto_channel_local(NULL, channel, 0, 0, 0, ":%s MODE %s +nt",
                          me.name, channel->name);
 
-  if (client->away_message)
-    sendto_channel_local(client, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                         client->name, client->username, client->host, client->away_message);
+  hook_dispatch(ircd_hook_channel_join, &(ircd_hook_channel_join_ctx)
+  {
+    .client = client,
+    .channel = channel
+  });
 
   if (!string_is_empty(channel->topic))
   {

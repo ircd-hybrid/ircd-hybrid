@@ -18,7 +18,6 @@
 #include "io_string.h"
 #include "module.h"
 
-#include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_member.h"
@@ -26,6 +25,7 @@
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
 #include "parse.h"
 #include "send.h"
@@ -152,15 +152,13 @@ ms_join(struct Client *source, size_t parc, char *parv[])
     if (client_has_flag(source->nexthop, FLAGS_EOB))
       channel_flood_record_join(channel, source);
 
-    sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                         source->name, source->username, source->host, channel->name,
-                         source->account, source->info);
-    sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                         source->name, source->username, source->host, channel->name);
+    channel_send_join_local(source, channel);
 
-    if (source->away_message)
-      sendto_channel_local(source, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                           source->name, source->username, source->host, source->away_message);
+    hook_dispatch(ircd_hook_channel_join, &(ircd_hook_channel_join_ctx)
+    {
+      .client = source,
+      .channel = channel
+    });
   }
 
   sendto_servers(source, 0, 0, ":%s JOIN %ju %s +",

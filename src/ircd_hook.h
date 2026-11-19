@@ -11,6 +11,7 @@
 
 #include "hook.h"
 
+struct Channel;
 struct Client;
 
 typedef struct
@@ -19,6 +20,19 @@ typedef struct
   uint32_t added;
   uint32_t removed;
 } ircd_hook_cap_change_ctx;
+
+typedef struct
+{
+  const struct Client *source;
+  const struct Client *target;
+  const struct Channel *channel;
+} ircd_hook_channel_invite_ctx;
+
+typedef struct
+{
+  const struct Client *client;
+  const struct Channel *channel;
+} ircd_hook_channel_join_ctx;
 
 typedef struct
 {
@@ -93,6 +107,8 @@ typedef struct
 } ircd_hook_whois_send_ctx;
 
 extern struct HookContainer *ircd_hook_cap_change;
+extern struct HookContainer *ircd_hook_channel_invite;
+extern struct HookContainer *ircd_hook_channel_join;
 extern struct HookContainer *ircd_hook_client_exit_local;
 extern struct HookContainer *ircd_hook_client_exit_remote;
 extern struct HookContainer *ircd_hook_conf_read;

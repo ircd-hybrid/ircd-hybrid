@@ -101,6 +101,7 @@ extern void channel_join(struct Client *, const char *, const char *);
 extern void channel_join_list(struct Client *, char *, char *);
 extern void channel_part(struct Client *, const char *, const char *);
 extern void channel_part_list(struct Client *, char *, const char *);
+extern void channel_send_join_local(const struct Client *, const struct Channel *);
 extern void channel_send_namereply(struct Client *, struct Channel *);
 extern void channel_send_state(struct Client *, const struct Channel *);
 extern void channel_set_mode_lock(struct Client *, struct Channel *, const char *);

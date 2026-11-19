@@ -9,6 +9,8 @@
 #include "ircd_hook.h"
 
 struct HookContainer *ircd_hook_cap_change;
+struct HookContainer *ircd_hook_channel_invite;
+struct HookContainer *ircd_hook_channel_join;
 struct HookContainer *ircd_hook_client_exit_local;
 struct HookContainer *ircd_hook_client_exit_remote;
 struct HookContainer *ircd_hook_conf_read;
@@ -31,6 +33,8 @@ void
 ircd_hook_init(void)
 {
   ircd_hook_cap_change = hook_container_register("cap_change");
+  ircd_hook_channel_invite = hook_container_register("channel_invite");
+  ircd_hook_channel_join = hook_container_register("channel_join");
   ircd_hook_client_exit_local = hook_container_register("client_exit_local");
   ircd_hook_client_exit_remote = hook_container_register("client_exit_remote");
   ircd_hook_conf_read = hook_container_register("conf_read");

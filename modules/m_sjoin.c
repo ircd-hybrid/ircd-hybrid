@@ -20,7 +20,6 @@
 #include "list.h"
 #include "module.h"
 
-#include "cap.h"
 #include "channel.h"
 #include "channel_invite.h"
 #include "channel_member.h"
@@ -30,6 +29,7 @@
 #include "client_find.h"
 #include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
 #include "parse.h"
 #include "send.h"
@@ -292,15 +292,13 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
       if (record_join_flood)
         channel_flood_record_join(channel, target);
 
-      sendto_channel_local(NULL, channel, 0, CAP_EXTENDED_JOIN, 0, ":%s!%s@%s JOIN %s %s :%s",
-                           target->name, target->username, target->host, channel->name,
-                           target->account, target->info);
-      sendto_channel_local(NULL, channel, 0, 0, CAP_EXTENDED_JOIN, ":%s!%s@%s JOIN :%s",
-                           target->name, target->username, target->host, channel->name);
+      channel_send_join_local(target, channel);
 
-      if (target->away_message)
-        sendto_channel_local(target, channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
-                             target->name, target->username, target->host, target->away_message);
+      hook_dispatch(ircd_hook_channel_join, &(ircd_hook_channel_join_ctx)
+      {
+        .client = target,
+        .channel = channel
+      });
     }
 
     const struct ChannelMember incoming_status = { .flags = status_flags };

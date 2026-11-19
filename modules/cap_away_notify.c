@@ -10,6 +10,7 @@
 #include "ircd_hook.h"
 #include "ircd_module.h"
 #include "monitor.h"
+#include "send.h"
 
 static struct Cap *capability;
 static const struct CapConfig capability_config =
@@ -18,6 +19,19 @@ static const struct CapConfig capability_config =
   .flag = CAP_AWAY_NOTIFY,
   .available = true
 };
+
+static hook_flow_t
+channel_join_hook(void *context)
+{
+  const ircd_hook_channel_join_ctx *const ctx = context;
+  const struct Client *const client = ctx->client;
+
+  if (client->away_message)
+    sendto_channel_local(client, ctx->channel, 0, CAP_AWAY_NOTIFY, 0, ":%s!%s@%s AWAY :%s",
+                         client->name, client->username, client->host, client->away_message);
+
+  return HOOK_FLOW_CONTINUE;
+}
 
 static hook_flow_t
 user_away_change_hook(void *context)
@@ -42,12 +56,14 @@ init_handler(void *context, char *error_message, size_t error_message_size)
     return false;
 
   hook_install(ircd_hook_user_away_change, user_away_change_hook, HOOK_PRIORITY_DEFAULT);
+  hook_install(ircd_hook_channel_join, channel_join_hook, HOOK_PRIORITY_DEFAULT);
   return true;
 }
 
 static void
 exit_handler(void *context)
 {
+  hook_uninstall(ircd_hook_channel_join, channel_join_hook);
   hook_uninstall(ircd_hook_user_away_change, user_away_change_hook);
   cap_unregister(&capability);
 }

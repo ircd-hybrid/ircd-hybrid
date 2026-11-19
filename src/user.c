@@ -546,23 +546,31 @@ user_set_hostmask(struct Client *client, const char *hostname, bool svshost)
   if (strcmp(client->host, hostname) == 0)
     return;
 
+  assert(client_is_user(client));
+
+  char old_host[sizeof(client->host)];
+  strlcpy(old_host, client->host, sizeof(old_host));
+
   sendto_common_channels_local(client, false, 0, CAP_CHGHOST, ":%s!%s@%s QUIT :Changing hostname",
                                client->name, client->username, client->host);
 
-  monitor_notify_extended(client, CAP_CHGHOST, ":%s!%s@%s CHGHOST %s %s",
-                          client->name, client->username, client->host, client->username, hostname);
-
   strlcpy(client->host, hostname, sizeof(client->host));
+
+  if (client_is_local(client))
+    clear_ban_cache_list(&client->channel_member_list);
+
+  hook_dispatch(ircd_hook_user_host_change, &(ircd_hook_user_host_change_ctx) {
+    .client = client,
+    .old_host = old_host,
+    .new_host = client->host
+  });
 
   if (svshost)
     sendto_servers(client, 0, 0, ":%s SVSHOST %s 0 %s",
                    client->uplink->id, client->id, client->host);
 
   if (client_is_local(client))
-  {
     sendto_one_numeric(client, &me, RPL_VISIBLEHOST, client->host);
-    clear_ban_cache_list(&client->channel_member_list);
-  }
 
   list_node_t *node;
   LIST_FOREACH(node, client->channel_member_list.head)

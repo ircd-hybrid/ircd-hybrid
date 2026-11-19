@@ -69,6 +69,13 @@ typedef struct
 typedef struct
 {
   struct Client *client;
+  const char *old_host;
+  const char *new_host;
+} ircd_hook_user_host_change_ctx;
+
+typedef struct
+{
+  struct Client *client;
 } ircd_hook_user_register_ctx;
 
 typedef struct
@@ -97,6 +104,7 @@ extern struct HookContainer *ircd_hook_nick_change_remote;
 extern struct HookContainer *ircd_hook_spy_request;
 extern struct HookContainer *ircd_hook_user_account_change;
 extern struct HookContainer *ircd_hook_user_away_change;
+extern struct HookContainer *ircd_hook_user_host_change;
 extern struct HookContainer *ircd_hook_user_register_local;
 extern struct HookContainer *ircd_hook_user_register_local_prepare;
 extern struct HookContainer *ircd_hook_user_register_remote;

@@ -5,8 +5,11 @@
 
 #include "module.h"
 
-#include "ircd_module.h"
 #include "cap.h"
+#include "client.h"
+#include "ircd_hook.h"
+#include "ircd_module.h"
+#include "monitor.h"
 
 static struct Cap *capability;
 static const struct CapConfig capability_config =
@@ -16,15 +19,33 @@ static const struct CapConfig capability_config =
   .available = true
 };
 
+static hook_flow_t
+user_host_change_hook(void *context)
+{
+  const ircd_hook_user_host_change_ctx *const ctx = context;
+  struct Client *const client = ctx->client;
+
+  monitor_notify_extended(client, CAP_CHGHOST, ":%s!%s@%s CHGHOST %s %s",
+                          client->name, client->username, ctx->old_host,
+                          client->username, ctx->new_host);
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  return ircd_module_register_cap(&capability_config, &capability, error_message, error_message_size);
+  if (!ircd_module_register_cap(&capability_config, &capability, error_message, error_message_size))
+    return false;
+
+  hook_install(ircd_hook_user_host_change, user_host_change_hook, HOOK_PRIORITY_DEFAULT);
+  return true;
 }
 
 static void
 exit_handler(void *context)
 {
+  hook_uninstall(ircd_hook_user_host_change, user_host_change_hook);
   cap_unregister(&capability);
 }
 

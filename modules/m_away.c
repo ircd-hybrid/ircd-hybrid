@@ -19,14 +19,12 @@
 #include "memory.h"
 #include "module.h"
 
-#include "cap.h"
 #include "client.h"
 #include "conf.h"
 #include "ircd.h"
 #include "ircd_hook.h"
 #include "ircd_module.h"
 #include "isupport.h"
-#include "monitor.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
@@ -60,45 +58,12 @@ _away_message_is_unchanged(const struct Client *source, const char *message)
 }
 
 static void
-_away_send_unset(struct Client *source)
+_away_propagate(const struct Client *source)
 {
-  sendto_servers(source, 0, 0, ":%s AWAY", source->id);
-  monitor_notify_extended(source, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY",
-                          source->name, source->username, source->host);
-}
-
-static void
-_away_send_set(struct Client *source)
-{
-  assert(source->away_message);
-
-  sendto_servers(source, 0, 0, ":%s AWAY :%s",
-                 source->id, source->away_message);
-  monitor_notify_extended(source, CAP_AWAY_NOTIFY, ":%s!%s@%s AWAY :%s",
-                          source->name, source->username, source->host, source->away_message);
-}
-
-static void
-_away_commit_unset(struct Client *source)
-{
-  if (source->away_message == NULL)
-    return;
-
-  io_free(source->away_message);
-  source->away_message = NULL;
-
-  _away_send_unset(source);
-}
-
-static void
-_away_commit_set(struct Client *source, const char *message)
-{
-  assert(!string_is_empty(message));
-
-  io_free(source->away_message);
-  source->away_message = io_strndup(message, ConfigGeneral.max_away_length);
-
-  _away_send_set(source);
+  if (source->away_message)
+    sendto_servers(source, 0, 0, ":%s AWAY :%s", source->id, source->away_message);
+  else
+    sendto_servers(source, 0, 0, ":%s AWAY", source->id);
 }
 
 static void
@@ -107,9 +72,31 @@ _away_commit(struct Client *source, const char *message)
   assert(client_is_user(source));
 
   if (string_is_empty(message))
-    _away_commit_unset(source);
+  {
+    if (source->away_message == NULL)
+      return;
+
+    io_free(source->away_message);
+    source->away_message = NULL;
+  }
   else
-    _away_commit_set(source, message);
+  {
+    if (_away_message_is_unchanged(source, message))
+    {
+      /* Repeated remote updates still need to reach the remaining servers. */
+      if (!client_is_local(source))
+        _away_propagate(source);
+      return;
+    }
+
+    char *const away_message = io_strndup(message, ConfigGeneral.max_away_length);
+    io_free(source->away_message);
+    source->away_message = away_message;
+  }
+
+  _away_propagate(source);
+  hook_dispatch(ircd_hook_user_away_change,
+                &(ircd_hook_user_away_change_ctx){ .client = source });
 }
 
 /*! \brief AWAY command handler
@@ -131,7 +118,7 @@ m_away(struct Client *source, size_t parc, char *parv[])
   const char *const message = parv[1];
   if (string_is_empty(message))
   {
-    _away_commit_unset(source);
+    _away_commit(source, message);
 
     sendto_one_numeric(source, &me, RPL_UNAWAY);
     return;
@@ -152,10 +139,7 @@ m_away(struct Client *source, size_t parc, char *parv[])
 
   sendto_one_numeric(source, &me, RPL_NOWAWAY);
 
-  if (_away_message_is_unchanged(source, message))
-    return;
-
-  _away_commit_set(source, message);
+  _away_commit(source, message);
 }
 
 static void

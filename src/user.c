@@ -91,9 +91,9 @@ user_set_account(struct Client *client, const char *account)
   if (client_is_local(client))
     _user_send_account_status(client);
 
-  if (changed && client_is_user(client))
-    monitor_notify_extended(client, CAP_ACCOUNT_NOTIFY, ":%s!%s@%s ACCOUNT %s",
-                            client->name, client->username, client->host, client->account);
+  if (changed)
+    hook_dispatch(ircd_hook_user_account_change,
+                  &(ircd_hook_user_account_change_ctx){ .client = client });
 
   return true;
 }

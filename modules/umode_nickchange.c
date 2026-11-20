@@ -23,9 +23,9 @@ static struct UserMode nickchange_mode =
 static hook_flow_t
 nick_change_hook(void *ctx_)
 {
-  ircd_hook_nick_change_ctx *ctx = ctx_;
+  const ircd_hook_nick_change_ctx *const ctx = ctx_;
   sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
-                 ctx->client->name, ctx->nick, ctx->client->username, ctx->client->host);
+                 ctx->old_nick, ctx->new_nick, ctx->client->username, ctx->client->host);
   return HOOK_FLOW_CONTINUE;
 }
 
@@ -44,9 +44,9 @@ init_handler(void *context, char *error_message, size_t error_message_size)
 static void
 exit_handler(void *context)
 {
-  user_mode_unregister(&nickchange_mode);
   hook_uninstall(ircd_hook_nick_change_local, nick_change_hook);
   hook_uninstall(ircd_hook_nick_change_remote, nick_change_hook);
+  user_mode_unregister(&nickchange_mode);
 }
 
 const struct module_descriptor module_entry_v1 =

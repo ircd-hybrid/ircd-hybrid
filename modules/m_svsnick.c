@@ -8,7 +8,6 @@
  * \brief Includes required functions for processing the SVSNICK command.
  */
 
-#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,18 +17,12 @@
 #include "io_string.h"
 #include "module.h"
 
-#include "channel.h"
-#include "channel_mode.h"
 #include "client.h"
 #include "client_find.h"
-#include "ircd.h"
 #include "ircd_module.h"
-#include "monitor.h"
 #include "parse.h"
 #include "send.h"
 #include "user.h"
-#include "user_mode.h"
-#include "whowas.h"
 
 /*! \brief SVSNICK command handler
  *
@@ -94,32 +87,7 @@ ms_svsnick(struct Client *source, size_t parc, char *parv[])
     }
   }
 
-  const bool samenick = io_strcasecmp(target->name, new_nick) == 0;
-
-  whowas_add_history(target, true);
-
-  if (samenick == false)
-    monitor_notify_signoff(target);
-
-  clear_ban_cache_list(&target->channel_member_list);
-
-  if (user_mode_has_flag(target, UMODE_REGISTERED))
-  {
-    const uint64_t mode_flags_old = target->user_mode_flags;
-    user_mode_unset_flag(target, UMODE_REGISTERED);
-    user_mode_send(target, mode_flags_old, USER_MODE_SEND_USER);
-  }
-
-  sendto_servers(NULL, 0, 0, ":%s NICK %s :%ju",
-                 target->id, new_nick, new_nick_timestamp);
-  sendto_common_channels_local(target, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               target->name, target->username, target->host, new_nick);
-
-  client_update_name(target, new_nick);
-  target->nick_timestamp = new_nick_timestamp;
-
-  if (samenick == false)
-    monitor_notify_signon(target);
+  user_change_nick(target, new_nick, new_nick_timestamp, USER_NICK_CHANGE_ORIGIN_SVSNICK);
 }
 
 static struct Command command_table =

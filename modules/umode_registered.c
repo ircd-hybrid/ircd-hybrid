@@ -7,9 +7,9 @@
 
 #include "module.h"
 
-#include "ircd_module.h"
 #include "client.h"
 #include "ircd_hook.h"
+#include "ircd_module.h"
 #include "numeric.h"
 #include "send.h"
 #include "user_mode.h"
@@ -20,6 +20,24 @@ static struct UserMode registered_mode =
   .mode_flag = &UMODE_REGISTERED,
   .policy = USER_MODE_POLICY_SERVICE_ONLY,
 };
+
+static hook_flow_t
+nick_change_prepare_hook(void *context)
+{
+  const ircd_hook_nick_change_ctx *const ctx = context;
+  struct Client *const client = ctx->client;
+
+  /* Registration follows IRC nickname identity, regardless of spelling or origin. */
+  if (!ctx->identity_changed || !user_mode_has_mode(client, &registered_mode))
+    return HOOK_FLOW_CONTINUE;
+
+  const uint64_t mode_flags_old = client->user_mode_flags;
+  user_mode_unset_mode(client, &registered_mode);
+  if (client_is_local(client))
+    user_mode_send(client, mode_flags_old, USER_MODE_SEND_USER);
+
+  return HOOK_FLOW_CONTINUE;
+}
 
 static hook_flow_t
 who_send_hook(void *ctx_)
@@ -53,6 +71,7 @@ init_handler(void *context, char *error_message, size_t error_message_size)
   if (!ircd_module_register_user_mode(&registered_mode, error_message, error_message_size))
     return false;
 
+  hook_install(ircd_hook_nick_change_prepare, nick_change_prepare_hook, HOOK_PRIORITY_DEFAULT);
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_ABOVE_NORMAL);
 
@@ -62,9 +81,10 @@ init_handler(void *context, char *error_message, size_t error_message_size)
 static void
 exit_handler(void *context)
 {
-  user_mode_unregister(&registered_mode);
+  hook_uninstall(ircd_hook_nick_change_prepare, nick_change_prepare_hook);
   hook_uninstall(ircd_hook_who_send, who_send_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
+  user_mode_unregister(&registered_mode);
 }
 
 const struct module_descriptor module_entry_v1 =

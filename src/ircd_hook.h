@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "hook.h"
+#include "user.h"
 
 struct Channel;
 struct Client;
@@ -60,7 +61,10 @@ typedef struct
 typedef struct
 {
   struct Client *client;
-  const char *nick;
+  const char *old_nick;
+  const char *new_nick;
+  user_nick_change_origin_t origin;
+  bool identity_changed;
 } ircd_hook_nick_change_ctx;
 
 typedef struct
@@ -116,6 +120,7 @@ extern struct HookContainer *ircd_hook_msg_client_source_local;
 extern struct HookContainer *ircd_hook_msg_client_target_local;
 extern struct HookContainer *ircd_hook_msg_sent;
 extern struct HookContainer *ircd_hook_nick_change_local;
+extern struct HookContainer *ircd_hook_nick_change_prepare;
 extern struct HookContainer *ircd_hook_nick_change_remote;
 extern struct HookContainer *ircd_hook_spy_request;
 extern struct HookContainer *ircd_hook_user_account_change;

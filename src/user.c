@@ -48,6 +48,7 @@
 #include "send.h"
 #include "user.h"
 #include "user_mode.h"
+#include "whowas.h"
 
 bool
 user_account_is_valid(const char *account)
@@ -95,6 +96,60 @@ user_set_account(struct Client *client, const char *account)
                   &(ircd_hook_user_account_change_ctx){ .client = client });
 
   return true;
+}
+
+void
+user_change_nick(struct Client *client, const char *new_nick, uintmax_t nick_timestamp,
+                 user_nick_change_origin_t origin)
+{
+  assert(client_is_user(client));
+  assert(nickname_is_valid(client->name, false));
+  assert(nickname_is_valid(new_nick, false));
+  assert(origin == USER_NICK_CHANGE_ORIGIN_NICK ||
+         (origin == USER_NICK_CHANGE_ORIGIN_SVSNICK && client_is_local(client)));
+
+  if (strcmp(client->name, new_nick) == 0)
+    return;
+
+  char old_nick[NICKLEN + 1];
+  char new_nick_buffer[NICKLEN + 1];
+  strlcpy(old_nick, client->name, sizeof(old_nick));
+  strlcpy(new_nick_buffer, new_nick, sizeof(new_nick_buffer));
+
+  const bool identity_changed = io_strcasecmp(old_nick, new_nick_buffer) != 0;
+  assert(!identity_changed || nick_timestamp != 0);
+  if (identity_changed)
+  {
+    client->nick_timestamp = nick_timestamp;
+
+    if (client_is_local(client))
+      clear_ban_cache_list(&client->channel_member_list);
+
+    monitor_notify_signoff(client);
+  }
+
+  ircd_hook_nick_change_ctx ctx =
+  {
+    .client = client,
+    .old_nick = old_nick,
+    .new_nick = new_nick_buffer,
+    .origin = origin,
+    .identity_changed = identity_changed
+  };
+  hook_dispatch(ircd_hook_nick_change_prepare, &ctx);
+  hook_dispatch(client_is_local(client) ? ircd_hook_nick_change_local : ircd_hook_nick_change_remote, &ctx);
+
+  whowas_add_history(client, true);
+
+  sendto_servers(client, 0, 0, ":%s NICK %s :%ju",
+                 client->id, new_nick_buffer, client->nick_timestamp);
+  sendto_common_channels_local(client, true, 0, 0, ":%s!%s@%s NICK :%s",
+                               old_nick, client->username, client->host, new_nick_buffer);
+
+  client_update_name(client, new_nick_buffer);
+
+  if (identity_changed)
+    monitor_notify_signon(client);
 }
 
 void

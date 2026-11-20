@@ -35,16 +35,14 @@
 #include "hash.h"
 #include "ipcache.h"
 #include "ircd.h"
-#include "ircd_module.h"
 #include "ircd_hook.h"
+#include "ircd_module.h"
 #include "isupport.h"
-#include "monitor.h"
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
 #include "user.h"
 #include "user_mode.h"
-#include "whowas.h"
 
 static bool
 check_clean_nick(struct Client *source, const char *nick)
@@ -159,82 +157,7 @@ nick_change_local(struct Client *source, const char *nick)
     source->connection->nick.count++;
   }
 
-  bool samenick = io_strcasecmp(source->name, nick) == 0;
-  if (samenick == false)
-  {
-    source->nick_timestamp = io_time_get(IO_TIME_REALTIME_SEC);
-
-    clear_ban_cache_list(&source->channel_member_list);
-
-    monitor_notify_signoff(source);
-
-    if (user_mode_has_flag(source, UMODE_REGISTERED))
-    {
-      const uint64_t mode_flags_old = source->user_mode_flags;
-      user_mode_unset_flag(source, UMODE_REGISTERED);
-      user_mode_send(source, mode_flags_old, USER_MODE_SEND_USER);
-    }
-  }
-
-  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = nick };
-  hook_dispatch(ircd_hook_nick_change_local, &ctx);
-
-  whowas_add_history(source, true);
-
-  sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, nick, source->nick_timestamp);
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, nick);
-
-  client_update_name(source, nick);
-
-  if (samenick == false)
-    monitor_notify_signon(source);
-}
-
-/*!
- *
- * \param source Pointer to allocated Client struct from which the message
- *                 originally comes from.  This can be a local or remote client.
- * \param parv     Argument vector where parv[0] .. parv[parc-1] are non-NULL
- *                 pointers.
- * \note Valid arguments for this command are:
- *
- *      - parv[0] = command
- *      - parv[1] = nickname
- *      - parv[2] = timestamp
- */
-static void
-nick_change_remote(struct Client *source, const char *new_nick, uintmax_t nick_timestamp)
-{
-  assert(!string_is_empty(new_nick));
-  assert(client_is_user(source));
-  assert(source->name[0]);
-
-  const bool samenick = io_strcasecmp(source->name, new_nick) == 0;
-  if (samenick == false)
-  {
-    assert(nick_timestamp);
-    source->nick_timestamp = nick_timestamp;
-
-    user_mode_unset_flag(source, UMODE_REGISTERED);
-    monitor_notify_signoff(source);
-  }
-
-  ircd_hook_nick_change_ctx ctx = { .client = source, .nick = new_nick };
-  hook_dispatch(ircd_hook_nick_change_remote, &ctx);
-
-  whowas_add_history(source, true);
-
-  sendto_servers(source, 0, 0, ":%s NICK %s :%ju",
-                 source->id, new_nick, source->nick_timestamp);
-  sendto_common_channels_local(source, true, 0, 0, ":%s!%s@%s NICK :%s",
-                               source->name, source->username, source->host, new_nick);
-
-  client_update_name(source, new_nick);
-
-  if (samenick == false)
-    monitor_notify_signon(source);
+  user_change_nick(source, nick, io_time_get(IO_TIME_REALTIME_SEC), USER_NICK_CHANGE_ORIGIN_NICK);
 }
 
 /*!
@@ -643,7 +566,7 @@ ms_nick(struct Client *source, size_t parc, char *parv[])
   if (target == source)
   {
     if (strcmp(target->name, new_nick))
-      nick_change_remote(source, new_nick, source->nick_timestamp);
+      user_change_nick(source, new_nick, source->nick_timestamp, USER_NICK_CHANGE_ORIGIN_NICK);
 
     return;
   }
@@ -653,15 +576,15 @@ ms_nick(struct Client *source, size_t parc, char *parv[])
     return;
 
   if (target == NULL)
-    nick_change_remote(source, new_nick, new_nick_timestamp);
+    user_change_nick(source, new_nick, new_nick_timestamp, USER_NICK_CHANGE_ORIGIN_NICK);
   else if (client_is_unknown(target))
   {
     client_exit(target, "Overridden by other sign on");
 
-    nick_change_remote(source, new_nick, new_nick_timestamp);
+    user_change_nick(source, new_nick, new_nick_timestamp, USER_NICK_CHANGE_ORIGIN_NICK);
   }
   else if (perform_nick_change_collides(source, target, new_nick_timestamp))
-    nick_change_remote(source, new_nick, new_nick_timestamp);
+    user_change_nick(source, new_nick, new_nick_timestamp, USER_NICK_CHANGE_ORIGIN_NICK);
 }
 
 /*! \brief UID command handler

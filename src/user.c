@@ -32,7 +32,6 @@
 #include "client_format.h"
 #include "client_id.h"
 #include "client_input.h"
-#include "cloak.h"
 #include "conf.h"
 #include "conf_auth.h"
 #include "conf_gecos.h"
@@ -201,9 +200,6 @@ user_welcome(struct Client *client)
 
   if (client_has_flag(client, FLAGS_TLS_ACTIVE))
   {
-    user_mode_set_flag(client, UMODE_SECURE);
-
-    client->tls_cipher = io_strdup(tls_session_get_cipher(&client->connection->fde->tls));
     sendto_one_notice(client, &me, ":*** Connected securely via %s",
                       client->tls_cipher);
 
@@ -385,14 +381,20 @@ user_register_local(struct Client *client)
     Count.max_tot = list_length(&global_client_list);
   ++Count.totalrestartcount;
 
-  if (ConfigGeneral.invisible_on_connect)
-    user_mode_set_flag_exec(client, UMODE_INVISIBLE, USER_MODE_SOURCE_REGULAR);
+  if (client_has_flag(client, FLAGS_TLS_ACTIVE))
+    client->tls_cipher = io_strdup(tls_session_get_cipher(&client->connection->fde->tls));
 
   _user_report_and_set_flags(client, auth);
 
+  hook_dispatch(ircd_hook_user_register_local_defaults, &(ircd_hook_user_register_ctx){ .client = client });
+  if (client_is_dead(client))
+    return;
+
   user_welcome(client);
 
-  user_mode_set_flag_exec(client, UMODE_CLOAK, USER_MODE_SOURCE_REGULAR);
+  hook_dispatch(ircd_hook_user_register_local_welcome, &(ircd_hook_user_register_ctx){ .client = client });
+  if (client_is_dead(client))
+    return;
 
   user_mode_send(client, 0, USER_MODE_SEND_USER);
 

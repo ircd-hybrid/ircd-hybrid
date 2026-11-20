@@ -72,7 +72,6 @@ uint64_t UMODE_HIDECHANS;
 uint64_t UMODE_HIDEIDLE;
 uint64_t UMODE_REGISTERED;
 uint64_t UMODE_SERVNOTICE;
-uint64_t UMODE_CLOAK;
 uint64_t UMODE_SPY;
 
 list_t unknown_list;

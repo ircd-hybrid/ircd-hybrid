@@ -8,7 +8,9 @@
 #include "module.h"
 
 #include "client.h"
+#include "conf.h"
 #include "ircd.h"
+#include "ircd_hook.h"
 #include "ircd_module.h"
 #include "user_mode.h"
 
@@ -36,15 +38,30 @@ static struct UserMode invisible_mode =
   .unset_callback = unset_callback
 };
 
+static hook_flow_t
+user_register_local_defaults_hook(void *context)
+{
+  const ircd_hook_user_register_ctx *const ctx = context;
+  if (ConfigGeneral.invisible_on_connect)
+    user_mode_set_mode_exec(ctx->client, &invisible_mode, USER_MODE_SOURCE_REGULAR);
+
+  return HOOK_FLOW_CONTINUE;
+}
+
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  return ircd_module_register_user_mode(&invisible_mode, error_message, error_message_size);
+  if (!ircd_module_register_user_mode(&invisible_mode, error_message, error_message_size))
+    return false;
+
+  hook_install(ircd_hook_user_register_local_defaults, user_register_local_defaults_hook, HOOK_PRIORITY_DEFAULT);
+  return true;
 }
 
 static void
 exit_handler(void *context)
 {
+  hook_uninstall(ircd_hook_user_register_local_defaults, user_register_local_defaults_hook);
   user_mode_unregister(&invisible_mode);
 }
 

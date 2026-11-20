@@ -10,9 +10,9 @@
 #include "io_string.h"
 #include "module.h"
 
-#include "ircd_module.h"
 #include "client.h"
 #include "ircd_hook.h"
+#include "ircd_module.h"
 #include "numeric.h"
 #include "send.h"
 #include "user_mode.h"
@@ -23,6 +23,16 @@ static struct UserMode secure_mode =
   .mode_flag = &UMODE_SECURE,
   .policy = USER_MODE_POLICY_INTERNAL_ONLY,
 };
+
+static hook_flow_t
+user_register_local_defaults_hook(void *context)
+{
+  const ircd_hook_user_register_ctx *const ctx = context;
+  if (client_has_flag(ctx->client, FLAGS_TLS_ACTIVE))
+    user_mode_set_mode(ctx->client, &secure_mode);
+
+  return HOOK_FLOW_CONTINUE;
+}
 
 static hook_flow_t
 who_send_hook(void *ctx_)
@@ -61,6 +71,7 @@ init_handler(void *context, char *error_message, size_t error_message_size)
   if (!ircd_module_register_user_mode(&secure_mode, error_message, error_message_size))
     return false;
 
+  hook_install(ircd_hook_user_register_local_defaults, user_register_local_defaults_hook, HOOK_PRIORITY_DEFAULT);
   hook_install(ircd_hook_who_send, who_send_hook, HOOK_PRIORITY_NORMAL);
   hook_install(ircd_hook_whois_send, whois_send_hook, HOOK_PRIORITY_NORMAL);
 
@@ -70,9 +81,10 @@ init_handler(void *context, char *error_message, size_t error_message_size)
 static void
 exit_handler(void *context)
 {
-  user_mode_unregister(&secure_mode);
+  hook_uninstall(ircd_hook_user_register_local_defaults, user_register_local_defaults_hook);
   hook_uninstall(ircd_hook_who_send, who_send_hook);
   hook_uninstall(ircd_hook_whois_send, whois_send_hook);
+  user_mode_unregister(&secure_mode);
 }
 
 const struct module_descriptor module_entry_v1 =

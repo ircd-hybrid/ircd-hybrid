@@ -8,11 +8,22 @@
 
 #include "module.h"
 
-#include "ircd_module.h"
 #include "client.h"
 #include "cloak.h"
+#include "ircd_hook.h"
+#include "ircd_module.h"
 #include "user.h"
 #include "user_mode.h"
+
+static bool set_callback(struct Client *, user_mode_source_t);
+static bool unset_callback(struct Client *, user_mode_source_t);
+
+static struct UserMode cloak_mode =
+{
+  .mode_char = 'x',
+  .set_callback = set_callback,
+  .unset_callback = unset_callback
+};
 
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
@@ -20,7 +31,7 @@ set_callback(struct Client *client, user_mode_source_t source)
   if (source != USER_MODE_SOURCE_REGULAR)
     return false;
 
-  if (user_mode_has_flag(client, UMODE_CLOAK))
+  if (user_mode_has_mode(client, &cloak_mode))
     return false;
 
   if (client_is_local(client))
@@ -45,7 +56,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
   if (source != USER_MODE_SOURCE_REGULAR)
     return false;
 
-  if (!user_mode_has_flag(client, UMODE_CLOAK))
+  if (!user_mode_has_mode(client, &cloak_mode))
     return false;
 
   if (client_is_local(client))
@@ -53,23 +64,29 @@ unset_callback(struct Client *client, user_mode_source_t source)
   return true;
 }
 
-static struct UserMode cloak_mode =
+static hook_flow_t
+user_register_local_welcome_hook(void *context)
 {
-  .mode_char = 'x',
-  .mode_flag = &UMODE_CLOAK,
-  .set_callback = set_callback,
-  .unset_callback = unset_callback
-};
+  const ircd_hook_user_register_ctx *const ctx = context;
+  user_mode_set_mode_exec(ctx->client, &cloak_mode, USER_MODE_SOURCE_REGULAR);
+
+  return HOOK_FLOW_CONTINUE;
+}
 
 static bool
 init_handler(void *context, char *error_message, size_t error_message_size)
 {
-  return ircd_module_register_user_mode(&cloak_mode, error_message, error_message_size);
+  if (!ircd_module_register_user_mode(&cloak_mode, error_message, error_message_size))
+    return false;
+
+  hook_install(ircd_hook_user_register_local_welcome, user_register_local_welcome_hook, HOOK_PRIORITY_DEFAULT);
+  return true;
 }
 
 static void
 exit_handler(void *context)
 {
+  hook_uninstall(ircd_hook_user_register_local_welcome, user_register_local_welcome_hook);
   user_mode_unregister(&cloak_mode);
 }
 

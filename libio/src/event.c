@@ -523,42 +523,6 @@ event_schedule_at(event_handle_t event, uintmax_t absolute_time_ms)
 }
 
 event_status_t
-event_schedule_jittered(event_handle_t event)
-{
-  if (event == NULL || event->destroy_pending)
-    return EVENT_ERR_INVALID_ARG;
-
-  assert(event->manager);
-  assert(event->handler);
-
-  uintmax_t delay_ms = event->interval_ms;
-
-  if (event->interval_ms >= 3000)
-  {
-    const uintmax_t jitter_ms = event->interval_ms / 3;
-    const uintmax_t random_range_ms = 2 * jitter_ms;
-
-    delay_ms = event->interval_ms + (genrand_int32() % (random_range_ms + 1)) - jitter_ms;
-    if (delay_ms == 0)
-      delay_ms = 1;
-  }
-
-  return _event_schedule_relative(event, delay_ms);
-}
-
-event_status_t
-event_reset(event_handle_t event)
-{
-  if (event == NULL || event->destroy_pending)
-    return EVENT_ERR_INVALID_ARG;
-
-  assert(event->manager);
-  assert(event->handler);
-
-  return event_reschedule(event, event->interval_ms);
-}
-
-event_status_t
 event_reschedule(event_handle_t event, uintmax_t new_delay_ms)
 {
   if (event == NULL || event->destroy_pending || new_delay_ms == 0)
@@ -623,20 +587,6 @@ event_get_name(event_handle_t event)
     return "[invalid]";
 
   return event->name ? event->name : "[unnamed]";
-}
-
-event_status_t
-event_set_name(event_handle_t event, const char *new_name)
-{
-  if (event == NULL || event->manager == NULL || event->destroy_pending)
-    return EVENT_ERR_INVALID_ARG;
-
-  char *const copy = new_name ? io_strdup(new_name) : NULL;
-
-  io_free(event->name);
-  event->name = copy;
-
-  return EVENT_SUCCESS;
 }
 
 uint8_t

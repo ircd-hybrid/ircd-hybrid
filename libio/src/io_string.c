@@ -79,27 +79,6 @@ stripws(char *str)
   return str;
 }
 
-/**
- * @brief Extracts the base name of a path.
- *
- * This function returns a pointer to the base name portion of a file path.
- * It finds the last occurrence of the directory separator ('/') in the input
- * path. If none is found, the entire input string is considered the base name.
- *
- * Note: Unlike some standard C library implementations, this function does not
- * modify the input path argument, making it suitable when the original path
- * must remain unchanged.
- *
- * @param path The input path from which to extract the base name.
- * @return A pointer to the extracted base name within the input path.
- */
-const char *
-io_basename(const char *path)
-{
-  const char *const s = strrchr(path, '/');
-  return s ? s + 1 : path;
-}
-
 /*    $OpenBSD: strlcat.c,v 1.18 2016/10/16 17:37:39 dtucker Exp $    */
 /*    $OpenBSD: strlcpy.c,v 1.15 2016/10/16 17:37:39 dtucker Exp $    */
 /*

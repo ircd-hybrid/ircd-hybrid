@@ -22,7 +22,6 @@
 extern const unsigned char io_ascii_to_lower_table[256];  /*!< Lookup table for converting characters to lowercase. */
 extern const unsigned char io_ascii_to_upper_table[256];  /*!< Lookup table for converting characters to uppercase. */
 
-extern const char *io_basename(const char *);
 extern const char *stripws(char *);
 extern bool has_wildcards(const char *);
 extern int match(const char *, const char *);

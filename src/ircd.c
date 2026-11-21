@@ -469,8 +469,8 @@ main(int argc, char *argv[])
   event_schedule(event_conf_db_save_all);
 
   event_handle_t event_server_connect_auto =
-    event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 15000, false, NULL, NULL);
-  event_schedule_jittered(event_server_connect_auto);
+    event_create(ircd_event_manager, "server_connect_auto", server_connect_auto, 5000, false, NULL, NULL);
+  event_reschedule(event_server_connect_auto, 1);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
   _io_loop();

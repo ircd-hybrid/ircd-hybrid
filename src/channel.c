@@ -307,7 +307,7 @@ channel_create(const char *name)
 void
 channel_destroy(struct Channel *channel)
 {
-  channel_invite_remove_all(&channel->invite_list);
+  channel_invite_clear_channel(channel);
 
   _channel_free_mask_list(&channel->ban_list);
   _channel_free_mask_list(&channel->exception_list);
@@ -805,6 +805,9 @@ channel_join(struct Client *client, const char *name, const char *key)
     return;
   }
 
+  const uintmax_t now = io_time_get(IO_TIME_MONOTONIC_SEC);
+  channel_invite_expire_client(client, now);
+
   struct Channel *channel = channel_find(name);
   const bool is_new_channel = channel == NULL;
   if (is_new_channel)
@@ -829,7 +832,7 @@ channel_join(struct Client *client, const char *name, const char *key)
   channel_flood_record_join(channel, client);
   channel_invite_consume(channel, client);
 
-  client->connection->last_join_time = io_time_get(IO_TIME_MONOTONIC_SEC);
+  client->connection->last_join_time = now;
 
   if (is_new_channel)
   {

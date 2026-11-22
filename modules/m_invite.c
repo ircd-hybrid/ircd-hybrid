@@ -38,8 +38,9 @@
 static void
 _invite_send_invite_list(struct Client *source)
 {
-  list_node_t *node;
+  channel_invite_expire_client(source, io_time_get(IO_TIME_MONOTONIC_SEC));
 
+  const list_node_t *node;
   LIST_FOREACH(node, source->connection->channel_invite_list.head)
   {
     const struct ChannelInvite *const invite = node->data;

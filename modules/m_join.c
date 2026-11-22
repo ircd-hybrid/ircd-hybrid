@@ -128,7 +128,7 @@ ms_join(struct Client *source, size_t parc, char *parv[])
     const char *const origin_name = client_get_visible_server_name(source->uplink);
     channel_mode_clear_member_statuses(channel, origin_name);
 
-    channel_invite_remove_all(&channel->invite_list);
+    channel_invite_clear_channel(channel);
 
     channel_set_mode_lock(source->nexthop, channel, NULL);
 

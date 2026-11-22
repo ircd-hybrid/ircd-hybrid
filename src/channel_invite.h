@@ -14,6 +14,9 @@
 
 #include "list.h"
 
+struct Channel;
+struct Client;
+
 /** Invite structure */
 struct ChannelInvite
 {
@@ -25,8 +28,9 @@ struct ChannelInvite
 };
 
 extern void channel_invite_add(struct Channel *, struct Client *);
-extern void channel_invite_remove(struct ChannelInvite *);
-extern void channel_invite_remove_all(list_t *);
+extern void channel_invite_clear_channel(struct Channel *);
+extern void channel_invite_clear_client(struct Client *);
+extern void channel_invite_expire_client(struct Client *, uintmax_t);
 extern bool channel_invite_consume(struct Channel *, struct Client *);
-extern struct ChannelInvite *channel_invite_find(struct Channel *, struct Client *);
+extern const struct ChannelInvite *channel_invite_find(const struct Channel *, const struct Client *);
 #endif  /* INCLUDED_channel_invite_h */

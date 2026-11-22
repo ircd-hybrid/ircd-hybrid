@@ -207,7 +207,7 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
     remove_ban_list(channel, origin_name, &channel->invite_exception_list, 'I');
 
     clear_ban_cache_list(&channel->local_member_list);
-    channel_invite_remove_all(&channel->invite_list);
+    channel_invite_clear_channel(channel);
 
     channel_set_mode_lock(source, channel, NULL);
 

@@ -687,7 +687,7 @@ _client_exit_cleanup_user_connection(struct Client *client, const char *reason)
       list_free_node(node);
   }
 
-  channel_invite_remove_all(&client->connection->channel_invite_list);
+  channel_invite_clear_client(client);
   accept_clear_list(&client->connection->accept_list);
   monitor_clear_list(client);
 

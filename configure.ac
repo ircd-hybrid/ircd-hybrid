@@ -18,7 +18,6 @@ AC_PROG_INSTALL
 LT_CONFIG_LTDL_DIR([libltdl])
 LT_INIT([dlopen disable-static])
 LTDL_INIT([recursive convenience])
-LIBTOOL="$LIBTOOL --silent"
 
 # Checks for libraries.
 AX_GCC_STACK_PROTECT_CC

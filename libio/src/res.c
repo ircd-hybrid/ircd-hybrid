@@ -55,6 +55,7 @@
 #include "reslib.h"
 #include "memory.h"
 #include "address.h"
+#include "log.h"
 
 #if (CHAR_BIT != 8)
 #error this code needs to be able to address individual octets
@@ -148,8 +149,10 @@ res_ourserver(const struct io_addr *inp)
 /*
  * start_resolver - do everything we need to read the resolv.conf file
  * and initialize the resolver file descriptor if needed
+ *
+ * Returns false, with errno set, if the resolver socket could not be opened.
  */
-static void
+static bool
 start_resolver(void)
 {
   reslib_res_init();
@@ -158,28 +161,45 @@ start_resolver(void)
   {
     int fd = comm_socket(address_get_family(&reslib_nsaddr_list[0]), SOCK_DGRAM, 0);
     if (fd == -1)
-      return;
+      return false;
 
     ResolverFileDescriptor = fd_open(fd, true, "UDP resolver socket");
 
     /* At the moment, the resolver FD data is global .. */
     comm_setselect(ResolverFileDescriptor, COMM_SELECT_READ, res_readreply, NULL, 0);
   }
+
+  return true;
 }
 
 /*
  * restart_resolver - reread resolv.conf, reopen socket
+ *
+ * If the new socket can't be opened, keep the old socket and nameservers.
  */
 void
 restart_resolver(void)
 {
-  if (ResolverFileDescriptor)
+  fde_t *old_fd = ResolverFileDescriptor;
+  struct io_addr old_nsaddr_list[RESLIB_MAXNS];
+  const unsigned int old_nscount = reslib_nscount;
+
+  memcpy(old_nsaddr_list, reslib_nsaddr_list, sizeof(old_nsaddr_list));
+  ResolverFileDescriptor = NULL;
+
+  if (start_resolver() == false)
   {
-    fd_close(ResolverFileDescriptor);
-    ResolverFileDescriptor = NULL;
+    log_write(LOG_TYPE_IRCD, "restart_resolver: couldn't open resolver socket: %s; "
+              "keeping the existing configuration", strerror(errno));
+
+    ResolverFileDescriptor = old_fd;
+    memcpy(reslib_nsaddr_list, old_nsaddr_list, sizeof(old_nsaddr_list));
+    reslib_nscount = old_nscount;
+    return;
   }
 
-  start_resolver();
+  if (old_fd)
+    fd_close(old_fd);
 }
 
 /*
@@ -613,6 +633,12 @@ resolver_init(void)
     .when = 1
   };
 
-  start_resolver();
+  if (start_resolver() == false)
+  {
+    log_write(LOG_TYPE_IRCD, "resolver_init: couldn't open resolver socket: %s",
+              strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
   event_add(&resolver_timeout_event, NULL);
 }

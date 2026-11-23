@@ -183,6 +183,11 @@ lookup_start(struct Client *client)
       ident_start(&client->addr, client->connection->fd->fd, lookup_ident_callback, lookup, ConfigGeneral.ident_timeout);
     if (lookup->ident_request)
       lookup->ident_pending = true;
+    else
+    {
+      ++ServerStats.is_abad;
+      sendto_one_notice(client, &me, "%s", lookup_report_headers[LOOKUP_IDENT_FAIL]);
+    }
   }
 
   lookup_check_complete(lookup);

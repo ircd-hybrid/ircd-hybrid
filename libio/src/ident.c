@@ -232,7 +232,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   {
     log_write(LOG_TYPE_IRCD, "Failed to create Ident socket: %s",
               strerror(errno));
-    request->callback(request->user_data, NULL);
     ident_delete(request);
     return NULL;
   }
@@ -249,7 +248,6 @@ ident_start(const struct io_addr *addr, int socket_fd, IdentCallback callback, v
   {
     log_write(LOG_TYPE_IRCD, "getsockname/getpeername failed: %s",
               strerror(errno));
-    request->callback(request->user_data, NULL);
     ident_delete(request);
     return NULL;
   }

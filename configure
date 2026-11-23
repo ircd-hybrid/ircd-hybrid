@@ -15493,7 +15493,6 @@ eval "LTDLOPEN=\"$libname_spec\""
 # Only expand once:
 
 
-LIBTOOL="$LIBTOOL --silent"
 
 # Checks for libraries.
 

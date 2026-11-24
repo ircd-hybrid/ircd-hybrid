@@ -37,6 +37,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static uintmax_t
 _dline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
@@ -181,7 +182,7 @@ _dline_report_added(struct Client *source, const struct conf_deny *deny,
   {
     const uintmax_t duration_minutes = duration_seconds / 60;
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary D-line added by %s for [%s] (%ju min) [%s]",
                    source_name, prefix, duration_minutes, deny->reason);
     log_write(LOG_TYPE_DLINE,
@@ -190,7 +191,7 @@ _dline_report_added(struct Client *source, const struct conf_deny *deny,
     return;
   }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "D-line added by %s for [%s] [%s]",
                  source_name, prefix, deny->reason);
   log_write(LOG_TYPE_DLINE, "D-line added by %s for [%s] [%s]",

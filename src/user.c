@@ -288,7 +288,7 @@ _user_register_report_rejection(struct Client *client, const char *reason_format
   va_end(args);
 
   client_format_name_buffer_t client_name_buffer;
-  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Client registration rejected: %s (%s)",
                  client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer), reason);
 }
@@ -424,7 +424,7 @@ user_register_local(struct Client *client)
     Count.max_loc = list_length(&local_client_list);
 
     if (!(Count.max_loc % 10))
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "New peak in local client connections: %u",
                      Count.max_loc);
   }

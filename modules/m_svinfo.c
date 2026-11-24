@@ -25,6 +25,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server.h"
+#include "user_mode.h"
 
 static void _svinfo_report_link_status(struct Client *, bool, const char *, ...) IO_AFP(3, 4);
 static void
@@ -40,9 +41,9 @@ _svinfo_report_link_status(struct Client *link, bool write_log, const char *stat
   client_format_name_buffer_t admin_name_buffer;
   client_format_name_buffer_t oper_name_buffer;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Link %s %s",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Link %s %s",
                  client_format_name(link, CLIENT_FORMAT_NAME_ADMIN, &admin_name_buffer), status);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Link %s %s",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Link %s %s",
                  client_format_name(link, CLIENT_FORMAT_NAME_OPER, &oper_name_buffer), status);
 
   if (write_log)

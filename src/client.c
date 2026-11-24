@@ -38,6 +38,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server.h"
+#include "user_mode.h"
 #include "whowas.h"
 
 enum client_connection_policy_result
@@ -46,33 +47,6 @@ enum client_connection_policy_result
   CLIENT_CONNECTION_POLICY_DLINED,
   CLIENT_CONNECTION_POLICY_THROTTLED
 };
-
-uint64_t UMODE_BOT;
-uint64_t UMODE_DEAF;
-uint64_t UMODE_FARCONNECT;
-uint64_t UMODE_SOFTCALLERID;
-uint64_t UMODE_HIDDEN;
-uint64_t UMODE_EXPIRATION;
-uint64_t UMODE_REGONLY;
-uint64_t UMODE_SECURE;
-uint64_t UMODE_WEBIRC;
-uint64_t UMODE_SECUREONLY;
-uint64_t UMODE_ADMIN;
-uint64_t UMODE_CCONN;
-uint64_t UMODE_EXTERNAL;
-uint64_t UMODE_FLOOD;
-uint64_t UMODE_CALLERID;
-uint64_t UMODE_INVISIBLE;
-uint64_t UMODE_REJ;
-uint64_t UMODE_SKILL;
-uint64_t UMODE_LOCOPS;
-uint64_t UMODE_NCHANGE;
-uint64_t UMODE_OPER;
-uint64_t UMODE_HIDECHANS;
-uint64_t UMODE_HIDEIDLE;
-uint64_t UMODE_REGISTERED;
-uint64_t UMODE_SERVNOTICE;
-uint64_t UMODE_SPY;
 
 list_t unknown_list;
 list_t local_client_list;
@@ -527,7 +501,7 @@ _client_exit_notify_network(struct Client *client, const char *reason)
       snprintf(split_reason, sizeof(split_reason), "%s %s",
                client->uplink->name, client->name);
 
-    sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
+    sendto_clients(USER_MODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s split from %s",
                    client->name, client->uplink->name);
 
     /* Send SQUIT for 'client' in every direction. 'client' is already off of local_server_list here. */
@@ -562,7 +536,7 @@ _client_exit_detach(struct Client *client)
   {
     if (client_is_oper(client))
       --Count.oper;
-    if (user_mode_has_flag(client, UMODE_INVISIBLE))
+    if (user_mode_has_flag(client, USER_MODE_INVISIBLE))
       --Count.invisi;
 
     channel_member_remove_list(&client->channel_member_list);
@@ -651,7 +625,7 @@ _client_exit_cleanup_server_connection(struct Client *client, const char *reason
   assert(client && client_is_local(client));
   assert(client_is_server(client));
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Link Closed: %s [ip=%s class=%s uptime=\"%s\" sent=%juKiB recv=%juKiB] (Reason: %s)",
                  client->name, client->sockhost, client_get_class_name(client),
                  time_format_duration(client_get_session_duration(client)),
@@ -702,7 +676,7 @@ _client_exit_cleanup_unregistered_connection(struct Client *client, const char *
   assert(client_is_unknown(client) || client_is_connecting(client) || client_is_handshake(client));
 
   if (client_is_connecting(client) || client_is_handshake(client))
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Link Failed: %s [ip=%s] (Reason: %s)",
                    client->name, client->sockhost, reason);
 

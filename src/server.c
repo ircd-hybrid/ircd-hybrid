@@ -31,6 +31,7 @@
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 /**
  * @brief Finds the first routable client in a list matching a wildcard mask.
@@ -376,7 +377,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   if (connect->dns_pending)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error connecting to %s: DNS lookup for connect{} in progress.",
                    connect->name);
     return false;
@@ -384,7 +385,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   if (connect->dns_failed)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error connecting to %s: DNS lookup for connect{} failed.",
                    connect->name);
     return false;
@@ -461,9 +462,9 @@ server_connect_auto(void *unused)
 
     connect->autoconnect_hold_until = now + connect->retry_delay_sec;
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Connection to %s[%s] activated.",
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "Connection to %s[%s] activated.",
                    connect->name, connect->host);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Connection to %s activated.",
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "Connection to %s activated.",
                    connect->name);
     server_connect(connect, NULL);
     return;  /* We connect only one at time... */

@@ -16,7 +16,7 @@
 static struct UserMode nickchange_mode =
 {
   .mode_char = 'n',
-  .mode_flag = &UMODE_NCHANGE,
+  .mode_flag = &USER_MODE_NCHANGE,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
@@ -24,7 +24,7 @@ static hook_flow_t
 nick_change_hook(void *ctx_)
 {
   const ircd_hook_nick_change_ctx *const ctx = ctx_;
-  sendto_clients(UMODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
+  sendto_clients(USER_MODE_NCHANGE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Nick change: From %s to %s [%s@%s]",
                  ctx->old_nick, ctx->new_nick, ctx->client->username, ctx->client->host);
   return HOOK_FLOW_CONTINUE;
 }

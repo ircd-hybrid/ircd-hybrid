@@ -12,7 +12,7 @@
 static struct UserMode hideidle_mode =
 {
   .mode_char = 'q',
-  .mode_flag = &UMODE_HIDEIDLE
+  .mode_flag = &USER_MODE_HIDEIDLE
 };
 
 static bool

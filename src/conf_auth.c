@@ -34,6 +34,7 @@
 #include "ircd_defs.h"
 #include "send.h"
 #include "user.h"
+#include "user_mode.h"
 
 #define CONF_AUTH_FLAGS_ALL \
   (CONF_AUTH_FLAG_NO_TILDE | \
@@ -191,7 +192,7 @@ _conf_auth_assign_class(struct conf_auth *auth, const char *class_name, const ch
 
   auth->klass = class_default;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                  "Warning: Class '%s' not found for auth block [%s@%s]. Defaulting to class '%s'.",
                  string_or_default(class_name, "<not specified>"), user, host, auth->klass->name);
   log_write(LOG_TYPE_IRCD,

@@ -84,7 +84,7 @@ _send_block_to_client(struct Client *to, struct dbuf_block *block)
         const char *const server_name =
           client_format_name(to, CLIENT_FORMAT_NAME_PUBLIC, &server_name_buffer);
 
-        sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+        sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                        "Max SendQ limit exceeded for %s: %zu > %zu",
                        server_name, new_sendq_size, max_sendq);
       }
@@ -121,7 +121,7 @@ _send_block_to_server(struct Client *to, const struct Client *from, struct dbuf_
     return;
 
   if (to == from->nexthop)
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Send message to %s dropped from %s (Fake Dir)",
                    to->name, from->name);
   else
     _send_block_to_client(to, block);
@@ -458,7 +458,7 @@ sendto_clients_ratelimited(uintmax_t *rate, const char *format, ...)
   vsnprintf(message, sizeof(message), format, args);
   va_end(args);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", message);
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s", message);
   log_write(LOG_TYPE_IRCD, "%s", message);
 }
 
@@ -728,7 +728,7 @@ sendto_channel_butone(const struct Client *exclude_client, const struct Client *
     if (required_rank && channel_member_get_highest_rank(member) < required_rank)
       continue;
 
-    if (user_mode_has_flag(target, UMODE_DEAF))
+    if (user_mode_has_flag(target, USER_MODE_DEAF))
       continue;
 
     if (client_is_local(target))

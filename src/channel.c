@@ -91,7 +91,7 @@ channel_flood_record_join(struct Channel *channel, const struct Client *client)
       const char *const client_name =
         client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Possible Join Flooder %s on %s target: %s",
                      client_name, client->uplink->name, channel->name);
     }
@@ -401,7 +401,7 @@ channel_send_namereply(struct Client *client, struct Channel *channel)
     LIST_FOREACH(node, channel->member_list.head)
     {
       const struct ChannelMember *const member = node->data;
-      if (user_mode_has_flag(member->client, UMODE_INVISIBLE) && is_member == false)
+      if (user_mode_has_flag(member->client, USER_MODE_INVISIBLE) && is_member == false)
         continue;
 
       size_t masklen = 0;
@@ -523,10 +523,10 @@ is_extbanned(const struct Channel *channel, const struct Client *client, uint64_
 static int
 _can_join(struct Client *client, struct Channel *channel, const char *key)
 {
-  if (channel_has_mode(channel, MODE_SECUREONLY) && !user_mode_has_flag(client, UMODE_SECURE))
+  if (channel_has_mode(channel, MODE_SECUREONLY) && !user_mode_has_flag(client, USER_MODE_SECURE))
     return ERR_SECUREONLYCHAN;
 
-  if (channel_has_mode(channel, MODE_REGONLY) && !user_mode_has_flag(client, UMODE_REGISTERED))
+  if (channel_has_mode(channel, MODE_REGONLY) && !user_mode_has_flag(client, USER_MODE_REGISTERED))
     return ERR_NEEDREGGEDNICK;
 
   if (channel_has_mode(channel, MODE_OPERONLY) && !client_is_oper(client))
@@ -633,7 +633,7 @@ channel_send_qualifies(struct Channel *channel, struct Client *client, struct Ch
     return CHANNEL_SEND_PERM_FORBIDDEN;
   }
 
-  if (channel_has_mode(channel, MODE_MODREG) && !user_mode_has_flag(client, UMODE_REGISTERED))
+  if (channel_has_mode(channel, MODE_MODREG) && !user_mode_has_flag(client, USER_MODE_REGISTERED))
   {
     *error = "you need to identify to a registered nick";
     return CHANNEL_SEND_PERM_FORBIDDEN;
@@ -691,7 +691,7 @@ _channel_check_spambot_warning(struct Client *client, const char *name)
     {
       client->connection->oper_warn_count_down = OPER_SPAM_COUNTDOWN;
 
-      sendto_clients(UMODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_FLOOD, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "User %s (%s@%s) trying to join %s is a possible spambot",
                      client->name, client->username, client->host, name);
     }
@@ -793,7 +793,7 @@ channel_join(struct Client *client, const char *name, const char *key)
     sendto_one_numeric(client, &me, ERR_CHANBANREASON, name, resv->reason);
 
     client_format_name_buffer_t client_name_buffer;
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
+    sendto_clients(USER_MODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved channel %s from user %s",
                    name, client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer));
     return;
   }

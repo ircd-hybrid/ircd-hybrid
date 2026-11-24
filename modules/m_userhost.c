@@ -72,7 +72,7 @@ m_userhost(struct Client *source, size_t parc, char *parv[])
     else
       masklen = snprintf(response, sizeof(response), "%s%s=%c%s@%s",
                          target->name, (client_is_oper(target) &&
-                                        (!user_mode_has_flag(target, UMODE_HIDDEN) ||
+                                        (!user_mode_has_flag(target, USER_MODE_HIDDEN) ||
                                          client_is_oper(source))) ? "*" : "",
                          target->away_message ? '-' : '+',
                          target->username,

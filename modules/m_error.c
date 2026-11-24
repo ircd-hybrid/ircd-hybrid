@@ -21,6 +21,7 @@
 #include "ircd_module.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 /*! \brief ERROR command handler
  *
@@ -49,9 +50,9 @@ mr_error(struct Client *source, size_t parc, char *parv[])
 
   log_write(LOG_TYPE_IRCD, "Received ERROR message from %s: %s",
             client_format_name(source, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
                  client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &public_name_buffer), message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
                  client_format_name(source, CLIENT_FORMAT_NAME_OPER, &oper_name_buffer), message);
 }
 
@@ -78,10 +79,10 @@ ms_error(struct Client *source, size_t parc, char *parv[])
             client_format_name(source, CLIENT_FORMAT_NAME_LOG, &log_name_buffer), message);
 
   if (client_is_local(source))
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s -- %s",
                    client_format_name(source->nexthop, CLIENT_FORMAT_NAME_OPER, &link_name_buffer), message);
   else
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s via %s -- %s",
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "ERROR :from %s via %s -- %s",
                    source->name, client_format_name(source->nexthop, CLIENT_FORMAT_NAME_OPER, &link_name_buffer), message);
 }
 

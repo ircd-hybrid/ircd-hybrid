@@ -89,6 +89,6 @@ accept_message(struct Client *source, struct Client *target)
                                       &target->connection->accept_list, match))
     return true;
 
-  return !user_mode_has_flag(target, UMODE_CALLERID) &&
-         user_mode_has_flag(target, UMODE_SOFTCALLERID) && client_shares_channel(source, target);
+  return !user_mode_has_flag(target, USER_MODE_CALLERID) &&
+         user_mode_has_flag(target, USER_MODE_SOFTCALLERID) && client_shares_channel(source, target);
 }

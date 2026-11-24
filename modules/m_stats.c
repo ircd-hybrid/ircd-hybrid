@@ -483,11 +483,11 @@ stats_operedup(struct Client *client, size_t parc, char *parv[])
   LIST_FOREACH(node, oper_list.head)
   {
     const struct Client *const target = node->data;
-    if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(client))
+    if (user_mode_has_flag(target, USER_MODE_HIDDEN) && !client_is_oper(client))
       continue;
 
     const char *duration = "n/a";
-    if (client_is_oper(client) || !user_mode_has_flag(target, UMODE_HIDEIDLE))
+    if (client_is_oper(client) || !user_mode_has_flag(target, USER_MODE_HIDEIDLE))
       duration = time_format_duration(client_get_idle_duration(target));
 
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "p :[%c] %s (%s@%s) Idle: %s",

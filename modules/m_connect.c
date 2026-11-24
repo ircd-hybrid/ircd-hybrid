@@ -24,6 +24,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server.h"
+#include "user_mode.h"
 
 static void
 _connect_report_request(const struct Client *source, const struct ConnectItem *connect)
@@ -32,7 +33,7 @@ _connect_report_request(const struct Client *source, const struct ConnectItem *c
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
   const char *const request_origin = client_is_local(source) ? "Local" : "Remote";
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
                  "from %s: %s CONNECT %s %u from %s",
                  me.name, request_origin, connect->name, connect->port, source_name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s CONNECT %s %u from %s",

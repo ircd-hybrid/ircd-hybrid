@@ -14,7 +14,7 @@
 static struct UserMode farconnect_mode =
 {
   .mode_char = 'F',
-  .mode_flag = &UMODE_FARCONNECT,
+  .mode_flag = &USER_MODE_FARCONNECT,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
@@ -23,7 +23,7 @@ user_register_hook(void *ctx_)
 {
   ircd_hook_user_register_ctx *ctx = ctx_;
   if (client_has_flag(ctx->client->uplink, FLAGS_EOB))
-    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client connecting at %s: %s (%s@%s) [%s] [%s] <%s>",
                    ctx->client->uplink->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
                    ctx->client->sockhost, ctx->client->info, ctx->client->id);
@@ -36,7 +36,7 @@ client_exit_hook(void *ctx_)
 {
   ircd_hook_client_exit_ctx *ctx = ctx_;
   if (client_is_user(ctx->client) && client_has_flag(ctx->client->uplink, FLAGS_EOB))
-    sendto_clients(UMODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_FARCONNECT, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Client exiting at %s: %s (%s@%s) [%s] [%s]",
                    ctx->client->uplink->name, ctx->client->name, ctx->client->username, ctx->client->realhost,
                    ctx->client->sockhost, ctx->reason);

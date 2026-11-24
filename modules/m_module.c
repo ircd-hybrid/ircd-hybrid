@@ -27,6 +27,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 struct module_command_context
 {
@@ -58,7 +59,7 @@ _module_announce(const struct module_command_context *command, const char *name,
 {
   sendto_one_notice(command->source, &me, ":Module %s %s", name, action);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Module %s %s by %s", name, action, command->source_name);
   log_write(LOG_TYPE_IRCD, "Module %s %s by %s", name, action, command->source_name);
 }
@@ -89,7 +90,7 @@ _module_reload_summary(const struct module_command_context *command, enum module
              code == MODULE_SUCCESS ? "completed" : "aborted", result->reloaded, result->skipped);
 
   sendto_one_notice(command->source, &me, ":%s", message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s (requested by %s)", message, command->source_name);
   log_write(LOG_TYPE_IRCD, "%s (requested by %s)", message, command->source_name);
 }

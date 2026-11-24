@@ -226,33 +226,6 @@ extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
-extern uint64_t UMODE_BOT;
-extern uint64_t UMODE_DEAF;
-extern uint64_t UMODE_FARCONNECT;
-extern uint64_t UMODE_SOFTCALLERID;
-extern uint64_t UMODE_HIDDEN;
-extern uint64_t UMODE_EXPIRATION;
-extern uint64_t UMODE_REGONLY;
-extern uint64_t UMODE_SECURE;
-extern uint64_t UMODE_WEBIRC;
-extern uint64_t UMODE_SECUREONLY;
-extern uint64_t UMODE_ADMIN;
-extern uint64_t UMODE_CCONN;
-extern uint64_t UMODE_EXTERNAL;
-extern uint64_t UMODE_FLOOD;
-extern uint64_t UMODE_CALLERID;
-extern uint64_t UMODE_INVISIBLE;
-extern uint64_t UMODE_REJ;
-extern uint64_t UMODE_SKILL;
-extern uint64_t UMODE_LOCOPS;
-extern uint64_t UMODE_NCHANGE;
-extern uint64_t UMODE_OPER;
-extern uint64_t UMODE_HIDECHANS;
-extern uint64_t UMODE_HIDEIDLE;
-extern uint64_t UMODE_REGISTERED;
-extern uint64_t UMODE_SERVNOTICE;
-extern uint64_t UMODE_SPY;
-
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
 extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
@@ -385,13 +358,13 @@ client_is_local_server(const struct Client *client)
 static inline bool
 client_is_oper(const struct Client *client)
 {
-  return user_mode_has_flag(client, UMODE_OPER);
+  return user_mode_has_flag(client, USER_MODE_OPER);
 }
 
 static inline bool
 client_is_admin(const struct Client *client)
 {
-  return user_mode_has_flag(client, UMODE_ADMIN);
+  return user_mode_has_flag(client, USER_MODE_ADMIN);
 }
 
 static inline bool

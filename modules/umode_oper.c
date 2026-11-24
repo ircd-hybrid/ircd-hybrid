@@ -74,7 +74,7 @@ who_send_hook(void *ctx_)
   ircd_hook_who_send_ctx *ctx = ctx_;
 
   if (client_is_oper(ctx->target))
-    if (client_is_oper(ctx->source) || !user_mode_has_flag(ctx->target, UMODE_HIDDEN))
+    if (client_is_oper(ctx->source) || !user_mode_has_flag(ctx->target, USER_MODE_HIDDEN))
       if (ctx->modes_len < sizeof(ctx->modes) - 1)
         ctx->modes[ctx->modes_len++] = '*';
 
@@ -84,7 +84,7 @@ who_send_hook(void *ctx_)
 static struct UserMode oper_mode =
 {
   .mode_char = 'o',
-  .mode_flag = &UMODE_OPER,
+  .mode_flag = &USER_MODE_OPER,
   .policy = USER_MODE_POLICY_OPER_ONLY,
   .set_callback = set_callback,
   .unset_callback = unset_callback

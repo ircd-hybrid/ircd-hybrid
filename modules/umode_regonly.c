@@ -18,17 +18,17 @@
 static struct UserMode regonly_mode =
 {
   .mode_char = 'R',
-  .mode_flag = &UMODE_REGONLY
+  .mode_flag = &USER_MODE_REGONLY
 };
 
 static hook_flow_t
 msg_client_source_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
-  if (!user_mode_has_flag(ctx->target, UMODE_REGONLY) || ctx->target == ctx->source)
+  if (!user_mode_has_flag(ctx->target, USER_MODE_REGONLY) || ctx->target == ctx->source)
     return HOOK_FLOW_CONTINUE;
 
-  if (user_mode_has_flag(ctx->source, UMODE_REGISTERED | UMODE_OPER))
+  if (user_mode_has_flag(ctx->source, USER_MODE_REGISTERED | USER_MODE_OPER))
     return HOOK_FLOW_CONTINUE;
 
   if (ctx->notice == false)

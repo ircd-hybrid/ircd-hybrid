@@ -59,6 +59,33 @@ struct UserMode
   user_mode_callback_t unset_callback;
 };
 
+extern uint64_t USER_MODE_ADMIN;
+extern uint64_t USER_MODE_BOT;
+extern uint64_t USER_MODE_CALLERID;
+extern uint64_t USER_MODE_CCONN;
+extern uint64_t USER_MODE_DEAF;
+extern uint64_t USER_MODE_EXPIRATION;
+extern uint64_t USER_MODE_EXTERNAL;
+extern uint64_t USER_MODE_FARCONNECT;
+extern uint64_t USER_MODE_FLOOD;
+extern uint64_t USER_MODE_HIDDEN;
+extern uint64_t USER_MODE_HIDECHANS;
+extern uint64_t USER_MODE_HIDEIDLE;
+extern uint64_t USER_MODE_INVISIBLE;
+extern uint64_t USER_MODE_LOCOPS;
+extern uint64_t USER_MODE_NCHANGE;
+extern uint64_t USER_MODE_OPER;
+extern uint64_t USER_MODE_REGISTERED;
+extern uint64_t USER_MODE_REGONLY;
+extern uint64_t USER_MODE_REJ;
+extern uint64_t USER_MODE_SECURE;
+extern uint64_t USER_MODE_SECUREONLY;
+extern uint64_t USER_MODE_SERVNOTICE;
+extern uint64_t USER_MODE_SKILL;
+extern uint64_t USER_MODE_SOFTCALLERID;
+extern uint64_t USER_MODE_SPY;
+extern uint64_t USER_MODE_WEBIRC;
+
 extern void user_mode_send(struct Client *, uint64_t, user_mode_send_t);
 extern void user_mode_send_invalid(void);
 extern bool user_mode_has(const struct Client *, char);

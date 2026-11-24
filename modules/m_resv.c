@@ -33,6 +33,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static uintmax_t
 _resv_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
@@ -49,7 +50,7 @@ _resv_report_added(struct Client *source, const struct conf_resv *resv, uintmax_
 
   if (duration_minutes)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary RESV added by %s for [%s] (%ju min) [%s]",
                    source_name, resv->mask, duration_minutes, resv->reason);
     log_write(LOG_TYPE_RESV,
@@ -58,7 +59,7 @@ _resv_report_added(struct Client *source, const struct conf_resv *resv, uintmax_
     return;
   }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "RESV added by %s for [%s] [%s]",
                  source_name, resv->mask, resv->reason);
   log_write(LOG_TYPE_RESV, "RESV added by %s for [%s] [%s]",

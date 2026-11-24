@@ -33,6 +33,7 @@
 #include "ircd_module.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 static void
 _sjoin_flush_modes(const struct Channel *channel, const char *header, struct ChannelModeBatch *batch)
@@ -97,7 +98,7 @@ ms_sjoin(struct Client *source, size_t parc, char *parv[])
   const char *const channel_name = parv[2];
   if (!channel_is_valid_name(channel_name, false))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
                    source->name, source->nexthop->name, channel_name);
     return;

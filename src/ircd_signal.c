@@ -29,6 +29,7 @@
 #include "ircd_signal.h"
 #include "motd.h"
 #include "send.h"
+#include "user_mode.h"
 
 static sigset_t deferred_signals;
 
@@ -112,7 +113,7 @@ ircd_signal_process(void)
   {
     conf_rehash();
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Got signal SIGHUP, reloading configuration file(s)");
     log_write(LOG_TYPE_IRCD, "Got signal SIGHUP, reloading configuration file(s)");
   }
@@ -121,7 +122,7 @@ ircd_signal_process(void)
   {
     motd_recache();
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Got signal SIGUSR1, reloading motd file(s)");
     log_write(LOG_TYPE_IRCD, "Got signal SIGUSR1, reloading motd file(s)");
   }

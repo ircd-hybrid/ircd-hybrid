@@ -18,14 +18,14 @@
 static struct UserMode secureonly_mode =
 {
   .mode_char = 'Z',
-  .mode_flag = &UMODE_SECUREONLY
+  .mode_flag = &USER_MODE_SECUREONLY
 };
 
 static hook_flow_t
 msg_client_source_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
-  if (user_mode_has_flag(ctx->target, UMODE_SECUREONLY) && !user_mode_has_flag(ctx->source, UMODE_SECURE))
+  if (user_mode_has_flag(ctx->target, USER_MODE_SECUREONLY) && !user_mode_has_flag(ctx->source, USER_MODE_SECURE))
   {
     if (ctx->notice == false)
       sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER,
@@ -33,7 +33,7 @@ msg_client_source_local_hook(void *ctx_)
     return HOOK_FLOW_STOP;
   }
 
-  if (user_mode_has_flag(ctx->source, UMODE_SECUREONLY) && !user_mode_has_flag(ctx->target, UMODE_SECURE))
+  if (user_mode_has_flag(ctx->source, USER_MODE_SECUREONLY) && !user_mode_has_flag(ctx->target, USER_MODE_SECURE))
   {
     if (ctx->notice == false)
       sendto_one_numeric(ctx->source, &me, ERR_CANNOTSENDTOUSER,

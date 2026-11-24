@@ -31,6 +31,7 @@
 #include "send.h"
 #include "server.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 /*! \brief JOIN command handler
  *
@@ -72,7 +73,7 @@ ms_join(struct Client *source, size_t parc, char *parv[])
   const char *const channel_name = parv[2];
   if (!channel_is_valid_name(channel_name, false))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "*** Too long or invalid channel name from %s(via %s): %s",
                    source->name, source->nexthop->name, channel_name);
     return;

@@ -15,6 +15,7 @@
 #include "conf_class.h"
 #include "conf_oper.h"
 #include "send.h"
+#include "user_mode.h"
 
 static list_t operator_items;
 
@@ -85,7 +86,7 @@ oper_assign_class(struct OperItem *oper, const char *class_name)
   {
     oper->klass = class_default;
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Warning: Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",
                    string_or_default(class_name, "<not specified>"), oper->name, oper->klass->name);
     log_write(LOG_TYPE_IRCD, "Class '%s' not found for operator block '%s'. Defaulting to class '%s'.",

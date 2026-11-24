@@ -22,6 +22,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 static const char *
 _squit_get_reason(const struct Client *source, const char *reason)
@@ -41,7 +42,7 @@ _squit_report_local_request(const struct Client *source, const struct Client *ta
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Received SQUIT %s from %s (%.*s)",
                  target->name, source_name, REASONLEN, reason);
   log_write(LOG_TYPE_IRCD, "SQUIT %s from %s (%.*s)",
@@ -54,7 +55,7 @@ _squit_report_remote_request(const struct Client *source, const struct Client *t
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL,
                  "from %s: Remote SQUIT %s from %s (%.*s)",
                  me.name, target->name, source_name, REASONLEN, reason);
   sendto_servers(source, 0, 0, ":%s GLOBOPS :Remote SQUIT %s from %s (%.*s)",

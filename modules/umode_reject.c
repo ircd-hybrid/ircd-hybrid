@@ -12,7 +12,7 @@
 static struct UserMode reject_mode =
 {
   .mode_char = 'j',
-  .mode_flag = &UMODE_REJ,
+  .mode_flag = &USER_MODE_REJ,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

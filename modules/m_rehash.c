@@ -25,6 +25,7 @@
 #include "parse.h"
 #include "resolver.h"
 #include "send.h"
+#include "user_mode.h"
 
 static void
 _rehash_report(struct Client *source, const char *option, const char *action)
@@ -33,7 +34,7 @@ _rehash_report(struct Client *source, const char *option, const char *action)
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
   sendto_one_numeric(source, &me, RPL_REHASHING, option);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s is %s", source_name, action);
   log_write(LOG_TYPE_IRCD, "REHASH %s from %s", option, source_name);
 }

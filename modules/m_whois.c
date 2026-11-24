@@ -68,7 +68,7 @@ typedef enum
 static whois_channel_visibility_t
 _whois_get_channel_visibility(const struct Channel *channel, const struct Client *source, const struct Client *target)
 {
-  if (channel_is_public(channel) && !user_mode_has_flag(target, UMODE_HIDECHANS))
+  if (channel_is_public(channel) && !user_mode_has_flag(target, USER_MODE_HIDECHANS))
     return WHOIS_CHANNEL_VISIBILITY_FULL;
 
   if (source == target || channel_member_find(channel, source))
@@ -78,7 +78,7 @@ _whois_get_channel_visibility(const struct Channel *channel, const struct Client
   {
     if (!channel_is_public(channel))
       return WHOIS_CHANNEL_VISIBILITY_LIMITED;
-    /* user_mode_has_flag(target, UMODE_HIDECHANS) == true */
+    /* user_mode_has_flag(target, USER_MODE_HIDECHANS) == true */
     return WHOIS_CHANNEL_VISIBILITY_HIDDEN;
   }
 
@@ -191,7 +191,7 @@ _whois_send_operator_numeric(struct Client *source, const struct Client *target)
   if (!client_is_oper(target) && !client_is_service(target))
     return;
 
-  if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+  if (user_mode_has_flag(target, USER_MODE_HIDDEN) && !client_is_oper(source))
     return;
 
   if (list_is_empty(&target->svstag_list))
@@ -233,7 +233,7 @@ _whois_send_idle_numeric(struct Client *source, const struct Client *target)
   if (!client_is_local(target))
     return;
 
-  if (user_mode_has_flag(target, UMODE_HIDEIDLE) && !client_is_oper(source) && source != target)
+  if (user_mode_has_flag(target, USER_MODE_HIDEIDLE) && !client_is_oper(source) && source != target)
     return;
 
   sendto_one_numeric(source, &me, RPL_WHOISIDLE,

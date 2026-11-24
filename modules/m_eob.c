@@ -17,6 +17,7 @@
 #include "client.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 /*! \brief EOB command handler
  *
@@ -37,7 +38,7 @@ ms_eob(struct Client *source, size_t parc, char *parv[])
   sendto_servers(source, 0, 0, ":%s EOB", source->id);
 
   if (client_is_local(source))
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "End of burst from %s (%ju seconds)", source->name, client_get_session_duration(source));
 }
 

@@ -45,7 +45,7 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
   client_set_oper_flag(client, oper->oper_privs);
 
   uint64_t mode_flags_old = client->user_mode_flags;
-  uint64_t mode_flags_add = UMODE_OPER | UMODE_ADMIN;
+  uint64_t mode_flags_add = USER_MODE_OPER | USER_MODE_ADMIN;
 
   if (oper->modes)
     mode_flags_add |= user_mode_string_to_flags(oper->modes);
@@ -69,7 +69,7 @@ _oper_commit(struct Client *client, const struct OperItem *oper)
   log_write(LOG_TYPE_OPER, "OPER %s by %s",
             oper->name, client_name);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "%s is now an operator",
                  oper_name);
   sendto_servers(NULL, 0, 0, ":%s GLOBOPS :%s is now an operator",
                  me.id, oper_name);
@@ -89,7 +89,7 @@ _oper_report_failed_attempt(struct Client *client, const char *name, oper_auth_r
   client_format_name_buffer_t client_name_buffer;
   const char *const client_name = client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Failed OPER attempt as [%s] by %s (%s)",
                  name, client_name, reason);
 

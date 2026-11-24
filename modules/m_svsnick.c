@@ -23,6 +23,7 @@
 #include "parse.h"
 #include "send.h"
 #include "user.h"
+#include "user_mode.h"
 
 /*! \brief SVSNICK command handler
  *
@@ -60,7 +61,7 @@ ms_svsnick(struct Client *source, size_t parc, char *parv[])
   {
     if (target->nexthop == source->nexthop)
     {
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Received wrong-direction SVSNICK for %s (behind %s) from %s",
                      target->name, source->nexthop->name, source->name);
       return;

@@ -22,14 +22,14 @@
 static struct UserMode callerid_mode =
 {
   .mode_char = 'g',
-  .mode_flag = &UMODE_CALLERID
+  .mode_flag = &USER_MODE_CALLERID
 };
 
 static hook_flow_t
 msg_client_target_local_hook(void *ctx_)
 {
   ircd_hook_msg_client_ctx *ctx = ctx_;
-  if (!user_mode_has_flag(ctx->target, UMODE_CALLERID))
+  if (!user_mode_has_flag(ctx->target, USER_MODE_CALLERID))
     return HOOK_FLOW_CONTINUE;
 
   if (accept_message(ctx->source, ctx->target))
@@ -57,7 +57,7 @@ static hook_flow_t
 whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
-  if (!user_mode_has_flag(ctx->target, UMODE_CALLERID))
+  if (!user_mode_has_flag(ctx->target, USER_MODE_CALLERID))
     return HOOK_FLOW_CONTINUE;
 
   sendto_one_numeric(ctx->source, &me, RPL_TARGUMODEG,

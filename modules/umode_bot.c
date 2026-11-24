@@ -18,7 +18,7 @@
 static struct UserMode bot_mode =
 {
   .mode_char = 'B',
-  .mode_flag = &UMODE_BOT
+  .mode_flag = &USER_MODE_BOT
 };
 
 static hook_flow_t
@@ -26,7 +26,7 @@ who_send_hook(void *ctx_)
 {
   ircd_hook_who_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_BOT))
+  if (user_mode_has_flag(ctx->target, USER_MODE_BOT))
     if (ctx->modes_len < sizeof(ctx->modes) - 1)
       ctx->modes[ctx->modes_len++] = bot_mode.mode_char;
 
@@ -38,7 +38,7 @@ whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_BOT))
+  if (user_mode_has_flag(ctx->target, USER_MODE_BOT))
     sendto_one_numeric(ctx->source, &me, RPL_WHOISBOT, ctx->target->name);
 
   return HOOK_FLOW_CONTINUE;

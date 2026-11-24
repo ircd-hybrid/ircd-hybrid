@@ -17,7 +17,7 @@
 static struct UserMode registered_mode =
 {
   .mode_char = 'r',
-  .mode_flag = &UMODE_REGISTERED,
+  .mode_flag = &USER_MODE_REGISTERED,
   .policy = USER_MODE_POLICY_SERVICE_ONLY,
 };
 
@@ -44,7 +44,7 @@ who_send_hook(void *ctx_)
 {
   ircd_hook_who_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_REGISTERED))
+  if (user_mode_has_flag(ctx->target, USER_MODE_REGISTERED))
     if (ctx->modes_len < sizeof(ctx->modes) - 1)
       ctx->modes[ctx->modes_len++] = registered_mode.mode_char;
 
@@ -56,7 +56,7 @@ whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_REGISTERED))
+  if (user_mode_has_flag(ctx->target, USER_MODE_REGISTERED))
     sendto_one_numeric(ctx->source, &me, RPL_WHOISREGNICK, ctx->target->name);
 
   if (client_has_account(ctx->target))

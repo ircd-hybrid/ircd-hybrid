@@ -35,6 +35,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static uintmax_t
 _xline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
@@ -67,7 +68,7 @@ _xline_report_added(struct Client *source, const struct conf_gecos *gecos, uintm
 
   if (duration_minutes)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary X-line added by %s for [%s] (%ju min) [%s]",
                    source_name, gecos->mask, duration_minutes, gecos->reason);
     log_write(LOG_TYPE_XLINE,
@@ -76,7 +77,7 @@ _xline_report_added(struct Client *source, const struct conf_gecos *gecos, uintm
     return;
   }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "X-line added by %s for [%s] [%s]",
                  source_name, gecos->mask, gecos->reason);
   log_write(LOG_TYPE_XLINE, "X-line added by %s for [%s] [%s]",

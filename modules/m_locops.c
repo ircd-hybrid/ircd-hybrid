@@ -21,6 +21,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 /*! \brief LOCOPS command handler
  *
@@ -43,7 +44,7 @@ mo_locops(struct Client *source, size_t parc, char *parv[])
   }
 
   const char *const message = parv[1];
-  sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
+  sendto_clients(USER_MODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                  source->name, message);
   cluster_distribute(source, "LOCOPS", 0, CLUSTER_LOCOPS, "%s", message);
 }
@@ -73,7 +74,7 @@ ms_locops(struct Client *source, size_t parc, char *parv[])
     return;
 
   if (shared_find(SHARED_LOCOPS, source->uplink->name, "*", "*"))
-    sendto_clients(UMODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
+    sendto_clients(USER_MODE_LOCOPS, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_LOCOPS, "from %s: %s",
                    source->name, message);
 }
 

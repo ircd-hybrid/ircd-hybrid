@@ -12,7 +12,7 @@
 static struct UserMode skill_mode =
 {
   .mode_char = 'k',
-  .mode_flag = &UMODE_SKILL,
+  .mode_flag = &USER_MODE_SKILL,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

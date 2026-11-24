@@ -37,6 +37,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static uintmax_t
 _kline_expiration_time(uintmax_t created_at, uintmax_t duration_seconds)
@@ -206,7 +207,7 @@ _kline_report_added(struct Client *source, const struct conf_kill *kill,
   {
     const uintmax_t duration_minutes = duration_seconds / 60;
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Temporary K-line added by %s for [%s@%s] (%ju min) [%s]",
                    source_name, kill->user, host, duration_minutes, kill->reason);
     log_write(LOG_TYPE_KLINE,
@@ -215,7 +216,7 @@ _kline_report_added(struct Client *source, const struct conf_kill *kill,
     return;
   }
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "K-line added by %s for [%s@%s] [%s]",
                  source_name, kill->user, host, kill->reason);
   log_write(LOG_TYPE_KLINE, "K-line added by %s for [%s@%s] [%s]",

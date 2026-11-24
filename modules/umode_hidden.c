@@ -12,7 +12,7 @@
 static struct UserMode hidden_mode =
 {
   .mode_char = 'H',
-  .mode_flag = &UMODE_HIDDEN,
+  .mode_flag = &USER_MODE_HIDDEN,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

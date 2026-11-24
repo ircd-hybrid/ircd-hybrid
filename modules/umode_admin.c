@@ -21,7 +21,7 @@ set_callback(struct Client *client, user_mode_source_t source)
 static struct UserMode admin_mode =
 {
   .mode_char = 'a',
-  .mode_flag = &UMODE_ADMIN,
+  .mode_flag = &USER_MODE_ADMIN,
   .policy = USER_MODE_POLICY_OPER_ONLY | USER_MODE_POLICY_MANUAL_ONLY,
   .set_callback = set_callback
 };

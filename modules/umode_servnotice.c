@@ -12,7 +12,7 @@
 static struct UserMode servnotice_mode =
 {
   .mode_char = 's',
-  .mode_flag = &UMODE_SERVNOTICE,
+  .mode_flag = &USER_MODE_SERVNOTICE,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

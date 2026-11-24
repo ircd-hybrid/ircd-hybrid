@@ -18,6 +18,7 @@
 #include "client_find.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 /*! \brief SVSJOIN command handler
  *
@@ -54,7 +55,7 @@ ms_svsjoin(struct Client *source, size_t parc, char *parv[])
 
   if (target->nexthop == source->nexthop)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received wrong-direction SVSJOIN for %s (behind %s) from %s",
                    target->name, source->nexthop->name, source->name);
     return;

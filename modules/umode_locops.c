@@ -12,7 +12,7 @@
 static struct UserMode locops_mode =
 {
   .mode_char = 'l',
-  .mode_flag = &UMODE_LOCOPS,
+  .mode_flag = &USER_MODE_LOCOPS,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

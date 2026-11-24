@@ -12,7 +12,7 @@
 static struct UserMode flood_mode =
 {
   .mode_char = 'f',
-  .mode_flag = &UMODE_FLOOD,
+  .mode_flag = &USER_MODE_FLOOD,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

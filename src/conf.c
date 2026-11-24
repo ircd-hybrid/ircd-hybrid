@@ -55,6 +55,7 @@
 #include "motd.h"
 #include "numeric.h"
 #include "send.h"
+#include "user_mode.h"
 #include "whowas.h"
 
 struct config_channel_entry ConfigChannel;
@@ -75,7 +76,7 @@ conf_report_file_error(const char *operation, const char *path, int error)
 {
   log_write(LOG_TYPE_IRCD, "Unable to %s configuration file: %s (path: '%s')",
             operation, strerror(error), path);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                  "Unable to %s configuration file: %s (path: '%s')",
                  operation, strerror(error), path);
 }
@@ -90,7 +91,7 @@ _conf_kill_expire_notice(const struct conf_kill *kill, void *unused)
   if (!formatted)
     return;
 
-  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Temporary K-line for [%s@%s] expired", kill->user, host);
 }
 
@@ -104,21 +105,21 @@ _conf_deny_expire_notice(const struct conf_deny *deny, void *unused)
   if (!formatted)
     return;
 
-  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Temporary D-line for [%s] expired", prefix);
 }
 
 static void
 _conf_gecos_expire_notice(const struct conf_gecos *gecos, void *unused)
 {
-  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Temporary X-line for [%s] expired", gecos->mask);
 }
 
 static void
 _conf_resv_expire_notice(const struct conf_resv *resv, void *unused)
 {
-  sendto_clients(UMODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_EXPIRATION, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Temporary RESV for [%s] expired", resv->mask);
 }
 
@@ -291,7 +292,7 @@ _conf_read(FILE *file)
       char message[IRCD_BUFSIZE];
       ircd_module_format_error("configuration replacement", &error, message, sizeof(message));
 
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", message);
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE, "%s", message);
     }
   }
 
@@ -489,7 +490,7 @@ conf_read_files(bool cold)
       exit(EXIT_FAILURE);
     }
 
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Error reloading TLS settings, check the ircd log");
   }
 
@@ -507,7 +508,7 @@ _conf_report_diagnostic(const char *severity, const char *message)
   const char *const line = stripws(conf_line_text);
   log_write(LOG_TYPE_IRCD, "\"%s\", line %u: %s: %s: %s",
             conf_file_name, conf_line_number, severity, message, line);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                  "\"%s\", line %u: %s: %s: %s",
                  conf_file_name, conf_line_number, severity, message, line);
 }
@@ -565,7 +566,7 @@ _conf_ban_report_active(struct Client *client, enum conf_ban_type type, const ch
   const char *const client_name =
     client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s active for %s (%s)",
                  _conf_ban_type_get_name(type), client_name, reason);
 }
@@ -577,7 +578,7 @@ _conf_ban_report_exempted(struct Client *client, enum conf_ban_type type, const 
   const char *const client_name =
     client_format_name(client, CLIENT_FORMAT_NAME_PUBLIC, &client_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "%s exempted for %s (%s)",
                  _conf_ban_type_get_name(type), client_name, exemption);
 }

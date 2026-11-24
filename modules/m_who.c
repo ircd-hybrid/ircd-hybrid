@@ -233,7 +233,7 @@ _who_matches_oper_selection(const struct Client *source, const struct Client *ta
   if (!client_is_oper(target))
     return false;
 
-  if (user_mode_has_flag(target, UMODE_HIDDEN) && !client_is_oper(source))
+  if (user_mode_has_flag(target, USER_MODE_HIDDEN) && !client_is_oper(source))
     return false;
 
   return true;
@@ -314,7 +314,7 @@ _who_on_common_channel(struct Client *source, struct Channel *channel,
     struct ChannelMember *const member = node->data;
     struct Client *const target = member->client;
 
-    if (!user_mode_has_flag(target, UMODE_INVISIBLE) || client_has_flag(target, FLAGS_MARK))
+    if (!user_mode_has_flag(target, USER_MODE_INVISIBLE) || client_has_flag(target, FLAGS_MARK))
       continue;
 
     client_set_flag(target, FLAGS_MARK);
@@ -366,7 +366,7 @@ _who_global(struct Client *source, const char *mask, struct WhoQuery *who)
     struct Client *const target = node->data;
     assert(client_is_user(target));
 
-    if (user_mode_has_flag(target, UMODE_INVISIBLE))
+    if (user_mode_has_flag(target, USER_MODE_INVISIBLE))
     {
       client_unset_flag(target, FLAGS_MARK);
       continue;
@@ -404,7 +404,7 @@ _who_on_channel(struct Client *source, struct Channel *channel, const struct Who
     struct ChannelMember *const member = node->data;
     struct Client *const target = member->client;
 
-    if (is_member || !user_mode_has_flag(target, UMODE_INVISIBLE))
+    if (is_member || !user_mode_has_flag(target, USER_MODE_INVISIBLE))
     {
       if (!_who_matches_oper_selection(source, target, who))
         continue;

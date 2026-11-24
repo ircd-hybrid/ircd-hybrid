@@ -15,7 +15,7 @@
 static struct UserMode webirc_mode =
 {
   .mode_char = 'W',
-  .mode_flag = &UMODE_WEBIRC,
+  .mode_flag = &USER_MODE_WEBIRC,
   .policy = USER_MODE_POLICY_INTERNAL_ONLY,
 };
 
@@ -24,7 +24,7 @@ whois_send_hook(void *ctx_)
 {
   ircd_hook_whois_send_ctx *ctx = ctx_;
 
-  if (user_mode_has_flag(ctx->target, UMODE_WEBIRC))
+  if (user_mode_has_flag(ctx->target, USER_MODE_WEBIRC))
     sendto_one_numeric(ctx->source, &me, RPL_WHOISTEXT,
                        ctx->target->name, "User connected using a webirc gateway");
 

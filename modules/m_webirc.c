@@ -115,7 +115,7 @@ mr_webirc(struct Client *source, size_t parc, char *parv[])
     return;
   }
 
-  user_mode_set_flag(source, UMODE_WEBIRC);
+  user_mode_set_flag(source, USER_MODE_WEBIRC);
   sendto_one_notice(source, &me, ":WebIRC host/IP set to %s %s", host, addr);
 }
 

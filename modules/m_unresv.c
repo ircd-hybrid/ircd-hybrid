@@ -28,6 +28,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static void
 _unresv_report_removed(struct Client *source, const struct conf_resv *resv)
@@ -35,7 +36,7 @@ _unresv_report_removed(struct Client *source, const struct conf_resv *resv)
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "RESV removed by %s for [%s]",
                  source_name, resv->mask);
   log_write(LOG_TYPE_RESV, "RESV removed by %s for [%s]",

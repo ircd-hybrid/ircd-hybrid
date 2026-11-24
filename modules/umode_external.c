@@ -12,7 +12,7 @@
 static struct UserMode external_mode =
 {
   .mode_char = 'e',
-  .mode_flag = &UMODE_EXTERNAL,
+  .mode_flag = &USER_MODE_EXTERNAL,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

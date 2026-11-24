@@ -28,6 +28,7 @@
 #include "parse.h"
 #include "send.h"
 #include "server_capab.h"
+#include "user_mode.h"
 
 static void
 _unkline_report_removed(struct Client *source, const struct conf_kill *kill, const char *host)
@@ -39,7 +40,7 @@ _unkline_report_removed(struct Client *source, const struct conf_kill *kill, con
   client_format_oper_name_buffer_t source_name_buffer;
   const char *const source_name = client_format_oper_name(source, &source_name_buffer);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "K-line removed by %s for [%s@%s]",
                  source_name, kill->user, host);
   log_write(LOG_TYPE_KLINE, "K-line removed by %s for [%s@%s]",

@@ -15,7 +15,7 @@
 static struct UserMode deaf_mode =
 {
   .mode_char = 'D',
-  .mode_flag = &UMODE_DEAF
+  .mode_flag = &USER_MODE_DEAF
 };
 
 static bool

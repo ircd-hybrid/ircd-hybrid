@@ -15,6 +15,7 @@
 #include "client_format.h"
 #include "send.h"
 #include "parse.h"
+#include "user_mode.h"
 
 /*! \brief GET/POST/PUT command handler
  *
@@ -33,7 +34,7 @@ mr_dumb_proxy(struct Client *source, size_t parc, char *parv[])
   const char *const source_name =
     client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer);
 
-  sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "HTTP request rejected from %s", source_name);
   client_exit(source, "HTTP request on IRC port");
 }

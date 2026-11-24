@@ -25,6 +25,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 static const struct Client *
 _kill_source_for_target(const struct Client *source, const struct Client *target)
@@ -100,7 +101,7 @@ mo_kill(struct Client *source, size_t parc, char *parv[])
    * Do not change the format of this message. There's no point in changing messages
    * that have been around for ever, for no reason..
    */
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Received KILL message for %s!%s@%s[%s]. From %s Path: %s (%.*s)",
                  target->name, target->username, target->host,
                  target->uplink->name, source->name, me.name, REASONLEN, reason);
@@ -177,13 +178,13 @@ ms_kill(struct Client *source, size_t parc, char *parv[])
    * local --fl
    */
   if (client_is_user(source))  /* Send it normally */
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s Path: %s!%s!%s!%s %s",
                    target->name, target->username, target->host,
                    target->uplink->name, source->name,
                    source->uplink->name, source->host, source->username, source->name, reason);
   else
-    sendto_clients(UMODE_SKILL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SKILL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Received KILL message for %s!%s@%s[%s]. From %s %s",
                    target->name, target->username, target->host,
                    target->uplink->name, source->name, reason);

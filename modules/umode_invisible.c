@@ -17,7 +17,7 @@
 static bool
 set_callback(struct Client *client, user_mode_source_t source)
 {
-  if (!user_mode_has_flag(client, UMODE_INVISIBLE))
+  if (!user_mode_has_flag(client, USER_MODE_INVISIBLE))
     ++Count.invisi;
   return true;
 }
@@ -25,7 +25,7 @@ set_callback(struct Client *client, user_mode_source_t source)
 static bool
 unset_callback(struct Client *client, user_mode_source_t source)
 {
-  if (user_mode_has_flag(client, UMODE_INVISIBLE))
+  if (user_mode_has_flag(client, USER_MODE_INVISIBLE))
     --Count.invisi;
   return true;
 }
@@ -33,7 +33,7 @@ unset_callback(struct Client *client, user_mode_source_t source)
 static struct UserMode invisible_mode =
 {
   .mode_char = 'i',
-  .mode_flag = &UMODE_INVISIBLE,
+  .mode_flag = &USER_MODE_INVISIBLE,
   .set_callback = set_callback,
   .unset_callback = unset_callback
 };

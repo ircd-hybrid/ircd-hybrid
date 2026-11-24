@@ -24,6 +24,7 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 enum SetOptionType
 {
@@ -173,12 +174,12 @@ _set_option_report_change(const struct Client *source, const struct SetOption *o
   switch (option->type)
   {
     case SET_OPTION_BOOL:
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "%s has changed %s to %s",
                      source_name, option->name, *option->value ? "true" : "false");
       return;
     case SET_OPTION_UINT:
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "%s has changed %s to %u",
                      source_name, option->name, *option->value);
       return;

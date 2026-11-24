@@ -12,7 +12,7 @@
 static struct UserMode hidechans_mode =
 {
   .mode_char = 'p',
-  .mode_flag = &UMODE_HIDECHANS
+  .mode_flag = &USER_MODE_HIDECHANS
 };
 
 static bool

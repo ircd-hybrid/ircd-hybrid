@@ -16,12 +16,13 @@
 #include "numeric.h"
 #include "parse.h"
 #include "send.h"
+#include "user_mode.h"
 
 static void
 _globops_send(struct Client *source, const char *message)
 {
   sendto_servers(source, 0, 0, ":%s GLOBOPS :%s", source->id, message);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_GLOBAL, "from %s: %s",
                  source->name, message);
 }
 

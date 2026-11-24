@@ -19,6 +19,33 @@
 
 #define USER_MODE_CAPACITY 52
 
+uint64_t USER_MODE_ADMIN;
+uint64_t USER_MODE_BOT;
+uint64_t USER_MODE_CALLERID;
+uint64_t USER_MODE_CCONN;
+uint64_t USER_MODE_DEAF;
+uint64_t USER_MODE_EXPIRATION;
+uint64_t USER_MODE_EXTERNAL;
+uint64_t USER_MODE_FARCONNECT;
+uint64_t USER_MODE_FLOOD;
+uint64_t USER_MODE_HIDDEN;
+uint64_t USER_MODE_HIDECHANS;
+uint64_t USER_MODE_HIDEIDLE;
+uint64_t USER_MODE_INVISIBLE;
+uint64_t USER_MODE_LOCOPS;
+uint64_t USER_MODE_NCHANGE;
+uint64_t USER_MODE_OPER;
+uint64_t USER_MODE_REGISTERED;
+uint64_t USER_MODE_REGONLY;
+uint64_t USER_MODE_REJ;
+uint64_t USER_MODE_SECURE;
+uint64_t USER_MODE_SECUREONLY;
+uint64_t USER_MODE_SERVNOTICE;
+uint64_t USER_MODE_SKILL;
+uint64_t USER_MODE_SOFTCALLERID;
+uint64_t USER_MODE_SPY;
+uint64_t USER_MODE_WEBIRC;
+
 static struct UserMode *user_mode_table[USER_MODE_CAPACITY];
 static char user_mode_string[USER_MODE_CAPACITY + 1];
 
@@ -197,7 +224,7 @@ _user_mode_check_policy(const struct UserMode *mode, const struct Client *client
 
   if (action == USER_MODE_ACTION_ADD)
     if ((mode->policy & USER_MODE_POLICY_OPER_ONLY) && source != USER_MODE_SOURCE_SVSMODE)
-      if (client_is_local(client) && !user_mode_has_flag(client, UMODE_OPER))
+      if (client_is_local(client) && !user_mode_has_flag(client, USER_MODE_OPER))
         return false;
 
   if ((mode->policy & USER_MODE_POLICY_SERVICE_ONLY) && source != USER_MODE_SOURCE_SVSMODE)

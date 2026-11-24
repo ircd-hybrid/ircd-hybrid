@@ -52,7 +52,7 @@ check_clean_nick(struct Client *source, const char *nick)
   if (nickname_is_valid(nick, false))
     return true;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Bad/long Nick: %s From: %s(via %s)",
                  nick, client_is_server(source) ? source->name : source->uplink->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Nickname)",
              me.id, nick, me.name);
@@ -77,7 +77,7 @@ check_clean_uid(struct Client *source, const char *nick, const char *uid)
   if (client_id_is_valid_uid(uid) && strncmp(uid, source->id, CLIENT_ID_SID_LENGTH) == 0)
     return true;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad UID: %s Nickname: %s From: %s(via %s)",
                  uid, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad UID)",
@@ -94,7 +94,7 @@ check_clean_user(struct Client *source, const char *nick, const char *user)
   if (username_is_valid(user, false))
     return true;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Username: %s Nickname: %s From: %s(via %s)",
                  user, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Username)",
@@ -111,7 +111,7 @@ check_clean_host(struct Client *source, const char *nick, const char *host)
   if (hostname_is_valid(host))
     return true;
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "Bad/Long Hostname: %s Nickname: %s From: %s(via %s)",
                  host, nick, source->name, source->nexthop->name);
   sendto_one(source, ":%s KILL %s :%s (Bad Hostname)",
@@ -251,7 +251,7 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   /* If their TS's are the same, kill both */
   if (nick_timestamp == target->nick_timestamp)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(both killed)",
                    target->name, target->nexthop->name, source->nexthop->name);
 
@@ -283,11 +283,11 @@ perform_uid_introduction_collides(struct Client *source, struct Client *target,
   }
 
   if (sameuser)
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
                    target->name, target->nexthop->name, source->nexthop->name);
   else
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
                    target->name, target->nexthop->name, source->nexthop->name);
 
@@ -323,7 +323,7 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
 
   if (nick_timestamp == target->nick_timestamp)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick change collision from %s to %s(%s <- %s)(both killed)",
                    source->name, target->name, target->nexthop->name,
                    source->nexthop->name);
@@ -347,12 +347,12 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
   if ((sameuser && nick_timestamp < target->nick_timestamp) || (sameuser == false && nick_timestamp > target->nick_timestamp))
   {
     if (sameuser)
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(older killed)",
                      source->name, target->name, target->nexthop->name,
                      source->nexthop->name);
     else
-      sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+      sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                      "Nick change collision from %s to %s(%s <- %s)(newer killed)",
                      source->name, target->name, target->nexthop->name,
                      source->nexthop->name);
@@ -370,11 +370,11 @@ perform_nick_change_collides(struct Client *source, struct Client *target, uintm
   }
 
   if (sameuser)
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(older killed)",
                    target->name, target->nexthop->name, source->nexthop->name);
   else
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Nick collision on %s(%s <- %s)(newer killed)",
                    target->name, target->nexthop->name, source->nexthop->name);
 
@@ -426,7 +426,7 @@ mr_nick(struct Client *source, size_t parc, char *parv[])
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
 
     client_format_name_buffer_t source_name_buffer;
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
+    sendto_clients(USER_MODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
                    nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
     return;
   }
@@ -506,7 +506,7 @@ m_nick(struct Client *source, size_t parc, char *parv[])
     sendto_one_numeric(source, &me, ERR_ERRONEUSNICKNAME, nick, resv->reason);
 
     client_format_name_buffer_t source_name_buffer;
-    sendto_clients(UMODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
+    sendto_clients(USER_MODE_REJ, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Forbidding reserved nick %s from user %s",
                    nick, client_format_name(source, CLIENT_FORMAT_NAME_PUBLIC, &source_name_buffer));
     return;
   }
@@ -626,7 +626,7 @@ ms_uid(struct Client *source, size_t parc, char *parv[])
 
   if (hopcount_status != IO_PARSE_OK || nick_timestamp_status != IO_PARSE_OK)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "Malformed UID introduction for %s (%s) from %s(via %s): hopcount='%s', timestamp='%s'",
                    parv[1], parv[9], source->name, source->nexthop->name,
                    parv[2], parv[3]);
@@ -644,7 +644,7 @@ ms_uid(struct Client *source, size_t parc, char *parv[])
   struct Client *target = client_find_entity_by_id(parv[9]);
   if (target)
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "ID collision for UID %s on %s (%s <- %s) (both killed)",
                    target->id, target->name, target->nexthop->name, source->nexthop->name);
 

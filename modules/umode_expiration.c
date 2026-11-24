@@ -12,7 +12,7 @@
 static struct UserMode expiration_mode =
 {
   .mode_char = 'X',
-  .mode_flag = &UMODE_EXPIRATION,
+  .mode_flag = &USER_MODE_EXPIRATION,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 

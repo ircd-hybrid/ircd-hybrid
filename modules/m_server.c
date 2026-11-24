@@ -96,10 +96,10 @@ _server_reject_internal(const server_rejection_context_t *ctx, const char *detai
   log_write(LOG_TYPE_IRCD, "%s from %s: %s (%s)",
             ctx->event_text, ctx->log_event_source, ctx->reason_text, detail);
 
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                  "%s from %s: %s (%s)",
                  ctx->event_text, ctx->admin_event_source, ctx->reason_text, detail);
-  sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                  "%s from %s: %s (%s)",
                  ctx->event_text, ctx->oper_event_source, ctx->reason_text, detail);
 
@@ -333,10 +333,10 @@ _server_establish_report_link(struct Client *client)
 
   if (tls_session_is_active(&client->connection->fde->tls))
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
                    admin_client_name, client->tls_cipher, capabilities);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",
                    oper_client_name, client->tls_cipher, capabilities);
 
@@ -345,10 +345,10 @@ _server_establish_report_link(struct Client *client)
   }
   else
   {
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
                    admin_client_name, capabilities);
-    sendto_clients(UMODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_OPER, SEND_TYPE_NOTICE,
                    "Link with %s established: (Capabilities: %s)",
                    oper_client_name, capabilities);
 
@@ -731,7 +731,7 @@ ms_sid(struct Client *source, size_t parc, char *parv[])
 
   sendto_servers(source->nexthop, 0, 0, ":%s SID %s %u %s +%s :%s",
                  source->id, target->name, target->hopcount + 1, target->id, client_is_hidden(target) ? "h" : "", target->info);
-  sendto_clients(UMODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",
+  sendto_clients(USER_MODE_EXTERNAL, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE, "Server %s being introduced by %s",
                  target->name, source->name);
 }
 

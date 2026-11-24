@@ -14,7 +14,7 @@
 static struct UserMode spy_mode =
 {
   .mode_char = 'y',
-  .mode_flag = &UMODE_SPY,
+  .mode_flag = &USER_MODE_SPY,
   .policy = USER_MODE_POLICY_OPER_ONLY,
 };
 
@@ -23,13 +23,13 @@ _spy_send_request_notice(const struct Client *source, const char *command, char 
 {
   if (selector == '\0')
   {
-    sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+    sendto_clients(USER_MODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                    "SPY: %s requested by %s (%s@%s) [%s]",
                    command, source->name, source->username, source->host, source->uplink->name);
     return;
   }
 
-  sendto_clients(UMODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
+  sendto_clients(USER_MODE_SPY, SEND_RECIPIENT_OPER_ALL, SEND_TYPE_NOTICE,
                  "SPY: %s %c requested by %s (%s@%s) [%s]",
                  command, selector, source->name, source->username, source->host, source->uplink->name);
 }
@@ -65,7 +65,7 @@ _spy_whois_send_hook(void *ctx_)
   if (ctx->source == ctx->target)
     return HOOK_FLOW_CONTINUE;
 
-  if (!user_mode_has_flag(ctx->target, UMODE_SPY))
+  if (!user_mode_has_flag(ctx->target, USER_MODE_SPY))
     return HOOK_FLOW_CONTINUE;
 
   _spy_send_whois_notice(ctx->source, ctx->target);

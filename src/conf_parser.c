@@ -139,7 +139,6 @@ static struct
     whois,
     modes,
     klass,
-    target,
     prepend,
     command;
 
@@ -271,7 +270,7 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 }
 
 
-#line 275 "conf_parser.c"
+#line 274 "conf_parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -310,7 +309,7 @@ extern int yydebug;
 
 #include <stdbool.h>
 
-#line 314 "conf_parser.c"
+#line 313 "conf_parser.c"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -746,13 +745,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 220 "conf_parser.y"
+#line 219 "conf_parser.y"
 
   bool boolean;
   unsigned int number;
   char *string;
 
-#line 756 "conf_parser.c"
+#line 755 "conf_parser.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -1673,65 +1672,65 @@ static const yytype_uint8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   431,   431,   432,   435,   436,   437,   438,   439,   440,
-     441,   442,   443,   444,   445,   446,   447,   448,   449,   450,
-     451,   452,   453,   454,   455,   456,   457,   458,   459,   460,
-     464,   473,   475,   475,   484,   491,   503,   504,   505,   506,
-     507,   510,   519,   521,   521,   530,   537,   549,   550,   551,
-     552,   553,   554,   555,   558,   573,   588,   600,   606,   608,
-     613,   616,   621,   624,   633,   635,   635,   636,   637,   638,
-     639,   640,   641,   642,   643,   644,   645,   646,   647,   650,
-     659,   668,   682,   696,   706,   720,   729,   752,   775,   784,
-     794,   796,   796,   797,   798,   799,   800,   802,   811,   820,
-     834,   833,   851,   851,   852,   852,   852,   854,   860,   871,
-     870,   905,   905,   906,   906,   906,   906,   906,   908,   914,
-     920,   926,   949,   950,   950,   952,   952,   953,   955,   965,
-     965,   978,   979,   981,   981,   982,   982,   984,   992,   995,
-    1001,  1000,  1006,  1010,  1014,  1018,  1022,  1026,  1030,  1034,
-    1045,  1044,  1106,  1106,  1107,  1108,  1109,  1110,  1111,  1112,
-    1113,  1114,  1115,  1116,  1117,  1119,  1125,  1131,  1137,  1143,
-    1154,  1160,  1171,  1177,  1184,  1183,  1189,  1189,  1190,  1194,
-    1198,  1202,  1206,  1210,  1214,  1218,  1222,  1226,  1230,  1234,
-    1238,  1242,  1246,  1250,  1254,  1258,  1262,  1266,  1270,  1274,
-    1278,  1282,  1286,  1290,  1294,  1298,  1302,  1313,  1312,  1355,
-    1355,  1356,  1357,  1358,  1359,  1360,  1361,  1362,  1363,  1364,
-    1365,  1366,  1367,  1369,  1375,  1381,  1387,  1393,  1399,  1405,
-    1411,  1418,  1424,  1430,  1440,  1439,  1446,  1445,  1450,  1450,
-    1451,  1455,  1459,  1463,  1467,  1473,  1473,  1474,  1474,  1474,
-    1474,  1474,  1476,  1476,  1478,  1478,  1480,  1484,  1490,  1496,
-    1507,  1506,  1562,  1562,  1563,  1564,  1565,  1566,  1567,  1568,
-    1569,  1571,  1577,  1583,  1589,  1601,  1600,  1606,  1606,  1608,
-    1612,  1616,  1620,  1624,  1628,  1632,  1636,  1640,  1646,  1661,
-    1660,  1683,  1683,  1684,  1684,  1684,  1684,  1686,  1692,  1698,
-    1708,  1710,  1710,  1711,  1711,  1713,  1730,  1729,  1752,  1752,
-    1753,  1753,  1753,  1753,  1755,  1761,  1781,  1780,  1786,  1786,
-    1787,  1791,  1795,  1799,  1803,  1807,  1811,  1815,  1819,  1823,
-    1827,  1838,  1837,  1856,  1856,  1857,  1857,  1857,  1859,  1866,
-    1865,  1871,  1871,  1872,  1876,  1880,  1884,  1888,  1892,  1896,
-    1900,  1904,  1908,  1919,  1918,  1974,  1974,  1975,  1976,  1977,
-    1978,  1979,  1980,  1981,  1982,  1983,  1984,  1985,  1986,  1987,
-    1988,  1989,  1990,  1992,  1998,  2004,  2010,  2016,  2022,  2035,
-    2048,  2054,  2060,  2064,  2071,  2070,  2075,  2075,  2076,  2080,
-    2086,  2097,  2103,  2109,  2120,  2119,  2144,  2144,  2145,  2145,
-    2145,  2147,  2167,  2178,  2177,  2200,  2200,  2201,  2201,  2201,
-    2203,  2209,  2219,  2221,  2221,  2222,  2222,  2224,  2238,  2237,
-    2256,  2256,  2257,  2257,  2257,  2259,  2265,  2275,  2277,  2277,
-    2278,  2279,  2280,  2281,  2282,  2283,  2284,  2285,  2286,  2287,
-    2288,  2289,  2290,  2291,  2292,  2293,  2294,  2295,  2296,  2297,
-    2298,  2299,  2300,  2301,  2302,  2303,  2304,  2305,  2306,  2307,
-    2308,  2309,  2310,  2311,  2312,  2313,  2314,  2315,  2316,  2317,
-    2318,  2321,  2326,  2331,  2336,  2341,  2346,  2351,  2356,  2361,
-    2366,  2371,  2376,  2381,  2389,  2394,  2399,  2404,  2409,  2414,
-    2419,  2424,  2429,  2434,  2439,  2444,  2449,  2454,  2459,  2464,
-    2469,  2474,  2479,  2484,  2493,  2498,  2503,  2508,  2513,  2521,
-    2526,  2550,  2552,  2552,  2553,  2554,  2555,  2556,  2557,  2558,
-    2559,  2561,  2573,  2582,  2591,  2600,  2610,  2624,  2626,  2626,
-    2627,  2628,  2629,  2630,  2631,  2632,  2633,  2634,  2635,  2636,
-    2637,  2638,  2639,  2640,  2641,  2642,  2643,  2645,  2650,  2655,
-    2660,  2665,  2670,  2675,  2680,  2685,  2690,  2695,  2700,  2705,
-    2723,  2731,  2736,  2745,  2747,  2747,  2748,  2749,  2750,  2751,
-    2752,  2753,  2754,  2755,  2756,  2758,  2764,  2775,  2784,  2790,
-    2796,  2802,  2811
+       0,   430,   430,   431,   434,   435,   436,   437,   438,   439,
+     440,   441,   442,   443,   444,   445,   446,   447,   448,   449,
+     450,   451,   452,   453,   454,   455,   456,   457,   458,   459,
+     463,   472,   474,   474,   483,   490,   502,   503,   504,   505,
+     506,   509,   518,   520,   520,   529,   536,   548,   549,   550,
+     551,   552,   553,   554,   557,   572,   587,   599,   605,   607,
+     612,   615,   620,   623,   632,   634,   634,   635,   636,   637,
+     638,   639,   640,   641,   642,   643,   644,   645,   646,   649,
+     658,   667,   681,   695,   705,   719,   728,   751,   774,   783,
+     793,   795,   795,   796,   797,   798,   799,   801,   810,   819,
+     833,   832,   850,   850,   851,   851,   851,   853,   859,   870,
+     869,   904,   904,   905,   905,   905,   905,   905,   907,   913,
+     919,   925,   948,   949,   949,   951,   951,   952,   954,   964,
+     964,   977,   978,   980,   980,   981,   981,   983,   991,   994,
+    1000,   999,  1005,  1009,  1013,  1017,  1021,  1025,  1029,  1033,
+    1044,  1043,  1105,  1105,  1106,  1107,  1108,  1109,  1110,  1111,
+    1112,  1113,  1114,  1115,  1116,  1118,  1124,  1130,  1136,  1142,
+    1153,  1159,  1170,  1176,  1183,  1182,  1188,  1188,  1189,  1193,
+    1197,  1201,  1205,  1209,  1213,  1217,  1221,  1225,  1229,  1233,
+    1237,  1241,  1245,  1249,  1253,  1257,  1261,  1265,  1269,  1273,
+    1277,  1281,  1285,  1289,  1293,  1297,  1301,  1312,  1311,  1354,
+    1354,  1355,  1356,  1357,  1358,  1359,  1360,  1361,  1362,  1363,
+    1364,  1365,  1366,  1368,  1374,  1380,  1386,  1392,  1398,  1404,
+    1410,  1417,  1423,  1429,  1439,  1438,  1445,  1444,  1449,  1449,
+    1450,  1454,  1458,  1462,  1466,  1472,  1472,  1473,  1473,  1473,
+    1473,  1473,  1475,  1475,  1477,  1477,  1479,  1483,  1489,  1495,
+    1506,  1505,  1561,  1561,  1562,  1563,  1564,  1565,  1566,  1567,
+    1568,  1570,  1576,  1582,  1588,  1600,  1599,  1605,  1605,  1607,
+    1611,  1615,  1619,  1623,  1627,  1631,  1635,  1639,  1645,  1660,
+    1659,  1682,  1682,  1683,  1683,  1683,  1683,  1685,  1691,  1697,
+    1707,  1709,  1709,  1710,  1710,  1712,  1729,  1728,  1751,  1751,
+    1752,  1752,  1752,  1752,  1754,  1760,  1780,  1779,  1785,  1785,
+    1786,  1790,  1794,  1798,  1802,  1806,  1810,  1814,  1818,  1822,
+    1826,  1837,  1836,  1855,  1855,  1856,  1856,  1856,  1858,  1865,
+    1864,  1870,  1870,  1871,  1875,  1879,  1883,  1887,  1891,  1895,
+    1899,  1903,  1907,  1918,  1917,  1973,  1973,  1974,  1975,  1976,
+    1977,  1978,  1979,  1980,  1981,  1982,  1983,  1984,  1985,  1986,
+    1987,  1988,  1989,  1991,  1997,  2003,  2009,  2015,  2021,  2034,
+    2047,  2053,  2059,  2063,  2070,  2069,  2074,  2074,  2075,  2079,
+    2085,  2096,  2102,  2108,  2119,  2118,  2143,  2143,  2144,  2144,
+    2144,  2146,  2166,  2177,  2176,  2199,  2199,  2200,  2200,  2200,
+    2202,  2208,  2218,  2220,  2220,  2221,  2221,  2223,  2237,  2236,
+    2255,  2255,  2256,  2256,  2256,  2258,  2264,  2274,  2276,  2276,
+    2277,  2278,  2279,  2280,  2281,  2282,  2283,  2284,  2285,  2286,
+    2287,  2288,  2289,  2290,  2291,  2292,  2293,  2294,  2295,  2296,
+    2297,  2298,  2299,  2300,  2301,  2302,  2303,  2304,  2305,  2306,
+    2307,  2308,  2309,  2310,  2311,  2312,  2313,  2314,  2315,  2316,
+    2317,  2320,  2325,  2330,  2335,  2340,  2345,  2350,  2355,  2360,
+    2365,  2370,  2375,  2380,  2388,  2393,  2398,  2403,  2408,  2413,
+    2418,  2423,  2428,  2433,  2438,  2443,  2448,  2453,  2458,  2463,
+    2468,  2473,  2478,  2483,  2492,  2497,  2502,  2507,  2512,  2520,
+    2525,  2549,  2551,  2551,  2552,  2553,  2554,  2555,  2556,  2557,
+    2558,  2560,  2572,  2581,  2590,  2599,  2609,  2623,  2625,  2625,
+    2626,  2627,  2628,  2629,  2630,  2631,  2632,  2633,  2634,  2635,
+    2636,  2637,  2638,  2639,  2640,  2641,  2642,  2644,  2649,  2654,
+    2659,  2664,  2669,  2674,  2679,  2684,  2689,  2694,  2699,  2704,
+    2722,  2730,  2735,  2744,  2746,  2746,  2747,  2748,  2749,  2750,
+    2751,  2752,  2753,  2754,  2755,  2757,  2763,  2774,  2783,  2789,
+    2795,  2801,  2810
 };
 #endif
 
@@ -3186,15 +3185,15 @@ yydestruct (const char *yymsg,
   switch (yykind)
     {
     case YYSYMBOL_DECIMAL: /* DECIMAL  */
-#line 428 "conf_parser.y"
+#line 427 "conf_parser.y"
             { io_free(((*yyvaluep).string)); }
-#line 3192 "conf_parser.c"
+#line 3191 "conf_parser.c"
         break;
 
     case YYSYMBOL_module_string: /* module_string  */
-#line 428 "conf_parser.y"
+#line 427 "conf_parser.y"
             { io_free(((*yyvaluep).string)); }
-#line 3198 "conf_parser.c"
+#line 3197 "conf_parser.c"
         break;
 
       default:
@@ -3465,7 +3464,7 @@ yyreduce:
   switch (yyn)
     {
   case 30: /* timespec: NUMBER  */
-#line 465 "conf_parser.y"
+#line 464 "conf_parser.y"
 {
   if ((yyvsp[0].number) != 0)
   {
@@ -3475,11 +3474,11 @@ yyreduce:
 
   (yyval.number) = 0;
 }
-#line 3479 "conf_parser.c"
+#line 3478 "conf_parser.c"
     break;
 
   case 33: /* time_components: time_components time_component  */
-#line 476 "conf_parser.y"
+#line 475 "conf_parser.y"
 {
   if (!_conf_parser_quantity_add((yyvsp[-1].number), (yyvsp[0].number), 1U, &(yyval.number)))
   {
@@ -3487,11 +3486,11 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3491 "conf_parser.c"
+#line 3490 "conf_parser.c"
     break;
 
   case 34: /* time_component: NUMBER time_unit  */
-#line 485 "conf_parser.y"
+#line 484 "conf_parser.y"
 {
   if (!_conf_parser_quantity_add(0, (yyvsp[-1].number), (yyvsp[0].number), &(yyval.number)))
   {
@@ -3499,11 +3498,11 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3503 "conf_parser.c"
+#line 3502 "conf_parser.c"
     break;
 
   case 35: /* time_component: DECIMAL time_unit  */
-#line 492 "conf_parser.y"
+#line 491 "conf_parser.y"
 {
   const enum conf_quantity_status status = _conf_parser_quantity_from_decimal((yyvsp[-1].string), (yyvsp[0].number), &(yyval.number));
   io_free((yyvsp[-1].string));
@@ -3514,41 +3513,41 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3518 "conf_parser.c"
+#line 3517 "conf_parser.c"
     break;
 
   case 36: /* time_unit: SECONDS  */
-#line 503 "conf_parser.y"
+#line 502 "conf_parser.y"
                    { (yyval.number) = 1U; }
-#line 3524 "conf_parser.c"
+#line 3523 "conf_parser.c"
     break;
 
   case 37: /* time_unit: MINUTES  */
-#line 504 "conf_parser.y"
+#line 503 "conf_parser.y"
                    { (yyval.number) = 60U; }
-#line 3530 "conf_parser.c"
+#line 3529 "conf_parser.c"
     break;
 
   case 38: /* time_unit: HOURS  */
-#line 505 "conf_parser.y"
+#line 504 "conf_parser.y"
                    { (yyval.number) = 60U * 60U; }
-#line 3536 "conf_parser.c"
+#line 3535 "conf_parser.c"
     break;
 
   case 39: /* time_unit: DAYS  */
-#line 506 "conf_parser.y"
+#line 505 "conf_parser.y"
                    { (yyval.number) = 60U * 60U * 24U; }
-#line 3542 "conf_parser.c"
+#line 3541 "conf_parser.c"
     break;
 
   case 40: /* time_unit: WEEKS  */
-#line 507 "conf_parser.y"
+#line 506 "conf_parser.y"
                    { (yyval.number) = 60U * 60U * 24U * 7U; }
-#line 3548 "conf_parser.c"
+#line 3547 "conf_parser.c"
     break;
 
   case 41: /* sizespec: NUMBER  */
-#line 511 "conf_parser.y"
+#line 510 "conf_parser.y"
 {
   if ((yyvsp[0].number) != 0)
   {
@@ -3558,11 +3557,11 @@ yyreduce:
 
   (yyval.number) = 0;
 }
-#line 3562 "conf_parser.c"
+#line 3561 "conf_parser.c"
     break;
 
   case 44: /* size_components: size_components size_component  */
-#line 522 "conf_parser.y"
+#line 521 "conf_parser.y"
 {
   if (!_conf_parser_quantity_add((yyvsp[-1].number), (yyvsp[0].number), 1U, &(yyval.number)))
   {
@@ -3570,11 +3569,11 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3574 "conf_parser.c"
+#line 3573 "conf_parser.c"
     break;
 
   case 45: /* size_component: NUMBER size_unit  */
-#line 531 "conf_parser.y"
+#line 530 "conf_parser.y"
 {
   if (!_conf_parser_quantity_add(0, (yyvsp[-1].number), (yyvsp[0].number), &(yyval.number)))
   {
@@ -3582,11 +3581,11 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3586 "conf_parser.c"
+#line 3585 "conf_parser.c"
     break;
 
   case 46: /* size_component: DECIMAL size_unit  */
-#line 538 "conf_parser.y"
+#line 537 "conf_parser.y"
 {
   const enum conf_quantity_status status = _conf_parser_quantity_from_decimal((yyvsp[-1].string), (yyvsp[0].number), &(yyval.number));
   io_free((yyvsp[-1].string));
@@ -3597,53 +3596,53 @@ yyreduce:
     YYERROR;
   }
 }
-#line 3601 "conf_parser.c"
+#line 3600 "conf_parser.c"
     break;
 
   case 47: /* size_unit: BYTES  */
-#line 549 "conf_parser.y"
+#line 548 "conf_parser.y"
                    { (yyval.number) = 1U; }
-#line 3607 "conf_parser.c"
+#line 3606 "conf_parser.c"
     break;
 
   case 48: /* size_unit: KBYTES  */
-#line 550 "conf_parser.y"
+#line 549 "conf_parser.y"
                    { (yyval.number) = 1000U; }
-#line 3613 "conf_parser.c"
+#line 3612 "conf_parser.c"
     break;
 
   case 49: /* size_unit: KIBYTES  */
-#line 551 "conf_parser.y"
+#line 550 "conf_parser.y"
                    { (yyval.number) = 1024U; }
-#line 3619 "conf_parser.c"
+#line 3618 "conf_parser.c"
     break;
 
   case 50: /* size_unit: MBYTES  */
-#line 552 "conf_parser.y"
+#line 551 "conf_parser.y"
                    { (yyval.number) = 1000U * 1000U; }
-#line 3625 "conf_parser.c"
+#line 3624 "conf_parser.c"
     break;
 
   case 51: /* size_unit: MIBYTES  */
-#line 553 "conf_parser.y"
+#line 552 "conf_parser.y"
                    { (yyval.number) = 1024U * 1024U; }
-#line 3631 "conf_parser.c"
+#line 3630 "conf_parser.c"
     break;
 
   case 52: /* size_unit: GBYTES  */
-#line 554 "conf_parser.y"
+#line 553 "conf_parser.y"
                    { (yyval.number) = 1000U * 1000U * 1000U; }
-#line 3637 "conf_parser.c"
+#line 3636 "conf_parser.c"
     break;
 
   case 53: /* size_unit: GIBYTES  */
-#line 555 "conf_parser.y"
+#line 554 "conf_parser.y"
                    { (yyval.number) = 1024U * 1024U * 1024U; }
-#line 3643 "conf_parser.c"
+#line 3642 "conf_parser.c"
     break;
 
   case 54: /* port_number: NUMBER  */
-#line 559 "conf_parser.y"
+#line 558 "conf_parser.y"
 {
   if ((yyvsp[0].number) > UINT16_MAX)
   {
@@ -3653,11 +3652,11 @@ yyreduce:
 
   (yyval.number) = (yyvsp[0].number);
 }
-#line 3657 "conf_parser.c"
+#line 3656 "conf_parser.c"
     break;
 
   case 55: /* module_base_path_entry: MODULE_BASE_PATH '=' module_string ';'  */
-#line 574 "conf_parser.y"
+#line 573 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3667,11 +3666,11 @@ yyreduce:
   }
   io_free((yyvsp[-1].string));
 }
-#line 3671 "conf_parser.c"
+#line 3670 "conf_parser.c"
     break;
 
   case 56: /* loadmodule_entry: LOADMODULE module_string module_attributes ';'  */
-#line 589 "conf_parser.y"
+#line 588 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3681,67 +3680,67 @@ yyreduce:
   }
   io_free((yyvsp[-2].string));
 }
-#line 3685 "conf_parser.c"
+#line 3684 "conf_parser.c"
     break;
 
   case 57: /* module_string: QSTRING  */
-#line 601 "conf_parser.y"
+#line 600 "conf_parser.y"
 {
   (yyval.string) = io_strdup((yyvsp[0].string));
 }
-#line 3693 "conf_parser.c"
+#line 3692 "conf_parser.c"
     break;
 
   case 58: /* module_attributes: %empty  */
-#line 606 "conf_parser.y"
+#line 605 "conf_parser.y"
 {
   (yyval.number) = 0;
 }
-#line 3701 "conf_parser.c"
+#line 3700 "conf_parser.c"
     break;
 
   case 59: /* module_attributes: ':' module_attributes_items  */
-#line 609 "conf_parser.y"
+#line 608 "conf_parser.y"
 {
   (yyval.number) = (yyvsp[0].number);
 }
-#line 3709 "conf_parser.c"
+#line 3708 "conf_parser.c"
     break;
 
   case 60: /* module_attributes_items: module_attributes_items ',' module_attributes_item  */
-#line 614 "conf_parser.y"
+#line 613 "conf_parser.y"
 {
   (yyval.number) = (yyvsp[-2].number) | (yyvsp[0].number);
 }
-#line 3717 "conf_parser.c"
+#line 3716 "conf_parser.c"
     break;
 
   case 61: /* module_attributes_items: module_attributes_item  */
-#line 617 "conf_parser.y"
+#line 616 "conf_parser.y"
 {
   (yyval.number) = (yyvsp[0].number);
 }
-#line 3725 "conf_parser.c"
+#line 3724 "conf_parser.c"
     break;
 
   case 62: /* module_attributes_item: RESIDENT  */
-#line 622 "conf_parser.y"
+#line 621 "conf_parser.y"
 {
   (yyval.number) = MODULE_FLAG_NO_DEACTIVATE;
 }
-#line 3733 "conf_parser.c"
+#line 3732 "conf_parser.c"
     break;
 
   case 63: /* module_attributes_item: REQUIRED  */
-#line 625 "conf_parser.y"
+#line 624 "conf_parser.y"
 {
   (yyval.number) = MODULE_FLAG_NO_REMOVE;
 }
-#line 3741 "conf_parser.c"
+#line 3740 "conf_parser.c"
     break;
 
   case 79: /* serverinfo_tls_certificate_file: TLS_CERTIFICATE_FILE '=' QSTRING ';'  */
-#line 651 "conf_parser.y"
+#line 650 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3749,11 +3748,11 @@ yyreduce:
     ConfigServerInfo.tls_certificate_file = io_strdup(yylval.string);
   }
 }
-#line 3753 "conf_parser.c"
+#line 3752 "conf_parser.c"
     break;
 
   case 80: /* serverinfo_tls_private_key_file: TLS_PRIVATE_KEY_FILE '=' QSTRING ';'  */
-#line 660 "conf_parser.y"
+#line 659 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3761,11 +3760,11 @@ yyreduce:
     ConfigServerInfo.tls_private_key_file = io_strdup(yylval.string);
   }
 }
-#line 3765 "conf_parser.c"
+#line 3764 "conf_parser.c"
     break;
 
   case 81: /* serverinfo_name: NAME '=' QSTRING ';'  */
-#line 669 "conf_parser.y"
+#line 668 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2 || ConfigServerInfo.name)
     break;
@@ -3778,11 +3777,11 @@ yyreduce:
 
   ConfigServerInfo.name = io_strdup((yyvsp[-1].string));
 }
-#line 3782 "conf_parser.c"
+#line 3781 "conf_parser.c"
     break;
 
   case 82: /* serverinfo_sid: IRCD_SID '=' QSTRING ';'  */
-#line 683 "conf_parser.y"
+#line 682 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2 || ConfigServerInfo.sid)
     break;
@@ -3795,11 +3794,11 @@ yyreduce:
 
   ConfigServerInfo.sid = io_strdup((yyvsp[-1].string));
 }
-#line 3799 "conf_parser.c"
+#line 3798 "conf_parser.c"
     break;
 
   case 83: /* serverinfo_description: DESCRIPTION '=' QSTRING ';'  */
-#line 697 "conf_parser.y"
+#line 696 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3808,11 +3807,11 @@ yyreduce:
     strlcpy(me.info, ConfigServerInfo.description, sizeof(me.info));
   }
 }
-#line 3812 "conf_parser.c"
+#line 3811 "conf_parser.c"
     break;
 
   case 84: /* serverinfo_network_name: NETWORK_NAME '=' QSTRING ';'  */
-#line 707 "conf_parser.y"
+#line 706 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3825,11 +3824,11 @@ yyreduce:
     ConfigServerInfo.network_name = io_strdup(yylval.string);
   }
 }
-#line 3829 "conf_parser.c"
+#line 3828 "conf_parser.c"
     break;
 
   case 85: /* serverinfo_network_description: NETWORK_DESCRIPTION '=' QSTRING ';'  */
-#line 721 "conf_parser.y"
+#line 720 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3837,11 +3836,11 @@ yyreduce:
   io_free(ConfigServerInfo.network_description);
   ConfigServerInfo.network_description = io_strdup(yylval.string);
 }
-#line 3841 "conf_parser.c"
+#line 3840 "conf_parser.c"
     break;
 
   case 86: /* serverinfo_default_max_clients: DEFAULT_MAX_CLIENTS '=' NUMBER ';'  */
-#line 730 "conf_parser.y"
+#line 729 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3863,11 +3862,11 @@ yyreduce:
   else
     ConfigServerInfo.default_max_clients = (yyvsp[-1].number);
 }
-#line 3867 "conf_parser.c"
+#line 3866 "conf_parser.c"
     break;
 
   case 87: /* serverinfo_max_nick_length: MAX_NICK_LENGTH '=' NUMBER ';'  */
-#line 753 "conf_parser.y"
+#line 752 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3889,11 +3888,11 @@ yyreduce:
   else
     ConfigServerInfo.max_nick_length = (yyvsp[-1].number);
 }
-#line 3893 "conf_parser.c"
+#line 3892 "conf_parser.c"
     break;
 
   case 88: /* serverinfo_motd_file: MOTD_FILE '=' QSTRING ';'  */
-#line 776 "conf_parser.y"
+#line 775 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -3901,20 +3900,20 @@ yyreduce:
     ConfigServerInfo.motd_file = io_strdup(yylval.string);
   }
 }
-#line 3905 "conf_parser.c"
+#line 3904 "conf_parser.c"
     break;
 
   case 89: /* serverinfo_hub: HUB '=' TBOOL ';'  */
-#line 785 "conf_parser.y"
+#line 784 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerInfo.hub = (yyvsp[-1].boolean);
 }
-#line 3914 "conf_parser.c"
+#line 3913 "conf_parser.c"
     break;
 
   case 97: /* admin_name: NAME '=' QSTRING ';'  */
-#line 803 "conf_parser.y"
+#line 802 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3922,11 +3921,11 @@ yyreduce:
   io_free(ConfigAdminInfo.name);
   ConfigAdminInfo.name = io_strdup(yylval.string);
 }
-#line 3926 "conf_parser.c"
+#line 3925 "conf_parser.c"
     break;
 
   case 98: /* admin_email: EMAIL '=' QSTRING ';'  */
-#line 812 "conf_parser.y"
+#line 811 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3934,11 +3933,11 @@ yyreduce:
   io_free(ConfigAdminInfo.email);
   ConfigAdminInfo.email = io_strdup(yylval.string);
 }
-#line 3938 "conf_parser.c"
+#line 3937 "conf_parser.c"
     break;
 
   case 99: /* admin_description: DESCRIPTION '=' QSTRING ';'  */
-#line 821 "conf_parser.y"
+#line 820 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -3946,20 +3945,20 @@ yyreduce:
   io_free(ConfigAdminInfo.description);
   ConfigAdminInfo.description = io_strdup(yylval.string);
 }
-#line 3950 "conf_parser.c"
+#line 3949 "conf_parser.c"
     break;
 
   case 100: /* $@1: %empty  */
-#line 834 "conf_parser.y"
+#line 833 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 3959 "conf_parser.c"
+#line 3958 "conf_parser.c"
     break;
 
   case 101: /* motd_entry: MOTD $@1 '{' motd_items '}' ';'  */
-#line 838 "conf_parser.y"
+#line 837 "conf_parser.y"
 {
   list_node_t *node;
 
@@ -3972,38 +3971,38 @@ yyreduce:
   LIST_FOREACH(node, block_state.mask.list.head)
     motd_add(node->data, block_state.file.buf);
 }
-#line 3976 "conf_parser.c"
+#line 3975 "conf_parser.c"
     break;
 
   case 107: /* motd_mask: MASK '=' QSTRING ';'  */
-#line 855 "conf_parser.y"
+#line 854 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
-#line 3985 "conf_parser.c"
+#line 3984 "conf_parser.c"
     break;
 
   case 108: /* motd_file: T_FILE '=' QSTRING ';'  */
-#line 861 "conf_parser.y"
+#line 860 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 }
-#line 3994 "conf_parser.c"
+#line 3993 "conf_parser.c"
     break;
 
   case 109: /* $@2: %empty  */
-#line 871 "conf_parser.y"
+#line 870 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4003 "conf_parser.c"
+#line 4002 "conf_parser.c"
     break;
 
   case 110: /* pseudo_entry: T_PSEUDO $@2 '{' pseudo_items '}' ';'  */
-#line 875 "conf_parser.y"
+#line 874 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4033,38 +4032,38 @@ yyreduce:
       break;
   }
 }
-#line 4037 "conf_parser.c"
+#line 4036 "conf_parser.c"
     break;
 
   case 118: /* pseudo_command: T_COMMAND '=' QSTRING ';'  */
-#line 909 "conf_parser.y"
+#line 908 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.command.buf, yylval.string, sizeof(block_state.command.buf));
 }
-#line 4046 "conf_parser.c"
+#line 4045 "conf_parser.c"
     break;
 
   case 119: /* pseudo_name: NAME '=' QSTRING ';'  */
-#line 915 "conf_parser.y"
+#line 914 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 4055 "conf_parser.c"
+#line 4054 "conf_parser.c"
     break;
 
   case 120: /* pseudo_prepend: T_PREPEND '=' QSTRING ';'  */
-#line 921 "conf_parser.y"
+#line 920 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.prepend.buf, yylval.string, sizeof(block_state.prepend.buf));
 }
-#line 4064 "conf_parser.c"
+#line 4063 "conf_parser.c"
     break;
 
   case 121: /* pseudo_target: T_TARGET '=' QSTRING ';'  */
-#line 927 "conf_parser.y"
+#line 926 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4082,11 +4081,11 @@ yyreduce:
     nuh_split(&nuh);
   }
 }
-#line 4086 "conf_parser.c"
+#line 4085 "conf_parser.c"
     break;
 
   case 128: /* logging_use_logging: USE_LOGGING '=' TBOOL ';'  */
-#line 956 "conf_parser.y"
+#line 955 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -4094,20 +4093,20 @@ yyreduce:
     log_set_enabled(ConfigLog.use_logging);
   }
 }
-#line 4098 "conf_parser.c"
+#line 4097 "conf_parser.c"
     break;
 
   case 129: /* $@3: %empty  */
-#line 965 "conf_parser.y"
+#line 964 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4107 "conf_parser.c"
+#line 4106 "conf_parser.c"
     break;
 
   case 130: /* logging_file_entry: $@3 T_FILE '{' logging_file_items '}' ';'  */
-#line 969 "conf_parser.y"
+#line 968 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4116,119 +4115,119 @@ yyreduce:
     log_add(block_state.type.value, false, block_state.size.value,
             block_state.file.buf);
 }
-#line 4120 "conf_parser.c"
+#line 4119 "conf_parser.c"
     break;
 
   case 137: /* logging_file_name: NAME '=' QSTRING ';'  */
-#line 985 "conf_parser.y"
+#line 984 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
 
   strlcpy(block_state.file.buf, yylval.string, sizeof(block_state.file.buf));
 }
-#line 4131 "conf_parser.c"
+#line 4130 "conf_parser.c"
     break;
 
   case 138: /* logging_file_size: T_SIZE '=' sizespec ';'  */
-#line 993 "conf_parser.y"
+#line 992 "conf_parser.y"
 {
   block_state.size.value = (yyvsp[-1].number);
 }
-#line 4139 "conf_parser.c"
+#line 4138 "conf_parser.c"
     break;
 
   case 139: /* logging_file_size: T_SIZE '=' T_UNLIMITED ';'  */
-#line 996 "conf_parser.y"
+#line 995 "conf_parser.y"
 {
   block_state.size.value = 0;
 }
-#line 4147 "conf_parser.c"
+#line 4146 "conf_parser.c"
     break;
 
   case 140: /* $@4: %empty  */
-#line 1001 "conf_parser.y"
+#line 1000 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = 0;
 }
-#line 4156 "conf_parser.c"
+#line 4155 "conf_parser.c"
     break;
 
   case 142: /* logging_file_type_item: USER  */
-#line 1007 "conf_parser.y"
+#line 1006 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_USER;
 }
-#line 4165 "conf_parser.c"
+#line 4164 "conf_parser.c"
     break;
 
   case 143: /* logging_file_type_item: OPERATOR  */
-#line 1011 "conf_parser.y"
+#line 1010 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_OPER;
 }
-#line 4174 "conf_parser.c"
+#line 4173 "conf_parser.c"
     break;
 
   case 144: /* logging_file_type_item: XLINE  */
-#line 1015 "conf_parser.y"
+#line 1014 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_XLINE;
 }
-#line 4183 "conf_parser.c"
+#line 4182 "conf_parser.c"
     break;
 
   case 145: /* logging_file_type_item: RESV  */
-#line 1019 "conf_parser.y"
+#line 1018 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_RESV;
 }
-#line 4192 "conf_parser.c"
+#line 4191 "conf_parser.c"
     break;
 
   case 146: /* logging_file_type_item: T_DLINE  */
-#line 1023 "conf_parser.y"
+#line 1022 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_DLINE;
 }
-#line 4201 "conf_parser.c"
+#line 4200 "conf_parser.c"
     break;
 
   case 147: /* logging_file_type_item: KLINE  */
-#line 1027 "conf_parser.y"
+#line 1026 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_KLINE;
 }
-#line 4210 "conf_parser.c"
+#line 4209 "conf_parser.c"
     break;
 
   case 148: /* logging_file_type_item: KILL  */
-#line 1031 "conf_parser.y"
+#line 1030 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_KILL;
 }
-#line 4219 "conf_parser.c"
+#line 4218 "conf_parser.c"
     break;
 
   case 149: /* logging_file_type_item: T_DEBUG  */
-#line 1035 "conf_parser.y"
+#line 1034 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.type.value = LOG_TYPE_DEBUG;
 }
-#line 4228 "conf_parser.c"
+#line 4227 "conf_parser.c"
     break;
 
   case 150: /* $@5: %empty  */
-#line 1045 "conf_parser.y"
+#line 1044 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4236,11 +4235,11 @@ yyreduce:
   reset_block_state();
   block_state.flags.value |= OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 }
-#line 4240 "conf_parser.c"
+#line 4239 "conf_parser.c"
     break;
 
   case 151: /* oper_entry: OPERATOR $@5 '{' oper_items '}' ';'  */
-#line 1052 "conf_parser.y"
+#line 1051 "conf_parser.y"
 {
   list_node_t *node;
 
@@ -4294,47 +4293,47 @@ yyreduce:
     oper_assign_class(oper, block_state.klass.buf);
   }
 }
-#line 4298 "conf_parser.c"
+#line 4297 "conf_parser.c"
     break;
 
   case 165: /* oper_name: NAME '=' QSTRING ';'  */
-#line 1120 "conf_parser.y"
+#line 1119 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 4307 "conf_parser.c"
+#line 4306 "conf_parser.c"
     break;
 
   case 166: /* oper_user: USER '=' QSTRING ';'  */
-#line 1126 "conf_parser.y"
+#line 1125 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
-#line 4316 "conf_parser.c"
+#line 4315 "conf_parser.c"
     break;
 
   case 167: /* oper_password: PASSWORD '=' QSTRING ';'  */
-#line 1132 "conf_parser.y"
+#line 1131 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 4325 "conf_parser.c"
+#line 4324 "conf_parser.c"
     break;
 
   case 168: /* oper_whois: WHOIS '=' QSTRING ';'  */
-#line 1138 "conf_parser.y"
+#line 1137 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.whois.buf, yylval.string, sizeof(block_state.whois.buf));
 }
-#line 4334 "conf_parser.c"
+#line 4333 "conf_parser.c"
     break;
 
   case 169: /* oper_encrypted: ENCRYPTED '=' TBOOL ';'  */
-#line 1144 "conf_parser.y"
+#line 1143 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4344,20 +4343,20 @@ yyreduce:
   else
     block_state.flags.value &= ~OPER_CONF_FLAG_ENCRYPTED_PASSWORD;
 }
-#line 4348 "conf_parser.c"
+#line 4347 "conf_parser.c"
     break;
 
   case 170: /* oper_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'  */
-#line 1155 "conf_parser.y"
+#line 1154 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 }
-#line 4357 "conf_parser.c"
+#line 4356 "conf_parser.c"
     break;
 
   case 171: /* oper_tls_connection_required: TLS_CONNECTION_REQUIRED '=' TBOOL ';'  */
-#line 1161 "conf_parser.y"
+#line 1160 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -4367,299 +4366,299 @@ yyreduce:
   else
     block_state.flags.value &= ~OPER_CONF_FLAG_REQUIRE_TLS;
 }
-#line 4371 "conf_parser.c"
+#line 4370 "conf_parser.c"
     break;
 
   case 172: /* oper_class: CLASS '=' QSTRING ';'  */
-#line 1172 "conf_parser.y"
+#line 1171 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 }
-#line 4380 "conf_parser.c"
+#line 4379 "conf_parser.c"
     break;
 
   case 173: /* oper_umodes: T_UMODES '=' QSTRING ';'  */
-#line 1178 "conf_parser.y"
+#line 1177 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.modes.buf, yylval.string, sizeof(block_state.modes.buf));
 }
-#line 4389 "conf_parser.c"
+#line 4388 "conf_parser.c"
     break;
 
   case 174: /* $@6: %empty  */
-#line 1184 "conf_parser.y"
+#line 1183 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = 0;
 }
-#line 4398 "conf_parser.c"
+#line 4397 "conf_parser.c"
     break;
 
   case 178: /* oper_flags_item: KILL ':' REMOTE  */
-#line 1191 "conf_parser.y"
+#line 1190 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KILL_REMOTE;
 }
-#line 4407 "conf_parser.c"
+#line 4406 "conf_parser.c"
     break;
 
   case 179: /* oper_flags_item: KILL  */
-#line 1195 "conf_parser.y"
+#line 1194 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KILL;
 }
-#line 4416 "conf_parser.c"
+#line 4415 "conf_parser.c"
     break;
 
   case 180: /* oper_flags_item: CONNECT ':' REMOTE  */
-#line 1199 "conf_parser.y"
+#line 1198 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CONNECT_REMOTE;
 }
-#line 4425 "conf_parser.c"
+#line 4424 "conf_parser.c"
     break;
 
   case 181: /* oper_flags_item: CONNECT  */
-#line 1203 "conf_parser.y"
+#line 1202 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CONNECT;
 }
-#line 4434 "conf_parser.c"
+#line 4433 "conf_parser.c"
     break;
 
   case 182: /* oper_flags_item: SQUIT ':' REMOTE  */
-#line 1207 "conf_parser.y"
+#line 1206 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SQUIT_REMOTE;
 }
-#line 4443 "conf_parser.c"
+#line 4442 "conf_parser.c"
     break;
 
   case 183: /* oper_flags_item: SQUIT  */
-#line 1211 "conf_parser.y"
+#line 1210 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SQUIT;
 }
-#line 4452 "conf_parser.c"
+#line 4451 "conf_parser.c"
     break;
 
   case 184: /* oper_flags_item: KLINE  */
-#line 1215 "conf_parser.y"
+#line 1214 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_KLINE;
 }
-#line 4461 "conf_parser.c"
+#line 4460 "conf_parser.c"
     break;
 
   case 185: /* oper_flags_item: UNKLINE  */
-#line 1219 "conf_parser.y"
+#line 1218 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNKLINE;
 }
-#line 4470 "conf_parser.c"
+#line 4469 "conf_parser.c"
     break;
 
   case 186: /* oper_flags_item: T_DLINE  */
-#line 1223 "conf_parser.y"
+#line 1222 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_DLINE;
 }
-#line 4479 "conf_parser.c"
+#line 4478 "conf_parser.c"
     break;
 
   case 187: /* oper_flags_item: T_UNDLINE  */
-#line 1227 "conf_parser.y"
+#line 1226 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNDLINE;
 }
-#line 4488 "conf_parser.c"
+#line 4487 "conf_parser.c"
     break;
 
   case 188: /* oper_flags_item: XLINE  */
-#line 1231 "conf_parser.y"
+#line 1230 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_XLINE;
 }
-#line 4497 "conf_parser.c"
+#line 4496 "conf_parser.c"
     break;
 
   case 189: /* oper_flags_item: T_UNXLINE  */
-#line 1235 "conf_parser.y"
+#line 1234 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNXLINE;
 }
-#line 4506 "conf_parser.c"
+#line 4505 "conf_parser.c"
     break;
 
   case 190: /* oper_flags_item: DIE  */
-#line 1239 "conf_parser.y"
+#line 1238 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_DIE;
 }
-#line 4515 "conf_parser.c"
+#line 4514 "conf_parser.c"
     break;
 
   case 191: /* oper_flags_item: T_RESTART  */
-#line 1243 "conf_parser.y"
+#line 1242 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_RESTART;
 }
-#line 4524 "conf_parser.c"
+#line 4523 "conf_parser.c"
     break;
 
   case 192: /* oper_flags_item: REHASH ':' REMOTE  */
-#line 1247 "conf_parser.y"
+#line 1246 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REHASH_REMOTE;
 }
-#line 4533 "conf_parser.c"
+#line 4532 "conf_parser.c"
     break;
 
   case 193: /* oper_flags_item: REHASH  */
-#line 1251 "conf_parser.y"
+#line 1250 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REHASH;
 }
-#line 4542 "conf_parser.c"
+#line 4541 "conf_parser.c"
     break;
 
   case 194: /* oper_flags_item: ADMIN  */
-#line 1255 "conf_parser.y"
+#line 1254 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_ADMIN;
 }
-#line 4551 "conf_parser.c"
+#line 4550 "conf_parser.c"
     break;
 
   case 195: /* oper_flags_item: T_GLOBOPS  */
-#line 1259 "conf_parser.y"
+#line 1258 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_GLOBOPS;
 }
-#line 4560 "conf_parser.c"
+#line 4559 "conf_parser.c"
     break;
 
   case 196: /* oper_flags_item: T_LOCOPS  */
-#line 1263 "conf_parser.y"
+#line 1262 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_LOCOPS;
 }
-#line 4569 "conf_parser.c"
+#line 4568 "conf_parser.c"
     break;
 
   case 197: /* oper_flags_item: REMOTEBAN  */
-#line 1267 "conf_parser.y"
+#line 1266 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_REMOTEBAN;
 }
-#line 4578 "conf_parser.c"
+#line 4577 "conf_parser.c"
     break;
 
   case 198: /* oper_flags_item: T_SET  */
-#line 1271 "conf_parser.y"
+#line 1270 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_SET;
 }
-#line 4587 "conf_parser.c"
+#line 4586 "conf_parser.c"
     break;
 
   case 199: /* oper_flags_item: MODULE  */
-#line 1275 "conf_parser.y"
+#line 1274 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MODULE;
 }
-#line 4596 "conf_parser.c"
+#line 4595 "conf_parser.c"
     break;
 
   case 200: /* oper_flags_item: NICK ':' RESV  */
-#line 1279 "conf_parser.y"
+#line 1278 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_NICK_RESV;
 }
-#line 4605 "conf_parser.c"
+#line 4604 "conf_parser.c"
     break;
 
   case 201: /* oper_flags_item: JOIN ':' RESV  */
-#line 1283 "conf_parser.y"
+#line 1282 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_JOIN_RESV;
 }
-#line 4614 "conf_parser.c"
+#line 4613 "conf_parser.c"
     break;
 
   case 202: /* oper_flags_item: RESV  */
-#line 1287 "conf_parser.y"
+#line 1286 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_RESV;
 }
-#line 4623 "conf_parser.c"
+#line 4622 "conf_parser.c"
     break;
 
   case 203: /* oper_flags_item: T_UNRESV  */
-#line 1291 "conf_parser.y"
+#line 1290 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_UNRESV;
 }
-#line 4632 "conf_parser.c"
+#line 4631 "conf_parser.c"
     break;
 
   case 204: /* oper_flags_item: CLOSE  */
-#line 1295 "conf_parser.y"
+#line 1294 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_CLOSE;
 }
-#line 4641 "conf_parser.c"
+#line 4640 "conf_parser.c"
     break;
 
   case 205: /* oper_flags_item: MESSAGE ':' MASS  */
-#line 1299 "conf_parser.y"
+#line 1298 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_MESSAGE_MASS;
 }
-#line 4650 "conf_parser.c"
+#line 4649 "conf_parser.c"
     break;
 
   case 206: /* oper_flags_item: BYPASS ':' INPUT_FLOOD  */
-#line 1303 "conf_parser.y"
+#line 1302 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value |= OPER_FLAG_BYPASS_INPUT_FLOOD;
 }
-#line 4659 "conf_parser.c"
+#line 4658 "conf_parser.c"
     break;
 
   case 207: /* $@7: %empty  */
-#line 1313 "conf_parser.y"
+#line 1312 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4670,11 +4669,11 @@ yyreduce:
   block_state.max_sendq.value = CLASS_DEFAULT_MAX_SENDQ;
   block_state.max_recvq.value = CLASS_DEFAULT_MAX_RECVQ;
 }
-#line 4674 "conf_parser.c"
+#line 4673 "conf_parser.c"
     break;
 
   case 208: /* class_entry: CLASS $@7 '{' class_items '}' ';'  */
-#line 1323 "conf_parser.y"
+#line 1322 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 1)
     break;
@@ -4706,224 +4705,224 @@ yyreduce:
   if (diff)
     class_ip_limit_rebuild(klass);
 }
-#line 4710 "conf_parser.c"
+#line 4709 "conf_parser.c"
     break;
 
   case 223: /* class_name: NAME '=' QSTRING ';'  */
-#line 1370 "conf_parser.y"
+#line 1369 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 }
-#line 4719 "conf_parser.c"
+#line 4718 "conf_parser.c"
     break;
 
   case 224: /* class_ping_time: PING_TIME '=' timespec ';'  */
-#line 1376 "conf_parser.y"
+#line 1375 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.ping_freq.value = (yyvsp[-1].number);
 }
-#line 4728 "conf_parser.c"
+#line 4727 "conf_parser.c"
     break;
 
   case 225: /* class_number_per_ip_local: NUMBER_PER_IP_LOCAL '=' NUMBER ';'  */
-#line 1382 "conf_parser.y"
+#line 1381 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_perip_local.value = (yyvsp[-1].number);
 }
-#line 4737 "conf_parser.c"
+#line 4736 "conf_parser.c"
     break;
 
   case 226: /* class_number_per_ip_global: NUMBER_PER_IP_GLOBAL '=' NUMBER ';'  */
-#line 1388 "conf_parser.y"
+#line 1387 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_perip_global.value = (yyvsp[-1].number);
 }
-#line 4746 "conf_parser.c"
+#line 4745 "conf_parser.c"
     break;
 
   case 227: /* class_max_channels: MAX_CHANNELS '=' NUMBER ';'  */
-#line 1394 "conf_parser.y"
+#line 1393 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_channels.value = (yyvsp[-1].number);
 }
-#line 4755 "conf_parser.c"
+#line 4754 "conf_parser.c"
     break;
 
   case 228: /* class_max_number: MAX_NUMBER '=' NUMBER ';'  */
-#line 1400 "conf_parser.y"
+#line 1399 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_total.value = (yyvsp[-1].number);
 }
-#line 4764 "conf_parser.c"
+#line 4763 "conf_parser.c"
     break;
 
   case 229: /* class_sendq: SENDQ '=' sizespec ';'  */
-#line 1406 "conf_parser.y"
+#line 1405 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.max_sendq.value = (yyvsp[-1].number);
 }
-#line 4773 "conf_parser.c"
+#line 4772 "conf_parser.c"
     break;
 
   case 230: /* class_recvq: T_RECVQ '=' sizespec ';'  */
-#line 1412 "conf_parser.y"
+#line 1411 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     if ((yyvsp[-1].number) >= CLIENT_FLOOD_MIN)
       block_state.max_recvq.value = (yyvsp[-1].number);
 }
-#line 4783 "conf_parser.c"
+#line 4782 "conf_parser.c"
     break;
 
   case 231: /* class_cidr_bitlen_ipv4: CIDR_BITLEN_IPV4 '=' NUMBER ';'  */
-#line 1419 "conf_parser.y"
+#line 1418 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.cidr_bitlen_ipv4.value = (yyvsp[-1].number) > 32 ? 32 : (yyvsp[-1].number);
 }
-#line 4792 "conf_parser.c"
+#line 4791 "conf_parser.c"
     break;
 
   case 232: /* class_cidr_bitlen_ipv6: CIDR_BITLEN_IPV6 '=' NUMBER ';'  */
-#line 1425 "conf_parser.y"
+#line 1424 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.cidr_bitlen_ipv6.value = (yyvsp[-1].number) > 128 ? 128 : (yyvsp[-1].number);
 }
-#line 4801 "conf_parser.c"
+#line 4800 "conf_parser.c"
     break;
 
   case 233: /* class_number_per_cidr: NUMBER_PER_CIDR '=' NUMBER ';'  */
-#line 1431 "conf_parser.y"
+#line 1430 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 1)
     block_state.number_per_cidr.value = (yyvsp[-1].number);
 }
-#line 4810 "conf_parser.c"
+#line 4809 "conf_parser.c"
     break;
 
   case 234: /* $@8: %empty  */
-#line 1440 "conf_parser.y"
+#line 1439 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4819 "conf_parser.c"
+#line 4818 "conf_parser.c"
     break;
 
   case 236: /* $@9: %empty  */
-#line 1446 "conf_parser.y"
+#line 1445 "conf_parser.y"
 {
   block_state.flags.value = 0;
 }
-#line 4827 "conf_parser.c"
+#line 4826 "conf_parser.c"
     break;
 
   case 240: /* listen_flags_item: T_TLS  */
-#line 1452 "conf_parser.y"
+#line 1451 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= LISTENER_TLS;
 }
-#line 4836 "conf_parser.c"
+#line 4835 "conf_parser.c"
     break;
 
   case 241: /* listen_flags_item: HIDDEN  */
-#line 1456 "conf_parser.y"
+#line 1455 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= LISTENER_HIDDEN;
 }
-#line 4845 "conf_parser.c"
+#line 4844 "conf_parser.c"
     break;
 
   case 242: /* listen_flags_item: T_SERVER  */
-#line 1460 "conf_parser.y"
+#line 1459 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_SERVER;
 }
-#line 4854 "conf_parser.c"
+#line 4853 "conf_parser.c"
     break;
 
   case 243: /* listen_flags_item: CLIENT  */
-#line 1464 "conf_parser.y"
+#line 1463 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_CLIENT;
 }
-#line 4863 "conf_parser.c"
+#line 4862 "conf_parser.c"
     break;
 
   case 244: /* listen_flags_item: DEFER  */
-#line 1468 "conf_parser.y"
+#line 1467 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
    block_state.flags.value |= LISTENER_DEFER;
 }
-#line 4872 "conf_parser.c"
+#line 4871 "conf_parser.c"
     break;
 
   case 252: /* $@10: %empty  */
-#line 1476 "conf_parser.y"
+#line 1475 "conf_parser.y"
                                  { reset_block_state(); }
-#line 4878 "conf_parser.c"
+#line 4877 "conf_parser.c"
     break;
 
   case 256: /* port_item: port_number  */
-#line 1481 "conf_parser.y"
+#line 1480 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     _conf_parser_add_listeners((uint16_t)(yyvsp[0].number), (uint16_t)(yyvsp[0].number), block_state.addr.buf, block_state.flags.value);
 }
-#line 4887 "conf_parser.c"
+#line 4886 "conf_parser.c"
     break;
 
   case 257: /* port_item: port_number TWODOTS port_number  */
-#line 1485 "conf_parser.y"
+#line 1484 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     _conf_parser_add_listeners((uint16_t)(yyvsp[-2].number), (uint16_t)(yyvsp[0].number), block_state.addr.buf, block_state.flags.value);
 }
-#line 4896 "conf_parser.c"
+#line 4895 "conf_parser.c"
     break;
 
   case 258: /* listen_address: IP '=' QSTRING ';'  */
-#line 1491 "conf_parser.y"
+#line 1490 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 4905 "conf_parser.c"
+#line 4904 "conf_parser.c"
     break;
 
   case 259: /* listen_host: HOST '=' QSTRING ';'  */
-#line 1497 "conf_parser.y"
+#line 1496 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 4914 "conf_parser.c"
+#line 4913 "conf_parser.c"
     break;
 
   case 260: /* $@11: %empty  */
-#line 1507 "conf_parser.y"
+#line 1506 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 4923 "conf_parser.c"
+#line 4922 "conf_parser.c"
     break;
 
   case 261: /* auth_entry: IRCD_AUTH $@11 '{' auth_items '}' ';'  */
-#line 1511 "conf_parser.y"
+#line 1510 "conf_parser.y"
 {
   struct conf_auth *auth = NULL;
   list_node_t *node;
@@ -4974,38 +4973,38 @@ yyreduce:
       conf_report_error("Unable to add auth block");
   }
 }
-#line 4978 "conf_parser.c"
+#line 4977 "conf_parser.c"
     break;
 
   case 271: /* auth_user: USER '=' QSTRING ';'  */
-#line 1572 "conf_parser.y"
+#line 1571 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
-#line 4987 "conf_parser.c"
+#line 4986 "conf_parser.c"
     break;
 
   case 272: /* auth_passwd: PASSWORD '=' QSTRING ';'  */
-#line 1578 "conf_parser.y"
+#line 1577 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 4996 "conf_parser.c"
+#line 4995 "conf_parser.c"
     break;
 
   case 273: /* auth_class: CLASS '=' QSTRING ';'  */
-#line 1584 "conf_parser.y"
+#line 1583 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 }
-#line 5005 "conf_parser.c"
+#line 5004 "conf_parser.c"
     break;
 
   case 274: /* auth_encrypted: ENCRYPTED '=' TBOOL ';'  */
-#line 1590 "conf_parser.y"
+#line 1589 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -5015,101 +5014,101 @@ yyreduce:
       block_state.flags.value &= ~CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
   }
 }
-#line 5019 "conf_parser.c"
+#line 5018 "conf_parser.c"
     break;
 
   case 275: /* $@12: %empty  */
-#line 1601 "conf_parser.y"
+#line 1600 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value &= CONF_AUTH_FLAG_ENCRYPTED_PASSWORD;
 }
-#line 5028 "conf_parser.c"
+#line 5027 "conf_parser.c"
     break;
 
   case 279: /* auth_flags_item: EXCEED_LIMIT  */
-#line 1609 "conf_parser.y"
+#line 1608 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_LIMITS;
 }
-#line 5037 "conf_parser.c"
+#line 5036 "conf_parser.c"
     break;
 
   case 280: /* auth_flags_item: KLINE_EXEMPT  */
-#line 1613 "conf_parser.y"
+#line 1612 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_KLINE;
 }
-#line 5046 "conf_parser.c"
+#line 5045 "conf_parser.c"
     break;
 
   case 281: /* auth_flags_item: XLINE_EXEMPT  */
-#line 1617 "conf_parser.y"
+#line 1616 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_XLINE;
 }
-#line 5055 "conf_parser.c"
+#line 5054 "conf_parser.c"
     break;
 
   case 282: /* auth_flags_item: NEED_IDENT  */
-#line 1621 "conf_parser.y"
+#line 1620 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_REQUIRE_IDENT;
 }
-#line 5064 "conf_parser.c"
+#line 5063 "conf_parser.c"
     break;
 
   case 283: /* auth_flags_item: CAN_FLOOD  */
-#line 1625 "conf_parser.y"
+#line 1624 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_CAN_FLOOD;
 }
-#line 5073 "conf_parser.c"
+#line 5072 "conf_parser.c"
     break;
 
   case 284: /* auth_flags_item: NO_TILDE  */
-#line 1629 "conf_parser.y"
+#line 1628 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_NO_TILDE;
 }
-#line 5082 "conf_parser.c"
+#line 5081 "conf_parser.c"
     break;
 
   case 285: /* auth_flags_item: RESV_EXEMPT  */
-#line 1633 "conf_parser.y"
+#line 1632 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_EXEMPT_RESV;
 }
-#line 5091 "conf_parser.c"
+#line 5090 "conf_parser.c"
     break;
 
   case 286: /* auth_flags_item: T_WEBIRC  */
-#line 1637 "conf_parser.y"
+#line 1636 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_WEBIRC;
 }
-#line 5100 "conf_parser.c"
+#line 5099 "conf_parser.c"
     break;
 
   case 287: /* auth_flags_item: NEED_PASSWORD  */
-#line 1641 "conf_parser.y"
+#line 1640 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONF_AUTH_FLAG_REJECT_PASSWORD_MISMATCH;
 }
-#line 5109 "conf_parser.c"
+#line 5108 "conf_parser.c"
     break;
 
   case 288: /* auth_spoof: SPOOF '=' QSTRING ';'  */
-#line 1647 "conf_parser.y"
+#line 1646 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5119,11 +5118,11 @@ yyreduce:
   else
     conf_report_warning("Invalid auth::spoof; ignoring value");
 }
-#line 5123 "conf_parser.c"
+#line 5122 "conf_parser.c"
     break;
 
   case 289: /* $@13: %empty  */
-#line 1661 "conf_parser.y"
+#line 1660 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5131,11 +5130,11 @@ yyreduce:
   reset_block_state();
   strlcpy(block_state.rpass.buf, CONF_NOREASON, sizeof(block_state.rpass.buf));
 }
-#line 5135 "conf_parser.c"
+#line 5134 "conf_parser.c"
     break;
 
   case 290: /* resv_entry: RESV $@13 '{' resv_items '}' ';'  */
-#line 1668 "conf_parser.y"
+#line 1667 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5150,38 +5149,38 @@ yyreduce:
   if (conf_resv_add(&spec) == NULL)
     conf_report_error("Unable to add reservation");
 }
-#line 5154 "conf_parser.c"
+#line 5153 "conf_parser.c"
     break;
 
   case 297: /* resv_mask: MASK '=' QSTRING ';'  */
-#line 1687 "conf_parser.y"
+#line 1686 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5163 "conf_parser.c"
+#line 5162 "conf_parser.c"
     break;
 
   case 298: /* resv_reason: REASON '=' QSTRING ';'  */
-#line 1693 "conf_parser.y"
+#line 1692 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5172 "conf_parser.c"
+#line 5171 "conf_parser.c"
     break;
 
   case 299: /* resv_exempt: EXEMPT '=' QSTRING ';'  */
-#line 1699 "conf_parser.y"
+#line 1698 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.mask.list);
 }
-#line 5181 "conf_parser.c"
+#line 5180 "conf_parser.c"
     break;
 
   case 305: /* service_name: NAME '=' QSTRING ';'  */
-#line 1714 "conf_parser.y"
+#line 1713 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5192,11 +5191,11 @@ yyreduce:
     service->name = io_strdup(yylval.string);
   }
 }
-#line 5196 "conf_parser.c"
+#line 5195 "conf_parser.c"
     break;
 
   case 306: /* $@14: %empty  */
-#line 1730 "conf_parser.y"
+#line 1729 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5208,11 +5207,11 @@ yyreduce:
   strlcpy(block_state.host.buf, "*", sizeof(block_state.host.buf));
   block_state.flags.value = SHARED_ALL;
 }
-#line 5212 "conf_parser.c"
+#line 5211 "conf_parser.c"
     break;
 
   case 307: /* shared_entry: T_SHARED $@14 '{' shared_items '}' ';'  */
-#line 1741 "conf_parser.y"
+#line 1740 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5223,20 +5222,20 @@ yyreduce:
   shared->user = io_strdup(block_state.user.buf);
   shared->host = io_strdup(block_state.host.buf);
 }
-#line 5227 "conf_parser.c"
+#line 5226 "conf_parser.c"
     break;
 
   case 314: /* shared_name: NAME '=' QSTRING ';'  */
-#line 1756 "conf_parser.y"
+#line 1755 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5236 "conf_parser.c"
+#line 5235 "conf_parser.c"
     break;
 
   case 315: /* shared_user: USER '=' QSTRING ';'  */
-#line 1762 "conf_parser.y"
+#line 1761 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -5254,119 +5253,119 @@ yyreduce:
     nuh_split(&nuh);
   }
 }
-#line 5258 "conf_parser.c"
+#line 5257 "conf_parser.c"
     break;
 
   case 316: /* $@15: %empty  */
-#line 1781 "conf_parser.y"
+#line 1780 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = 0;
 }
-#line 5267 "conf_parser.c"
+#line 5266 "conf_parser.c"
     break;
 
   case 320: /* shared_type_item: KLINE  */
-#line 1788 "conf_parser.y"
+#line 1787 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_KLINE;
 }
-#line 5276 "conf_parser.c"
+#line 5275 "conf_parser.c"
     break;
 
   case 321: /* shared_type_item: UNKLINE  */
-#line 1792 "conf_parser.y"
+#line 1791 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNKLINE;
 }
-#line 5285 "conf_parser.c"
+#line 5284 "conf_parser.c"
     break;
 
   case 322: /* shared_type_item: T_DLINE  */
-#line 1796 "conf_parser.y"
+#line 1795 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_DLINE;
 }
-#line 5294 "conf_parser.c"
+#line 5293 "conf_parser.c"
     break;
 
   case 323: /* shared_type_item: T_UNDLINE  */
-#line 1800 "conf_parser.y"
+#line 1799 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNDLINE;
 }
-#line 5303 "conf_parser.c"
+#line 5302 "conf_parser.c"
     break;
 
   case 324: /* shared_type_item: XLINE  */
-#line 1804 "conf_parser.y"
+#line 1803 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_XLINE;
 }
-#line 5312 "conf_parser.c"
+#line 5311 "conf_parser.c"
     break;
 
   case 325: /* shared_type_item: T_UNXLINE  */
-#line 1808 "conf_parser.y"
+#line 1807 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNXLINE;
 }
-#line 5321 "conf_parser.c"
+#line 5320 "conf_parser.c"
     break;
 
   case 326: /* shared_type_item: REHASH  */
-#line 1812 "conf_parser.y"
+#line 1811 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_REHASH;
 }
-#line 5330 "conf_parser.c"
+#line 5329 "conf_parser.c"
     break;
 
   case 327: /* shared_type_item: RESV  */
-#line 1816 "conf_parser.y"
+#line 1815 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_RESV;
 }
-#line 5339 "conf_parser.c"
+#line 5338 "conf_parser.c"
     break;
 
   case 328: /* shared_type_item: T_UNRESV  */
-#line 1820 "conf_parser.y"
+#line 1819 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_UNRESV;
 }
-#line 5348 "conf_parser.c"
+#line 5347 "conf_parser.c"
     break;
 
   case 329: /* shared_type_item: T_LOCOPS  */
-#line 1824 "conf_parser.y"
+#line 1823 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= SHARED_LOCOPS;
 }
-#line 5357 "conf_parser.c"
+#line 5356 "conf_parser.c"
     break;
 
   case 330: /* shared_type_item: T_ALL  */
-#line 1828 "conf_parser.y"
+#line 1827 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = SHARED_ALL;
 }
-#line 5366 "conf_parser.c"
+#line 5365 "conf_parser.c"
     break;
 
   case 331: /* $@16: %empty  */
-#line 1838 "conf_parser.y"
+#line 1837 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5376,11 +5375,11 @@ yyreduce:
   strlcpy(block_state.name.buf, "*", sizeof(block_state.name.buf));
   block_state.flags.value = CLUSTER_ALL;
 }
-#line 5380 "conf_parser.c"
+#line 5379 "conf_parser.c"
     break;
 
   case 332: /* cluster_entry: T_CLUSTER $@16 '{' cluster_items '}' ';'  */
-#line 1847 "conf_parser.y"
+#line 1846 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5389,119 +5388,119 @@ yyreduce:
   cluster->type = block_state.flags.value;
   cluster->server = io_strdup(block_state.name.buf);
 }
-#line 5393 "conf_parser.c"
+#line 5392 "conf_parser.c"
     break;
 
   case 338: /* cluster_name: NAME '=' QSTRING ';'  */
-#line 1860 "conf_parser.y"
+#line 1859 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5402 "conf_parser.c"
+#line 5401 "conf_parser.c"
     break;
 
   case 339: /* $@17: %empty  */
-#line 1866 "conf_parser.y"
+#line 1865 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = 0;
 }
-#line 5411 "conf_parser.c"
+#line 5410 "conf_parser.c"
     break;
 
   case 343: /* cluster_type_item: KLINE  */
-#line 1873 "conf_parser.y"
+#line 1872 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_KLINE;
 }
-#line 5420 "conf_parser.c"
+#line 5419 "conf_parser.c"
     break;
 
   case 344: /* cluster_type_item: UNKLINE  */
-#line 1877 "conf_parser.y"
+#line 1876 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNKLINE;
 }
-#line 5429 "conf_parser.c"
+#line 5428 "conf_parser.c"
     break;
 
   case 345: /* cluster_type_item: T_DLINE  */
-#line 1881 "conf_parser.y"
+#line 1880 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_DLINE;
 }
-#line 5438 "conf_parser.c"
+#line 5437 "conf_parser.c"
     break;
 
   case 346: /* cluster_type_item: T_UNDLINE  */
-#line 1885 "conf_parser.y"
+#line 1884 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNDLINE;
 }
-#line 5447 "conf_parser.c"
+#line 5446 "conf_parser.c"
     break;
 
   case 347: /* cluster_type_item: XLINE  */
-#line 1889 "conf_parser.y"
+#line 1888 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_XLINE;
 }
-#line 5456 "conf_parser.c"
+#line 5455 "conf_parser.c"
     break;
 
   case 348: /* cluster_type_item: T_UNXLINE  */
-#line 1893 "conf_parser.y"
+#line 1892 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNXLINE;
 }
-#line 5465 "conf_parser.c"
+#line 5464 "conf_parser.c"
     break;
 
   case 349: /* cluster_type_item: RESV  */
-#line 1897 "conf_parser.y"
+#line 1896 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_RESV;
 }
-#line 5474 "conf_parser.c"
+#line 5473 "conf_parser.c"
     break;
 
   case 350: /* cluster_type_item: T_UNRESV  */
-#line 1901 "conf_parser.y"
+#line 1900 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_UNRESV;
 }
-#line 5483 "conf_parser.c"
+#line 5482 "conf_parser.c"
     break;
 
   case 351: /* cluster_type_item: T_LOCOPS  */
-#line 1905 "conf_parser.y"
+#line 1904 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CLUSTER_LOCOPS;
 }
-#line 5492 "conf_parser.c"
+#line 5491 "conf_parser.c"
     break;
 
   case 352: /* cluster_type_item: T_ALL  */
-#line 1909 "conf_parser.y"
+#line 1908 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value = CLUSTER_ALL;
 }
-#line 5501 "conf_parser.c"
+#line 5500 "conf_parser.c"
     break;
 
   case 353: /* $@18: %empty  */
-#line 1919 "conf_parser.y"
+#line 1918 "conf_parser.y"
 {
 
   if (conf_parser_ctx.pass != 2)
@@ -5512,11 +5511,11 @@ yyreduce:
   block_state.timeout.value = CONNECT_DEFAULT_TIMEOUT_SEC;
   block_state.retry_delay_sec.value = CONNECT_DEFAULT_RETRY_DELAY_SEC;
 }
-#line 5516 "conf_parser.c"
+#line 5515 "conf_parser.c"
     break;
 
   case 354: /* connect_entry: CONNECT $@18 '{' connect_items '}' ';'  */
-#line 1929 "conf_parser.y"
+#line 1928 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5561,56 +5560,56 @@ yyreduce:
   connect_assign_class(connect, block_state.klass.buf);
   connect_dns_lookup(connect);
 }
-#line 5565 "conf_parser.c"
+#line 5564 "conf_parser.c"
     break;
 
   case 373: /* connect_name: NAME '=' QSTRING ';'  */
-#line 1993 "conf_parser.y"
+#line 1992 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5574 "conf_parser.c"
+#line 5573 "conf_parser.c"
     break;
 
   case 374: /* connect_host: HOST '=' QSTRING ';'  */
-#line 1999 "conf_parser.y"
+#line 1998 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.host.buf, yylval.string, sizeof(block_state.host.buf));
 }
-#line 5583 "conf_parser.c"
+#line 5582 "conf_parser.c"
     break;
 
   case 375: /* connect_timeout: TIMEOUT '=' timespec ';'  */
-#line 2005 "conf_parser.y"
+#line 2004 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.timeout.value = (yyvsp[-1].number);
 }
-#line 5592 "conf_parser.c"
+#line 5591 "conf_parser.c"
     break;
 
   case 376: /* connect_retry_delay: RETRY_DELAY '=' timespec ';'  */
-#line 2011 "conf_parser.y"
+#line 2010 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.retry_delay_sec.value = (yyvsp[-1].number);
 }
-#line 5601 "conf_parser.c"
+#line 5600 "conf_parser.c"
     break;
 
   case 377: /* connect_bind: T_BIND '=' QSTRING ';'  */
-#line 2017 "conf_parser.y"
+#line 2016 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.bind.buf, yylval.string, sizeof(block_state.bind.buf));
 }
-#line 5610 "conf_parser.c"
+#line 5609 "conf_parser.c"
     break;
 
   case 378: /* connect_send_password: SEND_PASSWORD '=' QSTRING ';'  */
-#line 2023 "conf_parser.y"
+#line 2022 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5622,11 +5621,11 @@ yyreduce:
   else
     strlcpy(block_state.spass.buf, yylval.string, sizeof(block_state.spass.buf));
 }
-#line 5626 "conf_parser.c"
+#line 5625 "conf_parser.c"
     break;
 
   case 379: /* connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'  */
-#line 2036 "conf_parser.y"
+#line 2035 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5638,73 +5637,73 @@ yyreduce:
   else
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5642 "conf_parser.c"
+#line 5641 "conf_parser.c"
     break;
 
   case 380: /* connect_tls_certificate_fingerprint: TLS_CERTIFICATE_FINGERPRINT '=' QSTRING ';'  */
-#line 2049 "conf_parser.y"
+#line 2048 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.cert.buf, yylval.string, sizeof(block_state.cert.buf));
 }
-#line 5651 "conf_parser.c"
+#line 5650 "conf_parser.c"
     break;
 
   case 381: /* connect_port: PORT '=' port_number ';'  */
-#line 2055 "conf_parser.y"
+#line 2054 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.port.value = (yyvsp[-1].number);
 }
-#line 5660 "conf_parser.c"
+#line 5659 "conf_parser.c"
     break;
 
   case 382: /* connect_aftype: AFTYPE '=' T_IPV4 ';'  */
-#line 2061 "conf_parser.y"
+#line 2060 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.aftype.value = AF_INET;
 }
-#line 5669 "conf_parser.c"
+#line 5668 "conf_parser.c"
     break;
 
   case 383: /* connect_aftype: AFTYPE '=' T_IPV6 ';'  */
-#line 2065 "conf_parser.y"
+#line 2064 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.aftype.value = AF_INET6;
 }
-#line 5678 "conf_parser.c"
+#line 5677 "conf_parser.c"
     break;
 
   case 384: /* $@19: %empty  */
-#line 2071 "conf_parser.y"
+#line 2070 "conf_parser.y"
 {
   block_state.flags.value &= CONNECT_FLAG_ENCRYPTED_PASSWORD;
 }
-#line 5686 "conf_parser.c"
+#line 5685 "conf_parser.c"
     break;
 
   case 388: /* connect_flags_item: AUTOCONN  */
-#line 2077 "conf_parser.y"
+#line 2076 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONNECT_FLAG_ALLOW_AUTO_CONN;
 }
-#line 5695 "conf_parser.c"
+#line 5694 "conf_parser.c"
     break;
 
   case 389: /* connect_flags_item: T_TLS  */
-#line 2081 "conf_parser.y"
+#line 2080 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     block_state.flags.value |= CONNECT_FLAG_USE_TLS;
 }
-#line 5704 "conf_parser.c"
+#line 5703 "conf_parser.c"
     break;
 
   case 390: /* connect_encrypted: ENCRYPTED '=' TBOOL ';'  */
-#line 2087 "conf_parser.y"
+#line 2086 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -5714,47 +5713,47 @@ yyreduce:
       block_state.flags.value &= ~CONNECT_FLAG_ENCRYPTED_PASSWORD;
   }
 }
-#line 5718 "conf_parser.c"
+#line 5717 "conf_parser.c"
     break;
 
   case 391: /* connect_hub_mask: HUB_MASK '=' QSTRING ';'  */
-#line 2098 "conf_parser.y"
+#line 2097 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.hub.list);
 }
-#line 5727 "conf_parser.c"
+#line 5726 "conf_parser.c"
     break;
 
   case 392: /* connect_leaf_mask: LEAF_MASK '=' QSTRING ';'  */
-#line 2104 "conf_parser.y"
+#line 2103 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     list_add(io_strdup(yylval.string), list_make_node(), &block_state.leaf.list);
 }
-#line 5736 "conf_parser.c"
+#line 5735 "conf_parser.c"
     break;
 
   case 393: /* connect_class: CLASS '=' QSTRING ';'  */
-#line 2110 "conf_parser.y"
+#line 2109 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.klass.buf, yylval.string, sizeof(block_state.klass.buf));
 }
-#line 5745 "conf_parser.c"
+#line 5744 "conf_parser.c"
     break;
 
   case 394: /* $@20: %empty  */
-#line 2120 "conf_parser.y"
+#line 2119 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5754 "conf_parser.c"
+#line 5753 "conf_parser.c"
     break;
 
   case 395: /* kill_entry: KILL $@20 '{' kill_items '}' ';'  */
-#line 2124 "conf_parser.y"
+#line 2123 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5774,11 +5773,11 @@ yyreduce:
   if (conf_kill_add(&spec) == NULL)
     conf_report_error("Unable to add K-line");
 }
-#line 5778 "conf_parser.c"
+#line 5777 "conf_parser.c"
     break;
 
   case 401: /* kill_user: USER '=' QSTRING ';'  */
-#line 2148 "conf_parser.y"
+#line 2147 "conf_parser.y"
 {
 
   if (conf_parser_ctx.pass == 2)
@@ -5797,29 +5796,29 @@ yyreduce:
     nuh_split(&nuh);
   }
 }
-#line 5801 "conf_parser.c"
+#line 5800 "conf_parser.c"
     break;
 
   case 402: /* kill_reason: REASON '=' QSTRING ';'  */
-#line 2168 "conf_parser.y"
+#line 2167 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5810 "conf_parser.c"
+#line 5809 "conf_parser.c"
     break;
 
   case 403: /* $@21: %empty  */
-#line 2178 "conf_parser.y"
+#line 2177 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5819 "conf_parser.c"
+#line 5818 "conf_parser.c"
     break;
 
   case 404: /* deny_entry: DENY $@21 '{' deny_items '}' ';'  */
-#line 2182 "conf_parser.y"
+#line 2181 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5837,29 +5836,29 @@ yyreduce:
   if (conf_deny_add(&spec) == NULL)
     conf_report_error("Unable to add D-line");
 }
-#line 5841 "conf_parser.c"
+#line 5840 "conf_parser.c"
     break;
 
   case 410: /* deny_ip: IP '=' QSTRING ';'  */
-#line 2204 "conf_parser.y"
+#line 2203 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.addr.buf, yylval.string, sizeof(block_state.addr.buf));
 }
-#line 5850 "conf_parser.c"
+#line 5849 "conf_parser.c"
     break;
 
   case 411: /* deny_reason: REASON '=' QSTRING ';'  */
-#line 2210 "conf_parser.y"
+#line 2209 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5859 "conf_parser.c"
+#line 5858 "conf_parser.c"
     break;
 
   case 417: /* exempt_ip: IP '=' QSTRING ';'  */
-#line 2225 "conf_parser.y"
+#line 2224 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5867,20 +5866,20 @@ yyreduce:
   if (conf_exempt_add(yylval.string) == NULL)
     conf_report_error("Unable to add D-line exemption");
 }
-#line 5871 "conf_parser.c"
+#line 5870 "conf_parser.c"
     break;
 
   case 418: /* $@22: %empty  */
-#line 2238 "conf_parser.y"
+#line 2237 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     reset_block_state();
 }
-#line 5880 "conf_parser.c"
+#line 5879 "conf_parser.c"
     break;
 
   case 419: /* gecos_entry: GECOS $@22 '{' gecos_items '}' ';'  */
-#line 2242 "conf_parser.y"
+#line 2241 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -5894,288 +5893,288 @@ yyreduce:
   if (conf_gecos_add(&spec) == NULL)
     conf_report_error("Unable to add X-line");
 }
-#line 5898 "conf_parser.c"
+#line 5897 "conf_parser.c"
     break;
 
   case 425: /* gecos_name: NAME '=' QSTRING ';'  */
-#line 2260 "conf_parser.y"
+#line 2259 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.name.buf, yylval.string, sizeof(block_state.name.buf));
 }
-#line 5907 "conf_parser.c"
+#line 5906 "conf_parser.c"
     break;
 
   case 426: /* gecos_reason: REASON '=' QSTRING ';'  */
-#line 2266 "conf_parser.y"
+#line 2265 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     strlcpy(block_state.rpass.buf, yylval.string, sizeof(block_state.rpass.buf));
 }
-#line 5916 "conf_parser.c"
+#line 5915 "conf_parser.c"
     break;
 
   case 471: /* general_away_count: AWAY_COUNT '=' NUMBER ';'  */
-#line 2322 "conf_parser.y"
+#line 2321 "conf_parser.y"
 {
   ConfigGeneral.away_count = (yyvsp[-1].number);
 }
-#line 5924 "conf_parser.c"
+#line 5923 "conf_parser.c"
     break;
 
   case 472: /* general_away_time: AWAY_TIME '=' timespec ';'  */
-#line 2327 "conf_parser.y"
+#line 2326 "conf_parser.y"
 {
   ConfigGeneral.away_time = (yyvsp[-1].number);
 }
-#line 5932 "conf_parser.c"
+#line 5931 "conf_parser.c"
     break;
 
   case 473: /* general_max_monitor: MAX_MONITOR '=' NUMBER ';'  */
-#line 2332 "conf_parser.y"
+#line 2331 "conf_parser.y"
 {
   ConfigGeneral.max_monitor = (yyvsp[-1].number);
 }
-#line 5940 "conf_parser.c"
+#line 5939 "conf_parser.c"
     break;
 
   case 474: /* general_whowas_history_length: WHOWAS_HISTORY_LENGTH '=' NUMBER ';'  */
-#line 2337 "conf_parser.y"
+#line 2336 "conf_parser.y"
 {
   ConfigGeneral.whowas_history_length = (yyvsp[-1].number);
 }
-#line 5948 "conf_parser.c"
+#line 5947 "conf_parser.c"
     break;
 
   case 475: /* general_dline_min_cidr: DLINE_MIN_CIDR '=' NUMBER ';'  */
-#line 2342 "conf_parser.y"
+#line 2341 "conf_parser.y"
 {
   ConfigGeneral.dline_min_cidr = (yyvsp[-1].number);
 }
-#line 5956 "conf_parser.c"
+#line 5955 "conf_parser.c"
     break;
 
   case 476: /* general_dline_min_cidr6: DLINE_MIN_CIDR6 '=' NUMBER ';'  */
-#line 2347 "conf_parser.y"
+#line 2346 "conf_parser.y"
 {
   ConfigGeneral.dline_min_cidr6 = (yyvsp[-1].number);
 }
-#line 5964 "conf_parser.c"
+#line 5963 "conf_parser.c"
     break;
 
   case 477: /* general_kline_min_cidr: KLINE_MIN_CIDR '=' NUMBER ';'  */
-#line 2352 "conf_parser.y"
+#line 2351 "conf_parser.y"
 {
   ConfigGeneral.kline_min_cidr = (yyvsp[-1].number);
 }
-#line 5972 "conf_parser.c"
+#line 5971 "conf_parser.c"
     break;
 
   case 478: /* general_kline_min_cidr6: KLINE_MIN_CIDR6 '=' NUMBER ';'  */
-#line 2357 "conf_parser.y"
+#line 2356 "conf_parser.y"
 {
   ConfigGeneral.kline_min_cidr6 = (yyvsp[-1].number);
 }
-#line 5980 "conf_parser.c"
+#line 5979 "conf_parser.c"
     break;
 
   case 479: /* general_kill_chase_time_limit: KILL_CHASE_TIME_LIMIT '=' timespec ';'  */
-#line 2362 "conf_parser.y"
+#line 2361 "conf_parser.y"
 {
   ConfigGeneral.kill_chase_time_limit = (yyvsp[-1].number);
 }
-#line 5988 "conf_parser.c"
+#line 5987 "conf_parser.c"
     break;
 
   case 480: /* general_max_nick_time: MAX_NICK_TIME '=' timespec ';'  */
-#line 2367 "conf_parser.y"
+#line 2366 "conf_parser.y"
 {
   ConfigGeneral.max_nick_time = (yyvsp[-1].number);
 }
-#line 5996 "conf_parser.c"
+#line 5995 "conf_parser.c"
     break;
 
   case 481: /* general_max_nick_changes: MAX_NICK_CHANGES '=' NUMBER ';'  */
-#line 2372 "conf_parser.y"
+#line 2371 "conf_parser.y"
 {
   ConfigGeneral.max_nick_changes = (yyvsp[-1].number);
 }
-#line 6004 "conf_parser.c"
+#line 6003 "conf_parser.c"
     break;
 
   case 482: /* general_max_accept: MAX_ACCEPT '=' NUMBER ';'  */
-#line 2377 "conf_parser.y"
+#line 2376 "conf_parser.y"
 {
   ConfigGeneral.max_accept = (yyvsp[-1].number);
 }
-#line 6012 "conf_parser.c"
+#line 6011 "conf_parser.c"
     break;
 
   case 483: /* general_max_away_length: MAX_AWAY_LENGTH '=' NUMBER ';'  */
-#line 2382 "conf_parser.y"
+#line 2381 "conf_parser.y"
 {
   if ((yyvsp[-1].number) < 1 || (yyvsp[-1].number) > AWAYLEN)
     ConfigGeneral.max_away_length = AWAYLEN;
   else
     ConfigGeneral.max_away_length = (yyvsp[-1].number);
 }
-#line 6023 "conf_parser.c"
+#line 6022 "conf_parser.c"
     break;
 
   case 484: /* general_anti_spam_exit_message_time: ANTI_SPAM_EXIT_MESSAGE_TIME '=' timespec ';'  */
-#line 2390 "conf_parser.y"
+#line 2389 "conf_parser.y"
 {
   ConfigGeneral.anti_spam_exit_message_time = (yyvsp[-1].number);
 }
-#line 6031 "conf_parser.c"
+#line 6030 "conf_parser.c"
     break;
 
   case 485: /* general_ts_warn_delta: TS_WARN_DELTA '=' timespec ';'  */
-#line 2395 "conf_parser.y"
+#line 2394 "conf_parser.y"
 {
   ConfigGeneral.ts_warn_delta = (yyvsp[-1].number);
 }
-#line 6039 "conf_parser.c"
+#line 6038 "conf_parser.c"
     break;
 
   case 486: /* general_ts_max_delta: TS_MAX_DELTA '=' timespec ';'  */
-#line 2400 "conf_parser.y"
+#line 2399 "conf_parser.y"
 {
   ConfigGeneral.ts_max_delta = (yyvsp[-1].number);
 }
-#line 6047 "conf_parser.c"
+#line 6046 "conf_parser.c"
     break;
 
   case 487: /* general_invisible_on_connect: INVISIBLE_ON_CONNECT '=' TBOOL ';'  */
-#line 2405 "conf_parser.y"
+#line 2404 "conf_parser.y"
 {
   ConfigGeneral.invisible_on_connect = (yyvsp[-1].boolean);
 }
-#line 6055 "conf_parser.c"
+#line 6054 "conf_parser.c"
     break;
 
   case 488: /* general_warn_no_connect_block: WARN_NO_CONNECT_BLOCK '=' TBOOL ';'  */
-#line 2410 "conf_parser.y"
+#line 2409 "conf_parser.y"
 {
   ConfigGeneral.warn_no_connect_block = (yyvsp[-1].boolean);
 }
-#line 6063 "conf_parser.c"
+#line 6062 "conf_parser.c"
     break;
 
   case 489: /* general_stats_e_disabled: STATS_E_DISABLED '=' TBOOL ';'  */
-#line 2415 "conf_parser.y"
+#line 2414 "conf_parser.y"
 {
   ConfigGeneral.stats_e_disabled = (yyvsp[-1].boolean);
 }
-#line 6071 "conf_parser.c"
+#line 6070 "conf_parser.c"
     break;
 
   case 490: /* general_stats_u_oper_only: STATS_U_OPER_ONLY '=' TBOOL ';'  */
-#line 2420 "conf_parser.y"
+#line 2419 "conf_parser.y"
 {
   ConfigGeneral.stats_u_oper_only = (yyvsp[-1].boolean);
 }
-#line 6079 "conf_parser.c"
+#line 6078 "conf_parser.c"
     break;
 
   case 491: /* general_pace_wait: PACE_WAIT '=' timespec ';'  */
-#line 2425 "conf_parser.y"
+#line 2424 "conf_parser.y"
 {
   ConfigGeneral.pace_wait = (yyvsp[-1].number);
 }
-#line 6087 "conf_parser.c"
+#line 6086 "conf_parser.c"
     break;
 
   case 492: /* general_caller_id_wait: CALLER_ID_WAIT '=' timespec ';'  */
-#line 2430 "conf_parser.y"
+#line 2429 "conf_parser.y"
 {
   ConfigGeneral.caller_id_wait = (yyvsp[-1].number);
 }
-#line 6095 "conf_parser.c"
+#line 6094 "conf_parser.c"
     break;
 
   case 493: /* general_opers_bypass_callerid: OPERS_BYPASS_CALLERID '=' TBOOL ';'  */
-#line 2435 "conf_parser.y"
+#line 2434 "conf_parser.y"
 {
   ConfigGeneral.opers_bypass_callerid = (yyvsp[-1].boolean);
 }
-#line 6103 "conf_parser.c"
+#line 6102 "conf_parser.c"
     break;
 
   case 494: /* general_pace_wait_simple: PACE_WAIT_SIMPLE '=' timespec ';'  */
-#line 2440 "conf_parser.y"
+#line 2439 "conf_parser.y"
 {
   ConfigGeneral.pace_wait_simple = (yyvsp[-1].number);
 }
-#line 6111 "conf_parser.c"
+#line 6110 "conf_parser.c"
     break;
 
   case 495: /* general_short_motd: SHORT_MOTD '=' TBOOL ';'  */
-#line 2445 "conf_parser.y"
+#line 2444 "conf_parser.y"
 {
   ConfigGeneral.short_motd = (yyvsp[-1].boolean);
 }
-#line 6119 "conf_parser.c"
+#line 6118 "conf_parser.c"
     break;
 
   case 496: /* general_specials_in_ident: SPECIALS_IN_IDENT '=' NUMBER ';'  */
-#line 2450 "conf_parser.y"
+#line 2449 "conf_parser.y"
 {
   ConfigGeneral.specials_in_ident = (yyvsp[-1].number);
 }
-#line 6127 "conf_parser.c"
+#line 6126 "conf_parser.c"
     break;
 
   case 497: /* general_max_targets: MAX_TARGETS '=' NUMBER ';'  */
-#line 2455 "conf_parser.y"
+#line 2454 "conf_parser.y"
 {
   ConfigGeneral.max_targets = (yyvsp[-1].number);
 }
-#line 6135 "conf_parser.c"
+#line 6134 "conf_parser.c"
     break;
 
   case 498: /* general_ping_cookie: PING_COOKIE '=' TBOOL ';'  */
-#line 2460 "conf_parser.y"
+#line 2459 "conf_parser.y"
 {
   ConfigGeneral.ping_cookie = (yyvsp[-1].boolean);
 }
-#line 6143 "conf_parser.c"
+#line 6142 "conf_parser.c"
     break;
 
   case 499: /* general_disable_ident: DISABLE_IDENT '=' TBOOL ';'  */
-#line 2465 "conf_parser.y"
+#line 2464 "conf_parser.y"
 {
   ConfigGeneral.disable_ident = (yyvsp[-1].boolean);
 }
-#line 6151 "conf_parser.c"
+#line 6150 "conf_parser.c"
     break;
 
   case 500: /* general_disable_dns: DISABLE_DNS '=' TBOOL ';'  */
-#line 2470 "conf_parser.y"
+#line 2469 "conf_parser.y"
 {
   ConfigGeneral.disable_dns = (yyvsp[-1].boolean);
 }
-#line 6159 "conf_parser.c"
+#line 6158 "conf_parser.c"
     break;
 
   case 501: /* general_throttle_count: THROTTLE_COUNT '=' NUMBER ';'  */
-#line 2475 "conf_parser.y"
+#line 2474 "conf_parser.y"
 {
   ConfigGeneral.throttle_count = (yyvsp[-1].number);
 }
-#line 6167 "conf_parser.c"
+#line 6166 "conf_parser.c"
     break;
 
   case 502: /* general_throttle_time: THROTTLE_TIME '=' timespec ';'  */
-#line 2480 "conf_parser.y"
+#line 2479 "conf_parser.y"
 {
   ConfigGeneral.throttle_time = (yyvsp[-1].number);
 }
-#line 6175 "conf_parser.c"
+#line 6174 "conf_parser.c"
     break;
 
   case 503: /* general_oper_umodes: OPER_UMODES '=' QSTRING ';'  */
-#line 2485 "conf_parser.y"
+#line 2484 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6183,62 +6182,62 @@ yyreduce:
   io_free(ConfigGeneral.oper_umodes);
   ConfigGeneral.oper_umodes = io_strdup(yylval.string);
 }
-#line 6187 "conf_parser.c"
+#line 6186 "conf_parser.c"
     break;
 
   case 504: /* general_min_nonwildcard: MIN_NONWILDCARD '=' NUMBER ';'  */
-#line 2494 "conf_parser.y"
+#line 2493 "conf_parser.y"
 {
   ConfigGeneral.min_nonwildcard = (yyvsp[-1].number);
 }
-#line 6195 "conf_parser.c"
+#line 6194 "conf_parser.c"
     break;
 
   case 505: /* general_min_nonwildcard_simple: MIN_NONWILDCARD_SIMPLE '=' NUMBER ';'  */
-#line 2499 "conf_parser.y"
+#line 2498 "conf_parser.y"
 {
   ConfigGeneral.min_nonwildcard_simple = (yyvsp[-1].number);
 }
-#line 6203 "conf_parser.c"
+#line 6202 "conf_parser.c"
     break;
 
   case 506: /* general_default_floodcount: DEFAULT_FLOODCOUNT '=' NUMBER ';'  */
-#line 2504 "conf_parser.y"
+#line 2503 "conf_parser.y"
 {
   ConfigGeneral.default_floodcount = (yyvsp[-1].number);
 }
-#line 6211 "conf_parser.c"
+#line 6210 "conf_parser.c"
     break;
 
   case 507: /* general_default_floodtime: DEFAULT_FLOODTIME '=' timespec ';'  */
-#line 2509 "conf_parser.y"
+#line 2508 "conf_parser.y"
 {
   ConfigGeneral.default_floodtime = (yyvsp[-1].number);
 }
-#line 6219 "conf_parser.c"
+#line 6218 "conf_parser.c"
     break;
 
   case 508: /* general_ident_timeout: IDENT_TIMEOUT '=' timespec ';'  */
-#line 2514 "conf_parser.y"
+#line 2513 "conf_parser.y"
 {
   if ((yyvsp[-1].number) < 1 || (yyvsp[-1].number) > 30)
     break;
 
   ConfigGeneral.ident_timeout = (yyvsp[-1].number);
 }
-#line 6230 "conf_parser.c"
+#line 6229 "conf_parser.c"
     break;
 
   case 509: /* general_registration_timeout: REGISTRATION_TIMEOUT '=' timespec ';'  */
-#line 2522 "conf_parser.y"
+#line 2521 "conf_parser.y"
 {
   ConfigGeneral.registration_timeout = (yyvsp[-1].number);
 }
-#line 6238 "conf_parser.c"
+#line 6237 "conf_parser.c"
     break;
 
   case 510: /* general_sasl_service: SASL_SERVICE '=' QSTRING ';'  */
-#line 2527 "conf_parser.y"
+#line 2526 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6257,11 +6256,11 @@ yyreduce:
 
   ConfigGeneral.sasl_service = io_strdup((yyvsp[-1].string));
 }
-#line 6261 "conf_parser.c"
+#line 6260 "conf_parser.c"
     break;
 
   case 521: /* cloak_enabled: ENABLED '=' TBOOL ';'  */
-#line 2562 "conf_parser.y"
+#line 2561 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6272,11 +6271,11 @@ yyreduce:
   else
     cloak_set_disabled();
 }
-#line 6276 "conf_parser.c"
+#line 6275 "conf_parser.c"
     break;
 
   case 522: /* cloak_cidr_len_ipv4: CIDR_LEN_IPV4 '=' NUMBER ';'  */
-#line 2574 "conf_parser.y"
+#line 2573 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6284,11 +6283,11 @@ yyreduce:
   ConfigCloak.cidr_len_ipv4 = (yyvsp[-1].number);
   cloak_set_cidr_len_ipv4((yyvsp[-1].number));
 }
-#line 6288 "conf_parser.c"
+#line 6287 "conf_parser.c"
     break;
 
   case 523: /* cloak_cidr_len_ipv6: CIDR_LEN_IPV6 '=' NUMBER ';'  */
-#line 2583 "conf_parser.y"
+#line 2582 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6296,11 +6295,11 @@ yyreduce:
   ConfigCloak.cidr_len_ipv6 = (yyvsp[-1].number);
   cloak_set_cidr_len_ipv6((yyvsp[-1].number));
 }
-#line 6300 "conf_parser.c"
+#line 6299 "conf_parser.c"
     break;
 
   case 524: /* cloak_num_bits: NUM_BITS '=' NUMBER ';'  */
-#line 2592 "conf_parser.y"
+#line 2591 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6308,11 +6307,11 @@ yyreduce:
   ConfigCloak.num_bits = (yyvsp[-1].number);
   cloak_set_num_bits((yyvsp[-1].number));
 }
-#line 6312 "conf_parser.c"
+#line 6311 "conf_parser.c"
     break;
 
   case 525: /* cloak_secret: SECRET '=' QSTRING ';'  */
-#line 2601 "conf_parser.y"
+#line 2600 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6321,11 +6320,11 @@ yyreduce:
   ConfigCloak.secret = io_strdup((yyvsp[-1].string));
   cloak_set_secret((yyvsp[-1].string));
 }
-#line 6325 "conf_parser.c"
+#line 6324 "conf_parser.c"
     break;
 
   case 526: /* cloak_suffix: SUFFIX '=' QSTRING ';'  */
-#line 2611 "conf_parser.y"
+#line 2610 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6334,107 +6333,107 @@ yyreduce:
   ConfigCloak.suffix = io_strdup((yyvsp[-1].string));
   cloak_set_suffix((yyvsp[-1].string));
 }
-#line 6338 "conf_parser.c"
+#line 6337 "conf_parser.c"
     break;
 
   case 547: /* channel_disable_fake_channels: DISABLE_FAKE_CHANNELS '=' TBOOL ';'  */
-#line 2646 "conf_parser.y"
+#line 2645 "conf_parser.y"
 {
   ConfigChannel.disable_fake_channels = (yyvsp[-1].boolean);
 }
-#line 6346 "conf_parser.c"
+#line 6345 "conf_parser.c"
     break;
 
   case 548: /* channel_invite_client_count: INVITE_CLIENT_COUNT '=' NUMBER ';'  */
-#line 2651 "conf_parser.y"
+#line 2650 "conf_parser.y"
 {
   ConfigChannel.invite_client_count = (yyvsp[-1].number);
 }
-#line 6354 "conf_parser.c"
+#line 6353 "conf_parser.c"
     break;
 
   case 549: /* channel_invite_client_time: INVITE_CLIENT_TIME '=' timespec ';'  */
-#line 2656 "conf_parser.y"
+#line 2655 "conf_parser.y"
 {
   ConfigChannel.invite_client_time = (yyvsp[-1].number);
 }
-#line 6362 "conf_parser.c"
+#line 6361 "conf_parser.c"
     break;
 
   case 550: /* channel_invite_delay_channel: INVITE_DELAY_CHANNEL '=' timespec ';'  */
-#line 2661 "conf_parser.y"
+#line 2660 "conf_parser.y"
 {
   ConfigChannel.invite_delay_channel = (yyvsp[-1].number);
 }
-#line 6370 "conf_parser.c"
+#line 6369 "conf_parser.c"
     break;
 
   case 551: /* channel_invite_expire_time: INVITE_EXPIRE_TIME '=' timespec ';'  */
-#line 2666 "conf_parser.y"
+#line 2665 "conf_parser.y"
 {
   ConfigChannel.invite_expire_time = (yyvsp[-1].number);
 }
-#line 6378 "conf_parser.c"
+#line 6377 "conf_parser.c"
     break;
 
   case 552: /* channel_knock_client_count: KNOCK_CLIENT_COUNT '=' NUMBER ';'  */
-#line 2671 "conf_parser.y"
+#line 2670 "conf_parser.y"
 {
   ConfigChannel.knock_client_count = (yyvsp[-1].number);
 }
-#line 6386 "conf_parser.c"
+#line 6385 "conf_parser.c"
     break;
 
   case 553: /* channel_knock_client_time: KNOCK_CLIENT_TIME '=' timespec ';'  */
-#line 2676 "conf_parser.y"
+#line 2675 "conf_parser.y"
 {
   ConfigChannel.knock_client_time = (yyvsp[-1].number);
 }
-#line 6394 "conf_parser.c"
+#line 6393 "conf_parser.c"
     break;
 
   case 554: /* channel_knock_delay_channel: KNOCK_DELAY_CHANNEL '=' timespec ';'  */
-#line 2681 "conf_parser.y"
+#line 2680 "conf_parser.y"
 {
   ConfigChannel.knock_delay_channel = (yyvsp[-1].number);
 }
-#line 6402 "conf_parser.c"
+#line 6401 "conf_parser.c"
     break;
 
   case 555: /* channel_max_channels: MAX_CHANNELS '=' NUMBER ';'  */
-#line 2686 "conf_parser.y"
+#line 2685 "conf_parser.y"
 {
   ConfigChannel.max_channels = (yyvsp[-1].number);
 }
-#line 6410 "conf_parser.c"
+#line 6409 "conf_parser.c"
     break;
 
   case 556: /* channel_max_invites: MAX_INVITES '=' NUMBER ';'  */
-#line 2691 "conf_parser.y"
+#line 2690 "conf_parser.y"
 {
   ConfigChannel.max_invites = (yyvsp[-1].number);
 }
-#line 6418 "conf_parser.c"
+#line 6417 "conf_parser.c"
     break;
 
   case 557: /* channel_max_bans: MAX_BANS '=' NUMBER ';'  */
-#line 2696 "conf_parser.y"
+#line 2695 "conf_parser.y"
 {
   ConfigChannel.max_bans = (yyvsp[-1].number);
 }
-#line 6426 "conf_parser.c"
+#line 6425 "conf_parser.c"
     break;
 
   case 558: /* channel_max_bans_large: MAX_BANS_LARGE '=' NUMBER ';'  */
-#line 2701 "conf_parser.y"
+#line 2700 "conf_parser.y"
 {
   ConfigChannel.max_bans_large = (yyvsp[-1].number);
 }
-#line 6434 "conf_parser.c"
+#line 6433 "conf_parser.c"
     break;
 
   case 559: /* channel_max_kick_length: MAX_KICK_LENGTH '=' NUMBER ';'  */
-#line 2706 "conf_parser.y"
+#line 2705 "conf_parser.y"
 {
   if (conf_parser_ctx.pass != 2)
     break;
@@ -6451,47 +6450,47 @@ yyreduce:
   else
     ConfigChannel.max_kick_length = (yyvsp[-1].number);
 }
-#line 6455 "conf_parser.c"
+#line 6454 "conf_parser.c"
     break;
 
   case 560: /* channel_max_topic_length: MAX_TOPIC_LENGTH '=' NUMBER ';'  */
-#line 2724 "conf_parser.y"
+#line 2723 "conf_parser.y"
 {
   if ((yyvsp[-1].number) < 1 || (yyvsp[-1].number) > TOPICLEN)
     ConfigChannel.max_topic_length = TOPICLEN;
   else
     ConfigChannel.max_topic_length = (yyvsp[-1].number);
 }
-#line 6466 "conf_parser.c"
+#line 6465 "conf_parser.c"
     break;
 
   case 561: /* channel_default_join_flood_count: DEFAULT_JOIN_FLOOD_COUNT '=' NUMBER ';'  */
-#line 2732 "conf_parser.y"
+#line 2731 "conf_parser.y"
 {
   ConfigChannel.default_join_flood_count = (yyvsp[-1].number);
 }
-#line 6474 "conf_parser.c"
+#line 6473 "conf_parser.c"
     break;
 
   case 562: /* channel_default_join_flood_time: DEFAULT_JOIN_FLOOD_TIME '=' timespec ';'  */
-#line 2737 "conf_parser.y"
+#line 2736 "conf_parser.y"
 {
   ConfigChannel.default_join_flood_time = (yyvsp[-1].number);
 }
-#line 6482 "conf_parser.c"
+#line 6481 "conf_parser.c"
     break;
 
   case 575: /* serverhide_flatten_links: FLATTEN_LINKS '=' TBOOL ';'  */
-#line 2759 "conf_parser.y"
+#line 2758 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.flatten_links = (yyvsp[-1].boolean);
 }
-#line 6491 "conf_parser.c"
+#line 6490 "conf_parser.c"
     break;
 
   case 576: /* serverhide_flatten_links_delay: FLATTEN_LINKS_DELAY '=' timespec ';'  */
-#line 2765 "conf_parser.y"
+#line 2764 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6501,11 +6500,11 @@ yyreduce:
     links_cache_set_timer(interval_seconds);
   }
 }
-#line 6505 "conf_parser.c"
+#line 6504 "conf_parser.c"
     break;
 
   case 577: /* serverhide_flatten_links_file: FLATTEN_LINKS_FILE '=' QSTRING ';'  */
-#line 2776 "conf_parser.y"
+#line 2775 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6513,38 +6512,38 @@ yyreduce:
     ConfigServerHide.flatten_links_file = io_strdup(yylval.string);
   }
 }
-#line 6517 "conf_parser.c"
+#line 6516 "conf_parser.c"
     break;
 
   case 578: /* serverhide_disable_remote_commands: DISABLE_REMOTE_COMMANDS '=' TBOOL ';'  */
-#line 2785 "conf_parser.y"
+#line 2784 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.disable_remote_commands = (yyvsp[-1].boolean);
 }
-#line 6526 "conf_parser.c"
+#line 6525 "conf_parser.c"
     break;
 
   case 579: /* serverhide_hide_servers: HIDE_SERVERS '=' TBOOL ';'  */
-#line 2791 "conf_parser.y"
+#line 2790 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_servers = (yyvsp[-1].boolean);
 }
-#line 6535 "conf_parser.c"
+#line 6534 "conf_parser.c"
     break;
 
   case 580: /* serverhide_hide_services: HIDE_SERVICES '=' TBOOL ';'  */
-#line 2797 "conf_parser.y"
+#line 2796 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hide_services = (yyvsp[-1].boolean);
 }
-#line 6544 "conf_parser.c"
+#line 6543 "conf_parser.c"
     break;
 
   case 581: /* serverhide_hidden_name: HIDDEN_NAME '=' QSTRING ';'  */
-#line 2803 "conf_parser.y"
+#line 2802 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
   {
@@ -6552,20 +6551,20 @@ yyreduce:
     ConfigServerHide.hidden_name = io_strdup(yylval.string);
   }
 }
-#line 6556 "conf_parser.c"
+#line 6555 "conf_parser.c"
     break;
 
   case 582: /* serverhide_hidden: HIDDEN '=' TBOOL ';'  */
-#line 2812 "conf_parser.y"
+#line 2811 "conf_parser.y"
 {
   if (conf_parser_ctx.pass == 2)
     ConfigServerHide.hidden = (yyvsp[-1].boolean);
 }
-#line 6565 "conf_parser.c"
+#line 6564 "conf_parser.c"
     break;
 
 
-#line 6569 "conf_parser.c"
+#line 6568 "conf_parser.c"
 
       default: break;
     }

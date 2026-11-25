@@ -84,7 +84,6 @@ static struct
     whois,
     modes,
     klass,
-    target,
     prepend,
     command;
 

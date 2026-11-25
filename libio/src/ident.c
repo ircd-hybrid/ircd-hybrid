@@ -567,14 +567,7 @@ _ident_connect_complete(fde_t *fde, int error, void *context)
   struct ident_request *const request = context;
   assert(request);
 
-  /*
-   * Closing a socket with a pending comm_connect_tcp() synchronously invokes
-   * its cleanup callback. A request being cancelled detaches its fde before
-   * closing it, so this callback becomes a no-op in that re-entrant path.
-   */
-  if (request->fde != fde)
-    return;
-
+  assert(request->fde == fde);
   assert(request->state == IDENT_REQUEST_STATE_STARTING ||
          request->state == IDENT_REQUEST_STATE_ACTIVE);
   assert(request->timeout_event);

@@ -47,6 +47,8 @@ struct comm_op_st
   event_handle_t timeout_event;
 };
 
+static void _comm_connect_cleanup(void *);
+
 void
 comm_init(event_manager_t mgr)
 {
@@ -181,78 +183,70 @@ comm_get_select_timeout(event_manager_t mgr)
 }
 
 static void
-comm_connect_complete(comm_op_t *op, int status)
+_comm_connect_release(comm_op_t *op)
 {
   assert(op);
 
-  fde_t *fde = op->fde;
-  void (*hdl)(fde_t *, int, void *) = op->completion_handler;
-  void *hdl_data = op->completion_handler_data;
+  fde_t *const fde = op->fde;
+  assert(fde && fde->flags.open);
+  assert(fde->cleanup_handler == _comm_connect_cleanup);
+  assert(fde->cleanup_data == op);
+
+  fde->cleanup_handler = NULL;
+  fde->cleanup_data = NULL;
 
   if (op->timeout_event)
-  {
     event_destroy(op->timeout_event);
-    op->timeout_event = NULL;
-  }
-
-  if (fde == NULL || fde->flags.open == false)
-  {
-    hdl(fde, COMM_ERROR, hdl_data);
-
-    io_free(op);
-    return;
-  }
-
-  if (fde->cleanup_data == op)
-  {
-    fde->cleanup_handler = NULL;
-    fde->cleanup_data = NULL;
-  }
 
   comm_setselect(fde, COMM_SELECT_WRITE, NULL, NULL);
-
-  hdl(fde, status, hdl_data);
   io_free(op);
 }
 
 static void
-comm_connect_cleanup(void *cbdata)
+comm_connect_complete(comm_op_t *op, int status)
 {
-  comm_op_t *op = cbdata;
   assert(op);
 
-  comm_connect_complete(op, COMM_ERROR);
+  fde_t *const fde = op->fde;
+  void (*const handler)(fde_t *, int, void *) = op->completion_handler;
+  void *const data = op->completion_handler_data;
+
+  _comm_connect_release(op);
+  handler(fde, status, data);
+}
+
+static void
+_comm_connect_cleanup(void *cbdata)
+{
+  _comm_connect_release(cbdata);
+}
+
+bool
+comm_connect_cancel(fde_t *fde)
+{
+  assert(fde);
+  assert(fde->flags.open);
+
+  if (fde->cleanup_handler != _comm_connect_cleanup)
+    return false;
+
+  _comm_connect_release(fde->cleanup_data);
+  return true;
 }
 
 static void
 comm_connect_timeout(void *cbdata)
 {
-  comm_op_t *op = cbdata;
-  assert(op);
-
-  event_handle_t timeout_event = op->timeout_event;
-  op->timeout_event = NULL;
-  event_destroy(timeout_event);
-
-  comm_connect_complete(op, COMM_ERR_TIMEOUT);
+  comm_connect_complete(cbdata, COMM_ERR_TIMEOUT);
 }
 
-/* static void comm_connect_tryconnect(fde_t *fd, void *unused)
- * Input: The fd, the handler data(unused).
- * Output: None.
- * Side-effects: Try and connect with pending connect data for the FD. If
- *               we succeed or get a fatal error, call the callback.
- *               Otherwise, it is still blocking or something, so register
- *               to select for a write event on this FD.
- */
 static void
 comm_connect_handler(fde_t *fde, void *cbdata)
 {
   comm_op_t *op = cbdata;
   assert(op);
 
-  /* This check is needed or re-entrant s_bsd_* like sigio break it. */
-  if (fde->cleanup_handler != comm_connect_cleanup || fde->cleanup_data != op)
+  if (fde->cleanup_handler != _comm_connect_cleanup || fde->cleanup_data != op)
     return;
 
   int sock_err = 0;
@@ -262,19 +256,6 @@ comm_connect_handler(fde_t *fde, void *cbdata)
     comm_connect_complete(op, COMM_ERR_CONNECT);
 }
 
-/*
- * void comm_connect_tcp(int fd, const char *host, unsigned short port,
- *                       struct sockaddr *clocal, int socklen,
- *                       CNCB *callback, void *data, int aftype, int timeout)
- * Input: An fd to connect with, a host and port to connect to,
- *        a local sockaddr to connect from + length(or NULL to use the
- *        default), a callback, the data to pass into the callback, the
- *        address family.
- * Output: None.
- * Side-effects: A non-blocking connection to the host is started, and
- *               if necessary, set up for selection. The callback given
- *               may be called now, or it may be called later.
- */
 void
 comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
                  void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout_ms)
@@ -286,6 +267,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   assert(handler);
   assert(fde->cleanup_handler == NULL);
   assert(fde->cleanup_data == NULL);
+  assert(fde->write_handler == NULL);
 
   comm_op_t *const op = io_calloc(sizeof(*op));
   op->fde = fde;
@@ -293,7 +275,7 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   op->completion_handler_data = data;
   address_copy(&op->remote_addr, caddr);
 
-  fde->cleanup_handler = comm_connect_cleanup;
+  fde->cleanup_handler = _comm_connect_cleanup;
   fde->cleanup_data = op;
 
   if (!address_set_port(&op->remote_addr, port))

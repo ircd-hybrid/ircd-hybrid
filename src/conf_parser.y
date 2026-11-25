@@ -379,7 +379,6 @@ _conf_parser_quantity_from_decimal(const char *text, unsigned int unit, unsigned
 %token  T_IPV6
 %token  T_LOCOPS
 %token  T_LOG
-%token  T_OPME
 %token  T_PREPEND
 %token  T_PSEUDO
 %token  T_RECVQ

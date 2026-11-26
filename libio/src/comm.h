@@ -37,7 +37,7 @@ enum
 
 extern event_manager_t comm_event_manager;
 
-extern void comm_connect_tcp(fde_t *, const struct io_addr *, uint16_t, const struct io_addr *, void (fde_t *, int, void *), void *, uintmax_t);
+extern void comm_connect_tcp(fde_t *, const struct io_addr *, uint16_t, const struct io_addr *, void (*)(fde_t *, int, void *), void *, uintmax_t);
 extern void comm_init(event_manager_t);
 extern void comm_select(int);
 extern void comm_select_init(void);

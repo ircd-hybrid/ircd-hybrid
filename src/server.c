@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/socket.h>
 
 #include "comm.h"
 #include "io_string.h"
@@ -421,7 +422,9 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
-  comm_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, &connect->bind_addr,
+  const struct io_addr *const local_addr =
+    address_get_family(&connect->bind_addr) == AF_UNSPEC ? NULL : &connect->bind_addr;
+  comm_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, local_addr,
                    _server_connect_callback, client, connect->timeout * 1000ULL);
   return true;
 }

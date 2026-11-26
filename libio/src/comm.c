@@ -257,13 +257,13 @@ comm_connect_handler(fde_t *fde, void *cbdata)
 }
 
 void
-comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const struct io_addr *baddr,
+comm_connect_tcp(fde_t *fde, const struct io_addr *remote_addr, uint16_t remote_port, const struct io_addr *local_addr,
                  void (*handler)(fde_t *, int, void *), void *data, uintmax_t timeout_ms)
 {
   assert(fde);
   assert(fde->flags.open);
-  assert(caddr);
-  assert(address_is_ipv4(caddr) || address_is_ipv6(caddr));
+  assert(remote_addr);
+  assert(address_is_ipv4(remote_addr) || address_is_ipv6(remote_addr));
   assert(handler);
   assert(fde->cleanup_handler == NULL);
   assert(fde->cleanup_data == NULL);
@@ -273,24 +273,24 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *caddr, uint16_t port, const s
   op->fde = fde;
   op->completion_handler = handler;
   op->completion_handler_data = data;
-  address_copy(&op->remote_addr, caddr);
+  address_copy(&op->remote_addr, remote_addr);
 
   fde->cleanup_handler = _comm_connect_cleanup;
   fde->cleanup_data = op;
 
-  if (!address_set_port(&op->remote_addr, port))
+  if (!address_set_port(&op->remote_addr, remote_port))
   {
     comm_connect_complete(op, COMM_ERR_CONNECT);
     return;
   }
 
-  if (baddr && address_is_specified(baddr))
+  if (local_addr)
   {
-    if (bind(fde->fd, address_get_sockaddr(baddr), address_get_sockaddr_length(baddr)) == -1)
+    const socklen_t local_length = address_get_sockaddr_length(local_addr);
+    if (local_length == 0 || bind(fde->fd, address_get_sockaddr(local_addr), local_length) == -1)
     {
-      /* Failure, call the callback with COMM_ERR_BIND */
       comm_connect_complete(op, COMM_ERR_BIND);
-      return;  /* ... and quit */
+      return;
     }
   }
 

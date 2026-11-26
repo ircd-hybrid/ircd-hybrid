@@ -15,8 +15,10 @@
 
 
 #include "address.h"
+#include "comm.h"
 #include "event.h"
 #include "fdlist.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -363,12 +365,20 @@ stats_events(struct Client *client, size_t parc, char *parv[])
 static void
 stats_fdlist(struct Client *client, size_t parc, char *parv[])
 {
-  for (int fd = 0; fd <= highest_fd; ++fd)
+  const struct io_poll_fd_info *const control = io_poll_control_fd(comm_get_poller());
+  const int control_fd = control ? control->fd : -1;
+  for (int fd = 0; fd <= IO_MAX(highest_fd, control_fd); ++fd)
   {
-    const fde_t *const F = &fd_table[fd];
-    if (F->flags.open)
-      sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "F :fd %-5d desc '%s'",
-                         F->fd, F->desc);
+    const char *description;
+    if (fd == control_fd)
+      description = control->description;
+    else if (fd <= highest_fd && fd_table[fd].flags.open)
+      description = fd_table[fd].desc;
+    else
+      continue;
+
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "F :fd %-5d desc '%s'",
+                       fd, description ? description : "");
   }
 }
 

@@ -27,39 +27,19 @@
  */
 enum { FD_DESC_SIZE = 80 };  /* HOSTLEN + comment */
 
-/**
- * @struct _fde
- * @brief Structure representing a file descriptor entry.
- */
 typedef struct _fde
 {
-  /*
-   * Yes, this gives us only one pending read and one pending write per
-   * filedescriptor. Think though: when do you think we'll need more?
-   */
   int fd;  /**< File descriptor. */
-  int comm_index;  /**< Index in the poll list. */
-  int evcache;  /**< Current fd events as set up by the underlying I/O. */
   char *desc;  /**< File descriptor description. */
-
-  /** @name Event Handlers */
-  /**@{*/
-  void (*read_handler)(struct _fde *, void *);  /**< Read event handler. */
-  void *read_data;  /**< Data for the read event handler. */
-
-  void (*write_handler)(struct _fde *, void *);  /**< Write event handler. */
-  void *write_data;  /**< Data for the write event handler. */
 
   void (*cleanup_handler)(void *data);
   void *cleanup_data;
-  /**@}*/
 
   /** @name Flags */
   /**@{*/
   struct
   {
     bool open;  /**< Flag indicating if the file descriptor is open. */
-    bool is_socket;  /**< Flag indicating if the file descriptor is a socket. */
   } flags;
   /**@}*/
 
@@ -74,6 +54,6 @@ extern fde_t *fd_table;  /**< File descriptor table. */
 extern void fdlist_init(void);
 extern void fd_note(fde_t *, const char *, ...) IO_AFP(2,3);
 extern void close_fds(void);
-extern fde_t *fd_open(int, bool, const char *);
-extern fde_t *fd_close(fde_t *);
+extern fde_t *fd_open(int, const char *);
+extern void fd_close(fde_t *);
 #endif  /* INCLUDED_fdlist_h */

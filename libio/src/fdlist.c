@@ -15,7 +15,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "comm.h"
 #include "defaults.h"
 #include "fdlist.h"
 #include "io_rlimit.h"
@@ -69,22 +68,15 @@ fdlist_update_highest_fd(int fd, bool opening)
 }
 
 fde_t *
-fd_open(int fd, bool is_socket, const char *desc)
+fd_open(int fd, const char *desc)
 {
-  fde_t *F = &fd_table[fd];
-
-  assert(fd >= 0);
+  assert(fd >= 0 && fd < hard_fdlimit);
+  fde_t *const F = &fd_table[fd];
   assert(F->fd == 0);
   assert(F->flags.open == false);
 
-  /*
-   * Note: normally we'd have to clear the other flags, but currently F
-   * is always cleared before calling us.
-   */
   F->fd = fd;
-  F->comm_index = -1;
   F->flags.open = true;
-  F->flags.is_socket = is_socket;
 
   if (desc)
     F->desc = io_strndup(desc, FD_DESC_SIZE);
@@ -95,7 +87,7 @@ fd_open(int fd, bool is_socket, const char *desc)
   return F;
 }
 
-fde_t *
+void
 fd_close(fde_t *F)
 {
   assert(F->fd >= 0);
@@ -104,14 +96,10 @@ fd_close(fde_t *F)
   if (F->cleanup_handler)
     F->cleanup_handler(F->cleanup_data);
 
-  if (F->flags.is_socket)
-    comm_setselect(F, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
-
   if (tls_session_is_active(&F->tls))
     tls_session_deinit(&F->tls);
 
   io_free(F->desc);
-  /* Unlike squid, we're actually closing the FD here! -- adrian */
   close(F->fd);
   F->flags.open = false;  /* Must set F->flags.open == false before fdlist_update_highest_fd() */
 
@@ -119,8 +107,6 @@ fd_close(fde_t *F)
   --number_fd;
 
   memset(F, 0, sizeof(*F));
-
-  return F;
 }
 
 void

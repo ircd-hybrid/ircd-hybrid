@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 
 #include "comm.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -244,7 +245,7 @@ _server_handshake_irc_start(struct Client *client)
              me.name, me.id, ConfigServerHide.hidden ? "h" : "", me.info);
 
   /* If we get here, we're ok, so lets start reading some data */
-  read_packet(client->connection->fde, client);
+  read_packet(client);
 }
 
 static void
@@ -258,9 +259,7 @@ _server_handshake_tls_finish(struct Client *client)
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
   client_set_flag(client, FLAGS_TLS_ACTIVE);
 
-  fde_t *fde = client->connection->fde;
-  comm_setselect(fde, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL);
-
+  fde_t *const fde = client->connection->fde;
   tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
   const struct ConnectItem *const connect = server_conf_get(client);
@@ -274,10 +273,9 @@ _server_handshake_tls_finish(struct Client *client)
 }
 
 static void
-_server_handshake_tls_start(fde_t *fde, void *data_)
+_server_handshake_tls_start(int fd, void *context)
 {
-  struct Client *const client = data_;
-  assert(fde);
+  struct Client *const client = context;
   assert(client && client_is_local(client));
 
   /*
@@ -287,8 +285,8 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fde);
-  assert(client->connection->fde == fde);
+  fde_t *const fde = client->connection->fde;
+  assert(fde && fde->fd == fd);
 
   tls_handshake_status_t ret = tls_session_handshake(&fde->tls, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
@@ -300,10 +298,10 @@ _server_handshake_tls_start(fde_t *fde, void *data_)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(fde, COMM_SELECT_WRITE, _server_handshake_tls_start, client);
+      io_poll_watch_write(comm_get_poller(), fd, _server_handshake_tls_start, client);
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(fde, COMM_SELECT_READ, _server_handshake_tls_start, client);
+      io_poll_watch_read(comm_get_poller(), fd, _server_handshake_tls_start, client);
       break;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
@@ -329,7 +327,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
   client_update_activity_timeout(client);
 
-  _server_handshake_tls_start(fde, client);
+  _server_handshake_tls_start(fde->fd, client);
 }
 
 static void

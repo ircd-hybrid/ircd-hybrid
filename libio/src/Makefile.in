@@ -120,14 +120,15 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_LIBADD =
 am_libio_la_OBJECTS = address.lo address_index.lo address_parse.lo \
-	base32.lo comm.lo comm_epoll.lo comm_kqueue.lo comm_poll.lo \
-	dbuf.lo dns.lo event.lo fdlist.lo hook.lo hostmask_index.lo \
-	ident.lo io_daemon.lo io_getopt.lo io_hash.lo io_hex.lo \
-	io_parse.lo io_pidfile.lo io_rlimit.lo io_signal.lo \
-	io_string.lo io_time.lo list.lo log.lo match.lo misc.lo \
-	memory.lo module.lo module_config.lo module_loader.lo \
-	patricia.lo resolver.lo resolver_config.lo rng_mt.lo sha3.lo \
-	tls_gnutls.lo tls_none.lo tls_openssl.lo tls_wolfssl.lo
+	base32.lo comm.lo dbuf.lo dns.lo event.lo fdlist.lo hook.lo \
+	hostmask_index.lo ident.lo io_daemon.lo io_getopt.lo \
+	io_hash.lo io_hex.lo io_parse.lo io_pidfile.lo io_poll.lo \
+	io_poll_epoll.lo io_poll_kqueue.lo io_poll_poll.lo \
+	io_rlimit.lo io_signal.lo io_string.lo io_time.lo list.lo \
+	log.lo match.lo misc.lo memory.lo module.lo module_config.lo \
+	module_loader.lo patricia.lo resolver.lo resolver_config.lo \
+	rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo tls_openssl.lo \
+	tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -151,14 +152,14 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/address_index.Plo ./$(DEPDIR)/address_parse.Plo \
 	./$(DEPDIR)/base32.Plo ./$(DEPDIR)/comm.Plo \
-	./$(DEPDIR)/comm_epoll.Plo ./$(DEPDIR)/comm_kqueue.Plo \
-	./$(DEPDIR)/comm_poll.Plo ./$(DEPDIR)/dbuf.Plo \
-	./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo \
+	./$(DEPDIR)/dbuf.Plo ./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo \
 	./$(DEPDIR)/fdlist.Plo ./$(DEPDIR)/hook.Plo \
 	./$(DEPDIR)/hostmask_index.Plo ./$(DEPDIR)/ident.Plo \
 	./$(DEPDIR)/io_daemon.Plo ./$(DEPDIR)/io_getopt.Plo \
 	./$(DEPDIR)/io_hash.Plo ./$(DEPDIR)/io_hex.Plo \
 	./$(DEPDIR)/io_parse.Plo ./$(DEPDIR)/io_pidfile.Plo \
+	./$(DEPDIR)/io_poll.Plo ./$(DEPDIR)/io_poll_epoll.Plo \
+	./$(DEPDIR)/io_poll_kqueue.Plo ./$(DEPDIR)/io_poll_poll.Plo \
 	./$(DEPDIR)/io_rlimit.Plo ./$(DEPDIR)/io_signal.Plo \
 	./$(DEPDIR)/io_string.Plo ./$(DEPDIR)/io_time.Plo \
 	./$(DEPDIR)/list.Plo ./$(DEPDIR)/log.Plo ./$(DEPDIR)/match.Plo \
@@ -358,9 +359,6 @@ libio_la_SOURCES = address.c     \
                     base32.h      \
                     comm.c        \
                     comm.h        \
-                    comm_epoll.c  \
-                    comm_kqueue.c \
-                    comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
                     dns.c         \
@@ -388,6 +386,12 @@ libio_la_SOURCES = address.c     \
                     io_parse.h    \
                     io_pidfile.c  \
                     io_pidfile.h  \
+                    io_poll.c        \
+                    io_poll.h        \
+                    io_poll_backend.h \
+                    io_poll_epoll.c  \
+                    io_poll_kqueue.c \
+                    io_poll_poll.c   \
                     io_rlimit.c   \
                     io_rlimit.h   \
                     io_signal.c   \
@@ -488,9 +492,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/address_parse.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/base32.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_epoll.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_kqueue.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm_poll.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
@@ -504,6 +505,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_hex.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_parse.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_pidfile.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_poll.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_poll_epoll.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_poll_kqueue.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_poll_poll.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_rlimit.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_signal.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_string.Plo@am__quote@ # am--include-marker
@@ -690,9 +695,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/address_parse.Plo
 	-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
-	-rm -f ./$(DEPDIR)/comm_epoll.Plo
-	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
-	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
@@ -706,6 +708,10 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/io_hex.Plo
 	-rm -f ./$(DEPDIR)/io_parse.Plo
 	-rm -f ./$(DEPDIR)/io_pidfile.Plo
+	-rm -f ./$(DEPDIR)/io_poll.Plo
+	-rm -f ./$(DEPDIR)/io_poll_epoll.Plo
+	-rm -f ./$(DEPDIR)/io_poll_kqueue.Plo
+	-rm -f ./$(DEPDIR)/io_poll_poll.Plo
 	-rm -f ./$(DEPDIR)/io_rlimit.Plo
 	-rm -f ./$(DEPDIR)/io_signal.Plo
 	-rm -f ./$(DEPDIR)/io_string.Plo
@@ -777,9 +783,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/address_parse.Plo
 	-rm -f ./$(DEPDIR)/base32.Plo
 	-rm -f ./$(DEPDIR)/comm.Plo
-	-rm -f ./$(DEPDIR)/comm_epoll.Plo
-	-rm -f ./$(DEPDIR)/comm_kqueue.Plo
-	-rm -f ./$(DEPDIR)/comm_poll.Plo
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
@@ -793,6 +796,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/io_hex.Plo
 	-rm -f ./$(DEPDIR)/io_parse.Plo
 	-rm -f ./$(DEPDIR)/io_pidfile.Plo
+	-rm -f ./$(DEPDIR)/io_poll.Plo
+	-rm -f ./$(DEPDIR)/io_poll_epoll.Plo
+	-rm -f ./$(DEPDIR)/io_poll_kqueue.Plo
+	-rm -f ./$(DEPDIR)/io_poll_poll.Plo
 	-rm -f ./$(DEPDIR)/io_rlimit.Plo
 	-rm -f ./$(DEPDIR)/io_signal.Plo
 	-rm -f ./$(DEPDIR)/io_string.Plo

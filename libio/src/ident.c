@@ -17,6 +17,7 @@
 #include "comm.h"
 #include "event.h"
 #include "ident.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "list.h"
 #include "memory.h"
@@ -459,22 +460,22 @@ _ident_reply_find_line_end(const char *reply, size_t reply_length, size_t *line_
 }
 
 static void
-_ident_reply_read(fde_t *fde, void *context)
+_ident_reply_read(int fd, void *context)
 {
   struct ident_request *const request = context;
   assert(request);
 
-  if (request->fde != fde)
+  if (request->fde == NULL || request->fde->fd != fd)
     return;
 
-  assert(fde->flags.open);
+  assert(request->fde->flags.open);
   assert(request->state == IDENT_REQUEST_STATE_ACTIVE);
   assert(request->reply_length <= sizeof(request->reply));
 
   while (request->reply_length < sizeof(request->reply))
   {
     const size_t reply_capacity_remaining = sizeof(request->reply) - request->reply_length;
-    const ssize_t recv_result = recv(fde->fd, request->reply + request->reply_length,
+    const ssize_t recv_result = recv(fd, request->reply + request->reply_length,
                                      reply_capacity_remaining, 0);
 
     if (recv_result > 0)
@@ -508,7 +509,7 @@ _ident_reply_read(fde_t *fde, void *context)
 
     if (_ident_errno_is_would_block(errno))
     {
-      comm_setselect(fde, COMM_SELECT_READ, _ident_reply_read, request);
+      io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request);
       return;
     }
 
@@ -520,15 +521,15 @@ _ident_reply_read(fde_t *fde, void *context)
 }
 
 static void
-_ident_query_write(fde_t *fde, void *context)
+_ident_query_write(int fd, void *context)
 {
   struct ident_request *const request = context;
   assert(request);
 
-  if (request->fde != fde)
+  if (request->fde == NULL || request->fde->fd != fd)
     return;
 
-  assert(fde->flags.open);
+  assert(request->fde->flags.open);
   assert(request->state == IDENT_REQUEST_STATE_STARTING ||
          request->state == IDENT_REQUEST_STATE_ACTIVE);
   assert(request->query_offset <= request->query_length);
@@ -537,7 +538,7 @@ _ident_query_write(fde_t *fde, void *context)
   {
     const char *const query_data = request->query + request->query_offset;
     const size_t query_remaining = request->query_length - request->query_offset;
-    const ssize_t send_result = send(fde->fd, query_data, query_remaining, 0);
+    const ssize_t send_result = send(fd, query_data, query_remaining, 0);
 
     if (send_result > 0)
     {
@@ -550,7 +551,7 @@ _ident_query_write(fde_t *fde, void *context)
 
     if (send_result == -1 && _ident_errno_is_would_block(errno))
     {
-      comm_setselect(fde, COMM_SELECT_WRITE, _ident_query_write, request);
+      io_poll_watch_write(comm_get_poller(), fd, _ident_query_write, request);
       return;
     }
 
@@ -558,7 +559,7 @@ _ident_query_write(fde_t *fde, void *context)
     return;
   }
 
-  comm_setselect(fde, COMM_SELECT_READ, _ident_reply_read, request);
+  io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request);
 }
 
 static void
@@ -578,7 +579,7 @@ _ident_connect_complete(fde_t *fde, int error, void *context)
     return;
   }
 
-  _ident_query_write(fde, request);
+  _ident_query_write(fde->fd, request);
 }
 
 static bool

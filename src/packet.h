@@ -10,7 +10,7 @@
 #ifndef INCLUDED_packet_h
 #define INCLUDED_packet_h
 
-#include "fdlist.h"
+struct Client;
 
-extern void read_packet(fde_t *, void *);
+extern void read_packet(struct Client *);
 #endif  /* INCLUDED_packet_h */

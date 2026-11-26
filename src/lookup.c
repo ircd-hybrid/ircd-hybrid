@@ -111,7 +111,7 @@ _lookup_complete_if_ready(struct LookupRequest *lookup)
   client_update_activity_timeout(client);
 
   /* Hand the connection over to the main packet reader to begin processing IRC protocol commands. */
-  read_packet(client->connection->fde, client);
+  read_packet(client);
 }
 
 static void

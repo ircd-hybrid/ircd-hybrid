@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "comm.h"
 #include "fdlist.h"
 #include "io_pidfile.h"
 #include "io_string.h"
@@ -92,6 +93,7 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   io_pidfile_remove(pidFileName);
   io_pidfile_close();
+  comm_shutdown();
 
   if (action == IRCD_EXIT_RESTART)
   {

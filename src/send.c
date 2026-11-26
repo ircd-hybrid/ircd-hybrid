@@ -13,6 +13,7 @@
 #include "address.h"
 #include "comm.h"
 #include "dbuf.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -128,11 +129,11 @@ _send_block_to_server(struct Client *to, const struct Client *from, struct dbuf_
 }
 
 void
-send_write_ready(fde_t *fde, void *data)
+send_write_ready(int fd, void *context)
 {
-  struct Client *const client = data;
+  struct Client *const client = context;
+  (void)fd;
 
-  assert(fde);
   assert(client);
   assert(client->connection);
 
@@ -140,7 +141,7 @@ send_write_ready(fde_t *fde, void *data)
     return;
 
   assert(client->connection->fde);
-  assert(client->connection->fde == fde);
+  assert(client->connection->fde->fd == fd);
   assert(client_has_flag(client, FLAGS_BLOCKED));
 
   client_unset_flag(client, FLAGS_BLOCKED);
@@ -185,7 +186,7 @@ send_queued_write(struct Client *to)
       {
         client_set_flag(to, FLAGS_BLOCKED);
         /* We have a non-fatal error, reschedule a write */
-        comm_setselect(to->connection->fde, COMM_SELECT_WRITE, send_write_ready, to);
+        io_poll_watch_write(comm_get_poller(), to->connection->fde->fd, send_write_ready, to);
       }
       else
       {

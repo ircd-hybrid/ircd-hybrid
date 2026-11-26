@@ -15,11 +15,13 @@
 #include <jansson.h>  /**< Jansson JSON library. */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -30,6 +32,7 @@
 #include "io_daemon.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
+#include "io_poll.h"
 #include "io_rlimit.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -156,6 +159,22 @@ static struct io_getopt myopts[] =
   { NULL, 0, NULL, STRING, NULL }
 };
 
+enum { IRCD_IO_MAX_WAIT_MS = 100 };
+
+static int
+_io_wait_timeout_ms(void)
+{
+  const uintmax_t next_fire_ms = event_manager_get_next_fire_time(ircd_event_manager);
+  if (next_fire_ms == EVENT_TIME_NEVER)
+    return IRCD_IO_MAX_WAIT_MS;
+
+  const uintmax_t now_ms = io_time_get_monotonic_ms_total();
+  if (next_fire_ms <= now_ms)
+    return 0;
+
+  return (int)IO_MIN(next_fire_ms - now_ms, IRCD_IO_MAX_WAIT_MS);
+}
+
 /**
  * @brief Main IO loop for processing events and managing server activities.
  *
@@ -163,13 +182,21 @@ static struct io_getopt myopts[] =
  * processing events, checking for rehash signals, and managing client connections.
  */
 static void
-_io_loop(void)
+_io_loop(struct io_poll *poller)
 {
   while (true)
   {
     ircd_signal_process();
 
-    comm_select(comm_get_select_timeout(ircd_event_manager));
+    if (io_poll_dispatch(poller, _io_wait_timeout_ms()) == -1 && errno != EINTR)
+    {
+      if (errno == EBADF)
+        ircd_exit_fmt(IRCD_EXIT_FAILURE, "I/O polling failed: %s", strerror(errno));
+
+      /* Avoid a busy loop after persistent wait errors. */
+      const struct timespec delay = { .tv_nsec = 50000000 };
+      nanosleep(&delay, NULL);
+    }
 
     ircd_signal_process();
 
@@ -422,7 +449,12 @@ main(int argc, char *argv[])
   fdlist_init();
   log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
-  comm_init(ircd_event_manager);  /* This needs to be setup early ! -- adrian */
+  if (!comm_init(ircd_event_manager))
+  {
+    log_write(LOG_TYPE_IRCD, "Failed to initialize I/O polling: %s", strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
   tls_library_init();
 
   /* Check if there is pidfile and daemon already running */
@@ -473,7 +505,7 @@ main(int argc, char *argv[])
   event_reschedule(event_server_connect_auto, 1);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
-  _io_loop();
+  _io_loop(comm_get_poller());
 
   return 0;
 }

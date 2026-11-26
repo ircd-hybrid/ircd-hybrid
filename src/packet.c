@@ -16,6 +16,7 @@
 
 #include "comm.h"
 #include "fdlist.h"
+#include "io_poll.h"
 #include "io_time.h"
 
 #include "client.h"
@@ -26,10 +27,18 @@
 
 enum { READBUF_SIZE = 16384 };
 
-void
-read_packet(fde_t *fde, void *data_)
+static void
+read_packet_ready(int fd, void *context)
 {
-  struct Client *const client = data_;
+  struct Client *const client = context;
+  assert(client->connection->fde && client->connection->fde->fd == fd);
+  (void)fd;
+  read_packet(client);
+}
+
+void
+read_packet(struct Client *client)
+{
   ssize_t length = 0;
   char raw_receive_buffer[READBUF_SIZE];
 
@@ -39,8 +48,9 @@ read_packet(fde_t *fde, void *data_)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fde);
-  assert(client->connection->fde == fde);
+  fde_t *const fde = client->connection->fde;
+  assert(fde);
+  const int fd = fde->fd;
 
   while (true)
   {
@@ -50,20 +60,16 @@ read_packet(fde_t *fde, void *data_)
       length = tls_session_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
 
       if (want_write)
-        comm_setselect(fde, COMM_SELECT_WRITE, send_write_ready, client);
+        io_poll_watch_write(comm_get_poller(), fd, send_write_ready, client);
     }
     else
-      length = recv(fde->fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
+      length = recv(fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
     if (length <= 0)
     {
-      /*
-       * If true, then we can recover from this error. Stop here and register for
-       * another COMM_SELECT_READ io-request.
-       */
       const int error_code = length < 0 ? errno : 0;
       if (length < 0 && comm_errno_is_recoverable(error_code))
-        comm_setselect(fde, COMM_SELECT_READ, read_packet, client);
+        io_poll_watch_read(comm_get_poller(), fd, read_packet_ready, client);
       else
         client_schedule_exit_on_io_failure(client, CLIENT_IO_OPERATION_READ,
                                            length == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED

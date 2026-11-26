@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "comm.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "log.h"
 #include "memory.h"
@@ -921,9 +922,9 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
 }
 
 static void
-_client_tls_session_handshake_handler(fde_t *fde, void *data)
+_client_tls_session_handshake_handler(int fd, void *context)
 {
-  struct Client *const client = data;
+  struct Client *const client = context;
   assert(client && client_is_local(client));
   assert(client->connection);
 
@@ -934,8 +935,8 @@ _client_tls_session_handshake_handler(fde_t *fde, void *data)
   if (client_is_defunct(client))
     return;
 
-  assert(client->connection->fde);
-  assert(client->connection->fde == fde);
+  fde_t *const fde = client->connection->fde;
+  assert(fde && fde->fd == fd);
 
   const char *tls_error = NULL;
   const tls_handshake_status_t status = tls_session_handshake(&fde->tls, &tls_error);
@@ -946,16 +947,15 @@ _client_tls_session_handshake_handler(fde_t *fde, void *data)
       client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
       client_set_flag(client, FLAGS_TLS_ACTIVE);
 
-      comm_setselect(fde, 0, NULL, NULL);
       tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
 
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      comm_setselect(fde, COMM_SELECT_WRITE, _client_tls_session_handshake_handler, client);
+      io_poll_watch_write(comm_get_poller(), fd, _client_tls_session_handshake_handler, client);
       return;
     case TLS_HANDSHAKE_WANT_READ:
-      comm_setselect(fde, COMM_SELECT_READ, _client_tls_session_handshake_handler, client);
+      io_poll_watch_read(comm_get_poller(), fd, _client_tls_session_handshake_handler, client);
       return;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
@@ -988,7 +988,7 @@ _client_begin_local_connection_ingress(struct Client *client)
   }
 
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-  _client_tls_session_handshake_handler(client->connection->fde, client);
+  _client_tls_session_handshake_handler(client->connection->fde->fd, client);
 }
 
 static struct Client *

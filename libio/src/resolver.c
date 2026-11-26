@@ -24,6 +24,7 @@
 #include "comm.h"
 #include "dns.h"
 #include "fdlist.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -137,7 +138,7 @@ static uint64_t resolver_config_generation;
 static list_t request_list;
 static struct resolver_request *requests_by_transaction_id[UINT16_MAX + 1U];
 
-static void _resolver_read_reply(fde_t *, void *);
+static void _resolver_read_reply(int, void *);
 
 static const struct resolver_socket *
 _resolver_socket_find_by_family(int family)
@@ -163,7 +164,7 @@ _resolver_socket_open(struct resolver_socket *socket)
   if (socket->fde == NULL)
     return false;
 
-  comm_setselect(socket->fde, COMM_SELECT_READ, _resolver_read_reply, socket);
+  io_poll_watch_read(comm_get_poller(), socket->fde->fd, _resolver_read_reply, socket);
   return true;
 }
 
@@ -1162,12 +1163,11 @@ _resolver_process_packet(const struct resolver_socket *socket,
 }
 
 static void
-_resolver_read_reply(fde_t *fde, void *data)
+_resolver_read_reply(int fd, void *context)
 {
-  struct resolver_socket *const socket = data;
+  struct resolver_socket *const socket = context;
   assert(socket);
-  assert(socket->fde);
-  assert(socket->fde == fde);
+  assert(socket->fde && socket->fde->fd == fd);
 
   const uint64_t generation = socket->generation;
   unsigned char packet[RESOLVER_UDP_MESSAGE_CAPACITY];
@@ -1178,7 +1178,7 @@ _resolver_read_reply(fde_t *fde, void *data)
   };
 
   /* Keep reception armed before callbacks can reconfigure the resolver. */
-  comm_setselect(fde, COMM_SELECT_READ, _resolver_read_reply, socket);
+  io_poll_watch_read(comm_get_poller(), fd, _resolver_read_reply, socket);
 
   for (size_t packets_read = 0; packets_read < RESOLVER_READ_PACKET_BUDGET; ++packets_read)
   {
@@ -1196,7 +1196,7 @@ _resolver_read_reply(fde_t *fde, void *data)
         .msg_iovlen = 1
       };
 
-      bytes_received = recvmsg(fde->fd, &message, 0);
+      bytes_received = recvmsg(fd, &message, 0);
     } while (bytes_received == -1 && errno == EINTR);
 
     if (bytes_received == -1)

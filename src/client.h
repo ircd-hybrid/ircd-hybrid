@@ -89,7 +89,7 @@ enum
   FLAGS_FLOODDONE       = 1 << 11,  /**< Flood grace period has been ended. */
   FLAGS_EOB             = 1 << 12,  /**< Server has sent us an EOB */
   FLAGS_HIDDEN          = 1 << 13,  /**< A hidden server. Not shown in /links */
-  FLAGS_BLOCKED         = 1 << 14,  /**< Must wait for COMM_SELECT_WRITE */
+  FLAGS_BLOCKED         = 1 << 14,  /**< Waiting for write readiness */
   FLAGS_EXEMPTRESV      = 1 << 15,  /**< User is exempt from RESV */
   FLAGS_GOTUSER         = 1 << 16,  /**< If we received a USER command */
   FLAGS_FLOOD_NOTICED   = 1 << 17,  /**< Notice to opers about this flooder has been sent */

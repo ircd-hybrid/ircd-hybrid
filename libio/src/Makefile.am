@@ -11,9 +11,6 @@ libio_la_SOURCES =  address.c     \
                     base32.h      \
                     comm.c        \
                     comm.h        \
-                    comm_epoll.c  \
-                    comm_kqueue.c \
-                    comm_poll.c   \
                     dbuf.c        \
                     dbuf.h        \
                     dns.c         \
@@ -41,6 +38,12 @@ libio_la_SOURCES =  address.c     \
                     io_parse.h    \
                     io_pidfile.c  \
                     io_pidfile.h  \
+                    io_poll.c        \
+                    io_poll.h        \
+                    io_poll_backend.h \
+                    io_poll_epoll.c  \
+                    io_poll_kqueue.c \
+                    io_poll_poll.c   \
                     io_rlimit.c   \
                     io_rlimit.h   \
                     io_signal.c   \

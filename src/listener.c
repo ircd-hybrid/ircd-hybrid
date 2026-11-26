@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 
 #include "comm.h"
+#include "io_poll.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "log.h"
@@ -60,12 +61,12 @@ _listener_destroy(struct Listener *listener)
 enum { LISTENER_ACCEPT_BUDGET = 128 };
 
 static void
-_listener_accept_connection(fde_t *F, void *data_)
+_listener_accept_connection(int fd, void *context)
 {
-  struct Listener *const listener = data_;
+  struct Listener *const listener = context;
+  (void)fd;
   assert(listener);
-  assert(listener->fde == F);
-  assert(listener->fde);
+  assert(listener->fde && listener->fde->fd == fd);
   assert(listener->fde->flags.open);
 
   const char *desc =
@@ -101,7 +102,7 @@ _listener_accept_connection(fde_t *F, void *data_)
   }
 
   /* Re-register a new IO request for the next accept .. */
-  comm_setselect(listener->fde, COMM_SELECT_READ, _listener_accept_connection, listener);
+  io_poll_watch_read(comm_get_poller(), listener->fde->fd, _listener_accept_connection, listener);
 }
 
 /**
@@ -178,7 +179,7 @@ _listener_finalize(struct Listener *listener)
 
   listener->fde = new_fde;
 
-  comm_setselect(listener->fde, COMM_SELECT_READ, _listener_accept_connection, listener);
+  io_poll_watch_read(comm_get_poller(), listener->fde->fd, _listener_accept_connection, listener);
   return true;
 }
 

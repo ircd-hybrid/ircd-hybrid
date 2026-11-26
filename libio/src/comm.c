@@ -35,13 +35,13 @@ static const char *const comm_err_str[] =
   [COMM_ERR_BIND] = "Error during bind()",
   [COMM_ERR_TIMEOUT] = "connect timeout",
   [COMM_ERR_CONNECT] = "Error during connect()",
-  [COMM_ERROR] = "Comm Error"
+  [COMM_ERROR] = "Comm Error",
+  [COMM_ERR_TIMER] = "Unable to schedule connect timeout"
 };
 
 struct comm_op_st
 {
   fde_t *fde;
-  struct io_addr remote_addr;
   void (*completion_handler)(fde_t *, int, void *);
   void *completion_handler_data;
   event_handle_t timeout_event;
@@ -273,12 +273,12 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *remote_addr, uint16_t remote_
   op->fde = fde;
   op->completion_handler = handler;
   op->completion_handler_data = data;
-  address_copy(&op->remote_addr, remote_addr);
 
   fde->cleanup_handler = _comm_connect_cleanup;
   fde->cleanup_data = op;
 
-  if (!address_set_port(&op->remote_addr, remote_port))
+  struct io_addr endpoint = *remote_addr;
+  if (!address_set_port(&endpoint, remote_port))
   {
     comm_connect_complete(op, COMM_ERR_CONNECT);
     return;
@@ -294,8 +294,18 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *remote_addr, uint16_t remote_
     }
   }
 
-  /* Try the connect() */
-  if (connect(fde->fd, address_get_sockaddr(&op->remote_addr), address_get_sockaddr_length(&op->remote_addr)) == 0)
+  if (timeout_ms > 0)
+  {
+    op->timeout_event =
+      event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout_ms, true, op, NULL);
+    if (op->timeout_event == NULL || event_schedule(op->timeout_event) != EVENT_SUCCESS)
+    {
+      comm_connect_complete(op, COMM_ERR_TIMER);
+      return;
+    }
+  }
+
+  if (connect(fde->fd, address_get_sockaddr(&endpoint), address_get_sockaddr_length(&endpoint)) == 0)
   {
     comm_connect_complete(op, COMM_OK);
     return;
@@ -305,12 +315,6 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *remote_addr, uint16_t remote_
   {
     comm_connect_complete(op, COMM_ERR_CONNECT);
     return;
-  }
-
-  if (timeout_ms > 0)
-  {
-    op->timeout_event = event_create(comm_event_manager, "comm_connect_timeout", comm_connect_timeout, timeout_ms, true, op, NULL);
-    event_schedule(op->timeout_event);
   }
 
   comm_setselect(fde, COMM_SELECT_WRITE, comm_connect_handler, op);

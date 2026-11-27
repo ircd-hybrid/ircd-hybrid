@@ -560,9 +560,10 @@ _ident_query_write(int fd, void *context)
 }
 
 static void
-_ident_connect_complete(fde_t *socket_fde, enum io_socket_connect_status status, void *context)
+_ident_connect_complete(fde_t *socket_fde, enum io_socket_connect_status status, int system_error, void *context)
 {
   struct ident_request *const request = context;
+  (void)system_error;
   assert(request);
 
   assert(request->fde == socket_fde);
@@ -645,6 +646,10 @@ ident_start(event_manager_t event_manager, ident_callback_fn callback, void *cal
   if (server_port == 0 || client_port == 0)
     return false;
 
+  if (!address_set_port(&connection_peer_addr, IDENT_SERVICE_PORT) ||
+      !address_set_port(&connection_local_addr, 0))
+    return false;
+
   struct ident_request *const request = io_calloc(sizeof(*request));
   request->callback = callback;
   request->callback_ctx = callback_ctx;
@@ -671,15 +676,6 @@ ident_start(event_manager_t event_manager, ident_callback_fn callback, void *cal
     return false;
   }
 
-  struct io_addr bind_addr;
-  address_copy(&bind_addr, &connection_local_addr);
-
-  if (!address_set_port(&bind_addr, 0))
-  {
-    _ident_request_destroy(request);
-    return false;
-  }
-
   request->timeout_event =
     event_create(event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
   if (request->timeout_event == NULL || event_schedule(request->timeout_event) != EVENT_SUCCESS)
@@ -688,7 +684,7 @@ ident_start(event_manager_t event_manager, ident_callback_fn callback, void *cal
     return false;
   }
 
-  io_socket_connect_tcp(request->fde, &connection_peer_addr, IDENT_SERVICE_PORT, &bind_addr,
+  io_socket_connect_tcp(request->fde, &connection_peer_addr, &connection_local_addr,
                         _ident_connect_complete, request, 0);
 
   if (request->state == IDENT_REQUEST_STATE_START_FAILED)

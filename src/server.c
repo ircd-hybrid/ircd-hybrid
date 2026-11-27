@@ -335,7 +335,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 }
 
 static void
-_server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status, void *context)
+_server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status, int system_error, void *context)
 {
   struct Client *const client = context;
   assert(client && client_is_local(client));
@@ -346,7 +346,10 @@ _server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status
     const char *const status_text = io_socket_connect_status_to_string(status);
 
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed or closed connect socket. */
-    client_exit_fmt(client, "Connection failed: %s", status_text);
+    if (system_error)
+      client_exit_fmt(client, "Connection failed: %s: %s", status_text, strerror(system_error));
+    else
+      client_exit_fmt(client, "Connection failed: %s", status_text);
     return;
   }
 
@@ -394,12 +397,16 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
     return false;
   }
 
+  struct io_addr remote_endpoint = connect->remote_addr;
+  if (!address_set_port(&remote_endpoint, connect->port))
+    return false;
+
   char addr_str[HOSTIPLEN + 1];
-  address_to_string(&connect->remote_addr, addr_str, sizeof(addr_str));
+  address_to_string(&remote_endpoint, addr_str, sizeof(addr_str));
 
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
-  fde_t *const new_fde = io_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
+  fde_t *const new_fde = io_socket_create(address_get_family(&remote_endpoint), SOCK_STREAM, 0, NULL);
   if (new_fde == NULL)
     return false;
 
@@ -424,9 +431,9 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
-  const struct io_addr *const bind_addr =
+  const struct io_addr *const local_endpoint =
     address_get_family(&connect->bind_addr) == AF_UNSPEC ? NULL : &connect->bind_addr;
-  io_socket_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, bind_addr,
+  io_socket_connect_tcp(client->connection->fde, &remote_endpoint, local_endpoint,
                         _server_connect_callback, client, connect->timeout * 1000ULL);
   return true;
 }

@@ -191,7 +191,8 @@ io_socket_connect_operation_destroy(struct io_socket_connect_operation *operatio
 }
 
 static void
-io_socket_connect_complete(struct io_socket_connect_operation *operation, enum io_socket_connect_status status)
+io_socket_connect_complete(struct io_socket_connect_operation *operation, enum io_socket_connect_status status,
+                           int system_error)
 {
   assert(operation);
 
@@ -200,7 +201,7 @@ io_socket_connect_complete(struct io_socket_connect_operation *operation, enum i
   void *const callback_context = operation->callback_context;
 
   io_socket_connect_operation_destroy(operation);
-  callback(socket_fde, status, callback_context);
+  callback(socket_fde, status, system_error, callback_context);
 }
 
 static void
@@ -225,7 +226,7 @@ io_socket_connect_cancel(fde_t *socket_fde)
 static void
 io_socket_connect_on_timeout(void *context)
 {
-  io_socket_connect_complete(context, IO_SOCKET_CONNECT_TIMED_OUT);
+  io_socket_connect_complete(context, IO_SOCKET_CONNECT_TIMED_OUT, 0);
 }
 
 static void
@@ -234,27 +235,24 @@ io_socket_connect_on_write_ready(int fd, void *context)
   struct io_socket_connect_operation *const operation = context;
   assert(operation && operation->socket_fde->fd == fd);
 
-  int pending_error = 0;
-  socklen_t option_length = sizeof(pending_error);
-  const int result = getsockopt(fd, SOL_SOCKET, SO_ERROR, &pending_error, &option_length);
-  if (result == -1)
-    log_write(LOG_TYPE_DEBUG, "io_socket_connect_on_write_ready: getsockopt(SO_ERROR) failed for FD %d: %s",
-              fd, strerror(errno));
+  int system_error = 0;
+  socklen_t option_length = sizeof(system_error);
+  if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &system_error, &option_length) == -1)
+    system_error = errno;
 
   const enum io_socket_connect_status status =
-    result == 0 && pending_error == 0 ? IO_SOCKET_CONNECT_SUCCESS : IO_SOCKET_CONNECT_FAILED;
-  io_socket_connect_complete(operation, status);
+    system_error == 0 ? IO_SOCKET_CONNECT_SUCCESS : IO_SOCKET_CONNECT_FAILED;
+  io_socket_connect_complete(operation, status, system_error);
 }
 
 void
-io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_addr, uint16_t remote_port,
-                      const struct io_addr *bind_addr, io_socket_connect_callback_fn callback,
+io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_endpoint,
+                      const struct io_addr *local_endpoint, io_socket_connect_callback_fn callback,
                       void *callback_context, uintmax_t timeout_ms)
 {
   assert(socket_fde);
   assert(socket_fde->flags.open);
-  assert(remote_addr);
-  assert(address_is_ipv4(remote_addr) || address_is_ipv6(remote_addr));
+  assert(remote_endpoint);
   assert(callback);
   assert(socket_fde->cleanup_handler == NULL);
   assert(socket_fde->cleanup_data == NULL);
@@ -267,19 +265,31 @@ io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_addr, uint
   socket_fde->cleanup_handler = io_socket_connect_cleanup;
   socket_fde->cleanup_data = operation;
 
-  struct io_addr remote_endpoint = *remote_addr;
-  if (!address_set_port(&remote_endpoint, remote_port))
+  const socklen_t remote_length = address_get_sockaddr_length(remote_endpoint);
+  if (remote_length == 0)
   {
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED);
+    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, EAFNOSUPPORT);
     return;
   }
 
-  if (bind_addr)
+  if (address_get_port(remote_endpoint) == 0)
   {
-    const socklen_t bind_addr_length = address_get_sockaddr_length(bind_addr);
-    if (bind_addr_length == 0 || bind(socket_fde->fd, address_get_sockaddr(bind_addr), bind_addr_length) == -1)
+    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, EINVAL);
+    return;
+  }
+
+  if (local_endpoint)
+  {
+    const socklen_t local_length = address_get_sockaddr_length(local_endpoint);
+    if (local_length == 0)
     {
-      io_socket_connect_complete(operation, IO_SOCKET_CONNECT_BIND_FAILED);
+      io_socket_connect_complete(operation, IO_SOCKET_CONNECT_BIND_FAILED, EAFNOSUPPORT);
+      return;
+    }
+
+    if (bind(socket_fde->fd, address_get_sockaddr(local_endpoint), local_length) == -1)
+    {
+      io_socket_connect_complete(operation, IO_SOCKET_CONNECT_BIND_FAILED, errno);
       return;
     }
   }
@@ -291,27 +301,27 @@ io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_addr, uint
                    timeout_ms, true, operation, NULL);
     if (operation->timeout_event == NULL || event_schedule(operation->timeout_event) != EVENT_SUCCESS)
     {
-      io_socket_connect_complete(operation, IO_SOCKET_CONNECT_TIMER_FAILED);
+      io_socket_connect_complete(operation, IO_SOCKET_CONNECT_TIMER_FAILED, 0);
       return;
     }
   }
 
-  if (connect(socket_fde->fd, address_get_sockaddr(&remote_endpoint),
-              address_get_sockaddr_length(&remote_endpoint)) == 0)
+  if (connect(socket_fde->fd, address_get_sockaddr(remote_endpoint), remote_length) == 0)
   {
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_SUCCESS);
+    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_SUCCESS, 0);
     return;
   }
 
-  if (!io_socket_errno_is_transient(errno))
+  const int system_error = errno;
+  if (!io_socket_errno_is_transient(system_error))
   {
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED);
+    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, system_error);
     return;
   }
 
   if (io_poll_watch_write(io_socket_poller, socket_fde->fd, io_socket_connect_on_write_ready,
                           operation, &operation->write_watch_id) == -1)
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_WATCH_FAILED);
+    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_WATCH_FAILED, errno);
 }
 
 const char *

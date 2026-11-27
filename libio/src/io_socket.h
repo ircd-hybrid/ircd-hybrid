@@ -29,10 +29,10 @@ enum io_socket_connect_status
   IO_SOCKET_CONNECT_STATUS_COUNT
 };
 
-typedef void (*io_socket_connect_callback_fn)(fde_t *, enum io_socket_connect_status, void *);
+typedef void (*io_socket_connect_callback_fn)(fde_t *, enum io_socket_connect_status, int, void *);
 
 extern void io_socket_close(fde_t *);
-extern void io_socket_connect_tcp(fde_t *, const struct io_addr *, uint16_t, const struct io_addr *,
+extern void io_socket_connect_tcp(fde_t *, const struct io_addr *, const struct io_addr *,
                                   io_socket_connect_callback_fn, void *, uintmax_t);
 extern void io_socket_set_description_fmt(fde_t *, const char *, ...) IO_AFP(2,3);
 extern void io_socket_shutdown(void);

@@ -16,14 +16,17 @@
 #include "address.h"
 #include "event.h"
 
+struct io_socket_context;
+
 typedef void (*resolver_lookup_addr_callback_fn)(void *, const char *, size_t);
 typedef void (*resolver_lookup_name_callback_fn)(void *, const struct io_addr *, size_t);
 
 extern void resolver_cancel_by_context(const void *);
-extern bool resolver_init(event_manager_t);
+extern bool resolver_init(struct io_socket_context *, event_manager_t);
 extern bool resolver_lookup_addr(resolver_lookup_addr_callback_fn, void *, const struct io_addr *);
 extern bool resolver_lookup_name(resolver_lookup_name_callback_fn, void *, const char *, int);
 extern bool resolver_nameserver_get(size_t, struct io_addr *);
 extern bool resolver_reload(void);
 extern size_t resolver_nameserver_count(void);
+extern void resolver_shutdown(void);
 #endif  /* INCLUDED_resolver_h */

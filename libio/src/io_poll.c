@@ -84,6 +84,12 @@ io_poll_control_fd(const struct io_poll *poller)
   return poller && poller->backend && poller->control_fd.fd >= 0 ? &poller->control_fd : NULL;
 }
 
+int
+io_poll_fd_limit(const struct io_poll *poller)
+{
+  return poller->fd_limit;
+}
+
 static void
 io_poll_free_storage(struct io_poll *poller)
 {

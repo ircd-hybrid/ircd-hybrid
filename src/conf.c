@@ -46,6 +46,7 @@
 #include "conf_service.h"
 #include "conf_shared.h"
 #include "defaults.h"
+#include "ircd.h"
 #include "ircd_hook.h"
 #include "ircd_module.h"
 #include "ircd_defs.h"
@@ -386,7 +387,7 @@ _conf_clear(void)
   ConfigGeneral.sasl_service = NULL;
 
   /* Clean out listeners */
-  listener_close_marked();
+  listener_close_all();
 }
 
 static bool

@@ -15,8 +15,6 @@ libio_la_SOURCES =  address.c     \
                     dns.h         \
                     event.c       \
                     event.h       \
-                    fdlist.c      \
-                    fdlist.h      \
                     hook.c        \
                     hook.h        \
                     hostmask_index.c \

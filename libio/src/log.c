@@ -12,6 +12,7 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,6 +66,26 @@ static list_t log_list;
 
 static bool log_enabled = true;
 
+static FILE *
+log_open(const char *path)
+{
+  const int fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, S_IRUSR | S_IWUSR);
+  if (fd == -1)
+    return NULL;
+
+  FILE *const file = fdopen(fd, "a");
+  if (file == NULL)
+  {
+    const int error = errno;
+    close(fd);
+    errno = error;
+    return NULL;
+  }
+
+  fchmod(fd, S_IRUSR | S_IWUSR);
+  return file;
+}
+
 /**
  * @brief Initializes the logging system with a specific log type, file name, maximum file size, flush behavior, and log level.
  *
@@ -87,14 +108,14 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
   log->main = main;
   log->flush_immediately = true;
   log->time_provider = date_iso8601_usec;
-  log->file = fopen(file_name, "a");
+  log->file = log_open(file_name);
   list_add(log, &log->node, &log_list);
 
   if (log->file == NULL)
   {
     if (log->main)
     {
-      perror("fopen");
+      perror(file_name);
       exit(EXIT_FAILURE);
     }
 
@@ -102,8 +123,6 @@ log_add(enum log_type type, bool main, size_t max_file_size, const char *file_na
     return NULL;
   }
 
-  /* Set owner-only read and write permissions. */
-  chmod(log->file_name, S_IRUSR | S_IWUSR);
   return log;
 }
 
@@ -145,7 +164,7 @@ log_rotate(struct Log *log)
     return false;  /* Rotation failed. */
 
   /* Create a new log file. */
-  FILE *new_file = fopen(log->file_name, "a");
+  FILE *const new_file = log_open(log->file_name);
   if (new_file == NULL)
     return false;  /* Rotation failed. */
 
@@ -156,8 +175,6 @@ log_rotate(struct Log *log)
   fclose(log->file);
   log->file = new_file;
 
-  /* Set owner-only read and write permissions. */
-  chmod(log->file_name, S_IRUSR | S_IWUSR);
   return true;  /* Rotation succeeded. */
 }
 

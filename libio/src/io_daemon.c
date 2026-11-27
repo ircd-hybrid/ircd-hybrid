@@ -15,7 +15,7 @@
 static bool
 _io_daemon_redirect_standard_fds(void)
 {
-  const int null_fd = open("/dev/null", O_RDWR | O_CLOEXEC);
+  const int null_fd = open("/dev/null", O_RDWR);
   if (null_fd == -1)
     return false;
 

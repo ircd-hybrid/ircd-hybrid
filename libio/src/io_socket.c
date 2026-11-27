@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/*! \file comm.c
+/*! \file io_socket.c
  * \brief Socket lifecycle and nonblocking TCP connections.
  */
 
@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -22,9 +23,10 @@
 
 #include "address.h"
 #include "event.h"
-#include "fdlist.h"
 #include "io_poll.h"
 #include "io_socket.h"
+#include "io_string.h"
+#include "list.h"
 #include "log.h"
 #include "memory.h"
 
@@ -41,60 +43,118 @@ static const char *const io_socket_connect_status_strings[IO_SOCKET_CONNECT_STAT
 
 struct io_socket_connect_operation
 {
-  fde_t *socket_fde;
+  struct io_socket *socket;
   io_socket_connect_callback_fn callback;
   void *callback_context;
   event_handle_t timeout_event;
   uint64_t write_watch_id;
 };
 
-static void io_socket_connect_cleanup(void *);
-
-static event_manager_t io_socket_event_manager;
-static struct io_poll *io_socket_poller;
-
-bool
-io_socket_init(event_manager_t event_manager)
+struct io_socket_context
 {
-  assert(event_manager);
-  assert(io_socket_poller == NULL);
+  struct io_poll *poller;
+  event_manager_t event_manager;
+  size_t socket_limit;
+  list_t sockets;
+};
 
-  io_socket_poller = io_poll_create(hard_fdlimit);
-  if (io_socket_poller == NULL)
-    return false;
+struct io_socket
+{
+  struct io_socket_context *context;
+  list_node_t node;
+  int fd;
+  bool connect_available;
+  char *description;
+  tls_data_t tls;
+  struct io_socket_connect_operation *connect_operation;
+};
 
-  io_socket_event_manager = event_manager;
-  if (io_poll_control_fd(io_socket_poller))
-    ++number_fd;
-  return true;
+struct io_socket_context *
+io_socket_context_create(struct io_poll *poller, event_manager_t event_manager, size_t socket_limit)
+{
+  assert(poller && event_manager);
+
+  struct io_socket_context *const context = io_calloc(sizeof(*context));
+  context->poller = poller;
+  context->event_manager = event_manager;
+  context->socket_limit = socket_limit;
+  return context;
 }
 
-struct io_poll *
-io_socket_get_poller(void)
+int
+io_socket_context_destroy(struct io_socket_context *context)
 {
-  return io_socket_poller;
+  if (context && !list_is_empty(&context->sockets))
+  {
+    errno = EBUSY;
+    return -1;
+  }
+
+  io_free(context);
+  return 0;
 }
 
-void
-io_socket_shutdown(void)
+size_t
+io_socket_context_available_slots(const struct io_socket_context *context)
 {
-  if (io_socket_poller == NULL)
-    return;
+  return context->socket_limit - list_length(&context->sockets);
+}
 
-  for (int fd = 0; fd <= highest_fd; ++fd)
-    if (fd_table[fd].flags.open)
-      io_socket_connect_cancel(&fd_table[fd]);
+static int
+io_socket_snapshot_compare(const void *left, const void *right)
+{
+  const struct io_socket_snapshot *const a = left;
+  const struct io_socket_snapshot *const b = right;
+  return (a->fd > b->fd) - (a->fd < b->fd);
+}
 
-  if (io_poll_control_fd(io_socket_poller))
-    --number_fd;
-  io_poll_destroy(io_socket_poller);
-  io_socket_poller = NULL;
-  io_socket_event_manager = NULL;
+int
+io_socket_context_snapshot(const struct io_socket_context *context,
+                           struct io_socket_snapshot **snapshot_out, size_t *count_out)
+{
+  const size_t count = list_length(&context->sockets);
+
+  if (count > SIZE_MAX / sizeof(struct io_socket_snapshot))
+  {
+    errno = EOVERFLOW;
+    return -1;
+  }
+
+  *count_out = count;
+  *snapshot_out = NULL;
+
+  if (count == 0)
+    return 0;
+
+  struct io_socket_snapshot *const snapshot = io_calloc(count * sizeof(*snapshot));
+  struct io_socket_snapshot *entry = snapshot;
+
+  const list_node_t *node;
+  LIST_FOREACH(node, context->sockets.head)
+  {
+    const struct io_socket *const socket = node->data;
+    entry->fd = socket->fd;
+    strlcpy(entry->description, socket->description ? socket->description : "", sizeof(entry->description));
+    ++entry;
+  }
+
+  qsort(snapshot, count, sizeof(*snapshot), io_socket_snapshot_compare);
+  *snapshot_out = snapshot;
+  return 0;
 }
 
 static bool
 io_socket_configure(int fd, int family, int socket_type)
 {
+  if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
+  {
+    const int error = errno;
+    log_write(LOG_TYPE_IRCD, "io_socket_configure: fcntl(FD_CLOEXEC) failed for FD %d: %s",
+              fd, strerror(error));
+    errno = error;
+    return false;
+  }
+
   if (socket_type == SOCK_STREAM)
   {
     int option_value = 1;
@@ -174,19 +234,16 @@ io_socket_connect_operation_destroy(struct io_socket_connect_operation *operatio
 {
   assert(operation);
 
-  fde_t *const socket_fde = operation->socket_fde;
-  assert(socket_fde && socket_fde->flags.open);
-  assert(socket_fde->cleanup_handler == io_socket_connect_cleanup);
-  assert(socket_fde->cleanup_data == operation);
-
-  socket_fde->cleanup_handler = NULL;
-  socket_fde->cleanup_data = NULL;
+  struct io_socket *const socket = operation->socket;
+  assert(socket->connect_operation == operation);
+  socket->connect_operation = NULL;
 
   if (operation->timeout_event)
     event_destroy(operation->timeout_event);
 
   if (operation->write_watch_id)
-    io_poll_unwatch_write(io_socket_poller, socket_fde->fd, operation->write_watch_id);
+    io_poll_unwatch_write(socket->context->poller, socket->fd, operation->write_watch_id);
+
   io_free(operation);
 }
 
@@ -196,30 +253,21 @@ io_socket_connect_complete(struct io_socket_connect_operation *operation, enum i
 {
   assert(operation);
 
-  fde_t *const socket_fde = operation->socket_fde;
+  struct io_socket *const socket = operation->socket;
   const io_socket_connect_callback_fn callback = operation->callback;
   void *const callback_context = operation->callback_context;
 
   io_socket_connect_operation_destroy(operation);
-  callback(socket_fde, status, system_error, callback_context);
-}
-
-static void
-io_socket_connect_cleanup(void *context)
-{
-  io_socket_connect_operation_destroy(context);
+  callback(socket, status, system_error, callback_context);
 }
 
 bool
-io_socket_connect_cancel(fde_t *socket_fde)
+io_socket_connect_cancel(struct io_socket *socket)
 {
-  assert(socket_fde);
-  assert(socket_fde->flags.open);
-
-  if (socket_fde->cleanup_handler != io_socket_connect_cleanup)
+  if (socket->connect_operation == NULL)
     return false;
 
-  io_socket_connect_operation_destroy(socket_fde->cleanup_data);
+  io_socket_connect_operation_destroy(socket->connect_operation);
   return true;
 }
 
@@ -233,7 +281,7 @@ static void
 io_socket_connect_on_write_ready(int fd, void *context)
 {
   struct io_socket_connect_operation *const operation = context;
-  assert(operation && operation->socket_fde->fd == fd);
+  assert(operation && operation->socket->fd == fd);
 
   int system_error = 0;
   socklen_t option_length = sizeof(system_error);
@@ -245,37 +293,41 @@ io_socket_connect_on_write_ready(int fd, void *context)
   io_socket_connect_complete(operation, status, system_error);
 }
 
-void
-io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_endpoint,
+int
+io_socket_connect_tcp(struct io_socket *socket, const struct io_addr *remote_endpoint,
                       const struct io_addr *local_endpoint, io_socket_connect_callback_fn callback,
                       void *callback_context, uintmax_t timeout_ms)
 {
-  assert(socket_fde);
-  assert(socket_fde->flags.open);
+  assert(socket);
   assert(remote_endpoint);
   assert(callback);
-  assert(socket_fde->cleanup_handler == NULL);
-  assert(socket_fde->cleanup_data == NULL);
+
+  if (!socket->connect_available)
+  {
+    errno = socket->connect_operation ? EBUSY : EINVAL;
+    return -1;
+  }
+
+  socket->connect_available = false;
 
   struct io_socket_connect_operation *const operation = io_calloc(sizeof(*operation));
-  operation->socket_fde = socket_fde;
+  operation->socket = socket;
   operation->callback = callback;
   operation->callback_context = callback_context;
 
-  socket_fde->cleanup_handler = io_socket_connect_cleanup;
-  socket_fde->cleanup_data = operation;
+  socket->connect_operation = operation;
 
   const socklen_t remote_length = address_get_sockaddr_length(remote_endpoint);
   if (remote_length == 0)
   {
     io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, EAFNOSUPPORT);
-    return;
+    return 0;
   }
 
   if (address_get_port(remote_endpoint) == 0)
   {
     io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, EINVAL);
-    return;
+    return 0;
   }
 
   if (local_endpoint)
@@ -284,44 +336,46 @@ io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_endpoint,
     if (local_length == 0)
     {
       io_socket_connect_complete(operation, IO_SOCKET_CONNECT_BIND_FAILED, EAFNOSUPPORT);
-      return;
+      return 0;
     }
 
-    if (bind(socket_fde->fd, address_get_sockaddr(local_endpoint), local_length) == -1)
+    if (bind(socket->fd, address_get_sockaddr(local_endpoint), local_length) == -1)
     {
       io_socket_connect_complete(operation, IO_SOCKET_CONNECT_BIND_FAILED, errno);
-      return;
+      return 0;
     }
   }
 
   if (timeout_ms > 0)
   {
     operation->timeout_event =
-      event_create(io_socket_event_manager, "io_socket_connect_timeout", io_socket_connect_on_timeout,
+      event_create(socket->context->event_manager, "io_socket_connect_timeout", io_socket_connect_on_timeout,
                    timeout_ms, true, operation, NULL);
     if (operation->timeout_event == NULL || event_schedule(operation->timeout_event) != EVENT_SUCCESS)
     {
       io_socket_connect_complete(operation, IO_SOCKET_CONNECT_TIMER_FAILED, 0);
-      return;
+      return 0;
     }
   }
 
-  if (connect(socket_fde->fd, address_get_sockaddr(remote_endpoint), remote_length) == 0)
+  if (connect(socket->fd, address_get_sockaddr(remote_endpoint), remote_length) == 0)
   {
     io_socket_connect_complete(operation, IO_SOCKET_CONNECT_SUCCESS, 0);
-    return;
+    return 0;
   }
 
   const int system_error = errno;
   if (!io_socket_errno_is_transient(system_error))
   {
     io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED, system_error);
-    return;
+    return 0;
   }
 
-  if (io_poll_watch_write(io_socket_poller, socket_fde->fd, io_socket_connect_on_write_ready,
+  if (io_poll_watch_write(socket->context->poller, socket->fd, io_socket_connect_on_write_ready,
                           operation, &operation->write_watch_id) == -1)
     io_socket_connect_complete(operation, IO_SOCKET_CONNECT_WATCH_FAILED, errno);
+
+  return 0;
 }
 
 const char *
@@ -329,13 +383,15 @@ io_socket_connect_status_to_string(enum io_socket_connect_status status)
 {
   if ((unsigned int)status >= IO_SOCKET_CONNECT_STATUS_COUNT)
     return "Invalid socket connect status";
+
   return io_socket_connect_status_strings[status];
 }
 
-static fde_t *
-io_socket_adopt(int fd, int family, int socket_type, const char *description)
+static struct io_socket *
+io_socket_adopt(struct io_socket_context *context, int fd, int family, int socket_type,
+                const char *description, bool connect_available)
 {
-  if (fd >= hard_fdlimit)
+  if (fd >= io_poll_fd_limit(context->poller))
   {
     close(fd);
     errno = EMFILE;
@@ -350,13 +406,21 @@ io_socket_adopt(int fd, int family, int socket_type, const char *description)
     return NULL;
   }
 
-  return fd_open(fd, description);
+  struct io_socket *const socket = io_calloc(sizeof(*socket));
+  socket->context = context;
+  socket->fd = fd;
+  socket->connect_available = connect_available;
+  if (description)
+    socket->description = io_strndup(description, IO_SOCKET_DESCRIPTION_MAX);
+
+  list_add_tail(socket, &socket->node, &context->sockets);
+  return socket;
 }
 
-fde_t *
-io_socket_create(int family, int socket_type, int protocol, const char *description)
+struct io_socket *
+io_socket_create(struct io_socket_context *context, int family, int socket_type, int protocol, const char *description)
 {
-  if (number_fd >= hard_fdlimit)
+  if (io_socket_context_available_slots(context) == 0)
   {
     log_write(LOG_TYPE_DEBUG, "io_socket_create: Cannot create new socket: %s", strerror(ENFILE));
     errno = ENFILE;
@@ -372,25 +436,28 @@ io_socket_create(int family, int socket_type, int protocol, const char *descript
     return NULL;
   }
 
-  return io_socket_adopt(fd, family, socket_type, description);
+  const bool tcp = (family == AF_INET || family == AF_INET6) && socket_type == SOCK_STREAM &&
+                   (protocol == 0 || protocol == IPPROTO_TCP);
+  return io_socket_adopt(context, fd, family, socket_type, description, tcp);
 }
 
-fde_t *
-io_socket_listen(const struct io_addr *bind_addr, int backlog, const char *description)
+struct io_socket *
+io_socket_listen(struct io_socket_context *context, const struct io_addr *bind_addr, int backlog, const char *description)
 {
   assert(backlog > 0);
 
-  fde_t *const listener_fde = io_socket_create(address_get_family(bind_addr), SOCK_STREAM, 0, description);
-  if (listener_fde == NULL)
+  struct io_socket *const listener =
+    io_socket_create(context, address_get_family(bind_addr), SOCK_STREAM, 0, description);
+  if (listener == NULL)
     return NULL;
 
   const int reuse_addr = 1;
-  if (setsockopt(listener_fde->fd, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr)) == -1)
+  if (setsockopt(listener->fd, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr)) == -1)
   {
     const int error = errno;
     log_write(LOG_TYPE_IRCD, "io_socket_listen: setsockopt(SO_REUSEADDR) failed for FD %d: %s",
-              listener_fde->fd, strerror(error));
-    io_socket_close(listener_fde);
+              listener->fd, strerror(error));
+    io_socket_close(listener);
     errno = error;
     return NULL;
   }
@@ -399,19 +466,19 @@ io_socket_listen(const struct io_addr *bind_addr, int backlog, const char *descr
   if (address_is_ipv6(bind_addr))
   {
     const int ipv6_only = 1;
-    if (setsockopt(listener_fde->fd, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)) == -1)
+    if (setsockopt(listener->fd, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)) == -1)
     {
       const int error = errno;
       log_write(LOG_TYPE_DEBUG, "io_socket_listen: setsockopt(IPV6_V6ONLY=1) failed for FD %d: %s",
-                listener_fde->fd, strerror(error));
-      io_socket_close(listener_fde);
+                listener->fd, strerror(error));
+      io_socket_close(listener);
       errno = error;
       return NULL;
     }
   }
 #endif
 
-  if (bind(listener_fde->fd, address_get_sockaddr(bind_addr), address_get_sockaddr_length(bind_addr)) == -1)
+  if (bind(listener->fd, address_get_sockaddr(bind_addr), address_get_sockaddr_length(bind_addr)) == -1)
   {
     const int error = errno;
     char address_text[ADDRESS_STRING_BUFSIZE];
@@ -419,45 +486,51 @@ io_socket_listen(const struct io_addr *bind_addr, int backlog, const char *descr
 
     log_write(LOG_TYPE_IRCD, "io_socket_listen: bind() failed for %s: %s",
               address_text, strerror(error));
-    io_socket_close(listener_fde);
+    io_socket_close(listener);
     errno = error;
     return NULL;
   }
 
-  if (listen(listener_fde->fd, backlog) == -1)
+  if (listen(listener->fd, backlog) == -1)
   {
     const int error = errno;
     log_write(LOG_TYPE_IRCD, "io_socket_listen: listen() failed for FD %d: %s",
-              listener_fde->fd, strerror(error));
-    io_socket_close(listener_fde);
+              listener->fd, strerror(error));
+    io_socket_close(listener);
     errno = error;
     return NULL;
   }
 
-  return listener_fde;
+  listener->connect_available = false;
+  return listener;
 }
 
 void
-io_socket_close(fde_t *socket_fde)
+io_socket_close(struct io_socket *socket)
 {
-  assert(socket_fde && socket_fde->flags.open == true);
+  struct io_socket_context *const context = socket->context;
 
-  if (io_socket_poller)
-    io_poll_unwatch(io_socket_poller, socket_fde->fd);
+  io_poll_unwatch(context->poller, socket->fd);
+  io_socket_connect_cancel(socket);
 
-  if (tls_session_is_active(&socket_fde->tls))
-    tls_session_close_notify(&socket_fde->tls);
+  if (tls_session_is_active(&socket->tls))
+  {
+    tls_session_close_notify(&socket->tls);
+    tls_session_deinit(&socket->tls);
+  }
 
-  fd_close(socket_fde);
+  close(socket->fd);
+  list_remove(&socket->node, &context->sockets);
+  io_free(socket->description);
+  io_free(socket);
 }
 
-fde_t *
-io_socket_accept(fde_t *listener_fde, struct io_addr *peer_addr, const char *description)
+struct io_socket *
+io_socket_accept(struct io_socket *listener, struct io_addr *peer_addr, const char *description)
 {
-  assert(listener_fde);
-  assert(listener_fde->flags.open);
+  struct io_socket_context *const context = listener->context;
 
-  if (number_fd >= hard_fdlimit)
+  if (io_socket_context_available_slots(context) == 0)
   {
     log_write(LOG_TYPE_IRCD, "io_socket_accept: Cannot accept new connection: %s", strerror(ENFILE));
     errno = ENFILE;
@@ -467,36 +540,131 @@ io_socket_accept(fde_t *listener_fde, struct io_addr *peer_addr, const char *des
   address_clear(peer_addr);
 
   socklen_t peer_addr_length = sizeof(peer_addr->ss);
-  const int fd = accept(listener_fde->fd, (struct sockaddr *)&peer_addr->ss, &peer_addr_length);
+  const int fd = accept(listener->fd, (struct sockaddr *)&peer_addr->ss, &peer_addr_length);
   if (fd < 0)
   {
     const int error = errno;
     if (!io_socket_errno_is_transient(error))
       log_write(LOG_TYPE_IRCD, "io_socket_accept: accept() failed on FD %d: %s",
-                listener_fde->fd, strerror(error));
+                listener->fd, strerror(error));
     errno = error;
     return NULL;
   }
 
   address_unmap_ipv4(peer_addr);
 
-  return io_socket_adopt(fd, address_get_family(peer_addr), SOCK_STREAM, description);
+  return io_socket_adopt(context, fd, address_get_family(peer_addr), SOCK_STREAM, description, false);
 }
 
 void
-io_socket_set_description_fmt(fde_t *socket_fde, const char *format, ...)
+io_socket_set_description_fmt(struct io_socket *socket, const char *format, ...)
 {
+  char *description = NULL;
+
   if (format)
   {
-    char description[FD_DESC_SIZE + 1];
+    char buffer[IO_SOCKET_DESCRIPTION_MAX + 1];
     va_list args;
 
     va_start(args, format);
-    vsnprintf(description, sizeof(description), format, args);
+    vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    fd_note(socket_fde, "%s", description);
+    description = io_strdup(buffer);
   }
-  else
-    fd_note(socket_fde, NULL);
+
+  io_free(socket->description);
+  socket->description = description;
+}
+
+int
+io_socket_fd(const struct io_socket *socket)
+{
+  return socket->fd;
+}
+
+int
+io_socket_watch_read(struct io_socket *socket, io_poll_handler_fn handler, void *context)
+{
+  if (socket->connect_operation)
+  {
+    errno = EBUSY;
+    return -1;
+  }
+
+  const int result = io_poll_watch_read(socket->context->poller, socket->fd, handler, context);
+  if (result == 0)
+    socket->connect_available = false;
+
+  return result;
+}
+
+int
+io_socket_watch_write(struct io_socket *socket, io_poll_handler_fn handler, void *context)
+{
+  if (socket->connect_operation)
+  {
+    errno = EBUSY;
+    return -1;
+  }
+
+  const int result = io_poll_watch_write(socket->context->poller, socket->fd, handler, context, NULL);
+  if (result == 0)
+    socket->connect_available = false;
+
+  return result;
+}
+
+bool
+io_socket_tls_start(struct io_socket *socket, tls_role_t role)
+{
+  assert(!tls_session_is_active(&socket->tls));
+
+  if (socket->connect_operation)
+  {
+    errno = EBUSY;
+    return false;
+  }
+
+  if (!tls_session_init(&socket->tls, socket->fd, role))
+    return false;
+
+  socket->connect_available = false;
+  return true;
+}
+
+bool
+io_socket_tls_is_active(const struct io_socket *socket)
+{
+  return tls_session_is_active(&socket->tls);
+}
+
+tls_handshake_status_t
+io_socket_tls_handshake(struct io_socket *socket, const char **error)
+{
+  return tls_session_handshake(&socket->tls, error);
+}
+
+ssize_t
+io_socket_tls_read(struct io_socket *socket, char *buffer, size_t length, bool *want_write)
+{
+  return tls_session_read(&socket->tls, buffer, length, want_write);
+}
+
+ssize_t
+io_socket_tls_write(struct io_socket *socket, const char *buffer, size_t length, bool *want_read)
+{
+  return tls_session_write(&socket->tls, buffer, length, want_read);
+}
+
+bool
+io_socket_tls_get_peer_certificate_fingerprint(struct io_socket *socket, char **fingerprint)
+{
+  return tls_session_get_peer_certificate_fingerprint(&socket->tls, fingerprint);
+}
+
+const char *
+io_socket_tls_get_cipher(const struct io_socket *socket)
+{
+  return tls_session_get_cipher(&socket->tls);
 }

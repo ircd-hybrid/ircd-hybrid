@@ -48,14 +48,12 @@
 #define LPATH     LOGPATH "/ircd.log"  /* ircd logfile */
 #define PPATH     RUNPATH "/ircd.pid"  /* pid file */
 
-/* tests show that about 7 fds are not registered by fdlist.c, these
- * include std* descriptors + some others (by OpenSSL etc.). Note this is
- * intentionally too high, we don't want to eat fds up to the last one */
-#define LEAKED_FDS       10
+/* Reserve descriptors for standard streams, files and library internals. */
+#define IRCD_FD_RESERVE  10
 /* how many (privileged) clients can exceed max_clients */
 #define MAX_BUFFER       60
 
-#define MAXCLIENTS_MAX   (hard_fdlimit - LEAKED_FDS - MAX_BUFFER)
+#define MAXCLIENTS_MAX   (ircd_fd_limit - IRCD_FD_RESERVE - MAX_BUFFER)
 #define MAXCLIENTS_MIN   32
 
 /* class {} default values */

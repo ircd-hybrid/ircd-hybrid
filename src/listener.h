@@ -14,8 +14,9 @@
 #include <stdint.h>
 
 #include "address.h"
-#include "fdlist.h"
 #include "list.h"
+
+struct io_socket;
 
 /** Listener flags */
 typedef enum
@@ -44,13 +45,13 @@ struct Listener
   struct io_addr addr;  /**< Holds an IPv6 or IPv4 address */
   char *name;  /**< Holds an IPv6 or IPv4 address in string representation */
   listener_flag_t flags;  /**< Listener flags (tls, hidden, server, client, defer) */
-  fde_t *fde;  /**< File descriptor (NULL if inactive) */
+  struct io_socket *socket;  /**< NULL if inactive. */
   uint32_t ref_count;  /**< Number of connection references */
 };
 
 extern void listener_release(struct Listener *);
 extern void listener_retain(struct Listener *);
-extern void listener_close_marked(void);
+extern void listener_close_all(void);
 extern listener_result_t listener_add(uint16_t, const char *, listener_flag_t);
 extern const char *listener_result_to_string(listener_result_t);
 extern const list_t *listener_get_list(void);
@@ -76,6 +77,6 @@ listener_has_flag(const struct Listener *listener, listener_flag_t flags)
 static inline bool
 listener_is_active(const struct Listener *listener)
 {
-  return listener->fde && listener->fde->flags.open;
+  return listener->socket != NULL;
 }
 #endif  /* INCLUDED_listener_h */

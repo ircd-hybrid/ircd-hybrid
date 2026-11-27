@@ -106,5 +106,11 @@ extern const char *pidFileName;
 extern struct Counter Count;
 extern struct SetOptions GlobalSetOptions;
 extern struct ServerState_t server_state;
+struct io_poll;
+struct io_socket_context;
+
 extern event_manager_t ircd_event_manager;
+extern int ircd_fd_limit;
+extern struct io_poll *ircd_poller;
+extern struct io_socket_context *ircd_socket_context;
 #endif  /* INCLUDED_ircd_h */

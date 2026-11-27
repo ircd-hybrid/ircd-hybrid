@@ -16,12 +16,12 @@
 
 #include "address.h"
 #include "event.h"
-#include "fdlist.h"
 #include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
+#include "memory.h"
 #include "misc.h"
 #include "module.h"
 #include "resolver.h"
@@ -363,23 +363,39 @@ stats_events(struct Client *client, size_t parc, char *parv[])
 }
 
 static void
-stats_fdlist(struct Client *client, size_t parc, char *parv[])
+stats_file_descriptors(struct Client *client, size_t parc, char *parv[])
 {
-  const struct io_poll_fd_info *const control = io_poll_control_fd(io_socket_get_poller());
-  const int control_fd = control ? control->fd : -1;
-  for (int fd = 0; fd <= IO_MAX(highest_fd, control_fd); ++fd)
+  struct io_socket_snapshot *sockets;
+  size_t count;
+  if (io_socket_context_snapshot(ircd_socket_context, &sockets, &count) == -1)
   {
+    sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "F :Socket snapshot unavailable");
+    return;
+  }
+
+  const struct io_poll_fd_info *control = io_poll_control_fd(ircd_poller);
+  for (size_t index = 0; index < count || control;)
+  {
+    int fd;
     const char *description;
-    if (fd == control_fd)
+    if (control && (index == count || control->fd < sockets[index].fd))
+    {
+      fd = control->fd;
       description = control->description;
-    else if (fd <= highest_fd && fd_table[fd].flags.open)
-      description = fd_table[fd].desc;
+      control = NULL;
+    }
     else
-      continue;
+    {
+      fd = sockets[index].fd;
+      description = sockets[index].description;
+      ++index;
+    }
 
     sendto_one_numeric(client, &me, RPL_STATSDEBUG | SND_EXPLICIT, "F :fd %-5d desc '%s'",
                        fd, description ? description : "");
   }
+
+  io_free(sockets);
 }
 
 static void
@@ -791,8 +807,8 @@ static const struct StatsHandler stats_tab[] =
   STATS_HANDLER_INIT('D', stats_deny, STATS_ACCESS_OPER),
   STATS_HANDLER_INIT('e', stats_exempt, STATS_ACCESS_OPER),
   STATS_HANDLER_INIT('E', stats_events, STATS_ACCESS_ADMIN),
-  STATS_HANDLER_INIT('f', stats_fdlist, STATS_ACCESS_ADMIN),
-  STATS_HANDLER_INIT('F', stats_fdlist, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('f', stats_file_descriptors, STATS_ACCESS_ADMIN),
+  STATS_HANDLER_INIT('F', stats_file_descriptors, STATS_ACCESS_ADMIN),
   STATS_HANDLER_INIT('h', stats_hubleaf, STATS_ACCESS_OPER),
   STATS_HANDLER_INIT('H', stats_hubleaf, STATS_ACCESS_OPER),
   STATS_HANDLER_INIT('i', stats_auth, STATS_ACCESS_OPER),

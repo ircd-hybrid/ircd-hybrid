@@ -12,7 +12,6 @@
 
 #include "address.h"
 #include "dbuf.h"
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -140,8 +139,8 @@ send_write_ready(int fd, void *context)
   if (client_is_dead(client))
     return;
 
-  assert(client->connection->fde);
-  assert(client->connection->fde->fd == fd);
+  assert(client->connection->socket);
+  assert(io_socket_fd(client->connection->socket) == fd);
   assert(client_has_flag(client, FLAGS_BLOCKED));
 
   client_unset_flag(client, FLAGS_BLOCKED);
@@ -168,23 +167,23 @@ send_queued_write(struct Client *to)
 
     ssize_t retlen;
 
-    if (tls_session_is_active(&to->connection->fde->tls))
+    if (io_socket_tls_is_active(to->connection->socket))
     {
       bool tls_want_read = false;
-      retlen = tls_session_write(&to->connection->fde->tls, view.data, view.length, &tls_want_read);
+      retlen = io_socket_tls_write(to->connection->socket, view.data, view.length, &tls_want_read);
 
       if (tls_want_read)
         return;  /* Retry later, don't register for write events. */
     }
     else
-      retlen = send(to->connection->fde->fd, view.data, view.length, 0);
+      retlen = send(io_socket_fd(to->connection->socket), view.data, view.length, 0);
 
     if (retlen <= 0)
     {
       const int error_code = retlen < 0 ? errno : 0;
       if (retlen < 0 && io_socket_errno_is_transient(error_code))
       {
-        if (io_poll_watch_write(io_socket_get_poller(), to->connection->fde->fd, send_write_ready, to, NULL) == 0)
+        if (io_socket_watch_write(to->connection->socket, send_write_ready, to) == 0)
           client_set_flag(to, FLAGS_BLOCKED);
         else
           client_schedule_exit_fmt(to, "Write watch registration failed: %s", strerror(errno));

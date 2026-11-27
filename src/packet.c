@@ -15,8 +15,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "fdlist.h"
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_time.h"
 
@@ -32,7 +30,7 @@ static void
 read_packet_ready(int fd, void *context)
 {
   struct Client *const client = context;
-  assert(client->connection->fde && client->connection->fde->fd == fd);
+  assert(client->connection->socket && io_socket_fd(client->connection->socket) == fd);
   (void)fd;
   read_packet(client);
 }
@@ -49,20 +47,20 @@ read_packet(struct Client *client)
   if (client_is_defunct(client))
     return;
 
-  fde_t *const fde = client->connection->fde;
-  assert(fde);
-  const int fd = fde->fd;
+  struct io_socket *const socket = client->connection->socket;
+  assert(socket);
+  const int fd = io_socket_fd(socket);
 
   while (true)
   {
     bool want_write = false;
-    if (tls_session_is_active(&fde->tls))
-      length = tls_session_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
+    if (io_socket_tls_is_active(socket))
+      length = io_socket_tls_read(socket, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
     else
       length = recv(fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
     const int error_code = length < 0 ? errno : 0;
-    if (want_write && io_poll_watch_write(io_socket_get_poller(), fd, send_write_ready, client, NULL) == -1)
+    if (want_write && io_socket_watch_write(socket, send_write_ready, client) == -1)
     {
       client_schedule_exit_fmt(client, "Write watch registration failed: %s", strerror(errno));
       return;
@@ -72,7 +70,7 @@ read_packet(struct Client *client)
     {
       if (length < 0 && io_socket_errno_is_transient(error_code))
       {
-        if (io_poll_watch_read(io_socket_get_poller(), fd, read_packet_ready, client) == -1)
+        if (io_socket_watch_read(socket, read_packet_ready, client) == -1)
           client_schedule_exit_fmt(client, "Read watch registration failed: %s", strerror(errno));
       }
       else

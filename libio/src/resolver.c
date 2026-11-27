@@ -22,8 +22,6 @@
 
 #include "address.h"
 #include "dns.h"
-#include "fdlist.h"
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -106,7 +104,7 @@ struct resolver_socket
 {
   int family;
   const char *description;
-  fde_t *fde;
+  struct io_socket *handle;
   uint64_t generation;
 };
 
@@ -134,6 +132,8 @@ static struct resolver_socket resolver_sockets[] =
 };
 
 static struct resolver_config resolver_config;
+static struct io_socket_context *resolver_socket_context;
+static event_handle_t resolver_timeout_event;
 static uint64_t resolver_config_generation;
 static list_t request_list;
 static struct resolver_request *requests_by_transaction_id[UINT16_MAX + 1U];
@@ -151,45 +151,47 @@ _resolver_socket_find_by_family(int family)
 }
 
 static bool
-_resolver_socket_open(struct resolver_socket *socket)
+_resolver_socket_open(struct io_socket_context *socket_context, struct resolver_socket *socket)
 {
   assert(socket);
   assert(socket->family == AF_INET || socket->family == AF_INET6);
   assert(socket->description);
 
-  if (socket->fde)
+  if (socket->handle)
     return true;
 
-  fde_t *const fde = io_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
-  if (fde == NULL)
+  struct io_socket *const handle =
+    io_socket_create(socket_context, socket->family, SOCK_DGRAM, 0, socket->description);
+  if (handle == NULL)
     return false;
 
-  if (io_poll_watch_read(io_socket_get_poller(), fde->fd, _resolver_read_reply, socket) == -1)
+  if (io_socket_watch_read(handle, _resolver_read_reply, socket) == -1)
   {
     const int error = errno;
 
-    io_socket_close(fde);
+    io_socket_close(handle);
     errno = error;
     return false;
   }
 
-  socket->fde = fde;
+  socket->handle = handle;
   return true;
 }
 
 static void
 _resolver_socket_close(struct resolver_socket *socket)
 {
-  if (socket->fde == NULL)
+  if (socket->handle == NULL)
     return;
 
-  io_socket_close(socket->fde);
-  socket->fde = NULL;
+  struct io_socket *const handle = socket->handle;
+  socket->handle = NULL;
   ++socket->generation;
+  io_socket_close(handle);
 }
 
 static bool
-_resolver_socket_reconfigure(const struct resolver_config *config)
+_resolver_socket_reconfigure(struct io_socket_context *socket_context, const struct resolver_config *config)
 {
   assert(config);
   assert(config->nameserver_count > 0);
@@ -200,10 +202,10 @@ _resolver_socket_reconfigure(const struct resolver_config *config)
   for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
   {
     struct resolver_socket *const socket = &resolver_sockets[i];
-    if (!resolver_config_has_family(config, socket->family) || socket->fde)
+    if (!resolver_config_has_family(config, socket->family) || socket->handle)
       continue;
 
-    if (!_resolver_socket_open(socket))
+    if (!_resolver_socket_open(socket_context, socket))
     {
       for (size_t j = 0; j < IO_ARRAY_LENGTH(resolver_sockets); ++j)
       {
@@ -239,12 +241,12 @@ _resolver_send_packet(const unsigned char *packet, size_t packet_length, size_t 
   const struct io_addr *const nameserver = &resolver_config.nameservers[nameserver_index];
   const struct resolver_socket *const socket =
     _resolver_socket_find_by_family(address_get_family(nameserver));
-  if (socket == NULL || socket->fde == NULL)
+  if (socket == NULL || socket->handle == NULL)
     return false;
 
   ssize_t bytes_sent;
   do
-    bytes_sent = sendto(socket->fde->fd, packet, packet_length, 0,
+    bytes_sent = sendto(io_socket_fd(socket->handle), packet, packet_length, 0,
                         address_get_sockaddr(nameserver), address_get_sockaddr_length(nameserver));
   while (bytes_sent == -1 && errno == EINTR);
 
@@ -1176,7 +1178,7 @@ _resolver_read_reply(int fd, void *context)
 {
   struct resolver_socket *const socket = context;
   assert(socket);
-  assert(socket->fde && socket->fde->fd == fd);
+  assert(socket->handle && io_socket_fd(socket->handle) == fd);
 
   const uint64_t generation = socket->generation;
   unsigned char packet[RESOLVER_UDP_MESSAGE_CAPACITY];
@@ -1187,7 +1189,7 @@ _resolver_read_reply(int fd, void *context)
   };
 
   /* Keep reception armed before callbacks can reconfigure the resolver. */
-  if (io_poll_watch_read(io_socket_get_poller(), fd, _resolver_read_reply, socket) == -1)
+  if (io_socket_watch_read(socket->handle, _resolver_read_reply, socket) == -1)
   {
     _resolver_socket_close(socket);
     return;
@@ -1238,6 +1240,7 @@ _resolver_process_timeouts(void *unused)
   if (list_is_empty(&request_list))
     return;
 
+  const event_handle_t timeout_event = resolver_timeout_event;
   const uintmax_t now_ms = io_time_get_monotonic_ms_total();
 
   for (size_t i = 0; i < IO_ARRAY_LENGTH(requests_by_transaction_id); ++i)
@@ -1260,18 +1263,20 @@ _resolver_process_timeouts(void *unused)
     struct resolver_completion completion;
     _resolver_request_finalize_failure(request, &completion);
     _resolver_completion_dispatch(&completion);
+    if (resolver_timeout_event != timeout_event)
+      return;
   }
 }
 
 static bool
-_resolver_config_update(void)
+_resolver_config_update(struct io_socket_context *socket_context)
 {
   struct resolver_config candidate;
 
   if (!resolver_config_load(&candidate))
     return false;
 
-  if (!_resolver_socket_reconfigure(&candidate))
+  if (!_resolver_socket_reconfigure(socket_context, &candidate))
     return false;
 
   if (resolver_config_equal(&resolver_config, &candidate))
@@ -1283,9 +1288,11 @@ _resolver_config_update(void)
 }
 
 bool
-resolver_init(event_manager_t manager)
+resolver_init(struct io_socket_context *socket_context, event_manager_t manager)
 {
-  event_handle_t timeout_event =
+  assert(socket_context && resolver_socket_context == NULL);
+
+  const event_handle_t timeout_event =
     event_create(manager, "_resolver_process_timeouts", _resolver_process_timeouts,
                  RESOLVER_TIMEOUT_SCAN_INTERVAL_MS, false, NULL, NULL);
   if (timeout_event == NULL)
@@ -1293,7 +1300,7 @@ resolver_init(event_manager_t manager)
 
   if (event_set_priority(timeout_event, 1) != EVENT_SUCCESS ||
       event_schedule(timeout_event) != EVENT_SUCCESS ||
-      !_resolver_config_update())
+      !_resolver_config_update(socket_context))
   {
     const event_status_t status = event_destroy(timeout_event);
     assert(status == EVENT_SUCCESS);
@@ -1301,13 +1308,37 @@ resolver_init(event_manager_t manager)
     return false;
   }
 
+  resolver_timeout_event = timeout_event;
+  resolver_socket_context = socket_context;
   return true;
+}
+
+void
+resolver_shutdown(void)
+{
+  if (resolver_socket_context == NULL)
+    return;
+
+  resolver_socket_context = NULL;
+  const event_handle_t timeout_event = resolver_timeout_event;
+  resolver_timeout_event = NULL;
+  const event_status_t status = event_destroy(timeout_event);
+  assert(status == EVENT_SUCCESS);
+  (void)status;
+
+  while (!list_is_empty(&request_list))
+    _resolver_request_destroy(list_peek_head(&request_list));
+
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(resolver_sockets); ++i)
+    _resolver_socket_close(&resolver_sockets[i]);
+
+  resolver_config = (struct resolver_config){ 0 };
 }
 
 bool
 resolver_reload(void)
 {
-  return _resolver_config_update();
+  return resolver_socket_context && _resolver_config_update(resolver_socket_context);
 }
 
 size_t
@@ -1337,6 +1368,9 @@ resolver_lookup_name(resolver_lookup_name_callback_fn callback, void *callback_c
   assert(name);
   assert(family == AF_INET || family == AF_INET6);
 
+  if (resolver_socket_context == NULL)
+    return false;
+
   const uint16_t query_type = _resolver_query_type_from_family(family);
   return _resolver_query_name(callback, callback_ctx, name, query_type);
 }
@@ -1348,7 +1382,7 @@ resolver_lookup_addr(resolver_lookup_addr_callback_fn callback, void *callback_c
   assert(addr);
   assert(address_is_ipv4(addr) || address_is_ipv6(addr));
 
-  return _resolver_query_addr(callback, callback_ctx, addr);
+  return resolver_socket_context && _resolver_query_addr(callback, callback_ctx, addr);
 }
 
 void

@@ -610,8 +610,7 @@ parse_message(struct Client *client, char *buffer, const char *buffer_end)
   assert(client && client_is_local(client));
   assert(client->nexthop);
   assert(client->command_handler < COMMAND_HANDLER_TYPE_COUNT);
-  assert(client->connection->fde);
-  assert(client->connection->fde->flags.open);
+  assert(client->connection->socket);
   assert(!client_is_dead(client));
 
   parse_context_t ctx =

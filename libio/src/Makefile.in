@@ -120,15 +120,14 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio_la_LIBADD =
 am_libio_la_OBJECTS = address.lo address_index.lo address_parse.lo \
-	base32.lo dbuf.lo dns.lo event.lo fdlist.lo hook.lo \
-	hostmask_index.lo ident.lo io_daemon.lo io_getopt.lo \
-	io_hash.lo io_hex.lo io_parse.lo io_pidfile.lo io_poll.lo \
-	io_poll_epoll.lo io_poll_kqueue.lo io_poll_poll.lo \
-	io_rlimit.lo io_signal.lo io_socket.lo io_string.lo io_time.lo \
-	list.lo log.lo match.lo misc.lo memory.lo module.lo \
-	module_config.lo module_loader.lo patricia.lo resolver.lo \
-	resolver_config.lo rng_mt.lo sha3.lo tls_gnutls.lo tls_none.lo \
-	tls_openssl.lo tls_wolfssl.lo
+	base32.lo dbuf.lo dns.lo event.lo hook.lo hostmask_index.lo \
+	ident.lo io_daemon.lo io_getopt.lo io_hash.lo io_hex.lo \
+	io_parse.lo io_pidfile.lo io_poll.lo io_poll_epoll.lo \
+	io_poll_kqueue.lo io_poll_poll.lo io_rlimit.lo io_signal.lo \
+	io_socket.lo io_string.lo io_time.lo list.lo log.lo match.lo \
+	misc.lo memory.lo module.lo module_config.lo module_loader.lo \
+	patricia.lo resolver.lo resolver_config.lo rng_mt.lo sha3.lo \
+	tls_gnutls.lo tls_none.lo tls_openssl.lo tls_wolfssl.lo
 libio_la_OBJECTS = $(am_libio_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -152,8 +151,7 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/address.Plo \
 	./$(DEPDIR)/address_index.Plo ./$(DEPDIR)/address_parse.Plo \
 	./$(DEPDIR)/base32.Plo ./$(DEPDIR)/dbuf.Plo \
-	./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo \
-	./$(DEPDIR)/fdlist.Plo ./$(DEPDIR)/hook.Plo \
+	./$(DEPDIR)/dns.Plo ./$(DEPDIR)/event.Plo ./$(DEPDIR)/hook.Plo \
 	./$(DEPDIR)/hostmask_index.Plo ./$(DEPDIR)/ident.Plo \
 	./$(DEPDIR)/io_daemon.Plo ./$(DEPDIR)/io_getopt.Plo \
 	./$(DEPDIR)/io_hash.Plo ./$(DEPDIR)/io_hex.Plo \
@@ -364,8 +362,6 @@ libio_la_SOURCES = address.c     \
                     dns.h         \
                     event.c       \
                     event.h       \
-                    fdlist.c      \
-                    fdlist.h      \
                     hook.c        \
                     hook.h        \
                     hostmask_index.c \
@@ -495,7 +491,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fdlist.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hostmask_index.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident.Plo@am__quote@ # am--include-marker
@@ -698,7 +693,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
-	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
 	-rm -f ./$(DEPDIR)/hostmask_index.Plo
 	-rm -f ./$(DEPDIR)/ident.Plo
@@ -786,7 +780,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/dbuf.Plo
 	-rm -f ./$(DEPDIR)/dns.Plo
 	-rm -f ./$(DEPDIR)/event.Plo
-	-rm -f ./$(DEPDIR)/fdlist.Plo
 	-rm -f ./$(DEPDIR)/hook.Plo
 	-rm -f ./$(DEPDIR)/hostmask_index.Plo
 	-rm -f ./$(DEPDIR)/ident.Plo

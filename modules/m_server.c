@@ -277,7 +277,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  io_socket_set_description_fmt(client->connection->fde, "Server: %s", client->name);
+  io_socket_set_description_fmt(client->connection->socket, "Server: %s", client->name);
 
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
 
@@ -287,8 +287,8 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   if (service_find(client->name))
     client_set_flag(client, FLAGS_SERVICE);
 
-  if (tls_session_is_active(&client->connection->fde->tls))
-    client->tls_cipher = io_strdup(tls_session_get_cipher(&client->connection->fde->tls));
+  if (io_socket_tls_is_active(client->connection->socket))
+    client->tls_cipher = io_strdup(io_socket_tls_get_cipher(client->connection->socket));
 
   client_set_state(client, CLIENT_STATE_SERVER);
   client_update_activity_timeout(client);
@@ -331,7 +331,7 @@ _server_establish_report_link(struct Client *client)
     client_format_name(client, CLIENT_FORMAT_NAME_OPER, &oper_client_name_buffer);
   const char *const capabilities = capab_get(client, true);
 
-  if (tls_session_is_active(&client->connection->fde->tls))
+  if (io_socket_tls_is_active(client->connection->socket))
   {
     sendto_clients(USER_MODE_SERVNOTICE, SEND_RECIPIENT_ADMIN, SEND_TYPE_NOTICE,
                    "Link with %s established: [TLS: %s] (Capabilities: %s)",

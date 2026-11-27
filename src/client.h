@@ -18,7 +18,6 @@
 #include "address.h"
 #include "dbuf.h"
 #include "event.h"
-#include "fdlist.h"
 #include "io.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -34,6 +33,8 @@
 #include "lookup.h"
 #include "server.h"
 #include "user_mode.h"
+
+struct io_socket;
 
 /** Client connection states */
 enum client_state
@@ -152,7 +153,7 @@ struct Connection
   list_t monitor_list;  /**< Chain of Monitor pointer blocks */
   list_t channel_invite_list;  /**< Chain of invite pointer blocks */
 
-  fde_t *fde;  /**< Pointer to the file descriptor entry for the underlying socket. */
+  struct io_socket *socket;
 
   int input_parse_debt;  /**< Decaying parse debt that limits queued input processing. */
 
@@ -226,9 +227,10 @@ extern list_t local_server_list;  /* local servers to this server ONLY */
 extern list_t unknown_list;  /* unknown clients ON this server only */
 extern list_t oper_list;  /* our opers, duplicated in local_client_list */
 
+extern void client_close_local_connections(void);
 extern void client_exit(struct Client *, const char *);
 extern void client_exit_fmt(struct Client *, const char *, ...) IO_AFP(2,3);
-extern void client_process_accepted_connection(fde_t *, struct Listener *, const struct io_addr *, const char *);
+extern void client_process_accepted_connection(struct io_socket *, struct Listener *, const struct io_addr *, const char *);
 extern void client_process_deferred_destroy(void);
 extern void client_process_scheduled_exits(void);
 extern void client_update_activity_timeout(struct Client *);

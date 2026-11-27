@@ -15,13 +15,13 @@
 
 #include "event.h"
 #include "io.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
 #include "log.h"
 #include "memory.h"
 #include "rng_mt.h"
-#include "tls.h"
 
 #include "cap.h"
 #include "channel.h"
@@ -437,7 +437,7 @@ user_register_local(struct Client *client)
   ++Count.totalrestartcount;
 
   if (client_has_flag(client, FLAGS_TLS_ACTIVE))
-    client->tls_cipher = io_strdup(tls_session_get_cipher(&client->connection->fde->tls));
+    client->tls_cipher = io_strdup(io_socket_tls_get_cipher(client->connection->socket));
 
   _user_report_and_set_flags(client, auth);
 

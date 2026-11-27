@@ -8,18 +8,21 @@
  * @brief Functions to facilitate the restart and termination of the IRC server.
  */
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
-#include "fdlist.h"
 #include "io_pidfile.h"
+#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "log.h"
+#include "resolver.h"
 
 #include "client.h"
 #include "conf_db.h"
@@ -27,6 +30,7 @@
 #include "ircd.h"
 #include "ircd_exit.h"
 #include "ircd_module.h"
+#include "listener.h"
 #include "send.h"
 
 /**
@@ -91,14 +95,23 @@ ircd_exit(ircd_exit_action_t action, const char *message)
 
   ircd_module_shutdown();
 
+  client_close_local_connections();
+  listener_close_all();
+  resolver_shutdown();
+
   io_pidfile_remove(pidFileName);
   io_pidfile_close();
-  io_socket_shutdown();
+
+  /* Live sockets retain their poller and are closed by the process exit or exec. */
+  if (io_socket_context_destroy(ircd_socket_context) == 0)
+    io_poll_destroy(ircd_poller);
+  else
+    log_write(LOG_TYPE_IRCD, "Failed to destroy socket context: %s", strerror(errno));
 
   if (action == IRCD_EXIT_RESTART)
   {
-    close_fds();
     execv(SPATH, myargv);
+    log_write(LOG_TYPE_IRCD, "Failed to execute %s: %s", SPATH, strerror(errno));
   }
 
   exit(action == IRCD_EXIT_TERMINATE ? EXIT_SUCCESS : EXIT_FAILURE);

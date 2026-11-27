@@ -27,7 +27,7 @@
 #include <sys/types.h>
 
 #include "event.h"
-#include "fdlist.h"
+#include "io.h"
 #include "io_daemon.h"
 #include "io_getopt.h"
 #include "io_pidfile.h"
@@ -67,6 +67,9 @@
 #include "server_capab.h"
 
 event_manager_t ircd_event_manager;
+int ircd_fd_limit;
+struct io_poll *ircd_poller;
+struct io_socket_context *ircd_socket_context;
 
 /**
  * @struct SetOptions
@@ -445,15 +448,20 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  /* We need this to initialise the fd array before anything else */
-  fdlist_init();
+  const int nofile_limit = (int)io_rlimit_get_cur_nofile();
+  ircd_fd_limit = IO_MAX(nofile_limit, IRCD_FD_RESERVE + MAX_BUFFER + MAXCLIENTS_MIN);
   log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
-  if (!io_socket_init(ircd_event_manager))
+  ircd_poller = io_poll_create(ircd_fd_limit);
+  if (ircd_poller == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize I/O polling: %s", strerror(errno));
     exit(EXIT_FAILURE);
   }
+
+  const size_t reserved_fds = IRCD_FD_RESERVE + (io_poll_control_fd(ircd_poller) != NULL);
+  ircd_socket_context = io_socket_context_create(ircd_poller, ircd_event_manager,
+                                                 (size_t)ircd_fd_limit - reserved_fds);
 
   tls_library_init();
 
@@ -475,7 +483,7 @@ main(int argc, char *argv[])
   conf_kill_init();
   conf_read_files(true);
 
-  if (!resolver_init(ircd_event_manager))
+  if (!resolver_init(ircd_socket_context, ircd_event_manager))
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize resolver");
     exit(EXIT_FAILURE);
@@ -505,7 +513,7 @@ main(int argc, char *argv[])
   event_reschedule(event_server_connect_auto, 1);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
-  _io_loop(io_socket_get_poller());
+  _io_loop(ircd_poller);
 
   return 0;
 }

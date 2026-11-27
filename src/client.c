@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "log.h"
@@ -277,7 +276,7 @@ _client_destroy_local(struct Client *client)
   assert(client->connection->node.prev == NULL && client->connection->node.next == NULL);
   assert(client->connection->list_task == NULL);
   assert(client->connection->lookup_request == NULL);
-  assert(client->connection->fde == NULL);
+  assert(client->connection->socket == NULL);
   assert(client->connection->listener == NULL);
   assert(client->connection->activity_timeout_event == NULL);
   assert(client->connection->flood_recalc_event == NULL);
@@ -350,8 +349,8 @@ client_update_name(struct Client *client, const char *new_name)
 
   hash_add_client(client);
 
-  if (client_is_local(client) && client->connection->fde)
-    io_socket_set_description_fmt(client->connection->fde, "Name: %s", client->name);
+  if (client_is_local(client) && client->connection->socket)
+    io_socket_set_description_fmt(client->connection->socket, "Name: %s", client->name);
 }
 
 const struct Client *
@@ -438,15 +437,29 @@ _client_exit_teardown_connection(struct Client *client)
     send_queued_write(client);
   }
 
-  if (client->connection->fde)
+  if (client->connection->socket)
   {
-    io_socket_close(client->connection->fde);
-    client->connection->fde = NULL;
+    struct io_socket *const socket = client->connection->socket;
+    client->connection->socket = NULL;
+    io_socket_close(socket);
   }
 
   /* Free transport-level buffer memory now that the socket is gone. */
   dbuf_queue_clear(&client->connection->send_queue);
   dbuf_queue_clear(&client->connection->recv_queue);
+}
+
+void
+client_close_local_connections(void)
+{
+  const list_t *const lists[] = { &unknown_list, &local_client_list, &local_server_list };
+
+  for (size_t i = 0; i < IO_ARRAY_LENGTH(lists); ++i)
+  {
+    list_node_t *node;
+    LIST_FOREACH(node, lists[i]->head)
+      _client_exit_teardown_connection(node->data);
+  }
 }
 
 static void
@@ -878,9 +891,9 @@ _client_normalize_ipv6_address_string(char *addr_string, size_t addr_string_size
 }
 
 static void
-_client_reject_connection_server_full(fde_t *client_fde, const struct Listener *listener, const char *remote_addr_str)
+_client_reject_connection_server_full(struct io_socket *client_socket, const struct Listener *listener, const char *remote_addr_str)
 {
-  assert(client_fde);
+  assert(client_socket);
   assert(listener);
   assert(remote_addr_str);
 
@@ -888,7 +901,7 @@ _client_reject_connection_server_full(fde_t *client_fde, const struct Listener *
   sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
                              remote_addr_str, listener_get_name(listener), listener_get_port(listener));
 
-  io_socket_close(client_fde);
+  io_socket_close(client_socket);
 }
 
 static enum client_connection_policy_result
@@ -907,10 +920,10 @@ _client_check_connection_policy(const struct io_addr *addr)
 }
 
 static void
-_client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *listener,
+_client_reject_connection_by_policy(struct io_socket *client_socket, const struct Listener *listener,
                                     const char *remote_addr_str, enum client_connection_policy_result result)
 {
-  assert(client_fde);
+  assert(client_socket);
   assert(listener);
   assert(remote_addr_str);
   assert(result == CLIENT_CONNECTION_POLICY_DLINED || result == CLIENT_CONNECTION_POLICY_THROTTLED);
@@ -919,13 +932,14 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
             remote_addr_str, listener_get_name(listener), listener_get_port(listener),
             result == CLIENT_CONNECTION_POLICY_DLINED ? "D-lined" : "Throttled");
 
-  io_socket_close(client_fde);
+  io_socket_close(client_socket);
 }
 
 static void
 _client_tls_session_handshake_handler(int fd, void *context)
 {
   struct Client *const client = context;
+  (void)fd;
   assert(client && client_is_local(client));
   assert(client->connection);
 
@@ -936,11 +950,11 @@ _client_tls_session_handshake_handler(int fd, void *context)
   if (client_is_defunct(client))
     return;
 
-  fde_t *const fde = client->connection->fde;
-  assert(fde && fde->fd == fd);
+  struct io_socket *const socket = client->connection->socket;
+  assert(socket && io_socket_fd(socket) == fd);
 
   const char *tls_error = NULL;
-  const tls_handshake_status_t status = tls_session_handshake(&fde->tls, &tls_error);
+  const tls_handshake_status_t status = io_socket_tls_handshake(socket, &tls_error);
 
   switch (status)
   {
@@ -948,16 +962,16 @@ _client_tls_session_handshake_handler(int fd, void *context)
       client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
       client_set_flag(client, FLAGS_TLS_ACTIVE);
 
-      tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
+      io_socket_tls_get_peer_certificate_fingerprint(socket, &client->tls_certfp);
 
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      if (io_poll_watch_write(io_socket_get_poller(), fd, _client_tls_session_handshake_handler, client, NULL) == 0)
+      if (io_socket_watch_write(socket, _client_tls_session_handshake_handler, client) == 0)
         return;
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      if (io_poll_watch_read(io_socket_get_poller(), fd, _client_tls_session_handshake_handler, client) == 0)
+      if (io_socket_watch_read(socket, _client_tls_session_handshake_handler, client) == 0)
         return;
       break;
     default:
@@ -974,7 +988,7 @@ _client_begin_local_connection_ingress(struct Client *client)
 {
   assert(client && client_is_local(client));
   assert(client->connection);
-  assert(client->connection->fde);
+  assert(client->connection->socket);
   assert(client->connection->listener);
 
   client_update_activity_timeout(client);
@@ -985,7 +999,7 @@ _client_begin_local_connection_ingress(struct Client *client)
     return;
   }
 
-  if (!tls_session_init(&client->connection->fde->tls, client->connection->fde->fd, TLS_ROLE_SERVER))
+  if (!io_socket_tls_start(client->connection->socket, TLS_ROLE_SERVER))
   {
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
@@ -993,20 +1007,20 @@ _client_begin_local_connection_ingress(struct Client *client)
   }
 
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
-  _client_tls_session_handshake_handler(client->connection->fde->fd, client);
+  _client_tls_session_handshake_handler(io_socket_fd(client->connection->socket), client);
 }
 
 static struct Client *
-_client_create_accepted_local_connection(fde_t *client_fde, struct Listener *listener,
+_client_create_accepted_local_connection(struct io_socket *client_socket, struct Listener *listener,
                                          const struct io_addr *remote_addr, const char *remote_addr_str)
 {
-  assert(client_fde);
+  assert(client_socket);
   assert(listener);
   assert(remote_addr);
   assert(remote_addr_str);
 
   struct Client *const client = client_create_local();
-  client->connection->fde = client_fde;
+  client->connection->socket = client_socket;
 
   address_copy(&client->addr, remote_addr);
 
@@ -1024,28 +1038,29 @@ _client_create_accepted_local_connection(fde_t *client_fde, struct Listener *lis
 }
 
 void
-client_process_accepted_connection(fde_t *client_fde, struct Listener *listener,
+client_process_accepted_connection(struct io_socket *client_socket, struct Listener *listener,
                                    const struct io_addr *remote_addr, const char *remote_addr_str)
 {
-  assert(client_fde);
+  assert(client_socket);
   assert(listener);
   assert(remote_addr);
   assert(remote_addr_str);
 
-  if (number_fd > hard_fdlimit - 10)
+  enum { CLIENT_ADMISSION_FD_RESERVE = 10 };
+  if (io_socket_context_available_slots(ircd_socket_context) < CLIENT_ADMISSION_FD_RESERVE)
   {
-    _client_reject_connection_server_full(client_fde, listener, remote_addr_str);
+    _client_reject_connection_server_full(client_socket, listener, remote_addr_str);
     return;
   }
 
   const enum client_connection_policy_result result = _client_check_connection_policy(remote_addr);
   if (result != CLIENT_CONNECTION_POLICY_ALLOWED)
   {
-    _client_reject_connection_by_policy(client_fde, listener, remote_addr_str, result);
+    _client_reject_connection_by_policy(client_socket, listener, remote_addr_str, result);
     return;
   }
 
   struct Client *const client =
-    _client_create_accepted_local_connection(client_fde, listener, remote_addr, remote_addr_str);
+    _client_create_accepted_local_connection(client_socket, listener, remote_addr, remote_addr_str);
   _client_begin_local_connection_ingress(client);
 }

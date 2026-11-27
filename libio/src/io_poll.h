@@ -21,6 +21,7 @@ extern void io_poll_destroy(struct io_poll *);
 extern void io_poll_unwatch(struct io_poll *, int);
 extern void io_poll_unwatch_write(struct io_poll *, int, uint64_t);
 extern int io_poll_dispatch(struct io_poll *, int);
+extern int io_poll_fd_limit(const struct io_poll *);
 extern int io_poll_watch_read(struct io_poll *, int, io_poll_handler_fn, void *);
 extern int io_poll_watch_write(struct io_poll *, int, io_poll_handler_fn, void *, uint64_t *);
 extern struct io_poll *io_poll_create(int fd_limit);

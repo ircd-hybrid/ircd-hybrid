@@ -12,7 +12,6 @@
 #include <string.h>
 #include <sys/socket.h>
 
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -252,15 +251,15 @@ static void
 _server_handshake_tls_finish(struct Client *client)
 {
   assert(client && client_is_local(client));
-  assert(client->connection->fde);
+  assert(client->connection->socket);
   assert(client_has_flag(client, FLAGS_TLS_HANDSHAKING));
   assert(!client_has_flag(client, FLAGS_TLS_ACTIVE));
 
   client_unset_flag(client, FLAGS_TLS_HANDSHAKING);
   client_set_flag(client, FLAGS_TLS_ACTIVE);
 
-  fde_t *const fde = client->connection->fde;
-  tls_session_get_peer_certificate_fingerprint(&fde->tls, &client->tls_certfp);
+  struct io_socket *const socket = client->connection->socket;
+  io_socket_tls_get_peer_certificate_fingerprint(socket, &client->tls_certfp);
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
@@ -276,6 +275,7 @@ static void
 _server_handshake_tls_start(int fd, void *context)
 {
   struct Client *const client = context;
+  (void)fd;
   assert(client && client_is_local(client));
 
   /*
@@ -285,10 +285,10 @@ _server_handshake_tls_start(int fd, void *context)
   if (client_is_defunct(client))
     return;
 
-  fde_t *const fde = client->connection->fde;
-  assert(fde && fde->fd == fd);
+  struct io_socket *const socket = client->connection->socket;
+  assert(socket && io_socket_fd(socket) == fd);
 
-  tls_handshake_status_t ret = tls_session_handshake(&fde->tls, NULL);
+  tls_handshake_status_t ret = io_socket_tls_handshake(socket, NULL);
   if (ret == TLS_HANDSHAKE_DONE)
   {
     _server_handshake_tls_finish(client);
@@ -298,11 +298,11 @@ _server_handshake_tls_start(int fd, void *context)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      if (io_poll_watch_write(io_socket_get_poller(), fd, _server_handshake_tls_start, client, NULL) == 0)
+      if (io_socket_watch_write(socket, _server_handshake_tls_start, client) == 0)
         return;
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      if (io_poll_watch_read(io_socket_get_poller(), fd, _server_handshake_tls_start, client) == 0)
+      if (io_socket_watch_read(socket, _server_handshake_tls_start, client) == 0)
         return;
       break;
     default:
@@ -315,13 +315,13 @@ _server_handshake_tls_start(int fd, void *context)
 }
 
 static void
-_server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t *fde)
+_server_tls_init(struct Client *client, struct io_socket *socket)
 {
   assert(client && client_is_local(client));
-  assert(client->connection->fde);
-  assert(client->connection->fde == fde);
+  assert(client->connection->socket);
+  assert(client->connection->socket == socket);
 
-  if (!tls_session_init(&fde->tls, fde->fd, TLS_ROLE_CLIENT))
+  if (!io_socket_tls_start(socket, TLS_ROLE_CLIENT))
   {
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
     client_exit(client, "TLS context initialization failed");
@@ -331,11 +331,11 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
   client_set_flag(client, FLAGS_TLS_HANDSHAKING);
   client_update_activity_timeout(client);
 
-  _server_handshake_tls_start(fde->fd, client);
+  _server_handshake_tls_start(io_socket_fd(socket), client);
 }
 
 static void
-_server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status, int system_error, void *context)
+_server_connect_callback(struct io_socket *socket, enum io_socket_connect_status status, int system_error, void *context)
 {
   struct Client *const client = context;
   assert(client && client_is_local(client));
@@ -353,8 +353,8 @@ _server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status
     return;
   }
 
-  assert(socket_fde);
-  assert(client->connection->fde == socket_fde);
+  assert(socket);
+  assert(client->connection->socket == socket);
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
@@ -364,7 +364,7 @@ _server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status
   }
 
   if (connect->flags & CONNECT_FLAG_USE_TLS)
-    _server_tls_init(client, connect, socket_fde);
+    _server_tls_init(client, socket);
   else
     _server_handshake_irc_start(client);
 }
@@ -406,12 +406,13 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
-  fde_t *const new_fde = io_socket_create(address_get_family(&remote_endpoint), SOCK_STREAM, 0, NULL);
-  if (new_fde == NULL)
+  struct io_socket *const socket =
+    io_socket_create(ircd_socket_context, address_get_family(&remote_endpoint), SOCK_STREAM, 0, NULL);
+  if (socket == NULL)
     return false;
 
   struct Client *const client = client_create_local();
-  client->connection->fde = new_fde;
+  client->connection->socket = socket;
 
   address_copy(&client->addr, &connect->remote_addr);
   strlcpy(client->name, connect->name, sizeof(client->name));
@@ -426,15 +427,16 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   client_set_state(client, CLIENT_STATE_CONNECTING);
 
-  io_socket_set_description_fmt(client->connection->fde, "Server: %s", client->name);
+  io_socket_set_description_fmt(client->connection->socket, "Server: %s", client->name);
 
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
   const struct io_addr *const local_endpoint =
     address_get_family(&connect->bind_addr) == AF_UNSPEC ? NULL : &connect->bind_addr;
-  io_socket_connect_tcp(client->connection->fde, &remote_endpoint, local_endpoint,
-                        _server_connect_callback, client, connect->timeout * 1000ULL);
+  if (io_socket_connect_tcp(socket, &remote_endpoint, local_endpoint,
+                            _server_connect_callback, client, connect->timeout * 1000ULL) == -1)
+    _server_connect_callback(socket, IO_SOCKET_CONNECT_FAILED, errno, client);
   return true;
 }
 

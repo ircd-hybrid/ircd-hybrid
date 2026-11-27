@@ -17,7 +17,6 @@
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 
-#include "io_poll.h"
 #include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
@@ -68,18 +67,19 @@ _listener_accept_connection(int fd, void *context)
   struct Listener *const listener = context;
   (void)fd;
   assert(listener);
-  assert(listener->fde && listener->fde->fd == fd);
-  assert(listener->fde->flags.open);
+  assert(listener->socket && io_socket_fd(listener->socket) == fd);
 
   const char *desc =
     listener_has_flag(listener, LISTENER_TLS) ? "Incoming TLS connection" : "Incoming connection";
 
-  for (unsigned int accepted_count = 0; accepted_count < LISTENER_ACCEPT_BUDGET; ++accepted_count)
+  listener_retain(listener);
+  for (unsigned int accepted_count = 0;
+       accepted_count < LISTENER_ACCEPT_BUDGET && listener_is_active(listener); ++accepted_count)
   {
     struct io_addr remote_addr;
 
-    fde_t *const client_fde = io_socket_accept(listener->fde, &remote_addr, desc);
-    if (client_fde == NULL)
+    struct io_socket *const client_socket = io_socket_accept(listener->socket, &remote_addr, desc);
+    if (client_socket == NULL)
     {
       /*
        * A recoverable error indicates the listen queue is now empty. For any
@@ -96,19 +96,22 @@ _listener_accept_connection(int fd, void *context)
     if (!address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)))
     {
       log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
-      io_socket_close(client_fde);
+      io_socket_close(client_socket);
       continue;
     }
 
-    client_process_accepted_connection(client_fde, listener, &remote_addr, remote_addr_str);
+    client_process_accepted_connection(client_socket, listener, &remote_addr, remote_addr_str);
   }
 
-  if (io_poll_watch_read(io_socket_get_poller(), fd, _listener_accept_connection, listener) == -1)
+  if (listener_is_active(listener) &&
+      io_socket_watch_read(listener->socket, _listener_accept_connection, listener) == -1)
   {
     log_write(LOG_TYPE_IRCD, "Failed to rearm listener %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
     _listener_close(listener);
   }
+
+  listener_release(listener);
 }
 
 /**
@@ -142,8 +145,9 @@ _listener_finalize(struct Listener *listener)
   io_free(listener->name);
   listener->name = io_strdup(buf);
 
-  fde_t *const new_fde = io_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
-  if (new_fde == NULL)
+  struct io_socket *const listener_socket =
+    io_socket_listen(ircd_socket_context, &listener->addr, LISTEN_BACKLOG, "Listener socket");
+  if (listener_socket == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu",
               listener_get_name(listener), listener_get_port(listener));
@@ -155,11 +159,11 @@ _listener_finalize(struct Listener *listener)
   {
     const int timeout = 1;
 
-    if (setsockopt(new_fde->fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout)) == -1)
+    if (setsockopt(io_socket_fd(listener_socket), IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout)) == -1)
     {
       log_write(LOG_TYPE_IRCD, "Failed to set TCP_DEFER_ACCEPT for listener %s/%hu: %s",
                 listener_get_name(listener), listener_get_port(listener), strerror(errno));
-      io_socket_close(new_fde);
+      io_socket_close(listener_socket);
       return false;
     }
   }
@@ -173,25 +177,25 @@ _listener_finalize(struct Listener *listener)
 
     strlcpy(afa.af_name, "dataready", sizeof(afa.af_name));
 
-    if (setsockopt(new_fde->fd, SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa)) == -1)
+    if (setsockopt(io_socket_fd(listener_socket), SOL_SOCKET, SO_ACCEPTFILTER, &afa, sizeof(afa)) == -1)
     {
       log_write(LOG_TYPE_IRCD, "Failed to set SO_ACCEPTFILTER for listener %s/%hu: %s",
                 listener_get_name(listener), listener_get_port(listener), strerror(errno));
-      io_socket_close(new_fde);
+      io_socket_close(listener_socket);
       return false;
     }
   }
 #endif
 
-  if (io_poll_watch_read(io_socket_get_poller(), new_fde->fd, _listener_accept_connection, listener) == -1)
+  if (io_socket_watch_read(listener_socket, _listener_accept_connection, listener) == -1)
   {
     log_write(LOG_TYPE_IRCD, "Failed to watch listener %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    io_socket_close(new_fde);
+    io_socket_close(listener_socket);
     return false;
   }
 
-  listener->fde = new_fde;
+  listener->socket = listener_socket;
   return true;
 }
 
@@ -220,12 +224,11 @@ _listener_find(const struct io_addr *addr)
 static void
 _listener_close(struct Listener *listener)
 {
-  if (listener->fde)
+  if (listener->socket)
   {
-    assert(listener->fde->flags.open);
-
-    io_socket_close(listener->fde);
-    listener->fde = NULL;
+    struct io_socket *const socket = listener->socket;
+    listener->socket = NULL;
+    io_socket_close(socket);
   }
 
   if (listener->ref_count)
@@ -235,7 +238,7 @@ _listener_close(struct Listener *listener)
 }
 
 void
-listener_close_marked(void)
+listener_close_all(void)
 {
   list_node_t *node, *node_next;
 

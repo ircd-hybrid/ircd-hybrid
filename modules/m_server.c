@@ -16,9 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "comm.h"
 #include "io.h"
 #include "io_parse.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -277,7 +277,7 @@ _server_establish_finalize_local(struct Client *client, struct ConnectItem *conn
   io_free(client->connection->password);
   client->connection->password = NULL;
 
-  comm_socket_note(client->connection->fde, "Server: %s", client->name);
+  io_socket_set_description_fmt(client->connection->fde, "Server: %s", client->name);
 
   client_set_class(client, connect->klass, CLIENT_CLASS_BASE);
 

@@ -21,10 +21,10 @@
 #include <sys/uio.h>
 
 #include "address.h"
-#include "comm.h"
 #include "dns.h"
 #include "fdlist.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -160,15 +160,15 @@ _resolver_socket_open(struct resolver_socket *socket)
   if (socket->fde)
     return true;
 
-  fde_t *const fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
+  fde_t *const fde = io_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
   if (fde == NULL)
     return false;
 
-  if (io_poll_watch_read(comm_get_poller(), fde->fd, _resolver_read_reply, socket) == -1)
+  if (io_poll_watch_read(io_socket_get_poller(), fde->fd, _resolver_read_reply, socket) == -1)
   {
     const int error = errno;
 
-    comm_socket_close(fde);
+    io_socket_close(fde);
     errno = error;
     return false;
   }
@@ -183,7 +183,7 @@ _resolver_socket_close(struct resolver_socket *socket)
   if (socket->fde == NULL)
     return;
 
-  comm_socket_close(socket->fde);
+  io_socket_close(socket->fde);
   socket->fde = NULL;
   ++socket->generation;
 }
@@ -1187,7 +1187,7 @@ _resolver_read_reply(int fd, void *context)
   };
 
   /* Keep reception armed before callbacks can reconfigure the resolver. */
-  if (io_poll_watch_read(comm_get_poller(), fd, _resolver_read_reply, socket) == -1)
+  if (io_poll_watch_read(io_socket_get_poller(), fd, _resolver_read_reply, socket) == -1)
   {
     _resolver_socket_close(socket);
     return;

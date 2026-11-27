@@ -11,9 +11,9 @@
 #include <errno.h>
 
 #include "address.h"
-#include "comm.h"
 #include "dbuf.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -182,9 +182,9 @@ send_queued_write(struct Client *to)
     if (retlen <= 0)
     {
       const int error_code = retlen < 0 ? errno : 0;
-      if (retlen < 0 && comm_errno_is_recoverable(error_code))
+      if (retlen < 0 && io_socket_errno_is_transient(error_code))
       {
-        if (io_poll_watch_write(comm_get_poller(), to->connection->fde->fd, send_write_ready, to, NULL) == 0)
+        if (io_poll_watch_write(io_socket_get_poller(), to->connection->fde->fd, send_write_ready, to, NULL) == 0)
           client_set_flag(to, FLAGS_BLOCKED);
         else
           client_schedule_exit_fmt(to, "Write watch registration failed: %s", strerror(errno));

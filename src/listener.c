@@ -17,8 +17,8 @@
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 
-#include "comm.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "log.h"
@@ -78,7 +78,7 @@ _listener_accept_connection(int fd, void *context)
   {
     struct io_addr remote_addr;
 
-    fde_t *const client_fde = comm_accept(listener->fde, &remote_addr, desc);
+    fde_t *const client_fde = io_socket_accept(listener->fde, &remote_addr, desc);
     if (client_fde == NULL)
     {
       /*
@@ -86,7 +86,7 @@ _listener_accept_connection(int fd, void *context)
        * other error (e.g., a single connection failing setup), we continue
        * trying to accept other pending connections.
        */
-      if (comm_errno_is_recoverable(errno))
+      if (io_socket_errno_is_transient(errno))
         break;
 
       continue;
@@ -96,14 +96,14 @@ _listener_accept_connection(int fd, void *context)
     if (!address_to_string(&remote_addr, remote_addr_str, sizeof(remote_addr_str)))
     {
       log_write(LOG_TYPE_IRCD, "listener_accept_connection: address_to_string() failed for new connection");
-      comm_socket_close(client_fde);
+      io_socket_close(client_fde);
       continue;
     }
 
     client_process_accepted_connection(client_fde, listener, &remote_addr, remote_addr_str);
   }
 
-  if (io_poll_watch_read(comm_get_poller(), fd, _listener_accept_connection, listener) == -1)
+  if (io_poll_watch_read(io_socket_get_poller(), fd, _listener_accept_connection, listener) == -1)
   {
     log_write(LOG_TYPE_IRCD, "Failed to rearm listener %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
@@ -142,7 +142,7 @@ _listener_finalize(struct Listener *listener)
   io_free(listener->name);
   listener->name = io_strdup(buf);
 
-  fde_t *const new_fde = comm_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
+  fde_t *const new_fde = io_socket_listen(&listener->addr, LISTEN_BACKLOG, "Listener socket");
   if (new_fde == NULL)
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu",
@@ -159,7 +159,7 @@ _listener_finalize(struct Listener *listener)
     {
       log_write(LOG_TYPE_IRCD, "Failed to set TCP_DEFER_ACCEPT for listener %s/%hu: %s",
                 listener_get_name(listener), listener_get_port(listener), strerror(errno));
-      comm_socket_close(new_fde);
+      io_socket_close(new_fde);
       return false;
     }
   }
@@ -177,17 +177,17 @@ _listener_finalize(struct Listener *listener)
     {
       log_write(LOG_TYPE_IRCD, "Failed to set SO_ACCEPTFILTER for listener %s/%hu: %s",
                 listener_get_name(listener), listener_get_port(listener), strerror(errno));
-      comm_socket_close(new_fde);
+      io_socket_close(new_fde);
       return false;
     }
   }
 #endif
 
-  if (io_poll_watch_read(comm_get_poller(), new_fde->fd, _listener_accept_connection, listener) == -1)
+  if (io_poll_watch_read(io_socket_get_poller(), new_fde->fd, _listener_accept_connection, listener) == -1)
   {
     log_write(LOG_TYPE_IRCD, "Failed to watch listener %s/%hu: %s",
               listener_get_name(listener), listener_get_port(listener), strerror(errno));
-    comm_socket_close(new_fde);
+    io_socket_close(new_fde);
     return false;
   }
 
@@ -224,7 +224,7 @@ _listener_close(struct Listener *listener)
   {
     assert(listener->fde->flags.open);
 
-    comm_socket_close(listener->fde);
+    io_socket_close(listener->fde);
     listener->fde = NULL;
   }
 

@@ -15,10 +15,10 @@
 
 
 #include "address.h"
-#include "comm.h"
 #include "event.h"
 #include "fdlist.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -365,7 +365,7 @@ stats_events(struct Client *client, size_t parc, char *parv[])
 static void
 stats_fdlist(struct Client *client, size_t parc, char *parv[])
 {
-  const struct io_poll_fd_info *const control = io_poll_control_fd(comm_get_poller());
+  const struct io_poll_fd_info *const control = io_poll_control_fd(io_socket_get_poller());
   const int control_fd = control ? control->fd : -1;
   for (int fd = 0; fd <= IO_MAX(highest_fd, control_fd); ++fd)
   {

@@ -13,8 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "comm.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "log.h"
 #include "memory.h"
@@ -351,7 +351,7 @@ client_update_name(struct Client *client, const char *new_name)
   hash_add_client(client);
 
   if (client_is_local(client) && client->connection->fde)
-    comm_socket_note(client->connection->fde, "Name: %s", client->name);
+    io_socket_set_description_fmt(client->connection->fde, "Name: %s", client->name);
 }
 
 const struct Client *
@@ -440,7 +440,7 @@ _client_exit_teardown_connection(struct Client *client)
 
   if (client->connection->fde)
   {
-    comm_socket_close(client->connection->fde);
+    io_socket_close(client->connection->fde);
     client->connection->fde = NULL;
   }
 
@@ -888,7 +888,7 @@ _client_reject_connection_server_full(fde_t *client_fde, const struct Listener *
   sendto_clients_ratelimited(&rate, "Refused connection from %s on listener [%s/%hu]: server full",
                              remote_addr_str, listener_get_name(listener), listener_get_port(listener));
 
-  comm_socket_close(client_fde);
+  io_socket_close(client_fde);
 }
 
 static enum client_connection_policy_result
@@ -919,7 +919,7 @@ _client_reject_connection_by_policy(fde_t *client_fde, const struct Listener *li
             remote_addr_str, listener_get_name(listener), listener_get_port(listener),
             result == CLIENT_CONNECTION_POLICY_DLINED ? "D-lined" : "Throttled");
 
-  comm_socket_close(client_fde);
+  io_socket_close(client_fde);
 }
 
 static void
@@ -953,11 +953,11 @@ _client_tls_session_handshake_handler(int fd, void *context)
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      if (io_poll_watch_write(comm_get_poller(), fd, _client_tls_session_handshake_handler, client, NULL) == 0)
+      if (io_poll_watch_write(io_socket_get_poller(), fd, _client_tls_session_handshake_handler, client, NULL) == 0)
         return;
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      if (io_poll_watch_read(comm_get_poller(), fd, _client_tls_session_handshake_handler, client) == 0)
+      if (io_poll_watch_read(io_socket_get_poller(), fd, _client_tls_session_handshake_handler, client) == 0)
         return;
       break;
     default:

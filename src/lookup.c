@@ -9,8 +9,8 @@
 #include <stdint.h>
 
 #include "address.h"
-#include "comm.h"
 #include "ident.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "memory.h"

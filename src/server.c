@@ -12,8 +12,8 @@
 #include <string.h>
 #include <sys/socket.h>
 
-#include "comm.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -298,11 +298,11 @@ _server_handshake_tls_start(int fd, void *context)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      if (io_poll_watch_write(comm_get_poller(), fd, _server_handshake_tls_start, client, NULL) == 0)
+      if (io_poll_watch_write(io_socket_get_poller(), fd, _server_handshake_tls_start, client, NULL) == 0)
         return;
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      if (io_poll_watch_read(comm_get_poller(), fd, _server_handshake_tls_start, client) == 0)
+      if (io_poll_watch_read(io_socket_get_poller(), fd, _server_handshake_tls_start, client) == 0)
         return;
       break;
     default:
@@ -335,23 +335,23 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 }
 
 static void
-_server_connect_callback(fde_t *fde, int status, void *data_)
+_server_connect_callback(fde_t *socket_fde, int status, void *context)
 {
-  struct Client *const client = data_;
+  struct Client *const client = context;
   assert(client && client_is_local(client));
   assert(client_is_connecting(client));
 
-  if (status != COMM_OK)
+  if (status != IO_SOCKET_CONNECT_SUCCESS)
   {
-    const char *const err_str = comm_errstr(status);
+    const char *const status_text = io_socket_connect_status_to_string(status);
 
     client_set_dead(client);  /* Prevent client_exit() from sending on a failed or closed connect socket. */
-    client_exit_fmt(client, "Connection failed: %s", err_str);
+    client_exit_fmt(client, "Connection failed: %s", status_text);
     return;
   }
 
-  assert(fde);
-  assert(client->connection->fde == fde);
+  assert(socket_fde);
+  assert(client->connection->fde == socket_fde);
 
   const struct ConnectItem *const connect = server_conf_get(client);
   if (connect->active == false)
@@ -361,7 +361,7 @@ _server_connect_callback(fde_t *fde, int status, void *data_)
   }
 
   if (connect->flags & CONNECT_FLAG_USE_TLS)
-    _server_tls_init(client, connect, fde);
+    _server_tls_init(client, connect, socket_fde);
   else
     _server_handshake_irc_start(client);
 }
@@ -399,7 +399,7 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   log_write(LOG_TYPE_IRCD, "Connect to %s[%s] @%s", connect->name, connect->host, addr_str);
 
-  fde_t *const new_fde = comm_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
+  fde_t *const new_fde = io_socket_create(address_get_family(&connect->remote_addr), SOCK_STREAM, 0, NULL);
   if (new_fde == NULL)
     return false;
 
@@ -419,15 +419,15 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
 
   client_set_state(client, CLIENT_STATE_CONNECTING);
 
-  comm_socket_note(client->connection->fde, "Server: %s", client->name);
+  io_socket_set_description_fmt(client->connection->fde, "Server: %s", client->name);
 
   list_add(client, &client->connection->node, &unknown_list);
   hash_add_client(client);
 
-  const struct io_addr *const local_addr =
+  const struct io_addr *const bind_addr =
     address_get_family(&connect->bind_addr) == AF_UNSPEC ? NULL : &connect->bind_addr;
-  comm_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, local_addr,
-                   _server_connect_callback, client, connect->timeout * 1000ULL);
+  io_socket_connect_tcp(client->connection->fde, &connect->remote_addr, connect->port, bind_addr,
+                        _server_connect_callback, client, connect->timeout * 1000ULL);
   return true;
 }
 

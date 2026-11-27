@@ -14,10 +14,10 @@
 #include <sys/types.h>
 
 #include "address.h"
-#include "comm.h"
 #include "event.h"
 #include "ident.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "list.h"
 #include "memory.h"
@@ -372,7 +372,7 @@ _ident_request_destroy(struct ident_request *request)
   if (fde)
   {
     assert(fde->flags.open);
-    comm_socket_close(fde);
+    io_socket_close(fde);
   }
 
   io_free(request);
@@ -508,7 +508,7 @@ _ident_reply_read(int fd, void *context)
       continue;
 
     if (_ident_errno_is_would_block(errno) &&
-        io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request) == 0)
+        io_poll_watch_read(io_socket_get_poller(), fd, _ident_reply_read, request) == 0)
       return;
 
     _ident_request_complete(request, NULL);
@@ -548,35 +548,35 @@ _ident_query_write(int fd, void *context)
       continue;
 
     if (send_result == -1 && _ident_errno_is_would_block(errno) &&
-        io_poll_watch_write(comm_get_poller(), fd, _ident_query_write, request, NULL) == 0)
+        io_poll_watch_write(io_socket_get_poller(), fd, _ident_query_write, request, NULL) == 0)
       return;
 
     _ident_request_fail(request);
     return;
   }
 
-  if (io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request) == -1)
+  if (io_poll_watch_read(io_socket_get_poller(), fd, _ident_reply_read, request) == -1)
     _ident_request_fail(request);
 }
 
 static void
-_ident_connect_complete(fde_t *fde, int error, void *context)
+_ident_connect_complete(fde_t *socket_fde, int status, void *context)
 {
   struct ident_request *const request = context;
   assert(request);
 
-  assert(request->fde == fde);
+  assert(request->fde == socket_fde);
   assert(request->state == IDENT_REQUEST_STATE_STARTING ||
          request->state == IDENT_REQUEST_STATE_ACTIVE);
   assert(request->timeout_event);
 
-  if (error != COMM_OK)
+  if (status != IO_SOCKET_CONNECT_SUCCESS)
   {
     _ident_request_fail(request);
     return;
   }
 
-  _ident_query_write(fde->fd, request);
+  _ident_query_write(socket_fde->fd, request);
 }
 
 static bool
@@ -663,7 +663,7 @@ ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, u
   request->query_length = (size_t)formatted_length;
 
   request->fde =
-    comm_socket_create(address_get_family(&connection_peer_addr), SOCK_STREAM, 0, "ident");
+    io_socket_create(address_get_family(&connection_peer_addr), SOCK_STREAM, 0, "ident");
   if (request->fde == NULL)
   {
     _ident_request_destroy(request);
@@ -680,15 +680,15 @@ ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, u
   }
 
   request->timeout_event =
-    event_create(comm_event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
+    event_create(io_socket_event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
   if (request->timeout_event == NULL || event_schedule(request->timeout_event) != EVENT_SUCCESS)
   {
     _ident_request_destroy(request);
     return false;
   }
 
-  comm_connect_tcp(request->fde, &connection_peer_addr, IDENT_SERVICE_PORT, &bind_addr,
-                   _ident_connect_complete, request, 0);
+  io_socket_connect_tcp(request->fde, &connection_peer_addr, IDENT_SERVICE_PORT, &bind_addr,
+                        _ident_connect_complete, request, 0);
 
   if (request->state == IDENT_REQUEST_STATE_START_FAILED)
   {

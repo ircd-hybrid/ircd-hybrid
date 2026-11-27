@@ -15,9 +15,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "comm.h"
 #include "fdlist.h"
 #include "io_poll.h"
+#include "io_socket.h"
 #include "io_time.h"
 
 #include "client.h"
@@ -62,7 +62,7 @@ read_packet(struct Client *client)
       length = recv(fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
     const int error_code = length < 0 ? errno : 0;
-    if (want_write && io_poll_watch_write(comm_get_poller(), fd, send_write_ready, client, NULL) == -1)
+    if (want_write && io_poll_watch_write(io_socket_get_poller(), fd, send_write_ready, client, NULL) == -1)
     {
       client_schedule_exit_fmt(client, "Write watch registration failed: %s", strerror(errno));
       return;
@@ -70,9 +70,9 @@ read_packet(struct Client *client)
 
     if (length <= 0)
     {
-      if (length < 0 && comm_errno_is_recoverable(error_code))
+      if (length < 0 && io_socket_errno_is_transient(error_code))
       {
-        if (io_poll_watch_read(comm_get_poller(), fd, read_packet_ready, client) == -1)
+        if (io_poll_watch_read(io_socket_get_poller(), fd, read_packet_ready, client) == -1)
           client_schedule_exit_fmt(client, "Read watch registration failed: %s", strerror(errno));
       }
       else

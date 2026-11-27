@@ -26,7 +26,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "comm.h"
 #include "event.h"
 #include "fdlist.h"
 #include "io_daemon.h"
@@ -34,6 +33,7 @@
 #include "io_pidfile.h"
 #include "io_poll.h"
 #include "io_rlimit.h"
+#include "io_socket.h"
 #include "io_string.h"
 #include "io_time.h"
 #include "list.h"
@@ -449,7 +449,7 @@ main(int argc, char *argv[])
   fdlist_init();
   log_add(LOG_TYPE_IRCD, true, 0, logFileName);
 
-  if (!comm_init(ircd_event_manager))
+  if (!io_socket_init(ircd_event_manager))
   {
     log_write(LOG_TYPE_IRCD, "Failed to initialize I/O polling: %s", strerror(errno));
     exit(EXIT_FAILURE);
@@ -505,7 +505,7 @@ main(int argc, char *argv[])
   event_reschedule(event_server_connect_auto, 1);
 
   log_write(LOG_TYPE_IRCD, "Server ready. Running version: %s", IRCD_VERSION);
-  _io_loop(comm_get_poller());
+  _io_loop(io_socket_get_poller());
 
   return 0;
 }

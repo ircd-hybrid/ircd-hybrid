@@ -9,8 +9,6 @@ libio_la_SOURCES =  address.c     \
                     address_parse.c \
                     base32.c      \
                     base32.h      \
-                    comm.c        \
-                    comm.h        \
                     dbuf.c        \
                     dbuf.h        \
                     dns.c         \
@@ -48,6 +46,8 @@ libio_la_SOURCES =  address.c     \
                     io_rlimit.h   \
                     io_signal.c   \
                     io_signal.h   \
+                    io_socket.c   \
+                    io_socket.h   \
                     io_string.c   \
                     io_string.h   \
                     io_time.c     \

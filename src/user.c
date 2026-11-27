@@ -434,7 +434,7 @@ valid_hostname(const char *hostname)
  * Absolutely always reject any '*' '!' '?' '@' in an user name
  * reject any odd control characters names.
  * Allow '.' in username to allow for "first.last"
- * style of username
+ * style of username, and '\' for "DOMAIN\user"
  */
 bool
 valid_username(const char *username, bool local)
@@ -458,9 +458,13 @@ valid_username(const char *username, bool local)
   {
     unsigned int special = 0;
 
+    /* IsAlNum() treats '\' as a letter; don't let it lead either */
+    if (*p == '\\')
+      return false;
+
     while (*p)
     {
-      if (*p == '-' || *p == '_' || *p == '.')
+      if (*p == '-' || *p == '_' || *p == '.' || *p == '\\')
       {
         if (ConfigGeneral.specials_in_ident < ++special)
           return false;

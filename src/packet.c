@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -54,22 +55,26 @@ read_packet(struct Client *client)
 
   while (true)
   {
+    bool want_write = false;
     if (tls_session_is_active(&fde->tls))
-    {
-      bool want_write = false;
       length = tls_session_read(&fde->tls, raw_receive_buffer, sizeof(raw_receive_buffer), &want_write);
-
-      if (want_write)
-        io_poll_watch_write(comm_get_poller(), fd, send_write_ready, client);
-    }
     else
       length = recv(fd, raw_receive_buffer, sizeof(raw_receive_buffer), 0);
 
+    const int error_code = length < 0 ? errno : 0;
+    if (want_write && io_poll_watch_write(comm_get_poller(), fd, send_write_ready, client, NULL) == -1)
+    {
+      client_schedule_exit_fmt(client, "Write watch registration failed: %s", strerror(errno));
+      return;
+    }
+
     if (length <= 0)
     {
-      const int error_code = length < 0 ? errno : 0;
       if (length < 0 && comm_errno_is_recoverable(error_code))
-        io_poll_watch_read(comm_get_poller(), fd, read_packet_ready, client);
+      {
+        if (io_poll_watch_read(comm_get_poller(), fd, read_packet_ready, client) == -1)
+          client_schedule_exit_fmt(client, "Read watch registration failed: %s", strerror(errno));
+      }
       else
         client_schedule_exit_on_io_failure(client, CLIENT_IO_OPERATION_READ,
                                            length == 0 ? CLIENT_IO_FAILURE_PEER_CLOSED

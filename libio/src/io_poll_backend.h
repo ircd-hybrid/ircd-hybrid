@@ -21,7 +21,9 @@ enum
 extern struct io_poll_backend *io_poll_backend_create(int fd_limit, struct io_poll_fd_info *control_fd);
 extern void io_poll_backend_destroy(struct io_poll_backend *backend);
 
-/* Apply the complete interest mask synchronously. Return -1 and set errno on failure. */
+/* Apply the interest mask synchronously. Each update either adds one interest
+ * or removes interests. Return -1 with errno on failure. A failed addition
+ * leaves the previous mask installed. */
 extern int io_poll_backend_set_interests(struct io_poll_backend *backend, int fd,
                                          unsigned int previous_interests, unsigned int interests);
 

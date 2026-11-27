@@ -37,7 +37,8 @@ static const char *const comm_err_str[] =
   [COMM_ERR_TIMEOUT] = "connect timeout",
   [COMM_ERR_CONNECT] = "Error during connect()",
   [COMM_ERROR] = "Comm Error",
-  [COMM_ERR_TIMER] = "Unable to schedule connect timeout"
+  [COMM_ERR_TIMER] = "Unable to schedule connect timeout",
+  [COMM_ERR_WATCH] = "Unable to watch socket for connect completion"
 };
 
 struct comm_connect_operation
@@ -331,7 +332,8 @@ comm_connect_tcp(fde_t *fde, const struct io_addr *remote_addr, uint16_t remote_
     return;
   }
 
-  operation->write_watch_id = io_poll_watch_write(comm_poller, fde->fd, comm_connect_handler, operation);
+  if (io_poll_watch_write(comm_poller, fde->fd, comm_connect_handler, operation, &operation->write_watch_id) == -1)
+    comm_connect_complete(operation, COMM_ERR_WATCH);
 }
 
 /*

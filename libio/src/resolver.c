@@ -160,11 +160,20 @@ _resolver_socket_open(struct resolver_socket *socket)
   if (socket->fde)
     return true;
 
-  socket->fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
-  if (socket->fde == NULL)
+  fde_t *const fde = comm_socket_create(socket->family, SOCK_DGRAM, 0, socket->description);
+  if (fde == NULL)
     return false;
 
-  io_poll_watch_read(comm_get_poller(), socket->fde->fd, _resolver_read_reply, socket);
+  if (io_poll_watch_read(comm_get_poller(), fde->fd, _resolver_read_reply, socket) == -1)
+  {
+    const int error = errno;
+
+    comm_socket_close(fde);
+    errno = error;
+    return false;
+  }
+
+  socket->fde = fde;
   return true;
 }
 
@@ -1178,7 +1187,11 @@ _resolver_read_reply(int fd, void *context)
   };
 
   /* Keep reception armed before callbacks can reconfigure the resolver. */
-  io_poll_watch_read(comm_get_poller(), fd, _resolver_read_reply, socket);
+  if (io_poll_watch_read(comm_get_poller(), fd, _resolver_read_reply, socket) == -1)
+  {
+    _resolver_socket_close(socket);
+    return;
+  }
 
   for (size_t packets_read = 0; packets_read < RESOLVER_READ_PACKET_BUDGET; ++packets_read)
   {

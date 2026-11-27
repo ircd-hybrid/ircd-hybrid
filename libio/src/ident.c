@@ -507,11 +507,9 @@ _ident_reply_read(int fd, void *context)
     if (errno == EINTR)
       continue;
 
-    if (_ident_errno_is_would_block(errno))
-    {
-      io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request);
+    if (_ident_errno_is_would_block(errno) &&
+        io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request) == 0)
       return;
-    }
 
     _ident_request_complete(request, NULL);
     return;
@@ -549,17 +547,16 @@ _ident_query_write(int fd, void *context)
     if (send_result == -1 && errno == EINTR)
       continue;
 
-    if (send_result == -1 && _ident_errno_is_would_block(errno))
-    {
-      io_poll_watch_write(comm_get_poller(), fd, _ident_query_write, request);
+    if (send_result == -1 && _ident_errno_is_would_block(errno) &&
+        io_poll_watch_write(comm_get_poller(), fd, _ident_query_write, request, NULL) == 0)
       return;
-    }
 
     _ident_request_fail(request);
     return;
   }
 
-  io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request);
+  if (io_poll_watch_read(comm_get_poller(), fd, _ident_reply_read, request) == -1)
+    _ident_request_fail(request);
 }
 
 static void

@@ -8,6 +8,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -952,16 +953,20 @@ _client_tls_session_handshake_handler(int fd, void *context)
       lookup_start(client);
       return;
     case TLS_HANDSHAKE_WANT_WRITE:
-      io_poll_watch_write(comm_get_poller(), fd, _client_tls_session_handshake_handler, client);
-      return;
+      if (io_poll_watch_write(comm_get_poller(), fd, _client_tls_session_handshake_handler, client, NULL) == 0)
+        return;
+      break;
     case TLS_HANDSHAKE_WANT_READ:
-      io_poll_watch_read(comm_get_poller(), fd, _client_tls_session_handshake_handler, client);
-      return;
+      if (io_poll_watch_read(comm_get_poller(), fd, _client_tls_session_handshake_handler, client) == 0)
+        return;
+      break;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
       client_exit(client, tls_error ? tls_error : "Error during TLS handshake");
       return;
   }
+
+  client_schedule_exit_fmt(client, "TLS handshake watch registration failed: %s", strerror(errno));
 }
 
 static void

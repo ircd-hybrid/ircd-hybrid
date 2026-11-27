@@ -184,9 +184,10 @@ send_queued_write(struct Client *to)
       const int error_code = retlen < 0 ? errno : 0;
       if (retlen < 0 && comm_errno_is_recoverable(error_code))
       {
-        client_set_flag(to, FLAGS_BLOCKED);
-        /* We have a non-fatal error, reschedule a write */
-        io_poll_watch_write(comm_get_poller(), to->connection->fde->fd, send_write_ready, to);
+        if (io_poll_watch_write(comm_get_poller(), to->connection->fde->fd, send_write_ready, to, NULL) == 0)
+          client_set_flag(to, FLAGS_BLOCKED);
+        else
+          client_schedule_exit_fmt(to, "Write watch registration failed: %s", strerror(errno));
       }
       else
       {

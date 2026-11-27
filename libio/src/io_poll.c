@@ -27,7 +27,7 @@ struct io_poll_fd_state
 {
   struct io_poll_watch read;
   struct io_poll_watch write;
-  unsigned int interests;
+  unsigned int registered_interests;
 };
 
 struct io_poll_ready_event
@@ -105,86 +105,104 @@ io_poll_destroy(struct io_poll *poller)
 }
 
 static struct io_poll_fd_state *
-io_poll_fd_state_for(struct io_poll *poller, int fd)
+io_poll_fd_state_find(struct io_poll *poller, int fd)
 {
   if (poller == NULL || poller->backend == NULL || fd < 0 || fd >= poller->fd_limit)
-  {
-    log_write(LOG_TYPE_IRCD, "io_poll: invalid watch descriptor %d", fd);
-    abort();
-  }
+    return NULL;
 
   return &poller->fd_states[fd];
 }
 
-static void
-io_poll_update_interests(struct io_poll *poller, int fd, struct io_poll_fd_state *state)
+static int
+io_poll_set_interests(struct io_poll *poller, int fd, struct io_poll_fd_state *state,
+                      unsigned int interests)
 {
-  const unsigned int interests = (state->read.id ? IO_POLL_EVENT_READ : 0) |
-                                 (state->write.id ? IO_POLL_EVENT_WRITE : 0);
-  if (interests == state->interests)
-    return;
+  if (interests == state->registered_interests)
+    return 0;
 
-  if (io_poll_backend_set_interests(poller->backend, fd, state->interests, interests) == -1)
-  {
-    log_write(LOG_TYPE_IRCD, "io_poll: cannot update I/O interest for FD %d: %s",
-              fd, strerror(errno));
-    abort();
-  }
+  if (io_poll_backend_set_interests(poller->backend, fd, state->registered_interests, interests) == -1)
+    return -1;
 
-  state->interests = interests;
+  state->registered_interests = interests;
+  return 0;
 }
 
 static void
-io_poll_watch_set(struct io_poll *poller, struct io_poll_watch *watch,
-                  io_poll_handler_fn handler, void *context)
+io_poll_remove_interests(struct io_poll *poller, int fd, struct io_poll_fd_state *state,
+                         unsigned int interests)
 {
-  if (handler == NULL)
+  if (io_poll_set_interests(poller, fd, state, state->registered_interests & ~interests) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "io_poll: cannot remove I/O interest for FD %d: %s",
+              fd, strerror(errno));
     abort();
+  }
+}
+
+static int
+io_poll_watch_set(struct io_poll *poller, int fd, unsigned int interest,
+                  io_poll_handler_fn handler, void *context, uint64_t *watch_id)
+{
+  struct io_poll_fd_state *const state = io_poll_fd_state_find(poller, fd);
+  if (state == NULL || handler == NULL)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
+  /*
+   * Leave consumed interests installed until dispatch completes. This update
+   * only adds the requested direction, even when called by a ready handler.
+   */
+  if (io_poll_set_interests(poller, fd, state, state->registered_interests | interest) == -1)
+    return -1;
 
   if (++poller->last_watch_id == 0)
     ++poller->last_watch_id;
 
+  struct io_poll_watch *const watch = interest == IO_POLL_EVENT_READ ? &state->read : &state->write;
   *watch = (struct io_poll_watch){ .handler = handler, .context = context, .id = poller->last_watch_id };
+
+  if (watch_id)
+    *watch_id = watch->id;
+
+  return 0;
 }
 
-void
+int
 io_poll_watch_read(struct io_poll *poller, int fd, io_poll_handler_fn handler, void *context)
 {
-  struct io_poll_fd_state *const state = io_poll_fd_state_for(poller, fd);
-
-  io_poll_watch_set(poller, &state->read, handler, context);
-  io_poll_update_interests(poller, fd, state);
+  return io_poll_watch_set(poller, fd, IO_POLL_EVENT_READ, handler, context, NULL);
 }
 
-uint64_t
-io_poll_watch_write(struct io_poll *poller, int fd, io_poll_handler_fn handler, void *context)
+int
+io_poll_watch_write(struct io_poll *poller, int fd, io_poll_handler_fn handler, void *context,
+                    uint64_t *watch_id)
 {
-  struct io_poll_fd_state *const state = io_poll_fd_state_for(poller, fd);
-
-  io_poll_watch_set(poller, &state->write, handler, context);
-  io_poll_update_interests(poller, fd, state);
-  return state->write.id;
+  return io_poll_watch_set(poller, fd, IO_POLL_EVENT_WRITE, handler, context, watch_id);
 }
 
 void
 io_poll_unwatch_write(struct io_poll *poller, int fd, uint64_t watch_id)
 {
-  struct io_poll_fd_state *const state = io_poll_fd_state_for(poller, fd);
+  struct io_poll_fd_state *const state = io_poll_fd_state_find(poller, fd);
+  if (state == NULL || watch_id == 0 || state->write.id != watch_id)
+    return;
 
-  if (state->write.id == watch_id)
-    state->write = (struct io_poll_watch){ 0 };
-
-  io_poll_update_interests(poller, fd, state);
+  state->write = (struct io_poll_watch){ 0 };
+  io_poll_remove_interests(poller, fd, state, IO_POLL_EVENT_WRITE);
 }
 
 void
 io_poll_unwatch(struct io_poll *poller, int fd)
 {
-  struct io_poll_fd_state *const state = io_poll_fd_state_for(poller, fd);
+  struct io_poll_fd_state *const state = io_poll_fd_state_find(poller, fd);
+  if (state == NULL)
+    return;
 
   state->read = (struct io_poll_watch){ 0 };
   state->write = (struct io_poll_watch){ 0 };
-  io_poll_update_interests(poller, fd, state);
+  io_poll_remove_interests(poller, fd, state, state->registered_interests);
 }
 
 int
@@ -212,7 +230,13 @@ io_poll_ready_reserve(struct io_poll *poller, size_t count)
 void
 io_poll_ready_append(struct io_poll *poller, int fd, unsigned int events)
 {
-  const struct io_poll_fd_state *const state = io_poll_fd_state_for(poller, fd);
+  const struct io_poll_fd_state *const state = io_poll_fd_state_find(poller, fd);
+  if (state == NULL)
+  {
+    log_write(LOG_TYPE_IRCD, "io_poll: backend reported invalid descriptor %d", fd);
+    abort();
+  }
+
   const struct io_poll_ready_event event =
   {
     .fd = fd,
@@ -250,8 +274,12 @@ io_poll_ready_dispatch(struct io_poll *poller, const struct io_poll_ready_event 
 
   io_poll_watch_dispatch(event->fd, &state->write, event->write_watch_id);
 
-  if (poller->backend)
-    io_poll_update_interests(poller, event->fd, state);
+  if (poller->backend == NULL)
+    return;
+
+  const unsigned int inactive_interests = (state->read.id == 0 ? IO_POLL_EVENT_READ : 0) |
+                                          (state->write.id == 0 ? IO_POLL_EVENT_WRITE : 0);
+  io_poll_remove_interests(poller, event->fd, state, inactive_interests);
 }
 
 int

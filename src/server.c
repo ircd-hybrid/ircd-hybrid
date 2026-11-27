@@ -298,16 +298,20 @@ _server_handshake_tls_start(int fd, void *context)
   switch (ret)
   {
     case TLS_HANDSHAKE_WANT_WRITE:
-      io_poll_watch_write(comm_get_poller(), fd, _server_handshake_tls_start, client);
+      if (io_poll_watch_write(comm_get_poller(), fd, _server_handshake_tls_start, client, NULL) == 0)
+        return;
       break;
     case TLS_HANDSHAKE_WANT_READ:
-      io_poll_watch_read(comm_get_poller(), fd, _server_handshake_tls_start, client);
+      if (io_poll_watch_read(comm_get_poller(), fd, _server_handshake_tls_start, client) == 0)
+        return;
       break;
     default:
       client_set_dead(client);  /* Prevent client_exit() from sending on a failed TLS socket. */
       client_exit(client, "Error during TLS handshake");
-      break;
+      return;
   }
+
+  client_schedule_exit_fmt(client, "TLS handshake watch registration failed: %s", strerror(errno));
 }
 
 static void

@@ -20,9 +20,9 @@ typedef void (*io_poll_handler_fn)(int, void *);
 extern void io_poll_destroy(struct io_poll *);
 extern void io_poll_unwatch(struct io_poll *, int);
 extern void io_poll_unwatch_write(struct io_poll *, int, uint64_t);
-extern void io_poll_watch_read(struct io_poll *, int, io_poll_handler_fn, void *);
 extern int io_poll_dispatch(struct io_poll *, int);
-extern uint64_t io_poll_watch_write(struct io_poll *, int, io_poll_handler_fn, void *);
-extern struct io_poll *io_poll_create(int);
+extern int io_poll_watch_read(struct io_poll *, int, io_poll_handler_fn, void *);
+extern int io_poll_watch_write(struct io_poll *, int, io_poll_handler_fn, void *, uint64_t *);
+extern struct io_poll *io_poll_create(int fd_limit);
 extern const struct io_poll_fd_info *io_poll_control_fd(const struct io_poll *);
 #endif  /* INCLUDED_io_poll_h */

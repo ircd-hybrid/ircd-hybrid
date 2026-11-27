@@ -33,6 +33,8 @@
 
 static list_t listener_list;
 
+static void _listener_close(struct Listener *);
+
 const list_t *
 listener_get_list(void)
 {
@@ -101,8 +103,12 @@ _listener_accept_connection(int fd, void *context)
     client_process_accepted_connection(client_fde, listener, &remote_addr, remote_addr_str);
   }
 
-  /* Re-register a new IO request for the next accept .. */
-  io_poll_watch_read(comm_get_poller(), listener->fde->fd, _listener_accept_connection, listener);
+  if (io_poll_watch_read(comm_get_poller(), fd, _listener_accept_connection, listener) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "Failed to rearm listener %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
+    _listener_close(listener);
+  }
 }
 
 /**
@@ -177,9 +183,15 @@ _listener_finalize(struct Listener *listener)
   }
 #endif
 
-  listener->fde = new_fde;
+  if (io_poll_watch_read(comm_get_poller(), new_fde->fd, _listener_accept_connection, listener) == -1)
+  {
+    log_write(LOG_TYPE_IRCD, "Failed to watch listener %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(errno));
+    comm_socket_close(new_fde);
+    return false;
+  }
 
-  io_poll_watch_read(comm_get_poller(), listener->fde->fd, _listener_accept_connection, listener);
+  listener->fde = new_fde;
   return true;
 }
 

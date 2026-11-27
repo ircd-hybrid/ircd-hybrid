@@ -560,7 +560,7 @@ _ident_query_write(int fd, void *context)
 }
 
 static void
-_ident_connect_complete(fde_t *socket_fde, int status, void *context)
+_ident_connect_complete(fde_t *socket_fde, enum io_socket_connect_status status, void *context)
 {
   struct ident_request *const request = context;
   assert(request);
@@ -627,11 +627,12 @@ _ident_connection_endpoints_get(int connection_fd, struct io_addr *local_addr_ou
 }
 
 bool
-ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, uintmax_t timeout_ms)
+ident_start(event_manager_t event_manager, ident_callback_fn callback, void *callback_ctx,
+            int connection_fd, uintmax_t timeout_ms)
 {
   assert(callback);
 
-  if (connection_fd < 0 || timeout_ms == 0)
+  if (event_manager == NULL || connection_fd < 0 || timeout_ms == 0)
     return false;
 
   struct io_addr connection_local_addr;
@@ -680,7 +681,7 @@ ident_start(ident_callback_fn callback, void *callback_ctx, int connection_fd, u
   }
 
   request->timeout_event =
-    event_create(io_socket_event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
+    event_create(event_manager, "ident_timeout", _ident_timeout_expire, timeout_ms, true, request, NULL);
   if (request->timeout_event == NULL || event_schedule(request->timeout_event) != EVENT_SUCCESS)
   {
     _ident_request_destroy(request);

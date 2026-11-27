@@ -244,7 +244,8 @@ _lookup_ident_start(struct LookupRequest *lookup)
   _lookup_report(lookup, LOOKUP_REPORT_IDENT_START);
 
   const uintmax_t timeout_ms = ConfigGeneral.ident_timeout * 1000ULL;
-  if (ident_start(_lookup_ident_callback, lookup, lookup->client->connection->fde->fd, timeout_ms))
+  if (ident_start(ircd_event_manager, _lookup_ident_callback, lookup,
+                  lookup->client->connection->fde->fd, timeout_ms))
   {
     lookup->ident_pending = true;
     return;

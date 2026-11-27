@@ -335,7 +335,7 @@ _server_tls_init(struct Client *client, const struct ConnectItem *connect, fde_t
 }
 
 static void
-_server_connect_callback(fde_t *socket_fde, int status, void *context)
+_server_connect_callback(fde_t *socket_fde, enum io_socket_connect_status status, void *context)
 {
   struct Client *const client = context;
   assert(client && client_is_local(client));

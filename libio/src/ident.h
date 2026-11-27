@@ -8,8 +8,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "event.h"
+
 typedef void (*ident_callback_fn)(void *, const char *);
 
 extern void ident_cancel_by_context(const void *);
-extern bool ident_start(ident_callback_fn, void *, int, uintmax_t);
+extern bool ident_start(event_manager_t, ident_callback_fn, void *, int, uintmax_t);
 #endif  /* INCLUDED_ident_h */

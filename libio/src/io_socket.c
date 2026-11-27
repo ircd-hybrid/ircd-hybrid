@@ -28,8 +28,6 @@
 #include "log.h"
 #include "memory.h"
 
-event_manager_t io_socket_event_manager;
-
 static const char *const io_socket_connect_status_strings[IO_SOCKET_CONNECT_STATUS_COUNT] =
 {
   [IO_SOCKET_CONNECT_SUCCESS] = "Success",
@@ -52,6 +50,7 @@ struct io_socket_connect_operation
 
 static void io_socket_connect_cleanup(void *);
 
+static event_manager_t io_socket_event_manager;
 static struct io_poll *io_socket_poller;
 
 bool
@@ -91,30 +90,6 @@ io_socket_shutdown(void)
   io_poll_destroy(io_socket_poller);
   io_socket_poller = NULL;
   io_socket_event_manager = NULL;
-}
-
-bool
-io_socket_get_pending_error(const fde_t *socket_fde, int *const error_out)
-{
-  assert(socket_fde);
-  assert(socket_fde->flags.open);
-  assert(error_out);
-
-  *error_out = 0;
-
-  int pending_error = 0;
-  socklen_t option_length = sizeof(pending_error);
-  if (getsockopt(socket_fde->fd, SOL_SOCKET, SO_ERROR, &pending_error, &option_length) == 0)
-  {
-    *error_out = pending_error;
-    return true;
-  }
-  else
-  {
-    log_write(LOG_TYPE_DEBUG, "io_socket_get_pending_error: getsockopt(SO_ERROR) failed for FD %d: %s",
-              socket_fde->fd, strerror(errno));
-    return false;
-  }
 }
 
 static bool
@@ -216,7 +191,7 @@ io_socket_connect_operation_destroy(struct io_socket_connect_operation *operatio
 }
 
 static void
-io_socket_connect_complete(struct io_socket_connect_operation *operation, int status)
+io_socket_connect_complete(struct io_socket_connect_operation *operation, enum io_socket_connect_status status)
 {
   assert(operation);
 
@@ -258,13 +233,17 @@ io_socket_connect_on_write_ready(int fd, void *context)
 {
   struct io_socket_connect_operation *const operation = context;
   assert(operation && operation->socket_fde->fd == fd);
-  (void)fd;
 
   int pending_error = 0;
-  if (io_socket_get_pending_error(operation->socket_fde, &pending_error) && pending_error == 0)
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_SUCCESS);
-  else
-    io_socket_connect_complete(operation, IO_SOCKET_CONNECT_FAILED);
+  socklen_t option_length = sizeof(pending_error);
+  const int result = getsockopt(fd, SOL_SOCKET, SO_ERROR, &pending_error, &option_length);
+  if (result == -1)
+    log_write(LOG_TYPE_DEBUG, "io_socket_connect_on_write_ready: getsockopt(SO_ERROR) failed for FD %d: %s",
+              fd, strerror(errno));
+
+  const enum io_socket_connect_status status =
+    result == 0 && pending_error == 0 ? IO_SOCKET_CONNECT_SUCCESS : IO_SOCKET_CONNECT_FAILED;
+  io_socket_connect_complete(operation, status);
 }
 
 void
@@ -336,9 +315,9 @@ io_socket_connect_tcp(fde_t *socket_fde, const struct io_addr *remote_addr, uint
 }
 
 const char *
-io_socket_connect_status_to_string(int status)
+io_socket_connect_status_to_string(enum io_socket_connect_status status)
 {
-  if (status < 0 || status >= IO_SOCKET_CONNECT_STATUS_COUNT)
+  if ((unsigned int)status >= IO_SOCKET_CONNECT_STATUS_COUNT)
     return "Invalid socket connect status";
   return io_socket_connect_status_strings[status];
 }

@@ -8,6 +8,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -383,5 +384,42 @@ address_prefix_to_string(const struct io_addr *addr, unsigned int prefix_length,
     return false;
 
   memcpy(buffer, prefix, (size_t)written + 1);
+  return true;
+}
+
+bool
+address_endpoint_to_string(const struct io_addr *addr, char *buffer, size_t buffer_size)
+{
+  assert(addr);
+  assert(buffer);
+
+  if (buffer_size == 0)
+    return false;
+
+  char address[ADDRESS_STRING_BUFSIZE];
+  if (!address_to_string(addr, address, sizeof(address)))
+    return false;
+
+  char endpoint[ADDRESS_ENDPOINT_BUFSIZE];
+  const unsigned int port = address_get_port(addr);
+  int written;
+
+  if (address_is_ipv6(addr))
+  {
+    const struct sockaddr_in6 *const v6 = (const struct sockaddr_in6 *)&addr->ss;
+    const uint32_t scope_id = v6->sin6_scope_id;
+
+    if (scope_id)
+      written = snprintf(endpoint, sizeof(endpoint), "[%s%%%" PRIu32 "]:%u", address, scope_id, port);
+    else
+      written = snprintf(endpoint, sizeof(endpoint), "[%s]:%u", address, port);
+  }
+  else
+    written = snprintf(endpoint, sizeof(endpoint), "%s:%u", address, port);
+
+  if (written < 0 || (size_t)written >= sizeof(endpoint) || (size_t)written >= buffer_size)
+    return false;
+
+  memcpy(buffer, endpoint, (size_t)written + 1);
   return true;
 }

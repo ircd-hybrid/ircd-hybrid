@@ -21,6 +21,7 @@ enum
 {
   ADDRESS_STRING_BUFSIZE = INET6_ADDRSTRLEN,
   ADDRESS_PREFIX_BUFSIZE = INET6_ADDRSTRLEN + sizeof("/128") - 1,
+  ADDRESS_ENDPOINT_BUFSIZE = INET6_ADDRSTRLEN + sizeof("[]%4294967295:65535") - 1,
   ADDRESS_REVERSE_NAME_BUFSIZE = 74
 };
 
@@ -37,6 +38,7 @@ struct io_addr
 };
 
 extern void address_unmap_ipv4(struct io_addr *);
+extern bool address_endpoint_to_string(const struct io_addr *, char *, size_t);
 extern bool address_equal(const struct io_addr *, const struct io_addr *);
 extern bool address_equal_with_port(const struct io_addr *, const struct io_addr *);
 extern bool address_from_bytes(struct io_addr *, int, const void *, size_t);

@@ -409,7 +409,12 @@ server_connect(struct ConnectItem *connect, const struct Client *initiator)
   struct io_socket *const socket =
     io_socket_create(ircd_socket_context, address_get_family(&remote_endpoint), SOCK_STREAM, 0, NULL);
   if (socket == NULL)
+  {
+    const int error = errno;
+    log_write(LOG_TYPE_IRCD, "Failed to open socket for %s[%s]: %s",
+              connect->name, connect->host, strerror(error));
     return false;
+  }
 
   struct Client *const client = client_create_local();
   client->connection->socket = socket;

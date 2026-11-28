@@ -72,6 +72,7 @@ _listener_accept_connection(int fd, void *context)
   const char *desc =
     listener_has_flag(listener, LISTENER_TLS) ? "Incoming TLS connection" : "Incoming connection";
 
+  int accept_error = 0;
   listener_retain(listener);
   for (unsigned int accepted_count = 0;
        accepted_count < LISTENER_ACCEPT_BUDGET && listener_is_active(listener); ++accepted_count)
@@ -81,13 +82,12 @@ _listener_accept_connection(int fd, void *context)
     struct io_socket *const client_socket = io_socket_accept(listener->socket, &remote_addr, desc);
     if (client_socket == NULL)
     {
-      /*
-       * A recoverable error indicates the listen queue is now empty. For any
-       * other error (e.g., a single connection failing setup), we continue
-       * trying to accept other pending connections.
-       */
-      if (io_socket_errno_is_transient(errno))
+      const int error = errno;
+      if (io_socket_errno_is_transient(error))
         break;
+
+      if (accept_error == 0)
+        accept_error = error;
 
       continue;
     }
@@ -102,6 +102,10 @@ _listener_accept_connection(int fd, void *context)
 
     client_process_accepted_connection(client_socket, listener, &remote_addr, remote_addr_str);
   }
+
+  if (accept_error)
+    log_write(LOG_TYPE_IRCD, "Failed to accept connection on listener %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(accept_error));
 
   if (listener_is_active(listener) &&
       io_socket_watch_read(listener->socket, _listener_accept_connection, listener) == -1)
@@ -149,8 +153,9 @@ _listener_finalize(struct Listener *listener)
     io_socket_listen(ircd_socket_context, &listener->addr, LISTEN_BACKLOG, "Listener socket");
   if (listener_socket == NULL)
   {
-    log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu",
-              listener_get_name(listener), listener_get_port(listener));
+    const int error = errno;
+    log_write(LOG_TYPE_IRCD, "Failed to initialize listener for %s/%hu: %s",
+              listener_get_name(listener), listener_get_port(listener), strerror(error));
     return false;
   }
 

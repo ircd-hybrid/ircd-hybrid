@@ -27,7 +27,6 @@
 #include "io_socket.h"
 #include "io_string.h"
 #include "list.h"
-#include "log.h"
 #include "memory.h"
 
 static const char *const io_socket_connect_status_strings[IO_SOCKET_CONNECT_STATUS_COUNT] =
@@ -144,60 +143,36 @@ io_socket_context_snapshot(const struct io_socket_context *context,
 }
 
 static bool
-io_socket_configure(int fd, int family, int socket_type)
+_io_socket_configure(int fd, int family, int socket_type)
 {
   if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
-  {
-    const int error = errno;
-    log_write(LOG_TYPE_IRCD, "io_socket_configure: fcntl(FD_CLOEXEC) failed for FD %d: %s",
-              fd, strerror(error));
-    errno = error;
     return false;
-  }
-
-  if (socket_type == SOCK_STREAM)
-  {
-    int option_value = 1;
-    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &option_value, sizeof(option_value)) == -1)
-      log_write(LOG_TYPE_DEBUG, "io_socket_configure: setsockopt(TCP_NODELAY) failed for FD %d: %s",
-                fd, strerror(errno));
-
-#if defined(IPTOS_LOWDELAY)
-    option_value = IPTOS_LOWDELAY;
-
-    if (family == AF_INET)
-    {
-      if (setsockopt(fd, IPPROTO_IP, IP_TOS, &option_value, sizeof(option_value)) == -1)
-        log_write(LOG_TYPE_DEBUG, "io_socket_configure: setsockopt(IP_TOS) failed for FD %d: %s",
-                  fd, strerror(errno));
-    }
-#ifdef IPV6_TCLASS
-    else if (family == AF_INET6)
-    {
-      if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, &option_value, sizeof(option_value)) == -1)
-        log_write(LOG_TYPE_DEBUG, "io_socket_configure: setsockopt(IPV6_TCLASS) failed for FD %d: %s",
-                  fd, strerror(errno));
-    }
-#endif
-#endif
-
-#ifdef TCP_QUICKACK
-    option_value = 1;
-    if (setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, &option_value, sizeof(option_value)) == -1)
-      log_write(LOG_TYPE_DEBUG, "io_socket_configure: setsockopt(TCP_QUICKACK) failed for FD %d: %s",
-                fd, strerror(errno));
-#endif
-  }
 
   const int status_flags = fcntl(fd, F_GETFL, 0);
   if (status_flags == -1 || fcntl(fd, F_SETFL, status_flags | O_NONBLOCK) == -1)
-  {
-    const int error = errno;
-    log_write(LOG_TYPE_IRCD, "io_socket_configure: fcntl(O_NONBLOCK) failed for FD %d: %s",
-              fd, strerror(error));
-    errno = error;
     return false;
-  }
+
+  if (socket_type != SOCK_STREAM)
+    return true;
+
+  const int enabled = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof(enabled));
+
+#ifdef IPTOS_LOWDELAY
+  const int low_delay = IPTOS_LOWDELAY;
+  if (family == AF_INET)
+    setsockopt(fd, IPPROTO_IP, IP_TOS, &low_delay, sizeof(low_delay));
+#ifdef IPV6_TCLASS
+  else if (family == AF_INET6)
+    setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, &low_delay, sizeof(low_delay));
+#endif
+#else
+  (void)family;
+#endif
+
+#ifdef TCP_QUICKACK
+  setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, &enabled, sizeof(enabled));
+#endif
 
   return true;
 }
@@ -398,7 +373,7 @@ io_socket_adopt(struct io_socket_context *context, int fd, int family, int socke
     return NULL;
   }
 
-  if (!io_socket_configure(fd, family, socket_type))
+  if (!_io_socket_configure(fd, family, socket_type))
   {
     const int error = errno;
     close(fd);
@@ -422,19 +397,13 @@ io_socket_create(struct io_socket_context *context, int family, int socket_type,
 {
   if (io_socket_context_available_slots(context) == 0)
   {
-    log_write(LOG_TYPE_DEBUG, "io_socket_create: Cannot create new socket: %s", strerror(ENFILE));
     errno = ENFILE;
     return NULL;
   }
 
   const int fd = socket(family, socket_type, protocol);
   if (fd < 0)
-  {
-    const int error = errno;
-    log_write(LOG_TYPE_DEBUG, "io_socket_create: socket() failed: %s", strerror(error));
-    errno = error;
     return NULL;
-  }
 
   const bool tcp = (family == AF_INET || family == AF_INET6) && socket_type == SOCK_STREAM &&
                    (protocol == 0 || protocol == IPPROTO_TCP);
@@ -451,58 +420,28 @@ io_socket_listen(struct io_socket_context *context, const struct io_addr *bind_a
   if (listener == NULL)
     return NULL;
 
-  const int reuse_addr = 1;
-  if (setsockopt(listener->fd, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr)) == -1)
-  {
-    const int error = errno;
-    log_write(LOG_TYPE_IRCD, "io_socket_listen: setsockopt(SO_REUSEADDR) failed for FD %d: %s",
-              listener->fd, strerror(error));
-    io_socket_close(listener);
-    errno = error;
-    return NULL;
-  }
+  const int enabled = 1;
+  if (setsockopt(listener->fd, SOL_SOCKET, SO_REUSEADDR, &enabled, sizeof(enabled)) == -1)
+    goto fail;
 
 #ifdef IPV6_V6ONLY
-  if (address_is_ipv6(bind_addr))
-  {
-    const int ipv6_only = 1;
-    if (setsockopt(listener->fd, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)) == -1)
-    {
-      const int error = errno;
-      log_write(LOG_TYPE_DEBUG, "io_socket_listen: setsockopt(IPV6_V6ONLY=1) failed for FD %d: %s",
-                listener->fd, strerror(error));
-      io_socket_close(listener);
-      errno = error;
-      return NULL;
-    }
-  }
+  if (address_is_ipv6(bind_addr) &&
+      setsockopt(listener->fd, IPPROTO_IPV6, IPV6_V6ONLY, &enabled, sizeof(enabled)) == -1)
+    goto fail;
 #endif
 
-  if (bind(listener->fd, address_get_sockaddr(bind_addr), address_get_sockaddr_length(bind_addr)) == -1)
-  {
-    const int error = errno;
-    char address_text[ADDRESS_STRING_BUFSIZE];
-    address_to_string(bind_addr, address_text, sizeof(address_text));
-
-    log_write(LOG_TYPE_IRCD, "io_socket_listen: bind() failed for %s: %s",
-              address_text, strerror(error));
-    io_socket_close(listener);
-    errno = error;
-    return NULL;
-  }
-
-  if (listen(listener->fd, backlog) == -1)
-  {
-    const int error = errno;
-    log_write(LOG_TYPE_IRCD, "io_socket_listen: listen() failed for FD %d: %s",
-              listener->fd, strerror(error));
-    io_socket_close(listener);
-    errno = error;
-    return NULL;
-  }
+  if (bind(listener->fd, address_get_sockaddr(bind_addr), address_get_sockaddr_length(bind_addr)) == -1 ||
+      listen(listener->fd, backlog) == -1)
+    goto fail;
 
   listener->connect_available = false;
   return listener;
+
+fail:
+  const int error = errno;
+  io_socket_close(listener);
+  errno = error;
+  return NULL;
 }
 
 void
@@ -532,7 +471,6 @@ io_socket_accept(struct io_socket *listener, struct io_addr *peer_addr, const ch
 
   if (io_socket_context_available_slots(context) == 0)
   {
-    log_write(LOG_TYPE_IRCD, "io_socket_accept: Cannot accept new connection: %s", strerror(ENFILE));
     errno = ENFILE;
     return NULL;
   }
@@ -542,14 +480,7 @@ io_socket_accept(struct io_socket *listener, struct io_addr *peer_addr, const ch
   socklen_t peer_addr_length = sizeof(peer_addr->ss);
   const int fd = accept(listener->fd, (struct sockaddr *)&peer_addr->ss, &peer_addr_length);
   if (fd < 0)
-  {
-    const int error = errno;
-    if (!io_socket_errno_is_transient(error))
-      log_write(LOG_TYPE_IRCD, "io_socket_accept: accept() failed on FD %d: %s",
-                listener->fd, strerror(error));
-    errno = error;
     return NULL;
-  }
 
   address_unmap_ipv4(peer_addr);
 

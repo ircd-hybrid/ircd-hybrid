@@ -56,6 +56,8 @@ extern int io_socket_connect_tcp(struct io_socket *, const struct io_addr *, con
 extern int io_socket_context_destroy(struct io_socket_context *);
 extern int io_socket_context_snapshot(const struct io_socket_context *, struct io_socket_snapshot **, size_t *);
 extern int io_socket_fd(const struct io_socket *);
+extern int io_socket_get_local_endpoint(const struct io_socket *, struct io_addr *);
+extern int io_socket_get_peer_endpoint(const struct io_socket *, struct io_addr *);
 extern int io_socket_watch_read(struct io_socket *, io_poll_handler_fn, void *);
 extern int io_socket_watch_write(struct io_socket *, io_poll_handler_fn, void *);
 extern size_t io_socket_context_available_slots(const struct io_socket_context *);

@@ -583,6 +583,57 @@ io_socket_fd(const struct io_socket *socket)
   return socket->fd;
 }
 
+static int
+_io_socket_get_endpoint(const struct io_socket *socket, bool peer, struct io_addr *endpoint)
+{
+  assert(socket);
+  assert(endpoint);
+
+  struct io_addr address = { 0 };
+  socklen_t length = sizeof(address.ss);
+  struct sockaddr *const storage = (struct sockaddr *)&address.ss;
+  const int result = peer ? getpeername(socket->fd, storage, &length) :
+                            getsockname(socket->fd, storage, &length);
+  if (result == -1)
+    return -1;
+
+  const size_t family_end = offsetof(struct sockaddr_storage, ss_family) + sizeof(address.ss.ss_family);
+  if ((size_t)length < family_end || (size_t)length > sizeof(address.ss))
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
+  const socklen_t expected_length = address_get_sockaddr_length(&address);
+  if (expected_length == 0)
+  {
+    errno = EAFNOSUPPORT;
+    return -1;
+  }
+
+  if (length < expected_length)
+  {
+    errno = EINVAL;
+    return -1;
+  }
+
+  address_unmap_ipv4(&address);
+  *endpoint = address;
+  return 0;
+}
+
+int
+io_socket_get_local_endpoint(const struct io_socket *socket, struct io_addr *endpoint)
+{
+  return _io_socket_get_endpoint(socket, false, endpoint);
+}
+
+int
+io_socket_get_peer_endpoint(const struct io_socket *socket, struct io_addr *endpoint)
+{
+  return _io_socket_get_endpoint(socket, true, endpoint);
+}
+
 int
 io_socket_watch_read(struct io_socket *socket, io_poll_handler_fn handler, void *context)
 {
